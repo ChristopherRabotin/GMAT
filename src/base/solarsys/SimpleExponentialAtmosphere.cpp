@@ -32,6 +32,8 @@
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
+ *
+ * @param  name   name of the SimpleExponentialAtmosphere (default is blank)
  */
 //------------------------------------------------------------------------------
 SimpleExponentialAtmosphere::SimpleExponentialAtmosphere(const std::string &name) :
@@ -60,13 +62,13 @@ SimpleExponentialAtmosphere::~SimpleExponentialAtmosphere()
 // SimpleExponentialAtmosphere(const SimpleExponentialAtmosphere& atm)
 //------------------------------------------------------------------------------
 /**
- * Copy constructor. (private implementation)
+ * Copy constructor.
  *
  * @param atm SimpleExponentialAtmosphere object to copy into the new one.
  */
 //------------------------------------------------------------------------------
 SimpleExponentialAtmosphere::SimpleExponentialAtmosphere(
-      const SimpleExponentialAtmosphere& atm) :
+                             const SimpleExponentialAtmosphere& atm) :
    AtmosphereModel      (atm),
    scaleHeight          (atm.scaleHeight),
    refHeight            (atm.refHeight),
@@ -77,20 +79,20 @@ SimpleExponentialAtmosphere::SimpleExponentialAtmosphere(
 
 //------------------------------------------------------------------------------
 // SimpleExponentialAtmosphere& operator=(
-//       const SimpleExponentialAtmosphere& bary)
+//                              const SimpleExponentialAtmosphere& atm)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the SimpleExponentialAtmosphere class.
  *
- * @param bary the SimpleExponentialAtmosphere object whose data to assign to
+ * @param atm  the SimpleExponentialAtmosphere object whose data to assign to
  *             "this" calculated point.
  *
  * @return "this" SimpleExponentialAtmosphere with data of input
- *                SimpleExponentialAtmosphere ea.
+ *                SimpleExponentialAtmosphere atm.
  */
 //------------------------------------------------------------------------------
 SimpleExponentialAtmosphere& SimpleExponentialAtmosphere::operator=(
-      const SimpleExponentialAtmosphere &atm)
+                             const SimpleExponentialAtmosphere &atm)
 {
    if (&atm != this)
    {
@@ -121,7 +123,7 @@ SimpleExponentialAtmosphere& SimpleExponentialAtmosphere::operator=(
  */
 //------------------------------------------------------------------------------
 bool SimpleExponentialAtmosphere::Density(Real *position, Real *density,
-      Real epoch, Integer count)
+                                          Real epoch,     Integer count)
 {
    #ifdef DEBUG_DENSITY
       MessageInterface::ShowMessage("SimpleExponentialAtmosphere::Density called\n");

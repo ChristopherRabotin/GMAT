@@ -58,7 +58,7 @@ private:
    CelestialBodyOrientationPanel *orientation;
    
    
-   void EnableAll(bool enable); // ????????????? //
+   void EnableAll(bool enable);
 
    // event handling
    

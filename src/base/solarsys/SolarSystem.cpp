@@ -58,9 +58,9 @@
 
 using namespace GmatSolarSystemDefaults;
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
 {
@@ -89,7 +89,8 @@ SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
 };
 
-const std::string SolarSystem::SOLAR_SYSTEM_BARYCENTER_NAME = GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME;
+const std::string SolarSystem::SOLAR_SYSTEM_BARYCENTER_NAME
+                                               = GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME;
 
 
 const std::string SolarSystem::SUN_NAME        = GmatSolarSystemDefaults::SUN_NAME;
@@ -165,7 +166,7 @@ const std::string SolarSystem::CHARON_NAME     = GmatSolarSystemDefaults::CHARON
 
 
 
-//// default values for Planet data ------------------------ planets ------------------------
+//// default values  ------------------------ planets --------------------------
 const Gmat::PosVelSource    SolarSystem::PLANET_POS_VEL_SOURCE    = Gmat::DE405;
 const Integer               SolarSystem::PLANET_ORDER[NumberOfDefaultPlanets]               =
                             {0, 0, 4, 0, 0, 0, 0, 0, 0};
@@ -234,7 +235,8 @@ const std::string          SolarSystem::PLANET_SHAPE_MODELS[] =
    // none for Neptune at this time
    // none for Pluto at this time
 };
-//// default values for Planet data ------------------------  moons  ------------------------
+
+//// default values  ------------------------  moons  --------------------------
 const Gmat::PosVelSource    SolarSystem::MOON_POS_VEL_SOURCE[NumberOfDefaultMoons]    =
 {
          Gmat::DE405,
@@ -291,34 +293,24 @@ const std::string          SolarSystem::MOON_SHAPE_MODELS[] =
 {
    "None"
 };
-//// default values for Planet data ------------------------  the Sun  ------------------------
+//// default values ------------------------  the Sun  --------------------------
 //
-const Gmat::PosVelSource    SolarSystem::STAR_POS_VEL_SOURCE      = Gmat::DE405;
-const Integer               SolarSystem::STAR_ORDER               = 0;
-const Integer               SolarSystem::STAR_DEGREE              = 0;
-const Integer               SolarSystem::STAR_NUM_GRAVITY_MODELS = 0;
+const Gmat::PosVelSource    SolarSystem::STAR_POS_VEL_SOURCE        = Gmat::DE405;
+const Integer               SolarSystem::STAR_ORDER                 = 0;
+const Integer               SolarSystem::STAR_DEGREE                = 0;
+const Integer               SolarSystem::STAR_NUM_GRAVITY_MODELS    = 0;
 const Integer               SolarSystem::STAR_NUM_ATMOSPHERE_MODELS = 0;
-const Integer               SolarSystem::STAR_NUM_MAGNETIC_MODELS = 0;
-const Integer               SolarSystem::STAR_NUM_SHAPE_MODELS = 0;
-const std::string           SolarSystem::STAR_GRAVITY_MODELS = "None";
-const std::string           SolarSystem::STAR_ATMOSPHERE_MODELS = "None";
-const std::string           SolarSystem::STAR_MAGNETIC_MODELS = "None";
-const std::string           SolarSystem::STAR_SHAPE_MODELS = "None"; // @todo add Shape Models
+const Integer               SolarSystem::STAR_NUM_MAGNETIC_MODELS   = 0;
+const Integer               SolarSystem::STAR_NUM_SHAPE_MODELS      = 0;
+const std::string           SolarSystem::STAR_GRAVITY_MODELS        = "None";
+const std::string           SolarSystem::STAR_ATMOSPHERE_MODELS     = "None";
+const std::string           SolarSystem::STAR_MAGNETIC_MODELS       = "None";
+const std::string           SolarSystem::STAR_SHAPE_MODELS          = "None"; // @todo add Shape Models
 
-
-// add other moons, asteroids, comets, as needed
-// what about libration points?
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// static methods
-//------------------------------------------------------------------------------
-// none at this time
-
 
 //------------------------------------------------------------------------------
 //  SolarSystem(std::string withName)
@@ -330,16 +322,19 @@ const std::string           SolarSystem::STAR_SHAPE_MODELS = "None"; // @todo ad
  *                   system (default is "").
  */
 //------------------------------------------------------------------------------
-SolarSystem::SolarSystem(std::string withName)
-   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName)
+SolarSystem::SolarSystem(std::string withName) :
+   GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName),
+   pvSrcForAll                 (Gmat::DE405),
+   thePlanetaryEphem           (NULL),
+   overrideTimeForAll          (false),
+   ephemUpdateInterval         (0.0),
+   allowSpiceForDefaultBodies  (true),
+   theSPKFilename              (""),
+   lskKernelName               ("")
 {
    objectTypes.push_back(Gmat::SOLAR_SYSTEM);
    objectTypeNames.push_back("SolarSystem");
    parameterCount      = SolarSystemParamCount;
-   pvSrcForAll         = Gmat::DE405;
-   thePlanetaryEphem   = NULL;
-   overrideTimeForAll  = false;
-   ephemUpdateInterval = 0.0;
 #ifdef __USE_SPICE__
    planetarySPK   = new SpiceOrbitKernelReader();
    #ifdef DEBUG_SS_CREATE
@@ -351,15 +346,11 @@ SolarSystem::SolarSystem(std::string withName)
       MessageInterface::ShowMessage("PlanetarySPK is at <%p>\n", planetarySPK);
    #endif
 #endif
-   allowSpiceForDefaultBodies = true; // as of 2010.03.31, this is the default value
 
    // we want to cloak the Solar System data; i.e. we want to write only those
    // parameters that have been modified by the suer to a script; and we don't
    // want to include the Create line either
    cloaking = true;
-
-   theSPKFilename             = "";
-   lskKernelName              = "";
 
    FileManager *fm = FileManager::Instance();
    std::string upperCaseName;
@@ -374,15 +365,12 @@ SolarSystem::SolarSystem(std::string withName)
        "Star* theSun = new Star(SUN_NAME)");
    #endif
    theSun->SetCentralBody(EARTH_NAME);  // central body here is a reference body
-//   theSun->SetSolarSystem(this);
    theSun->SetSource(STAR_POS_VEL_SOURCE);
    theSun->SetEquatorialRadius(STAR_EQUATORIAL_RADIUS);
    theSun->SetFlattening(STAR_FLATTENING);
    theSun->SetGravitationalConstant(STAR_MU);
    theSun->SetOrder(STAR_ORDER);
    theSun->SetDegree(STAR_DEGREE);
-//   theSun->SetHarmonicCoefficientsSij(STAR_SIJ);
-//   theSun->SetHarmonicCoefficientsCij(STAR_CIJ);
    theSun->SetRadiantPower(STAR_RADIANT_POWER, STAR_REFERENCE_DISTANCE);
    theSun->SetPhotosphereRadius(STAR_PHOTOSPHERE_RADIUS);
    theSun->SetIntegerParameter(theSun->GetParameterID("NAIFId"),STAR_NAIF_IDS);
@@ -429,15 +417,12 @@ SolarSystem::SolarSystem(std::string withName)
       #endif
       if (PLANET_NAMES[ii] == EARTH_NAME) theEarth = newPlanet;
       newPlanet->SetCentralBody(SUN_NAME);
-//      newPlanet->SetSolarSystem(this);
       newPlanet->SetSource(PLANET_POS_VEL_SOURCE);
       newPlanet->SetEquatorialRadius(PLANET_EQUATORIAL_RADIUS[ii]);
       newPlanet->SetFlattening(PLANET_FLATTENING[ii]);
       newPlanet->SetGravitationalConstant(PLANET_MU[ii]);
       newPlanet->SetOrder(PLANET_ORDER[ii]);
       newPlanet->SetDegree(PLANET_DEGREE[ii]);
-//      newPlanet->SetHarmonicCoefficientsSij(PLANET_SIJ[ii]);
-//      newPlanet->SetHarmonicCoefficientsCij(PLANET_CIJ[ii]);
       // reference object must be set before setting TwoBodyEpoch or TwoBodyElements
       newPlanet->SetRefObject(theSun, Gmat::CELESTIAL_BODY, SUN_NAME);
 
@@ -499,8 +484,6 @@ SolarSystem::SolarSystem(std::string withName)
       newMoon->SetGravitationalConstant(MOON_MU[ii]);
       newMoon->SetOrder(MOON_ORDER[ii]);
       newMoon->SetDegree(MOON_DEGREE[ii]);
-//      newMoon->SetHarmonicCoefficientsSij(MOON_SIJ[ii]);
-//      newMoon->SetHarmonicCoefficientsCij(MOON_CIJ[ii]);
       // reference object must be set before setting TwoBodyEpoch or TwoBodyElements
       CelestialBody *central = FindBody(MOON_CENTRAL_BODIES[ii]);
       if (!central)
@@ -511,7 +494,6 @@ SolarSystem::SolarSystem(std::string withName)
          throw SolarSystemException(errMsg);
       }
       newMoon->SetCentralBody(MOON_CENTRAL_BODIES[ii]);
-//      newMoon->SetSolarSystem(this);
       newMoon->SetRefObject(central, Gmat::CELESTIAL_BODY, MOON_CENTRAL_BODIES[ii]);
 
       newMoon->SetTwoBodyEpoch(MOON_TWO_BODY_EPOCH[ii]);
@@ -557,11 +539,6 @@ SolarSystem::SolarSystem(std::string withName)
    SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
    AddSpecialPoint(ssb);
-#ifdef __USE_SPICE__
-  // Set the kernel reader on the solar system barycenter
-//   ssb->SetSpiceOrbitKernelReader(planetarySPK);   //  let special points get the pointer from the SS when it's needed
-#endif
-//   specialPoints[SOLAR_SYSTEM_BARYCENTER_NAME] = ssb;
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");
    #endif
@@ -790,15 +767,6 @@ SolarSystem::~SolarSystem()
        GetName().c_str(), thePlanetaryEphem, planetarySPK);
    #endif
    
-//   if (theDefaultSlpFile != NULL)
-//   {
-//      #ifdef DEBUG_SS_CLONING
-//      MessageInterface::ShowMessage
-//         ("   deleting theDefaultSlpFile=%p\n",  theDefaultSlpFile);
-//      #endif
-//
-//      delete theDefaultSlpFile;
-//   }
 
    if (theDefaultDeFile != NULL)
    {
@@ -827,6 +795,12 @@ SolarSystem::~SolarSystem()
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
+/**
+ * Initializes the SolarSystem class.
+ *
+ * @return initialization success flag
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::Initialize()
 {
    #ifdef DEBUG_SS_INIT
@@ -852,7 +826,6 @@ bool SolarSystem::Initialize()
 			if (theDefaultDeFile == NULL)
 				MessageInterface::ShowMessage(" theDefaultDeFile == NULL\n");
 			else
-//				MessageInterface::ShowMessage(" theDefaultDeFile: <%p> name ='%s'\n",theDefaultDeFile, theDefaultDeFile->theFileName.c_str());
 		#endif
        
 		for (std::vector<CelestialBody*>::const_iterator cbi = bodiesInUse.begin();
@@ -897,7 +870,7 @@ bool SolarSystem::Initialize()
 // void CreatePlanetarySource(bool setDefault)
 //------------------------------------------------------------------------------
 /*
- * Creates planetary epemeris source.
+ * Creates planetary ephemeris source.
  *
  * @param <setDefault> set to true if default ephemeris is to be created (true)
  */
@@ -931,27 +904,27 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
 //      thePlanetarySourceNames.push_back("N/A");  // TwoBodyPropagation has no file associated with it // 2012/01.14 - wcs - disallowed for now
 
      thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
-	  try															// made change by TUAN NGUYEN
-	  {																// made change by TUAN NGUYEN
-		  std::string pathname = fm->GetFullPathname("DE421_FILE");	// made change by TUAN NGUYEN
-	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
-	  }																// made change by TUAN NGUYEN
-	  catch (UtilityException e)									// made change by TUAN NGUYEN
-	  {																// made change by TUAN NGUYEN
-		  // skip the settting DE421 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
-		  MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");	// made change by TUAN NGUYEN
-	  }																// made change by TUAN NGUYEN
+	  try
+	  {
+		  std::string pathname = fm->GetFullPathname("DE421_FILE");
+	     thePlanetarySourceNames.push_back(pathname);
+	  }
+	  catch (UtilityException e)
+	  {
+		  // skip the setting DE421 when it is not defined in gmat_startup file
+		  MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");
+	  }
 
-	  try															// made change by TUAN NGUYEN
-	  {																// made change by TUAN NGUYEN
-		  std::string pathname = fm->GetFullPathname("DE424_FILE");	// made change by TUAN NGUYEN
-	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
-	  }																// made change by TUAN NGUYEN
-	  catch (UtilityException e)									// made change by TUAN NGUYEN
-	  {																// made change by TUAN NGUYEN
-		  // skip the settting DE424 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
-		  MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");	// made change by TUAN NGUYEN
-	  }																// made change by TUAN NGUYEN
+	  try
+	  {
+		  std::string pathname = fm->GetFullPathname("DE424_FILE");
+	     thePlanetarySourceNames.push_back(pathname);
+	  }
+	  catch (UtilityException e)
+	  {
+		  // skip the settting DE424 when it is not defined in gmat_startup file
+		  MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");
+	  }
 
       if (spiceAvailable)
       {
@@ -987,7 +960,7 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
 // const StringArray& GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 /**
- * @return a planetary source types
+ * @return  planetary source types string array
  */
 //------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetPlanetarySourceTypes()
@@ -999,7 +972,7 @@ const StringArray& SolarSystem::GetPlanetarySourceTypes()
 // const StringArray& GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 /**
- * @return a planetary source file names
+ * @return planetary source file names string array
  */
 //------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetPlanetarySourceNames()
@@ -1011,7 +984,7 @@ const StringArray& SolarSystem::GetPlanetarySourceNames()
 // const StringArray& GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
 /**
- * @return a planetary source types in use
+ * @return  planetary source types in use string array
  */
 //------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetPlanetarySourceTypesInUse()
@@ -1026,7 +999,14 @@ const StringArray& SolarSystem::GetPlanetarySourceTypesInUse()
 
 //------------------------------------------------------------------------------
 // bool SetPlanetarySourceName(const std::string &sourceType,
-//                           const std::string &fileName)
+//                             const std::string &fileName)
+//------------------------------------------------------------------------------
+/*
+ * Sets the planetary ephemeris source name.
+ *
+ * @param <sourceType> type of planetary source
+ * @param <fileName>   name of the planetary source file
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
                                          const std::string &fileName)
@@ -1093,6 +1073,12 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
 //------------------------------------------------------------------------------
 // std::string GetPlanetarySourceName(const std::string &sourceType)
 //------------------------------------------------------------------------------
+/*
+ * Returns planetary ephemeris source file name.
+ *
+ * @return planetary source name
+ */
+//------------------------------------------------------------------------------
 std::string SolarSystem::GetPlanetarySourceName(const std::string &sourceType)
 {
    Integer id = GetPlanetarySourceId(sourceType);
@@ -1108,12 +1094,12 @@ std::string SolarSystem::GetPlanetarySourceName(const std::string &sourceType)
 // Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 //------------------------------------------------------------------------------
 /*
- * @param <sourceTypes> list of file type in the priority order of use
+ * @param <sourceTypes> list of file types in the priority order of use
  *
  * @return 0, if error setting any of planetary file in the list.
  *         1, if error setting first planetary file in the list, but set to
  *            next available file.
- *         2, if successfuly set to first planetary file in the list
+ *         2, if successfully set to first planetary file in the list
  */
 //------------------------------------------------------------------------------
 Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
@@ -1184,7 +1170,6 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             break;
          }
       }
-      // made changes by TUAN NGUYEN
       else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421])
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
@@ -1203,7 +1188,6 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             break;
          }
       }
-      // made changes by TUAN NGUYEN
       else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424])
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
@@ -1326,13 +1310,11 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             if (thePlanetarySourcePriority[Gmat::DE405] > 0)
                thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405]);
          }
-         // made changes by TUAN NGUYEN
          else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421])
          {
             if (thePlanetarySourcePriority[Gmat::DE421] > 0)
                thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);
          }
-         // made changes by TUAN NGUYEN
          else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424])
          {
             if (thePlanetarySourcePriority[Gmat::DE424] > 0)
@@ -1370,6 +1352,14 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
 //------------------------------------------------------------------------------
 // Integer GetPlanetarySourceId(const std::string &sourceType)
 //------------------------------------------------------------------------------
+/*
+ * Returns the planetary source ID.
+ *
+ * @param <sourceType> string representation of the ephemeris source type
+ *
+ * @return planetary source ID
+ */
+//------------------------------------------------------------------------------
 Integer SolarSystem::GetPlanetarySourceId(const std::string &sourceType)
 {
    for (int i=0; i<Gmat::PosVelSourceCount; i++)
@@ -1385,6 +1375,12 @@ Integer SolarSystem::GetPlanetarySourceId(const std::string &sourceType)
 //------------------------------------------------------------------------------
 // std::string GetPlanetarySourceNameInUse()
 //------------------------------------------------------------------------------
+/*
+ * Returns the planetary source name in use.
+ *
+ * @return planetary source name in use
+ */
+//------------------------------------------------------------------------------
 std::string SolarSystem::GetCurrentPlanetarySource()
 {
    return theCurrentPlanetarySource;
@@ -1392,6 +1388,14 @@ std::string SolarSystem::GetCurrentPlanetarySource()
 
 //------------------------------------------------------------------------------
 // void SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
+//------------------------------------------------------------------------------
+/*
+ * Sets flag specifying whether or not SPICE ephemeris input is allowed
+ * for the default bodies.
+ *
+ * @param <allowSpice> flag specifying whether or not SPICE ephemeris
+ *                     input is allowed for the default bodies
+ */
 //------------------------------------------------------------------------------
 void SolarSystem::SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
 {
@@ -1417,18 +1421,33 @@ void SolarSystem::SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
       (spi->second)->SetAllowSpice(allowSpiceForDefaultBodies);
       ++spi;
    }
-
-
 }
 
 //------------------------------------------------------------------------------
 // bool IsSpiceAllowedForDefaultBodies() const
+//------------------------------------------------------------------------------
+/*
+ * Returns flag specifying whether or not SPICE ephemeris input is allowed
+ * for the default bodies.
+ *
+ * @return flag specifying whether or not SPICE ephemeris
+ *         input is allowed for the default bodies
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::IsSpiceAllowedForDefaultBodies() const
 {
    return allowSpiceForDefaultBodies;
 }
 
+//------------------------------------------------------------------------------
+// PlanetaryEphem* GetPlanetaryEphem()
+//------------------------------------------------------------------------------
+/*
+ * Returns a pointer to the planetary ephemeris object.
+ *
+ * @return pointer to the planetary ephemeris object
+ */
+//------------------------------------------------------------------------------
 PlanetaryEphem* SolarSystem::GetPlanetaryEphem()
 {
    return thePlanetaryEphem;
@@ -1437,6 +1456,10 @@ PlanetaryEphem* SolarSystem::GetPlanetaryEphem()
 #ifdef __USE_SPICE__
 //------------------------------------------------------------------------------
 // void LoadSpiceKernels()
+//------------------------------------------------------------------------------
+/*
+ * Calls the SpiceInterface to load the planetary SPICE kernels.
+ */
 //------------------------------------------------------------------------------
 void SolarSystem::LoadSpiceKernels()
 {
@@ -1511,7 +1534,6 @@ void SolarSystem::LoadSpiceKernels()
                ("   kernelReader now trying to load the LSK file %s\n", lskName.c_str());
             #endif
             planetarySPK->SetLeapSecondKernel(lskName);
-//            planetarySPK->LoadKernel(lskName);
             #ifdef DEBUG_SS_SPICE
             MessageInterface::ShowMessage
                ("   kernelReader has loaded LSK file %s\n", lskName.c_str());
@@ -1533,6 +1555,15 @@ void SolarSystem::LoadSpiceKernels()
    }
 }
 
+//------------------------------------------------------------------------------
+// SpiceOrbitKernelReader* GetSpiceOrbitKernelReader()
+//------------------------------------------------------------------------------
+/*
+ * Returns a pointer to the orbit kernel reader for the SolarSystem.
+ *
+ * @return pointer to the orbit kernel reader.
+ */
+//------------------------------------------------------------------------------
 SpiceOrbitKernelReader* SolarSystem::GetSpiceOrbitKernelReader()
 {
    return planetarySPK;
@@ -1542,6 +1573,10 @@ SpiceOrbitKernelReader* SolarSystem::GetSpiceOrbitKernelReader()
 
 //------------------------------------------------------------------------------
 // void ResetToDefaults()
+//------------------------------------------------------------------------------
+/*
+ * Resets SolarSystem data members to default values.
+ */
 //------------------------------------------------------------------------------
 void SolarSystem::ResetToDefaults()
 {
@@ -1577,7 +1612,6 @@ void SolarSystem::ResetToDefaults()
    }
 
 }
-
 
 //------------------------------------------------------------------------------
 //  bool AddBody(CelestialBody* cb)
@@ -1618,7 +1652,7 @@ bool SolarSystem::AddBody(CelestialBody* cb)
    if (!userDef)
    {
       if (!cb->SetSource(pvSrcForAll))  return false;
-      if ((pvSrcForAll == Gmat::DE405)||(pvSrcForAll == Gmat::DE421)||(pvSrcForAll == Gmat::DE424))		// made changes by TUAN NGUYEN
+      if ((pvSrcForAll == Gmat::DE405)||(pvSrcForAll == Gmat::DE421)||(pvSrcForAll == Gmat::DE424))
       {
          if (thePlanetaryEphem)
             if (!cb->SetSourceFile(thePlanetaryEphem))  return false;
@@ -1631,11 +1665,6 @@ bool SolarSystem::AddBody(CelestialBody* cb)
          MessageInterface::ShowMessage("Now about to set SPKreader on user-defined body %s\n",
                (cb->GetName()).c_str());
       #endif
-     // Set the kernel reader on the celestial bodies
-   #ifdef DEBUG_PLANETARY_SPK
-//      MessageInterface::ShowMessage("in SS AddBody, setting planetarySPK <%p> on body %s\n", planetarySPK, (cb->GetName()).c_str());
-   #endif
-//      cb->SetSpiceOrbitKernelReader(planetarySPK);  //  let celestial bodies get the pointer from the SS when it's needed
    #endif
 
    // Set the pointer to the Solar System
@@ -1661,6 +1690,18 @@ CelestialBody* SolarSystem::GetBody(std::string withName)
    return FindBody(withName);
 }
 
+//------------------------------------------------------------------------------
+//  bool DeleteBody(const std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * Deletes the specified body from the SolarSystem.
+ *
+ * @param <withName>  name of the body to delete.
+ *
+ * @return  success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::DeleteBody(const std::string &withName)
 {
    // Search through bodiesInUse for the body with the name withName
@@ -1692,6 +1733,18 @@ bool SolarSystem::DeleteBody(const std::string &withName)
    return false;
 }
 
+//------------------------------------------------------------------------------
+//  bool AddSpecialPoint(SpecialCelestialPoint *cp)
+//------------------------------------------------------------------------------
+/**
+ * Adds the specified special point to the SolarSystem.
+ *
+ * @param <cp>  the special celestial point to add.
+ *
+ * @return  success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::AddSpecialPoint(SpecialCelestialPoint *cp)
 {
    #ifdef DEBUG_SS_ADD_BODY
@@ -1721,7 +1774,18 @@ bool SolarSystem::AddSpecialPoint(SpecialCelestialPoint *cp)
    return true;
 }
 
-
+//------------------------------------------------------------------------------
+//  SpecialCelestialPoint* GetSpecialPoint(const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Returns a pointer to the specified special point.
+ *
+ * @param <withName>  the name of the special celestial point to retrieve.
+ *
+ * @return  pointer to the specified special celestial point
+ *
+ */
+//------------------------------------------------------------------------------
 SpecialCelestialPoint* SolarSystem::GetSpecialPoint(const std::string &withName)
 {
    std::map<std::string, SpecialCelestialPoint*>::iterator spi;
@@ -1758,11 +1822,32 @@ bool SolarSystem::IsBodyInUse(std::string theBody)
    return false;
 }
 
+//------------------------------------------------------------------------------
+//  const StringArray& GetDefaultBodies() const
+//------------------------------------------------------------------------------
+/**
+ * Returns a list of default celestial bodies included in the SolarSystem.
+ *
+ * @return list of the names of the default bodies
+ *
+ */
+//------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetDefaultBodies() const
 {
    return defaultBodyStrings;
 }
 
+//------------------------------------------------------------------------------
+//  const StringArray& GetUserDefinedBodies() const
+//------------------------------------------------------------------------------
+/**
+ * Returns a list of user-defined celestial bodies currently included in this
+ * SolarSystem.
+ *
+ * @return list of the names of the user-defined bodies
+ *
+ */
+//------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetUserDefinedBodies() const
 {
    return userDefinedBodyStrings;
@@ -1774,9 +1859,9 @@ const StringArray& SolarSystem::GetUserDefinedBodies() const
 //------------------------------------------------------------------------------
 /**
  * This method returns the source of position and velocity for the bodies in
- * use (assuming all have the same source).
+ * use (all default bodies have the same source).
  *
- * @return position/velocity source for the bodies.
+ * @return position/velocity source for the default bodies.
  *
  */
 //------------------------------------------------------------------------------
@@ -1791,9 +1876,9 @@ Gmat::PosVelSource   SolarSystem::GetPosVelSource() const
 //------------------------------------------------------------------------------
 /**
  * This method returns the source file name for the bodies in
- * use (assuming all have the same source).
+ * use (all default bodies have the same source).
  *
- * @return source file name for the bodies.
+ * @return source file name for the default bodies.
  *
  */
 //------------------------------------------------------------------------------
@@ -1807,6 +1892,14 @@ std::string SolarSystem::GetSourceFileName() const
 //------------------------------------------------------------------------------
 // bool GetOverrideTimeSystem() const
 //------------------------------------------------------------------------------
+/**
+ * Returns the flag indicating whether or not we are overriding the
+ * time system with TT time (instead of TDB time).
+ *
+ * @return specfied flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::GetOverrideTimeSystem() const
 {
    return overrideTimeForAll;
@@ -1815,6 +1908,13 @@ bool SolarSystem::GetOverrideTimeSystem() const
 
 //------------------------------------------------------------------------------
 // Real GetEphemUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the ephem update interval in seconds.
+ *
+ * @return ephem update interval (sec)
+ *
+ */
 //------------------------------------------------------------------------------
 Real SolarSystem::GetEphemUpdateInterval() const
 {
@@ -1825,8 +1925,15 @@ Real SolarSystem::GetEphemUpdateInterval() const
 //------------------------------------------------------------------------------
 // StringArray GetValidModelList(Gmat::ModelType m, const std::string &forBody)
 //------------------------------------------------------------------------------
+/**
+ * Returns a string list of valid models for the specified body
+ *
+ * @return a string list of valid models for the specified body
+ *
+ */
+//------------------------------------------------------------------------------
 StringArray SolarSystem::GetValidModelList(Gmat::ModelType m,
-                         const std::string &forBody)
+                                           const std::string &forBody)
 {
    for (std::vector<CelestialBody*>::iterator i = bodiesInUse.begin();
         i != bodiesInUse.end(); ++i)
@@ -1843,8 +1950,8 @@ StringArray SolarSystem::GetValidModelList(Gmat::ModelType m,
 //  bool SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
 /**
- * This method sets the source for the bodies in
- * use (assuming all have the same source).
+ * This method sets the source for the default bodies in
+ * use (they all have the same source).
  *
  * @param <pvSrc> source (for pos and vel) for all of the default bodies.
  *
@@ -1909,8 +2016,8 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
 //  bool SetSource(const std::string &pvSrc)
 //------------------------------------------------------------------------------
 /**
- * This method sets the source for the bodies in
- * use (assuming all have the same source).
+ * This method sets the source for the default bodies in
+ * use (they all have the same source).
  *
  * @param <pvSrc> source (for pos and vel) for all of the bodies.
  *
@@ -1937,8 +2044,8 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
 //  bool SetSourceFile(PlanetaryEphem *src)
 //------------------------------------------------------------------------------
 /**
- * This method sets the source (DE) file for the bodies in
- * use (assuming all have the same method).
+ * This method sets the source (DE) file for the default bodies in
+ * use (they all have the same source).
  *
  * @param <src> planetary ephem - source for all of the bodies.
  *
@@ -1985,6 +2092,15 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
 //------------------------------------------------------------------------------
 // bool SolarSystem::SetSPKFile(const std::string &spkFile)
 //------------------------------------------------------------------------------
+/**
+ * Sets the main planetary SPK kernel name.
+ *
+ * @param <spkFile> name of the planetary SPK kernel
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SetSPKFile(const std::string &spkFile)
 {
    std::string fullSpkName = spkFile;
@@ -2014,6 +2130,15 @@ bool SolarSystem::SetSPKFile(const std::string &spkFile)
 
 //------------------------------------------------------------------------------
 // bool SetLSKFile(const std::string &lskFile)
+//------------------------------------------------------------------------------
+/**
+ * Sets the main planetary LSK (leap second) kernel name.
+ *
+ * @param <lskFile> name of the planetary LSK kernel
+ *
+ * @return success flag for the operation.
+ *
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::SetLSKFile(const std::string &lskFile)
 {
@@ -2047,6 +2172,7 @@ bool SolarSystem::SetLSKFile(const std::string &lskFile)
 }
 
 
+//------------------------------------------------------------------------------
 //  bool SetOverrideTimeSystem(bool overrideIt)
 //------------------------------------------------------------------------------
 /**
@@ -2088,6 +2214,15 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
 //------------------------------------------------------------------------------
 // bool SetEphemUpdateInterval(Real intvl)
 //------------------------------------------------------------------------------
+/**
+ * This method sets the ephemeris update interval (seconds).
+ *
+ * @param <intvl> ephemeris update interval
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 {
    if (intvl < 0.0)
@@ -2122,6 +2257,18 @@ bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 // bool AddValidModelName(Gmat::ModelType m, const std::string &forBody,
 //                        const std::string &theModel)
 //------------------------------------------------------------------------------
+/**
+ * This method adds a valid model name of the specified model type for the
+ * specified body.
+ *
+ * @param <m>        model type
+ * @param <forBody>  body for which to set the model
+ * @param <theModel> model name
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::AddValidModelName(Gmat::ModelType m,
                   const std::string &forBody,
                   const std::string &theModel)
@@ -2138,8 +2285,20 @@ bool SolarSystem::AddValidModelName(Gmat::ModelType m,
 
 //------------------------------------------------------------------------------
 // bool SolarSystem::RemoveValidModelName(Gmat::ModelType m,
-//                  const std::string & forBody,
-//                  const std::string &theModel)
+//                                        const std::string & forBody,
+//                                        const std::string &theModel)
+//------------------------------------------------------------------------------
+/**
+ * This method removes the specified model of the specified model type from the
+ * specified body.
+ *
+ * @param <m>        model type
+ * @param <forBody>  body for which to remove the model
+ * @param <theModel> model name
+ *
+ * @return success flag for the operation.
+ *
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::RemoveValidModelName(Gmat::ModelType m,
                   const std::string & forBody,
@@ -2160,7 +2319,8 @@ bool SolarSystem::RemoveValidModelName(Gmat::ModelType m,
 //  const StringArray& GetBodiesInUse() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a list of strings representing the bodies in use.
+ * This method returns a list of strings representing the celestial bodies in
+ * use.
  *
  * @return list of strings representing the bodies in use.
  *
@@ -2192,8 +2352,6 @@ SolarSystem* SolarSystem::Clone() const
    #endif
 
    return clonedSS;
-
-//   return new SolarSystem(*this);
 }
 
 
@@ -2209,6 +2367,9 @@ SolarSystem* SolarSystem::Clone() const
 void SolarSystem::Copy(const GmatBase* orig)
 {
    // We don't want to clone the bodies so, just copy
+
+   // We don't want to copy everything as in operator=, so
+   // don't call that method - is this true???  wcs 2012.10.29
 
    SolarSystem *ss = (SolarSystem*)orig;
 
@@ -2351,7 +2512,7 @@ std::string SolarSystem::GetParameterTypeString(const Integer id) const
 //  Integer  GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the Integer parameter value, given the input
+ * This method returns the Integer parameter value, given the input
  * parameter ID.
  *
  * @param <id> ID for the requested parameter.
@@ -2372,7 +2533,7 @@ Integer SolarSystem::GetIntegerParameter(const Integer id) const
 //  Integer  GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the Integer parameter value, given the input
+ * This method returns the Integer parameter value, given the input
  * parameter label.
  *
  * @param <label> label for the requested parameter.
@@ -2390,6 +2551,10 @@ Integer SolarSystem::GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 Real SolarSystem::GetRealParameter(const Integer id) const
 {
    if (id == EPHEM_UPDATE_INTERVAL) return ephemUpdateInterval;
@@ -2400,6 +2565,10 @@ Real SolarSystem::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 Real SolarSystem::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
@@ -2407,6 +2576,10 @@ Real SolarSystem::GetRealParameter(const std::string &label) const
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 Real SolarSystem::SetRealParameter(const Integer id, const Real value)
 {
@@ -2422,6 +2595,10 @@ Real SolarSystem::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 Real SolarSystem::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label),value);
@@ -2430,6 +2607,10 @@ Real SolarSystem::SetRealParameter(const std::string &label, const Real value)
 
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::GetBooleanParameter(const Integer id) const
 {
@@ -2441,6 +2622,10 @@ bool SolarSystem::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
@@ -2449,6 +2634,10 @@ bool SolarSystem::GetBooleanParameter(const std::string &label) const
 
 //------------------------------------------------------------------------------
 // bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::SetBooleanParameter(const Integer id, const bool value)
 {
@@ -2468,6 +2657,10 @@ bool SolarSystem::SetBooleanParameter(const Integer id, const bool value)
 
 //------------------------------------------------------------------------------
 // bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 bool SolarSystem::SetBooleanParameter(const std::string &label, const bool value)
 {
@@ -2549,6 +2742,10 @@ std::string SolarSystem::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SetStringParameter(const Integer id,
                                      const std::string &value)
 {
@@ -2605,56 +2802,49 @@ bool SolarSystem::SetStringParameter(const Integer id,
    {
 	  // set source:
      SetSource(value);				// theCurrentPlanetarySource is set to the value
-     // Get the current source index:												// made change by TUAN NGUYEN
-     int sourceindex;																// made change by TUAN NGUYEN
-	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)						// made change by TUAN NGUYEN
-	  {																				// made change by TUAN NGUYEN
-		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == value)					// made change by TUAN NGUYEN
-			  break;																// made change by TUAN NGUYEN
-	  }																				// made change by TUAN NGUYEN
+     // Get the current source index:
+     int sourceindex;
+	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)
+	  {
+		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == value)
+			  break;
+	  }
 
 	  // create DE file and set source file:
 	  if ((sourceindex < Gmat::PosVelSourceCount) &&
 	      ((sourceindex == Gmat::DE405)||
           (sourceindex == Gmat::DE421)||
-          (sourceindex == Gmat::DE424)))									// made change by TUAN NGUYEN
-	  {																				// made change by TUAN NGUYEN
+          (sourceindex == Gmat::DE424)))
+	  {
          // remove old DE file object, create new DE file object
 		 // and assign it to theDefaultDeFile
-         CreateDeFile(sourceindex, thePlanetarySourceNames[sourceindex]);			// made change by TUAN NGUYEN
+         CreateDeFile(sourceindex, thePlanetarySourceNames[sourceindex]);
 
          // set source file
-         SetSourceFile(theDefaultDeFile);											// made change by TUAN NGUYEN
-	  }																				// made change by TUAN NGUYEN
+         SetSourceFile(theDefaultDeFile);
+	  }
 
       return true;
    }
    if (id == DE_FILE_NAME)
    {
-      // Get the current source index:													// made change by TUAN NGUYEN
-      int sourceindex;																	// made change by TUAN NGUYEN
-	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)		// made change by TUAN NGUYEN
-	  {																					// made change by TUAN NGUYEN
-		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN
-			  break;																	// made change by TUAN NGUYEN
-	  }																					// made change by TUAN NGUYEN
+      // Get the current source index:
+      int sourceindex;
+	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)
+	  {
+		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)
+			  break;
+	  }
 
 	  // if the source file name was changed then set the change in
 	  // thePlanetarySourceNames, create new DE file, and set
 	  // the source file to the new DE file.
-	  if (value != thePlanetarySourceNames[sourceindex])								// made change by TUAN NGUYEN
-	  {																					// made change by TUAN NGUYEN
-         CreateDeFile(sourceindex, value);												// made change by TUAN NGUYEN
-         thePlanetarySourceNames[sourceindex] = value;									// made change by TUAN NGUYEN
-         SetSourceFile(theDefaultDeFile);												// made change by TUAN NGUYEN
-	  }																					// made change by TUAN NGUYEN
-
-//      if (value != thePlanetarySourceNames[Gmat::DE405])							// made change by TUAN NGUYEN
-//      {																			// made change by TUAN NGUYEN
-//         CreateDeFile(Gmat::DE405, value);										// made change by TUAN NGUYEN
-//         thePlanetarySourceNames[Gmat::DE405] = value;							// made change by TUAN NGUYEN
-//         SetSourceFile(theDefaultDeFile);											// made change by TUAN NGUYEN
-//      }																			// made change by TUAN NGUYEN
+	  if (value != thePlanetarySourceNames[sourceindex])
+	  {
+         CreateDeFile(sourceindex, value);
+         thePlanetarySourceNames[sourceindex] = value;
+         SetSourceFile(theDefaultDeFile);
+	  }
       return true;
    }
    if (id == SPK_FILE_NAME)
@@ -2679,7 +2869,6 @@ bool SolarSystem::SetStringParameter(const Integer id,
    {
       #ifdef __USE_SPICE__
          return SetLSKFile(value);
-//         return true;
       #else
          return false;
       #endif
@@ -2692,12 +2881,15 @@ bool SolarSystem::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SetStringParameter(const std::string &label,
                                      const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
-
 
 //------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter(const Integer id) const
@@ -2745,6 +2937,10 @@ SolarSystem::GetStringArrayParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 // Integer GetOwnedObjectCount()
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 Integer SolarSystem::GetOwnedObjectCount()
 {
    return bodiesInUse.size();
@@ -2753,6 +2949,10 @@ Integer SolarSystem::GetOwnedObjectCount()
 
 //------------------------------------------------------------------------------
 // GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 GmatBase* SolarSystem::GetOwnedObject(Integer whichOne)
 {
@@ -2766,6 +2966,10 @@ GmatBase* SolarSystem::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 // bool IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::IsParameterReadOnly(const Integer id) const
 {
    // do not write out these items
@@ -2774,16 +2978,16 @@ bool SolarSystem::IsParameterReadOnly(const Integer id) const
    if (id == EPHEMERIS)     // deprecated!!!!
       return true;
 
-//   if ((theCurrentPlanetarySource == "DE405") && (id == SPK_FILE_NAME))
-//      return true;
-//
-//   if ((theCurrentPlanetarySource == "SPICE") && (id == DE_FILE_NAME))
-//      return true;
-//
    return GmatBase::IsParameterReadOnly(id);
 }
 
-
+//------------------------------------------------------------------------------
+// bool IsParameterCloaked(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::IsParameterCloaked(const Integer id) const
 {
    #ifdef DEBUG_SS_CLOAKING
@@ -2801,6 +3005,13 @@ bool SolarSystem::IsParameterCloaked(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool IsParameterEqualToDefault(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::IsParameterEqualToDefault(const Integer id) const
 {
    #ifdef DEBUG_SS_CLOAKING
@@ -2809,20 +3020,6 @@ bool SolarSystem::IsParameterEqualToDefault(const Integer id) const
    #endif
    if (id == EPHEMERIS)    // deprecated!!!!
    {
-//      #ifdef DEBUG_SS_PARAM_EQUAL
-//            MessageInterface::ShowMessage("Checking equality for ephem filenames for SS\n");
-//            MessageInterface::ShowMessage("size of default list is %d;   size of list is %d\n",
-//                  default_planetarySourceTypesInUse.size(), thePlanetarySourceTypesInUse.size());
-//      #endif
-//      if (default_planetarySourceTypesInUse.size() != thePlanetarySourceTypesInUse.size()) return false;
-//      for (unsigned int ii = 0; ii < default_planetarySourceTypesInUse.size(); ii++)
-//      {
-//         #ifdef DEBUG_SS_PARAM_EQUAL
-//               MessageInterface::ShowMessage("    %s     vs.     %s\n",
-//                     (default_planetarySourceTypesInUse.at(ii)).c_str(), (thePlanetarySourceTypesInUse.at(ii)).c_str());
-//         #endif
-//         if (default_planetarySourceTypesInUse.at(ii) != thePlanetarySourceTypesInUse.at(ii)) return false;
-//      }
       return true;
    }
    if (id == EPHEMERIS_SOURCE)
@@ -2883,6 +3080,13 @@ bool SolarSystem::IsParameterEqualToDefault(const Integer id) const
    return GmatBase::IsParameterEqualToDefault(id);
 }
 
+//------------------------------------------------------------------------------
+// bool SaveAllAsDefault() const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SaveAllAsDefault()
 {
    #ifdef DEBUG_SS_CLOAKING
@@ -2908,6 +3112,13 @@ bool SolarSystem::SaveAllAsDefault()
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool SaveParameterAsDefault(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::SaveParameterAsDefault(const Integer id)
 {
    if (id == EPHEMERIS) // deprecated!!!!
@@ -2951,7 +3162,6 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
 }
 
 
-
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
@@ -2964,7 +3174,7 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
  *
  * @param <withName>  name of body requested.
  *
- * @return pointer to a CelestialBody wiith the requested name.
+ * @return pointer to a CelestialBody with the requested name.
  */
 //------------------------------------------------------------------------------
 CelestialBody* SolarSystem::FindBody(std::string withName)
@@ -2992,7 +3202,8 @@ CelestialBody* SolarSystem::FindBody(std::string withName)
 // void SetJ2000Body()
 //------------------------------------------------------------------------------
 /*
- * Sets J2000Body used for Earth to all bodies in the solar system.
+ * Sets the J2000Body used for Earth to be use for all bodies in the solar
+ * system.
  */
 //------------------------------------------------------------------------------
 void SolarSystem::SetJ2000Body()
@@ -3024,6 +3235,14 @@ void SolarSystem::SetJ2000Body()
 
 //------------------------------------------------------------------------------
 // void CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoints)
+//------------------------------------------------------------------------------
+/*
+ * Clones all of the celestial bodies in use.
+ *
+ * @param <ss>                 the solar system whose celestial bodies to clone
+ * @param <cloneSpecialPoints> flag indicating whether or not to also clone the
+ *                             special points
+ */
 //------------------------------------------------------------------------------
 void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoints)
 {
@@ -3108,6 +3327,13 @@ void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoint
 //------------------------------------------------------------------------------
 // void DeleteBodiesInUse(bool deleteSpecialPoints)
 //------------------------------------------------------------------------------
+/*
+ * Deletes all of the celestial bodies in use.
+ *
+ * @param <cloneSpecialPoints> flag indicating whether or not to also delete the
+ *                             special celestial points
+ */
+//------------------------------------------------------------------------------
 void SolarSystem::DeleteBodiesInUse(bool deleteSpecialPoints)
 {
    #ifdef DEBUG_SS_CLONING
@@ -3158,6 +3384,11 @@ void SolarSystem::DeleteBodiesInUse(bool deleteSpecialPoints)
 //------------------------------------------------------------------------------
 // void SetDefaultPlanetarySource()
 //------------------------------------------------------------------------------
+/*
+ * Sets the planetary source list to the default values in teh default order.
+ *
+ */
+//------------------------------------------------------------------------------
 void SolarSystem::SetDefaultPlanetarySource()
 {
    #ifdef DEBUG_SS_PLANETARY_FILE
@@ -3171,8 +3402,8 @@ void SolarSystem::SetDefaultPlanetarySource()
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405]);
 
    // put other planetary sources defined in the setup file:
-   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);			// made change by TUAN NGUYEN
-   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);			// made change by TUAN NGUYEN
+   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);
+   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);
 
 //   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]); // 2012.01.24 - wcs - disallowed for now
    if (spiceAvailable) thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE]);
@@ -3182,7 +3413,7 @@ void SolarSystem::SetDefaultPlanetarySource()
 
 
 ////------------------------------------------------------------------------------
-//// bool CreateSlpFile(const std::string &fileName)
+//// bool CreateSlpFile(const std::string &fileName)  <LEAVING IN FOR NOW>
 ////------------------------------------------------------------------------------
 //bool SolarSystem::CreateSlpFile(const std::string &fileName)
 //{
@@ -3219,6 +3450,16 @@ void SolarSystem::SetDefaultPlanetarySource()
 // bool CreateDeFile(const Integer id, const std::string &fileName,
 //                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
 //------------------------------------------------------------------------------
+/*
+ * Creates the DE file object using the input ID, file name, and format.
+ *
+ * @param <id>            type of DE file
+ * @param <fileName>      fileName of the DE file
+ * @param <format>        format of the file
+ *
+ * @return success flag
+ */
+//------------------------------------------------------------------------------
 bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
                                Gmat::DeFileFormat format)
 {
@@ -3248,10 +3489,10 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    case Gmat::DE405:
       deFileType = Gmat::DE_DE405;
       break;
-   case Gmat::DE421:						// made change by TUAN NGUYEN
+   case Gmat::DE421:
       deFileType = Gmat::DE_DE421;
       break;
-   case Gmat::DE424:						// made change by TUAN NGUYEN
+   case Gmat::DE424:
       deFileType = Gmat::DE_DE424;
       break;
    default:

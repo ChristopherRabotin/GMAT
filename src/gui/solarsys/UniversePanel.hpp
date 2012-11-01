@@ -38,14 +38,13 @@ public:
 private:
    StringArray mAllFileTypes;
    StringArray mFileTypesInUse;
-//   StringArray mAnalyticModels;
    
    std::map<wxString, wxString> mFileTypeNameMap;
    
-   bool mHasFileTypesInUseChanged;
-   bool mHasFileNameChanged;
-   bool mHasLSKFileNameChanged;
-   bool mHasTextModified;
+   bool        mHasFileTypesInUseChanged;
+   bool        mHasFileNameChanged;
+   bool        mHasLSKFileNameChanged;
+   bool        mHasTextModified;
    
    wxComboBox *mFileTypeComboBox;
    
@@ -56,11 +55,11 @@ private:
    wxBitmapButton *mBrowseButton;
    wxBitmapButton *mLSKBrowseButton;
 
-   wxCheckBox *mOverrideCheckBox;
+   wxCheckBox     *mOverrideCheckBox;
 
    GmatStaticBoxSizer *mPageSizer;
    
-   SolarSystem *theSolarSystem;
+   SolarSystem  *theSolarSystem;
    
    wxStaticText *lskNameLabel;
    wxStaticText *fileNameLabel;
@@ -86,17 +85,10 @@ private:
    enum
    {     
       ID_TEXT = 6100,
-//      ID_LISTBOX,
       ID_COMBOBOX,
-//      ID_BUTTON_ADD,
-//      ID_BUTTON_SORT,
-//      ID_BUTTON_REMOVE,
-//      ID_BUTTON_CLEAR,
-//      ID_AVAILABLE_LIST,
       ID_TEXT_CTRL,
       ID_BUTTON_BROWSE,
       ID_LSK_BUTTON_BROWSE,
-//      ID_SELECTED_LIST,
       ID_CHECKBOX,
    };
 };

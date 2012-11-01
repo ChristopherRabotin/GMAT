@@ -33,9 +33,9 @@
 //#define DEBUG_UNIVERSEPANEL_LOAD
 //#define DEBUG_UNIVERSEPANEL_SAVE
 
-//------------------------------
+//------------------------------------------------------------------------------
 // event tables for wxWindows
-//------------------------------
+//------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
@@ -51,9 +51,9 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
 END_EVENT_TABLE()
    
    
-//---------------------------------
+//------------------------------------------------------------------------------
 // public methods
-//---------------------------------
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 // UniversePanel(wxWindow *parent)
 //------------------------------------------------------------------------------
@@ -61,8 +61,6 @@ END_EVENT_TABLE()
  * Constructs UniversePanel object.
  *
  * @param <parent> input parent.
- *
- * @note Creates the Universe GUI
  */
 //------------------------------------------------------------------------------
 UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
@@ -96,6 +94,11 @@ UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
 //------------------------------------------------------------------------------
 // ~UniversePanel()
 //------------------------------------------------------------------------------
+/**
+ * Destroys UniversePanel object (destructor)
+ *
+ */
+//------------------------------------------------------------------------------
 UniversePanel::~UniversePanel()
 {
 }
@@ -105,14 +108,15 @@ UniversePanel::~UniversePanel()
 // void OnScript()
 //------------------------------------------------------------------------------
 /**
- * Shows Scripts
+ * Event handler - shows scripts
  */
 //------------------------------------------------------------------------------
 void UniversePanel::OnScript(wxCommandEvent &event)
 {
    wxString title = "Object Script";
    // open separate window to show scripts?
-   if (mObject != NULL) {
+   if (mObject != NULL)
+   {
       title = "Scripting for ";
       title += mObject->GetName().c_str();
    }
@@ -122,17 +126,15 @@ void UniversePanel::OnScript(wxCommandEvent &event)
 
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // methods inherited from GmatPanel
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
 /**
- * @param <scName> input spacecraft name.
- *
- * @note Creates the notebook for spacecraft information
+ * Creates the GUI panel to manage Solar System
  */
 //------------------------------------------------------------------------------
 void UniversePanel::Create()
@@ -272,6 +274,10 @@ void UniversePanel::Create()
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data from the Solar System object into the GUI widgets
+ */
+//------------------------------------------------------------------------------
 void UniversePanel::LoadData()
 {
    #ifdef DEBUG_UNIVERSEPANEL_LOAD
@@ -322,16 +328,7 @@ void UniversePanel::LoadData()
          MessageInterface::ShowMessage
             ("      <%-20s>   '%-30s'\n", (i->first).c_str(), (i->second).c_str());
       #endif
-      
-      // available analytic models
-      //for (unsigned int i=0; i<mAnalyticModels.size(); i++)
-      //{
-      //   mAnalyticModelComboBox->Append(mAnalyticModels[i].c_str());
-      //}
-      //   
-      // set defaults
-      //mAnalyticModelComboBox->SetSelection(0);
-      
+
       std::string currentSource =
          theSolarSystem->GetStringParameter(theSolarSystem->GetParameterID("EphemerisSource"));
       mFileTypeComboBox->SetStringSelection(currentSource.c_str());
@@ -341,8 +338,6 @@ void UniversePanel::LoadData()
          ("   Ephemeris source set to '%s'\n", currentSource.c_str());
       #endif
       
-      //mFileTypeComboBox->SetStringSelection(fileTypesInUse[0].c_str());
-      //if (mFileTypeComboBox->GetStringSelection() == "Analytic")
       if (mFileTypeComboBox->GetStringSelection() == "TwoBodyPropagation")
       {
          fileNameLabel->SetLabel(wxT("Ephemeris "GUI_ACCEL_KEY"Filename"));
@@ -353,7 +348,6 @@ void UniversePanel::LoadData()
          wxWindow *windowWithFocus = FindFocus();
          if (windowWithFocus == mLSKFileNameTextCtrl)  mFileNameTextCtrl->SetFocus();
          mLSKFileNameTextCtrl->Show(false);
-         //mPageSizer->Show(mAnaModelSizer, true);
       }
       else
       {
@@ -375,7 +369,6 @@ void UniversePanel::LoadData()
             if (windowWithFocus == mLSKFileNameTextCtrl)  mFileNameTextCtrl->SetFocus();
             mLSKFileNameTextCtrl->Show(false);
          }
-         //mPageSizer->Show(mAnaModelSizer, false);
       }
       
       wxString selStr = mFileTypeComboBox->GetStringSelection();
@@ -425,6 +418,10 @@ void UniversePanel::LoadData()
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
+/**
+ * Saves the data from GUI to the Solar System object
+ */
+//------------------------------------------------------------------------------
 void UniversePanel::SaveData()
 {
    #ifdef DEBUG_UNIVERSEPANEL_SAVE
@@ -471,9 +468,7 @@ void UniversePanel::SaveData()
       // save planetary file types in use, if changed
       if (mHasFileTypesInUseChanged)
       {
-//         mFileTypesInUse.clear(); // wcs 2012.10.22 don't change source types in use
          std::string srcSelection = std::string(mFileTypeComboBox->GetStringSelection().c_str());
-//         mFileTypesInUse.push_back(srcSelection);
          theSolarSystem->SetStringParameter(theSolarSystem->GetParameterID("EphemerisSource"),
                srcSelection);
          #ifdef DEBUG_UNIVERSEPANEL_SAVE
@@ -481,7 +476,6 @@ void UniversePanel::SaveData()
             ("UniversePanel::SaveData() types=%s\n",
              mFileTypesInUse[0].c_str());
          #endif
-//         theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
          mHasFileTypesInUseChanged = false;
       }
          
@@ -493,7 +487,6 @@ void UniversePanel::SaveData()
          std::ifstream filename(str.c_str());
          
          // Check if the file doesn't exist then stop
-//         if (type != "Analytic" && !filename) 
          if (type != "TwoBodyPropagation" && !filename) 
          {
             std::string fieldName = "DEFilename";
@@ -554,7 +547,6 @@ void UniversePanel::SaveData()
          std::ifstream filename(str.c_str());
 
          // Check if the file doesn't exist then stop
-//         if (type != "Analytic" && !filename)
          if (type == "SPICE" && !filename)
          {
             std::string fieldName = "LSKFilename";
@@ -578,14 +570,6 @@ void UniversePanel::SaveData()
 
          mHasLSKFileNameChanged = false;
       }
-
-      // save analytical model, if changed 
-//      if (mHasAnaModelChanged)
-//      {
-//         theGuiInterpreter->
-//            SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
-//         mHasAnaModelChanged = false;
-//      }
       
       theSolarSystem->SetBooleanParameter("UseTTForEphemeris",
                                           mOverrideCheckBox->IsChecked());
@@ -605,6 +589,12 @@ void UniversePanel::SaveData()
 
 //------------------------------------------------------------------------------
 // void OnBrowseButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Event handler - handles event triggered when user pushes the Browse Button
+ *
+ * @param <event>   event being handled
+ */
 //------------------------------------------------------------------------------
 void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 {
@@ -630,6 +620,13 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnLSKBrowseButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler - handles event triggered when user pushes the LSK Browse
+ * Button
+ *
+ * @param <event>   event being handled
+ */
+//------------------------------------------------------------------------------
 void UniversePanel::OnLSKBrowseButton(wxCommandEvent& event)
 {
    wxString oldname = mLSKFileNameTextCtrl->GetValue();
@@ -644,7 +641,6 @@ void UniversePanel::OnLSKBrowseButton(wxCommandEvent& event)
       if (!filename.IsSameAs(oldname))
       {
          mLSKFileNameTextCtrl->SetValue(filename);
-//         mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()] = filename;
          mHasLSKFileNameChanged = true;
          EnableUpdate(true);
       }
@@ -657,6 +653,13 @@ void UniversePanel::OnLSKBrowseButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler - handles event triggered when user modified a Combo Box
+ * value
+ *
+ * @param <event>   event being handled
+ */
+//------------------------------------------------------------------------------
 void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 {
    mFileNameTextCtrl->Enable();
@@ -665,10 +668,8 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
       wxString type = mFileTypeComboBox->GetStringSelection();
       mFileNameTextCtrl->SetValue(mFileTypeNameMap[type]);
 
-//      if (type == "Analytic")
       if (type == "TwoBodyPropagation")
       {
-//         mPageSizer->Show(mAnaModelSizer, true);
          fileNameLabel->SetLabel(wxT("Ephemeris "GUI_ACCEL_KEY"Filename"));
          mBrowseButton->Disable();
          mFileNameTextCtrl->Disable();
@@ -684,7 +685,6 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
       }
       else
       {
-//         mPageSizer->Show(mAnaModelSizer, false);
          mBrowseButton->Enable();
          mFileNameTextCtrl->Enable();
          if (type == "SPICE")
@@ -714,16 +714,19 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 
       mPageSizer->Layout();
    }
-//   else if (event.GetEventObject() == mAnalyticModelComboBox)
-//   {
-//      mHasAnaModelChanged = true;
-//   }
    mHasFileTypesInUseChanged = true;
    EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
 // void OnCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Event handler - handles event triggered when user changes the check box
+ * selection
+ *
+ * @param <event>   event being handled
+ */
 //------------------------------------------------------------------------------
 void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 {
@@ -732,6 +735,12 @@ void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 
 //------------------------------------------------------------------------------
 // void OnTextCtrlChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Event handler - handles event triggered when user changes a text value
+ *
+ * @param <event>   event being handled
+ */
 //------------------------------------------------------------------------------
 void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
 {

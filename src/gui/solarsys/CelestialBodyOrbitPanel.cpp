@@ -15,7 +15,7 @@
 // Created: 2009.01.26
 //
 /**
- * This is the panel for the Properties tab on the notebook on the CelestialBody
+ * This is the panel for the Orbit tab on the notebook on the CelestialBody
  * Panel.
  *
  */
@@ -35,7 +35,9 @@
 //#define DEBUG_CB_ORBIT_PANEL
 //#define DEBUG_CB_ORBIT_SAVE
 
+//------------------------------------------------------------------------------
 // event tables for wxMac/Widgets
+//------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(CelestialBodyOrbitPanel, wxPanel)
    EVT_COMBOBOX(ID_COMBO_BOX_EPHEM_SOURCE, CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange)
    EVT_TEXT(ID_TEXT_CTRL_EPHEM_FILE, CelestialBodyOrbitPanel::OnEphemFileTextCtrlChange)
@@ -59,6 +61,19 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------------------------------------------------------
 
+
+//------------------------------------------------------------------------------
+// CelestialBodyOrbitPanel(GmatPanel *cbPanel, wxWindow *parent,
+//                         CelestialBody *body)
+//------------------------------------------------------------------------------
+/**
+ * Creates the panel (default constructor).
+ *
+ * @param <cbPanel>             pointer to panel on which this one resides
+ * @param <parent>              pointer to the parent window
+ * @param <body>                body whose data the panel should display
+ */
+//------------------------------------------------------------------------------
 CelestialBodyOrbitPanel::CelestialBodyOrbitPanel(GmatPanel *cbPanel, 
                               wxWindow *parent, CelestialBody *body) :
    wxPanel          (parent),
@@ -104,11 +119,27 @@ CelestialBodyOrbitPanel::CelestialBodyOrbitPanel(GmatPanel *cbPanel,
    Create();
 }
 
+//------------------------------------------------------------------------------
+// ~CelestialBodyOrbitPanel()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the panel (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 CelestialBodyOrbitPanel::~CelestialBodyOrbitPanel()
 {
    guiManager->UnregisterComboBox("CelestialBody", centralBodyComboBox);
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the panel widgets to the body object.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::SaveData()
 {
    std::string strval;
@@ -289,6 +320,14 @@ void CelestialBodyOrbitPanel::SaveData()
    }
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from the body object to the panel widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::LoadData()
 {
    try
@@ -431,6 +470,15 @@ void CelestialBodyOrbitPanel::LoadData()
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates and arranges the widgets on the panel.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::Create()
 {
    int bSize     = 2;
@@ -519,16 +567,8 @@ void CelestialBodyOrbitPanel::Create()
    }
    
    // central body
-//   centralBodyArray      = ss->GetBodiesInUse();
-//   unsigned int bodiesSz = centralBodyArray.size();
-//   centralBodyArrayWX = new wxString[bodiesSz];
-//   for (unsigned int ii = 0; ii < bodiesSz; ii++)
-//      centralBodyArrayWX[ii] = wxT(centralBodyArray[ii].c_str());
    centralBodyStaticText = new wxStaticText(this, ID_TEXT, wxT("Central "GUI_ACCEL_KEY"Body"),
                            wxDefaultPosition, wxSize(-1,-1), 0);
-//   centralBodyComboBox   = new wxComboBox(this, ID_COMBO_BOX_CENTRAL_BODY, wxT(centralBodyArrayWX[0]),
-//                           wxDefaultPosition, wxDefaultSize, bodiesSz, centralBodyArrayWX,
-//                           wxCB_DROPDOWN|wxCB_READONLY);
    centralBodyComboBox = guiManager->GetCelestialBodyComboBox(this, ID_COMBO_BOX_CENTRAL_BODY, 
                                                               wxSize(150,-1));
    centralBodyComboBox->SetToolTip(pConfig->Read(_T("CentralBodyHint")));
@@ -595,7 +635,6 @@ void CelestialBodyOrbitPanel::Create()
       TATextCtrl->SetToolTip(pConfig->Read(_T("TAHint")));
       TAUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg"),
                            wxDefaultPosition, wxSize(-1,-1), 0);
-   
    }
    
    // sizers
@@ -717,6 +756,17 @@ void CelestialBodyOrbitPanel::Create()
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void ResetChangeFlags(bool discardMods)
+//------------------------------------------------------------------------------
+/**
+ * Resets the change flags for the panel.
+ *
+ * @param <discardMods>    flag indicating whether or not to discard the
+ *                         modifications on the widgets
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::ResetChangeFlags(bool discardMods)
 {
    ephemSrcChanged  = false;
@@ -735,14 +785,12 @@ void CelestialBodyOrbitPanel::ResetChangeFlags(bool discardMods)
    
    if (discardMods)
    {
-//      ephemSourceComboBox->DiscardEdits();
       ephemFileTextCtrl->DiscardEdits();
       if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
       {
 //         spkFileListBox->DiscardEdits();  // why doesn't this work??
          naifIDTextCtrl->DiscardEdits();
       }
-//      centralBodyComboBox->DiscardEdits();
       if (!isSun  && includeTwoBody)
       {
          initialEpochTextCtrl->DiscardEdits();
@@ -756,14 +804,27 @@ void CelestialBodyOrbitPanel::ResetChangeFlags(bool discardMods)
    }
 }
 
+//------------------------------------------------------------------------------
 //Event Handling
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void OnEphemSourceComboBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the ephem source combo
+ * box value.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange(wxCommandEvent &event)
 {
    std::string newEphemSrc = (ephemSourceComboBox->GetStringSelection()).c_str();
    if (newEphemSrc == previousEphemSrc) return;
    ephemSrcChanged = true;
    dataChanged     = true;
-//   ephemSrc        = newEphemSrc;
    theCBPanel->EnableUpdate(true);
    if (newEphemSrc != "DE405")
    {
@@ -842,6 +903,16 @@ void CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange(wxCommandEvent &event)
    previousEphemSrc = newEphemSrc;
 }
 
+//------------------------------------------------------------------------------
+// void OnEphemFileTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the ephem file text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnEphemFileTextCtrlChange(wxCommandEvent &event)
 {
    if (ephemFileTextCtrl->IsModified())
@@ -852,6 +923,17 @@ void CelestialBodyOrbitPanel::OnEphemFileTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnEphemFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the ephem file browse
+ * button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnEphemFileBrowseButton(wxCommandEvent &event)
 {
    wxString oldFile = ephemFileTextCtrl->GetValue();
@@ -869,6 +951,17 @@ void CelestialBodyOrbitPanel::OnEphemFileBrowseButton(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSpkFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the SPK browse
+ * button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnSpkFileBrowseButton(wxCommandEvent &event)
 {
    wxArrayString oldFiles = spkFileListBox->GetStrings();
@@ -905,6 +998,14 @@ void CelestialBodyOrbitPanel::OnSpkFileBrowseButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnSpkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the SPK remove
+ * button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnSpkFileRemoveButton(wxCommandEvent &event)
 {
    wxArrayInt selections;
@@ -927,6 +1028,17 @@ void CelestialBodyOrbitPanel::OnSpkFileRemoveButton(wxCommandEvent &event)
       spkFileListBox->SetSelection(count -1);
 }
 
+//------------------------------------------------------------------------------
+// void OnSpkFileListBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the SPK
+ * file list box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnSpkFileListBoxChange(wxCommandEvent &event)
 {
    spkFileChanged = true;
@@ -934,6 +1046,17 @@ void CelestialBodyOrbitPanel::OnSpkFileListBoxChange(wxCommandEvent &event)
    theCBPanel->EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnNaifIdTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the NAIF ID
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnNaifIdTextCtrlChange(wxCommandEvent &event)
 {
    if (naifIDTextCtrl->IsModified())
@@ -944,6 +1067,17 @@ void CelestialBodyOrbitPanel::OnNaifIdTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnCentralBodyComboBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the central
+ * body combo box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnCentralBodyComboBoxChange(wxCommandEvent &event)
 {
    std::string newCentralBody = (centralBodyComboBox->GetStringSelection()).c_str();
@@ -954,6 +1088,17 @@ void CelestialBodyOrbitPanel::OnCentralBodyComboBoxChange(wxCommandEvent &event)
    theCBPanel->EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnEpochTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the epoch
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnEpochTextCtrlChange(wxCommandEvent &event)
 {
    if (initialEpochTextCtrl->IsModified())
@@ -964,6 +1109,17 @@ void CelestialBodyOrbitPanel::OnEpochTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSMATextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the SMA
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnSMATextCtrlChange(wxCommandEvent &event)
 {
    if (SMATextCtrl->IsModified())
@@ -974,6 +1130,17 @@ void CelestialBodyOrbitPanel::OnSMATextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnECCTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the ECC
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnECCTextCtrlChange(wxCommandEvent &event)
 {
    if (ECCTextCtrl->IsModified())
@@ -984,6 +1151,17 @@ void CelestialBodyOrbitPanel::OnECCTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnINCTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the INC
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnINCTextCtrlChange(wxCommandEvent &event)
 {
    if (INCTextCtrl->IsModified())
@@ -994,6 +1172,17 @@ void CelestialBodyOrbitPanel::OnINCTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnRAANTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the RAAN
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnRAANTextCtrlChange(wxCommandEvent &event)
 {
    if (RAANTextCtrl->IsModified())
@@ -1004,6 +1193,17 @@ void CelestialBodyOrbitPanel::OnRAANTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnAOPTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the AOP
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnAOPTextCtrlChange(wxCommandEvent &event)
 {
    if (AOPTextCtrl->IsModified())
@@ -1014,6 +1214,17 @@ void CelestialBodyOrbitPanel::OnAOPTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnTATextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the TA
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnTATextCtrlChange(wxCommandEvent &event)
 {
    if (TATextCtrl->IsModified())

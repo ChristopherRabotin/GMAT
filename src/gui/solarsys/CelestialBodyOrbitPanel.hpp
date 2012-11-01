@@ -28,7 +28,7 @@
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
 #include "SolarSystem.hpp"
-#include "GuiInterpreter.hpp"   // <<<<<<<<<< ?
+#include "GuiInterpreter.hpp"
 #include "gmatwxdefs.hpp"
 #include "GuiItemManager.hpp"  
 #include "GmatPanel.hpp"
@@ -162,12 +162,10 @@ private:
    // strings for the combo boxes
    StringArray  sourceArray;
    StringArray  spkFileArray;
-//   StringArray  centralBodyArray;
    
    // wxString arrays for the combo boxes
    wxString     *sourceArrayWX;
    wxString     *spkFileArrayWX;
-//   wxString     *centralBodyArrayWX;
    
    /// string versions of current data
    wxString     ephemSourceStringWX;

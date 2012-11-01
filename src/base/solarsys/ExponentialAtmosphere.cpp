@@ -19,7 +19,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "ExponentialAtmosphere.hpp"
 #include <cmath>
 #include "MessageInterface.hpp"
@@ -29,6 +28,8 @@
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
+ *
+ * @param  name  name of the model (default is blank)
  */
 //------------------------------------------------------------------------------
 ExponentialAtmosphere::ExponentialAtmosphere(const std::string &name) :
@@ -65,33 +66,33 @@ ExponentialAtmosphere::~ExponentialAtmosphere()
 // ExponentialAtmosphere(const ExponentialAtmosphere& atm)
 //------------------------------------------------------------------------------
 /**
- * Copy constructor. (private implementation)
+ * Copy constructor.
  *
- * @param <atm> ExponentialAtmosphere object to copy increating the new one.
+ * @param <atm> ExponentialAtmosphere object to copy in creating the new one.
  */
 //------------------------------------------------------------------------------
 ExponentialAtmosphere::ExponentialAtmosphere(const ExponentialAtmosphere& atm) :
-AtmosphereModel      (atm),
-scaleHeight          (NULL),
-refHeight            (NULL),
-refDensity           (NULL),
-altitudeBands        (atm.altitudeBands),
-smoothDensity        (false)
+   AtmosphereModel      (atm),
+   scaleHeight          (NULL),
+   refHeight            (NULL),
+   refDensity           (NULL),
+   altitudeBands        (atm.altitudeBands),
+   smoothDensity        (false)
 {
    SetConstants();
 }
 
 //------------------------------------------------------------------------------
-//  ExponentialAtmosphere& operator= (const ExponentialAtmosphere& bary)
+//  ExponentialAtmosphere& operator= (const ExponentialAtmosphere& atm)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the ExponentialAtmosphere class.
  *
- * @param <bary> the ExponentialAtmosphere object whose data to assign to "this"
- *             calculated point.
+ * @param <atm> the ExponentialAtmosphere object whose data to assign to "this"
+ *              ExponentialAtmosphere.
  *
  * @return "this" ExponentialAtmosphere with data of input ExponentialAtmosphere
- *  ea.
+ *          atm.
  */
 //------------------------------------------------------------------------------
 ExponentialAtmosphere& ExponentialAtmosphere::operator=(
@@ -130,52 +131,53 @@ ExponentialAtmosphere& ExponentialAtmosphere::operator=(
  */
 //------------------------------------------------------------------------------
 bool ExponentialAtmosphere::Density(Real *position, Real *density, Real epoch,
-      Integer count)
+                                    Integer count)
 {
-    if (!refDensity || !refHeight || !scaleHeight)
-       throw AtmosphereException("Exponential atmosphere not initialized");
+   if (!refDensity || !refHeight || !scaleHeight)
+      throw AtmosphereException("Exponential atmosphere not initialized");
     
-    if (centralBodyLocation == NULL)
-       throw AtmosphereException("Exponential atmosphere: Central body vector "
+   if (centralBodyLocation == NULL)
+      throw AtmosphereException("Exponential atmosphere: Central body vector "
              "was not initialized");
         
-    Real loc[3], height;
-    Integer i, index;
+   Real loc[3], height;
+   Integer i, index;
     
-    for (i = 0; i < count; ++i) {
-        loc[0] = position[ i*6 ] - centralBodyLocation[0];
-        loc[1] = position[i*6+1] - centralBodyLocation[1];
-        loc[2] = position[i*6+2] - centralBodyLocation[2];
+   for (i = 0; i < count; ++i)
+   {
+      loc[0] = position[ i*6 ] - centralBodyLocation[0];
+      loc[1] = position[i*6+1] - centralBodyLocation[1];
+      loc[2] = position[i*6+2] - centralBodyLocation[2];
         
-        height = CalculateGeodetics(loc, epoch);
-        if (height < 0.0)
-            throw AtmosphereException("Exponential atmosphere: Position vector "
-                  "is inside central body");
+      height = CalculateGeodetics(loc, epoch);
+      if (height < 0.0)
+         throw AtmosphereException("Exponential atmosphere: Position vector "
+                                   "is inside central body");
             
-        index = FindBand(height);
-        if (smoothDensity)
-           density[i] = Smooth(height, index);
-        else
-           density[i] = refDensity[index] * exp(-(height - refHeight[index]) /
+      index = FindBand(height);
+      if (smoothDensity)
+         density[i] = Smooth(height, index);
+      else
+         density[i] = refDensity[index] * exp(-(height - refHeight[index]) /
                                                 scaleHeight[index]);
-    }
+   }
     
-    return true;
+   return true;
 }
 
 
 //------------------------------------------------------------------------------
-// void SetConstants(void)
+// void SetConstants()
 //------------------------------------------------------------------------------
 /**
  * Builds 3 arrays corresponding to the columns in Vallado's Table 8-4.
  * 
  * Users that want to build other atmosphere models that have the same form as
- * Vallado's (and Wertz's) can derived a class from this one and override this
+ * Vallado's (and Wertz's) can derive a class from this one and override this
  * method with their choice of constants.
  */
 //------------------------------------------------------------------------------
-void ExponentialAtmosphere::SetConstants(void)
+void ExponentialAtmosphere::SetConstants()
 {
    // Delete old array first
    if (scaleHeight)

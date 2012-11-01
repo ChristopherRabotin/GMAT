@@ -12,8 +12,8 @@
 // Created: 2004/02/25
 //
 /**
- * Implements CelesBodySelectDialog class. This class shows dialog window where
- * celestial bodies can be selected.
+ * Implements CelesBodySelectDialog class. This class shows a dialog window on
+ * which celestial bodies can be selected.
  * 
  */
 //------------------------------------------------------------------------------
@@ -40,6 +40,17 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude, ...
 //------------------------------------------------------------------------------
+/**
+ * Creates the dialog (default constructor).
+ *
+ * @param <parent>              pointer to the parent window
+ * @param <bodiesToExclude>     list of bodies to exclude when asking for
+ *                              the celestial body list
+ * @param <bodiesToHide>        list of bodies to hide on the list
+ * @param <showCalPoints>       flag specifying whether or not to show the
+ *                              calculated points (default is false)
+ */
+//------------------------------------------------------------------------------
 CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
                                              wxArrayString &bodiesToExclude,
                                              wxArrayString &bodiesToHide,
@@ -63,6 +74,11 @@ CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
 //------------------------------------------------------------------------------
 // ~CelesBodySelectDialog()
 //------------------------------------------------------------------------------
+/**
+ * Destroys the dialog (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 CelesBodySelectDialog::~CelesBodySelectDialog()
 {
    #if DEBUG_GUI_ITEM_UNREG
@@ -81,6 +97,11 @@ CelesBodySelectDialog::~CelesBodySelectDialog()
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates and arranges the widgets for the dialog.
+ *
+ */
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::Create()
 {
@@ -172,6 +193,13 @@ void CelesBodySelectDialog::Create()
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user pushes a button on the dialog.
+ *
+ * @param <event>   the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
 {
    if ( event.GetEventObject() == mAddBodyButton )  
@@ -231,6 +259,13 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnSelectBody(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects a body on the dialog.
+ *
+ * @param <event>   the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelesBodySelectDialog::OnSelectBody(wxCommandEvent& event)
 {
    ShowBodyOption(mBodySelectedListBox->GetStringSelection(), true);
@@ -239,6 +274,14 @@ void CelesBodySelectDialog::OnSelectBody(wxCommandEvent& event)
 
 //------------------------------------------------------------------------------
 // void OnListBoxDoubleClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user double-clicks on a list box
+ * on the dialog.
+ *
+ * @param <event>   the handled event
+ *
+ */
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::OnListBoxDoubleClick(wxCommandEvent& event)
 {
@@ -258,6 +301,11 @@ void CelesBodySelectDialog::OnListBoxDoubleClick(wxCommandEvent& event)
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from the object onto the widgets of the dialog.
+ *
+ */
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::LoadData()
 {
@@ -295,6 +343,11 @@ void CelesBodySelectDialog::LoadData()
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
+/**
+ * Saves the data from the widgets of the dialog back to the object.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelesBodySelectDialog::SaveData()
 {
    mBodyNames.Clear();
@@ -308,6 +361,11 @@ void CelesBodySelectDialog::SaveData()
 //------------------------------------------------------------------------------
 // virtual void ResetData()
 //------------------------------------------------------------------------------
+/**
+ * Resets flags for the dialog.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelesBodySelectDialog::ResetData()
 {
    mIsBodySelected = false;
@@ -316,6 +374,14 @@ void CelesBodySelectDialog::ResetData()
 
 //------------------------------------------------------------------------------
 // void ShowBodyOption(const wxString &name, bool show = true)
+//------------------------------------------------------------------------------
+/**
+ * Sets the flag indicating whether or not to show a body with the input name.
+ *
+ * @param <name>    name of the body
+ * @param <show>    show this body?  (default is true)
+ *
+ */
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::ShowBodyOption(const wxString &name, bool show)
 {

@@ -35,7 +35,9 @@
 //#define DEBUG_CB_ORIENTATION_PANEL
 //#define DEBUG_CB_ORIENT_SAVE
 
+//------------------------------------------------------------------------------
 // event tables for wxMac/Widgets
+//------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(CelestialBodyOrientationPanel, wxPanel)
    EVT_COMBOBOX(ID_COMBO_BOX_ROTATION_DATA_SOURCE, CelestialBodyOrientationPanel::OnRotationDataSourceComboBoxChange)
    EVT_TEXT(ID_TEXT_CTRL_NUTATION_UPDATE_INTERVAL, CelestialBodyOrientationPanel::OnNutationUpdateIntervalTextCtrlChange)
@@ -51,6 +53,18 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// CelestialBodyOrientationPanel(GmatPanel *cbPanel, wxWindow *parent,
+//                               CelestialBody *body)
+//------------------------------------------------------------------------------
+/**
+ * Creates the panel (default constructor).
+ *
+ * @param <cbPanel>             pointer to panel on which this one resides
+ * @param <parent>              pointer to the parent window
+ * @param <body>                body whose data the panel should display
+ */
+//------------------------------------------------------------------------------
 CelestialBodyOrientationPanel::CelestialBodyOrientationPanel(GmatPanel *cbPanel, 
                                wxWindow *parent, CelestialBody *body) :
    wxPanel                       (parent),
@@ -79,16 +93,31 @@ CelestialBodyOrientationPanel::CelestialBodyOrientationPanel(GmatPanel *cbPanel,
    userDef                       (false)
 {
    guiManager     = GuiItemManager::GetInstance();
-//   guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    
    Create();
 }
 
+//------------------------------------------------------------------------------
+// ~CelestialBodyOrientationPanel()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the panel (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 CelestialBodyOrientationPanel::~CelestialBodyOrientationPanel()
 {
    // nothing to do ... la la la la la ...
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the panel widgets to the body object.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::SaveData()
 {
    std::string strval;
@@ -221,14 +250,18 @@ void CelestialBodyOrientationPanel::SaveData()
    
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from the body object to the panel widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::LoadData()
 {
    try
    {
-//      StringArray ephemSourceList = theBody->GetEphemSourceList();
-//      for (unsigned int ii = 0; ii < ephemSourceList.size(); ii++)
-//         ephemSourceComboBox-Append((ephemSourceList.at[ii]).c_str());
-
 //      if (isLuna)
 //      {
          rotationDataSource = theBody->GetStringParameter(theBody->GetParameterID("RotationDataSource"));
@@ -281,6 +314,15 @@ void CelestialBodyOrientationPanel::LoadData()
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates and arranges the widgets on the panel.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::Create()
 {
    int bSize     = 2;
@@ -294,7 +336,6 @@ void CelestialBodyOrientationPanel::Create()
    pConfig->SetPath(wxT("/Celestial Body Orientation"));
 
    GmatStaticBoxSizer  *boxSizer1 = new GmatStaticBoxSizer(wxVERTICAL, this, "Orientation Data");
-//   GmatStaticBoxSizer  *boxSizer2 = new GmatStaticBoxSizer(wxVERTICAL, this, "");
     
    // empty the temporary value strings
    rotationDataSourceStringWX     = "";
@@ -375,7 +416,7 @@ void CelestialBodyOrientationPanel::Create()
                                  wxDefaultPosition, wxSize(-1,-1), 0);
   
    
-// sizers
+   // sizers
    if (theBody->GetName() == SolarSystem::EARTH_NAME) isEarth = true;
    else if (theBody->GetName() == SolarSystem::MOON_NAME) isLuna = true;
 
@@ -468,6 +509,17 @@ void CelestialBodyOrientationPanel::Create()
    mainBoxSizer->SetSizeHints(this);
 }
 
+//------------------------------------------------------------------------------
+// void ResetChangeFlags(bool discardMods)
+//------------------------------------------------------------------------------
+/**
+ * Resets the change flags for the panel.
+ *
+ * @param <discardMods>    flag indicating whether or not to discard the
+ *                         modifications on the widgets
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::ResetChangeFlags(bool discardMods)
 {
    rotationDataSourceChanged     = false;
@@ -492,7 +544,21 @@ void CelestialBodyOrientationPanel::ResetChangeFlags(bool discardMods)
    }
 }
 
+//------------------------------------------------------------------------------
 //Event Handling
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void OnRotationDataSourceComboBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the selection on the
+ * rotation data source combo box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnRotationDataSourceComboBoxChange(wxCommandEvent &event)
 {
    std::string newSrc = (rotationDataSourceComboBox->GetStringSelection()).c_str();
@@ -503,7 +569,19 @@ void CelestialBodyOrientationPanel::OnRotationDataSourceComboBoxChange(wxCommand
    theCBPanel->EnableUpdate(true);
 }
 
-void CelestialBodyOrientationPanel::OnNutationUpdateIntervalTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+// void OnNutationUpdateIntervalTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the update interval text
+ * box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
+void CelestialBodyOrientationPanel::OnNutationUpdateIntervalTextCtrlChange(
+                                    wxCommandEvent &event)
 {
    if (nutationUpdateIntervalTextCtrl->IsModified())
    {
@@ -513,6 +591,17 @@ void CelestialBodyOrientationPanel::OnNutationUpdateIntervalTextCtrlChange(wxCom
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSpinAxisRAConstantTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the spin axis RA constant
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnSpinAxisRAConstantTextCtrlChange(wxCommandEvent &event)
 {
    if (spinAxisRAConstantTextCtrl->IsModified())
@@ -523,6 +612,17 @@ void CelestialBodyOrientationPanel::OnSpinAxisRAConstantTextCtrlChange(wxCommand
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSpinAxisRARateTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the spin axis RA rate
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnSpinAxisRARateTextCtrlChange(wxCommandEvent &event)
 {
    if (spinAxisRARateTextCtrl->IsModified())
@@ -533,6 +633,17 @@ void CelestialBodyOrientationPanel::OnSpinAxisRARateTextCtrlChange(wxCommandEven
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSpinAxisDECConstantTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the spin axis DEC constant
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnSpinAxisDECConstantTextCtrlChange(wxCommandEvent &event)
 {
    if (spinAxisDECConstantTextCtrl->IsModified())
@@ -543,6 +654,17 @@ void CelestialBodyOrientationPanel::OnSpinAxisDECConstantTextCtrlChange(wxComman
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnSpinAxisDECRateTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the spin axis DEC rate
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnSpinAxisDECRateTextCtrlChange(wxCommandEvent &event)
 {
    if (spinAxisDECRateTextCtrl->IsModified())
@@ -553,6 +675,17 @@ void CelestialBodyOrientationPanel::OnSpinAxisDECRateTextCtrlChange(wxCommandEve
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnRotationConstantTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the rotation constant
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnRotationConstantTextCtrlChange(wxCommandEvent &event)
 {
    if (rotationConstantTextCtrl->IsModified())
@@ -563,6 +696,17 @@ void CelestialBodyOrientationPanel::OnRotationConstantTextCtrlChange(wxCommandEv
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnRotationRateTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the rotation rate
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnRotationRateTextCtrlChange(wxCommandEvent &event)
 {
    if (rotationRateTextCtrl->IsModified())

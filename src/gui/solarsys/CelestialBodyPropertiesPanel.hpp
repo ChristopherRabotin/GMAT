@@ -27,9 +27,8 @@
 
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
-//#include "GuiInterpreter.hpp" 
 #include "gmatwxdefs.hpp"
-#include "GuiItemManager.hpp"  // <<<<<<<<<<< ?
+#include "GuiItemManager.hpp"
 #include "GmatPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
 
@@ -52,7 +51,6 @@ private:
    
    CelestialBody  *theBody;
    GuiItemManager *guiManager;
-//   GuiInterpreter *guiInterpreter;
    
    Real           mu;
    Real           eqRad;
@@ -116,8 +114,5 @@ private:
       ID_TEXT_CTRL_FLAT,
       ID_TEXT_CTRL_TEXTURE,
    };
-   
-   
-                                
 };
 #endif // CelestialBodyPropertiesPanel_hpp

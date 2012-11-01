@@ -26,47 +26,26 @@
 //#define DEBUG_PARAM_PANEL 1
 //#define DEBUG_CELESBODY_SAVE 1
 
-//const std::string
-//CelestialBodyPanel::KEP_ELEMENT_NAMES[6] =
-//{
-//   "SMA",
-//   "ECC",
-//   "INC",
-//   "RAAN",
-//   "AOP",
-//   "TA",
-//};
-//
-//const std::string
-//CelestialBodyPanel::KEP_ELEMENT_UNITS[6] =
-//{
-//   "km",
-//   "",
-//   "deg",
-//   "deg",
-//   "deg",
-//   "deg",
-//};
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+// none at this time
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(CelestialBodyPanel, GmatPanel)
-//   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-//   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-//   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-//   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-//   
-////   EVT_TEXT(ID_TEXTCTRL, CelestialBodyPanel::OnTextUpdate)
-////   EVT_COMBOBOX(ID_COMBO, CelestialBodyPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// CelestialBodyPanel()
+// CelestialBodyPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 /**
- * A constructor.
+ * Creates the panel (default constructor).
+ *
+ * @param <parent>   pointer to the parent window
+ * @param <name>     name for the panel
  */
 //------------------------------------------------------------------------------
 CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
@@ -102,6 +81,10 @@ CelestialBodyPanel::~CelestialBodyPanel()
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
+/**
+ * Creates and arranges the widgets for the panel.
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPanel::Create()
 {
    // use a clone here
@@ -136,6 +119,10 @@ void CelestialBodyPanel::Create()
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data from the Celestial Body object onto the widgets.
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPanel::LoadData()
 {
    try
@@ -151,8 +138,6 @@ void CelestialBodyPanel::LoadData()
             e.GetFullMessage().c_str());
    }
 
-   // Activate "ShowScript"
-//   mObject = theCelestialBody;
    mObject = origCelestialBody;
    
    EnableUpdate(false);
@@ -162,13 +147,13 @@ void CelestialBodyPanel::LoadData()
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
+/**
+ * Saves data from the widgets back to the celestial body object.
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPanel::SaveData()
 {
    #if DEBUG_CELESBODY_SAVE
-//   MessageInterface::ShowMessage
-//      ("CelestialBodyPanel::SaveData() isTextModified=%d, isStateTextModified=%d,"
-//       " isRotDataSourceChanged=%d\n", isTextModified, isStateTextModified,
-//       isRotDataSourceChanged);
       MessageInterface::ShowMessage("in CBPanel, origBody = %p, theBody = %p\n",
             origCelestialBody, theCelestialBody);
    #endif
@@ -202,6 +187,15 @@ void CelestialBodyPanel::SaveData()
 
 }
 
+//------------------------------------------------------------------------------
+// void OnPageChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user change the page.
+ *
+ * @param <event>  the handled event
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPanel::OnPageChange(wxCommandEvent &event)
 {
    properties->LoadData();

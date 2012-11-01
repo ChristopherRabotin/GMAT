@@ -21,15 +21,13 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef CelestialBodyOrientationPanel_hpp
 #define CelestialBodyOrientationPanel_hpp
 
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
-//#include "GuiInterpreter.hpp" 
 #include "gmatwxdefs.hpp"
-#include "GuiItemManager.hpp"  // <<<<<<<<<<< ?
+#include "GuiItemManager.hpp"
 #include "GmatPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
 
@@ -52,9 +50,7 @@ private:
    
    CelestialBody  *theBody;
    GuiItemManager *guiManager;
-//   GuiInterpreter *guiInterpreter;
-   
-   //**************************************
+
    std::string    rotationDataSource;
    Real           nutationUpdateInterval;;
    Real           spinAxisRAConstant;
@@ -157,8 +153,5 @@ private:
       ID_TEXT_CTRL_ROTATION_CONSTANT,
       ID_TEXT_CTRL_ROTATION_RATE,
    };
-   
-   
-                                
 };
 #endif // CelestialBodyOrientationPanel_hpp

@@ -29,7 +29,6 @@
 #include "CoordinateConverter.hpp"
 
 
-//#include "RealUtilities.hpp"        // Inadequate for my needs here, so...
 #include <cmath>                    // for exp
 
 
@@ -37,10 +36,9 @@
 //#define DEBUG_ANGVEL
 //#define DEBUG_COORDINATE_TRANSFORMS
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-
+//------------------------------------------------------------------------------
 const std::string
 AtmosphereModel::PARAMETER_TEXT[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
@@ -58,13 +56,13 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 };
 
 //------------------------------------------------------------------------------
-//  AtmosphereModel()
+//  AtmosphereModel(const std::string &typeStr, const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
- *  Constructor.
+ *  Default Constructor.
  *
  *  @param <typeStr> The type of the derived atmosphere model.
- *  @param <name> The name of the derived atmosphere model.
+ *  @param <name>    The name of the derived atmosphere model.
  */
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &name) :
@@ -190,10 +188,10 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    solarSystem          = am.solarSystem;
    mCentralBody         = am.mCentralBody;
    solarFluxFile        = NULL;
-   sunVector            = NULL;
-   centralBodyLocation  = NULL;
    fileName             = am.fileName;
+   sunVector            = NULL;
    centralBody          = am.centralBody;
+   centralBodyLocation  = NULL;
    cbRadius             = am.cbRadius;
    cbFlattening         = am.cbFlattening;
    newFile              = false;
@@ -249,10 +247,10 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 // void SetUpdateParameters(Real interval, GmatEpoch epoch)
 //------------------------------------------------------------------------------
 /**
- * Sets the update interval and, if selected, and epoch to apply
+ * Sets the update interval and, if selected, the epoch to apply
  *
  * @param interval The update interval, in days
- * @param epoch An update epoch
+ * @param epoch    An update epoch
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetUpdateParameters(Real interval, GmatEpoch epoch)
@@ -306,7 +304,8 @@ void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
 void AtmosphereModel::SetFixedCoordinateSystem(CoordinateSystem *cs)
 {
    if (!cs->AreAxesOfType("BodyFixedAxes"))
-      throw SolarSystemException("AtmosphereModel: coordinate system is not of type BodyFixed.\n");
+      throw SolarSystemException(
+            "AtmosphereModel: coordinate system is not of type BodyFixed.\n");
    cbFixed = cs;
 }
 
@@ -418,7 +417,6 @@ void AtmosphereModel::UpdateAngularVelocity(const GmatEpoch when)
             throw AtmosphereException("The body-fixed coordinate system is "
                   "not set");
          Real in[3], out[3];
-//         cbFixed->ToMJ2000Eq(when, in, out, true, true);
          cbFixed->ToBaseSystem(when, in, out, true, true);  // @todo - do we need ToMJ2000Eq here?
          BuildAngularVelocity(when);
       }
@@ -431,6 +429,8 @@ void AtmosphereModel::UpdateAngularVelocity(const GmatEpoch when)
 //------------------------------------------------------------------------------
 /**
  * Selects the Kp -> Ap conversion method
+ *
+ * @param <method>  Method to use (see next method prolog)
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetKpApConversionMethod(Integer method)
@@ -658,7 +658,7 @@ bool AtmosphereModel::HasTemperatureModel()
 
 //-----------------------------------------------------------------------------
 // bool Temperature(Real *position, Real *temperature, Real epoch, 
-//       Integer count)
+//                  Integer count)
 //-----------------------------------------------------------------------------
 /**
  * Retrieves the temperature.
@@ -672,7 +672,7 @@ bool AtmosphereModel::HasTemperatureModel()
  */
 //-----------------------------------------------------------------------------
 bool AtmosphereModel::Temperature(Real *position, Real *temperature, 
-         Real epoch, Integer count)
+                                  Real epoch, Integer count)
 {
    return false;
 }
@@ -706,7 +706,7 @@ bool AtmosphereModel::HasPressureModel()
  */
 //-----------------------------------------------------------------------------
 bool AtmosphereModel::Pressure(Real *position, Real *pressure, 
-         Real epoch, Integer count)
+                               Real epoch, Integer count)
 {
    return false;
 }
@@ -992,7 +992,7 @@ void AtmosphereModel::CloseFile()
 
 
 //------------------------------------------------------------------------------
-// Real CalculateGeodetics(Real *position, bool includeLatLong)
+// Real CalculateGeodetics(Real *position, GmatEpoch when, bool includeLatLong)
 //------------------------------------------------------------------------------
 /**
  * Calculates the geodetic height, latitude and longitude for the input state
@@ -1000,16 +1000,17 @@ void AtmosphereModel::CloseFile()
  * The method used here is the same as used in the parameter code.  We may want
  * to refactor so that both call a common, low level source.
  *
- * @param position The cb-centered MJ2000 Cartesian state for the calculations
+ * @param position       The cb-centered MJ2000 Cartesian state for the
+ *                       calculations
+ * @param when           Epoch for the lat/long calculations
  * @param includeLatLong true to calculate latitude and longitude, false to skip
- * @param when Epoch for the lat/long calculations
  *
  * @return The geodetic height.  The latitude and longitude are filled in to
  *         class variables
  */
 //------------------------------------------------------------------------------
 Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
-      bool includeLatLong)
+                                         bool includeLatLong)
 {
    Rvector6 instate(position), state;
 
@@ -1079,62 +1080,11 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
 
    return geoHeight;
 
-//   // Compute the geocentric latitude in radians
-//   // (atan2() is safer than atan() since it avoids division by 0)
-//   Real rPlane2 = position[0]*position[0] + position[1]*position[1];
-//   Real phi = atan2(position[2], sqrt(rPlane2));
-//
-//   // Correct phi for geodesy
-//   phi += cbFlattening * sin(2.0 * phi);
-//
-//   // Compute the cosine of phi
-//   Real cos_phi = cos(phi);
-//
-//   // Compute the magnitude of position vector
-//   Real d = sqrt(rPlane2 + position[2]*position[2]);
-//
-//   // Calculate the geodetic height
-//   if (cbFlattening == 0.0)
-//      geoHeight = d - cbRadius;
-//   else
-//      geoHeight = d - cbRadius * (1 - cbFlattening) /
-//            sqrt(1.0 - cbFlattening * (2.0 - cbFlattening) * cos_phi * cos_phi);
-//
-//   if (includeLatLong)
-//   {
-//      if (ghaEpoch != when)
-//      {
-//         if (when == -1.0)
-//            when = wUpdateEpoch;
-//         gha = mCentralBody->GetHourAngle(when);
-//      }
-//
-//      Real ra = atan2(position[1], position[0]) * GmatMathUtil::DEG_PER_RAD;
-//
-//      // Compute east longitude
-//      geoLong = ra - gha;
-//
-//      // Range check because the lst calculation needs 0 < lon < 360
-//      if (geoLong < 0.0) geoLong += 360.0;
-//      if (geoLong > 360.0) geoLong -= 360.0;
-//
-//
-//      // Now geodetic latitude
-//      Real arg = position[2] / d;
-//      arg = ((fabs(arg) <= 1.0) ? arg : arg / fabs(arg));
-//      Real radlat = GmatMathUtil::PI_OVER_TWO - acos(arg);
-//
-//      // Convert to geodetic latitude, in degrees
-//      radlat += cbFlattening * sin(2.0 * radlat);
-//      geoLat = radlat * GmatMathUtil::DEG_PER_RAD;
-//   }
-//
-//   return geoHeight;
 }
 
 
 //------------------------------------------------------------------------------
-// Real CalculateGeocentrics(Real *position, bool includeLatLong)
+// Real CalculateGeocentrics(Real *position, GmatEpoch when, bool includeLatLong)
 //------------------------------------------------------------------------------
 /**
  * Calculates the geocentric height, latitude and longitude for the input state
@@ -1142,16 +1092,17 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
  * The method used here is the same as used in the parameter code.  We may want
  * to refactor so that both call a common, low level source.
  *
- * @param position The cb-centered MJ2000 Cartesian state for the calculations
+ * @param position       The cb-centered MJ2000 Cartesian state for the
+ *                       calculations
+ * @param when           Epoch for the lat/long calculations
  * @param includeLatLong true to calculate latitude and longitude, false to skip
- * @param when Epoch for the lat/long calculations
  *
  * @return The geocentrics height.  The latitude and longitude are filled in to
  *         class variables
  */
 //------------------------------------------------------------------------------
 Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
-      bool includeLatLong)
+                                           bool includeLatLong)
 {
    Rvector6 instate(position), state;
 
@@ -1203,5 +1154,4 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    #endif
 
    return geoHeight;
-
 }

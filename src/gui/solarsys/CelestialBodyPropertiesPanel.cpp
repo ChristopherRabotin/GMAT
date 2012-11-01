@@ -34,7 +34,9 @@
 //#define DEBUG_CB_PROP_SAVE
 
 
+//------------------------------------------------------------------------------
 // event tables for wxMac/Widgets
+//------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(CelestialBodyPropertiesPanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_BROWSE, CelestialBodyPropertiesPanel::OnBrowseButton)
    EVT_TEXT(ID_TEXT_CTRL_MU, CelestialBodyPropertiesPanel::OnMuTextCtrlChange)
@@ -47,6 +49,18 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// CelestialBodyPropertiesPanel(GmatPanel *cbPanel, wxWindow *parent,
+//                              CelestialBody *body)
+//------------------------------------------------------------------------------
+/**
+ * Creates the panel (default constructor).
+ *
+ * @param <cbPanel>             pointer to panel on which this one resides
+ * @param <parent>              pointer to the parent window
+ * @param <body>                body whose data the panel should display
+ */
+//------------------------------------------------------------------------------
 CelestialBodyPropertiesPanel::CelestialBodyPropertiesPanel(GmatPanel *cbPanel, 
                               wxWindow *parent, CelestialBody *body) :
    wxPanel        (parent),
@@ -64,16 +78,31 @@ CelestialBodyPropertiesPanel::CelestialBodyPropertiesPanel(GmatPanel *cbPanel,
    theCBPanel     (cbPanel)
 {
    guiManager     = GuiItemManager::GetInstance();
-//   guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    
    Create();
 }
 
+//------------------------------------------------------------------------------
+// ~CelestialBodyPropertiesPanel()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the panel (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 CelestialBodyPropertiesPanel::~CelestialBodyPropertiesPanel()
 {
    // nothing to do ... la la la la la ...
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the panel widgets to the body object.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::SaveData()
 {
    std::string strval;
@@ -194,6 +223,14 @@ void CelestialBodyPropertiesPanel::SaveData()
    
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from the body object to the panel widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::LoadData()
 {
    try
@@ -225,6 +262,15 @@ void CelestialBodyPropertiesPanel::LoadData()
 
 //------------------------------------------------------------------------------
 // private methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates and arranges the widgets on the panel.
+ *
+ */
 //------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::Create()
 {
@@ -324,6 +370,17 @@ void CelestialBodyPropertiesPanel::Create()
    pageSizer->Fit(this);
 }
 
+//------------------------------------------------------------------------------
+// void ResetChangeFlags(bool discardMods)
+//------------------------------------------------------------------------------
+/**
+ * Resets the change flags for the panel.
+ *
+ * @param <discardMods>    flag indicating whether or not to discard the
+ *                         modifications on the widgets
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::ResetChangeFlags(bool discardMods)
 {
    muChanged      = false;
@@ -340,7 +397,20 @@ void CelestialBodyPropertiesPanel::ResetChangeFlags(bool discardMods)
    dataChanged = false;
 }
 
+//------------------------------------------------------------------------------
 //Event Handling
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void OnMuTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the mu text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::OnMuTextCtrlChange(wxCommandEvent &event)
 {
    if (muTextCtrl->IsModified())
@@ -351,6 +421,17 @@ void CelestialBodyPropertiesPanel::OnMuTextCtrlChange(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnEqRadTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the equatorial radius
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::OnEqRadTextCtrlChange(wxCommandEvent &event)
 {
    if (eqRadTextCtrl->IsModified())
@@ -362,6 +443,17 @@ void CelestialBodyPropertiesPanel::OnEqRadTextCtrlChange(wxCommandEvent &event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnFlatTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the flattening coefficient
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::OnFlatTextCtrlChange(wxCommandEvent &event)
 {
    if (flatTextCtrl->IsModified())
@@ -373,6 +465,17 @@ void CelestialBodyPropertiesPanel::OnFlatTextCtrlChange(wxCommandEvent &event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnTextureTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the texture filename
+ * text box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::OnTextureTextCtrlChange(wxCommandEvent &event)
 {
    if (textureTextCtrl->IsModified())
@@ -385,6 +488,16 @@ void CelestialBodyPropertiesPanel::OnTextureTextCtrlChange(wxCommandEvent &event
 }
 
 
+//------------------------------------------------------------------------------
+// void OnBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the browse button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::OnBrowseButton(wxCommandEvent &event)
 {
    wxString oldTexture = textureTextCtrl->GetValue();
@@ -402,11 +515,19 @@ void CelestialBodyPropertiesPanel::OnBrowseButton(wxCommandEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// wxString ToString(Real rval)
+//------------------------------------------------------------------------------
+/**
+ * Converts the Real input value to a wxString.
+ *
+ * @param <rval>    real value
+ *
+ * @return   the wxString representation of the input real value
+ *
+ */
+//------------------------------------------------------------------------------
 wxString CelestialBodyPropertiesPanel::ToString(Real rval)
 {
    return guiManager->ToWxString(rval);
 }
-
-
-
-   

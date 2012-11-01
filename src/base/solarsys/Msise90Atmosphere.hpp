@@ -16,6 +16,9 @@
 //
 /**
  * The MSISE90 atmosphere
+ *
+ * Wraps the MSISE90 atmosphere code, ported by a.i. Solutions from the FORTRAN,
+ * into the GMAT atmosphere model format.
  */
 //------------------------------------------------------------------------------
 
@@ -25,10 +28,6 @@
 #include "AtmosphereModel.hpp"
 #include "TimeTypes.hpp"
  
-/**
- * Wraps the MSISE90 atmosphere code, ported by a.i. Solutions from the FORTRAN,
- * into the GMAT atmosphere model format.
- */
 class GMAT_API Msise90Atmosphere : public AtmosphereModel
 {
 public:

@@ -50,16 +50,25 @@ static FILE *logFile;  // Temp log file
 //------------------------------------------------------------------------------
 /**
  *  Constructor.
+ *
+ *  @param name   Name of the Msise90Atmosphere (default is blank)
  */
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     AtmosphereModel     ("MSISE90", name),
     fileData            (false),
-    fluxfilename        ("")
+    fluxfilename        (""),
+    sod                 (0.0),
+    yd                  (0),
+    f107                (0.0),
+    f107a               (0.0),
+    mass                (0)
 {
     #ifdef DEBUG_MSISE90_ATMOSPHERE
     logFile = NULL;
     #endif
+    for (Integer i = 0; i < 7; i++)
+       ap[i] = 0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -83,16 +92,16 @@ Msise90Atmosphere::~Msise90Atmosphere()
  */
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
-AtmosphereModel     (msise),
-fileData            (false),  // is this correct?
-fluxfilename        (msise.fluxfilename),
-sod                 (msise.sod),
-yd                  (msise.yd),
-f107                (msise.f107),
-f107a               (msise.f107a),
-mass                (msise.mass)
+   AtmosphereModel     (msise),
+   fileData            (false),  // is this correct?
+   fluxfilename        (msise.fluxfilename),
+   sod                 (msise.sod),
+   yd                  (msise.yd),
+   f107                (msise.f107),
+   f107a               (msise.f107a),
+   mass                (msise.mass)
 {
-        for (Integer i = 0; i < 7; i++)
+   for (Integer i = 0; i < 7; i++)
       ap[i] = msise.ap[i];
 }
 
@@ -164,14 +173,14 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
 
    GetInputs(utcEpoch);
 
-   int xyd = yd;
+   int xyd    = yd;
    float xsod = (float)sod;
    float xalt; //alt;
    float xlat; // Geodetic Latitude
    float xlon; //lon;
    float xlst;
    float xf107a = (float)f107a;
-   float xf107 = (float)f107;
+   float xf107  = (float)f107;
    int xmass;
    float xap[7];
    float xden[8];
@@ -379,7 +388,7 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* Clone() cnst
+// GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * Clone the object (inherited from GmatBase).

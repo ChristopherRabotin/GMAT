@@ -68,19 +68,19 @@ public:
    virtual bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
                         Integer count = 1) = 0;
 
-   void SetSunVector(Real *sv);
-   void SetCentralBodyVector(Real *cv);
+   void         SetSunVector(Real *sv);
+   void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetCentralBody(CelestialBody *cb);
-   void SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
+   void         SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetCbJ2000CoordinateSystem(CoordinateSystem *cs);
-   void SetFixedCoordinateSystem(CoordinateSystem *cs);
-   Real* GetAngularVelocity(const Real GmatEpoch = -1.0);
-   void BuildAngularVelocity(const Real GmatEpoch);
-   void UpdateAngularVelocity(const Real GmatEpoch);
-   void SetKpApConversionMethod(Integer method);
-   Real ConvertKpToAp(const Real kp);
+   void         SetFixedCoordinateSystem(CoordinateSystem *cs);
+   Real*        GetAngularVelocity(const Real GmatEpoch = -1.0);
+   void         BuildAngularVelocity(const Real GmatEpoch);
+   void         UpdateAngularVelocity(const Real GmatEpoch);
+   void         SetKpApConversionMethod(Integer method);
+   Real         ConvertKpToAp(const Real kp);
 
    // Extra methods some models may support
    virtual bool HasWindModel();
@@ -88,10 +88,12 @@ public:
 						   Integer count = 1);
    virtual bool HasTemperatureModel();
    virtual bool Temperature(Real *position, Real *temperature, 
-         Real epoch = GmatTimeConstants::MJD_OF_J2000, Integer count = 1);
+                            Real epoch = GmatTimeConstants::MJD_OF_J2000,
+                            Integer count = 1);
    virtual bool HasPressureModel();
    virtual bool Pressure(Real *position, Real *pressure, 
-         Real epoch = GmatTimeConstants::MJD_OF_J2000, Integer count = 1);
+                         Real epoch = GmatTimeConstants::MJD_OF_J2000,
+                         Integer count = 1);
 
 
    // Methods overridden from GmatBase
@@ -127,7 +129,7 @@ protected:
    /// Pointer to the binary file
    FILE                    *solarFluxFile;
    /// Solar flux file name
-   std::string             fileName;  // waw: Added 06/29/04
+   std::string             fileName;
    /// Vector from the central body to the sun
    Real                    *sunVector;
    /// Name of the central body
@@ -176,9 +178,6 @@ protected:
    Real                    gha;
    /// GHA epoch
    Real                    ghaEpoch;
-
-   /// Conversion routines to go to the fixed frame
-//   CoordinateConverter     mCoordConverter;
 
    
    Real                    CalculateGeodetics(Real *position,

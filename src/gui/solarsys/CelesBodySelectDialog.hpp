@@ -12,8 +12,8 @@
 // Created: 2004/02/25
 //
 /**
- * Declares CelesBodySelectDialog class. This class shows dialog window where
- * celestial bodies can be selected.
+ * Declares CelesBodySelectDialog class. This class shows a dialog window on
+ * which celestial bodies can be selected.
  * 
  */
 //------------------------------------------------------------------------------
@@ -80,4 +80,3 @@ private:
 };
 
 #endif
-

@@ -20,10 +20,8 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef ExponentialAtmosphere_hpp
 #define ExponentialAtmosphere_hpp
-
 
 #include "AtmosphereModel.hpp"
 #include "TimeTypes.hpp"
@@ -32,7 +30,7 @@
 /**
  * The exponential atmosphere model in Vallado (2001) and Wertz (1978).
  * 
- * This code calculates the atmosphereic density at a given position based on 
+ * This code calculates the atmospheric density at a given position based on
  * the altitude of the input state above the spherical Earth.  This model does
  * not include an atmospheric bulge due to solar heating.  The code will need
  * to be refined to use the oblate Earth once oblateness is added to the code.
@@ -51,7 +49,7 @@
  * method.
  * 
  * @todo Replace the spherical Earth model with an oblate Earth model.
- * @test Check to see if the band disconituities merit smoothing.
+ * @test Check to see if the band discontinuities merit smoothing.
  */
 class GMAT_API ExponentialAtmosphere : public AtmosphereModel
 {
@@ -77,7 +75,7 @@ protected:
    /// Flag indicating if the altitude is "at" a boundary
    bool                    smoothDensity;
     
-   virtual void            SetConstants(void);
+   virtual void            SetConstants();
    Integer                 FindBand(Real height);
    Real                    Smooth(Real height, Integer index);
 
@@ -86,6 +84,5 @@ protected:
 private:
 
 };
-
 
 #endif // ExponentialAtmosphere_hpp

@@ -16,6 +16,8 @@
 //
 /**
  * The Jacchia-Roberts atmosphere.
+ *
+ * @note This is the JR model, ported from the Swingby/Windows source
  */
 //------------------------------------------------------------------------------
 
@@ -27,11 +29,6 @@
 #include "A1Mjd.hpp"
 #include "TimeTypes.hpp"
 
-/**
- * The Jacchia-Roberts Atmosphere Model
- *
- * This is the JR model, ported from the Swingby/Windows source.
- */
 class GMAT_API JacchiaRobertsAtmosphere : public AtmosphereModel
 {
 public:
@@ -62,40 +59,40 @@ private:
    Real cbPolarSquared;
 
    /// low altitude density in g/cm**2
-   const Real rho_zero;
+   static const Real RHO_ZERO;
    /// Temperature in degrees kelvin at height of 90km
-   const Real tzero;
+   static const Real TZERO;
    /// earth gravitational constant m/sec**2
-   const Real g_zero;
+   static const Real G_ZERO;
    /// gas constant (joules/(degK-mole))
-   const Real gas_con;
+   static const Real GAS_CON;
    /// Avogadro's number
-   const Real avogadro;
+   static const Real AVOGADRO;
 
    // Tables of constants from the model (formerly defined as globals)
    /// Constants for series expansion
-   Real con_c[5];
+   static const Real CON_C[5];
    /// Constants for series expansion
-   Real con_l[5];
+   static const Real CON_L[5];
    /// Constants required between 90 km  and 100 km
-   Real mzero;
+   static const Real MZERO;
    /// Constants for series expansion
-   Real m_con[7];
+   static const Real M_CON[7];
    /// Constants for series expansion
-   Real s_con[6];
+   static const Real S_CON[6];
    /// Constants for series expansion
-   Real s_beta[6];
+   static const Real S_BETA[6];
    /// Constants required for attitudes between 100 km and 125 km
-   Real omega;
+   static const Real OMEGA;
    /// Constants for series expansion
-   Real zeta_con[7];
+   static const Real ZETA_CON[7];
    /// Molecular masses of atmospheric  constituents in grams/mole
-   Real mol_mass[6];
+   static const Real MOL_MASS[6];
    /// Number density divided by Avogadro's number of atmospheric constituents
-   Real num_dens[5];
+   static const Real NUM_DENS[5];
    // Constants required for altitude greater than 125 km
    /// Polynomial coefficients for constituent densities of each atmospheric gas
-   Real con_den[5][7];
+   static const Real CON_DEN[5][7];
 
 
    Real JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],
@@ -112,7 +109,6 @@ private:
    void deflate_polynomial(Real c[], Integer n, Real root, Real c_new[]);
    Real length_of(Real v[3]);
    Real dot_product(Real a[3] , Real b[3]);
-   void LoadConstants();
 };
 
 #endif // JacchiaRobertsAtmosphere_hpp
