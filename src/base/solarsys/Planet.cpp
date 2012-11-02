@@ -216,7 +216,8 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;  // interval in Julian centuries
       Real N    = 357.85 + 52.316 * T;
       //Real NDot = 52.316 * CelestialBody::TDot;
-      Real NDot = 6.0551e-04;   // per new specs 2004.02.22
+	  //NDot = 52.316 (deg/century) * (1 century/36525 days)
+      Real NDot      = 0.0014323;   // fixed conversion error from spec, (SPH) 02 Nov. 2012
       Real alpha     = orientation[0] + orientation[1] * Sin(Rad(N));
       Real delta     = orientation[2] + orientation[3] * Cos(Rad(N));
       Real W         = orientation[4] + orientation[5] * d - 0.48 * Sin(Rad(N));
