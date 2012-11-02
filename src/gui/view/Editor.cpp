@@ -129,7 +129,7 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
    // Set EOL mode to wxSTC_EOL_LF. Why wxSTC_EOL_CRLF keep adding blank line?
    // wxSTC_EOL_CRLF (Windows), wxSTC_EOL_CR (Macintosh) and wxSTC_EOL_LF (Linux)
    SetEOLMode(wxSTC_EOL_LF);
-   
+
    // default font for all styles
    SetViewEOL(GmatEditor::globalCommonPrefs.displayEOLEnable);
    SetIndentationGuides(GmatEditor::globalCommonPrefs.indentGuideEnable);
@@ -302,12 +302,23 @@ void Editor::SetReplaceText(const wxString &text)
  */
 void Editor::OnSize(wxSizeEvent& event)
 {
-   int x = GetClientSize().x +
-     (GmatEditor::globalCommonPrefs.lineNumberEnable? mLineNumberMargin: 0) +
-     (GmatEditor::globalCommonPrefs.foldEnable? mFoldingMargin: 0);
+   int w = 0;
+   int maxw = 0;
+   // this code assumes no font size changes
+   for (int line=0;line<GetLineCount();line++)
+   {
+	   w = TextWidth(0, GetLine(line));
+	   if (w > maxw)
+		   maxw = w;
+   }
+   // TGG: This code is wrong as GetClientSize has nothing to do with line width
+   // Unfortunately, the SetScrollWidthTracking method was not exposed
+   //int x = GetClientSize().x +
+   //  (GmatEditor::globalCommonPrefs.lineNumberEnable? mLineNumberMargin: 0) +
+   //  (GmatEditor::globalCommonPrefs.foldEnable? mFoldingMargin: 0);
    
-   if (x > 0)
-      SetScrollWidth(x);
+   if (maxw > 0)
+      SetScrollWidth(maxw);
    
    event.Skip();
 }
