@@ -42,6 +42,8 @@ public:
    // destructor
    virtual ~BodySpinSunAxes();
 
+   virtual bool IsParameterReadOnly(const Integer id) const;
+
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
    virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;

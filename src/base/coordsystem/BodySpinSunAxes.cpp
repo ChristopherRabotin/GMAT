@@ -236,6 +236,22 @@ GmatBase* BodySpinSunAxes::Clone() const
 
    return (new BodySpinSunAxes(*this));
 }
+
+bool BodySpinSunAxes::IsParameterReadOnly(const Integer id) const
+{
+   switch (id)
+   {
+      case PRIMARY_OBJECT_NAME:
+	  case SECONDARY_OBJECT_NAME:
+	  case X_AXIS:
+	  case Y_AXIS:
+	  case Z_AXIS:
+		 return true;
+         break;
+	  default:
+         return ObjectReferencedAxes::IsParameterReadOnly(id);
+   }
+}
    
 //------------------------------------------------------------------------------
 // protected methods
