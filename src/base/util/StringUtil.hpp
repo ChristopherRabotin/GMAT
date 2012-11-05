@@ -42,8 +42,10 @@ namespace GmatStringUtil
                            bool removeAll = false);
    GMAT_API std::string RemoveSpaceInBrackets(const std::string &str,
                            const std::string &bracketPair);
+   GMAT_API std::string RemoveMultipleSpaces(const std::string &str);
    GMAT_API std::string RemoveTrailingZeros(Real val, const std::string &valStr,
                            Integer iterCount = 0);
+   GMAT_API std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false);
    
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                            bool removeSemicolon = false, bool removeEol = false);
@@ -57,7 +59,6 @@ namespace GmatStringUtil
                            const std::string &to);
    GMAT_API std::string ReplaceNumber(const std::string &str, const std::string &from,
                            const std::string &to);
-   GMAT_API std::string ReplaceRepeatedPlusMinusSigns(const std::string &str);
    
    GMAT_API std::string ToString(const bool &val);
    GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,
@@ -94,6 +95,8 @@ namespace GmatStringUtil
    GMAT_API StringArray DecomposeBy(const std::string &str, const std::string &delim);
    
    GMAT_API bool IsNumber(const std::string &str);
+   GMAT_API bool IsValidReal(const std::string &str, Real &value, Integer &errorCode,
+                             bool trimParens = false);
    GMAT_API bool ToReal(const std::string &str, Real *value, bool trimParens = false);
    GMAT_API bool ToReal(const std::string &str, Real &value, bool trimParens = false);
    GMAT_API bool ToInteger(const std::string &str, Integer *value, bool trimParens = false);
@@ -146,6 +149,7 @@ namespace GmatStringUtil
    GMAT_API bool IsParenBalanced(const std::string &str);
    GMAT_API bool IsParenEmpty(const std::string &str);
    GMAT_API bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
+   GMAT_API bool AreAllNamesValid(const std::string &str, bool blanksRemoved = true);
    GMAT_API bool IsOuterParen(const std::string &str);
    GMAT_API bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
    GMAT_API bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
@@ -157,13 +161,16 @@ namespace GmatStringUtil
    GMAT_API bool IsSingleItem(const std::string &str);
    GMAT_API bool StartsWith(const std::string &str, const std::string &value);
    GMAT_API bool EndsWith(const std::string &str, const std::string &value);
-   GMAT_API bool EndsWithPathSeparator(const std::string &str); 
+   GMAT_API bool EndsWithPathSeparator(const std::string &str);
    GMAT_API bool IsValidNumber(const std::string &str);
-   GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false);
+   GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false,
+                             bool blankNameIsOk = false);
+   GMAT_API bool IsLastNumberPartOfName(const std::string &str);
    GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
    GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote,
                                  bool ignoreSpaceAfterQuote = true);
-   GMAT_API bool IsMathEquation(const std::string &str, bool checkInvalidOpOnly = false);
+   GMAT_API bool IsMathEquation(const std::string &str, bool checkInvalidOpOnly = false,
+                                bool blankNameIsOk = false);
    GMAT_API bool IsMathOperator(const char &ch);
    
    GMAT_API Integer NumberOfOccurrences(const std::string &str, const char c);

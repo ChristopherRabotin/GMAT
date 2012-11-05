@@ -102,6 +102,9 @@ private:
    std::string  FindOperator(const std::string &str, Integer &opIndex,
                              bool isAfterCloseParen = false);
    std::string  GetOperatorName(const std::string &op, bool &opFound);
+   std::string  RemoveSpaceInMathEquation(const std::string &str);
+   std::string  ReplaceChainedUnaryOperators(const std::string &str);
+   
    void         BuildAllFunctionList();
    void         BuildGmatFunctionList(const std::string &str);
    void         BuildFunction(const std::string &str, const StringArray &fnList,

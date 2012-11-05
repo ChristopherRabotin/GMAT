@@ -36,6 +36,8 @@
 
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_EQUATION 1
+//#define DEBUG_MATH_EQ 2
+//#define DEBUG_VALID_NAME 1
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
@@ -141,7 +143,7 @@ MathParser::~MathParser()
 //------------------------------------------------------------------------------
 /*
  * Examines if given string is a math equation.
- * Call this method with RHS of assignement.
+ * Call this method with RHS of assignment.
  *
  * @param str The string to be examined for an equation
  * @param checkMinusSign Check for leading minus sign.
@@ -168,24 +170,108 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    std::string left, right;
    Real rval;
    std::string::size_type opIndex;
+   Integer errCode;
    
    // Check if string is enclosed with quotes
    if (GmatStringUtil::IsEnclosedWith(str, "'"))
    {
-      isEq = false;
+      #if DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage
+         ("MathParser::IsEquation(%s) returning false, it is enclosed with quotes\n", str.c_str());
+      #endif
+      return false;
    }
    // Check if it is just a number
-   else if (GmatStringUtil::ToReal(str, &rval))
+   //else if (GmatStringUtil::ToReal(str, &rval))
+   else if (GmatStringUtil::IsValidReal(str, rval, errCode))
    {
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage("   real value = %f\n", rval);
+      MessageInterface::ShowMessage
+         ("MathParser::IsEquation(%s) returning false, it is a number\n", str.c_str());
       #endif
-      isEq = false;
+      return false;
    }
    else
    {
+      #if DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage
+         ("   GmatStringUtil::IsValidReal() errCode=%d\n", errCode);
+      #endif
+      
+      std::string str1 = str;
+      // Check for any math symbols or blank and comma, etc
+      if (str1.find_first_of(" (),*/+-^'") == str1.npos)
+      {
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage
+            ("MathParser::IsEquation(%s) returning false, no math symbols found\n", str.c_str());
+         #endif
+         return false;
+      }
+      
+      // If [] found as in sat.Quaternion = [1.0 0.0 0.0 0.0], return false
+      if (str1.find_first_of("[]") != str1.npos)
+      {
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage
+            ("MathParser::IsEquation(%s) returning false, found []\n", str.c_str());
+         #endif
+         return false;
+      }
+      
+      // If invalid number found in the equation, check for more invalid math equation
+      if (errCode <= -3)
+      {
+         // Check if any invalid math operators found
+         if (!GmatStringUtil::IsMathEquation(str1, true))
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("MathParser::IsEquation() 1 Throwng exception - Invalid number or math equation\n");
+            #endif
+            throw MathException("Invalid number or math equation");
+         }
+         else
+         {
+            // Check for invalid names without removing spaces first
+            if (!GmatStringUtil::AreAllNamesValid(str1, false))
+            {
+               #if DEBUG_PARSE_EQUATION
+               MessageInterface::ShowMessage
+                  ("MathParser::IsEquation() 2 Throwng exception - Invalid number or math equation\n");
+               #endif
+               throw MathException("Invalid number or math equation");
+            }
+            
+            // Remove spaces in the equation
+            str1 = RemoveSpaceInMathEquation(str1);
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("   Checking for any errors in the equation\n   After removing "
+                "spaces in math eq, str1=<%s>\n", str1.c_str());
+            #endif
+            
+            // Remove chained plus or minus signs
+            str1 = ReplaceChainedUnaryOperators(str1);
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("   After replacing chained unary +- signs, str1=<%s>\n", str1.c_str());
+            #endif
+            
+            if (!GmatStringUtil::IsMathEquation(str1, false, true))
+            {
+               #if DEBUG_PARSE_EQUATION
+               MessageInterface::ShowMessage
+                  ("MathParser::IsEquation() 3 Throwng exception - Invalid number or math equation\n");
+               #endif
+               throw MathException("Invalid number or math equation");
+            }
+         }
+      }
+      
       // Replace ^(-1) with inverse op
-      std::string str1 = GmatStringUtil::Replace(str, "^(-1)", inverseOpStr);
+      str1 = GmatStringUtil::Replace(str1, "^(-1)", inverseOpStr);
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
          ("   after replacing ^(-1) with %s, str1=<%s>\n", inverseOpStr.c_str(), str1.c_str());
@@ -492,7 +578,8 @@ MathNode* MathParser::Parse(const std::string &str)
    #endif
    
    // first remove all blank spaces, extra layer of parenthesis, and semicoln
-   std::string newEq = GmatStringUtil::RemoveAllBlanks(theEquation);
+   //std::string newEq = GmatStringUtil::RemoveAllBlanks(theEquation);
+   std::string newEq = RemoveSpaceInMathEquation(theEquation);
    newEq = GmatStringUtil::RemoveExtraParen(newEq);
    std::string::size_type index = newEq.find_first_of(';');
    if (index != newEq.npos)
@@ -540,8 +627,11 @@ MathNode* MathParser::Parse(const std::string &str)
        inverseOpStr.c_str(), newEq.c_str());
    #endif
    
+   // Remove spaces first
+   newEq = RemoveSpaceInMathEquation(newEq);
+   
    // Replace chained unary operators to correct operator
-   newEq = GmatStringUtil::ReplaceRepeatedPlusMinusSigns(newEq);
+   newEq = ReplaceChainedUnaryOperators(newEq);
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
       ("MathParser::Parse() After replacing chained +- signs\n   newEq=%s\n", newEq.c_str());
@@ -1321,16 +1411,7 @@ std::string::size_type MathParser::FindOperatorIndex(std::string::size_type inde
    MessageInterface::ShowMessage
       ("   ===> i1=%3d, i2=%3d, i3=%3d\n", i1, i2, i3);
    #endif
-   
-   #if 0
-   if (index1 == std::string::npos)
-      i1 = -1;
-   if (index2 == std::string::npos)
-      i2 = -1;
-   if (index3 == std::string::npos)
-      i3 = -1;
-   #endif
-   
+      
    std::string::size_type index = std::string::npos;
    
    if (i1 > i2 && i1 > i3)
@@ -1900,6 +1981,208 @@ std::string MathParser::GetOperator(const IntegerMap::iterator &pos1,
    #endif
    
    return opStr;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveSpaceInMathEquation(const std::string &str)
+//------------------------------------------------------------------------------
+std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
+{
+   #if DEBUG_MATH_EQ
+   MessageInterface::ShowMessage
+      ("\nMathParser::RemoveSpaceInMathEquation() entered, str=<%s>\n", str.c_str());
+   #endif
+   
+   std::string str1 = GmatStringUtil::Trim(str);  
+   std::string::iterator begin = str1.begin();
+   std::string::iterator pos = str1.begin();
+   Integer dist = 0, lastNonBlank = 0;
+   while (pos != str1.end())
+   {
+      dist = distance(begin, pos);
+      if (dist > 0)
+      {
+         char currCh = *pos;
+         char prevCh = str1[dist-1];
+         #if DEBUG_MATH_EQ > 1
+         MessageInterface::ShowMessage("   currCh=<%c>, prev char=<%c>\n", currCh, prevCh);
+         #endif
+         
+         if (currCh == ' ')
+         {
+            #if DEBUG_MATH_EQ > 1
+            MessageInterface::ShowMessage("   ===> current ch is blank, dist=%d\n", currCh, dist);
+            #endif
+            if (isalnum(prevCh))
+            {
+               #if DEBUG_MATH_EQ > 1
+               MessageInterface::ShowMessage
+                  ("   previous ch <%c> is alphanumeric, lastNonBlank=%d\n", prevCh, lastNonBlank);
+               #endif
+               // Check if digit is part of name
+               std::string substr = str1.substr(lastNonBlank, dist-lastNonBlank);
+               if (GmatStringUtil::IsLastNumberPartOfName(substr))
+               {
+                  #if DEBUG_MATH_EQ > 1
+                  MessageInterface::ShowMessage
+                     ("   => <%c> is part of name <%s>, so deleting <%c>\n", prevCh, substr.c_str(), *pos);
+                  #endif
+                  str1.erase(pos);
+                  lastNonBlank = distance(begin, pos);
+               }
+               else
+                  ++pos;
+            }
+            else if (prevCh == '.')
+               ++pos;
+            else
+            {
+               #if DEBUG_MATH_EQ > 1
+               MessageInterface::ShowMessage
+                  ("   => previous ch <%c> is not alphanumeric or dot, so deleting <%c>\n",
+                   prevCh, *pos);
+               #endif
+               str1.erase(pos);
+               lastNonBlank = distance(begin, pos);
+            }
+         }
+         else if (currCh == '(' || currCh == ')' || currCh == ',' ||
+                  GmatStringUtil::IsMathOperator(currCh))
+         {
+            #if DEBUG_MATH_EQ > 1
+            MessageInterface::ShowMessage("   ===> current ch is (), or operators\n", currCh);
+            #endif
+            if (prevCh == ' ')
+            {
+               #if DEBUG_MATH_EQ > 1
+               MessageInterface::ShowMessage
+                  ("   => previous ch is blank, so deleting <%c>\n", prevCh, *(pos-1));
+               #endif
+               str1.erase(pos-1);
+               lastNonBlank = distance(begin, pos);
+            }
+            else
+               ++pos;
+         }
+         else
+            ++pos;
+      }
+      else // else of if (dist > 0)
+         ++pos;
+   }
+   
+   #if DEBUG_MATH_EQ
+   MessageInterface::ShowMessage
+      ("MathParser::RemoveSpaceInMathEquation() returning, str=<%s>\n\n", str1.c_str());
+   #endif
+   
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ReplaceChainedUnaryOperators(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Replaces repeated plus (+) or minus (-) signs with one sign.
+ * For example "+--+abc-+--def+-+-ghi" will give "+abc-def_ghi".
+ */
+//------------------------------------------------------------------------------
+std::string MathParser::ReplaceChainedUnaryOperators(const std::string &str)
+{
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("MathParser::ReplaceChainedUnaryOperators() entered, str='%s'\n", str.c_str());
+   #endif
+   
+   std::string str1 = str;
+   Integer length = str1.size();
+   std::string signs, nonSigns, finalStr;
+   bool signFound = false, signDone = false;
+   bool nonSignFound = false, nonSignDone = false;
+   
+   for (int i = 0; i < length; i++)
+   {
+      if (str1[i] == '+' || str1[i] == '-')
+      {
+         if (nonSignFound)
+            nonSignDone = true;
+         
+         signFound = true;
+         nonSignFound = false;
+         
+         if (nonSignDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   nonSigns = '%s'\n", nonSigns.c_str());
+            #endif
+            finalStr = finalStr + nonSigns;
+            nonSignDone = false;
+            nonSigns = "";
+            signs = str1[i];
+         }
+         else
+         {
+            signs = signs + str1[i];
+         }
+      }
+      else
+      {
+         if (signFound)
+            signDone = true;
+         
+         signFound = false;
+         nonSignFound = true;
+         
+         if (signDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   signs = '%s'\n", signs.c_str());
+            #endif
+            Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
+            char finalSign = '-';
+            if ((numMinus % 2) == 0)
+               finalSign = '+';
+            
+            finalStr = finalStr + finalSign;
+            signDone = false;
+            signs = "";
+            nonSigns = str1[i];
+         }
+         else
+         {
+            nonSigns = nonSigns + str1[i];
+         }
+      }
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage("   last signs = '%s'\n", signs.c_str());
+   MessageInterface::ShowMessage("   last nonSigns = '%s'\n", nonSigns.c_str());
+   #endif
+   
+   // Put last part
+   if (signs != "")
+   {
+      Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
+      char finalSign = '-';
+      if ((numMinus % 2) == 0)
+         finalSign = '+';
+      
+      finalStr = finalStr + finalSign;
+   }
+   else if (nonSigns != "")
+   {
+      finalStr = finalStr + nonSigns;
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("MathParser::ReplaceChainedUnaryOperators() returning '%s'\n", finalStr.c_str());
+   #endif
+   
+   return finalStr;
 }
 
 
