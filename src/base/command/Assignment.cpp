@@ -901,8 +901,12 @@ bool Assignment::Validate()
    }
    else
    {
-      // lhs Wrappers should have been set by now, so validation failed
-      lastErrorMessage = "Left of the equal sign is not valid.";
+      // lhs Wrapper should have been set by now, so validation failed
+      // Check for rhs Wrappers or rhs math tree first
+      if (!rhsWrapper && !mathTree)
+         lastErrorMessage = "Right of the equal sign is not valid.";
+      else if (rhsWrapper || mathTree)
+         lastErrorMessage = "Left of the equal sign is not valid.";
       retval = false;
    }
    
