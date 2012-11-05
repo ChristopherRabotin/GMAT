@@ -47,7 +47,7 @@ ICRFFile*     ICRFFile::instance       = NULL;
 ICRFFile* ICRFFile::Instance()
 {
    if (instance == NULL)
-	  instance = new ICRFFile("ICRF_Table.txt",3);
+	  instance = new ICRFFile("ICRF_Table.txt",3);	// this file contains a table of Euler rotation vectors for time range from 1957 to 2100
 
    return instance;
 }

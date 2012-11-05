@@ -28,7 +28,6 @@
 #include "GmatBase.hpp"
 #include "AxisSystem.hpp"
 #include "InertialAxes.hpp"
-#include "ICRFFile.hpp"
 
 class GMAT_API ICRFAxes : public InertialAxes
 {
@@ -65,9 +64,6 @@ protected:
 
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
-
-   /// this object contains a table of Euler rotation vectors for time range from 1957 to 2100
-   ICRFFile                 *icrfFile;
 
 };
 #endif // ICRFAxes_hpp

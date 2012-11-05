@@ -537,23 +537,8 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    RotationMatrixFromICRFToFK5(epoch, true);
    const Real* iToF = icrfToFK5.GetDataVector();
    
-/*
-   // Use the matrix from ICRF to FK5
-   Real iToF[9];
-   ICRFAxes* icrf = new ICRFAxes();
 
-   // the values set to origin and j2000body are not needed for computation of
-   // the rotation matrix, but they are needed for initialization
-   icrf->SetOriginName("Sun");
-   icrf->SetJ2000BodyName("Earth");
-   icrf->SetSolarSystem(solarSystem);
-   icrf->Initialize();
-   icrf->GetRotationMatrix(epoch, true);
-   icrf->GetLastRotationMatrix(&iToF[0]);
-
-   delete icrf;
-*/
-
+   // calculate outBaseState:
    if ((inBase == "ICRF") && (outBase == "FK5"))
    {
       outBaseState[0] = iToF[0]*inBaseState[0] + iToF[1]*inBaseState[1] + iToF[2]*inBaseState[2];
@@ -598,6 +583,7 @@ void CoordinateConverter::RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch,
    // Specify Euler rotation vector for theEpoch:
    Real vec[3];
    ICRFFile* icrfFile = ICRFFile::Instance();
+   icrfFile->Initialize();
    icrfFile->GetICRFRotationVector(theEpoch, &vec[0], 3, 9);
 
    // Calculate rotation matrix based on Euler rotation vector:
