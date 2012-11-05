@@ -667,9 +667,11 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    
    if (inStream->fail() || inStream->eof())
    {
+      #if DBGLVL_SCRIPT_READING
       MessageInterface::ShowMessage
-         ("==> ScriptInterpreter::ReadScript() inStream failed or eof reached, "
+         ("ScriptInterpreter::ReadScript() inStream failed or eof reached, "
           "so returning false\n");
+      #endif
       return false;
    }
    
@@ -739,6 +741,14 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          HandleError(e);
          retval1 = false;
       }
+      catch (...)
+      {
+         MessageInterface::ShowMessage
+            ("**** ERROR **** Unknown error occurred during parsing the line:\n%s\n",
+             currentBlock.c_str());
+         throw;
+      }
+      
       
       if (!retval1 && !continueOnError)
       {
