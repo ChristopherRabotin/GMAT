@@ -78,7 +78,7 @@
 #include "ParameterSetupPanel.hpp"
 #include "ConditionPanel.hpp"
 #include "ForPanel.hpp"
-#include "DoWhilePanel.hpp"
+//#include "DoWhilePanel.hpp"
 #include "FormationSetupPanel.hpp"
 #include "CallFunctionPanel.hpp"
 #include "CoordSystemConfigPanel.hpp"
