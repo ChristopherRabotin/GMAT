@@ -30,6 +30,7 @@
 //#define DEBUG_BURNPANEL_CREATE
 //#define DEBUG_BURNPANEL_LOAD
 //#define DEBUG_BURNPANEL_SAVE
+//#define DEBUG_BURNPANEL_SAVE_COEFS
 
 //------------------------------
 // event tables for wxWindows
@@ -70,10 +71,17 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    #endif
    
    isCoordSysChanged = false;
-   isTankChanged = false;
-   isTankEmpty = false;
-   coordSysName = "";
-   tankName = "";
+   isTankChanged     = false;
+   isTankEmpty       = false;
+   areCCoefsChanged  = false;
+   areKCoefsChanged  = false;
+   coordSysName      = "";
+   tankName          = "";
+
+   cCoefs.clear();
+   kCoefs.clear();
+   cCoefNames.clear();
+   kCoefNames.clear();
 }
 
 
@@ -441,7 +449,40 @@ void BurnThrusterPanel::LoadData()
             ispUnit->Disable();
          }
       }
-      
+
+
+      // Get the initial values for the coefficients
+      Integer cParamID  = 0;
+      Integer kParamID  = 0;
+      Integer coefCount = Thruster::COEFFICIENT_COUNT;
+      std::stringstream cStrings("");
+      std::stringstream kStrings("");
+      Real cVal, kVal;
+      for (Integer ii = 0; ii < coefCount; ii++)
+      {
+         cStrings << "C" << ii + 1;
+         cParamID = theObject->GetParameterID(cStrings.str());
+         cVal     = theObject->GetRealParameter(cParamID);
+         #ifdef DEBUG_BURNPANEL_LOAD
+            MessageInterface::ShowMessage("Loading: %s =  %lf\n", cStrings.str().c_str(), cVal);
+         #endif
+         cCoefs.push_back(cVal);
+         cCoefNames.push_back(cStrings.str());
+         cStrings.str("");
+      }
+      for (Integer ii = 0; ii < coefCount; ii++)
+      {
+         kStrings << "K" << ii + 1;
+         kParamID = theObject->GetParameterID(kStrings.str());
+         kVal     = theObject->GetRealParameter(kParamID);
+         #ifdef DEBUG_BURNPANEL_LOAD
+            MessageInterface::ShowMessage("Loading: %s =  %lf\n", kStrings.str().c_str(), kVal);
+         #endif
+         kCoefs.push_back(kVal);
+         kCoefNames.push_back(kStrings.str());
+         kStrings.str("");
+      }
+
       // Update Origin and Axes
       UpdateOriginAxes();
    }
@@ -551,6 +592,34 @@ void BurnThrusterPanel::SaveData()
             if (tankName != "")
                theObject->SetStringParameter(paramID, tankName.c_str());
       }
+
+      // Save C Coefficients
+      if (areCCoefsChanged)
+      {
+         unsigned int coefSize = cCoefs.size();
+         for (unsigned int i = 0; i < coefSize; i++)
+         {
+            #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+               MessageInterface::ShowMessage("Saving %s with value %lf\n", cCoefNames[i].c_str(), cCoefs[i]);
+            #endif
+            paramID = theObject->GetParameterID(cCoefNames[i]);
+            theObject->SetRealParameter(paramID, cCoefs[i]);
+         }
+      }
+
+      // Save K Coefficients
+      if (areKCoefsChanged)
+      {
+         unsigned int coefSize = kCoefs.size();
+         for (unsigned int i = 0; i < coefSize; i++)
+         {
+            #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+               MessageInterface::ShowMessage("Saving %s with value %lf\n", kCoefNames[i].c_str(), kCoefs[i]);
+            #endif
+            paramID = theObject->GetParameterID(kCoefNames[i]);
+            theObject->SetRealParameter(paramID, kCoefs[i]);
+         }
+      }
    }
    catch(BaseException &ex)
    {
@@ -636,16 +705,35 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {  
-    if (event.GetEventObject() == cCoefButton)
-    {
-       ThrusterCoefficientDialog tcDlg(this, -1, "ThrusterCoefficientDialog", theObject, "C");
-       tcDlg.ShowModal();
-    }
-    else if (event.GetEventObject() == kCoefButton)
-    {
-       ThrusterCoefficientDialog tcDlg(this, -1, "ImpulseCoefficientDialog", theObject, "K");
-       tcDlg.ShowModal();
-    }
+   bool isModified = false;
+   if (event.GetEventObject() == cCoefButton)
+   {
+      ThrusterCoefficientDialog tcDlg(this, -1, "ThrusterCoefficientDialog", theObject, "C", cCoefs);
+      tcDlg.ShowModal();
+      isModified = tcDlg.AreCoefsSaved();
+      if (isModified)
+      {
+         cCoefs.clear();
+         cCoefs      = tcDlg.GetCoefValues();
+
+         EnableUpdate(true);
+      }
+      areCCoefsChanged = areCCoefsChanged || isModified;
+   }
+   else if (event.GetEventObject() == kCoefButton)
+   {
+      ThrusterCoefficientDialog tcDlg(this, -1, "ImpulseCoefficientDialog", theObject, "K", kCoefs);
+      tcDlg.ShowModal();
+      isModified = tcDlg.AreCoefsSaved();
+      if (isModified)
+      {
+         kCoefs.clear();
+         kCoefs      = tcDlg.GetCoefValues();
+
+         EnableUpdate(true);
+      }
+      areKCoefsChanged = areKCoefsChanged || isModified;
+   }
 }
 
 

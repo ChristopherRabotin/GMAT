@@ -46,6 +46,10 @@ protected:
    virtual void SaveData();
    
    GmatBase* theObject;
+   RealArray   cCoefs;
+   RealArray   kCoefs;
+   StringArray cCoefNames;
+   StringArray kCoefNames;
    
    std::string coordSysName;
    std::string tankName;
@@ -56,6 +60,8 @@ protected:
    bool isCoordSysChanged;
    bool isTankChanged;
    bool isTankEmpty;
+   bool areCCoefsChanged;
+   bool areKCoefsChanged;
    
    wxStaticText *originLabel;
    wxStaticText *axisLabel;

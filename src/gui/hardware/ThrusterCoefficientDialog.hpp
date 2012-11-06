@@ -28,7 +28,10 @@ class ThrusterCoefficientDialog : public GmatDialog
 public:
    ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
                              const wxString &title, GmatBase *obj,
-                             const wxString &type);
+                             const wxString &type, const RealArray &coefsCOrK);
+
+   RealArray&      GetCoefValues()  { return coefValues;    }
+   bool            AreCoefsSaved()  { return coefsModified; }
    
 private:
    
@@ -37,6 +40,8 @@ private:
    StringArray coefNames;
    RealArray   coefValues;
    
+   bool        coefsModified;
+
    wxString coefType;
    
    wxGrid *coefGrid;
