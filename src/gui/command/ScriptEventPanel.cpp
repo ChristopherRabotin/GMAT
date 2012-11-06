@@ -378,6 +378,7 @@ void ScriptEventPanel::SaveData()
    
    canClose = false;
    std::stringstream scriptText1;
+   std::string oldName = theCommand->GetName();
    
    // If only the comment changed, just set the comment and return
    #ifdef __USE_STC_EDITOR__
@@ -397,7 +398,6 @@ void ScriptEventPanel::SaveData()
       #endif
       return;
    }
-   
    
    //-----------------------------------------------------------------
    // Add lines to stringstream
@@ -629,6 +629,7 @@ void ScriptEventPanel::SaveData()
       ReplaceScriptEvent();
       mObject = mNewCommand;
       theCommand = mNewCommand;
+	  theCommand->SetName(oldName);
       
       // We want to save comments regardless it is modified or not since
       // new BeginScript command was created.
