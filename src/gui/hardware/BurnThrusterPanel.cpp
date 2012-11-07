@@ -73,11 +73,12 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    isCoordSysChanged = false;
    isTankChanged     = false;
    isTankEmpty       = false;
-   areCCoefsChanged  = false;
-   areKCoefsChanged  = false;
    coordSysName      = "";
    tankName          = "";
 
+   // thruster only
+   areCCoefsChanged  = false;
+   areKCoefsChanged  = false;
    cCoefs.clear();
    kCoefs.clear();
    cCoefNames.clear();
@@ -450,37 +451,39 @@ void BurnThrusterPanel::LoadData()
          }
       }
 
-
-      // Get the initial values for the coefficients
-      Integer cParamID  = 0;
-      Integer kParamID  = 0;
-      Integer coefCount = Thruster::COEFFICIENT_COUNT;
-      std::stringstream cStrings("");
-      std::stringstream kStrings("");
-      Real cVal, kVal;
-      for (Integer ii = 0; ii < coefCount; ii++)
+      if (theObject->IsOfType(Gmat::THRUSTER))
       {
-         cStrings << "C" << ii + 1;
-         cParamID = theObject->GetParameterID(cStrings.str());
-         cVal     = theObject->GetRealParameter(cParamID);
-         #ifdef DEBUG_BURNPANEL_LOAD
-            MessageInterface::ShowMessage("Loading: %s =  %lf\n", cStrings.str().c_str(), cVal);
-         #endif
-         cCoefs.push_back(cVal);
-         cCoefNames.push_back(cStrings.str());
-         cStrings.str("");
-      }
-      for (Integer ii = 0; ii < coefCount; ii++)
-      {
-         kStrings << "K" << ii + 1;
-         kParamID = theObject->GetParameterID(kStrings.str());
-         kVal     = theObject->GetRealParameter(kParamID);
-         #ifdef DEBUG_BURNPANEL_LOAD
-            MessageInterface::ShowMessage("Loading: %s =  %lf\n", kStrings.str().c_str(), kVal);
-         #endif
-         kCoefs.push_back(kVal);
-         kCoefNames.push_back(kStrings.str());
-         kStrings.str("");
+         // Get the initial values for the coefficients
+         Integer cParamID  = 0;
+         Integer kParamID  = 0;
+         Integer coefCount = Thruster::COEFFICIENT_COUNT;
+         std::stringstream cStrings("");
+         std::stringstream kStrings("");
+         Real cVal, kVal;
+         for (Integer ii = 0; ii < coefCount; ii++)
+         {
+            cStrings << "C" << ii + 1;
+            cParamID = theObject->GetParameterID(cStrings.str());
+            cVal     = theObject->GetRealParameter(cParamID);
+            #ifdef DEBUG_BURNPANEL_LOAD
+               MessageInterface::ShowMessage("Loading: %s =  %lf\n", cStrings.str().c_str(), cVal);
+            #endif
+            cCoefs.push_back(cVal);
+            cCoefNames.push_back(cStrings.str());
+            cStrings.str("");
+         }
+         for (Integer ii = 0; ii < coefCount; ii++)
+         {
+            kStrings << "K" << ii + 1;
+            kParamID = theObject->GetParameterID(kStrings.str());
+            kVal     = theObject->GetRealParameter(kParamID);
+            #ifdef DEBUG_BURNPANEL_LOAD
+               MessageInterface::ShowMessage("Loading: %s =  %lf\n", kStrings.str().c_str(), kVal);
+            #endif
+            kCoefs.push_back(kVal);
+            kCoefNames.push_back(kStrings.str());
+            kStrings.str("");
+         }
       }
 
       // Update Origin and Axes
@@ -593,31 +596,34 @@ void BurnThrusterPanel::SaveData()
                theObject->SetStringParameter(paramID, tankName.c_str());
       }
 
-      // Save C Coefficients
-      if (areCCoefsChanged)
+      if (theObject->IsOfType(Gmat::THRUSTER))
       {
-         unsigned int coefSize = cCoefs.size();
-         for (unsigned int i = 0; i < coefSize; i++)
+         // Save C Coefficients
+         if (areCCoefsChanged)
          {
-            #ifdef DEBUG_BURNPANEL_SAVE_COEFS
-               MessageInterface::ShowMessage("Saving %s with value %lf\n", cCoefNames[i].c_str(), cCoefs[i]);
-            #endif
-            paramID = theObject->GetParameterID(cCoefNames[i]);
-            theObject->SetRealParameter(paramID, cCoefs[i]);
+            unsigned int coefSize = cCoefs.size();
+            for (unsigned int i = 0; i < coefSize; i++)
+            {
+               #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                  MessageInterface::ShowMessage("Saving %s with value %lf\n", cCoefNames[i].c_str(), cCoefs[i]);
+               #endif
+               paramID = theObject->GetParameterID(cCoefNames[i]);
+               theObject->SetRealParameter(paramID, cCoefs[i]);
+            }
          }
-      }
 
-      // Save K Coefficients
-      if (areKCoefsChanged)
-      {
-         unsigned int coefSize = kCoefs.size();
-         for (unsigned int i = 0; i < coefSize; i++)
+         // Save K Coefficients
+         if (areKCoefsChanged)
          {
-            #ifdef DEBUG_BURNPANEL_SAVE_COEFS
-               MessageInterface::ShowMessage("Saving %s with value %lf\n", kCoefNames[i].c_str(), kCoefs[i]);
-            #endif
-            paramID = theObject->GetParameterID(kCoefNames[i]);
-            theObject->SetRealParameter(paramID, kCoefs[i]);
+            unsigned int coefSize = kCoefs.size();
+            for (unsigned int i = 0; i < coefSize; i++)
+            {
+               #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                  MessageInterface::ShowMessage("Saving %s with value %lf\n", kCoefNames[i].c_str(), kCoefs[i]);
+               #endif
+               paramID = theObject->GetParameterID(kCoefNames[i]);
+               theObject->SetRealParameter(paramID, kCoefs[i]);
+            }
          }
       }
    }
