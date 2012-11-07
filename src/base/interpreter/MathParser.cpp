@@ -53,6 +53,7 @@
 //#define DEBUG_UNARY 1
 //#define DEBUG_CREATE_NODE 1
 //#define DEBUG_GMAT_FUNCTION 1
+//#define DEBUG_MATH_ELEMENT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -684,6 +685,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
 {
    #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage("\nMathParser::ParseNode() entered, str='%s'\n", str.c_str());
+   MessageInterface::ShowMessage("Calling Decompose(<%s>)\n", str.c_str());
    #endif
    
    StringArray items = Decompose(str);
@@ -702,16 +704,26 @@ MathNode* MathParser::ParseNode(const std::string &str)
    {
       #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
-         ("=====> Should create MathElement: '%s'\n", str.c_str());
+         ("=====> Should create MathElement: '%s'\n", left.c_str());
       #endif
       
-      // Remove extra parenthesis before creating a node (LOJ: 2010.07.29)
-      std::string str1 = GmatStringUtil::RemoveExtraParen(str);
-      
-      // Check for empty parenthesis such as () or (()) since RemoveExtraParen()
-      // does not remove it.
-      if (GmatStringUtil::IsParenEmpty(str1))
-         str1 = "";
+      std::string str1 = left;
+      if (str1.find_first_of("()") != str1.npos)
+      {
+         // Remove extra parenthesis before creating a node (LOJ: 2010.07.29)
+         str1 = GmatStringUtil::RemoveExtraParen(str1);
+         
+         // Check for empty parenthesis such as () or (()) since RemoveExtraParen()
+         // does not remove it.
+         if (GmatStringUtil::IsParenEmpty(str1))
+         {
+            #if DEBUG_CREATE_NODE
+            MessageInterface::ShowMessage
+               ("   <%s> has empty parenthesis, so setting str1 to blank\n", str1.c_str());
+            #endif
+            str1 = "";
+         }
+      }
       
       #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
@@ -719,7 +731,13 @@ MathNode* MathParser::ParseNode(const std::string &str)
       #endif
       
       if (str1 == "")
+      {  
+         #if DEBUG_CREATE_NODE
+         MessageInterface::ShowMessage
+            ("MathParser::ParseNode(<%s>) throwing Missing input arguments\n", str.c_str());
+         #endif
          throw MathException("Missing input arguments");
+      }
       
       mathNode = CreateNode("MathElement", str1);
    }
@@ -729,7 +747,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MessageInterface::ShowMessage
          ("=====> Should create MathNode: %s\n", op.c_str());
       #endif
-            
+      
       std::string operands = "( " + left + ", " + right + " )";
       if (right == "")
          operands = "( " + left + " )";
@@ -967,6 +985,7 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
  *    ParseUnitConversion()
  *
  * @return StringArray of elements
+ *         elements[0] = operator, elements[1] = left, elements[2] = right
  */
 //------------------------------------------------------------------------------
 StringArray MathParser::Decompose(const std::string &str)
@@ -980,7 +999,7 @@ StringArray MathParser::Decompose(const std::string &str)
    std::string str1 = GmatStringUtil::RemoveExtraParen(str);
    #if DEBUG_DECOMPOSE
    MessageInterface::ShowMessage
-      ("MathParser::Decompose() after removing extra paren, str1=%s\n", str1.c_str());
+      ("MathParser::Decompose() 1 after removing extra paren, str1=%s\n", str1.c_str());
    #endif
    
    // Remove first + sign which is unary +
@@ -991,7 +1010,18 @@ StringArray MathParser::Decompose(const std::string &str)
       ("MathParser::Decompose() after removing unary + at 0, str1=%s\n", str1.c_str());
    #endif
    
-   StringArray items = ParseParenthesis(str1);
+   StringArray items;
+   // If no parenthesis nor math symbols found, it is math element
+   if (IsMathElement(str1))
+   {
+      FillItems(items, "", str1, "");
+      #if DEBUG_DECOMPOSE
+      WriteItems("MathParser::Decompose() 1 It is a math element, returning ", items);
+      #endif
+      return items;
+   }
+   
+   items = ParseParenthesis(str1);
    
    #if DEBUG_DECOMPOSE
    WriteItems("MathParser::Decompose() after ParseParenthesis() ", items);
@@ -999,14 +1029,50 @@ StringArray MathParser::Decompose(const std::string &str)
    
    // if no operator found and left is not empty, decompose again
    if (items[0] == "" && items[1] != "")
+   {
+      std::string str2 = items[1];
+      // Remove first + sign which is unary +
+      if (str2[0] == '+')
+      {
+         str2 = str2.substr(1);
+         items[1] = str2;
+      }
+      
+      if (IsMathElement(items[1]))
+      {
+         #if DEBUG_DECOMPOSE
+         WriteItems("MathParser::Decompose() 2 It is a math element, returning ", items);
+         #endif
+         return items;
+      }
+      
+      #if DEBUG_DECOMPOSE
+      MessageInterface::ShowMessage
+         ("MathParser::Decompose() items[0] is blank and items[1] is <%s>, so calling Decompose(<%s>)\n",
+          items[1].c_str(), items[1].c_str());
+      #endif
+      
       items = Decompose(items[1]);
+      
+      #if DEBUG_DECOMPOSE
+      WriteItems("MathParser::Decompose() after Decompose() ", items);
+      #endif
+      
+      if (IsMathElement(items[1]))
+      {
+         #if DEBUG_DECOMPOSE
+         WriteItems("MathParser::Decompose() 2 It is a math element, returning ", items);
+         #endif
+         return items;
+      }
+   }
    
    if (GmatStringUtil::IsOuterParen(str1))
        str1 = GmatStringUtil::RemoveExtraParen(str1);
    
    #if DEBUG_DECOMPOSE
    MessageInterface::ShowMessage
-      ("MathParser::Decompose() after removing extra paren, str1=%s\n", str1.c_str());
+      ("MathParser::Decompose() 2 after removing extra paren, str1=%s\n", str1.c_str());
    #endif
    
    if (items[0] == "function")
@@ -1019,7 +1085,7 @@ StringArray MathParser::Decompose(const std::string &str)
       if (items[0] == "number")
       {
          #if DEBUG_DECOMPOSE
-         WriteItems("MathParser::Decompose(): It is a number, returning ", items);
+         WriteItems("MathParser::Decompose() It is a number, returning ", items);
          #endif
          items[0] = "";
          return items;
@@ -1316,7 +1382,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       
       #if DEBUG_PARENTHESIS
       WriteItems("======================================== MathParser::ParseParenthesis() returning, "
-                 "complete parenthesis found: ", items, true);
+                 "enclosed by parenthesis, so removed: ", items, true);
       #endif
       
       return items;
@@ -2799,6 +2865,91 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
    return items;
 }
 
+//------------------------------------------------------------------------------
+// bool IsMathElement(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Checks if string is a math element such as number, sat.X, arr(1,1).
+ */
+//------------------------------------------------------------------------------
+bool MathParser::IsMathElement(const std::string &str)
+{
+   if (str.find('\'') != str.npos) // ' for transpose
+   {
+      // If input is enclosed with single quote the it is a String so return true
+      if (GmatStringUtil::IsEnclosedWith(str, "'"))
+         return true; // Is string allowed?
+      else
+         return false;
+   }
+   else if (str.find(inverseOpStr) != str.npos)
+   {
+      #ifdef DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathParser::IsMathElement(<%s>) returning false, inver operator <%s> found\n",
+          str.c_str(), inverseOpStr.c_str());
+      #endif
+      return false;
+   }
+   else if (GmatStringUtil::IsThereMathSymbol(str))
+   {
+      #ifdef DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathParser::IsMathElement(<%s>) returning false, math operator found\n", str.c_str());
+      #endif
+      return false;
+   }
+   else if (str.find_first_of("()") != str.npos)
+   {
+      if (GmatStringUtil::IsParenPartOfArray(str))
+      {
+         if (IsParenPartOfFunction(str))
+         {
+            #ifdef DEBUG_MATH_ELEMENT
+            MessageInterface::ShowMessage
+               ("MathParser::IsMathElement(<%s>) returning false, it is a function call\n", str.c_str());
+            #endif
+            return false;
+         }
+         else
+         {
+            // Check for unary operator
+            if (str.find_first_of("+-") != str.npos)
+            {
+               #ifdef DEBUG_MATH_ELEMENT
+               MessageInterface::ShowMessage
+                  ("MathParser::IsMathElement(<%s>) returning false, it has unary + or -\n", str.c_str());
+               #endif
+               return false;
+            }
+            else
+            {
+               #ifdef DEBUG_MATH_ELEMENT
+               MessageInterface::ShowMessage
+                  ("MathParser::IsMathElement(<%s>) returning true, it is an array element\n", str.c_str());
+               #endif
+               return true;
+            }
+         }
+      }
+      else
+      {
+         #ifdef DEBUG_MATH_ELEMENT
+         MessageInterface::ShowMessage
+            ("MathParser::IsMathElement(<%s>) returning false, paren is not part of an array\n", str.c_str());
+         #endif
+         return false;
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathParser::IsMathElement(<%s>) returning true\n", str.c_str());
+      #endif
+      return true;
+   }
+}
 
 //------------------------------------------------------------------------------
 // bool IsMathFunction(const std::string &str)
@@ -2870,10 +3021,17 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
        str.c_str());
    #endif
    
+   std::string str1 = str;
+   if (str.find_first_of('(') != str.npos)
+   {
+      std::string::size_type openParen = str.find_first_of('(');
+      str1 = str.substr(0, openParen);
+   }
+   
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage("   Checking GmatFunction list...\n");
    #endif
-   if (HasFunctionName(str, gmatFuncList))
+   if (HasFunctionName(str1, gmatFuncList))
    {
       #if DEBUG_FUNCTION
       MessageInterface::ShowMessage
@@ -2885,7 +3043,7 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage("   Checking internal MathFunction list...\n");
    #endif
-   if (HasFunctionName(str, realFuncList))
+   if (HasFunctionName(str1, realFuncList))
    {
       #if DEBUG_FUNCTION
       MessageInterface::ShowMessage
@@ -2897,7 +3055,7 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage("   Checking internal MatrixFunction list...\n");
    #endif
-   if (HasFunctionName(str, matrixFuncList))
+   if (HasFunctionName(str1, matrixFuncList))
    {
       #if DEBUG_FUNCTION
       MessageInterface::ShowMessage
@@ -2909,7 +3067,7 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage("   Checking internal UnitConversionFunction list...\n");
    #endif
-   if (HasFunctionName(str, unitConvList))
+   if (HasFunctionName(str1, unitConvList))
    {
       #if DEBUG_FUNCTION
       MessageInterface::ShowMessage

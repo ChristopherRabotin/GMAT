@@ -2712,6 +2712,10 @@ bool GmatStringUtil::IsParenBalanced(const std::string &str)
 //------------------------------------------------------------------------------
 // bool IsParenEmpty(const std::string &str)
 //------------------------------------------------------------------------------
+/**
+ *  Checks if there is nothing inside parenthesis such as () or (()).
+ */
+//------------------------------------------------------------------------------
 bool GmatStringUtil::IsParenEmpty(const std::string &str)
 {
    std::string str1 = RemoveAllBlanks(str);
@@ -2866,12 +2870,16 @@ bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blanksRemoved
    #ifdef DEBUG_VALID_NAME
    MessageInterface::ShowMessage("   After removing <E+E-e+e->, str=<%s>\n", str1.c_str());
    #endif
-   StringArray parts;
    
+   StringArray parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
+   
+   // Remove this later since blanksRemoved is not used (LOJ: 2012.11.06)
+   #if 0
    if (!blanksRemoved)
       parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
    else
       parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
+   #endif
    
    Integer numParts = parts.size();
    std::string str2;

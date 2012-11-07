@@ -73,6 +73,7 @@ private:
    StringArray  ParseMathFunctions(const std::string &str);
    StringArray  ParseUnitConversion(const std::string &str);
    
+   bool         IsMathElement(const std::string &str);
    bool         IsMathFunction(const std::string &str);
    bool         HasFunctionName(const std::string &str, const StringArray &fnList);
    bool         IsParenPartOfFunction(const std::string &str);
