@@ -390,6 +390,11 @@ StringArray Barycenter::GetBuiltInNames()
 //------------------------------------------------------------------------------
 void Barycenter::CheckBodies()
 {
+   if ((bodyNames.empty()) && !(defaultBodies.empty()))
+   {
+      for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
+         bodyNames.push_back(defaultBodies.at(ii));
+   }
    if (bodyNames.empty())
       throw SolarSystemException("Attempting to use Barycenter with no bodies set ...\n");
 
