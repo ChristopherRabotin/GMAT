@@ -2210,19 +2210,20 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          if (addDefaultBodies)
          {
 //            obj->SetStringParameter("BodyNames", "Earth");
+//            obj->SetStringParameter("BodyNames", "Luna");
+
             ((CalculatedPoint*) obj)->SetDefaultBody("Earth");
             ((CalculatedPoint*) obj)->SetDefaultBody("Luna");
 
-            // Set body and J2000Body pointer, so that GUI can create LibrationPoint
+            // Set body and J2000Body pointer, so that GUI can create Barycenter
             // and use it in Coord.System conversion
-//            SpacePoint *earth = (SpacePoint*)FindObject("Earth");
-//            obj->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+            SpacePoint *earth = (SpacePoint*)FindObject("Earth");
+            obj->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
 
-            // obj->SetStringParameter("BodyNames", "Luna");
-            // SpacePoint *luna = (SpacePoint*)FindObject("Luna");
-            // if (luna->GetJ2000Body() == NULL)
-            //    luna->SetJ2000Body(earth);
-            // obj->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
+            SpacePoint *luna = (SpacePoint*)FindObject("Luna");
+            if (luna->GetJ2000Body() == NULL)
+                luna->SetJ2000Body(earth);
+            obj->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
          }
       }
       
