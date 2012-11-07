@@ -32,6 +32,18 @@ OPTION(DEBUG_BUILD "DebugBuild" OFF)
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(64_BIT "64Bit" OFF)
 
+# Optional Plugin Inputs
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" OFF)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugin" OFF)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" OFF)
+OPTION(PLUGIN_EXTRAPROPAGATOR "ExtraPropagation Plugin" OFF)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" OFF)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plguin" OFF)
+
+# Optional Jazz Plugin Inputs
+
+
 # Check if provided f2c directories exists
 if( (IS_DIRECTORY ${F2C_PATH}) AND (EXISTS ${F2C_PATH}) )
 	MESSAGE(STATUS "F2C FOUND")
@@ -128,7 +140,6 @@ ADD_DEFINITIONS("-DNO_GCC_PRAGMA")
 
 # Linker Flags
 if(UNIX)
-	set(CMAKE_SHARED_LINKER_FLAGS "-Wl")
 	if(NOT APPLE)
 		LINK_LIBRARIES("dl")	
 	endif()
@@ -201,3 +212,40 @@ SUBDIRS(../src/console)
 # ====================================================================
 # GUI binary
 SUBDIRS(../src/gui)
+
+# ====================================================================
+# CInterface Plugin binary
+if (PLUGIN_CINTERFACE)
+	SUBDIRS(../plugins/CInterfacePlugin/src/)
+endif()
+
+# ====================================================================
+# EphemPropagator Plugin binary
+if (PLUGIN_EPHEMPROPAGATOR)
+	SUBDIRS(../plugins/EphemPropagatorPlugin/src/)
+endif()
+
+# ====================================================================
+# Estimation Plugin binary
+if (PLUGIN_ESTIMATION)
+endif()
+
+# ====================================================================
+# EventLocator Plugin binary
+if (PLUGIN_EVENTLOCATOR)
+endif()
+
+# ====================================================================
+# ExtraPropagation Plugin binary
+if (PLUGIN_EXTRAPROPAGATOR)
+endif()
+
+# ====================================================================
+# GmatFunction Plugin binary
+if (PLUGIN_GMATFUNCTION)
+endif()
+
+# ====================================================================
+# MatlabInterface Plugin binary
+if (PLUGIN_MATLABINTERFACE)
+endif()
