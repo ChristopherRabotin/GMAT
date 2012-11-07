@@ -2402,10 +2402,10 @@ void SolarSystem::Copy(const GmatBase* orig)
       }
       else
       {
-         SolarSystemException ss;
-         ss.SetDetails("%s not found in the solar system named "
-                       "\"%s\"\n", cb->GetName().c_str(), GetName().c_str());
-         throw ss;
+         SolarSystemException sse;
+         sse.SetDetails("%s not found in the solar system named "
+                        "\"%s\"\n", cb->GetName().c_str(), GetName().c_str());
+         throw sse;
       }
    }
    // copy the Special Points
@@ -2420,10 +2420,10 @@ void SolarSystem::Copy(const GmatBase* orig)
       }
       else
       {
-         SolarSystemException ss;
-         ss.SetDetails("Special Point %s not found in the solar system named "
+         SolarSystemException sse;
+         sse.SetDetails("Special Point %s not found in the solar system named "
                        "\"%s\"\n", ((spi->first).c_str()), GetName().c_str());
-         throw ss;
+         throw sse;
       }
    }
 }
