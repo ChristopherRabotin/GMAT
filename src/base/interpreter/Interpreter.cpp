@@ -1158,7 +1158,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = (GmatBase*)theModerator->CreateBurn(type, name, createDefault);
       
       // Handle CalculatedPoint (Barycenter, LibrationPoint)
-      // Creates default Barycentor or LibrationPoint
+      // Creates default Barycenter or LibrationPoint
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
          obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
