@@ -853,6 +853,11 @@ void Editor::OnComment(wxCommandEvent &event)
 	   if ((selString.GetChar(n) == '\n') || (selString.GetChar(n) == '\r'))
 	   {
 		   newString.Append(selString.GetChar(n));
+		   if (((n+1) < selString.Length()) && ((selString.GetChar(n+1) == '\n') || (selString.GetChar(n+1) == '\r')))
+		   {
+			   n = n + 1;
+			   newString.Append(selString.GetChar(n));
+		   }
 		   newString.Append("% ");
 		   n = n + 1;
 	   }
@@ -931,6 +936,11 @@ void Editor::OnUncomment(wxCommandEvent &event)
 	   if ((selString.GetChar(n) == '\n') || (selString.GetChar(n) == '\r'))
 	   {
 		   newString.Append(selString.GetChar(n));
+		   if (((n+1) < selString.Length()) && ((selString.GetChar(n+1) == '\n') || (selString.GetChar(n+1) == '\r')))
+		   {
+			   n = n + 1;
+			   newString.Append(selString.GetChar(n));
+		   }
 		   lookForComment = true;
 		   n = n + 1;
 	   }
