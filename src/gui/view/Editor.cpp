@@ -32,7 +32,7 @@
 //#define DEBUG_GMAT_KEYWORDS
 //#define DEBUG_EDITOR_PREF
 //#define DEBUG_EDITOR_FIND
-
+//#define DEBUG_EDITOR_COMMENT
 
 BEGIN_EVENT_TABLE (Editor, wxStyledTextCtrl)
    // common
@@ -841,11 +841,16 @@ void Editor::OnComment(wxCommandEvent &event)
    SetSelection(cPos, ePos);
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
+
+   #ifdef DEBUG_EDITOR_COMMENT
+   MessageInterface::ShowMessage("Editor::OnComment() SelText='%s'\n", selString.c_str());
+   #endif
+
    wxString newString = "% ";
    size_t n = 0;
    while ( n < selString.Length() )
    {
-	   if (selString.GetChar(n) == '\n')
+	   if ((selString.GetChar(n) == '\n') || (selString.GetChar(n) == '\r'))
 	   {
 		   newString.Append(selString.GetChar(n));
 		   newString.Append("% ");
@@ -863,7 +868,7 @@ void Editor::OnComment(wxCommandEvent &event)
   
    // Replace the selected text with the argument text.
    ReplaceSelection(newString);
-   
+
    #ifdef DEBUG_EDITOR_COMMENT
    MessageInterface::ShowMessage("Editor::OnComment() exiting\n");
    #endif
@@ -913,12 +918,17 @@ void Editor::OnUncomment(wxCommandEvent &event)
 
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
+
+   #ifdef DEBUG_EDITOR_COMMENT
+   MessageInterface::ShowMessage("Editor::OnComment() SelText='%s'\n", selString.c_str());
+   #endif
+
    wxString newString;
    bool lookForComment = true;
    size_t n = 0;
    while ( n < selString.Length() )
    {
-	   if (selString.GetChar(n) == '\n')
+	   if ((selString.GetChar(n) == '\n') || (selString.GetChar(n) == '\r'))
 	   {
 		   newString.Append(selString.GetChar(n));
 		   lookForComment = true;
