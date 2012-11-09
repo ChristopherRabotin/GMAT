@@ -2855,7 +2855,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
 
 
    // 2012.01.24 - wcs - two body propagation disallowed for now
-   std::string noTwoBody = "The two-body ephemeris model for a celestial body has been depcrated. The following setting is invalid.\n";
+   std::string noTwoBody = "The two-body ephemeris model for a celestial body has been deprecated. The following setting is invalid \n";
    // 2012.01.24 - wcs - two body propagation disallowed for now
 
       
