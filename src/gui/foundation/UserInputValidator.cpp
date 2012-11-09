@@ -240,7 +240,7 @@ bool UserInputValidator::CheckReal(Real &rvalue, const std::string &str,
    
    // check for real value
    Real rval;
-   if (GmatStringUtil::ToReal(str, &rval))
+   if (GmatStringUtil::ToReal(str, &rval, false, false))
    {
       rvalue = rval;
       #ifdef DEBUG_CHECK_REAL
@@ -310,7 +310,7 @@ bool UserInputValidator::CheckInteger(Integer &ivalue, const std::string &str,
    
    // check for integer value
    Integer ival;
-   if (GmatStringUtil::ToInteger(str, &ival))
+   if (GmatStringUtil::ToInteger(str, &ival, false, false))
    {
       ivalue = ival;
 
@@ -361,7 +361,7 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
                                            bool includeLower, bool includeUpper)
 {
    Integer ival;
-   if (GmatStringUtil::ToInteger(str, &ival))
+   if (GmatStringUtil::ToInteger(str, &ival, false, false))
    {
       Real rval = (Real)ival;
       
@@ -780,7 +780,7 @@ Real UserInputValidator::ToReal(const wxString &wxStr)
 Integer UserInputValidator::ToInteger(const wxString &wxStr)
 {
    Integer intVal;
-   if (GmatStringUtil::ToInteger(wxStr.c_str(), intVal))
+   if (GmatStringUtil::ToInteger(wxStr.c_str(), intVal, false, false))
       return intVal;
    else
       return GmatIntegerConstants::INTEGER_UNDEFINED;
