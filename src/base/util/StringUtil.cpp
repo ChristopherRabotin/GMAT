@@ -30,6 +30,7 @@
 #include <stdio.h>               // for sprintf()
 #include <cstdlib>               // Required for GCC 4.3
 #include <algorithm>             // Required for GCC 4.3
+#include <sstream>
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_TOREAL
@@ -1274,12 +1275,13 @@ bool GmatStringUtil::IsNumber(const std::string &str)
  *           -7 = Input string contains non-numeric except E or e
  *           -8 = Input string has missing numbers after + or - sign
  * @param  trimParens  Set this to true if extra layers of parenthesis to be removed before checking [false]
+ * @param  
  * @return  true if input string is a number, false otherwise
  *
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &errorCode,
-                                 bool trimParens)
+                                 bool trimParens, bool allowOverflow)
 {
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
@@ -1433,7 +1435,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
          
          #ifdef DEBUG_TOREAL
          MessageInterface::ShowMessage
-            ("   GmatStringUtil::IsValidReal(%s) returnning false, found non-numeric except E or e\n", str2.c_str());
+            ("   GmatStringUtil::IsValidReal(%s) returning false, found non-numeric except E or e\n", str2.c_str());
          #endif
          errorCode = -7;
          return false;
@@ -1445,7 +1447,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
    {
       #ifdef DEBUG_TOREAL
       MessageInterface::ShowMessage
-         ("   GmatStringUtil::IsValidReal(%s) returnning false, missing number after + or -.\n", str2.c_str());
+         ("   GmatStringUtil::IsValidReal(%s) returning false, missing number after + or -.\n", str2.c_str());
       #endif
       errorCode = -8;
       return false;
@@ -1456,8 +1458,17 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       ("   Now calling atof('%s') for converting to Real\n", str2.c_str());
    #endif
    
-   value = atof(str2.c_str());
-   
+   errno = 0;
+   value = strtod(str2.c_str(), NULL);
+   if (errno == ERANGE)
+   {
+	   if (allowOverflow)
+			MessageInterface::ShowMessage
+				("GmatStringUtil::IsValidReal('%s') out of range error, value=%.12f\n", str.c_str(), value);
+	   else
+		   return false;
+   }
+
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
       ("GmatStringUtil::IsValidReal('%s') returning true, value=%.12f\n", str.c_str(), value);
@@ -1474,9 +1485,10 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
  * @see ToReal(const std::string &str, Real &value)
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens)
+bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens,
+	bool allowOverflow)
 {
-   return ToReal(str, *value, trimParens);
+   return ToReal(str, *value, trimParens, allowOverflow);
 }
 
 
@@ -1494,7 +1506,8 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens
  * @note  atof() returns 100.00 for 100.00ABC, but we want it be an error.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens)
+bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens,
+	bool allowOverflow)
 {
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
@@ -1502,7 +1515,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
    #endif
    
    Integer errCode = 0;
-   if (IsValidReal(str, value, errCode, trimParens))
+   if (IsValidReal(str, value, errCode, trimParens, allowOverflow))
       return true;
    else
       return false;
@@ -1516,9 +1529,10 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
  * @see ToInteger(const std::string &str, Integer &value)
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trimParens)
+bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trimParens, 
+	bool allowOverflow)
 {
-   return ToInteger(str, *value, trimParens);
+   return ToInteger(str, *value, trimParens, allowOverflow);
 }
 
 
@@ -1529,8 +1543,10 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
  * This method converts string to Integer (signed integer) using atoi() after
  * validation.
  *
- * @param  str  input string to be converted to Integer
- * @param  value  output Integer value
+ * @param  str			input string to be converted to Integer
+ * @param  value		output Integer value
+ * @param  trimParens	trim parentheses
+ * @param  allowOverflow warn (true) or error (false) on overflow
  *
  * @return true if input string represents valid Integer number, false otherwise
  *
@@ -1541,7 +1557,8 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
  *        The value out of this range will return complementary number
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trimParens)
+bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trimParens,
+	bool allowOverflow)
 {
    std::string str2 = Trim(str, BOTH);
    if (trimParens)
@@ -1565,7 +1582,16 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trim
          return false;
    }
 
-   value = atoi(str2.c_str());
+   errno = 0;
+   value = strtol(str2.c_str(), NULL, 0);
+   if (errno == ERANGE)
+   {
+		if (allowOverflow)
+			MessageInterface::ShowMessage
+				("GmatStringUtil::ToInteger('%s') out of range error, value=%d\n", str.c_str(), value);
+		else
+			return false;
+   }
    return true;
 }
 
@@ -1656,7 +1682,7 @@ bool GmatStringUtil::ToOnOff(const std::string &str, std::string &value, bool tr
 //------------------------------------------------------------------------------
 // RealArray ToRealArray(const std::string &str)
 //------------------------------------------------------------------------------
-RealArray GmatStringUtil::ToRealArray(const std::string &str)
+RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow)
 {
 //   MessageInterface::ShowMessage("ToRealArray() str='%s'\n", str.c_str());
 
@@ -1678,7 +1704,7 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str)
 
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
-      if (ToReal(vals[i], rval))
+      if (ToReal(vals[i], rval, false, allowOverflow))
           realArray.push_back(rval);
       else
          throw UtilityException
@@ -1692,7 +1718,7 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str)
 //------------------------------------------------------------------------------
 // IntegerArray ToIntegerArray(const std::string &str)
 //------------------------------------------------------------------------------
-IntegerArray GmatStringUtil::ToIntegerArray(const std::string &str)
+IntegerArray GmatStringUtil::ToIntegerArray(const std::string &str, bool allowOverflow)
 {
    IntegerArray intArray;
 
@@ -1710,7 +1736,7 @@ IntegerArray GmatStringUtil::ToIntegerArray(const std::string &str)
 
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
-      if (ToInteger(vals[i], ival))
+      if (ToInteger(vals[i], ival, false, allowOverflow))
           intArray.push_back(ival);
       else
          throw UtilityException
@@ -1729,7 +1755,7 @@ IntegerArray GmatStringUtil::ToIntegerArray(const std::string &str)
  * [0 127 255] or [0, 127, 255] to array of 0, 127, 255.
  */
 //------------------------------------------------------------------------------
-UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str)
+UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str, bool allowOverflow)
 {
    UnsignedIntArray intArray;
 
@@ -1747,7 +1773,7 @@ UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str)
 
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
-      if (ToInteger(vals[i], ival))
+      if (ToInteger(vals[i], ival, false, allowOverflow))
           intArray.push_back((UnsignedInt)ival);
       else
          throw UtilityException
@@ -4030,9 +4056,10 @@ bool GmatStringUtil::EndsWithPathSeparator(const std::string &str)
  * Checks if string is valid integer or real number.
  *
  * @param  str  The input string to check for valid number
+ * @param  allowOverflow warn (true) or error (false) on overflow
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsValidNumber(const std::string &str)
+bool GmatStringUtil::IsValidNumber(const std::string &str, bool allowOverflow)
 {
    std::string str1 = Strip(str);
    if (str1 == "")
@@ -4041,7 +4068,7 @@ bool GmatStringUtil::IsValidNumber(const std::string &str)
    Real rval;
    Integer ival;
 
-   if (!ToInteger(str1, ival, true) && !ToReal(str1, rval, true))
+   if (!ToInteger(str1, ival, true, allowOverflow) && !ToReal(str1, rval, true, allowOverflow))
    {
       #ifdef DEBUG_VALID_NUMBER
       MessageInterface::ShowMessage

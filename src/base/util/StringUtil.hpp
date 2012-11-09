@@ -96,18 +96,18 @@ namespace GmatStringUtil
    
    GMAT_API bool IsNumber(const std::string &str);
    GMAT_API bool IsValidReal(const std::string &str, Real &value, Integer &errorCode,
-                             bool trimParens = false);
-   GMAT_API bool ToReal(const std::string &str, Real *value, bool trimParens = false);
-   GMAT_API bool ToReal(const std::string &str, Real &value, bool trimParens = false);
-   GMAT_API bool ToInteger(const std::string &str, Integer *value, bool trimParens = false);
-   GMAT_API bool ToInteger(const std::string &str, Integer &value, bool trimParens = false);
+                             bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToReal(const std::string &str, Real *value, bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToReal(const std::string &str, Real &value, bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToInteger(const std::string &str, Integer *value, bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToInteger(const std::string &str, Integer &value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToBoolean(const std::string &str, bool *value, bool trimParens = false);
    GMAT_API bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
    GMAT_API bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false);
    
-   GMAT_API RealArray ToRealArray(const std::string &str);
-   GMAT_API IntegerArray ToIntegerArray(const std::string &str);
-   GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str);
+   GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true);
+   GMAT_API IntegerArray ToIntegerArray(const std::string &str, bool allowOverflow = true);
+   GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
    GMAT_API StringArray ToStringArray(const std::string &str);
    GMAT_API BooleanArray ToBooleanArray(const std::string &str);
    
@@ -162,7 +162,7 @@ namespace GmatStringUtil
    GMAT_API bool StartsWith(const std::string &str, const std::string &value);
    GMAT_API bool EndsWith(const std::string &str, const std::string &value);
    GMAT_API bool EndsWithPathSeparator(const std::string &str);
-   GMAT_API bool IsValidNumber(const std::string &str);
+   GMAT_API bool IsValidNumber(const std::string &str, bool allowOverflow = true);
    GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false,
                              bool blankNameIsOk = false);
    GMAT_API bool IsLastNumberPartOfName(const std::string &str);
