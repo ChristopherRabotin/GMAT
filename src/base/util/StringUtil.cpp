@@ -31,6 +31,7 @@
 #include <cstdlib>               // Required for GCC 4.3
 #include <algorithm>             // Required for GCC 4.3
 #include <sstream>
+#include <cerrno>
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_TOREAL
