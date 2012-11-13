@@ -150,15 +150,19 @@ bool Optimizer::IsParameterReadOnly(const std::string &label) const
 
 bool Optimizer::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Initializing Optimizer %s\n", 
+         instanceName.c_str());
+   #endif
+
    if (variableNames.size() == 0)  // constraints are not required
    {
       std::string errorMessage = "Optimizer cannot initialize: ";
       errorMessage += "No variables are set.\n";
       throw SolverException(errorMessage);
    }
-   
-   FreeArrays();
 
+   FreeArrays();
    Solver::Initialize();
    
    return true;

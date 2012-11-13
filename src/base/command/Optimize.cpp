@@ -403,6 +403,7 @@ bool Optimize::Initialize()
    specialState = Solver::INITIALIZING;
 
    Integer constraintCount = 0, variableCount = 0, objectiveCount = 0;
+
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       currentCmd = *node;
@@ -423,27 +424,38 @@ bool Optimize::Initialize()
              (currentCmd->GetTypeName() == "NonlinearConstraint"))
          {
             currentCmd->SetRefObject(theSolver, Gmat::SOLVER, solverName);
-            if (theSolver->IsSolverInternal())
+
+            // Count optimization parameters
+            if (currentCmd->GetTypeName() == "Minimize")
+               ++objectiveCount;
+            if (currentCmd->GetTypeName() == "NonlinearConstraint")
             {
-               if (currentCmd->GetTypeName() == "Minimize")
-                  ++objectiveCount;
-               if (currentCmd->GetTypeName() == "NonlinearConstraint")
-               {
-                  ++constraintCount;
-               }
-               if (currentCmd->GetTypeName() == "Vary")
-                  ++variableCount;
+               ++constraintCount;
+            }
+            if (currentCmd->GetTypeName() == "Vary")
+               ++variableCount;
                
-               #ifdef DEBUG_OPTIMIZE_EXEC
-                  MessageInterface::ShowMessage(
-                     "   *** COUNTS: %d Costs, %d Variables, %d Constraints ***\n",
-                     objectiveCount, variableCount, constraintCount);
-               #endif
-            }               
+            #ifdef DEBUG_OPTIMIZE_EXEC
+               MessageInterface::ShowMessage(
+                  "   *** COUNTS: %d Costs, %d Variables, %d Constraints ***\n",
+                  objectiveCount, variableCount, constraintCount);
+            #endif
          }
          
          currentCmd = currentCmd->GetNext();
       }
+   }
+
+   // Alert user if there is a problem identifying what to optimize
+   Integer goalsize = objectiveCount + constraintCount;
+   if (goalsize == 0) 
+   {
+      std::string errorMessage = "Optimizer ";
+      errorMessage += theSolver->GetName();
+      errorMessage += " cannot initialize: Optimizers require either a cost "
+            "function (set with the Minimize command) or a set of nonlinear "
+            "constraints\n";
+      throw SolverException(errorMessage);
    }
 
    bool retval = SolverBranchCommand::Initialize();

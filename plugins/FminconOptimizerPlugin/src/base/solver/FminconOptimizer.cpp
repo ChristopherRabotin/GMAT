@@ -288,7 +288,13 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       }
       for (Integer i=0;i<variableCount;i++)
          variable.at(i) = vars.at(i);
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage("   Starting nominal pass...");
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       RunNominal();
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage("pass complete\n");
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       nestedState = CALCULATING;
       status = RUN;  // Enables "Apply corrections"
    }
