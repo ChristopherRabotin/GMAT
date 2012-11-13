@@ -4740,8 +4740,9 @@ bool CelestialBody::SetUpSPICE()
       {
          std::stringstream ss("");
          ss << "Overriding input NAIF ID for body \"" << instanceName <<
-               "\" with SPICE NAIF ID (" << spiceNaifId << ").\n";
-         MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
+               "\" with NAIF ID (" << spiceNaifId << ") from SPICE kernel.\n";
+         //         MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
+         MessageInterface::ShowMessage(ss.str().c_str());
       }
       naifId    = spiceNaifId;
       naifIdObserver = kernelReader->GetNaifID(j2000BodyName, false);
