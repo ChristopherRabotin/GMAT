@@ -325,6 +325,65 @@ std::string GmatStringUtil::RemoveTrailingZeros(Real val, const std::string &val
 
 
 //------------------------------------------------------------------------------
+//std::string RemoveScientificNotation(const std::string &str)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
+{
+   #ifdef DEBUG_REMOVE_SCI_NOTATION
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::RemoveScientificNotation() entered, str=<%s>\n", str.c_str());
+   #endif
+   
+   if (str.find_first_of("eE") == str.npos)
+   {
+      #ifdef DEBUG_REMOVE_SCI_NOTATION
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::() RemoveScientificNotation() no E or e found so returning str=<%s>\n",
+          str.c_str());
+      #endif
+      return str;
+   }
+   
+   // Remove E+E-e+e- first
+   std::string str1 = Replace(str, "E+", "``");
+   str1 = Replace(str1, "E-", "``");
+   str1 = Replace(str1, "e+", "``");
+   str1 = Replace(str1, "e-", "``");
+   str1 = RemoveAll(str1, '`');
+   
+   #ifdef DEBUG_REMOVE_SCI_NOTATION
+   MessageInterface::ShowMessage("   After removing <E+E-e+e->, str=<%s>\n", str1.c_str());
+   #endif
+   
+   // Remove E or e without + or - sign, such as 5e7
+   std::string::iterator begin = str1.begin();
+   std::string::iterator pos = str1.begin();
+   Integer dist = 0, size = str1.length();
+   char currCh;
+   while (pos != str1.end())
+   {
+      dist = distance(begin, pos);
+      currCh = str1[dist];
+      if (dist > 0 && dist < size)
+      {
+         if ((currCh == 'E' || currCh == 'e') && isdigit(str1[dist+1]))
+            str1.erase(pos);
+         else
+            ++pos;
+      }
+      else
+         ++pos;
+   }
+   
+   #ifdef DEBUG_REMOVE_SCI_NOTATION
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::RemoveScientificNotation() returning <%s>\n", str1.c_str());
+   #endif
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::RemoveMathSymbols(const std::string &str, bool removeMathOperator)
@@ -346,16 +405,7 @@ std::string GmatStringUtil::RemoveMathSymbols(const std::string &str, bool remov
    }
    
    // Remove scientific notation first
-   std::string str1 = GmatStringUtil::Replace(str, "E+", "``");
-   str1 = GmatStringUtil::Replace(str1, "E-", "``");
-   str1 = GmatStringUtil::Replace(str1, "e+", "``");
-   str1 = GmatStringUtil::Replace(str1, "e-", "``");
-   str1 = GmatStringUtil::RemoveAll(str1, '`');
-   #ifdef DEBUG_REMOVE_MATH_SYMBOLS
-   MessageInterface::ShowMessage("   After removing <E+E-e+e->, str=<%s>\n", str1.c_str());
-   #endif
-   
-   str1 = GmatStringUtil::RemoveAll(str1, "(),._");
+   std::string str1 = RemoveScientificNotation(str);
    #ifdef DEBUG_REMOVE_MATH_SYMBOLS
    MessageInterface::ShowMessage("   After removing <(),._>, str=<%s>\n", str1.c_str());
    #endif
@@ -806,6 +856,111 @@ std::string GmatStringUtil::ReplaceNumber(const std::string &str, const std::str
 
 
 //------------------------------------------------------------------------------
+// std::string ReplaceChainedUnaryOperators(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Replaces repeated plus (+) or minus (-) signs with one sign.
+ * For example "+--+abc-+--def+-+-ghi" will give "+abc-def_ghi".
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ReplaceChainedUnaryOperators(const std::string &str)
+{
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("MathParser::ReplaceChainedUnaryOperators() entered, str='%s'\n", str.c_str());
+   #endif
+   
+   std::string str1 = str;
+   Integer length = str1.size();
+   std::string signs, nonSigns, finalStr;
+   bool signFound = false, signDone = false;
+   bool nonSignFound = false, nonSignDone = false;
+   
+   for (int i = 0; i < length; i++)
+   {
+      if (str1[i] == '+' || str1[i] == '-')
+      {
+         if (nonSignFound)
+            nonSignDone = true;
+         
+         signFound = true;
+         nonSignFound = false;
+         
+         if (nonSignDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   nonSigns = '%s'\n", nonSigns.c_str());
+            #endif
+            finalStr = finalStr + nonSigns;
+            nonSignDone = false;
+            nonSigns = "";
+            signs = str1[i];
+         }
+         else
+         {
+            signs = signs + str1[i];
+         }
+      }
+      else
+      {
+         if (signFound)
+            signDone = true;
+         
+         signFound = false;
+         nonSignFound = true;
+         
+         if (signDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   signs = '%s'\n", signs.c_str());
+            #endif
+            Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
+            char finalSign = '-';
+            if ((numMinus % 2) == 0)
+               finalSign = '+';
+            
+            finalStr = finalStr + finalSign;
+            signDone = false;
+            signs = "";
+            nonSigns = str1[i];
+         }
+         else
+         {
+            nonSigns = nonSigns + str1[i];
+         }
+      }
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage("   last signs = '%s'\n", signs.c_str());
+   MessageInterface::ShowMessage("   last nonSigns = '%s'\n", nonSigns.c_str());
+   #endif
+   
+   // Put last part
+   if (signs != "")
+   {
+      Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
+      char finalSign = '-';
+      if ((numMinus % 2) == 0)
+         finalSign = '+';
+      
+      finalStr = finalStr + finalSign;
+   }
+   else if (nonSigns != "")
+   {
+      finalStr = finalStr + nonSigns;
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("MathParser::ReplaceChainedUnaryOperators() returning '%s'\n", finalStr.c_str());
+   #endif
+   
+   return finalStr;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string ToString(const bool &val)
 //------------------------------------------------------------------------------
 /*
@@ -1129,21 +1284,33 @@ StringArray GmatStringUtil::SeparateByComma(const std::string &str)
 {
    #ifdef DEBUG_STRING_UTIL_SEP_COMMA
    MessageInterface::ShowMessage
-      ("GmatStringUtil::SeparateByComma() str=\"%s\"n", str.c_str());
+      ("GmatStringUtil::SeparateByComma() entered, str=<%s>\n", str.c_str());
    #endif
-
+   
    StringArray parts;
    parts.push_back(str);
-
+   
    // if no comma is found, just return input string
    std::string::size_type index1 = str.find(",");
    if (index1 == str.npos)
+   {
+      #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::SeparateByComma() returning <%s>, no comma found\n", str.c_str());
+      #endif
       return parts;
-
+   }
+   
    // Make sure that all parentheses are balanced
    if (!IsParenBalanced(str))
+   {
+      #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::SeparateByComma() returning <%s>, parenthesis is not balanced\n", str.c_str());
+      #endif
       return parts;
-
+   }
+   
    // Now go through each character in the string
    parts.clear();
    Integer count = str.size();
@@ -1151,11 +1318,15 @@ StringArray GmatStringUtil::SeparateByComma(const std::string &str)
    bool insideQuote = false;
    Integer openCount = 0;
    std::string part;
-
+   
    for (int i=0; i<count; i++)
    {
       if (str1[i] == ',')
       {
+         #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+         MessageInterface::ShowMessage
+            ("   curr ch is comma, insideQuote=%d, openCount=%d\n", insideQuote, openCount);
+         #endif
          if (insideQuote || openCount > 0)
          {
             part = part + str1[i];
@@ -1178,26 +1349,38 @@ StringArray GmatStringUtil::SeparateByComma(const std::string &str)
       {
          part = part + str1[i];
          openCount++;
+         #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+         MessageInterface::ShowMessage
+            ("   curr ch is (,  part=<%s>, openCount=%d\n", part.c_str(), openCount);
+         #endif
       }
       else if (str1[i] == ')')
       {
          part = part + str1[i];
          openCount--;
+         #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+         MessageInterface::ShowMessage
+            ("   curr ch is ), part=<%s>, openCount=%d\n", part.c_str(), openCount);
+         #endif
       }
       else
       {
          part = part + str1[i];
       }
    }
-
+   
    parts.push_back(part);
-
-   // Let's stip off leadin and trailing blanks before returning
+   
+   // Let's strip off leading and trailing blanks before returning
    for (UnsignedInt i=0; i<parts.size(); i++)
    {
       parts[i] = Trim(parts[i], BOTH);
    }
-
+   
+   #ifdef DEBUG_STRING_UTIL_SEP_COMMA
+   WriteStringArray(parts, "GmatStringUtil::SeparateByComma() returning:", "   ");
+   #endif
+   
    return parts;
 }
 
@@ -1269,12 +1452,13 @@ bool GmatStringUtil::IsNumber(const std::string &str)
  *            0 = No error
  *           -1 = Input string is blank
  *           -2 = Input string is blank after removing leading and trailing spaces
- *           -3 = First character of input string is +, -, ., or digit
- *           -4 = Input string has multiple E or e
- *           -5 = Input string has multiple + or - after E or e
- *           -6 = Input string has multiple dots
- *           -7 = Input string contains non-numeric except E or e
- *           -8 = Input string has missing numbers after + or - sign
+ *           -3 = Input string contains numbers with multiple dots or invalid scientific notation
+ *           -4 = First character of input string is +, -, ., or digit
+ *           -5 = Input string has multiple E or e
+ *           -6 = Input string has multiple + or - after E or e
+ *           -7 = Input string has multiple dots
+ *           -8 = Input string contains non-numeric except E or e
+ *           -9 = Input string has missing numbers after + or - sign
  * @param  trimParens  Set this to true if extra layers of parenthesis to be removed before checking [false]
  * @param  
  * @return  true if input string is a number, false otherwise
@@ -1307,8 +1491,6 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       str2 = RemoveExtraParen(str2);
       str2 = Trim(str2, BOTH);
    }
-   Integer numDot = 0;
-   std::string::size_type index1;
    
    if (str2.length() == 0)
    {
@@ -1341,7 +1523,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       MessageInterface::ShowMessage
          ("GmatStringUtil::IsValidReal() returning false, first char is not + - . or number.\n");
       #endif
-      errorCode = -3;
+      errorCode = -4;
       return false;
    }
    
@@ -1369,7 +1551,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
    }
    
    // Check for multiple E or e
-   index1 = str2.find_first_of("Ee");
+   std::string::size_type index1 = str2.find_first_of("Ee");
    if (index1 != str2.npos)
       if (str2.find_first_of("Ee", index1 + 1) != str2.npos)
       {
@@ -1377,10 +1559,10 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
          MessageInterface::ShowMessage
             ("GmatStringUtil::IsValidReal() returning false, it has multiple Ee.\n");
          #endif
-         errorCode = -4;
+         errorCode = -5;
          return false;
       }
-   
+
    // Check for multiple + or -
    index1 = str2.find_first_of("+-");
    if (index1 != str2.npos)
@@ -1395,12 +1577,15 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
             MessageInterface::ShowMessage
                ("GmatStringUtil::IsValidReal() returning false, it has multiple + or - after Ee.\n");
             #endif
-            errorCode = -5;
+            errorCode = -6;
             return false;
          }
       }
    }
    
+   // Check for multiple dots or dots in scientific notation suchas 5e-17.3
+   Integer numDot = 0;
+   bool sciNotationFound = false;
    for (unsigned int i=0; i<str2.length(); i++)
    {
       if (i == 0 && (str2[0] == '-' || str2[0] == '+'))
@@ -1409,14 +1594,24 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       if (str2[i] == '.')
       {
          numDot++;
-
-         if (numDot > 1)
+         
+         if ((sciNotationFound && numDot > 0) ||
+             (!sciNotationFound && numDot > 1))
          {
             #ifdef DEBUG_TOREAL
             MessageInterface::ShowMessage
-               ("GmatStringUtil::IsValidReal() returning false, it has multiple dots\n");
+               ("GmatStringUtil::IsValidReal() returning false, it has multiple "
+                "dots or dot in the scientific notation\n");
             #endif
-            errorCode = -6;
+            
+            // Check if it contains just number and/or scientific notation
+            std::string str3 = RemoveScientificNotation(str2);
+            str3 = RemoveAll(str3, '.');
+            Real rval;
+            if (ToReal(str3, rval))
+               errorCode = -3;
+            else
+               errorCode = -7;
             return false;
          }
          
@@ -1428,21 +1623,38 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
          // Handle scientific notation
          if ((str2[i] == 'e' || str2[i] == 'E') &&
              (str2[i+1] == '+' || str2[i+1] == '-' || isdigit(str2[i+1])))
+         {
+            sciNotationFound = true;
             continue;
+         }
          
          if ((str2[i] == '+' || str2[i] == '-' || isdigit(str2[i])) &&
              (str2[i-1] == 'e' || str2[i-1] == 'E'))
-            continue;
+         {
+            if (i == str2.length()-1)
+            {
+               #ifdef DEBUG_TOREAL
+               MessageInterface::ShowMessage
+                  ("GmatStringUtil::IsValidReal() returning false, it has missing number in "
+                   "the scientific notation\n");
+               #endif
+               errorCode = -3;
+               return false;
+            }
+            else
+               continue;
+         }
          
          #ifdef DEBUG_TOREAL
          MessageInterface::ShowMessage
             ("   GmatStringUtil::IsValidReal(%s) returning false, found non-numeric except E or e\n", str2.c_str());
          #endif
-         errorCode = -7;
+         errorCode = -8;
          return false;
       }
    }
    
+   // Check if there is number followed by scientific notation
    // Check if there is + or - without number
    if (str2 == "+" || str2 == "-")
    {
@@ -1450,7 +1662,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       MessageInterface::ShowMessage
          ("   GmatStringUtil::IsValidReal(%s) returning false, missing number after + or -.\n", str2.c_str());
       #endif
-      errorCode = -8;
+      errorCode = -9;
       return false;
    }
       
@@ -1472,7 +1684,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
 
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
-      ("GmatStringUtil::IsValidReal('%s') returning true, value=%.12f\n", str.c_str(), value);
+      ("GmatStringUtil::IsValidReal('%s') returning true, value=%g\n", str.c_str(), value);
    #endif
    
    return true;
@@ -1771,6 +1983,7 @@ UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str, bool
    str1 = Trim(str1);
 
    if (str1 == "")
+
       return intArray;
 
    StringArray vals = SeparateBy(str1, " ,");
@@ -2875,19 +3088,18 @@ bool GmatStringUtil::AreAllBracketsBalanced(const std::string &str,
 
 
 //------------------------------------------------------------------------------
-// bool AreAllNamesValid(const std::string &str, bool blanksRemoved = true)
+// bool AreAllNamesValid(const std::string &str, bool blankNameIsOk = false)
 //------------------------------------------------------------------------------
 /**
  * Checks if names or number are valid in the math equation.
- * If blanksRemoved is true, it assumes all blanks are removed properly.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blanksRemoved)
+bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blankNameIsOk)
 {
    #ifdef DEBUG_VALID_NAME
    MessageInterface::ShowMessage
-      ("MathParser::AreAllNamesValid() entered, str=<%s>, blanksRemoved=%d\n",
-       str.c_str(), blanksRemoved);
+      ("MathParser::AreAllNamesValid() entered, str=<%s>, blankNameIsOk=%d\n",
+       str.c_str(), blankNameIsOk);
    #endif
    
    std::string str1 = Trim(str);
@@ -2903,15 +3115,6 @@ bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blanksRemoved
    #endif
    
    StringArray parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
-   
-   // Remove this later since blanksRemoved is not used (LOJ: 2012.11.06)
-   #if 0
-   if (!blanksRemoved)
-      parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
-   else
-      parts = GmatStringUtil::SeparateBy(str1, "(),+-*/^'");
-   #endif
-   
    Integer numParts = parts.size();
    std::string str2;
    Real rval;
@@ -2938,13 +3141,14 @@ bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blanksRemoved
       }
       
       #ifdef DEBUG_VALID_NAME
-      MessageInterface::ShowMessage("   parts[%d]=<%s>\n", i, str2.c_str());
+      MessageInterface::ShowMessage
+         ("   parts[%d]=<%s>\n   Checking if it is a real number", i, str2.c_str());
       #endif
       
       if (!ToReal(str2, rval))
       {
-         if (!IsValidName(str2))
-         {            
+         if (!IsValidName(str2, false, blankNameIsOk))
+         {
             if (str2.find_first_of(' ') != str2.npos)
             {
                std::string str3 = RemoveAllBlanks(str2);
@@ -2958,6 +3162,20 @@ bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blanksRemoved
                       str2.c_str());
                   #endif
                   return false;
+               }
+               else
+               {
+                  // Check for invalid name such as starting with number
+                  // but Parameter is ok such as sat.X
+                  if (!IsValidName(str3) && !IsValidParameterName(str3))
+                  {
+                     #ifdef DEBUG_VALID_NAME
+                     MessageInterface::ShowMessage
+                        ("MathParser::AreAllNamesValid() returning false, <%s> is not a valid name\n",
+                         str2.c_str());
+                     #endif
+                     return false;
+                  }
                }
             }
          }
@@ -3510,7 +3728,8 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
 }
 
 //------------------------------------------------------------------------------
-// std::string RemoveExtraParen(const std::string &str, bool ignoreSingleQuotes = false)
+// std::string RemoveExtraParen(const std::string &str, bool ignoreComma = false,
+//                              bool ignoreSingleQuotes = false)
 //------------------------------------------------------------------------------
 /*
  * This method removs extra pair of parentheses.
@@ -4188,6 +4407,37 @@ bool GmatStringUtil::IsValidName(const std::string &str, bool ignoreBracket,
    #endif
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsValidParameterName(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Checks if input string a valid Parameter name syntax such as sat.X or sat.Earth.TA.
+ * It does not check for the actual Parameter name such as X or TA.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidParameterName(const std::string &str)
+{
+   #ifdef DEBUG_VALID_PARAMETER_NAME
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsValidParameterName() entered, str=<%s>\n", str.c_str());
+   #endif
+   
+   bool isValid = false;
+   
+   std::string type, owner, dep;
+   ParseParameter(str, type, owner, dep);
+   if (owner != "" && type != "")
+      isValid = true;
+   
+   #ifdef DEBUG_VALID_PARAMETER_NAME
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsValidParameterName() returning %d\n", isValid);
+   #endif
+   
+   return isValid;
 }
 
 

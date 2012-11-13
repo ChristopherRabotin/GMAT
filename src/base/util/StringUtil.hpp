@@ -45,6 +45,7 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveMultipleSpaces(const std::string &str);
    GMAT_API std::string RemoveTrailingZeros(Real val, const std::string &valStr,
                            Integer iterCount = 0);
+   GMAT_API std::string RemoveScientificNotation(const std::string &str);
    GMAT_API std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false);
    
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
@@ -59,6 +60,7 @@ namespace GmatStringUtil
                            const std::string &to);
    GMAT_API std::string ReplaceNumber(const std::string &str, const std::string &from,
                            const std::string &to);
+   GMAT_API std::string ReplaceChainedUnaryOperators(const std::string &str);
    
    GMAT_API std::string ToString(const bool &val);
    GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,
@@ -149,7 +151,7 @@ namespace GmatStringUtil
    GMAT_API bool IsParenBalanced(const std::string &str);
    GMAT_API bool IsParenEmpty(const std::string &str);
    GMAT_API bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
-   GMAT_API bool AreAllNamesValid(const std::string &str, bool blanksRemoved = true);
+   GMAT_API bool AreAllNamesValid(const std::string &str, bool blankNameIsOk = false);
    GMAT_API bool IsOuterParen(const std::string &str);
    GMAT_API bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
    GMAT_API bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
@@ -165,6 +167,7 @@ namespace GmatStringUtil
    GMAT_API bool IsValidNumber(const std::string &str, bool allowOverflow = true);
    GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false,
                              bool blankNameIsOk = false);
+   GMAT_API bool IsValidParameterName(const std::string &str);
    GMAT_API bool IsLastNumberPartOfName(const std::string &str);
    GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
    GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote,

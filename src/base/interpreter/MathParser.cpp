@@ -36,8 +36,7 @@
 
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_EQUATION 1
-//#define DEBUG_MATH_EQ 2
-//#define DEBUG_VALID_NAME 1
+//#define DEBUG_MATH_EQ 1
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
@@ -187,7 +186,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    else if (GmatStringUtil::IsValidReal(str, rval, errCode))
    {
       #if DEBUG_PARSE_EQUATION
-      MessageInterface::ShowMessage("   real value = %f\n", rval);
+      MessageInterface::ShowMessage("   real value = %g\n", rval);
       MessageInterface::ShowMessage
          ("MathParser::IsEquation(%s) returning false, it is a number\n", str.c_str());
       #endif
@@ -199,6 +198,16 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       MessageInterface::ShowMessage
          ("   GmatStringUtil::IsValidReal() errCode=%d\n", errCode);
       #endif
+      
+      // If it has only numbers and multiple dots
+      if (errCode == -3)
+      {
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage
+            ("MathParser::IsEquation() 1 Throwng exception - Invalid number or invalid scientific notation\n");
+         #endif
+         throw MathException("Invalid number or math equation");
+      }
       
       std::string str1 = str;
       // Check for any math symbols or blank and comma, etc
@@ -222,25 +231,25 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       }
       
       // If invalid number found in the equation, check for more invalid math equation
-      if (errCode <= -3)
+      if (errCode <= -4)
       {
          // Check if any invalid math operators found
          if (!GmatStringUtil::IsMathEquation(str1, true))
          {
             #if DEBUG_PARSE_EQUATION
             MessageInterface::ShowMessage
-               ("MathParser::IsEquation() 1 Throwng exception - Invalid number or math equation\n");
+               ("MathParser::IsEquation() 2 Throwng exception - Invalid number or math equation\n");
             #endif
             throw MathException("Invalid number or math equation");
          }
          else
          {
             // Check for invalid names without removing spaces first
-            if (!GmatStringUtil::AreAllNamesValid(str1, false))
+            if (!GmatStringUtil::AreAllNamesValid(str1, true))
             {
                #if DEBUG_PARSE_EQUATION
                MessageInterface::ShowMessage
-                  ("MathParser::IsEquation() 2 Throwng exception - Invalid number or math equation\n");
+                  ("MathParser::IsEquation() 3 Throwng exception - Invalid number or math equation\n");
                #endif
                throw MathException("Invalid number or math equation");
             }
@@ -254,7 +263,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
             #endif
             
             // Remove chained plus or minus signs
-            str1 = ReplaceChainedUnaryOperators(str1);
+            str1 = GmatStringUtil::ReplaceChainedUnaryOperators(str1);
             #if DEBUG_PARSE_EQUATION
             MessageInterface::ShowMessage
                ("   After replacing chained unary +- signs, str1=<%s>\n", str1.c_str());
@@ -312,7 +321,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       else
       {
          // Check ' for matrix transpose and ^(-1) for inverse
-         if (str1.find("'") != str1.npos || str1.find("^(-1)") != str1.npos)
+         if (str1.find(transposeOpStr) != str1.npos || str1.find(inverseOpStr) != str1.npos)
             isEq = true;
       }
    }
@@ -581,9 +590,19 @@ MathNode* MathParser::Parse(const std::string &str)
    // first remove all blank spaces, extra layer of parenthesis, and semicoln
    //std::string newEq = GmatStringUtil::RemoveAllBlanks(theEquation);
    std::string newEq = RemoveSpaceInMathEquation(theEquation);
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("   After removing spaces, newEq=<%s>\n", newEq.c_str());
+   #endif
+   
    newEq = GmatStringUtil::RemoveExtraParen(newEq);
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("   After removing extra parenthesis, newEq=<%s>\n", newEq.c_str());
+   #endif
+   
    std::string::size_type index = newEq.find_first_of(';');
-   if (index != newEq.npos)
+   if (index != newEq.npos && index == newEq.length() - 1)
       newEq.erase(index);
    
    // check if parenthesis are balanced
@@ -600,6 +619,9 @@ MathNode* MathParser::Parse(const std::string &str)
       throw MathException("Invalid math equation");
    
    // Check for invalid math equation for transpose
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage("   Checking for invalid math equation\n");
+   #endif
    std::string::size_type length = newEq.size();
    for (UnsignedInt i = 0; i < length; i++)
    {
@@ -609,15 +631,34 @@ MathNode* MathParser::Parse(const std::string &str)
          if (i <= length-2)
          {
             char nextCh = newEq[i+1];
-            if (GmatStringUtil::IsMathOperator(nextCh) || nextCh == ')')
+            if (GmatStringUtil::IsMathOperator(nextCh) || nextCh == ')' || nextCh == ',')
                continue;
             else
-               throw MathException("Invalid math equation");
+               throw MathException("Invalid math equation after transpose");
          }
       }
    }
    
-   // build GmatFunction list first
+   // Check for real number first
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage("   Checking if it is a real number\n");
+   #endif
+   Real rval;
+   Integer errCode;
+   if (GmatStringUtil::IsValidReal(newEq, rval, errCode))
+   {
+       MathNode *topNode = CreateNode("MathElement", newEq);
+       #if DEBUG_PARSE
+       MessageInterface::ShowMessage
+          ("MathParser::Parse() newEq<%s> is a real number <%f>, so returning "
+           "MathElement node <%p>\n", newEq.c_str(), rval, topNode);
+       #endif
+       return topNode;
+   }
+   
+   
+   // Now start parsing
+   // Build GmatFunction list first
    BuildGmatFunctionList(newEq);
    
    // Replace ^(-1) with inverse op (GMT-3046 LOJ: 2012.09.07)
@@ -632,7 +673,7 @@ MathNode* MathParser::Parse(const std::string &str)
    newEq = RemoveSpaceInMathEquation(newEq);
    
    // Replace chained unary operators to correct operator
-   newEq = ReplaceChainedUnaryOperators(newEq);
+   newEq = GmatStringUtil::ReplaceChainedUnaryOperators(newEq);
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
       ("MathParser::Parse() After replacing chained +- signs\n   newEq=%s\n", newEq.c_str());
@@ -685,6 +726,28 @@ MathNode* MathParser::ParseNode(const std::string &str)
 {
    #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage("\nMathParser::ParseNode() entered, str='%s'\n", str.c_str());
+   #endif
+   
+   MathNode *mathNode = NULL;
+
+   // Check for math element first
+   if (IsMathElement(str))
+   {
+      std::string str1 = GmatStringUtil::RemoveExtraParen(str);
+      #if DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   After removing extra parenthesis, str=<%s>\n", str1.c_str());
+      #endif
+      mathNode = CreateNode("MathElement", str1);
+      #if DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("MathParser::Parse() <%s> is a math element, so returning "
+          "MathElement node <%p>\n", str1.c_str(), mathNode);
+      #endif
+      return mathNode;
+   }
+   
+   #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage("Calling Decompose(<%s>)\n", str.c_str());
    #endif
    
@@ -696,8 +759,6 @@ MathNode* MathParser::ParseNode(const std::string &str)
    #if DEBUG_CREATE_NODE
    WriteItems("MathParser::ParseNode() After Decompose()", items);
    #endif
-   
-   MathNode *mathNode;
    
    // If operator is empty, create MathElement, create MathFunction otherwise
    if (op == "")
@@ -1102,7 +1163,7 @@ StringArray MathParser::Decompose(const std::string &str)
             if (items[0] == "")
             {
                items = ParseUnary(str1);
-                        
+               
                if (items[0] == "")
                {
                   items = ParseMatrixOps(str1);
@@ -1320,30 +1381,57 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       }
       
       #ifdef DEBUG_ATAN2
-      MessageInterface::ShowMessage("   Check for atan2 function which requires 2 args\n");
+      MessageInterface::ShowMessage
+         ("   Check for atan2 function which requires 2 args, str=<%s>\n", str.c_str());
       #endif
       
       // Handle special atan2(y,x) function
       if (op == "atan2")
       {
-         StringArray parts = GmatStringUtil::SeparateByComma(str);
-
-         #ifdef DEBUG_ATAN2
-         for (UnsignedInt i = 0; i < parts.size(); i++)
-            MessageInterface::ShowMessage("..... (1) %d '%s'\n", i, parts[i].c_str());
-         #endif
-         
-         bool parsingFailed = true;
-         
-         if (parts.size() == 1)
+         std::string::size_type openParen = str.find_first_of('(');
+         if (openParen == str.npos)
          {
-            std::string str1 = str.substr(openParen+1, index2-openParen-1);
-            parts = GmatStringUtil::SeparateByComma(str1);
-
+            throw MathException("Atan2() - Missing or invalid input arguments");
+         }
+         else
+         {
+            // Replace ' (transpose) with $, since SeparateByComma() checks for single quote
+            std::string str1 = GmatStringUtil::Replace(str, "'", "$");
+            #ifdef DEBUG_ATAN2
+            MessageInterface::ShowMessage("   After replacing ' with $, str1=<%s>\n", str1.c_str());
+            #endif
+            
+            std::string atan2Str = str1.substr(openParen);
+            bool parsingFailed = false;
+            #ifdef DEBUG_ATAN2
+            MessageInterface::ShowMessage("   After removing atan2, atan2Str=<%s>\n", atan2Str.c_str());
+            #endif
+            
+            atan2Str = GmatStringUtil::RemoveExtraParen(atan2Str);
+            #ifdef DEBUG_ATAN2
+            MessageInterface::ShowMessage("   After removing extra parenthesis, atan2Str=<%s>\n", atan2Str.c_str());
+            #endif
+            
+            StringArray parts = GmatStringUtil::SeparateByComma(atan2Str);
+            
             #ifdef DEBUG_ATAN2
             for (UnsignedInt i = 0; i < parts.size(); i++)
-               MessageInterface::ShowMessage("..... (2) %d '%s'\n", i, parts[i].c_str());
+               MessageInterface::ShowMessage("..... (1) %d '%s'\n", i, parts[i].c_str());
             #endif
+            
+            // In case all extra parenthesis didn't get removed by GmatStringUtil::RemoveExtraParen()
+            // remove it here
+            if (parts.size() == 1)
+            {
+               parsingFailed = true;
+               std::string str2 = str1.substr(openParen+1, index2-openParen-1);               
+               parts = GmatStringUtil::SeparateByComma(str2);
+               
+               #ifdef DEBUG_ATAN2
+               for (UnsignedInt i = 0; i < parts.size(); i++)
+                  MessageInterface::ShowMessage("..... (2) %d '%s'\n", i, parts[i].c_str());
+               #endif
+            }
             
             if (parts.size() == 2)
             {
@@ -1352,10 +1440,10 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
                if (left != "" && right != "")
                   parsingFailed = false;
             }
+            
+            if (parsingFailed)
+               throw MathException("Atan2() - Missing or invalid input arguments");
          }
-         
-         if (parsingFailed)
-            throw MathException("Atan2() - Missing or invalid input arguments");
       }
       else
       {
@@ -1514,6 +1602,12 @@ std::string MathParser::FindOperatorFrom(const std::string &str, std::string::si
    std::string op;
    std::string str1 = str.substr(start);
    std::string::size_type index = str1.npos;
+   
+   // Replace scientific notation e- E- e+ E+
+   str1 = GmatStringUtil::ReplaceNumber(str1, "e-", "e#");
+   str1 = GmatStringUtil::ReplaceNumber(str1, "e+", "e#");
+   str1 = GmatStringUtil::ReplaceNumber(str1, "E-", "e#");
+   str1 = GmatStringUtil::ReplaceNumber(str1, "E+", "e#");
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage("   str1=<%s>\n", str1.c_str());
@@ -2148,111 +2242,6 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// std::string ReplaceChainedUnaryOperators(const std::string &str)
-//------------------------------------------------------------------------------
-/**
- * Replaces repeated plus (+) or minus (-) signs with one sign.
- * For example "+--+abc-+--def+-+-ghi" will give "+abc-def_ghi".
- */
-//------------------------------------------------------------------------------
-std::string MathParser::ReplaceChainedUnaryOperators(const std::string &str)
-{
-   #ifdef DEBUG_REPLACE_PLUSMINUS
-   MessageInterface::ShowMessage
-      ("MathParser::ReplaceChainedUnaryOperators() entered, str='%s'\n", str.c_str());
-   #endif
-   
-   std::string str1 = str;
-   Integer length = str1.size();
-   std::string signs, nonSigns, finalStr;
-   bool signFound = false, signDone = false;
-   bool nonSignFound = false, nonSignDone = false;
-   
-   for (int i = 0; i < length; i++)
-   {
-      if (str1[i] == '+' || str1[i] == '-')
-      {
-         if (nonSignFound)
-            nonSignDone = true;
-         
-         signFound = true;
-         nonSignFound = false;
-         
-         if (nonSignDone)
-         {
-            #ifdef DEBUG_REPLACE_PLUSMINUS
-            MessageInterface::ShowMessage("   nonSigns = '%s'\n", nonSigns.c_str());
-            #endif
-            finalStr = finalStr + nonSigns;
-            nonSignDone = false;
-            nonSigns = "";
-            signs = str1[i];
-         }
-         else
-         {
-            signs = signs + str1[i];
-         }
-      }
-      else
-      {
-         if (signFound)
-            signDone = true;
-         
-         signFound = false;
-         nonSignFound = true;
-         
-         if (signDone)
-         {
-            #ifdef DEBUG_REPLACE_PLUSMINUS
-            MessageInterface::ShowMessage("   signs = '%s'\n", signs.c_str());
-            #endif
-            Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
-            char finalSign = '-';
-            if ((numMinus % 2) == 0)
-               finalSign = '+';
-            
-            finalStr = finalStr + finalSign;
-            signDone = false;
-            signs = "";
-            nonSigns = str1[i];
-         }
-         else
-         {
-            nonSigns = nonSigns + str1[i];
-         }
-      }
-   }
-   
-   #ifdef DEBUG_REPLACE_PLUSMINUS
-   MessageInterface::ShowMessage("   last signs = '%s'\n", signs.c_str());
-   MessageInterface::ShowMessage("   last nonSigns = '%s'\n", nonSigns.c_str());
-   #endif
-   
-   // Put last part
-   if (signs != "")
-   {
-      Integer numMinus = GmatStringUtil::NumberOfOccurrences(signs, '-');
-      char finalSign = '-';
-      if ((numMinus % 2) == 0)
-         finalSign = '+';
-      
-      finalStr = finalStr + finalSign;
-   }
-   else if (nonSigns != "")
-   {
-      finalStr = finalStr + nonSigns;
-   }
-   
-   #ifdef DEBUG_REPLACE_PLUSMINUS
-   MessageInterface::ShowMessage
-      ("MathParser::ReplaceChainedUnaryOperators() returning '%s'\n", finalStr.c_str());
-   #endif
-   
-   return finalStr;
-}
-
-
-//------------------------------------------------------------------------------
 // UnsignedInt FindSubtract(const std::string &str, std::string::size_type start)
 //------------------------------------------------------------------------------
 std::string::size_type MathParser::FindSubtract(const std::string &str,
@@ -2692,7 +2681,7 @@ StringArray MathParser::ParseUnary(const std::string &str)
    if (index1 != str.npos)
       op = "Negate";
    else
-      op = "None";
+      op = "";
    
    std::string left;
    
@@ -2886,13 +2875,28 @@ bool MathParser::IsMathElement(const std::string &str)
    {
       #ifdef DEBUG_MATH_ELEMENT
       MessageInterface::ShowMessage
-         ("MathParser::IsMathElement(<%s>) returning false, inver operator <%s> found\n",
+         ("MathParser::IsMathElement(<%s>) returning false, invere operator <%s> found\n",
           str.c_str(), inverseOpStr.c_str());
       #endif
       return false;
    }
    else if (GmatStringUtil::IsThereMathSymbol(str))
    {
+      // Check for unary + or - signs
+      if (str.find_first_of("+-") != str.npos)
+      {
+         Real rval;
+         Integer errCode;
+         if (GmatStringUtil::IsValidReal(str, rval, errCode))
+         {
+            #ifdef DEBUG_MATH_ELEMENT
+            MessageInterface::ShowMessage
+               ("MathParser::IsMathElement(<%s>) returning true, it is a number\n", str.c_str());
+            #endif
+            return true;
+         }
+      }
+      
       #ifdef DEBUG_MATH_ELEMENT
       MessageInterface::ShowMessage
          ("MathParser::IsMathElement(<%s>) returning false, math operator found\n", str.c_str());
@@ -2926,7 +2930,8 @@ bool MathParser::IsMathElement(const std::string &str)
             {
                #ifdef DEBUG_MATH_ELEMENT
                MessageInterface::ShowMessage
-                  ("MathParser::IsMathElement(<%s>) returning true, it is an array element\n", str.c_str());
+                  ("MathParser::IsMathElement(<%s>) returning true, it is an array "
+                   "element or Parameter\n", str.c_str());
                #endif
                return true;
             }
