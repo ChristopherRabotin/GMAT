@@ -1581,9 +1581,13 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trim
       if (!isdigit(str2[i]))
          return false;
    }
-
+   
    errno = 0;
-   value = strtol(str2.c_str(), NULL, 0);
+   //long int strtol ( const char * str, char ** endptr, int base );
+   // Changed the value of base To 10 (Fix for GMT-3273, LOJ: 2012.11.13)
+   // With base of 0, it assumes octal if string starts with 0
+   //value = strtol(str2.c_str(), NULL, 0);
+   value = strtol(str2.c_str(), NULL, 10);
    if (errno == ERANGE)
    {
 		if (allowOverflow)
