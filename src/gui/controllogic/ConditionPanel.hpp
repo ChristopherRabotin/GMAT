@@ -61,6 +61,7 @@ private:
    void GetNewValue(Integer row, Integer col);
    
    // Grid table event methods
+   void OnCellDoubleClick(wxGridEvent& event);
    void OnCellLeftClick(wxGridEvent& event);
    void OnCellRightClick(wxGridEvent& event);
    void OnCellValueChange(wxGridEvent& event);

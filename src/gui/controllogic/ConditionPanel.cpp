@@ -38,6 +38,7 @@
 BEGIN_EVENT_TABLE(ConditionPanel, GmatPanel)
     EVT_GRID_CELL_LEFT_CLICK(ConditionPanel::OnCellLeftClick)
     EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
+	EVT_GRID_CELL_LEFT_DCLICK(ConditionPanel::OnCellDoubleClick)
     EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
 END_EVENT_TABLE()
 
@@ -357,6 +358,69 @@ void ConditionPanel::GetNewValue(Integer row, Integer col)
       {
          conditionGrid->SetCellValue(row, col, paramDlg.GetParamName());
          EnableUpdate(true);
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnCellDoubleClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user double-clicks on the cell.
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
+{
+   int row = event.GetRow();
+   int col = event.GetCol();
+      
+   if ( (row == 0) && (col == COMMAND_COL) )
+      return;
+   
+   conditionGrid->SelectBlock(row, col, row, col);
+   conditionGrid->SetGridCursor(row, col);
+   
+   if (col == COMMAND_COL)
+   {
+      wxString oldStr = conditionGrid->GetCellValue(row, col);
+      wxString strArray[] = {wxT("&"), wxT("|")};        
+      
+      wxSingleChoiceDialog dialog(this, _T("Logical Operator Selection:"),
+                                        _T("LogicalOperators"), 2, strArray);
+      dialog.SetSelection(0);
+      
+      if (dialog.ShowModal() == wxID_OK)
+      {
+         if (oldStr != dialog.GetStringSelection())
+         {
+            conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
+            EnableUpdate(true);
+         }
+      }   
+   }   
+   else if ((col == LHS_COL) || (col == RHS_COL))
+   {
+	   event.Skip();
+   }
+   else if (col == COND_COL)
+   {
+      wxString oldStr = conditionGrid->GetCellValue(row, col);
+      wxString strArray[] = {wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
+                             wxT(">="), wxT("<=")};        
+      
+      wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
+                                        _T("RelationalOperators"), 6, strArray);
+      dialog.SetSelection(0);
+      
+      if (dialog.ShowModal() == wxID_OK)
+      {
+         if (oldStr != dialog.GetStringSelection())
+         {
+            conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
+            EnableUpdate(true);
+         }
       }
    }
 }
