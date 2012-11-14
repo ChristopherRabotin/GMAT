@@ -113,10 +113,11 @@ FminconOptimizer::FminconOptimizer(const std::string &name) :
           MessageInterface::ShowMessage(
          "Fmincon construct: now adding option value %s to list\n",
          (DEFAULT_OPTION_VALUES[i]).c_str());
-   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       options.push_back(ALLOWED_OPTIONS[i]);
       optionValues.push_back(DEFAULT_OPTION_VALUES[i]);
    }
+
    // ********* BEGIN temporary prototype, testing, etc. *****************************//
    //functionPath = "/Users/wcshoan/dev/Ec_GMAT/bin/files/matlab_functions";
    //OpenConnection();
@@ -408,6 +409,22 @@ bool FminconOptimizer::Optimize()
       "In Optimize method, the number of option values is %d ....\n",
       (Integer)optionValues.size());
    } // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+
+   // Add in the maxIterations setting
+   std::stringstream maxIter;
+   maxIter << maxIterations;
+   StringArray::iterator maxIterIterator = find(options.begin(), options.end(), "MaxIter");
+   if (maxIterIterator == options.end())
+   {
+      options.push_back("MaxIter");
+      optionValues.push_back(maxIter.str());
+   }
+   else
+   {
+      for (UnsignedInt i = 0; i < options.size(); ++i)
+         if (options.at(i) == "MaxIter")
+            optionValues.at(i) = maxIter.str();
+   }
 
    for (Integer i=0; i < (Integer) options.size(); i++)
    {
