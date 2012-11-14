@@ -27,6 +27,14 @@
 
 class MatlabInterface;
 
+/**
+ * Code that wraps MATLAB's fmincon optimizer for use in GMAT
+ *
+ * This class wraps MATLAB's fmincon optimizer into a GMAT Optimizer that works
+ * with GMAT's Solver subsystem.  The resulting class can be used to instantiate
+ * a Solver that works with the Optimize/EndOptimize, Vary, Minimize, and 
+ * NonlinearConstraint commands.
+ */
 class FMINCON_API FminconOptimizer : public ExternalOptimizer
 {
 public:
@@ -80,16 +88,22 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
+   /// The list of fmincon paramters supported
    StringArray  options;
+   /// The current values for the fmincon parameters
    StringArray  optionValues;
-   
+   /// The return code from fmincon when it completes an optimization
    Integer      fminconExitFlag;
-   
+   /// The interface ised to exchange data with fmincon running in MATLAB
    MatlabInterface *matlabIf;
    
+   /// Table of options supported, excluding options inherited from base classes
    static const std::string    ALLOWED_OPTIONS[6];
+   /// Default values for the supported options
    static const std::string    DEFAULT_OPTION_VALUES[6];
+   /// Option count
    static const Integer        NUM_MATLAB_OPTIONS;
+   /// Option strting index, for use in the parameter access methods
    static const Integer        MATLAB_OPTIONS_OFFSET;
    
    // Methods from Solver
