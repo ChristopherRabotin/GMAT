@@ -573,9 +573,11 @@ std::string Planet::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Planet::IsParameterReadOnly(const Integer id) const
 {
-//   if (id == UPDATE_INTERVAL)
    if (id == NUTATION_UPDATE_INTERVAL)
-      return false;
+   {
+      if (instanceName == SolarSystem::EARTH_NAME) return false;
+      else                                         return true;
+   }
    return CelestialBody::IsParameterReadOnly(id);
 }
 
@@ -614,8 +616,11 @@ Real Planet::SetRealParameter(const Integer id, const Real value)
 {
    if (id == NUTATION_UPDATE_INTERVAL)
    {
-        SetNutationUpdateInterval(value);
-      return true;
+      if (instanceName == SolarSystem::EARTH_NAME)
+      {
+         SetNutationUpdateInterval(value);
+         return true;
+      }
    }
    return CelestialBody::SetRealParameter(id,value);
 }
