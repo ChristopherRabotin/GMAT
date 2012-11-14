@@ -381,6 +381,8 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
 //------------------------------------------------------------------------------
 bool FminconOptimizer::Optimize()
 {
+   bool retval = false;
+
    #ifdef DEBUG_ML_CONNECTIONS
    MessageInterface::ShowMessage("Entering Optimize method ....\n");
    #endif
@@ -490,8 +492,14 @@ bool FminconOptimizer::Optimize()
       throw SolverException("Error determining exitFlag from fmincon");
    fminconExitFlag = (Integer) outArr[0];
 
+   if (fminconExitFlag > 0)
+   {
+      retval = true;
+      converged = true;
+   }
+
    // need to ask for fVal as well?
-   return false;
+   return retval;
 }
 
 
@@ -953,6 +961,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
    if (isInitialized)
    {
       std::stringstream message;
+      message.precision(16);
 
       switch (trigger)
       {
@@ -987,17 +996,25 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                message << "\n*** Equality Constraints:\n***    ";
 
                for (current = eqConstraintNames.begin(), i = 0;
-                    current != eqConstraintNames.end(); ++current)
+                    current != eqConstraintNames.end(); ++current, ++i)
                {
-                  message << *current << "\n***    ";
+                  message << *current
+                  // We'd like to do this, but the data isn't currently passed 
+                  // into the Optimizer
+                  //        << " = " << eqConstraintTargetValues[i] 
+                          << "\n***    ";
                }
 
                message << "\n*** Inequality Constraints:\n***    ";
 
                for (current = ineqConstraintNames.begin(), i = 0;
-                    current != ineqConstraintNames.end(); ++current)
+                    current != ineqConstraintNames.end(); ++current, ++i)
                {
-                  message << *current << "\n***    ";
+                  message << *current 
+                  // We'd like to do this, but the data isn't currently passed 
+                  // into the Optimizer
+                  //        << " = " << ineqConstraintTargetValues[i] 
+                          << "\n***    ";
                }
                message << "\n****************************"
                         << "****************************\n"
@@ -1037,7 +1054,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                message << "In the Calculating state" << std::endl;
             if (ineqConstraintCount > 0)
             {
-               message << "   Inequality Constraint Values: [";
+               message << "   Inequality Constraint Deltas: [";
                for (std::vector<Real>::iterator i = ineqConstraintValues.begin();
                     i != ineqConstraintValues.end(); ++i)
                   message << " " << (*i) << " ";
@@ -1045,7 +1062,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             }
             if (eqConstraintCount > 0)
             {
-               message << "   Equality Constraint Values: [";
+               message << "   Equality Constraint Deltas: [";
 
                for (std::vector<Real>::iterator i = eqConstraintValues.begin();
                     i != eqConstraintValues.end(); ++i)
@@ -1056,14 +1073,82 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             break;
 
          case FINISHED:
-            message << "\n****************************"
-                     << "****************************\n"
-                     << "*** Optimization Completed in " << iterationsTaken
-                     << " iterations"
-                     << "\n****************************"
-                     << "****************************\n"
-                     << std::endl;
+            {
+               std::string completionState;
+               bool convergenceMet = false;
 
+               switch(fminconExitFlag)
+               {
+               case 1:
+                  completionState = "First order optimality conditions were satisfied";
+                  convergenceMet = true;
+                  break;
+
+               case 2:
+                  completionState = "Variables are as close as possible to the optimal point";
+                  convergenceMet = true;
+                  break;
+
+               case 3:
+                  completionState = "Changes in the objective function are smaller than the minimum change for convergence";
+                  convergenceMet = true;
+                  break;
+
+               case 4:
+                  completionState = "The search direction is too small for further optimization";
+                  convergenceMet = true;
+                  break;
+
+               case 5:
+                  completionState = "Changes in the objective function are smaller than the convergence criteria";
+                  convergenceMet = true;
+                  break;
+
+               case 0:
+                  completionState = "Too many function evaluations or iterations attempted.";
+                  break;
+
+               case -1:
+                  completionState = "Optimization halted by the output or plot function";
+                  break;
+
+               case -2:
+                  completionState = "No feasible optimization state was located";
+                  break;
+
+               case -3:
+                  completionState = "The optimization state appears to be unbounded";
+                  break;
+
+               default:
+                  completionState = "An unknown return code was received from fmincon";
+                  break;
+               };
+
+               if (convergenceMet)
+               {
+                  message << "\n****************************"
+                           << "****************************\n"
+                           << "*** Optimization Converged in " << iterationsTaken
+                           << " iterations"
+                           << "\n****************************"
+                           << "****************************\n"
+                           << std::endl
+                           << "Convergence meets the following criterion:\n   "
+                           << completionState << std::endl;
+               }
+               else
+               {
+                  message  << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                           << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                           << "!!! Optimization Failed to Converge"
+                           << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                           << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                           << std::endl
+                           << "Convergence failed because of the following condition:\n   "
+                           << completionState << std::endl;
+               }
+            }
             break;
 
          case RUNEXTERNAL:
@@ -1086,7 +1171,15 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             //   "Solver state not supported for the Fmincon optimizer");
       }
       textFile << message.str();
-      MessageInterface::ShowMessage("%s", message.str().c_str());
+
+      if (showProgress)
+         MessageInterface::ShowMessage("%s", message.str().c_str());
+      else
+      {
+         // Always show the convergence status message
+         if (trigger == FINISHED)
+            MessageInterface::ShowMessage("%s", message.str().c_str());
+      }
    }
 }
 
