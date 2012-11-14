@@ -918,6 +918,16 @@ bool Achieve::Execute()
       Real goalData[2];
       goalData[0] = goal->EvaluateReal();
       goalData[1] = tolerance->EvaluateReal();
+
+      if (goalData[1] <= 0.0)
+      {
+         CommandException ce;
+         ce.SetDetails(errorMessageFormat.c_str(),
+                    tolerance->GetDescription().c_str(), "Tolerance",
+                    "Real Number, Array element, Variable, or Parameter > 0.0");
+         throw ce;
+      }
+
       goalId = targeter->SetSolverResults(goalData, goalName);
       targeterDataFinalized = true;
       
@@ -1050,4 +1060,3 @@ void Achieve::SetTolerance(Real value)
    MessageInterface::ShowMessage("Achieve::SetTolerance() leaving\n");
    #endif
 }
-
