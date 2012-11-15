@@ -32,6 +32,7 @@
 
 //#define DEBUG_OR_AXES
 //#define DEBUG_ROT_MATRIX
+//#define DEBUG_REFERENCE_SETTING
 
 
 #ifdef DEBUG_OR_AXES
@@ -798,7 +799,8 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
-      if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (name == primaryName))
+//      if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (name == primaryName))
+      if (name == primaryName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage("Setting %s as primary for %s\n",
@@ -806,7 +808,8 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          #endif
          primary = (SpacePoint*) obj;
       }
-      if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (name == secondaryName))
+//      if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (name == secondaryName))
+      if (name == secondaryName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage("Setting %s as secondary for %s\n",
