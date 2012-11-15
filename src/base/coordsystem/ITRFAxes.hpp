@@ -58,7 +58,7 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone(void) const;
+   virtual GmatBase*       Clone() const;
    // We need to override this method from CoordinateBase
    // to check for a CelestialBody origin only
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,

@@ -26,7 +26,7 @@
 //#define DEBUG_COORD_PANEL_LOAD 1
 //#define DEBUG_COORD_PANEL_SAVE 1
 //#define DEBUG_COORD_PANEL_TEXT
-//#define DEBUG_COORD_PANEL_XYZ
+#define DEBUG_COORD_PANEL_XYZ
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -221,14 +221,14 @@ void CoordSystemConfigPanel::SaveData()
              originName.c_str());
          #endif
          
-         mOriginChanged = false;
-         theCoordSys->SetStringParameter("Origin", originName);
-         
          // set coordinate system origin
          SpacePoint *origin =
             (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
+         theCoordSys->SetStringParameter("Origin", originName);
          theCoordSys->SetOrigin(origin);
          
+         mOriginChanged = false;
+
          // set Earth as J000Body if NULL
          if (origin->GetJ2000Body() == NULL)
          {
@@ -243,6 +243,7 @@ void CoordSystemConfigPanel::SaveData()
       //-------------------------------------------------------
       if (mObjRefChanged)
       {
+         AxisSystem *oldAxis = (AxisSystem*) theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
          AxisSystem *axis = mCoordPanel->CreateAxis();
          #ifdef DEBUG_COORD_PANEL_XYZ
             MessageInterface::ShowMessage("CoordSystemConfigPanel:: CreateAxis returned %s\n",
@@ -258,9 +259,19 @@ void CoordSystemConfigPanel::SaveData()
             
             if (canClose)
             {
-               // only set these if there was no error creating or initializing the coordinate system
-               theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-               theCoordSys->Initialize();
+               try
+               {
+                  // only set these if there was no error creating or initializing the coordinate system
+                  theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+                  theCoordSys->Initialize();
+               }
+               catch (BaseException &be)
+               {
+                  // reset the CS to have the axis system it started with
+                  theCoordSys->SetRefObject(oldAxis, Gmat::AXIS_SYSTEM, "");
+                  theCoordSys->Initialize();
+                  throw;
+               }
             }
          }
          else

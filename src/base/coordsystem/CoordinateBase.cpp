@@ -682,19 +682,41 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    #ifdef DEBUG_SET_REF
    MessageInterface::ShowMessage
-      ("CoordinateBase::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
-       obj, name.c_str());
+      ("CoordinateBase::SetRefObject() <%s> of type %s, obj=%p, name=%s\n", GetName().c_str(),
+       GetTypeName().c_str(), obj, name.c_str());
+   MessageInterface::ShowMessage("   needs celestial body origin?   %s\n",
+         (RequiresCelestialBodyOrigin()? "true" : "false"));
    #endif
    
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       SpacePoint *sp = (SpacePoint*) obj;
-      
+
       if (name == originName)
+      {
+         // Origin may have to be a celestial body
+         if (RequiresCelestialBodyOrigin() && !(sp->IsOfType("CelestialBody")))
+         {
+            CoordinateSystemException cse;
+            cse.SetDetails(errorMessageFormat.c_str(),
+                           name.c_str(), "Origin", "Celestial Body");
+            throw cse;
+         }
          origin = sp;
+      }
       
+      // J2000Body must be a celestial body
       if (name == j2000BodyName)
-         j2000Body = sp;      
+      {
+         if (!(sp->IsOfType("CelestialBody")))
+         {
+            CoordinateSystemException cse;
+            cse.SetDetails(errorMessageFormat.c_str(),
+                           name.c_str(), "J2000Body", "Celestial Body");
+            throw cse;
+         }
+         j2000Body = sp;
+      }
       
       if (origin != NULL)
          if (name == origin->GetJ2000BodyName())

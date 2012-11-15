@@ -56,6 +56,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
+   virtual bool                           RequiresCelestialBodyOrigin() const;
    virtual bool                           HasCelestialBodyOrigin() const;
 
    // methods to set parameters for the AxisSystems
@@ -191,6 +192,8 @@ protected:
    
    std::string               epochFormat;
    
+   bool                      needsCBOrigin;
+
    Real                      updateInterval;
    Real                      updateIntervalToUse;
    bool                      overrideOriginInterval;

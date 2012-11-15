@@ -72,6 +72,8 @@ DynamicAxes("Equator",itsName)
    objectTypeNames.push_back("EquatorAxes");
    parameterCount = EquatorAxesParamCount;
    theDeFile = NULL;
+
+   needsCBOrigin = true;
 }
 
 //------------------------------------------------------------------------------

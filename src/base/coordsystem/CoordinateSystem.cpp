@@ -46,6 +46,7 @@
 //#define DEBUG_CS_SET_REF
 //#define DEBUG_TRANSLATION
 //#define DEBUG_CS_CREATE
+//#define DEBUG_CS_SET_AXIS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -406,7 +407,25 @@ bool CoordinateSystem::UsesSpacecraft(const std::string &withName) const
 }
 
 //---------------------------------------------------------------------------
-// bool HasCelestialBodyOrigin(const std::string &withName) const
+// bool RequiresCelestialBodyOrigin() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not this coordinate system requires
+ * its origin to be a celestial body.
+ *
+ * @return flag indicating whether or not this coordinate system requires
+ *         a celestial body as the origin
+ */
+//---------------------------------------------------------------------------
+bool CoordinateSystem::RequiresCelestialBodyOrigin() const
+{
+   if (axes) return axes->RequiresCelestialBodyOrigin();
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+// bool HasCelestialBodyOrigin() const
 //---------------------------------------------------------------------------
 /**
  * Returns a flag indicating whether or not this coordinate system has a
@@ -1750,6 +1769,7 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
              "(AxisSystem*) obj->Clone()");
          #endif
          axes->SetName("");
+         axes->SetCoordinateSystemName(instanceName);
          ownedObjectCount = 1;
          
          #ifdef DEBUG_CS_SET_AXIS

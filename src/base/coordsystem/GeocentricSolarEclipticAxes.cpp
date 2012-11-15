@@ -120,6 +120,53 @@ GeocentricSolarEclipticAxes::~GeocentricSolarEclipticAxes()
 {
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool GeocentricSolarEclipticAxes::IsParameterReadOnly(const Integer id) const
+{
+   switch (id)
+   {
+      case PRIMARY_OBJECT_NAME:
+      case SECONDARY_OBJECT_NAME:
+      case X_AXIS:
+      case Y_AXIS:
+      case Z_AXIS:
+         return true;
+         break;
+      default:
+         return ObjectReferencedAxes::IsParameterReadOnly(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesPrimary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesPrimary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesSecondary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesSecondary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
 
 //------------------------------------------------------------------------------
 //  GmatCoordinate::ParameterUsage UsesXAxis() const

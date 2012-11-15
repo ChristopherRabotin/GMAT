@@ -129,6 +129,54 @@ GeocentricSolarMagneticAxes::~GeocentricSolarMagneticAxes()
 {
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool GeocentricSolarMagneticAxes::IsParameterReadOnly(const Integer id) const
+{
+   switch (id)
+   {
+      case PRIMARY_OBJECT_NAME:
+      case SECONDARY_OBJECT_NAME:
+      case X_AXIS:
+      case Y_AXIS:
+      case Z_AXIS:
+         return true;
+         break;
+      default:
+         return ObjectReferencedAxes::IsParameterReadOnly(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesPrimary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesPrimary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesSecondary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesSecondary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
 
 //------------------------------------------------------------------------------
 //  GmatCoordinate::ParameterUsage UsesXAxis() const

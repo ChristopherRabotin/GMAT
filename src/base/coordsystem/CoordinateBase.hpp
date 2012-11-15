@@ -106,6 +106,7 @@ public:
    // initializes the CoordinateBase
    virtual bool Initialize();
    
+   virtual bool                  RequiresCelestialBodyOrigin() const = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -160,6 +161,6 @@ protected:
    std::string     j2000BodyName;
    /// pointer to the solar system
    SolarSystem     *solar;
-   
+
 };
 #endif // CoordinateBase_hpp

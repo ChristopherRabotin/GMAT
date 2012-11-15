@@ -65,10 +65,10 @@ public:
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*       Clone() const;
 
-   // We need to override this method from
-   // to check for a CelestialBody origin only
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                        const std::string &name = "");
+//   // We need to override this method from
+//   // to check for a CelestialBody origin only
+//   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                        const std::string &name = "");
 
 protected:
 

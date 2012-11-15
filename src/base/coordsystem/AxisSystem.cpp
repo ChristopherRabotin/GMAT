@@ -118,6 +118,7 @@ baseSystem       ("FK5"),
 eop              (NULL),
 itrf             (NULL),
 epochFormat      ("A1ModJulian"),
+needsCBOrigin    (false),
 updateInterval   (60.0), 
 updateIntervalToUse    (60.0), 
 overrideOriginInterval (false),
@@ -174,6 +175,7 @@ baseSystem        (axisSys.baseSystem),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf),
 epochFormat       (axisSys.epochFormat),
+needsCBOrigin     (axisSys.needsCBOrigin),
 updateInterval    (axisSys.updateInterval),
 updateIntervalToUse    (axisSys.updateIntervalToUse),
 overrideOriginInterval (axisSys.overrideOriginInterval),
@@ -228,6 +230,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    eop               = axisSys.eop;
    itrf              = axisSys.itrf;
    epochFormat       = axisSys.epochFormat;
+   needsCBOrigin     = axisSys.needsCBOrigin;
    updateInterval    = axisSys.updateInterval;
    updateIntervalToUse    = axisSys.updateIntervalToUse;
    overrideOriginInterval = axisSys.overrideOriginInterval;
@@ -366,7 +369,7 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
 }
 
 //---------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
+//  GmatCoordinate::ParameterUsage UsesSecondary() const
 //---------------------------------------------------------------------------
 /**
  * Returns enum value indicating whether or not this axis system uses a
@@ -481,6 +484,26 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
    }
    return false;
 }
+
+//---------------------------------------------------------------------------
+//  bool RequiresCelestialBodyOrigin() const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not this axis system requires a
+ * celestial body origin
+ *
+ * @return flag indicating whether or not this axis system requires a
+ *         celestial body as origin
+ *
+ * @note   derived classes must set needsCBOrigin to true if they do
+ *         require an origin of type celestial body
+ */
+//---------------------------------------------------------------------------
+bool AxisSystem::RequiresCelestialBodyOrigin() const
+{
+   return needsCBOrigin;
+}
+
 
 //---------------------------------------------------------------------------
 //  bool HasCelestialBodyOrigin() const
@@ -865,7 +888,8 @@ void AxisSystem::GetLastRotationDotMatrix(Real *mat) const
 //---------------------------------------------------------------------------
 void AxisSystem::SetCoordinateSystemName(const std::string &csName)
 {
-   coordName = csName;
+   coordName    = csName;
+   instanceName = csName;
 }
 
 
@@ -1410,7 +1434,7 @@ Real AxisSystem::GetRealParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-//  Real  SetRealParameter(const Integer id, const Real value) 
+//  Real  SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 /**
  * This method sets the real value, given the input parameter ID.
@@ -1424,7 +1448,7 @@ Real AxisSystem::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real AxisSystem::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == EPOCH)
+   if (id == EPOCH && UsesEpoch())
    {
       epoch.Set(value);
       return true;

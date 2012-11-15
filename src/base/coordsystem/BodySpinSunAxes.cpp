@@ -75,13 +75,15 @@ using namespace GmatMathConstants;      // for RAD_PER_ARCSEC, etc.
  */
 //------------------------------------------------------------------------------
 BodySpinSunAxes::BodySpinSunAxes(const std::string &itsName) :
-ObjectReferencedAxes("BodySpinSun",itsName)
+   ObjectReferencedAxes("BodySpinSun",itsName)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("BodySpinSunAxes::BodySpinSunAxes()   default construction.\n");
 #endif
 
-   primaryName   = SolarSystem::SUN_NAME;
+   primaryName    = SolarSystem::SUN_NAME;
+
+   needsCBOrigin  = true;
 
    objectTypeNames.push_back("BodySpinSun");
    parameterCount = BodySpinSunAxesParamCount;
@@ -99,7 +101,7 @@ ObjectReferencedAxes("BodySpinSun",itsName)
  */
 //------------------------------------------------------------------------------
 BodySpinSunAxes::BodySpinSunAxes(const BodySpinSunAxes &bss) :
-ObjectReferencedAxes(bss)
+   ObjectReferencedAxes(bss)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("BodySpinSunAxes::BodySpinSunAxes()   copy construction.\n");
@@ -367,6 +369,3 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
 
 }
-
-
-

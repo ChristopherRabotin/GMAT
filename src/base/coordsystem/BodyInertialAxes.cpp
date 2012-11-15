@@ -68,7 +68,8 @@ InertialAxes("BodyInertial",itsName)
    Real mjdA1       = TimeConverterUtil::Convert(TAIModJul,
                       TimeConverterUtil::TAIMJD, TimeConverterUtil::A1MJD, 
                       GmatTimeConstants::JD_JAN_5_1941); 
-   epoch.Set(mjdA1);     
+   epoch.Set(mjdA1);
+   needsCBOrigin = true;
    
    #ifdef DEBUG_BODY_INERTIAL
       MessageInterface::ShowMessage("BodyInertialAxes created with name %s\n",
@@ -149,6 +150,7 @@ bool BodyInertialAxes::Initialize()
       MessageInterface::ShowMessage("   originName = %s\n", originName.c_str());
    #endif
    // if origin is not a CelestialBody, there is an error
+   // this should be caught at the CoordinateBase level
    if (!(origin->IsOfType("CelestialBody")))
       throw CoordinateSystemException(
             "Improper origin set for BodyInertialAxes object.");
@@ -191,19 +193,6 @@ bool BodyInertialAxes::Initialize()
    #endif
    // rotDotMatrix remains the zero matrix
    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatCoordinate::ParameterUsage UsesEpoch() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//---------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage BodyInertialAxes::UsesEpoch() const
-{
-   return GmatCoordinate::NOT_USED;
 }
 
 

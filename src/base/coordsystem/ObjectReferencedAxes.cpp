@@ -637,27 +637,27 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
        id, value.c_str());
    #endif
    bool OK = false;
-   if (id == X_AXIS)
+   if ((UsesXAxis() != GmatCoordinate::NOT_USED) && (id == X_AXIS))
    {
       xAxis = value;
       OK = true;
    }
-   if (id == Y_AXIS)
+   if ((UsesYAxis() != GmatCoordinate::NOT_USED) && (id == Y_AXIS))
    {
       yAxis = value;
       OK = true;
    }
-   if (id == Z_AXIS)
+   if ((UsesZAxis() != GmatCoordinate::NOT_USED) && (id == Z_AXIS))
    {
       zAxis = value;
       OK = true;
    }
-   if (id == PRIMARY_OBJECT_NAME)
+   if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (id == PRIMARY_OBJECT_NAME))
    {
       primaryName = value;
       OK = true;
    }
-   if (id == SECONDARY_OBJECT_NAME)
+   if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (id == SECONDARY_OBJECT_NAME))
    {
       secondaryName = value;
       OK = true;
@@ -798,7 +798,7 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
-      if (name == primaryName)
+      if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (name == primaryName))
       {
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage("Setting %s as primary for %s\n",
@@ -806,7 +806,7 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          #endif
          primary = (SpacePoint*) obj;
       }
-      if (name == secondaryName)
+      if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (name == secondaryName))
       {
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage("Setting %s as secondary for %s\n",

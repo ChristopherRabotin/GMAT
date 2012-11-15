@@ -169,6 +169,8 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       secondaryStaticText->Enable(mShowSecondaryBody);
       secondaryComboBox->Enable(mShowSecondaryBody);
       epochStaticText->Enable(mShowEpoch);
+      if (!mShowEpoch)
+         epochTextCtrl->SetValue("");
       epochTextCtrl->Enable(mShowEpoch);
       xStaticText->Enable(mShowXyz);
       xComboBox->Enable(mShowXyz);
@@ -183,6 +185,16 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
          primaryComboBox->SetStringSelection("Earth");
          secondaryComboBox->SetStringSelection("Sun");
          
+         primaryStaticText->Enable(false);
+         primaryComboBox->Enable(false);
+         secondaryStaticText->Enable(false);
+         secondaryComboBox->Enable(false);
+      }
+      if (typeStr == "BodySpinSun")
+      {
+         primaryComboBox->SetStringSelection("Sun");
+         secondaryComboBox->SetStringSelection(originComboBox->GetValue());
+
          primaryStaticText->Enable(false);
          primaryComboBox->Enable(false);
          secondaryStaticText->Enable(false);
@@ -850,12 +862,11 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       //-------------------------------------------------------
       // set origin and Axis
       //-------------------------------------------------------
-      wxString originName = originComboBox->GetValue().Trim();
-      coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
 
+      wxString originName = originComboBox->GetValue().Trim();
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
-
+      coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
       coordSys->SetOrigin(origin);
       
       CelestialBody *j2000body =

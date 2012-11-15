@@ -84,6 +84,8 @@ BodyFixedAxes::BodyFixedAxes(const std::string &itsName) :
 {
    objectTypeNames.push_back("BodyFixedAxes");
    parameterCount = BodyFixedAxesParamCount;
+
+   needsCBOrigin = true;
 }
 
 
@@ -233,47 +235,47 @@ GmatBase* BodyFixedAxes::Clone() const
    return (new BodyFixedAxes(*this));
 }
 
-//------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                    const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * This method sets a reference object for the BodyFixedAxes class.  This is
- * overridden from the CoordinateBase version, in order to make sure the origin
- * is a CelestialBody.
- *
- * @param obj   pointer to the reference object
- * @param type  type of the reference object
- * @param name  name of the reference object
- *
- * @return true if successful; otherwise, false.
- *
- */
-//------------------------------------------------------------------------------
-bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                 const std::string &name)
-{
-   if (obj == NULL)
-      return false;
-
-   #ifdef DEBUG_SET_REF
-   MessageInterface::ShowMessage
-      ("BodyFixedAxes::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
-       obj, name.c_str());
-   #endif
-   if (name == originName)
-   {
-      if (!obj->IsOfType("CelestialBody"))
-      {
-         CoordinateSystemException cse("");
-         cse.SetDetails(errorMessageFormatUnnamed.c_str(),
-                        (obj->GetName()).c_str(),
-                       "Origin", "Celestial Body");
-         throw cse;
-      }
-   }
-   return DynamicAxes::SetRefObject(obj, type, name);
-}
+////------------------------------------------------------------------------------
+////  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+////                    const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * This method sets a reference object for the BodyFixedAxes class.  This is
+// * overridden from the CoordinateBase version, in order to make sure the origin
+// * is a CelestialBody.
+// *
+// * @param obj   pointer to the reference object
+// * @param type  type of the reference object
+// * @param name  name of the reference object
+// *
+// * @return true if successful; otherwise, false.
+// *
+// */
+////------------------------------------------------------------------------------
+//bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                 const std::string &name)
+//{
+//   if (obj == NULL)
+//      return false;
+//
+//   #ifdef DEBUG_SET_REF
+//   MessageInterface::ShowMessage
+//      ("BodyFixedAxes::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
+//       obj, name.c_str());
+//   #endif
+//   if (name == originName)
+//   {
+//      if (!obj->IsOfType("CelestialBody"))
+//      {
+//         CoordinateSystemException cse("");
+//         cse.SetDetails(errorMessageFormatUnnamed.c_str(),
+//                        (obj->GetName()).c_str(),
+//                       "Origin", "Celestial Body");
+//         throw cse;
+//      }
+//   }
+//   return DynamicAxes::SetRefObject(obj, type, name);
+//}
 
 //------------------------------------------------------------------------------
 // protected methods

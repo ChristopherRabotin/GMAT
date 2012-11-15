@@ -152,19 +152,6 @@ bool ICRFAxes::Initialize()
    return true;
 }
 
-//----------------------------------------------------------------------------------
-// GmatCoordinate::ParameterUsage UsesEpoch() const
-//----------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//---------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage ICRFAxes::UsesEpoch() const
-{
-   return GmatCoordinate::REQUIRED;
-}
-
-
 //-----------------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
 //-----------------------------------------------------------------------------------

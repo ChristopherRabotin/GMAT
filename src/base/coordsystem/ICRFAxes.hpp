@@ -45,7 +45,6 @@ public:
    // method to initialize the data
    virtual bool Initialize();
 
-   virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
    virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
 
