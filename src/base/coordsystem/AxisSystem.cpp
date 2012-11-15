@@ -1448,7 +1448,7 @@ Real AxisSystem::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real AxisSystem::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == EPOCH && UsesEpoch())
+   if (id == EPOCH && (UsesEpoch() != GmatCoordinate::NOT_USED))
    {
       epoch.Set(value);
       return true;
