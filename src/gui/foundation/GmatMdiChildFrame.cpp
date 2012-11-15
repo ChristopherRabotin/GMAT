@@ -453,6 +453,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
        mDirty, mOverrideDirty);
    #endif
    
+   SetFocus();
    mCanClose = true;
    
    // We don't want to show duplicate save message, so check for override dirty flag
