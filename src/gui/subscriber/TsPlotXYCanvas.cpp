@@ -270,7 +270,7 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
       const std::vector<int> *ccs;
       const std::vector<int> *mcs;
       const std::vector<int> *highlights;
-      
+
       for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
            curve != data.end(); ++curve)
       {
@@ -279,6 +279,14 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
          mcs =  (*curve)->GetMarkerChangeLocations();
          highlights = (*curve)->GetHighlightPoints();
 
+         #ifdef DEBUG_MARK_POINT
+            MessageInterface::ShowMessage("HighlightCount = %d: [", 
+               highlights->size());
+            for (unsigned int i = 0; i < highlights->size(); ++i)
+               MessageInterface::ShowMessage(" %d ", highlights->at(i));
+            MessageInterface::ShowMessage("]; curve has %d points\n", 
+               (*curve)->abscissa.size());
+         #endif
          locCount = (int)pups->size();
          if (locCount > 0)
          {
@@ -415,8 +423,12 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
                   }
                   else if (find(highlights->begin(), highlights->end(), j) !=
                         highlights->end())
-                     DrawMarker(dc, highlightMarker, markerSize, x0, y0,
-                           plotPens[n]);
+                     if (j > 0) 
+                        DrawMarker(dc, highlightMarker, markerSize, x1, y1,
+                              plotPens[n]);
+                     else
+                        DrawMarker(dc, highlightMarker, markerSize, x0, y0,
+                              plotPens[n]);
                }
                else
                {
@@ -438,6 +450,10 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
 
                DrawMarker(dc, markerStyle, markerSize, x1, y1, plotPens[n]);
             }
+            else if (find(highlights->begin(), highlights->end(), j) !=
+                  highlights->end())
+               DrawMarker(dc, highlightMarker, markerSize, x1, y1,
+                     plotPens[n]);
 
             (*curve)->lastPointPlotted = j-1;
          }

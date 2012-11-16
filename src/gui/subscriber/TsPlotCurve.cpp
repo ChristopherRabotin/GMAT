@@ -505,7 +505,7 @@ int TsPlotCurve::GetStyle()
 void TsPlotCurve::HighlightPoint(int index)
 {
    if (index == -1)
-      index = abscissa.size();
+      index = (abscissa.size() == 0 ? 0 : abscissa.size()-1);
    highlightIndex.push_back(index);
 }
 
