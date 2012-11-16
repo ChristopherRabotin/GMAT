@@ -1086,7 +1086,8 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                   message << " " << (*i) << " ";
                message << "]" << std::endl;
             }
-            message << "   Objective function value:  " << cost << std::endl;
+            if (objectiveDefined)
+               message << "   Objective function value:  " << cost << std::endl;
             break;
 
          case FINISHED:
