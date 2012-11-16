@@ -130,7 +130,9 @@ Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
 {
    #ifdef DEBUG_OPW
    MessageInterface::ShowMessage
-      ("ObjectPropertyWrapper::GetDataType() entered, propID = %d\n", propID);
+      ("ObjectPropertyWrapper::GetDataType() entered, object=<%p><%s>'%s', propName = '%s', "
+       "propID = %d\n", object, object ? object->GetTypeName().c_str() : "NULL",
+       object ? object->GetName().c_str() : "NULL", propIDNames[0].c_str(), propID);
    #endif
    
    if (object == NULL)
@@ -139,11 +141,6 @@ Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
           "so cannot get data type");
    
    Gmat::ParameterType propType = object->GetParameterType(propID);
-   
-   #ifdef DEBUG_OPW
-   MessageInterface::ShowMessage
-      ("ObjectPropertyWrapper::GetDataType() returning %d\n", propType);
-   #endif
    
    #ifdef DEBUG_OPW
    MessageInterface::ShowMessage
@@ -265,13 +262,27 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
       try
       {
          propID = object->GetParameterID(propIDNames[0]);
+         #ifdef DEBUG_OPW
+         MessageInterface::ShowMessage
+            ("   For parameter '%s', propID = %d\n", propIDNames[0].c_str(), propID);
+         #endif
       }
       catch (GmatBaseException ex)
       {
+         #ifdef DEBUG_OPW
+         MessageInterface::ShowMessage
+            ("   For parameter '%s', propID not found, so trying owined object\n", propIDNames[0].c_str());
+         #endif
          // Handle the Propagator inside a PropSetup
          if (obj->IsOfType(Gmat::PROP_SETUP))
          {
             object = (GmatBase*)(((PropSetup *)obj)->GetPropagator());
+            propID = object->GetParameterID(propIDNames[0]);
+         }
+         // Handle the AxisSystem inside CoordinateSystem (LOJ: 2012.11.16)
+         else if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+         {
+            object = obj->GetRefObject(Gmat::AXIS_SYSTEM, "");
             propID = object->GetParameterID(propIDNames[0]);
          }
          else
