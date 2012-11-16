@@ -3079,10 +3079,14 @@ bool GmatStringUtil::AreAllBracketsBalanced(const std::string &str,
          }
       }
    }
-
+   
    if (openCounter != 0)
       retval = false;
-
+   
+   #ifdef DEBUG_BALANCED_BRACKETS
+   MessageInterface::ShowMessage("AreAllBracketsBalanced() returning %d\n", retval);
+   #endif
+   
    return retval;
 }
 

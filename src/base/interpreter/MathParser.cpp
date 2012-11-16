@@ -35,11 +35,13 @@
 #endif
 
 //#define DEBUG_PARSE 1
+//#define DEBUG_PARSE_NODE 1
 //#define DEBUG_PARSE_EQUATION 1
 //#define DEBUG_MATH_EQ 1
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
+//#define DEBUG_FIND_LOWEST_OPERATOR 1
 //#define DEBUG_FIND_OPERATOR 1
 //#define DEBUG_ADD_SUBTRACT 1
 //#define DEBUG_MULT_DIVIDE 1
@@ -284,7 +286,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       str1 = GmatStringUtil::Replace(str1, "^(-1)", inverseOpStr);
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
-         ("   after replacing ^(-1) with %s, str1=<%s>\n", inverseOpStr.c_str(), str1.c_str());
+         ("   After replacing ^(-1) with %s, str1=<%s>\n", inverseOpStr.c_str(), str1.c_str());
       #endif
       // Remove blanks before checking for function name
       str1 = GmatStringUtil::RemoveAllBlanks(str1);
@@ -293,7 +295,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
-         ("   after blank removal str1=<%s>\n", str1.c_str());
+         ("   After blank removal str1=<%s>\n", str1.c_str());
       #endif
       
       // build GmatFunction list first
@@ -362,7 +364,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
 std::string MathParser::FindLowestOperator(const std::string &str,
                                            Integer &opIndex, Integer start)
 {
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("============================== FindLowestOperator() entered, str=%s, start=%u, length=%u\n", str.c_str(),
        start, str.size());
@@ -380,14 +382,14 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    std::string substr;
    IntegerMap::iterator pos;
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage("   firstOpen=%u\n", firstOpen);
    #endif
    
    if (firstOpen == (Integer)str.npos)
       firstOpen = -1;   
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("FindLowestOperator() Find operator before first open parenthesis from <%s>\n"
        "   firstOpen=%d\n", str.c_str(), firstOpen);
@@ -404,7 +406,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
          opIndexMap[opStr] = index;
    }
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("FindLowestOperator() Find lowest operator before the last close "
        "parenthesis from <%s>\n", str.c_str());
@@ -420,7 +422,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
       std::string::size_type start2 = str.find('(', close1);
       if (start2 == str.npos)
       {
-         #if DEBUG_FIND_OPERATOR
+         #if DEBUG_FIND_LOWEST_OPERATOR > 1
          MessageInterface::ShowMessage
             ("   ===> There is no ( found after %d, so exiting while loop\n", close1);
          #endif
@@ -428,13 +430,13 @@ std::string MathParser::FindLowestOperator(const std::string &str,
       }
       
       start1 = (Integer)start2;
-      #if DEBUG_FIND_OPERATOR
+      #if DEBUG_FIND_LOWEST_OPERATOR > 1
       MessageInterface::ShowMessage("   found next open parenthesis at %u\n", start1);
       #endif
       
       substr = str.substr(close1+1, start1-close1-1);
       
-      #if DEBUG_FIND_OPERATOR
+      #if DEBUG_FIND_LOWEST_OPERATOR > 1
       MessageInterface::ShowMessage
          ("   substr=%s from %u and length of %u\n", substr.c_str(), close1+1, start1-close1-1);
       #endif
@@ -453,7 +455,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    if (close1 != length-1)
    {
       substr = str.substr(close1+1);
-      #if DEBUG_FIND_OPERATOR
+      #if DEBUG_FIND_LOWEST_OPERATOR
       MessageInterface::ShowMessage
          ("FindLowestOperator() Find lowest operator after the last close parenthesis, "
           "substr=%s\n", substr.c_str());
@@ -465,7 +467,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
          opIndexMap[opStr] = close1 + index + 1;
    }
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage("   There are %d operators\n", opIndexMap.size());
    for (pos = opIndexMap.begin(); pos != opIndexMap.end(); ++pos)
       MessageInterface::ShowMessage
@@ -485,7 +487,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    pos1 = opIndexMap.find("+");
    pos2 = opIndexMap.find("-");
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("   +op index=%d, -op index=%d\n",
        pos1 == opIndexMap.end() ? -1 : pos1->second,
@@ -499,7 +501,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
       if (pos2 != opIndexMap.end())
          index2 = pos2->second;
       
-      #if DEBUG_FIND_OPERATOR
+      #if DEBUG_FIND_LOWEST_OPERATOR
       MessageInterface::ShowMessage("   index1=%d, index2=%d\n", index1, index2);
       #endif
       
@@ -518,7 +520,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
          opFound = true;
    }
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("   unaryMinusFound=%d, opFound=%d\n", unaryMinusFound, opFound);
    #endif
@@ -552,7 +554,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    
    opIndex = index;
    
-   #if DEBUG_FIND_OPERATOR
+   #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
       ("============================== FindLowestOperator() returning opStr=%s, opIndex=%d\n\n",
        opStr.c_str(), opIndex);
@@ -724,22 +726,22 @@ StringArray MathParser::GetGmatFunctionNames()
 //------------------------------------------------------------------------------
 MathNode* MathParser::ParseNode(const std::string &str)
 {
-   #if DEBUG_CREATE_NODE
+   #if DEBUG_PARSE_NODE
    MessageInterface::ShowMessage("\nMathParser::ParseNode() entered, str='%s'\n", str.c_str());
    #endif
    
    MathNode *mathNode = NULL;
-
+   
    // Check for math element first
    if (IsMathElement(str))
    {
       std::string str1 = GmatStringUtil::RemoveExtraParen(str);
-      #if DEBUG_PARSE
+      #if DEBUG_PARSE_NODE
       MessageInterface::ShowMessage
          ("   After removing extra parenthesis, str=<%s>\n", str1.c_str());
       #endif
       mathNode = CreateNode("MathElement", str1);
-      #if DEBUG_PARSE
+      #if DEBUG_PARSE_NODE
       MessageInterface::ShowMessage
          ("MathParser::Parse() <%s> is a math element, so returning "
           "MathElement node <%p>\n", str1.c_str(), mathNode);
@@ -747,7 +749,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       return mathNode;
    }
    
-   #if DEBUG_CREATE_NODE
+   #if DEBUG_PARSE_NODE
    MessageInterface::ShowMessage("Calling Decompose(<%s>)\n", str.c_str());
    #endif
    
@@ -756,14 +758,14 @@ MathNode* MathParser::ParseNode(const std::string &str)
    std::string left = items[1];
    std::string right = items[2];
    
-   #if DEBUG_CREATE_NODE
+   #if DEBUG_PARSE_NODE
    WriteItems("MathParser::ParseNode() After Decompose()", items);
    #endif
    
    // If operator is empty, create MathElement, create MathFunction otherwise
    if (op == "")
    {
-      #if DEBUG_CREATE_NODE
+      #if DEBUG_PARSE_NODE
       MessageInterface::ShowMessage
          ("=====> Should create MathElement: '%s'\n", left.c_str());
       #endif
@@ -778,7 +780,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
          // does not remove it.
          if (GmatStringUtil::IsParenEmpty(str1))
          {
-            #if DEBUG_CREATE_NODE
+            #if DEBUG_PARSE_NODE
             MessageInterface::ShowMessage
                ("   <%s> has empty parenthesis, so setting str1 to blank\n", str1.c_str());
             #endif
@@ -786,25 +788,38 @@ MathNode* MathParser::ParseNode(const std::string &str)
          }
       }
       
-      #if DEBUG_CREATE_NODE
+      #if DEBUG_PARSE_NODE
       MessageInterface::ShowMessage
          ("       Creating MathElement with '%s'\n", str1.c_str());
       #endif
       
       if (str1 == "")
-      {  
-         #if DEBUG_CREATE_NODE
-         MessageInterface::ShowMessage
-            ("MathParser::ParseNode(<%s>) throwing Missing input arguments\n", str.c_str());
-         #endif
-         throw MathException("Missing input arguments");
+      {
+         // Check if it contains math
+         if (GmatStringUtil::IsMathEquation(str))
+         {
+            #if DEBUG_PARSE_NODE
+            MessageInterface::ShowMessage
+               ("MathParser::ParseNode(<%s>) throwing math is not allowed in array element referencing\n",
+                str.c_str());
+            #endif
+            throw MathException("Math is not allowed in array element referencing");
+         }
+         else
+         {
+            #if DEBUG_PARSE_NODE
+            MessageInterface::ShowMessage
+               ("MathParser::ParseNode(<%s>) throwing Missing input arguments\n", str.c_str());
+            #endif
+            throw MathException("Missing input arguments");
+         }
       }
       
       mathNode = CreateNode("MathElement", str1);
    }
    else
    {
-      #if DEBUG_CREATE_NODE
+      #if DEBUG_PARSE_NODE
       MessageInterface::ShowMessage
          ("=====> Should create MathNode: %s\n", op.c_str());
       #endif
@@ -829,7 +844,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       }
       else
       {
-         #if DEBUG_CREATE_NODE
+         #if DEBUG_PARSE_NODE
          MessageInterface::ShowMessage
             ("   left='%s', right='%s'\n", left.c_str(), right.c_str());
          #endif
@@ -842,7 +857,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
          }
          else
          {
-            #if DEBUG_CREATE_NODE
+            #if DEBUG_PARSE_NODE
             MessageInterface::ShowMessage
                ("===============> Parse left node: '%s'\n", left.c_str());
             #endif
@@ -862,7 +877,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
          }
          else
          {
-            #if DEBUG_CREATE_NODE
+            #if DEBUG_PARSE_NODE
             MessageInterface::ShowMessage
                ("===============> Parse right node: '%s'\n", right.c_str());
             #endif
@@ -873,7 +888,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       }
    }
    
-   #if DEBUG_CREATE_NODE
+   #if DEBUG_PARSE_NODE
    MessageInterface::ShowMessage
       ("MathParser::ParseNode() returning <%p><%s>\n",
        mathNode, mathNode->GetTypeName().c_str());
@@ -1082,9 +1097,14 @@ StringArray MathParser::Decompose(const std::string &str)
       return items;
    }
    
+   #if DEBUG_DECOMPOSE
+   MessageInterface::ShowMessage
+      ("MathParser::Decompose() It is not a math element, so calling ParseParenthesis()\n");
+   #endif
+   
    items = ParseParenthesis(str1);
    
-   #if DEBUG_DECOMPOSE
+   #if DEBUG_DECOMPOSE > 1
    WriteItems("MathParser::Decompose() after ParseParenthesis() ", items);
    #endif
    
@@ -1107,7 +1127,7 @@ StringArray MathParser::Decompose(const std::string &str)
          return items;
       }
       
-      #if DEBUG_DECOMPOSE
+      #if DEBUG_DECOMPOSE > 1
       MessageInterface::ShowMessage
          ("MathParser::Decompose() items[0] is blank and items[1] is <%s>, so calling Decompose(<%s>)\n",
           items[1].c_str(), items[1].c_str());
@@ -1115,7 +1135,7 @@ StringArray MathParser::Decompose(const std::string &str)
       
       items = Decompose(items[1]);
       
-      #if DEBUG_DECOMPOSE
+      #if DEBUG_DECOMPOSE > 1
       WriteItems("MathParser::Decompose() after Decompose() ", items);
       #endif
       
@@ -1131,7 +1151,7 @@ StringArray MathParser::Decompose(const std::string &str)
    if (GmatStringUtil::IsOuterParen(str1))
        str1 = GmatStringUtil::RemoveExtraParen(str1);
    
-   #if DEBUG_DECOMPOSE
+   #if DEBUG_DECOMPOSE > 1
    MessageInterface::ShowMessage
       ("MathParser::Decompose() 2 after removing extra paren, str1=%s\n", str1.c_str());
    #endif
@@ -1242,12 +1262,15 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    //-----------------------------------------------------------------
    // if lowest operator is + or - and not negate, just return
    //-----------------------------------------------------------------
-   Integer index;
-   std::string opStr1 = FindLowestOperator(str, index);
+   Integer index1;
+   #if DEBUG_PARENTHESIS
+   MessageInterface::ShowMessage("   Calling FindLowestOperator() str=<%s>\n", str.c_str());
+   #endif
+   std::string opStr1 = FindLowestOperator(str, index1);
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage("   lowest operator found <%s>\n", opStr1.c_str());
    #endif
-   if ((opStr1 == "+" || opStr1 == "-") && index != 0)
+   if ((opStr1 == "+" || opStr1 == "-") && index1 != 0)
    {
       FillItems(items, op, left, right);
       
@@ -1267,8 +1290,8 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       bool opFound1;      
       op = GetOperatorName(opStr1, opFound1);
       
-      left = str.substr(0, index);
-      right = str.substr(index+1, str.npos);
+      left = str.substr(0, index1);
+      right = str.substr(index1+1, str.npos);
       FillItems(items, op, left, right);
       
       #if DEBUG_PARENTHESIS
@@ -1287,8 +1310,8 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       bool opFound1;      
       op = GetOperatorName(opStr1, opFound1);
       
-      left = str.substr(0, index);
-      right = str.substr(index+1, str.npos);
+      left = str.substr(0, index1);
+      right = str.substr(index1+1, str.npos);
       FillItems(items, op, left, right);
       
       #if DEBUG_PARENTHESIS
@@ -1307,8 +1330,8 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       bool opFound1;      
       op = GetOperatorName(opStr1, opFound1);
       
-      left = str.substr(0, index);
-      right = str.substr(index+1, str.npos);
+      left = str.substr(0, index1);
+      right = str.substr(index1+1, str.npos);
       FillItems(items, op, left, right);
       
       #if DEBUG_PARENTHESIS
@@ -1324,7 +1347,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    //-----------------------------------------------------------------
    std::string strBeforeParen = str.substr(0, openParen);
    
-   #if DEBUG_PARENTHESIS
+   #if DEBUG_PARENTHESIS > 1
    MessageInterface::ShowMessage
       ("   ParseParenthesis() strBeforeParen=%s\n", strBeforeParen.c_str());
    #endif
@@ -1334,7 +1357,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       // find matching closing parenthesis
       UnsignedInt index2 = FindMatchingParen(str, openParen);
       
-      #if DEBUG_PARENTHESIS
+      #if DEBUG_PARENTHESIS > 1
       MessageInterface::ShowMessage
          ("   ParseParenthesis() Parenthesis is part of function. str=%s, size=%u, "
           "openParen=%u, index2=%u\n", str.c_str(), str.size(), openParen, index2);
@@ -1343,7 +1366,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       // if last char is ')'
       if (index2 == str.size()-1)
       {
-         #if DEBUG_PARENTHESIS
+         #if DEBUG_PARENTHESIS > 1
          MessageInterface::ShowMessage
             ("   ParseParenthesis() last char is ) so find function name\n");
          #endif
@@ -1357,7 +1380,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
             op = GetFunctionName(UNIT_CONVERSION, str, left);
       }
       
-      #if DEBUG_PARENTHESIS
+      #if DEBUG_PARENTHESIS > 1
       MessageInterface::ShowMessage("   ParseParenthesis() op='%s'\n", op.c_str());
       #endif
       
@@ -1459,7 +1482,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       
       return items;
    }
-      
+   
    //-----------------------------------------------------------------
    // if enclosed with parenthesis
    //-----------------------------------------------------------------
@@ -1476,21 +1499,28 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       return items;
    }
    
-   
+   // Why is FindLowestOperator() called again here?
+   // Exclude it (LOJ: 2012.11.15)
+   #if 0
    Integer index2;
    //-----------------------------------------------------------------
    // find the lowest operator
    //-----------------------------------------------------------------
-   std::string opStr = FindLowestOperator(str, index2);
-   if (opStr != "")
+   #if DEBUG_PARENTHESIS
+   MessageInterface::ShowMessage("   Calling FindLowestOperator() str=<%s>\n", str.c_str());
+   #endif
+   std::string opStr2 = FindLowestOperator(str, index2);
+   #endif
+   
+   if (opStr1 != "")
    {
       bool opFound;      
-      op = GetOperatorName(opStr, opFound);
+      op = GetOperatorName(opStr1, opFound);
       
       if (opFound)
       {
-         left = str.substr(0, index2);
-         right = str.substr(index2+1, str.npos);
+         left = str.substr(0, index1);
+         right = str.substr(index1+1, str.npos);
          
          if (op == "Subtract" && left == "")
          {
@@ -1514,24 +1544,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       MessageInterface::ShowMessage
          ("   ParseParenthesis() No operator found\n");
       #endif
-      
-      //--------------------------------------------------------------
-      // to be continued - will continue later (loj: 2008.09.03)
-      //--------------------------------------------------------------
-//       // Check if name before first parenthesis is GmatFunction
-//       if (IsGmatFunction(strBeforeParen))
-//       {
-//          FillItems(items, strBeforeParen, str.substr(openParen+1), "");
-         
-//          #if DEBUG_PARENTHESIS
-//          WriteItems("MathParser::ParseParenthesis() found lowest operator "
-//                     "returning ", items);
-//          #endif
-//          return items;
-//       }
-      //--------------------------------------------------------------
    }
-   
    
    FillItems(items, op, left, right);
    
@@ -2863,6 +2876,10 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
 //------------------------------------------------------------------------------
 bool MathParser::IsMathElement(const std::string &str)
 {
+   #ifdef DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathParser::IsMathElement() entered, str=<%s>\n", str.c_str());
+   #endif
    if (str.find('\'') != str.npos) // ' for transpose
    {
       // If input is enclosed with single quote the it is a String so return true

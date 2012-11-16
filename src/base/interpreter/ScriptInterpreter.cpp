@@ -876,7 +876,13 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    
    // Ignore lines with just a semicolon
    if (emptyChunks == count)
+   {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("ScriptInterpreter::Parse() returning true, empty logical block\n");
+      #endif
       return true;
+   }
    
    // actual script line
    std::string actualScript = sarray[count-1];
@@ -922,6 +928,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
    }
    
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage("   => Now start decopose by block type\n");
+   #endif
    // Decompose by block type
    StringArray chunks;
    try
@@ -930,9 +939,13 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    }
    catch (BaseException &e)
    {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage("   **** Caught the exception <%s>\n", e.GetFullMessage().c_str());
+      #endif
+      
       // Use exception to remove Visual C++ warning
       e.GetMessageType();
-
+      
       // if in function mode, throw better message 
       if (inFunctionMode && currentFunction != NULL)
       {
@@ -945,6 +958,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
       else
       {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   **** Rethrowing the exception\n");
+         #endif
          throw;
       }
    }
@@ -953,8 +969,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    GmatBase *obj = NULL;
    
    #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage("   There are %d chunks in the logical block\n", count);
    for (int i=0; i<count; i++)
-      MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
+      MessageInterface::ShowMessage("      chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
    
    // Now go through each block type
@@ -1058,6 +1075,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
    case Gmat::ASSIGNMENT_BLOCK:
       {
+         #ifdef DEBUG_PARSE_FOOTER
+         MessageInterface::ShowMessage("   Now parsing assignment block\n");
+         #endif
          retval = ParseAssignmentBlock(chunks, inCmd, obj);
          logicalBlockCount++;
          break;
@@ -1750,7 +1770,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
          // Check for numeric in lhs such as 3 = x and invalid name such as $abc = *y
          #ifdef DEBUG_PARSE_ASSIGNMENT
          MessageInterface::ShowMessage
-            ("   checking if lhs is a number or invalid name found with no <.(,)'> lhs='%s'\n", lhs.c_str());
+            ("   Checking if lhs is a number or invalid name found with no <.(,)'> lhs='%s'\n", lhs.c_str());
          #endif
          if (GmatStringUtil::IsNumber(lhs) ||
              (lhs.find_first_of(".(,)'") == lhs.npos && !GmatStringUtil::IsValidName(lhs)))
@@ -1766,6 +1786,9 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    }
    
    
+   #ifdef DEBUG_PARSE_ASSIGNMENT
+   MessageInterface::ShowMessage("   Checking for GmatGlobal setting\n");
+   #endif
    // Check for GmatGlobal setting
    if (lhs.find("GmatGlobal.") != std::string::npos)
    {
@@ -1792,7 +1815,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    Gmat::ParameterType paramType;
    
    #ifdef DEBUG_PARSE_ASSIGNMENT
-   MessageInterface::ShowMessage("   before check, inCommandMode=%d\n", inCommandMode);
+   MessageInterface::ShowMessage
+      ("   Before checking for math, inCommandMode=%d\n", inCommandMode);
    #endif
    
    if (!inCommandMode)
@@ -1859,7 +1883,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    
    #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage
-      ("    after check, inCommandMode=%d, inFunctionMode=%d\n", inCommandMode, inFunctionMode);
+      ("    After checking for math, inCommandMode=%d, inFunctionMode=%d\n",
+       inCommandMode, inFunctionMode);
    #endif
    
    bool createAssignment = true;
@@ -1906,13 +1931,24 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
          createAssignment = false;
    }
    
+   #ifdef DEBUG_PARSE_ASSIGNMENT
+   MessageInterface::ShowMessage("   createAssignment=%d\n", createAssignment);
+   #endif
    
    if (createAssignment)
+   {
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage("   Calling CreateAssignmentCommand()\n");
+      #endif
       obj = (GmatBase*)CreateAssignmentCommand(lhs, rhs, retval, inCmd);
+   }
    else
    {
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage("   Calling MakeAssignment()\n");
+      #endif
       obj = MakeAssignment(lhs, rhs);
-
+      
       // Save script if lhs is Variable, Array, and String so those can be
       // written out as they are read
       GmatBase *lhsObj = FindObject(lhs);
