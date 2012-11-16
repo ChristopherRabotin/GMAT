@@ -40,6 +40,7 @@ BEGIN_EVENT_TABLE(ConditionPanel, GmatPanel)
     EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
 	EVT_GRID_CELL_LEFT_DCLICK(ConditionPanel::OnCellDoubleClick)
     EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
+	EVT_KEY_DOWN(ConditionPanel::OnKeyDown)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -129,19 +130,8 @@ void ConditionPanel::Create()
    conditionGrid->SetColSize(RHS_COL, 165);
    conditionGrid->SetCellValue(0, COMMAND_COL, theCommand->GetTypeName().c_str());
 
-   // Set ... for LHS and RHS select columns
-   for (Integer i = 0; i < MAX_ROW; i++)
-   {
-      conditionGrid->SetReadOnly(i, COMMAND_COL, true);
-      conditionGrid->SetReadOnly(i, COND_COL, true);
-      conditionGrid->SetCellBackgroundColour(i, LHS_SEL_COL, *wxLIGHT_GREY);
-      conditionGrid->SetCellBackgroundColour(i, RHS_SEL_COL, *wxLIGHT_GREY);
-      conditionGrid->SetCellValue(i, LHS_SEL_COL, _T("  ... "));
-      conditionGrid->SetCellValue(i, RHS_SEL_COL, _T("  ... "));
-      conditionGrid->SetReadOnly(i, LHS_SEL_COL, true);
-      conditionGrid->SetReadOnly(i, RHS_SEL_COL, true);
-   }
-   
+   UpdateSpecialColumns();
+
    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 0 );
    
    theMiddleSizer->Add(item0, 0, wxGROW, 0);
@@ -423,6 +413,95 @@ void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
          }
       }
    }
+}
+
+//------------------------------------------------------------------------------
+// void UpdateSpecialColumns
+//------------------------------------------------------------------------------
+/**
+ * Set the editing and display for the special columns
+ *
+ */
+//------------------------------------------------------------------------------
+void ConditionPanel::UpdateSpecialColumns()
+{
+	conditionGrid->SetCellValue(0, COMMAND_COL, theCommand->GetTypeName().c_str());
+
+	// Set ... for LHS and RHS select columns
+	for (Integer i = 0; i < MAX_ROW; i++)
+	{
+		conditionGrid->SetReadOnly(i, COMMAND_COL, true);
+		conditionGrid->SetReadOnly(i, COND_COL, true);
+		conditionGrid->SetCellBackgroundColour(i, LHS_SEL_COL, *wxLIGHT_GREY);
+		conditionGrid->SetCellBackgroundColour(i, RHS_SEL_COL, *wxLIGHT_GREY);
+		conditionGrid->SetCellValue(i, LHS_SEL_COL, _T("  ... "));
+		conditionGrid->SetCellValue(i, RHS_SEL_COL, _T("  ... "));
+		conditionGrid->SetReadOnly(i, LHS_SEL_COL, true);
+		conditionGrid->SetReadOnly(i, RHS_SEL_COL, true);
+	}
+}
+
+//------------------------------------------------------------------------------
+// void OnKeyDown(wxKeyEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user presses a key on the grid (not
+ * in the in-place editor).
+ *
+ * @param  event   key event to handle
+ */
+//------------------------------------------------------------------------------
+void ConditionPanel::OnKeyDown(wxKeyEvent& event)
+{
+	if ((event.GetKeyCode() == WXK_DELETE) ||
+		(event.GetKeyCode() == WXK_BACK))
+	{
+		if (conditionGrid->IsSelection())
+		{
+			wxGridCellCoordsArray topLeft = conditionGrid->GetSelectionBlockTopLeft();
+			wxGridCellCoordsArray bottomRight = conditionGrid->GetSelectionBlockBottomRight();
+			// is it a row?
+			if ((topLeft.GetCount() == 1) && (bottomRight.GetCount() == 1))
+			{
+				if ((topLeft[0].GetCol() == 0) && (bottomRight[0].GetCol() == (MAX_COL-1)))
+				{
+					// delete rows
+					conditionGrid->DeleteRows(topLeft[0].GetRow(), bottomRight[0].GetRow()-topLeft[0].GetRow()+1);
+					conditionGrid->AppendRows(bottomRight[0].GetRow()-topLeft[0].GetRow()+1);
+					UpdateSpecialColumns();
+				}
+				else
+				{
+					// empty cells
+					for (Integer row=topLeft[0].GetRow();row<=bottomRight[0].GetRow();row++)
+					{
+						for (Integer col=topLeft[0].GetCol();col<=bottomRight[0].GetCol();col++)
+						{
+							conditionGrid->SetCellValue("", row, col);
+						}
+					}
+     				UpdateSpecialColumns();
+				}
+				EnableUpdate(true);
+				return;
+			}
+		}
+	}
+	else if (event.GetKeyCode() == WXK_INSERT)
+	{
+			wxGridCellCoordsArray topLeft = conditionGrid->GetSelectionBlockTopLeft();
+			wxGridCellCoordsArray bottomRight = conditionGrid->GetSelectionBlockBottomRight();
+			// is it a row?
+			if ((topLeft.GetCount() == 1) && (bottomRight.GetCount() == 1))
+			{
+				conditionGrid->InsertRows(topLeft[0].GetRow());
+				conditionGrid->DeleteRows(MAX_ROW);
+				UpdateSpecialColumns();
+				EnableUpdate(true);
+				return;
+			}
+	}
+    event.Skip();
 }
 
 //------------------------------------------------------------------------------
