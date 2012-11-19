@@ -339,7 +339,7 @@ void GmatSavePanel::OnClosePanel(wxCommandEvent &event)
       ("GmatSavePanel::OnClosePanel() '%s' entered, mEditorModified=%d\n",
        mFilename.c_str(), mEditorModified);
    #endif
-   
+
    // We don't want to show duplicate save message when GmatMdiChildFrame is closing,
    // so set override dirty flag to false
    ((GmatMdiChildFrame*)
@@ -396,18 +396,31 @@ void GmatSavePanel::UpdateScriptActiveStatus(bool isActive)
 
 
 //------------------------------------------------------------------------------
-// void UpdateStatusOnClose()
+// bool UpdateStatusOnClose()
+//
+// @ return TRUE if panel can close
 //------------------------------------------------------------------------------
-void GmatSavePanel::UpdateStatusOnClose()
+bool GmatSavePanel::UpdateStatusOnClose()
 {
       // For active script, update sync status
       if (mIsScriptActive)
       {
-		 // clean up the status since we are going away
-         theGuiManager->SetActiveScriptStatus(1);
-         GmatAppData::Instance()->GetMainFrame()->
-			 UpdateGuiScriptSyncStatus(theGuiManager->GetGuiStatus(), theGuiManager->GetActiveScriptStatus());
+		  if (GmatAppData::Instance()->GetMainFrame()->IsMissionRunning())
+		  {
+				wxMessageBox(wxT("GMAT is running the mission.\n"
+								"Please stop the mission first."),
+							wxT("Warning"), wxOK);
+			   return false;
+		  }
+		  //else
+		  {
+			 // clean up the status since we are going away
+			 theGuiManager->SetActiveScriptStatus(1);
+			 GmatAppData::Instance()->GetMainFrame()->
+				 UpdateGuiScriptSyncStatus(theGuiManager->GetGuiStatus(), theGuiManager->GetActiveScriptStatus());
+		  }
       }
+	  return true;
 }
 
 
