@@ -517,7 +517,13 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 
    GmatSavePanel* panel = ((GmatSavePanel*) GetAssociatedWindow());
    if (panel != NULL)
-	   panel->UpdateStatusOnClose();
+   {
+	   if (!panel->UpdateStatusOnClose()) 
+	   {
+		   mCanClose = false;
+		   return;
+	   }
+   }
 
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
