@@ -446,6 +446,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    theDescription = theCommand->GetGeneratingString(Gmat::NO_COMMENTS);
    continueOnError = contOnError;
    skipErrorMessage = false;
+   isFinalError = false;
    lhsParamType = Gmat::UNKNOWN_PARAMETER_TYPE;
    std::string typeName = cmd->GetTypeName();
    
@@ -510,13 +511,14 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
          //{
             #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage
-               ("1 Could not create an ElementWrapper for \"" + theDescription + "\"\n");
+               ("1 Could not create an ElementWrapper for '%s', skipErrorMessage=%d\n",
+                theDescription.c_str(), skipErrorMessage);
             #endif
             if (skipErrorMessage)
                return false;
             else
             {
-               theErrorMsg = "Undefined function or variable \"" + theDescription +
+               theErrorMsg = "Undefined function or object \"" + theDescription +
                   "\" found";
                return HandleError();
             }
@@ -543,11 +545,17 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
             {
                #if DBGLVL_WRAPPERS > 1
                MessageInterface::ShowMessage
-                  ("2 Could not create an ElementWrapper for \"" + theDescription + "\"\n");
+                  ("2 Could not create an ElementWrapper for '%s', skipErrorMessage=%d, "
+                   "isFinalError=%d\n", theDescription.c_str(), skipErrorMessage, isFinalError);
                #endif
-
-               theErrorMsg = " Undefined function or variable \"" + *i + "\" found ";
-               return HandleError();
+               
+               if (skipErrorMessage)
+                  return false;
+               else
+               {
+                  theErrorMsg = " Undefined function or object \"" + *i + "\" found ";
+                  return HandleError();
+               }
             }
             
             #if DBGLVL_WRAPPERS > 1
@@ -638,6 +646,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    std::string noExtraParen = GmatStringUtil::RemoveExtraParen(noBlanks);
    theDescription = GmatStringUtil::Trim(noExtraParen);
    skipErrorMessage = false;
+   isFinalError = false;
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
@@ -789,11 +798,19 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    }
    else
    {
-      createDefaultStringWrapper = true;
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         ("Validator::CreateElementWrapper() wrapper is NULL, skipErrorMessage=%d, isFinalError=%d\n",
+          skipErrorMessage, isFinalError);
+      #endif
+      
+      if (!isFinalError)
+         createDefaultStringWrapper = true;
       
       #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("Validator::CreateElementWrapper() createDefaultStringWrapper set to true\n");
+         ("Validator::CreateElementWrapper() createDefaultStringWrapper set to %s\n",
+          createDefaultStringWrapper ? "true" : "false");
       MessageInterface::ShowMessage
          ("Validator::CreateElementWrapper() returning NULL, could not create an "
           "ElementWrapper for \"" + theDescription + "\"\n");
@@ -1038,6 +1055,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    MessageInterface::ShowMessage("   Has %d wrapper names\n", wrapperNames.size());
    for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
       MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
+   MessageInterface::ShowMessage("   createDefaultStringWrapper initially set to true\n");
    #endif
    
    createDefaultStringWrapper = true;
@@ -1139,19 +1157,22 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
             if (addedQuotes)
                strToUse = origVal;
             
-            #if DBGLVL_WRAPPERS > 1
-            MessageInterface::ShowMessage
-               ("   Calling cmd->SetElementWrapper(<%p>, '%s')\n", ew, strToUse.c_str());
-            #endif
-            if (cmd->SetElementWrapper(ew, strToUse) == false)
+            if (ew)
             {
-               if (skipErrorMessage)
-                  return false;
-               else
+               #if DBGLVL_WRAPPERS > 1
+               MessageInterface::ShowMessage
+                  ("   Calling cmd->SetElementWrapper(<%p>, '%s')\n", ew, strToUse.c_str());
+               #endif
+               if (cmd->SetElementWrapper(ew, strToUse) == false)
                {
-                  theErrorMsg = "Failed to set ElementWrapper for RHS object \"" + strToUse +
-                     "\" in Assignment";
-                  return HandleError();
+                  if (skipErrorMessage)
+                     return false;
+                  else
+                  {
+                     theErrorMsg = "Failed to set ElementWrapper for RHS object \"" + strToUse +
+                        "\" in Assignment";
+                     return HandleError();
+                  }
                }
             }
          }
@@ -2305,9 +2326,10 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
 {
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("Validator::CreateValidWrapperWithDot() entered, obj=<%p><%s>, "
-       "parametersFirst=%d, manage=%d\n", obj, obj ? obj->GetName().c_str() : "NULL",
-       parametersFirst, manage);
+      ("Validator::CreateValidWrapperWithDot() entered, obj=<%p><%s>, type='%s', "
+       "owner='%s', depobj='%s', parametersFirst=%d, manage=%d\n", obj,
+       obj ? obj->GetName().c_str() : "NULL", type.c_str(), owner.c_str(),
+       depobj.c_str(), parametersFirst, manage);
    #endif
    
    Gmat::WrapperDataType itsType = Gmat::NUMBER_WT;
@@ -2333,12 +2355,64 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
       }
       
       #if DBGLVL_WRAPPERS > 1
-      MessageInterface::ShowMessage("   after few checking, paramFirst=%d\n", paramFirst);
+      MessageInterface::ShowMessage("   After few checking, paramFirst=%d\n", paramFirst);
       #endif
       
       if (paramFirst)
       {
          bool paramCreated = false;
+         bool isParameterValid = true;
+         
+         // Check for dependency before creating Spacecraft Parameter
+         // (Fix for GMT3272, 3271, 3215; LOJ:2012.11.19)
+         ParameterInfo *paramInfo = ParameterInfo::Instance();
+         GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
+         if (depType == GmatParam::NO_DEP)
+         {
+            #if DBGLVL_WRAPPERS > 1
+            MessageInterface::ShowMessage("   '%s' has no dependency\n", type.c_str());
+            #endif
+            if (depobj != "")
+            {
+               // Special case for Element1/2/3 since these are deprecated types of Spacecraft
+               // owend Thruster Parameter such as sat1.Thruster1.Element1
+               // We don't want to throw an exception for this case
+               GmatBase *ownedObj = FindObject(depobj);
+               if (ownedObj && ownedObj->IsOfType(Gmat::THRUSTER))
+                  isParameterValid = true;
+               else
+                  isParameterValid = false;
+            }
+         }
+         else if (depType == GmatParam::COORD_SYS || depType == GmatParam::ORIGIN)
+         {
+            GmatBase *depObjPtr = FindObject(depobj);
+            if (depObjPtr == NULL)
+               isParameterValid = false;
+            else
+            {
+               if ((depType == GmatParam::COORD_SYS && !depObjPtr->IsOfType(Gmat::COORDINATE_SYSTEM)) ||
+                   (depType == GmatParam::ORIGIN && !depObjPtr->IsOfType(Gmat::CELESTIAL_BODY)))
+                  isParameterValid = false;
+            }
+         }
+         
+         if (!isParameterValid)
+         {
+            #if DBGLVL_WRAPPERS
+            MessageInterface::ShowMessage
+               ("**** ERROR Invalid dependency name '%s' found for Parameter type "
+                "'%s' in '%s'\n", depobj.c_str(), type.c_str(), theDescription.c_str());
+            #endif
+            theErrorMsg = "Invalid dependency name \"" + depobj + "\" found for Parameter type \"" +
+               type + "\"";
+            skipErrorMessage = true;
+            isFinalError = true;
+            HandleError();
+            return NULL;
+         }
+         
+         // Now create Parameter
          Parameter *param = CreateSystemParameter(paramCreated, theDescription, manage);         
          
          // param is not NULL if only one Parameter is created,
@@ -3169,6 +3243,7 @@ Validator::Validator()
    createDefaultStringWrapper = true;
    continueOnError = true;
    skipErrorMessage = false;
+   isFinalError = true;
 }
 
 
