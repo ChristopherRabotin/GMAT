@@ -290,6 +290,9 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
          locCount = (int)pups->size();
          if (locCount > 0)
          {
+            #ifdef DEBUG_PENUP_PENDOWN
+               MessageInterface::ShowMessage("Penup count: %d\n", locCount);
+            #endif
             pupIndex = 0;
             pupLoc = (*pups)[pupIndex];
          }
@@ -321,6 +324,20 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
                ++pupIndex;
                if (pupIndex < locCount)
                   pupLoc = (*pups)[pupIndex];
+
+                  #ifdef DEBUG_PENUP_PENDOWN
+                     MessageInterface::ShowMessage("Penup location now %d, "
+                           "Surrounding y-axis points: [", pupLoc);
+
+                     for (Integer i = -2; i < 3; ++i)
+                     {
+                        if ((pupLoc + i >= 0) &&
+                            (pupLoc + i < (*curve)->ordinate.size()) )
+                           MessageInterface::ShowMessage(" %lf ",
+                                 (*curve)->ordinate[pupLoc + i]);
+                     }
+                     MessageInterface::ShowMessage("]\n");
+                  #endif
             }
             
             if ((unsigned int)ccLoc <= (*curve)->lastPointPlotted)
@@ -436,6 +453,19 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
                   ++pupIndex;
                   if (pupIndex < locCount)
                      pupLoc = (*pups)[pupIndex];
+                  #ifdef DEBUG_PENUP_PENDOWN
+                     MessageInterface::ShowMessage("Penup location now %d, "
+                           "Surrounding y-axis points: [", pupLoc);
+
+                     for (Integer i = -2; i < 3; ++i)
+                     {
+                        if ((pupLoc + i >= 0) &&
+                            (pupLoc + i < (*curve)->ordinate.size()) )
+                           MessageInterface::ShowMessage(" %lf ",
+                                 (*curve)->ordinate[pupLoc + i]);
+                     }
+                     MessageInterface::ShowMessage("]\n");
+                  #endif
                }
             }
 
