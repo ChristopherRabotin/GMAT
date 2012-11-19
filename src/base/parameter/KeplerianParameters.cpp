@@ -840,7 +840,7 @@ GmatBase* KepTA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepMA::KepMA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN, KEP_MA, true)
+   : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN, KEP_MA, false)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -955,7 +955,7 @@ GmatBase* KepMA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepEA::KepEA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "EA", obj, "Eccentric Anomaly", "Deg", GmatParam::ORIGIN, KEP_EA, true)
+   : OrbitReal(name, "EA", obj, "Eccentric Anomaly", "Deg", GmatParam::ORIGIN, KEP_EA, false)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -1070,7 +1070,7 @@ GmatBase* KepEA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepHA::KepHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "HA", obj, "Hyperbolic Anomaly", "Deg", GmatParam::ORIGIN, KEP_HA, true)
+   : OrbitReal(name, "HA", obj, "Hyperbolic Anomaly", "Deg", GmatParam::ORIGIN, KEP_HA, false)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
