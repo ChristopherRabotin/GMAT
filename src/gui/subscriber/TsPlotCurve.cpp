@@ -20,7 +20,9 @@
 #include <algorithm>
 
 
-// #define DEBUG_PENUP_PENDOWN
+//#define DEBUG_PENUP_PENDOWN
+//#define DEBUG_MESSSAGE_FLOW
+
 // #define TEST_POINT_22  // Tests curve change features starting at point 22
 
 //------------------------------------------------------------------------------
@@ -285,7 +287,21 @@ double TsPlotCurve::GetMaxY()
 //------------------------------------------------------------------------------
 void TsPlotCurve::PenUp()
 {
-   penUpIndex.push_back((int)abscissa.size() - 1);
+   #ifdef DEBUG_PENUP_PENDOWN
+      MessageInterface::ShowMessage("Penup at %d\n", (int)abscissa.size() - 1);
+   #endif
+
+   // Avoid repeated indices
+   int lastPup = (penUpIndex.size() > 0 ? penUpIndex[penUpIndex.size()-1] : -1);
+   if (lastPup != (int)abscissa.size()-1)
+      penUpIndex.push_back((int)abscissa.size() - 1);
+
+   #ifdef DEBUG_PENUP_PENDOWN
+      MessageInterface::ShowMessage("PenUp buffer: [");
+      for (unsigned int i = 0; i < penUpIndex.size(); ++i)
+         MessageInterface::ShowMessage(" %d ", penUpIndex[i]);
+      MessageInterface::ShowMessage("]\n");
+   #endif
    penIsDown = false;
 }
 
@@ -294,6 +310,9 @@ void TsPlotCurve::PenUp()
 //------------------------------------------------------------------------------
 void TsPlotCurve::PenDown()
 {
+   #ifdef DEBUG_PENUP_PENDOWN
+      MessageInterface::ShowMessage("Pendown at %d\n", (int)abscissa.size() - 1);
+   #endif
    penIsDown = true;
 }
 
@@ -549,6 +568,10 @@ void TsPlotCurve::BreakAndDiscard(int startBreakIndex, int endBreakIndex)
       MessageInterface::ShowMessage("   Pre-discard ordinate size: %d  "
             "abscissa: %d\n", ordinate.size(), abscissa.size());
    #endif
+
+   // Clear the penup buffer
+   if ((startBreakIndex == -1) && (endBreakIndex == -1))
+      penUpIndex.clear();
 
    if (breakIndex.size() == 0)
       return;
