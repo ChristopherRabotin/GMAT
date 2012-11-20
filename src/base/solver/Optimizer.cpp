@@ -195,6 +195,12 @@ Integer Optimizer::SetSolverResults(Real *data,
    
    if (type == "Objective")
    {
+      if (objectiveDefined)
+         throw SolverException("Error configuring the \"" + instanceName +
+               "\" Optimizer: Multiple objective functions were set using "
+               "Minimize commands, but optimizers only support one objective "
+               "function.");
+
       // need to check here if the name is not the same as the 
       // objectiveFnName? (error)
       objectiveDefined = true;
