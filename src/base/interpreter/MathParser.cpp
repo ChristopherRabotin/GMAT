@@ -1806,7 +1806,6 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             // If minus sign found after close parenthesis, then it is not an
             // unary minus, so send whole string to FindOperator() (LOJ: 2012.03.23)
             std::string str2 = (isAfterCloseParen ? str1 : str1.substr(1, str1.npos));
-            Integer opIndex;
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
                ("   Check if there are operators in <%s>\n", str2.c_str());
@@ -1902,7 +1901,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             if (str[index4-1] == '\'')
                checkNext = false;
          }
-         else if (index4 == index2 && str[index4-1] == '^')
+         else if (index4 == index2 && index4 > 0 && str[index4-1] == '^')
          {
             checkNext = true;
          }
@@ -1980,18 +1979,18 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
    #endif
    
    // check for double operator such as *-, /-
-   
    if (index == 0)
    {
       op = str1.substr(index, 1);
       opIndex = index;
    }
-   else if (str[index-1] == '+' || str[index-1] == '-' ||
-            str[index-1] == '*' || str[index-1] == '/' ||
-            str[index-1] == '^')
+   else if ((index > 0 && index != str.npos) &&
+            (str[index-1] == '+' || str[index-1] == '-' ||
+             str[index-1] == '*' || str[index-1] == '/' ||
+             str[index-1] == '^'))
    {
       op = str1.substr(index-1, 1);
-      opIndex = index-1;
+      opIndex = index - 1;
    }
    else if (index != str1.npos)
    {
