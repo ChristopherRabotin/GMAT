@@ -860,7 +860,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       }
       
       //-------------------------------------------------------
-      // set origin and Axis
+      // set Axis and Origin
       //-------------------------------------------------------
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
 
