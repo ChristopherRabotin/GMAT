@@ -799,7 +799,6 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
-//      if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (name == primaryName))
       if (name == primaryName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
@@ -808,7 +807,6 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          #endif
          primary = (SpacePoint*) obj;
       }
-//      if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (name == secondaryName))
       if (name == secondaryName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
@@ -817,26 +815,7 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          #endif
          secondary = (SpacePoint*) obj;
       }
-      // add in the CoordinateBase SpacePoints here too because if
-      // primaryName or secondaryName == originName or j2000BodyName
-      // (which is likely), the origin and/or j2000Body will never be set
-      if (name == originName)
-      {
-         #ifdef DEBUG_REFERENCE_SETTING
-            MessageInterface::ShowMessage("Setting %s as origin for %s\n",
-               name.c_str(), instanceName.c_str());
-         #endif
-         origin = (SpacePoint*) obj;
-      }
-      if (name == j2000BodyName)
-      {
-          #ifdef DEBUG_REFERENCE_SETTING
-            MessageInterface::ShowMessage("Setting %s as J2000body for %s\n",
-               name.c_str(), instanceName.c_str());
-         #endif
-        j2000Body = (SpacePoint*) obj;
-      }
-      return true;
+      // pass up to ancestor classes so that origin and j2000Body can be set
    }
 
    // Not handled here -- invoke the next higher SetRefObject call

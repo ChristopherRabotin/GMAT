@@ -83,10 +83,10 @@ BodySpinSunAxes::BodySpinSunAxes(const std::string &itsName) :
 
    primaryName    = SolarSystem::SUN_NAME;
 
-   needsCBOrigin  = true;
-
    objectTypeNames.push_back("BodySpinSun");
    parameterCount = BodySpinSunAxesParamCount;
+
+   needsCBOrigin  = true;
 }
 
 

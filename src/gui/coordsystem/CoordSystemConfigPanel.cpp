@@ -26,7 +26,7 @@
 //#define DEBUG_COORD_PANEL_LOAD 1
 //#define DEBUG_COORD_PANEL_SAVE 1
 //#define DEBUG_COORD_PANEL_TEXT
-#define DEBUG_COORD_PANEL_XYZ
+//#define DEBUG_COORD_PANEL_XYZ
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -209,35 +209,6 @@ void CoordSystemConfigPanel::SaveData()
       if (!canClose)
          return;
 
-
-      //-------------------------------------------------------
-      // set new origin
-      //-------------------------------------------------------
-      if (mOriginChanged)
-      {
-         #if DEBUG_COORD_PANEL_SAVE
-         MessageInterface::ShowMessage
-            ("CoordSystemConfigPanel::SaveData() originName = %s\n",
-             originName.c_str());
-         #endif
-         
-         // set coordinate system origin
-         SpacePoint *origin =
-            (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
-         theCoordSys->SetStringParameter("Origin", originName);
-         theCoordSys->SetOrigin(origin);
-         
-         mOriginChanged = false;
-
-         // set Earth as J000Body if NULL
-         if (origin->GetJ2000Body() == NULL)
-         {
-            SpacePoint *j2000body =
-               (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
-            origin->SetJ2000Body(j2000body);
-         }
-      }
-      
       //-------------------------------------------------------
       // set new axis system
       //-------------------------------------------------------
@@ -284,6 +255,35 @@ void CoordSystemConfigPanel::SaveData()
             canClose = false;
          }
       }
+
+      //-------------------------------------------------------
+      // set new origin - needs to be done after setting of the axis system
+      //-------------------------------------------------------
+      if (mOriginChanged)
+      {
+         #if DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() originName = %s\n",
+             originName.c_str());
+         #endif
+
+         // set coordinate system origin
+         SpacePoint *origin =
+            (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
+         theCoordSys->SetStringParameter("Origin", originName);
+         theCoordSys->SetOrigin(origin);
+
+         mOriginChanged = false;
+
+         // set Earth as J000Body if NULL
+         if (origin->GetJ2000Body() == NULL)
+         {
+            SpacePoint *j2000body =
+               (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
+            origin->SetJ2000Body(j2000body);
+         }
+      }
+
    }
    catch (BaseException &e)
    {
