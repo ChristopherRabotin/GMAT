@@ -4175,7 +4175,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          stream << "'";
       break;
 
-   // Symbolic constatns write out a string without quotes
+   // Symbolic constants write out a string without quotes
    case Gmat::ENUMERATION_TYPE:
       if (inMatlabMode)
          stream << "'";
@@ -4195,7 +4195,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          
          break;
       }
-   // On/Off constatns write out a string without quotes
+   // On/Off constants write out a string without quotes
    case Gmat::ON_OFF_TYPE:
       if (inMatlabMode)
          stream << "'";
