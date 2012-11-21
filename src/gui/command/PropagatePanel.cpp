@@ -1097,7 +1097,7 @@ void PropagatePanel::SaveData()
       for (UnsignedInt i=0; i<emptyProps.GetCount(); i++)
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Please select a Propagator for "
-             "Spacecraft(s) \"%s\"\n", emptyProps[i].c_str());
+             "Spacecraft \"%s\"\n", emptyProps[i].c_str());
       
       canClose = false;
    }
@@ -1107,7 +1107,7 @@ void PropagatePanel::SaveData()
    {
       for (UnsignedInt i=0; i<emptySos.GetCount(); i++)
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Please select Spacecraft(s) for "
+            (Gmat::ERROR_, "Please select Spacecraft for "
              "Propagator \"%s\"\n", emptySos[i].c_str());
       
       canClose = false;
