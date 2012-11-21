@@ -279,7 +279,7 @@ AxisSystem::~AxisSystem()
 {
    #ifdef DEBUG_DESTRUCTION
    MessageInterface::ShowMessage("---> Entering AxisSystem destructor for %s\n",
-   instanceName.c_str());
+   coordName.c_str());
    #endif
    
    if (aVals != NULL)
@@ -301,7 +301,7 @@ AxisSystem::~AxisSystem()
    
    #ifdef DEBUG_DESTRUCTION
    MessageInterface::ShowMessage("---> LEAVING AxisSystem destructor for %s\n",
-   instanceName.c_str());
+   coordName.c_str());
    #endif
 }
 
@@ -889,7 +889,6 @@ void AxisSystem::GetLastRotationDotMatrix(Real *mat) const
 void AxisSystem::SetCoordinateSystemName(const std::string &csName)
 {
    coordName    = csName;
-   instanceName = csName;
 }
 
 
@@ -1590,10 +1589,10 @@ void AxisSystem::InitializeFK5()
    #endif
    if (eop == NULL)
       throw CoordinateSystemException(
-            "EOP file has not been set for " + instanceName);
+            "EOP file has not been set for " + coordName);
    if (itrf == NULL)
       throw CoordinateSystemException(
-            "Coefficient file has not been set for " + instanceName);
+            "Coefficient file has not been set for " + coordName);
 
    nutationSrc    = itrf->GetNutationTermsSource();
    planetarySrc   = itrf->GetPlanetaryTermsSource();
