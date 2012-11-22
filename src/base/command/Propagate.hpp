@@ -305,6 +305,7 @@ protected:
    void                    CleanString(std::string &theString, 
                               const StringArray *extras = NULL);
    virtual void            PrepareToPropagate();
+   virtual void            PrepareStoppingConditions();
    virtual void            CheckStopConditions(Integer EpochID);
    virtual void            TakeFinalStep(Integer EpochID, Integer trigger);
    

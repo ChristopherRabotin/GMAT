@@ -3301,7 +3301,7 @@ void Propagate::PrepareToPropagate()
    #ifdef DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage
          ("Propagate::PrepareToPropagate() <%p> entered\n", this);
-      GmatState *dstate = prop[0]->GetPropStateManager()->GetState();
+      GmatState *dstate = propagators[0]->GetPropStateManager()->GetState();
       Integer dimension = dstate->GetSize();
       MessageInterface::ShowMessage(
             "PrepareToPropagate top; State vector contents and fm state are\n"
@@ -3431,76 +3431,7 @@ void Propagate::PrepareToPropagate()
       }
 
       // Now setup the stopping condition elements
-      #if DEBUG_PROPAGATE_INIT
-         if (p[0]->UsesODEModel())
-         {
-            MessageInterface::ShowMessage
-               ("Propagate::PrepareToPropagate() Propagate start; epoch = %f\n",
-             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeConstants::SECS_PER_DAY));
-            MessageInterface::ShowMessage
-               ("Propagate::PrepareToPropagate() Propagate start; fm epoch = %f\n",
-               (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
-         }
-         else
-         {
-            MessageInterface::ShowMessage("Propagator state data (No ODE "
-                  "Model):\n   To be filled in\n");
-         }
-         Integer stopCondCount = stopWhen.size();
-         MessageInterface::ShowMessage
-            ("Propagate::PrepareToPropagate() stopCondCount = %d\n", stopCondCount);
-
-         for (Integer i=0; i<stopCondCount; i++)
-         {
-            MessageInterface::ShowMessage
-               ("Propagate::PrepareToPropagate() stopCondName[%d]=%s\n", i,
-                      stopWhen[i]->GetName().c_str());
-         }
-      #endif
-
-      stopCondMet = false;
-      stopEpoch = 0.0;
-      std::string stopVar;
-      Real stopEpochBase;
-
-      #ifdef DEBUG_STOPPING_CONDITIONS
-         if (!singleStepMode)
-            MessageInterface::ShowMessage(
-               "Stopping condition IDs are [%d, %d, %d]\n",
-               stopCondEpochID, stopCondBaseEpochID, stopCondStopVarID);
-      #endif
-
-      try
-      {
-         for (UnsignedInt i = 0; i < stopWhen.size(); ++i)
-         {
-            if (i >= stopSats.size())
-               throw CommandException("Stopping condition " +
-               stopWhen[i]->GetName() + " has no associated spacecraft.");
-
-            #if DEBUG_PROPAGATE_INIT
-               MessageInterface::ShowMessage(
-                  "Propagate::PrepareToPropagate() stopSat = %s\n",
-                  stopSats[i]->GetName().c_str());
-            #endif
-
-            stopEpochBase = stopSats[i]->GetRealParameter(epochID);
-
-            // StopCondition need new base epoch
-            stopWhen[i]->SetRealParameter(stopCondBaseEpochID, stopEpochBase);
-         }
-      }
-      catch (BaseException &ex)
-      {
-         // Use exception to remove Visual C++ warning
-         ex.GetMessageType();
-         MessageInterface::ShowMessage(
-            "Propagate::PrepareToPropagate() Exception while initializing stopping "
-            "conditions\n");
-         inProgress = false;
-         throw;
-      }
-
+      PrepareStoppingConditions();
       inProgress = true;
    }
    else
@@ -3610,66 +3541,7 @@ void Propagate::PrepareToPropagate()
          #endif
 
          // Now setup the stopping condition elements
-         #if DEBUG_PROPAGATE_INIT
-            if (fm[0]!= NULL)
-            {
-               MessageInterface::ShowMessage
-                  ("Propagate::PrepareToPropagate() Propagate start; epoch = %f\n",
-                (baseEpoch[0] + fm[0]->GetTime() / GmatTimeConstants::SECS_PER_DAY));
-               MessageInterface::ShowMessage
-                  ("Propagate::PrepareToPropagate() Propagate start; fm epoch = %f\n",
-                  (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
-            }
-
-            Integer stopCondCount = stopWhen.size();
-            MessageInterface::ShowMessage
-               ("Propagate::PrepareToPropagate() stopCondCount = %d\n", stopCondCount);
-            for (Integer i=0; i<stopCondCount; i++)
-            {
-               MessageInterface::ShowMessage
-                  ("Propagate::PrepareToPropagate() stopCondName[%d]=%s\n", i,
-                         stopWhen[i]->GetName().c_str());
-            }
-         #endif
-
-         stopCondMet = false;
-         stopEpoch = 0.0;
-         std::string stopVar;
-         Real stopEpochBase;
-
-         try
-         {
-            for (UnsignedInt i = 0; i<stopWhen.size(); i++)
-            {
-               if (i >= stopSats.size())
-                  throw CommandException("Stopping condition " +
-                  stopWhen[i]->GetName() + " has no associated spacecraft.");
-
-               #if DEBUG_PROPAGATE_INIT
-                  MessageInterface::ShowMessage(
-                     "Propagate::PrepareToPropagate() stopSat = %s, stopWhen = %s, "
-                     "stopGoal = %s\n", stopSats[i]->GetName().c_str(),
-                     stopWhen[i]->GetName().c_str(),
-                     stopWhen[i]->GetStringParameter("Goal").c_str());
-               #endif
-
-               stopEpochBase = stopSats[i]->GetRealParameter(epochID);
-
-               // StopCondition need new base epoch
-               stopWhen[i]->SetRealParameter(stopCondBaseEpochID, stopEpochBase);
-            }
-         }
-         catch (BaseException &ex)
-         {
-            // Use exception to remove Visual C++ warning
-            ex.GetMessageType();
-            MessageInterface::ShowMessage(
-               "Propagate::PrepareToPropagate() Exception while initializing stopping "
-               "conditions\n");
-            inProgress = false;
-            throw;
-         }
-
+         PrepareStoppingConditions();
          hasFired = true;
          inProgress = true;
 
@@ -3781,6 +3653,103 @@ void Propagate::PrepareToPropagate()
    #endif
 }
 
+
+//------------------------------------------------------------------------------
+// void Propagate::PrepareStoppingConditions()
+//------------------------------------------------------------------------------
+/**
+ * Sets up stopping conditions structures as part of PrepareToPropagate
+ */
+//------------------------------------------------------------------------------
+void Propagate::PrepareStoppingConditions()
+{
+   #if DEBUG_PROPAGATE_INIT
+      if (p[0]->UsesODEModel())
+      {
+         MessageInterface::ShowMessage
+            ("Propagate::PrepareToPropagate() Propagate start; epoch = %f\n",
+          (baseEpoch[0] + fm[0]->GetTime() / GmatTimeConstants::SECS_PER_DAY));
+         MessageInterface::ShowMessage
+            ("Propagate::PrepareToPropagate() Propagate start; fm epoch = %f\n",
+            (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
+      }
+      else
+      {
+         MessageInterface::ShowMessage("Propagator state data (No ODE "
+               "Model):\n   To be filled in\n");
+      }
+      Integer stopCondCount = stopWhen.size();
+      MessageInterface::ShowMessage
+         ("Propagate::PrepareToPropagate() stopCondCount = %d\n", stopCondCount);
+
+      for (Integer i=0; i<stopCondCount; i++)
+      {
+         MessageInterface::ShowMessage
+            ("Propagate::PrepareToPropagate() stopCondName[%d]=%s\n", i,
+                   stopWhen[i]->GetName().c_str());
+      }
+   #endif
+
+   stopCondMet = false;
+   stopEpoch = 0.0;
+   std::string stopVar;
+   Real stopEpochBase;
+
+   #ifdef DEBUG_STOPPING_CONDITIONS
+      if (!singleStepMode)
+         MessageInterface::ShowMessage(
+            "Stopping condition IDs are [%d, %d, %d]\n",
+            stopCondEpochID, stopCondBaseEpochID, stopCondStopVarID);
+   #endif
+
+   try
+   {
+      for (UnsignedInt i = 0; i < stopWhen.size(); ++i)
+      {
+         if (i >= stopSats.size())
+            throw CommandException("Stopping condition " +
+            stopWhen[i]->GetName() + " has no associated spacecraft.");
+
+         #if DEBUG_PROPAGATE_INIT
+            MessageInterface::ShowMessage(
+               "Propagate::PrepareToPropagate() stopSat = %s\n",
+               stopSats[i]->GetName().c_str());
+         #endif
+
+         stopEpochBase = stopSats[i]->GetRealParameter(epochID);
+
+         // StopCondition needs new base epoch
+         stopWhen[i]->SetRealParameter(stopCondBaseEpochID, stopEpochBase);
+
+         // Validate that time based stops are propagating in correct direction
+         if (stopWhen[i]->IsTimeCondition())
+         {
+            // Calculate the direction needed
+            stopWhen[i]->Evaluate();
+            Real delta = stopWhen[i]->GetStopDifference();
+            if (delta * direction < 0.0)
+            {
+               std::string msg = "Error in a time based stopping condition.\n";
+               msg = msg + "The stopping condition " + stopWhen[i]->GetName() +
+                     " cannot be met; propagation runs in the wrong direction "
+                     "on the line\n   \"" +
+                     GetGeneratingString(Gmat::SCRIPTING) + "\"";
+               MessageInterface::ShowMessage("%s\n", msg.c_str());
+            }
+         }
+      }
+   }
+   catch (BaseException &ex)
+   {
+      // Use exception to remove Visual C++ warning
+      ex.GetMessageType();
+      MessageInterface::ShowMessage(
+         "Propagate::PrepareToPropagate() Exception while initializing stopping "
+         "conditions\n");
+      inProgress = false;
+      throw;
+   }
+}
 
 //------------------------------------------------------------------------------
 // bool Execute()
