@@ -8063,7 +8063,7 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
 {
    #if DEBUG_PARAMETER_REF_OBJ
    MessageInterface::ShowMessage
-      ("Moderator::SetParameterRefObject() param=<%p>, type=<%s>, name=<%s>, "
+      ("Moderator::SetParameterRefObject() entered, param=<%p>, type=<%s>, name=<%s>, "
        "owner=<%s>, dep=<%s>, manage=%d\n",  param, type.c_str(), name.c_str(),
        ownerName.c_str(), depName.c_str(), manage);
    #endif
@@ -8101,7 +8101,18 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
    #endif
    
    if (newDep != "")
-      param->AddRefObject(FindObject(newDep));
+   {
+      GmatBase *depObj = FindObject(newDep);
+      if (depObj)
+      {
+         #if DEBUG_PARAMETER_REF_OBJ
+         MessageInterface::ShowMessage
+            ("   Settng depObj=<%p><%s>'%s' to Parameter\n", depObj,
+             depObj->GetTypeName().c_str(), depObj->GetName().c_str());
+         #endif
+         param->AddRefObject(depObj);
+      }
+   }
    
    // I'm not sure if we always use EarthMJ2000Eq (loj: 2008.06.03)
    if (param->NeedCoordSystem())
@@ -8171,6 +8182,11 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
                                        name.c_str());
       }
    }
+   #if DEBUG_PARAMETER_REF_OBJ
+   MessageInterface::ShowMessage
+      ("Moderator::SetParameterRefObject() leaving, param's depObject='%s'\n",
+       param->GetStringParameter("DepObject").c_str());
+   #endif
 }
 
 
