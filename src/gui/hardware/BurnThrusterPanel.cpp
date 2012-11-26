@@ -174,7 +174,7 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    
    // ThrustDirection1
-   wxStaticText *elem1Unit = new wxStaticText(this, ID_TEXT, wxT(" km/s"));
+   wxStaticText *elem1Unit = new wxStaticText(this, ID_TEXT, wxT(""));
    XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
    elem1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -183,7 +183,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection2
    wxStaticText *elem2Unit =
-      new wxStaticText(this, ID_TEXT, wxT(" km/s"));
+      new wxStaticText(this, ID_TEXT, wxT(""));
    YLabel =
       new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"2"),
                         wxDefaultPosition,wxDefaultSize, 0);
@@ -193,7 +193,7 @@ void BurnThrusterPanel::Create()
    elem2TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection2Hint")));
    
    // ThrustDirection3
-   wxStaticText *elem3Unit = new wxStaticText(this, ID_TEXT, wxT(" km/s"));
+   wxStaticText *elem3Unit = new wxStaticText(this, ID_TEXT, wxT(""));
    ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
    elem3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
