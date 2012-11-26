@@ -64,22 +64,23 @@ END_EVENT_TABLE()
  * @param showObjectOption 0 = do not allow any whole object
  *                         1 = allow any whole object
  *                         2 = allow only whole array
- * @param allowMultiSelect true if multiple selection is allowed (false)
- * @param allowString      true if selection of String is allowed (false)
- * @param allowSysParam    true if selection of system parameter is allowed (true)
- * @param allowVariable    true if selection of Varialbe is allowed (true)
- * @param allowArray       true if selection of Array is allowed (true)
+ * @param allowMultiSelect true if multiple selection is allowed [false]
+ * @param allowString      true if selection of String is allowed [false]
+ * @param allowSysParam    true if selection of system parameter is allowed [true]
+ * @param allowVariable    true if selection of Varialbe is allowed [true]
+ * @param allowArray       true if selection of Array is allowed [true]
  * @param &objectType      default object type to show ("Spacecraft")
- * @param createParam      true if to create non-existant system parameter (true)
- * @param skipDependency   true if skipping dependency object when creating Parameter name (false)
+ * @param createParam      true if to create non-existant system parameter [true]
+ * @param skipDependency   true if skipping dependency object when creating Parameter name [false]
+ * @param forStopCondition true if this dialog is for stopping condition for propagation [false]
  */
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog
      (wxWindow *parent, const wxArrayString &objectTypeList, int showOption,
-      int showObjectOption, bool allowMultiSelect, bool allowString,
+      int showWholeObjOption, bool allowMultiSelect, bool allowString,
       bool allowSysParam, bool allowVariable, bool allowArray, 
       const wxString &objectType, bool createParam, bool showSettableOnly,
-      bool skipDependency)
+      bool skipDependency, bool forStopCondition)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mHasSelectionChanged = false;
@@ -89,7 +90,7 @@ ParameterSelectDialog::ParameterSelectDialog
    mUseUserParam = false;
    mObjectTypeList = objectTypeList;
    mShowOption = showOption;
-   mShowObjectOption = showObjectOption;
+   mShowObjectOption = showWholeObjOption;
    mAllowMultiSelect = allowMultiSelect;
    mAllowString = allowString;
    mAllowVariable = allowVariable;
@@ -98,6 +99,7 @@ ParameterSelectDialog::ParameterSelectDialog
    mCreateParam = createParam;
    mShowSettableOnly = showSettableOnly;
    mSkipDependency = skipDependency;
+   mForStopCondition = forStopCondition;
    mObjectType = objectType;
    
    // Set initial flag for allowing selecting whole object
@@ -111,11 +113,13 @@ ParameterSelectDialog::ParameterSelectDialog
    
    #ifdef DEBUG
    MessageInterface::ShowMessage
-      ("ParameterSelectDialog() mObjectType=%s, mShowOption=%d, mAllowSysParam=%d, "
-       "mAllowVariable=%d\n   mAllowArray=%d, mAllowString=%d, mShowObjectOption=%d, "
-       "mAllowMultiSelect=%d, mCreateParam=%d\n", mObjectType.c_str(), mShowOption,
-       mAllowSysParam, mAllowVariable, mAllowArray, mAllowString, mShowObjectOption,
-       mAllowMultiSelect, mCreateParam);
+      ("ParameterSelectDialog() mShowOption=%d, mShowOjectOption=%d, "
+       "mAllowMultiSelect=%d, mAllowString=%d, mAllowSysParam=%d, mAllowVariable=%d\n"
+       "   mAllowArray=%d, mObjectType=%s, mCreateParam=%d, mShowSettableOnly=%d, "
+       "mSkipDependency=%d, mForStopCondition=%d\n", mShowOption, mShowObjectOption,
+       mAllowMultiSelect, mAllowString, mAllowSysParam, mAllowVariable, mAllowArray,
+       mObjectType.c_str(), mCreateParam, mShowSettableOnly, mSkipDependency,
+       mForStopCondition);
    #endif
    
    Create();
@@ -252,7 +256,7 @@ void ParameterSelectDialog::Create()
                            mShowObjectOption, mShowSettableOnly,
                            mAllowMultiSelect, mAllowString,
                            mAllowSysParam, mAllowVariable,
-                           mAllowArray, mObjectType,
+                           mAllowArray, mForStopCondition, mObjectType,
                            "Parameter Select");
    
    //------------------------------------------------------
@@ -1412,7 +1416,7 @@ void ParameterSelectDialog::ShowObjectProperties()
       // Set object property based on the first item
       mPropertyListBox->
          Set(theGuiManager->GetPropertyList(objName, "", mShowOption,
-                                            mShowSettableOnly));
+                                            mShowSettableOnly, mForStopCondition));
       
       mPropertyListBox->SetSelection(0);
       if (mObjectTypeComboBox->GetValue() == "Spacecraft")
@@ -1434,9 +1438,9 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
    #endif
    
    mPropertyListBox->Clear();   
-   mPropertyListBox->
-      InsertItems(theGuiManager->GetPropertyList(scName, hwName, mShowOption,
-                                                 mShowSettableOnly), 0);
+   mPropertyListBox->InsertItems
+      (theGuiManager->GetPropertyList(scName, hwName, mShowOption,
+                                      mShowSettableOnly, mForStopCondition), 0);
    mParameterSizer->Layout();
    mPropertyListBox->SetSelection(0);
    

@@ -149,7 +149,8 @@ public:
    wxArrayString GetPropertyList(const wxString &objName,
                                  const wxString &ownedObjName = "",
                                  int showOption = SHOW_PLOTTABLE,
-                                 bool showSettableOnly = false);
+                                 bool showSettableOnly = false,
+                                 bool forStopCondition = false);
    
    int GetNumProperty(const wxString &objType);
    
@@ -277,7 +278,8 @@ public:
                                  const wxString &objType,
                                  int showOption = SHOW_PLOTTABLE,
                                  bool showSettableOnly = false,
-                                 bool multiSelect = false);
+                                 bool multiSelect = false,
+                                 bool forStopCondition = false);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
                                            const wxSize &size, 
@@ -341,9 +343,10 @@ public:
           wxListBox **selectedListBox, wxWindowID selectedListBoxId,
           const wxArrayString &objectTypeList, int showOption = SHOW_PLOTTABLE,
           int showObjectOption = 0, bool showSettableOnly = false,
-          bool allowMultiSelect = false, bool showString = false, // bool allowWholeObject = false,
+          bool allowMultiSelect = false, bool showString = false,
           bool showSysParam = true, bool showVariable = false,
-          bool showArray = false, const wxString &onwer = "Spacecraft",
+          bool showArray = false, bool forStopCondition = false,
+          const wxString &onwer = "Spacecraft",
           const wxString configSection = "Parameter Select");
    
    wxSizer*

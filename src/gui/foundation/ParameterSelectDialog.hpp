@@ -41,7 +41,8 @@ public:
                          const wxString &objectType = "Spacecraft",
                          bool createParam = true,
                          bool showSettableOnly = false,
-                         bool skipDependency = false);
+                         bool skipDependency = false,
+                         bool forStopCondition = false);
    ~ParameterSelectDialog();
 
    bool HasSelectionChanged();
@@ -72,6 +73,7 @@ protected:
    bool mCreateParam;
    bool mShowSettableOnly;
    bool mSkipDependency;
+   bool mForStopCondition;
    bool mAllowWholeObject;
    
    int  mShowOption;

@@ -1664,13 +1664,14 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
 //------------------------------------------------------------------------------
 wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
                                               const wxString &ownedObjName,
-                                              int showOption, bool showSettableOnly)
+                                              int showOption, bool showSettableOnly,
+                                              bool forStopCondition)
 {
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::GetPropertyList() entered, objName='%s', ownedObjName='%s', "
-       "showOption=%d, showSettableOnly=%d\n", objName.c_str(), ownedObjName.c_str(),
-       showOption, showSettableOnly);
+       "showOption=%d, showSettableOnly=%d, forStopCondition\n", objName.c_str(),
+       ownedObjName.c_str(), showOption, showSettableOnly, bool forStopCondition);
    #endif
    
    wxArrayString array;
@@ -1727,6 +1728,17 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
       else
       {
          array =  GetSpacecraftProperties(showOption, showSettableOnly);
+      }
+      
+      // Check if it is for propagate stopping condition
+      if (forStopCondition)
+      {
+         #if DBGLVL_GUI_ITEM_PROPERTY > 1
+         MessageInterface::ShowMessage
+            ("   Adding 'Apoapsis' and 'Periapsis' for stopping condition to property list\n");
+         #endif
+         array.Add("Apoapsis");
+         array.Add("Periapsis");
       }
       
       return array;
@@ -3019,7 +3031,7 @@ wxListBox* GuiItemManager::GetImpBurnListBox(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 // wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //            const wxString &objType, int showOption, bool showSettableOnly = false,
-//            bool multiSelect = false)
+//            bool multiSelect = false, bool forStopCondition = false)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
@@ -3029,13 +3041,13 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size,
                                               const wxString &objType,
                                               int showOption, bool showSettableOnly,
-                                              bool multiSelect)
+                                              bool multiSelect, bool forStopCondition)
 {
    #ifdef DEBUG_PROPERTY_LISTBOX
    MessageInterface::ShowMessage
       ("GuiItemManager::GetPropertyListBox() objType='%s', showOption=%d, "
-       "showSettableOnly=%d, multiSelect=%d\n", objType.c_str(), showOption,
-       showSettableOnly, multiSelect);
+       "showSettableOnly=%d, multiSelect=%d, forStopCondition=%d\n", objType.c_str(),
+       showOption, showSettableOnly, multiSelect, forStopCondition);
    #endif
    
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
@@ -3112,6 +3124,17 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                }
             }
          }
+      }
+      
+      // Check if it is for propagate stopping condition
+      if (forStopCondition)
+      {
+         #ifdef DEBUG_PROPERTY_LISTBOX
+         MessageInterface::ShowMessage
+            ("   Adding 'Apoapsis' and 'Periapsis' for stopping condition to property list box\n");
+         #endif
+         propertyListBox->Append("Apoapsis");
+         propertyListBox->Append("Periapsis");
       }
    }
    else if (objType == "ImpulsiveBurn")
@@ -3638,16 +3661,16 @@ wxSizer* GuiItemManager::CreateParameterSizer
     int showObjectOption, bool showSettableOnly,
     bool allowMultiSelect, bool showString,
     bool showSysParam, bool showVariable, bool showArray,
-    const wxString &objectType,
+    bool forStopCondition, const wxString &objectType,
     const wxString configSection)
 {
    #if DEBUG_PARAM_SIZER
    MessageInterface::ShowMessage
       ("GuiItemManager::CreateParameterSizer() entered\n"
-       "   showOption=%d, showObjectOption=%d, allowMultiSelect=%d, showString=%d, "//allowWholeObject=%d, "
-       "showSysParam=%d\n   showVariable=%d, showArray=%d, objectType=%s\n",
-       showOption, showObjectOption, allowMultiSelect, showString, //allowWholeObject,
-       showSysParam, showVariable, showArray, objectType.c_str());
+       "   showOption=%d, showObjectOption=%d, allowMultiSelect=%d, showString=%d, "
+       "showSysParam=%d\n   showVariable=%d, showArray=%d, forStopCondition=%d, objectType=%s\n",
+       showOption, showObjectOption, allowMultiSelect, showString,
+       showSysParam, showVariable, showArray, forStopCondition, objectType.c_str());
    #endif
    
    int bsize = 1;
@@ -3811,7 +3834,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       
       *propertyListBox = 
          GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 230), objectType,
-                            showOption, showSettableOnly, allowMultiSelect);
+                            showOption, showSettableOnly, allowMultiSelect, forStopCondition);
       (*propertyListBox)->SetToolTip(pConfig->Read(_T("ObjectPropertiesHint")));
       
       *coordSysLabel =

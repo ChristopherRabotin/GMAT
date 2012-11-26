@@ -568,7 +568,9 @@ void PropagatePanel::GetNewStopCondLeftValue(Integer row, Integer col)
 {
    // show dialog to select parameter
    // we cannot allow Variables
-   ParameterSelectDialog paramDlg(this, mObjectTypeList);
+   ParameterSelectDialog paramDlg(this, mObjectTypeList, GuiItemManager::SHOW_PLOTTABLE,
+                                  0, false, false, true, true, true, "Spacecraft",
+                                  true, false, false, true);
    paramDlg.ShowModal();
    
    if (paramDlg.HasSelectionChanged())
@@ -616,7 +618,9 @@ void PropagatePanel::GetNewStopCondRightValue(Integer row, Integer col)
    
    // show dialog to select parameter
    // we can allow Variables
-   ParameterSelectDialog paramDlg(this, mObjectTypeList);
+   ParameterSelectDialog paramDlg(this, mObjectTypeList, GuiItemManager::SHOW_PLOTTABLE,
+                                  0, false, false, true, true, true, "Spacecraft",
+                                  true, false, false, true);
    paramDlg.ShowModal();
    
    if (paramDlg.HasSelectionChanged())
