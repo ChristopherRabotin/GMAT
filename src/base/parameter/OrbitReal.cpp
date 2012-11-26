@@ -33,9 +33,9 @@
 
 //------------------------------------------------------------------------------
 // OrbitReal(const std::string &name, const std::string &typeStr, 
-//           GmatBase *obj, const std::string &desc,
-//           const std::string &unit, GmatParam::DepObject depObj,
-//           bool isSettable)
+//           GmatBase *obj, const std::string &desc, const std::string &unit,
+//           GmatParam::DepObject depObj, Integer itemId, bool isSettable,
+//           bool isPlottable, bool isReportable)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -46,15 +46,18 @@
  * @param <desc> description of the parameter
  * @param <unit> unit of the parameter
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NO_DEP)
- * @param <isSettable> true if parameter is settable, false otherwise
+ * @param <itemId> item id from OrbitData [-999]
+ * @param <isSettable> true if parameter is settable, false otherwise [false]
+ * @param <isPlottable> true if parameter is plottable, false otherwise [true]
+ * @param <isReportable> true if parameter is reportable, false otherwise [true]
  */
 //------------------------------------------------------------------------------
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
-                     GmatBase *obj, const std::string &desc,
-                     const std::string &unit, GmatParam::DepObject depObj,
-                     Integer itemId, bool isSettable)
+                     GmatBase *obj, const std::string &desc, const std::string &unit,
+                     GmatParam::DepObject depObj, Integer itemId, bool isSettable,
+                     bool isPlottable, bool isReportable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, Gmat::SPACECRAFT, false, isSettable),
+             depObj, Gmat::SPACECRAFT, false, isSettable, isPlottable, isReportable),
      OrbitData(name)
 {
    mItemId = itemId;

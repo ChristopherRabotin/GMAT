@@ -53,27 +53,30 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 /**
  * Constructor.
  *
- * @param <name> parameter name
- * @param <valStr>  value string of parameter
- * @param <typeStr>  parameter type string
- * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
- * @param <obj>  reference object pointer
- * @param <desc> parameter description
- * @param <unit> parameter unit
- * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
- * @param <ownerType> object type who owns this parameter as property
- * @param <isTimeParam> true if parameter is time related, false otherwise
- * @param <isSettable> true if parameter is settable
- * @param <ownedObjType> Type of the object which owned by owner or attached to owner
+ * @param <name> parameter name [""]
+ * @param <valStr>  value string of parameter [""]
+ * @param <typeStr>  parameter type string ["RealVar"]
+ * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc) [GmatParam::USER_PARAM]
+ * @param <obj>  reference object pointer [NULL]
+ * @param <desc> parameter description [""]
+ * @param <unit> parameter unit [""]
+ * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE) [GmatParam::NO_DEP]
+ * @param <ownerType> object type who owns this parameter as property [Gmat::UNKNOWN_OBJECT]
+ * @param <isTimeParam> true if parameter is time related, false otherwise [false]
+ * @param <isSettable> true if parameter is settable [false]
+ * @param <isPlottable> true if parameter is plottable, false otherwise [true]
+ * @param <isReportable> true if parameter is reportable, false otherwise [true]
+ * @param <ownedObjType> Type of the object which owned by owner or attached to owner [Gmat::UNKNOWN_OBJECT]
  */
 //------------------------------------------------------------------------------
 RealVar::RealVar(const std::string &name, const std::string &valStr,
                  const std::string &typeStr, GmatParam::ParameterKey key,
                  GmatBase *obj, const std::string &desc, const std::string &unit,
                  GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                 bool isTimeParam, bool isSettable, Gmat::ObjectType ownedObjType)
+                 bool isTimeParam, bool isSettable, bool isPlottable,
+                 bool isReportable,Gmat::ObjectType ownedObjType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               isSettable, true, true, ownedObjType)
+               isSettable, isPlottable, isReportable, ownedObjType)
 {
    mValueSet = false;
    mIsNumber = true;

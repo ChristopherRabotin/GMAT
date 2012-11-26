@@ -144,6 +144,9 @@ protected:
          AZIFPA_FPA, Item4Count};
    
    // Other orbit items
+   // @note - Do not add or remove items from this list without updating OrbitData.
+   //         These enums are also used in OrbitData for passing parameter names to
+   //         CalculationUtilitis::CalculateKeplerianData().
    enum {MM = Item4Count, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, C3_ENERGY, ENERGY, Item5Count};
    
    enum {SEMILATUS_RECTUM = Item5Count, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA,

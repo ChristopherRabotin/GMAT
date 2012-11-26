@@ -837,8 +837,13 @@ bool Report::Initialize()
       }
       
       if (!mapObj->IsOfType("Parameter"))
-         throw CommandException("Parameter type mismatch for " + 
-            mapObj->GetName());
+         throw CommandException("Parameter type mismatch for " + mapObj->GetName());
+      
+      // Check if it is reportable Parameter
+      Parameter *param = (Parameter *)mapObj;
+      if (!param->IsReportable())
+         throw CommandException("Parameter \"" + mapObj->GetName() + "\" is not reportable");
+      
       parms.push_back((Parameter *)mapObj);
    }
    

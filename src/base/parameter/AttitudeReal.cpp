@@ -30,7 +30,8 @@ AttitudeReal::AttitudeReal(const std::string &name, const std::string &typeStr,
                            GmatBase *obj, const std::string &desc,
                            const std::string &unit, bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             GmatParam::OWNED_OBJ, Gmat::SPACECRAFT, false, isSettable, Gmat::ATTITUDE)
+             GmatParam::OWNED_OBJ, Gmat::SPACECRAFT, false, isSettable, true,
+             true, Gmat::ATTITUDE)
 {
    AddRefObject(obj);
 }

@@ -36,6 +36,7 @@ public:
            GmatParam::DepObject depObj = GmatParam::NO_DEP,
            Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
            bool isTimeParam = false, bool isSettable = false,
+           bool isPlottable = true, bool isReportable = true,
            Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT);
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);

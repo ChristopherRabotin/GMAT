@@ -80,8 +80,7 @@ VelApoapsis::VelApoapsis(const VelApoapsis &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const VelApoapsis&
-VelApoapsis::operator=(const VelApoapsis &right)
+const VelApoapsis& VelApoapsis::operator=(const VelApoapsis &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -201,8 +200,7 @@ VelPeriapsis::VelPeriapsis(const VelPeriapsis &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const VelPeriapsis&
-VelPeriapsis::operator=(const VelPeriapsis &right)
+const VelPeriapsis& VelPeriapsis::operator=(const VelPeriapsis &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -290,12 +288,12 @@ GmatBase* VelPeriapsis::Clone(void) const
  */
 //------------------------------------------------------------------------------
 Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
+   : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN,
+               -999, false, false, false)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-   mIsPlottable = false;
 }
 
 
@@ -323,8 +321,7 @@ Apoapsis::Apoapsis(const Apoapsis &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const Apoapsis&
-Apoapsis::operator=(const Apoapsis &right)
+const Apoapsis& Apoapsis::operator=(const Apoapsis &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -426,12 +423,12 @@ GmatBase* Apoapsis::Clone(void) const
 */
 //------------------------------------------------------------------------------
 Periapsis::Periapsis(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
+   : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN,
+               -999, false, false, false)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-   mIsPlottable = false;
 }
 
 
@@ -459,8 +456,7 @@ Periapsis::Periapsis(const Periapsis &copy)
 * @param <right> the parameter to make copy of
 */
 //------------------------------------------------------------------------------
-const Periapsis&
-Periapsis::operator=(const Periapsis &right)
+const Periapsis& Periapsis::operator=(const Periapsis &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -567,7 +563,8 @@ GmatBase* Periapsis::Clone(void) const
 */
 //------------------------------------------------------------------------------
 OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN)
+   : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN,
+               ORBIT_PERIOD)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -599,8 +596,7 @@ OrbitPeriod::OrbitPeriod(const OrbitPeriod &copy)
 * @param <right> the parameter to make copy of
 */
 //------------------------------------------------------------------------------
-const OrbitPeriod&
-OrbitPeriod::operator=(const OrbitPeriod &right)
+const OrbitPeriod& OrbitPeriod::operator=(const OrbitPeriod &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -684,7 +680,8 @@ GmatBase* OrbitPeriod::Clone(void) const
  */
 //------------------------------------------------------------------------------
 C3Energy::C3Energy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
+   : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN,
+               C3_ENERGY)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -716,8 +713,7 @@ C3Energy::C3Energy(const C3Energy &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const C3Energy&
-C3Energy::operator=(const C3Energy &right)
+const C3Energy& C3Energy::operator=(const C3Energy &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -801,7 +797,8 @@ GmatBase* C3Energy::Clone(void) const
  */
 //------------------------------------------------------------------------------
 Energy::Energy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Energy", obj, "Orbit Energy", "Km^2/s^2", GmatParam::ORIGIN)
+   : OrbitReal(name, "Energy", obj, "Orbit Energy", "Km^2/s^2", GmatParam::ORIGIN,
+               ENERGY)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -833,8 +830,7 @@ Energy::Energy(const Energy &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const Energy&
-Energy::operator=(const Energy &right)
+const Energy& Energy::operator=(const Energy &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);

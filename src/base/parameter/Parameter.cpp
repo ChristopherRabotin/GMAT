@@ -318,6 +318,22 @@ GmatParam::CycleType  Parameter::GetCycleType() const
 
 
 //------------------------------------------------------------------------------
+// bool IsSystemParameter() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is system defined calculation parameter
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsSystemParameter() const
+{
+   if (mKey == GmatParam::SYSTEM_PARAM)
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsAngleParameter() const
 //------------------------------------------------------------------------------
 /**

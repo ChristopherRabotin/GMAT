@@ -2124,7 +2124,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             {
                solverName = cmd->GetRefObjectName(Gmat::SOLVER);
             }
-            catch (BaseException &ex)
+            catch (BaseException &)
             {
                if (solverName == "")
                   solverName = cmd->GetStringParameter("SolverName");
@@ -3253,7 +3253,16 @@ bool Interpreter::AssembleReportCommand(GmatCommand *cmd, const std::string &des
       {
          if (obj != NULL)
          {
-            cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
+            // Check if it is reportable Parameter
+            if (((Parameter*)obj)->IsReportable())
+               cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
+            else
+            {
+               InterpreterException ex
+                  ("\"" + parts[i] + "\" is not a reportable Parameter");
+               HandleError(ex);
+               retval = false;
+            }
          }
          else
          {
@@ -5535,8 +5544,8 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
       #ifdef DEBUG_SET
       if (param)
          MessageInterface::ShowMessage
-            ("   param=(%p)%s type=%s returnType=%d\n", param,
-             param->GetName().c_str(), param->GetTypeName().c_str(),
+            ("   param=<%p><%s>'%s', returnType=%d\n", param,
+             param->GetTypeName().c_str(), param->GetName().c_str(), 
              param->GetReturnType());
       #endif
    }
@@ -5554,6 +5563,22 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
    {
       if (param != NULL)
       {
+         std::string subMsg;
+         // If object is ReportFile or XYPlot, check if Parameter can be reported or plotted
+         if ((obj->IsOfType("ReportFile")) && (param->IsSystemParameter() && !param->IsReportable()))
+            subMsg = "reportable Parameter";
+         else if ((obj->IsOfType("XYPlot")) && (param->IsSystemParameter() && !param->IsPlottable()))
+            subMsg = "plottable Parameter";
+         if (subMsg != "")
+         {
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+            errorMsg2 = "  The allowed value is " + subMsg;
+            return false;
+         }
+         
          // Other than Subscriber, it can only take STRING_TYPE parameter
          if (param->GetReturnType() == Gmat::STRING_TYPE ||
              obj->IsOfType(Gmat::SUBSCRIBER))
@@ -6060,10 +6085,12 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
             // If type is RVECTOR_TYPE, we want to catch all non-Real values.
             // Invalid value for other types will be cautht in the FinalPass().
             // (Fix for catching [NONE, 123] for RVECTOR LOJ: 2012.08.10)
-            if (type == Gmat::RVECTOR_TYPE)
+            // Actually we want to catch all invalid values, such as non-reportable
+            // Parameters, so commented out (LOJ: 2012.11.26)
+            //if (type == Gmat::RVECTOR_TYPE)
+            //   retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
+            //else
                retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
-            else
-               retval = SetPropertyValue(obj, id, type, rhsValues[i], i);
          }
       }
    }

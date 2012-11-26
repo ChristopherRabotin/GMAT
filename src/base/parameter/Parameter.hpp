@@ -81,7 +81,8 @@ public:
    GmatParam::CycleType     GetCycleType() const;
    
    void  SetKey(const GmatParam::ParameterKey &key);
-   
+
+   bool  IsSystemParameter() const;
    bool  IsAngleParameter() const;
    bool  IsTimeParameter() const;
    bool  IsPlottable() const;
