@@ -4089,7 +4089,12 @@ bool Propagate::Execute()
          if (currentMode == SYNCHRONIZED)
             for (UnsignedInt i = 1; i < fm.size(); ++i)
                if (fm[i] != NULL)
-                  fm[i]->SetTime(fm[0]->GetTime());
+               {
+                  if (fm[0] != NULL)
+                     fm[i]->SetTime(fm[0]->GetTime());
+//                  else
+//                     fm[i]->SetTime(p[0]->GetTime());
+               }
       }
 
       TakeFinalStep(epochID, trigger);
@@ -4145,6 +4150,7 @@ bool Propagate::TakeAStep(Real propStep)
 
 
    std::vector<Propagator*>::iterator current = p.begin();
+
    if (propStep == 0.0)
    {
       switch (currentMode)
