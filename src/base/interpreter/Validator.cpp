@@ -2380,6 +2380,10 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
                GmatBase *ownedObj = FindObject(depobj);
                if (ownedObj && ownedObj->IsOfType(Gmat::THRUSTER))
                   isParameterValid = true;
+               // Special case for DateFormat such as sat1.Epoch.UTCGregorian
+               else if ((paramInfo->IsTimeParameter(type) && depobj == "Epoch") &&
+                        (type.find("Elapsed") == type.npos))
+                  isParameterValid = true;
                else
                   isParameterValid = false;
             }
@@ -2577,8 +2581,8 @@ ElementWrapper* Validator::CreateParameterWrapper(Parameter *param,
       
       #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         (">>> In Validator, created a ParameterWrapper <%p> for Parameter \"%s\"\n",
-          ew, param->GetName().c_str());
+         (">>> In Validator, created a ParameterWrapper <%p> for Parameter '%s', depObj='%s'\n",
+          ew, param->GetName().c_str(), param->GetStringParameter("DepObject").c_str());
       #endif
    }
    
