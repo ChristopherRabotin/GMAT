@@ -1017,7 +1017,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       }
       
       // Since BOOLEAN_TYPE and ON_OFF_TYPE can accept case insensitive True/False/On/Off,
-      // save LHS propety type if it is on object property wrapper (LOJ: 2012.06.15)
+      // save LHS property type if it is an object property wrapper (LOJ: 2012.06.15)
       if (leftEw->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
       {
          GmatBase *lhsObj = FindObject(owner);
@@ -2362,6 +2362,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
       {
          bool paramCreated = false;
          bool isParameterValid = true;
+         bool depExist = true;
          
          // Check for dependency before creating Spacecraft Parameter
          // (Fix for GMT3272, 3271, 3215; LOJ:2012.11.19)
@@ -2392,7 +2393,10 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          {
             GmatBase *depObjPtr = FindObject(depobj);
             if (depObjPtr == NULL)
+            {
+               depExist = false;
                isParameterValid = false;
+            }
             else
             {
                if ((depType == GmatParam::COORD_SYS && !depObjPtr->IsOfType(Gmat::COORDINATE_SYSTEM)) ||
@@ -2403,13 +2407,17 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          
          if (!isParameterValid)
          {
+            std::string subMsg = "Invalid";
+            if (!depExist) subMsg = "Nonexistent";
+            
             #if DBGLVL_WRAPPERS
             MessageInterface::ShowMessage
-               ("**** ERROR Invalid dependency name '%s' found for Parameter type "
-                "'%s' in '%s'\n", depobj.c_str(), type.c_str(), theDescription.c_str());
+               ("**** ERROR %s dependency name '%s' found for Parameter type "
+                "'%s' in '%s'\n", subMsg.c_str(), depobj.c_str(), type.c_str(),
+                theDescription.c_str());
             #endif
-            theErrorMsg = "Invalid dependency name \"" + depobj + "\" found for Parameter type \"" +
-               type + "\"";
+            theErrorMsg = subMsg + " dependency name \"" + depobj +
+               "\" found for Parameter type \"" + type + "\"";
             skipErrorMessage = true;
             isFinalError = true;
             HandleError();

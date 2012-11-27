@@ -115,7 +115,8 @@ OrbitData::OrbitData(const std::string &name)
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
-
+   
+   mIsParamOriginDep = false;
    firstTimeEpochWarning = false;
 }
 
@@ -242,6 +243,21 @@ void OrbitData::SetReal(Integer item, Real rval)
       ("   Sat       CS Origin = <%p>'%s'\n", satCS,
        satCS ? satCS->GetOriginName().c_str() : "NULL");
    #endif
+   
+   // Check if origin is different from spacecraft CS origin
+   if (mIsParamOriginDep && mOrigin)
+   {
+      if (satCS->GetOriginName() != mOrigin->GetName())
+      {
+         ParameterException pe;
+         pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
+                       "requires values to be in the '%s' origin (setting "
+                       "values in different origin will be implemented in "
+                       "future builds)",  mActualParamName.c_str(),
+                       mSpacecraft->GetName().c_str(), satCS->GetOriginName().c_str());
+         throw pe;
+      }
+   }
    
    if (mOutCoordSystem != NULL && mOutCoordSystem != satCS)
    {
@@ -442,7 +458,7 @@ Rvector6 OrbitData::GetCartState()
    
    // if origin dependent parameter, the relative position/velocity is computed in
    // the parameter calculation, so just return prop state.
-   if (mOriginDep)
+   if (mIsParamOriginDep)
       return mCartState;
    
    if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
@@ -675,7 +691,7 @@ Real OrbitData::GetKepReal(Integer item)
    
    Rvector6 state = GetCartState();
 
-   if (mOriginDep && mOrigin->GetName() != "Earth")
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
@@ -746,7 +762,7 @@ Real OrbitData::GetModKepReal(Integer item)
       
    Rvector6 state = GetCartState();
    
-   if (mOriginDep && mOrigin->GetName() != "Earth")
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
@@ -782,7 +798,7 @@ Real OrbitData::GetOtherKepReal(Integer item)
    
    Rvector6 state = GetCartState();
    
-   if (mOriginDep && mOrigin->GetName() != "Earth")
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
@@ -951,7 +967,7 @@ Real OrbitData::GetEquinReal(Integer item)
    
    Rvector6 state = GetCartState();
 
-   if (mOriginDep && mOrigin->GetName() != "Earth")
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
@@ -1255,7 +1271,7 @@ void OrbitData::InitializeRefObjects()
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
    
-   mOriginDep = false;
+   mIsParamOriginDep = false;
    
    if (originName != "")
    {
@@ -1283,7 +1299,7 @@ void OrbitData::InitializeRefObjects()
          #endif
       }
 
-      mOriginDep = true;
+      mIsParamOriginDep = true;
    }
    //-----------------------------------------------------------------
    // It is CoordinateSystem dependent parameter.
@@ -1337,7 +1353,7 @@ void OrbitData::InitializeRefObjects()
    #ifdef DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage
       ("OrbitData::InitializeRefObjects() exiting, mOrigin.Name=%s, mGravConst=%f, "
-       "mOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mOriginDep);
+       "mIsParamOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mIsParamOriginDep);
    MessageInterface::ShowMessage
       ("   mSpacecraft=<%p> '%s', mSolarSystem=<%p>, mOutCoordSystem=<%p>, mOrigin=<%p>\n",
        mSpacecraft, mSpacecraft->GetName().c_str(),mSolarSystem, mOutCoordSystem, mOrigin);

@@ -88,7 +88,6 @@ public:
    
 protected:
    
-   bool mOriginDep;
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
    
@@ -120,13 +119,12 @@ protected:
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
-//   StateConverter   stateConverter;
-
-   bool        firstTimeEpochWarning;
-
+   bool mIsParamOriginDep;
+   bool firstTimeEpochWarning;
+   
    // only one CoordinateConverter needed
    static CoordinateConverter mCoordConverter;
-
+   
    // Assign item ids
    // Cartesian items
    enum {CART_X = 0, CART_Y, CART_Z, CART_VX, CART_VY, CART_VZ, CART_STATE, Item1Count};
