@@ -32,6 +32,9 @@
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
 #include "GmatMdiChildFrame.hpp"
+#include "FileUtil.hpp"
+#include "FileManager.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 #include "bitmaps/NewScript.xpm"
 #include "bitmaps/report.xpm"
@@ -440,6 +443,16 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 			  s);
 		#endif
 
+		// if path is relative, try to append it to gmat root 
+		  if (GmatFileUtil::IsPathRelative(s.c_str()))
+		{
+			FileManager *fm = FileManager::Instance();
+			if (GmatStringUtil::EndsWithPathSeparator(fm->GetRootPath()))
+				s = fm->GetRootPath() + s;
+			else
+				s = fm->GetRootPath() + GmatFileUtil::GetPathSeparator() + s;
+
+		}
 		wxLaunchDefaultBrowser(s);
 	}
     
