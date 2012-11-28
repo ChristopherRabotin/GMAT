@@ -2818,8 +2818,8 @@ void EphemerisFile::WriteCcsdsHeader()
    else
       ss << "CCSDS_AEM_VERS = 1.0" << std::endl;
    
-   ss << "CREATION_DATE = " << creationTime << std::endl;
-   ss << "ORIGINATOR = " << originator << std::endl;
+   ss << "CREATION_DATE  = " << creationTime << std::endl;
+   ss << "ORIGINATOR     = " << originator << std::endl;
    
    WriteString(ss.str());
    #endif
@@ -2954,16 +2954,16 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    std::stringstream ss("");
    ss << std::endl;
    ss << "META_START" << std::endl;
-   ss << "OBJECT_NAME = " << spacecraftName << std::endl;
-   ss << "OBJECT_ID = " << objId << std::endl;
-   ss << "CENTER_NAME = " << origin << std::endl;
-   ss << "REF_FRAME = " << csType << std::endl;
-   ss << "TIME_SYSTEM = " << ccsdsEpochFormat << std::endl;
-   ss << "START_TIME = " << metaDataStartStr << std::endl;
-   ss << "USEABLE_START_TIME = " << metaDataStartStr << std::endl;
-   ss << "USEABLE_STOP_TIME = " << metaDataStopStr << std::endl;
-   ss << "STOP_TIME = " << metaDataStopStr << std::endl;
-   ss << "INTERPOLATION = " << interpolatorName << std::endl;
+   ss << "OBJECT_NAME          = " << spacecraftName << std::endl;
+   ss << "OBJECT_ID            = " << objId << std::endl;
+   ss << "CENTER_NAME          = " << origin << std::endl;
+   ss << "REF_FRAME            = " << csType << std::endl;
+   ss << "TIME_SYSTEM          = " << ccsdsEpochFormat << std::endl;
+   ss << "START_TIME           = " << metaDataStartStr << std::endl;
+   ss << "USEABLE_START_TIME   = " << metaDataStartStr << std::endl;
+   ss << "USEABLE_STOP_TIME    = " << metaDataStopStr << std::endl;
+   ss << "STOP_TIME            = " << metaDataStopStr << std::endl;
+   ss << "INTERPOLATION        = " << interpolatorName << std::endl;
    ss << "INTERPOLATION_DEGREE = " << interpolationOrder << std::endl;
    ss << "META_STOP" << std::endl << std::endl;
    
