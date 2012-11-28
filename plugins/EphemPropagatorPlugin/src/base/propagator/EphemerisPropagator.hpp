@@ -95,6 +95,17 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id,
+                                                const Integer index) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label,
+                                                const Integer index) const;
+
    // Access methods derived classes can override on reference objects
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
 //   virtual const ObjectTypeArray&
@@ -180,6 +191,8 @@ protected:
    Real                       *j2kState;
    /// Size of the most recent prop step
    Real                       stepTaken;
+   /// Test strings describing the different types of start options
+   StringArray                startOptions;
    /// Type of source used to obtain start epoch
    StartEpochSource           startEpochSource;
    /// Buffer that allows quick reversion to the previous state
@@ -196,6 +209,7 @@ protected:
       EPHEM_CENTRAL_BODY,
       EPHEM_EPOCH_FORMAT,
       EPHEM_START_EPOCH,
+      EPHEM_START_OPTIONS,
       EphemerisPropagatorParamCount
    };
 

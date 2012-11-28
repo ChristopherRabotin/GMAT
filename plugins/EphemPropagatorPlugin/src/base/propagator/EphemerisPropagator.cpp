@@ -40,7 +40,8 @@ EphemerisPropagator::PARAMETER_TEXT[EphemerisPropagatorParamCount - PropagatorPa
       "StepSize",       // EPHEM_STEP_SIZE
       "CentralBody",    // EPHEM_CENTRAL_BODY
       "EpochFormat",    // EPHEM_EPOCH_FORMAT
-      "StartEpoch"      // EPHEM_START_EPOCH
+      "StartEpoch",     // EPHEM_START_EPOCH
+      "StartOptions"    // EPHEM_START_OPTIONS
 };
 
 /// EphemerisPropagator parameter types
@@ -50,7 +51,8 @@ EphemerisPropagator::PARAMETER_TYPE[EphemerisPropagatorParamCount - PropagatorPa
       Gmat::REAL_TYPE,        // EPHEM_STEP_SIZE
       Gmat::OBJECT_TYPE,      // EPHEM_CENTRAL_BODY
       Gmat::STRING_TYPE,      // EPHEM_EPOCH_FORMAT
-      Gmat::STRING_TYPE       // EPHEM_START_EPOCH
+      Gmat::STRING_TYPE,      // EPHEM_START_EPOCH
+      Gmat::STRINGARRAY_TYPE  // EPHEM_START_OPTIONS
 };
 
 
@@ -92,6 +94,8 @@ EphemerisPropagator::EphemerisPropagator(const std::string & typeStr,
    std::stringstream epochString("");
    epochString << GmatTimeConstants::MJD_OF_J2000;
    startEpoch = epochString.str();
+   startOptions.push_back("FromSpacecraft");
+   startOptions.push_back("EphemStart");
 }
 
 
@@ -122,22 +126,23 @@ EphemerisPropagator::~EphemerisPropagator()
  */
 //------------------------------------------------------------------------------
 EphemerisPropagator::EphemerisPropagator(const EphemerisPropagator & ep) :
-   Propagator           (ep),
-   ephemStep            (ep.ephemStep),
-   epochFormat          (ep.epochFormat),
-   startEpoch           (ep.startEpoch),
-   initialEpoch         (ep.initialEpoch),
-   currentEpoch         (ep.currentEpoch),
-   timeFromEpoch        (ep.timeFromEpoch),
-   ephemStart           (ep.ephemStart),
-   ephemEnd             (ep.ephemEnd),
-   psm                  (NULL),
-   state                (NULL),
-   j2kState             (NULL),
-   stepTaken            (0.0),
-   startEpochSource     (ep.startEpochSource),
-   stepDirection        (ep.stepDirection),
-   solarSystem          (NULL)
+   Propagator              (ep),
+   ephemStep               (ep.ephemStep),
+   epochFormat             (ep.epochFormat),
+   startEpoch              (ep.startEpoch),
+   initialEpoch            (ep.initialEpoch),
+   currentEpoch            (ep.currentEpoch),
+   timeFromEpoch           (ep.timeFromEpoch),
+   ephemStart              (ep.ephemStart),
+   ephemEnd                (ep.ephemEnd),
+   psm                     (NULL),
+   state                   (NULL),
+   j2kState                (NULL),
+   stepTaken               (0.0),
+   startOptions            (ep.startOptions),
+   startEpochSource        (ep.startEpochSource),
+   stepDirection           (ep.stepDirection),
+   solarSystem             (NULL)
 {
 }
 
@@ -180,6 +185,7 @@ EphemerisPropagator& EphemerisPropagator::operator=(
          j2kState = NULL;
       }
       stepTaken        = 0.0;
+      startOptions     = ep.startOptions;
       startEpochSource = ep.startEpochSource;
       stepDirection    = ep.stepDirection;
       solarSystem      = NULL;
@@ -303,7 +309,7 @@ std::string EphemerisPropagator::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool EphemerisPropagator::IsParameterReadOnly(const Integer id) const
 {
-   if (id == INITIAL_STEP_SIZE)
+   if ((id == INITIAL_STEP_SIZE) || (id == EPHEM_START_OPTIONS))
       return true;
    return Propagator::IsParameterReadOnly(id);
 }
@@ -787,6 +793,81 @@ bool EphemerisPropagator::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accesses StringArray parameters
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The corresponding StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& EphemerisPropagator::GetStringArrayParameter(
+      const Integer id) const
+{
+   if (id == EPHEM_START_OPTIONS)
+   {
+      return startOptions;
+   }
+   return Propagator::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Accesses StringArray parameters from a vector of StringArrays
+ *
+ * @param id The ID of the parameter
+ * @param index The index of the array in the vector of arrays
+ *
+ * @return The corresponding StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& EphemerisPropagator::GetStringArrayParameter(
+      const Integer id, const Integer index) const
+{
+   return Propagator::GetStringArrayParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Accesses StringArray parameters from a vector of StringArrays
+ *
+ * @param label The text label of the parameter
+ *
+ * @return The corresponding StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& EphemerisPropagator::GetStringArrayParameter(
+      const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Accesses StringArray parameters from a vector of StringArrays
+ *
+ * @param label The text label of the parameter
+ * @param index The index of the array in the vector of arrays
+ *
+ * @return The corresponding StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& EphemerisPropagator::GetStringArrayParameter(
+      const std::string &label, const Integer index) const
+{
+   return GetStringArrayParameter(GetParameterID(label), index);
+}
 
 // Reference object code
 
