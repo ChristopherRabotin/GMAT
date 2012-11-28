@@ -52,7 +52,7 @@ namespace Gmat
 //      TWO_BODY_PROPAGATION = 0,	// 2012.01.24 - wcs - disallowed for now
       DE405 = 0,
       DE421,
-	  DE424,
+      DE424,
       SPICE,            // please leave this one at the end
       PosVelSourceCount
    };
@@ -565,6 +565,8 @@ private:
 
    bool isFirstTimeMu;
    bool isFirstTimeRadius;
-};
-#endif // CelestialBody_hpp
 
+   void WriteDeprecatedMessage(Integer id) const;
+};
+
+#endif // CelestialBody_hpp

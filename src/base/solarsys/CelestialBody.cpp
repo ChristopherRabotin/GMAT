@@ -1931,9 +1931,9 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 {
    // should I delete the old one here???
-   theSourceFile = src;
+   theSourceFile  = src;
    sourceFilename = theSourceFile->GetName();
-   bodyNumber = theSourceFile->GetBodyID(instanceName);
+   bodyNumber     = theSourceFile->GetBodyID(instanceName);
    #ifdef DEBUG_EPHEM_SOURCE
       MessageInterface::ShowMessage
          ("CelestialBody::SetSourceFile() <%p> %s, Setting source file to %p\n",
@@ -2741,6 +2741,14 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer CelestialBody::GetParameterID(const std::string &str) const
 {
+   if (str == "SourceFilename")
+   {
+      WriteDeprecatedMessage(SOURCE_FILENAME);
+   }
+   if (str == "SourceFile")
+   {
+      WriteDeprecatedMessage(SOURCE_FILE);
+   }
    for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
@@ -3101,8 +3109,11 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
 {
    if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
    if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
-   if (id == SOURCE_FILENAME)       return sourceFilename;
-   if (id == SOURCE_FILE)           return sourceFilename;
+   if ((id == SOURCE_FILENAME) ||(id == SOURCE_FILE))
+   {
+      WriteDeprecatedMessage(id);
+      return sourceFilename;
+   }
 
    if (id == POTENTIAL_FILE_NAME)   return potentialFileName;
    if (id == ATMOS_MODEL_NAME)
@@ -3160,7 +3171,7 @@ std::string CelestialBody::GetStringParameter(const Integer id,
  */
 //------------------------------------------------------------------------------
 bool CelestialBody::SetStringParameter(const Integer id,
-                                       const std::string &value) // const?
+                                       const std::string &value)
 {
    #ifdef DEBUG_CB_SET_STRING
    std::string idString = GetParameterText(id);
@@ -3218,10 +3229,11 @@ bool CelestialBody::SetStringParameter(const Integer id,
          }
       return false;
    }
-   if (id == SOURCE_FILENAME)
+   if ((id == SOURCE_FILENAME) || (id == SOURCE_FILE))
    {
       if (!(GmatFileUtil::DoesFileExist(value)))
       {
+         WriteDeprecatedMessage(id);
          SolarSystemException sse;
          sse.SetDetails(errorMessageFormat.c_str(),
                         value.c_str(), "SourceFilename", "File must exist");
@@ -3868,7 +3880,8 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    {
       return true;
    }
-   // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
+   // deprecated fields are not written out
+   if (id == SOURCE_FILENAME) return true;
 
    return SpacePoint::IsParameterReadOnly(id);
 }
@@ -4777,4 +4790,44 @@ bool CelestialBody::NeedsOnlyMainSPK()
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
-// none at this time
+
+//------------------------------------------------------------------------------
+// void WriteDeprecatedMessage(Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method writes a message once for each deprecated parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CelestialBody::WriteDeprecatedMessage(Integer id) const
+{
+   // Write only one message per session
+   static bool writeSourceFileName = true;
+   static bool writeSourceFile     = true;
+
+   switch (id)
+   {
+   case SOURCE_FILENAME:
+      if (writeSourceFileName)
+      {
+         MessageInterface::ShowMessage
+            (deprecatedMessageFormat.c_str(), "SourceFilename", GetName().c_str(),
+             "'DEFilename' on SolarSystem");
+         writeSourceFileName = false;
+      }
+      break;
+   case SOURCE_FILE:
+      if (writeSourceFile)
+      {
+         MessageInterface::ShowMessage
+            (deprecatedMessageFormat.c_str(), "SourceFile", GetName().c_str(),
+             "'DEFilename' on SolarSystem");
+         writeSourceFile = false;
+      }
+      break;
+   default:
+      break;
+   }
+}
+
+
