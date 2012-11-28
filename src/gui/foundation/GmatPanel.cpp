@@ -444,13 +444,16 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		#endif
 
 		// if path is relative, try to append it to gmat root 
-		  if (GmatFileUtil::IsPathRelative(s.c_str()))
+		if (GmatFileUtil::IsPathRelative(s.c_str()))
 		{
 			FileManager *fm = FileManager::Instance();
 			if (GmatStringUtil::EndsWithPathSeparator(fm->GetRootPath()))
-				s = fm->GetRootPath() + s;
+				s = fm->GetRootPath().c_str() + s;
 			else
-				s = fm->GetRootPath() + GmatFileUtil::GetPathSeparator() + s;
+			{
+			   wxString pathSep = GmatFileUtil::GetPathSeparator().c_str();
+				s = fm->GetRootPath().c_str() + pathSep + s;
+			}
 
 		}
 		wxLaunchDefaultBrowser(s);
