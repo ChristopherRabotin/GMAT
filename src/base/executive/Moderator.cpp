@@ -4613,6 +4613,22 @@ const StringArray& Moderator::GetDefaultCoordinateSystemNames()
    return defaultCoordSystemNames;
 }
 
+//------------------------------------------------------------------------------
+// bool IsDefaultCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Returns true if name found in the default coordinate system names, false otherwise
+ **/
+//------------------------------------------------------------------------------
+bool Moderator::IsDefaultCoordinateSystem(const std::string &name)
+{
+   if (find(defaultCoordSystemNames.begin(), defaultCoordSystemNames.end(), name) ==
+       defaultCoordSystemNames.end())
+      return false;
+   else
+      return true;
+}
+
 
 // Subscriber
 //------------------------------------------------------------------------------

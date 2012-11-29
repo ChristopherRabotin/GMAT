@@ -286,6 +286,7 @@ public:
                                             Integer manage = 1);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    const StringArray& GetDefaultCoordinateSystemNames();
+   bool IsDefaultCoordinateSystem(const std::string &name);
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,

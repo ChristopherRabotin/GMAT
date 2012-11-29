@@ -596,11 +596,7 @@ CoordinateSystem* GuiInterpreter::GetInternalCoordinateSystem()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::IsDefaultCoordinateSystem(const std::string &name)
 {
-   if (name == "EarthMJ2000Eq" || name == "EarthMJ2000Ec" ||
-       name == "EarthFixed")
-      return true;
-   else
-      return false;
+   return theModerator->IsDefaultCoordinateSystem(name);
 }
 
 
