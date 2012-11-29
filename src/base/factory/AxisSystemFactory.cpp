@@ -42,7 +42,7 @@
 #include "GeocentricSolarMagneticAxes.hpp"
 #include "TopocentricAxes.hpp"
 
-#include "ITRFAxes.hpp"
+//#include "ITRFAxes.hpp"
 #include "ICRFAxes.hpp"
 #include "BodySpinSunAxes.hpp"
 
@@ -153,10 +153,10 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new TopocentricAxes(withName);
    }
-   else if (ofType == "ITRF")
-   {
-      withAxes = new ITRFAxes(withName);
-   }
+//   else if (ofType == "ITRF")
+//   {
+//      withAxes = new ITRFAxes(withName);
+//   }
    else if (ofType == "ICRF")
    {
       withAxes = new ICRFAxes(withName);
@@ -203,7 +203,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("GSM");
       creatables.push_back("Topocentric");
 
-	  creatables.push_back("ITRF");
+//	  creatables.push_back("ITRF");
 	  creatables.push_back("ICRF");
 	  creatables.push_back("BodySpinSun");
    }
