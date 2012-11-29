@@ -217,7 +217,7 @@ void FunctionSetupPanel::SaveData()
    
    // save file contents
    #ifdef __USE_STC_EDITOR__
-      mEditor->SaveFile(pathname);
+      mEditor->SaveFile(pathname.c_str());
       #ifdef DEBUG_FUNCTIONPANEL_SAVE
       MessageInterface::ShowMessage("   contents saved to '%s'\n", pathname.c_str());
       #endif
