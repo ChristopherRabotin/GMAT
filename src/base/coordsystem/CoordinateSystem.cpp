@@ -1739,13 +1739,14 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
 bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name)
 {
+   if (obj == NULL)
+      return false;
+
    #ifdef DEBUG_CS_SET_REF
       MessageInterface::ShowMessage
          ("Entering CS::SetRefObject with obj of type %s and name '%s'\n",
           (obj->GetTypeName()).c_str(), name.c_str());
    #endif
-   if (obj == NULL)
-      return false;
    
    bool retval = false;
    
@@ -1763,6 +1764,9 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          AxisSystem *oldAxis = axes;
          
          axes = (AxisSystem*) obj->Clone();
+         #ifdef DEBUG_CS_SET_AXIS
+            MessageInterface::ShowMessage("CS::SetRefObject - axis cloned!!!\n");
+         #endif
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             (axes, "clonedAxes", "CoordinateSystem::SetRefObject()",
