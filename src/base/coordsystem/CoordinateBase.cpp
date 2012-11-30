@@ -277,6 +277,7 @@ void CoordinateBase::SetJ2000BodyName(const std::string &toName)
 void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)
 {
    j2000Body = j2000Ptr;
+   if (j2000Body) j2000BodyName = j2000Body->GetName();
 }
 
 
@@ -556,6 +557,14 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 //          "Warning: Attempting to set the read-only parameter 'J2000Body' "
 //          "on the coordinate system '%s'\n", instanceName.c_str());
 //       // j2000BodyName = value; 
+       static bool writeIgnoredMessage = true;
+       if (writeIgnoredMessage)
+       {
+          MessageInterface::ShowMessage
+             ("*** WARNING *** \"J2000Body\" on Coordinate Systems is ignored and will be "
+              "removed from a future build\n");
+          writeIgnoredMessage = false;
+       }
        return true;
     }
     

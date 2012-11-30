@@ -4536,7 +4536,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          #endif
          
          // Set J2000Body and SolarSystem
-         obj->SetStringParameter("J2000Body", "Earth");
+         obj->SetJ2000BodyName("Earth");
          obj->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
          obj->SetSolarSystem(ss);
          obj->Initialize();
@@ -4545,7 +4545,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          {
             // create MJ2000Eq AxisSystem with Earth as origin
             AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "MJ2000Eq_Earth");
-            obj->SetStringParameter("J2000Body", "Earth");
+            obj->SetJ2000BodyName("Earth");
             obj->SetStringParameter("Origin", "Earth");
             obj->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
             obj->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
@@ -7426,7 +7426,7 @@ void Moderator::CreateDefaultCoordSystems()
          #endif
          AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "MJ2000Ec_Earth");
          eccs->SetStringParameter("Origin", "Earth");
-         eccs->SetStringParameter("J2000Body", "Earth");
+         eccs->SetJ2000BodyName("Earth");
          eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
          eccs->SetOrigin(earth);
          eccs->SetJ2000Body(earth);
@@ -7466,7 +7466,7 @@ void Moderator::CreateDefaultCoordSystems()
          bfecAxis->SetEopFile(theEopFile);
          bfecAxis->SetCoefficientsFile(theItrfFile);
          bfcs->SetStringParameter("Origin", "Earth");
-         bfcs->SetStringParameter("J2000Body", "Earth");
+         bfcs->SetJ2000BodyName("Earth");
          bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
          bfcs->SetOrigin(earth);
          bfcs->SetJ2000Body(earth);
@@ -7556,9 +7556,9 @@ void Moderator::CreateDefaultParameters()
    CreateParameter("Element1", "DefaultIB.Element1");
    CreateParameter("Element2", "DefaultIB.Element2");
    CreateParameter("Element3", "DefaultIB.Element3");
-   CreateParameter("V", "DefaultIB.V");
-   CreateParameter("N", "DefaultIB.N");
-   CreateParameter("B", "DefaultIB.B");
+//   CreateParameter("V", "DefaultIB.V");  // deprecated
+//   CreateParameter("N", "DefaultIB.N");  // deprecated
+//   CreateParameter("B", "DefaultIB.B");  // deprecated
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
    #endif
@@ -8173,7 +8173,7 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
          cs->SetStringParameter("Origin", origin);
          cs->SetRefObject(FindObject(origin), Gmat::SPACE_POINT, origin);
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-         cs->SetStringParameter("J2000Body", "Earth");
+         cs->SetJ2000BodyName("Earth");
          cs->SetRefObject(FindObject("Earth"), Gmat::SPACE_POINT, "Earth");
          cs->SetSolarSystem(theSolarSystemInUse);
          cs->Initialize();

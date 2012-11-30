@@ -22,6 +22,7 @@
 
 #include "BurnParameters.hpp"
 #include "ColorTypes.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_BURN_PARAM 1
 
@@ -58,6 +59,21 @@ ImpBurnElements::ImpBurnElements(const std::string &type, const std::string &nam
       mColor = GmatColor::RED32;
    #endif
    
+   // Write deprecated message for each once per GMAT session
+   static bool writeDeprecatedMsg = true;
+
+   if ((type == "V") || (type == "N") || (type == "B"))
+   {
+      if  (writeDeprecatedMsg)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"V\", \"N\", \"B\" are deprecated and will be "
+             "removed from a future build; please use \"Element1\", \"Element2\", \"Element3\" "
+             "instead.\n");
+         writeDeprecatedMsg = false;
+      }
+   }
+
    if (type == "Element1" || type == "V")
       mElementId = ELEMENT1;
    else if (type == "Element2" || type == "N")

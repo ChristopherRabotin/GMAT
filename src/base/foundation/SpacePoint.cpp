@@ -284,7 +284,9 @@ void SpacePoint::SetJ2000Body(SpacePoint* toBody)
             instanceName.c_str());
    #endif
    
-   j2000Body = toBody;
+   j2000Body        = toBody;
+   if (j2000Body)
+      j2000BodyName = j2000Body->GetName();
 
    #ifdef DEBUG_J2000_STATE
       if (j2000Body)
@@ -783,9 +785,19 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
  bool SpacePoint::SetStringParameter(const Integer id, 
                                     const std::string &value)
 {
+    // this is also handled in CelestialBody and Spacecraft
+    // it is caught here if not handles there for some reason
    if (id == J2000_BODY_NAME) 
    {
-      j2000BodyName = value; 
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"J2000BodyName\" on SpacePoint objects is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+
       return true;
    }
    

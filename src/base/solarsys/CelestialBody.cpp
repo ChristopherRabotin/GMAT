@@ -3184,6 +3184,21 @@ bool CelestialBody::SetStringParameter(const Integer id,
    std::string noTwoBody = "TwoBody propagation not currently allowed in GMAT.\n";
    // 2012.01/24 - wcs - two body propagation disallowed for now
 
+   // this is also handled in SpacePoint - we catch it here to tailor the warning message
+   if (id == J2000_BODY_NAME)
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"J2000BodyName\" on Celestial Bodies is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+
+      return true;
+   }
+
    int i;
    if (id == BODY_TYPE)
    {

@@ -2772,6 +2772,21 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          id, GetParameterText(id).c_str(), value.c_str());
    #endif
 
+   // this is also handled in SpacePoint - we catch it here to tailor the warning message
+   if (id == J2000_BODY_NAME)
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"J2000BodyName\" on Spacecraft is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+
+      return true;
+   }
+
    if (id == ADD_HARDWARE)
    {
       // Only add the hardware if it is not in the list already
@@ -2795,7 +2810,13 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       }
 
    if ((id < SpaceObjectParamCount) || (id >= SpacecraftParamCount))
+   {
+      #ifdef DEBUG_SC_SET_STRING
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetStringParameter() calling SpaceObject::GetPId with id = %d\n", id);
+      #endif
       return SpaceObject::SetStringParameter(id, value);
+   }
 
    if (id == SC_EPOCH_ID)
    {
