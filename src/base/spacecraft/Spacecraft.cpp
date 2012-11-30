@@ -3571,122 +3571,129 @@ bool Spacecraft::Initialize()
        state[4], state[5]);
    #endif
 
-   // Set the mu if CelestialBody is there through coordinate system's origin;
-   // Otherwise, discontinue process and send the error message
-   if (!coordinateSystem)
-   {
-      throw SpaceObjectException("Spacecraft has empty coordinate system");
-   }
-   if (!attitude)
-   {
-      #ifdef DEBUG_SC_ATTITUDE
-      MessageInterface::ShowMessage("Spacecraft %s has no defined attitude object.\n",
-                     instanceName.c_str());
-      #endif
-      throw SpaceObjectException("Spacecraft has no attitude set.");
-   }
-   else
-   {
-      #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage(
-         "Initializing attitude object for spacecraft %s\n",
-         instanceName.c_str());
-      #endif
+   bool retval = false;
 
-#ifdef __USE_SPICE__
-      if (attitude->IsOfType("SpiceAttitude"))
+   if (SpaceObject::Initialize())
+   {
+      // Set the mu if CelestialBody is there through coordinate system's origin;
+      // Otherwise, discontinue process and send the error message
+      if (!coordinateSystem)
       {
-         #ifdef DEBUG_SPICE_KERNELS
-         MessageInterface::ShowMessage("About to set %d CK kernels on spiceAttitude\n",
-               attitudeSpiceKernelNames.size());
-         MessageInterface::ShowMessage("About to set %d SCLK kernels on spiceAttitude\n",
-               scClockSpiceKernelNames.size());
-         MessageInterface::ShowMessage("About to set %d FK kernels on spiceAttitude\n",
-               frameSpiceKernelNames.size());
+         throw SpaceObjectException("Spacecraft has empty coordinate system");
+      }
+      if (!attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage("Spacecraft %s has no defined attitude object.\n",
+                        instanceName.c_str());
          #endif
-         SpiceAttitude *spiceAttitude = (SpiceAttitude*) attitude;
-         spiceAttitude->SetObjectID(instanceName, naifId, naifIdRefFrame);
-         for (Integer ii = 0; ii < (Integer) attitudeSpiceKernelNames.size(); ii++)
-            spiceAttitude->SetStringParameter("AttitudeKernelName", attitudeSpiceKernelNames[ii], ii);
-         for (Integer ii = 0; ii < (Integer) scClockSpiceKernelNames.size(); ii++)
-            spiceAttitude->SetStringParameter("SCClockKernelName", scClockSpiceKernelNames[ii], ii);
-         for (Integer ii = 0; ii < (Integer) frameSpiceKernelNames.size(); ii++)
-            spiceAttitude->SetStringParameter("FrameKernelName", frameSpiceKernelNames[ii], ii);
+         throw SpaceObjectException("Spacecraft has no attitude set.");
       }
-#endif
-      attitude->Initialize();
-      #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage(
-         "***Finished initializing attitude object for spacecraft %s\n",
-         instanceName.c_str());
-      #endif
-   }
-
-   #ifdef DEBUG_HARDWARE
-      MessageInterface::ShowMessage("Hardware list names:\n");
-      for (UnsignedInt i = 0; i < hardwareNames.size(); ++i)
+      else
       {
-         MessageInterface::ShowMessage("   %s\n", hardwareNames[i].c_str());
-      }
+         #ifdef DEBUG_SC_ATTITUDE
+            MessageInterface::ShowMessage(
+            "Initializing attitude object for spacecraft %s\n",
+            instanceName.c_str());
+         #endif
 
-      MessageInterface::ShowMessage("Hardware list objects:\n");
-      for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
-      {
-         MessageInterface::ShowMessage("   %s\n", hardwareList[i]->GetName().c_str());
-      }
-   #endif
-
-   // Set the hardware interconnections
-   for (ObjectArray::iterator i=hardwareList.begin(); i!=hardwareList.end(); ++i)
-   {
-      if ((*i)->IsOfType(Gmat::HARDWARE))
-      {
-         Hardware *current = (Hardware*)(*i);
-
-         // Get the hardware reference list
-         StringArray refs = current->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-         for (UnsignedInt j = 0; j < refs.size(); ++j)
+   #ifdef __USE_SPICE__
+         if (attitude->IsOfType("SpiceAttitude"))
          {
-            #ifdef DEBUG_HARDWARE
-               MessageInterface::ShowMessage("Connecting up %s for %s\n",
-                     refs[j].c_str(), current->GetName().c_str());
+            #ifdef DEBUG_SPICE_KERNELS
+            MessageInterface::ShowMessage("About to set %d CK kernels on spiceAttitude\n",
+                  attitudeSpiceKernelNames.size());
+            MessageInterface::ShowMessage("About to set %d SCLK kernels on spiceAttitude\n",
+                  scClockSpiceKernelNames.size());
+            MessageInterface::ShowMessage("About to set %d FK kernels on spiceAttitude\n",
+                  frameSpiceKernelNames.size());
             #endif
+            SpiceAttitude *spiceAttitude = (SpiceAttitude*) attitude;
+            spiceAttitude->SetObjectID(instanceName, naifId, naifIdRefFrame);
+            for (Integer ii = 0; ii < (Integer) attitudeSpiceKernelNames.size(); ii++)
+               spiceAttitude->SetStringParameter("AttitudeKernelName", attitudeSpiceKernelNames[ii], ii);
+            for (Integer ii = 0; ii < (Integer) scClockSpiceKernelNames.size(); ii++)
+               spiceAttitude->SetStringParameter("SCClockKernelName", scClockSpiceKernelNames[ii], ii);
+            for (Integer ii = 0; ii < (Integer) frameSpiceKernelNames.size(); ii++)
+               spiceAttitude->SetStringParameter("FrameKernelName", frameSpiceKernelNames[ii], ii);
+         }
+   #endif
+         attitude->Initialize();
+         #ifdef DEBUG_SC_ATTITUDE
+            MessageInterface::ShowMessage(
+            "***Finished initializing attitude object for spacecraft %s\n",
+            instanceName.c_str());
+         #endif
+      }
 
-            for (UnsignedInt k = 0; k < hardwareList.size(); ++k)
+      #ifdef DEBUG_HARDWARE
+         MessageInterface::ShowMessage("Hardware list names:\n");
+         for (UnsignedInt i = 0; i < hardwareNames.size(); ++i)
+         {
+            MessageInterface::ShowMessage("   %s\n", hardwareNames[i].c_str());
+         }
+
+         MessageInterface::ShowMessage("Hardware list objects:\n");
+         for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
+         {
+            MessageInterface::ShowMessage("   %s\n", hardwareList[i]->GetName().c_str());
+         }
+      #endif
+
+      // Set the hardware interconnections
+      for (ObjectArray::iterator i=hardwareList.begin(); i!=hardwareList.end(); ++i)
+      {
+         if ((*i)->IsOfType(Gmat::HARDWARE))
+         {
+            Hardware *current = (Hardware*)(*i);
+
+            // Get the hardware reference list
+            StringArray refs = current->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+            for (UnsignedInt j = 0; j < refs.size(); ++j)
             {
-               if (hardwareList[k]->GetName() == refs[j])
-                  current->SetRefObject(hardwareList[k],
-                        hardwareList[k]->GetType(), hardwareList[k]->GetName());
+               #ifdef DEBUG_HARDWARE
+                  MessageInterface::ShowMessage("Connecting up %s for %s\n",
+                        refs[j].c_str(), current->GetName().c_str());
+               #endif
+
+               for (UnsignedInt k = 0; k < hardwareList.size(); ++k)
+               {
+                  if (hardwareList[k]->GetName() == refs[j])
+                     current->SetRefObject(hardwareList[k],
+                           hardwareList[k]->GetType(), hardwareList[k]->GetName());
+               }
             }
          }
       }
+
+
+      // Verify all Spacecraft's referenced objects:
+      if (VerifyAddHardware() == false)            // verify added hardware
+              return false;
+
+      #ifdef DEBUG_SPACECRAFT_CS
+         MessageInterface::ShowMessage("Spacecraft::Initialize() exiting ----------\n");
+      #endif
+
+      for (UnsignedInt i = 0; i < tanks.size(); ++i)
+      {
+         // MessageInterface::ShowMessage("%d:\n%s\n", i,
+         //       tanks[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         tanks[i]->Initialize();
+      }
+
+      for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+      {
+         // MessageInterface::ShowMessage("%d:\n%s\n", i,
+         //       thrusters[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         thrusters[i]->Initialize();
+      }
+
+      isInitialized = true;
+      retval = true;
    }
 
-
-   // Verify all Spacecraft's referenced objects:
-   if (VerifyAddHardware() == false)            // verify added hardware
-           return false;
-
-   #ifdef DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage("Spacecraft::Initialize() exiting ----------\n");
-   #endif
-
-   for (UnsignedInt i = 0; i < tanks.size(); ++i)
-   {
-      // MessageInterface::ShowMessage("%d:\n%s\n", i,
-      //       tanks[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      tanks[i]->Initialize();
-   }
-
-   for (UnsignedInt i = 0; i < thrusters.size(); ++i)
-   {
-      // MessageInterface::ShowMessage("%d:\n%s\n", i,
-      //       thrusters[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      thrusters[i]->Initialize();
-   }
-
-   isInitialized = true;
-   return true;
+   return retval;
 }
 
 
