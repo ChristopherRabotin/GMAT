@@ -46,6 +46,8 @@
 //#define DEBUG_PROP_PANEL_ATMOS
 //#define DEBUG_PROP_PANEL_ERROR
 //#define DEBUG_PROP_INTEGRATOR
+//#define DEBUG_PROP_PROPAGATOR
+
 
 // Hard coded drag enumeration replaced by dynamic version, so set NONE_DM here
 #define NONE_DM 0
@@ -79,6 +81,8 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_ERROR, PropagationConfigPanel::OnErrorControlComboBox)
    EVT_COMBOBOX(ID_CB_PROP_ORIGIN, PropagationConfigPanel::OnPropOriginComboBox)
    EVT_COMBOBOX(ID_CB_PROP_EPOCHFORMAT, PropagationConfigPanel::OnPropEpochComboBox)
+   EVT_COMBOBOX(ID_CB_PROP_EPOCHSTART, PropagationConfigPanel::OnStartEpochComboBox)
+   EVT_TEXT(ID_CB_PROP_EPOCHSTART, PropagationConfigPanel::OnStartEpochTextChange)
 END_EVENT_TABLE()
 
 
@@ -314,9 +318,9 @@ void PropagationConfigPanel::Create()
    startEpochStaticText =
          new wxStaticText( this, ID_TEXT, wxT("Start Epoch"),
                            wxDefaultPosition, wxDefaultSize );
-   startEpochTextCtrl =
-         new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
-                         wxDefaultPosition, wxSize(160,-1), 0);
+   startEpochCombobox = new wxComboBox( this, ID_CB_PROP_EPOCHSTART, wxT(""),
+         wxDefaultPosition, wxSize(160,-1), startEpochChoices, wxCB_DROPDOWN );
+   startEpochCombobox->SetToolTip(pConfig->Read(_T("StartEpochHint")));
 
    intFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
    intFlexGridSizer->AddGrowableCol(1);
@@ -355,7 +359,7 @@ void PropagationConfigPanel::Create()
    intFlexGridSizer->Add( propagatorEpochFormatComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( 20, 0, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( startEpochStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   intFlexGridSizer->Add( startEpochTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( startEpochCombobox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( 20, 0, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
    intFlexGridSizer->Add( theStopCheckBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -719,6 +723,21 @@ void PropagationConfigPanel::LoadData()
       isSpkBodyChanged     = true;
       isSpkEpFormatChanged = true;
       isSpkEpochChanged    = true;
+
+      try
+      {
+         StringArray choices =
+               thePropagator->GetStringArrayParameter("StartOptions");
+         startEpochChoices.Clear();
+         for (UnsignedInt i = 0; i < choices.size(); ++i)
+            startEpochChoices.Add(choices[i].c_str());
+
+         startEpochCombobox->Clear();
+         startEpochCombobox->Append(startEpochChoices);
+      }
+      catch (BaseException &)  // Ignore exceptions here
+      {
+      }
    }
 
    PopulateForces();
@@ -1780,7 +1799,7 @@ void PropagationConfigPanel::Initialize()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 {
-    int propIndex = theIntegratorComboBox->GetSelection();
+   int propIndex = theIntegratorComboBox->GetSelection();
 
    #ifdef DEBUG_PROP_INTEGRATOR
    MessageInterface::ShowMessage
@@ -1806,6 +1825,21 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          spkBody     = thePropagator->GetStringParameter("CentralBody").c_str();
          spkEpFormat = thePropagator->GetStringParameter("EpochFormat").c_str();
          spkEpoch    = thePropagator->GetStringParameter("StartEpoch").c_str();
+
+         try
+         {
+            StringArray choices =
+                  thePropagator->GetStringArrayParameter("StartOptions");
+            startEpochChoices.Clear();
+            for (UnsignedInt i = 0; i < choices.size(); ++i)
+               startEpochChoices.Add(choices[i].c_str());
+
+            startEpochCombobox->Clear();
+            startEpochCombobox->Append(startEpochChoices);
+         }
+         catch (BaseException &)  // Ignore exceptions here
+         {
+         }
 
          isSpkStepChanged     = true;
          isSpkBodyChanged     = true;
@@ -1969,7 +2003,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
       }
       if (isSpkEpochChanged)
       {
-            startEpochTextCtrl->SetValue(spkEpoch);
+         startEpochCombobox->SetValue(spkEpoch);
       }
 
 //      spkStep = propagatorStepSizeTextCtrl->GetValue();
@@ -2465,10 +2499,81 @@ void PropagationConfigPanel::UpdatePrimaryBodyComboBoxList()
 
 
 //------------------------------------------------------------------------------
+// bool ValidatePropEpochComboBoxes()
+//------------------------------------------------------------------------------
+/**
+ * Ensures consistency in propagatorEpochFormatComboBox and startEpochCombobox
+ *
+ * This method checks the setting in the startEpochComboBox.  If the field isn't
+ * a fixed value like "FromSpacecraft" or "EphemStart", it validates that the
+ * text in the combobox is formatted consistently with the format selected in
+ * the propagatorEpochFormatComboBox.
+ *
+ * @return true is the fields are consistent, false if not.
+ */
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::ValidatePropEpochComboBoxes()
+{
+   bool retval = false;
+
+   wxString startEpochValue = startEpochCombobox->GetValue();
+   Real fromVal, toVal;
+   std::string newStr;
+
+   try
+   {
+      if (startEpochChoices.Index(startEpochValue) == wxNOT_FOUND)
+      {
+         #ifdef DEBUG_PROP_PROPAGATOR
+            MessageInterface::ShowMessage("Checking user set epoch: %s\n",
+                  startEpochValue.c_str());
+         #endif
+         std::string prevFmt = spkEpFormat.c_str();
+         std::string prevVal = startEpochValue.c_str();
+         TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+
+         if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
+         {
+            fromVal = -999.999;
+            TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
+                  startEpochValue.c_str(), "A1ModJulian", toVal,
+                  newStr);
+            retval = true;
+         }
+         else
+         {
+            Real val = startEpochValue.ToDouble(&fromVal);
+            if (val > 0.0)
+               retval = true;
+         }
+      }
+      else
+      {
+         retval = true;
+      }
+      #ifdef DEBUG_PROP_PROPAGATOR
+         MessageInterface::ShowMessage("Ready to save epoch setting: %s\n",
+               startEpochValue.c_str());
+      #endif
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
+      retval = false;
+   }
+
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // bool SaveIntegratorData()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveIntegratorData()
 {
+   bool retval = false;
+
    #ifdef DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveIntegratorData() entered\n");
@@ -2579,14 +2684,16 @@ bool PropagationConfigPanel::SaveIntegratorData()
       ShowPropData("SaveData() AFTER  saving Integrator");
       #endif
 
-      return true;
+      retval = true;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return false;
+      retval = false;
    }
+
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -2625,33 +2732,25 @@ bool PropagationConfigPanel::SavePropagatorData()
       thePropagator->SetStringParameter(id, str);
 
       // Range check the epoch value
-      Real fromVal;
-      Real toVal = -999.999;
-      std::string newStr;
 
       std::string prevFmt = spkEpFormat.c_str();
-      std::string prevVal = startEpochTextCtrl->GetValue().c_str();
-      TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+      std::string prevVal = startEpochCombobox->GetValue().c_str();
 
-      if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
+      if (startEpochChoices.Index(prevVal.c_str()) == wxNOT_FOUND)
+         TimeConverterUtil::ValidateTimeFormat(prevFmt, prevVal, true);
+
+      wxString startEpochValue = startEpochCombobox->GetValue();
+
+      if (ValidatePropEpochComboBoxes())
       {
-         fromVal = -999.999;
-         TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
-               startEpochTextCtrl->GetValue().c_str(), "A1ModJulian", toVal,
-               newStr);
-      }
-      else
-      {
-         startEpochTextCtrl->GetValue().ToDouble(&fromVal);
-      }
+         str = propagatorEpochFormatComboBox->GetValue().c_str();
+         id = thePropagator->GetParameterID("EpochFormat");
+         thePropagator->SetStringParameter(id, str);
 
-      str = propagatorEpochFormatComboBox->GetValue().c_str();
-      id = thePropagator->GetParameterID("EpochFormat");
-      thePropagator->SetStringParameter(id, str);
-
-      str = startEpochTextCtrl->GetValue().c_str();
-      id = thePropagator->GetParameterID("StartEpoch");
-      thePropagator->SetStringParameter(id, str);
+         str = startEpochValue.c_str();
+         id = thePropagator->GetParameterID("StartEpoch");
+         thePropagator->SetStringParameter(id, str);
+      }
    }
    catch (BaseException &e)
    {
@@ -2676,6 +2775,8 @@ bool PropagationConfigPanel::SavePropagatorData()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveDegOrder()
 {
+   bool retval = false;
+
    #ifdef DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveDegOrder() entered\n");
@@ -2745,14 +2846,16 @@ bool PropagationConfigPanel::SaveDegOrder()
       }
 
       isDegOrderChanged = false;
-      return true;
+      retval = true;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return false;
+      retval = false;
    }
+
+   return retval;
 }
 
 
@@ -2761,6 +2864,8 @@ bool PropagationConfigPanel::SaveDegOrder()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SavePotFile()
 {
+   bool retval = false;
+
    #ifdef DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SavePotFile() entered\n");
@@ -2816,14 +2921,16 @@ bool PropagationConfigPanel::SavePotFile()
       }
 
       isPotFileChanged = false;
-      return true;
+      retval = true;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return false;
+      retval = false;
    }
+
+   return retval;
 }
 
 
@@ -2832,6 +2939,8 @@ bool PropagationConfigPanel::SavePotFile()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveAtmosModel()
 {
+   bool retval = false;
+
    #ifdef DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveAtmosModel() entered\n");
@@ -2922,14 +3031,16 @@ bool PropagationConfigPanel::SaveAtmosModel()
 
       isAtmosChanged = false;
       canClose = true;
-      return true;
+      retval = true;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return false;
+      retval = false;
    }
+
+   return retval;
 }
 
 
@@ -3176,39 +3287,52 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
 
    if (!spkEpFormat.IsSameAs(epochSelection))
    {
-      isIntegratorDataChanged = true;
-
-      spkEpoch = startEpochTextCtrl->GetValue();
-
-      // Update the epoch string
-      try
+      if (startEpochChoices.Index(startEpochCombobox->GetValue()) == wxNOT_FOUND)
       {
-         Real fromVal;
-         Real toVal = -999.999;
+         isIntegratorDataChanged = true;
 
-         std::string prevFmt = spkEpFormat.c_str();
-         std::string prevVal = spkEpoch.c_str();
-         TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+         if (ValidatePropEpochComboBoxes())
+         {
+            spkEpoch = startEpochCombobox->GetValue();
 
-         if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
-            fromVal = -999.999;
+            // Update the epoch string
+            try
+            {
+               Real fromVal;
+               Real toVal = -999.999;
+
+               std::string prevFmt = spkEpFormat.c_str();
+               std::string prevVal = spkEpoch.c_str();
+               TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+
+               if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
+                  fromVal = -999.999;
+               else
+               {
+                  spkEpoch.ToDouble(&fromVal);
+               }
+
+               TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal, spkEpoch.c_str(),
+                     epochSelection.c_str(), toVal, newStr);
+            }
+            catch (BaseException &e)
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, e.GetFullMessage() +
+                   "\nPlease enter valid Epoch before changing the Epoch Format\n");
+
+               Integer epIndex = propagatorEpochFormatComboBox->FindString(spkEpFormat);
+               propagatorEpochFormatComboBox->SetSelection(epIndex);
+               return;
+            }
+         }
          else
          {
-            spkEpoch.ToDouble(&fromVal);
+            MessageInterface::PopupMessage(Gmat::ERROR_, "Please enter a valid "
+                  "Epoch in the current format before changing the Epoch "
+                  "Format\n");
+            return;
          }
-
-         TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal, spkEpoch.c_str(),
-               epochSelection.c_str(), toVal, newStr);
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, e.GetFullMessage() +
-             "\nPlease enter valid Epoch before changing the Epoch Format\n");
-
-         Integer epIndex = propagatorEpochFormatComboBox->FindString(spkEpFormat);
-         propagatorEpochFormatComboBox->SetSelection(epIndex);
-         return;
       }
 
       spkEpFormat = epochSelection;
@@ -3217,13 +3341,99 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
       propagatorEpochFormatComboBox->SetSelection(epIndex);
 
       spkEpoch = newStr.c_str();
-      isSpkEpochChanged = true;
+      if (startEpochChoices.Index(startEpochCombobox->GetValue()) == wxNOT_FOUND)
+         isSpkEpochChanged = true;
 
       DisplayIntegratorData(false);
       EnableUpdate(true);
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void OnStartEpochComboBox(wxCommandEvent &)
+//------------------------------------------------------------------------------
+/**
+ * Tells the GUI that the start epoch combobox has changed
+ */
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
+{
+   if (thePropagator->IsOfType("Integrator"))
+      return;
+
+   if (startEpochChoices.Index(startEpochCombobox->GetValue()) == wxNOT_FOUND)
+   {
+      isIntegratorDataChanged = true;
+
+      if (ValidatePropEpochComboBoxes())
+      {
+         wxString epochSelection = propagatorEpochFormatComboBox->GetStringSelection();
+         std::string newStr;
+         spkEpoch = startEpochCombobox->GetValue();
+
+         // Update the epoch string
+         try
+         {
+            Real fromVal;
+            Real toVal = -999.999;
+
+            std::string prevFmt = spkEpFormat.c_str();
+            std::string prevVal = spkEpoch.c_str();
+            TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+
+            if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
+               fromVal = -999.999;
+            else
+            {
+               spkEpoch.ToDouble(&fromVal);
+            }
+
+            TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
+                  spkEpoch.c_str(), epochSelection.c_str(), toVal, newStr);
+         }
+         catch (BaseException &e)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, e.GetFullMessage() + "\nPlease enter valid Epoch "
+                     "before changing the Epoch Format\n");
+
+            Integer epIndex =
+                  propagatorEpochFormatComboBox->FindString(spkEpFormat);
+            propagatorEpochFormatComboBox->SetSelection(epIndex);
+            return;
+         }
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, "Please enter a valid "
+               "Epoch in the current format before changing the Epoch "
+               "Format\n");
+         return;
+      }
+   }
+   else
+      spkEpoch = startEpochCombobox->GetValue();
+
+   isSpkEpochChanged = true;
+   DisplayIntegratorData(false);
+   EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnStartEpochTextChange(wxCommandEvent &)
+//------------------------------------------------------------------------------
+/**
+ * Handles typed changes to the start epoch combobox
+ */
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnStartEpochTextChange(wxCommandEvent &)
+{
+   isIntegratorDataChanged = true;
+   isSpkEpochChanged = true;
+   EnableUpdate(true);
+}
 
 // wxButton events
 //------------------------------------------------------------------------------
@@ -3985,7 +4195,7 @@ void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
       propagatorEpochFormatStaticText->Show(false);
       propagatorEpochFormatComboBox->Show(false);
       startEpochStaticText->Show(false);
-      startEpochTextCtrl->Show(false);
+      startEpochCombobox->Show(false);
 
       theStopCheckBox->Show(true);
    }
@@ -4023,7 +4233,7 @@ void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
          propagatorEpochFormatStaticText->Show(true);
          propagatorEpochFormatComboBox->Show(true);
          startEpochStaticText->Show(true);
-         startEpochTextCtrl->Show(true);
+         startEpochCombobox->Show(true);
       }
       else
       {

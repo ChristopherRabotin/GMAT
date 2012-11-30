@@ -194,7 +194,8 @@ private:
    wxStaticText *propagatorEpochFormatStaticText;
    wxComboBox *propagatorEpochFormatComboBox;
    wxStaticText *startEpochStaticText;
-   wxTextCtrl *startEpochTextCtrl;
+   wxComboBox *startEpochCombobox;
+   wxArrayString startEpochChoices;
 
    wxString integratorString;
    wxString primaryBodyString;
@@ -308,6 +309,7 @@ private:
    void EnablePrimaryBodyItems(bool enable = true, bool clear = false);
    void UpdatePrimaryBodyItems();
    void UpdatePrimaryBodyComboBoxList();
+   bool ValidatePropEpochComboBoxes();
    
    // Saving data
    bool SaveIntegratorData();
@@ -338,6 +340,8 @@ private:
    void OnErrorControlComboBox(wxCommandEvent &event);
    void OnPropOriginComboBox(wxCommandEvent &);
    void OnPropEpochComboBox(wxCommandEvent &);
+   void OnStartEpochComboBox(wxCommandEvent &);
+   void OnStartEpochTextChange(wxCommandEvent &);
 
    
    // Button event methods
@@ -394,7 +398,8 @@ private:
       ID_BUTTON_PM_EDIT,
       ID_BUTTON_SRP_EDIT,
       ID_CB_PROP_ORIGIN,
-      ID_CB_PROP_EPOCHFORMAT
+      ID_CB_PROP_EPOCHFORMAT,
+      ID_CB_PROP_EPOCHSTART
    };
 };
 
