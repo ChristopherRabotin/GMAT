@@ -95,7 +95,7 @@ EphemerisPropagator::EphemerisPropagator(const std::string & typeStr,
    epochString << GmatTimeConstants::MJD_OF_J2000;
    startEpoch = epochString.str();
    startOptions.push_back("FromSpacecraft");
-   startOptions.push_back("EphemStart");
+//   startOptions.push_back("EphemStart");
 }
 
 
@@ -662,8 +662,9 @@ bool EphemerisPropagator::SetStringParameter(const Integer id,
          startEpoch = value;
          if (startEpoch == "FromSpacecraft")
             startEpochSource = FROM_SPACECRAFT;
-         else if (startEpoch == "EphemStart")
-            startEpochSource = FROM_EPHEM;
+         // Not currently supported:
+//         else if (startEpoch == "EphemStart")
+//            startEpochSource = FROM_EPHEM;
          else
             startEpochSource = FROM_SCRIPT;
          return true;
