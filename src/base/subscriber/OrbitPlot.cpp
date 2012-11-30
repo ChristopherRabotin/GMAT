@@ -2064,7 +2064,7 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
        mNumData, mDataCollectFrequency, currentProvider);
    #endif
    
-   // Buffer data if data collect frequecy is met or fist data
+   // Buffer data if data collect frequency is met or fist data
    if ((mNumData % mDataCollectFrequency) == 0 || (mNumData == 1))
    {
       Integer status = BufferOrbitData(dat, len);
