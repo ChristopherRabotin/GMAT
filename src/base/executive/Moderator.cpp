@@ -7377,6 +7377,7 @@ void Moderator::CreateInternalCoordSystem()
 //------------------------------------------------------------------------------
 // void CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
+#include "ICRFAxes.hpp"
 void Moderator::CreateDefaultCoordSystems()
 {
    #if DEBUG_INITIALIZE
@@ -7489,6 +7490,46 @@ void Moderator::CreateDefaultCoordSystems()
          #endif
          bfcs->SetSolarSystem(ss);
          bfcs->Initialize();
+      }
+
+      // EarthICRF			// made changes by TUAN NGUYEN
+      CoordinateSystem *earthICRFcs = GetCoordinateSystem("EarthICRF");
+      defaultCoordSystemNames.push_back("EarthICRF");
+      if (earthICRFcs == NULL)
+      {
+         earthICRFcs = CreateCoordinateSystem("EarthICRF", false);
+         #if DEBUG_INITIALIZE
+         MessageInterface::ShowMessage
+            (".....created <%p>'%s'\n", earthICRFcs, earthICRFcs->GetName().c_str());
+         #endif
+         ICRFAxes *icrfAxis =
+            (ICRFAxes*)CreateAxisSystem("ICRF", "ICRF_Axis");
+         icrfAxis->SetEopFile(theEopFile);
+         icrfAxis->SetCoefficientsFile(theItrfFile);
+         earthICRFcs->SetStringParameter("Origin", "Earth");
+         earthICRFcs->SetStringParameter("J2000Body", "Earth");
+         earthICRFcs->SetRefObject(icrfAxis, Gmat::AXIS_SYSTEM, icrfAxis->GetName());
+         earthICRFcs->SetOrigin(earth);
+         earthICRFcs->SetJ2000Body(earth);
+         earthICRFcs->SetSolarSystem(ss);
+         earthICRFcs->Initialize();
+         
+         // Since CoordinateSystem clones AxisSystem, delete it from here
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (bfecAxis, "localAxes", "Moderator::CreateDefaultCoordSystems()",
+             "deleting localAxes");
+         #endif
+         delete icrfAxis;
+      }
+      else
+      {
+         #if DEBUG_INITIALIZE
+         MessageInterface::ShowMessage
+            (".....found <%p>'%s'\n", earthICRFcs, earthICRFcs->GetName().c_str());
+         #endif
+         earthICRFcs->SetSolarSystem(ss);
+         earthICRFcs->Initialize();
       }
    }
    catch (BaseException &e)
