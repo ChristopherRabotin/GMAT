@@ -1681,7 +1681,7 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
 	   else
 		   return false;
    }
-   else if (value = -0)
+   else if (value == -0)
 	   value = 0;
 
    #ifdef DEBUG_TOREAL
