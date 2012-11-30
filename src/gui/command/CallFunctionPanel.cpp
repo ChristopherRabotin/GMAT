@@ -21,6 +21,7 @@
 #include "MessageInterface.hpp"
 
 #include "Function.hpp"
+#include <wx/colour.h>
 #include "Parameter.hpp"
 #include "ParameterSelectDialog.hpp"
 
@@ -151,11 +152,11 @@ void CallFunctionPanel::Create()
                      wxDefaultPosition, wxDefaultSize, 0 );
    
    wxStaticText *inLeftBracket =
-                     new wxStaticText( this, ID_TEXT, wxT("[  "),
+                     new wxStaticText( this, ID_TEXT, wxT("(  "),
                      wxDefaultPosition, wxDefaultSize, 0 );
    
    wxStaticText *inRightBracket =
-                     new wxStaticText( this, ID_TEXT, wxT("  ]"),
+                     new wxStaticText( this, ID_TEXT, wxT("  )"),
                      wxDefaultPosition, wxDefaultSize, 0 );
    
    wxStaticText *equalSign =
@@ -237,14 +238,17 @@ void CallFunctionPanel::Create()
    // Get available function ComboBox from theGuiManager
    theFunctionComboBox =
       theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(300, -1));
-   
+
+
    theInputTextCtrl =
       new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(50, -1),
                       wxTE_MULTILINE|wxTE_READONLY);
+   theInputTextCtrl->SetBackgroundColour( *wxLIGHT_GREY );
    
    theOutputTextCtrl =
       new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(50, -1),
                       wxTE_MULTILINE|wxTE_READONLY);
+   theOutputTextCtrl->SetBackgroundColour( *wxLIGHT_GREY );
    
    theInputViewButton = new
       wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
