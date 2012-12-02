@@ -31,25 +31,16 @@
 
 #include "Attitude.hpp"
 
-
-/**
- * Base class used for Kinematic attitude classes.
- * 
- * This class is the base class for classes computing spacecraft attitude 
- * kinematically for GMAT.
- *  
- * @note The current builds of GMAT only contain kinematic attitude modeling.
- */
 class GMAT_API Kinematic : public Attitude 
 {
 public:
-   // Constructor
+   /// Constructor
    Kinematic(const std::string &typeStr, const std::string &itsName = "");
-   // Copy constructor
-   Kinematic(const Kinematic &kin);
-   // operator =
-   Kinematic& operator=(const Kinematic &kin);
-   // destructor
+   /// Copy constructor
+   Kinematic(const Kinematic &att);
+   /// operator =
+   Kinematic& operator=(const Kinematic &att);
+   /// destructor
    virtual ~Kinematic();
 protected:
    enum 
@@ -57,12 +48,6 @@ protected:
        KinematicParamCount = AttitudeParamCount,
    };
    
-   // leave these here, in case we need them later
-   //static const std::string PARAMETER_TEXT[KinematicParamCount - AttitudeParamCount];
-   //
-   //static const Gmat::ParameterType PARAMETER_TYPE
-   //             [KinematicParamCount - AttitudeParamCount];
-
 private:
    // Default constructor - not implemented
    Kinematic();
@@ -70,4 +55,3 @@ private:
 
 };
 #endif /*Kinematic_hpp*/
-

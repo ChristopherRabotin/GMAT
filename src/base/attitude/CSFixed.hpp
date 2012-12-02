@@ -34,30 +34,22 @@
 #include "Kinematic.hpp"
 #include "Rmatrix33.hpp"
 
-/**
- * Class used for Coordinate System Fixed Attitude classes.
- * 
- * This class represents the coordinate system fixed spacecraft attitude 
- * for GMAT.
- *  
- * @note The current builds of GMAT only contain kinematic attitude modeling.
- */
 class GMAT_API CSFixed : public Kinematic 
 {
 public:
-   // Constructor
+   /// Constructor
    CSFixed(const std::string &itsName = "");
-   // copy constructor
+   /// copy constructor
    CSFixed(const CSFixed& att);
-   // operator =
+   /// operator =
    CSFixed& operator=(const CSFixed& att);
-   // destructor
+   /// destructor
    virtual ~CSFixed();
    
-   // Initialize the CSFixed attitude
+   /// Initialize the CSFixed attitude
    virtual bool Initialize();
 
-   // inherited from GmatBase
+   /// inherited from GmatBase
    virtual GmatBase* Clone() const;
 
 
@@ -67,11 +59,6 @@ protected:
        CSFixedParamCount = KinematicParamCount,
    };
    
-   // leave these here, in case we need them later
-   //static const std::string PARAMETER_TEXT[CSFixedParamCount - KinematicParamCount];
-   
-   //static const Gmat::ParameterType PARAMETER_TYPE[CSFixedParamCount - KinematicParamCount];
-
    virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);
 
 private:

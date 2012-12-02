@@ -29,9 +29,9 @@
 
 //#define DEBUG_CSFIXED
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 // none 
 
 //------------------------------------------------------------------------------
@@ -42,8 +42,7 @@
 //  CSFixed(const std::string &itsName)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the CSFixed class (Constructor).
- * The default value is the (0,0,0,1) quaternion.
+ * This method creates an object of the CSFixed class (constructor).
  */
 //------------------------------------------------------------------------------
 CSFixed::CSFixed(const std::string &itsName) : 
@@ -91,7 +90,7 @@ CSFixed& CSFixed::operator=(const CSFixed& att)
 //  ~CSFixed()
 //------------------------------------------------------------------------------
 /**
- * Destructor for the CSFixed class.
+ * Destroys the CSFixed class (constructor).
  */
 //------------------------------------------------------------------------------
 CSFixed::~CSFixed()
@@ -113,11 +112,10 @@ CSFixed::~CSFixed()
 bool CSFixed::Initialize()
 {
    return Kinematic::Initialize();
-   // may need to do other stuff here someday
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the CSFixed.
@@ -126,28 +124,25 @@ bool CSFixed::Initialize()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* CSFixed::Clone(void) const
+GmatBase* CSFixed::Clone() const
 {
    return (new CSFixed(*this));
 }
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  protected methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
 //------------------------------------------------------------------------------
 /**
- * This mothod computes the current CosineMatrix at the input time atTime.
+ * This method computes the current CosineMatrix at the input time atTime.
  *
  * @param atTime the A1Mjd time at which to compute the attitude.
  *
  * @note This method will update the CosineMatrix parameter of the class.
- * @note This method is pure virtual and will need to be implemented in
- *       the 'leaf' classes.
- * @note This method may not need to appear here - removal probable.
  */
 //------------------------------------------------------------------------------
 void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
@@ -163,16 +158,15 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    // We know RBi, since it is computed on initialization
    // Get the rotation matrix from the reference coordinate system
    Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
-//   Rvector bogus2 = refCS->FromMJ2000Eq(atTime, bogus, true);
    Rvector bogus2 = refCS->FromBaseSystem(atTime, bogus, true);  // @todo - do we need FromMJ2000Eq here?
    Rmatrix33 RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    // compute current attitude matrix
-   cosMat     = RBi * RiI;
+   dcm              = RBi * RiI;
    // Get the rotation dot matrix from the reference coordinate system
    // (it was computed on the last call to FromBaseSystem)         // @todo - do we need FromMJ2000Eq here?
    Rmatrix33 RiIDot = (refCS->GetLastRotationDotMatrix()).Transpose();
    
-   Rmatrix33 wxIBB  = - RBi * (RiIDot * (cosMat.Transpose()));
+   Rmatrix33 wxIBB  = - RBi * (RiIDot * (dcm.Transpose()));
    // set current angular velocity from this matrix
    angVel(0)   = wxIBB(2,1);
    angVel(1)   = wxIBB(0,2);
@@ -186,8 +180,7 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 }
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  private methods
-//---------------------------------
+//------------------------------------------------------------------------------
 // none 
-

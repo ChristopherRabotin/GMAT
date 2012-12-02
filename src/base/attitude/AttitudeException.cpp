@@ -15,28 +15,35 @@
 // Created: 2006.02.16
 //
 /**
- * Implementation code for the SolarSystemException class.
+ * Implementation of the AttitudeException class.
  */
 //------------------------------------------------------------------------------
 #include "AttitudeException.hpp"
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  public methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  AttitudeException(std::string details)
 //------------------------------------------------------------------------------
 /**
-* Constructs an AttitudeException object (default constructor).
+ * Constructs an AttitudeException object (default constructor).
  */
 //------------------------------------------------------------------------------
-
 AttitudeException::AttitudeException(std::string details) :
 BaseException  ("Attitude exception: ", details)
 {
 
 }
+
+//------------------------------------------------------------------------------
+//  ~AttitudeException()
+//------------------------------------------------------------------------------
+/**
+ * Destroys an AttitudeException object (destructor).
+ */
+//------------------------------------------------------------------------------
 AttitudeException::~AttitudeException()
 {
 }

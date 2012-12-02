@@ -30,9 +30,9 @@
 //#define DEBUG_SPICE_ATTITUDE
 //#define DEBUG_SPICE_ATTITUDE_GET_SET
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 SpiceAttitude::PARAMETER_TEXT[SpiceAttitudeParamCount - AttitudeParamCount] =
 {
@@ -137,8 +137,8 @@ SpiceAttitude& SpiceAttitude::operator=(const SpiceAttitude& att)
    sclk           = att.sclk;
    fk             = att.fk;
    #ifdef __USE_SPICE__
-   if (reader) delete reader;
-   reader         = (att.reader)->Clone();
+      if (reader) delete reader;
+      reader         = (att.reader)->Clone();
    #endif
    return *this;
 }
@@ -147,7 +147,7 @@ SpiceAttitude& SpiceAttitude::operator=(const SpiceAttitude& att)
 //  ~SpiceAttitude()
 //------------------------------------------------------------------------------
 /**
- * Destructor for the SpiceAttitude class.
+ * Destroys the SpiceAttitude class (destructor).
  */
 //------------------------------------------------------------------------------
 SpiceAttitude::~SpiceAttitude()
@@ -251,7 +251,7 @@ bool SpiceAttitude::Initialize()
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the SpiceAttitude.
@@ -260,23 +260,27 @@ bool SpiceAttitude::Initialize()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* SpiceAttitude::Clone(void) const
+GmatBase* SpiceAttitude::Clone() const
 {
    return (new SpiceAttitude(*this));
 }
 
 //------------------------------------------------------------------------------
-//  void SetObjectID(const std::string &objName, Integer objNaifId)
+//  void SetObjectID(const std::string &objName, Integer objNaifId,
+//                   Integer objRefFrameNaifId)
 //------------------------------------------------------------------------------
 /**
- * This method sets the object ID information (name, NAIF ID).
+ * This method sets the object ID information (name, NAIF ID, reference frame
+ * NAIF ID).
  *
- * @param objName   name of the object for which to get the attitude
- * @param objNaifId NAIF ID of the object
+ * @param objName           name of the object for which to set the object ids
+ * @param objNaifId         NAIF ID of the object
+ * @param objRefFrameNaifId reference frame NAIF ID
  *
  */
 //------------------------------------------------------------------------------
-void SpiceAttitude::SetObjectID(const std::string &objName, Integer objNaifId, Integer objRefFrameNaifId)
+void SpiceAttitude::SetObjectID(const std::string &objName, Integer objNaifId,
+                                Integer objRefFrameNaifId)
 {
    scName         = objName;
    naifId         = objNaifId;
@@ -299,7 +303,7 @@ const Rvector&   SpiceAttitude::GetQuaternion(Real atTime)
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime     = atTime;
-   quaternion       = Attitude::ToQuaternion(cosMat);
+   quaternion       = Attitude::ToQuaternion(dcm);
    return quaternion;
 }
 
@@ -320,7 +324,7 @@ const Rvector3&  SpiceAttitude::GetEulerAngles(Real atTime)
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime   = atTime;
-   eulerAngles    = Attitude::ToEulerAngles(cosMat,
+   eulerAngles    = Attitude::ToEulerAngles(dcm,
                               (Integer) eulerSequenceArray.at(0),
                               (Integer) eulerSequenceArray.at(1),
                               (Integer) eulerSequenceArray.at(2));
@@ -348,11 +352,11 @@ const Rvector3&  SpiceAttitude::GetEulerAngles(Real atTime)
  */
 //---------------------------------------------------------------------------
 const Rvector3&  SpiceAttitude::GetEulerAngles(Real atTime,  Integer seq1,
-                                          Integer seq2, Integer seq3)
+                                               Integer seq2, Integer seq3)
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime   = atTime;
-   eulerAngles    = Attitude::ToEulerAngles(cosMat, seq1, seq2, seq3);
+   eulerAngles    = Attitude::ToEulerAngles(dcm, seq1, seq2, seq3);
    return eulerAngles;
 }
 
@@ -373,7 +377,7 @@ const Rmatrix33& SpiceAttitude::GetCosineMatrix(Real atTime)
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime = atTime;
 
-   return cosMat;
+   return dcm;
 }
 
 //---------------------------------------------------------------------------
@@ -509,7 +513,7 @@ std::string SpiceAttitude::GetParameterTypeString(const Integer id) const
  * This method returns the string parameter value, given the input
  * parameter ID.
  *
- * @param id    ID for the requested parameter.
+ * @param id    ID for the requested parameter
  * @param index index into the array of strings
  *
  * @return  string value of the requested parameter.
@@ -517,7 +521,7 @@ std::string SpiceAttitude::GetParameterTypeString(const Integer id) const
  */
 //------------------------------------------------------------------------------
 std::string  SpiceAttitude::GetStringParameter(const Integer id,
-                                        const Integer index) const
+                                               const Integer index) const
 {
    if (id == ATTITUDE_KERNEL_NAME)
    {
@@ -560,19 +564,19 @@ std::string  SpiceAttitude::GetStringParameter(const Integer id,
  * This method sets the string parameter value, given the input
  * parameter ID.
  *
- * @param id ID for the requested parameter.
+ * @param id    ID for the requested parameter.
  * @param value string value for the requested parameter.
  * @param index index into the string array
  *
- * @exception <SolarSystemException> thrown if value is out of range
+ * @exception <AttitudeException> thrown if value is out of range
  *
  * @return  success flag.
  *
  */
 //------------------------------------------------------------------------------
 bool SpiceAttitude::SetStringParameter(const Integer id,
-                                        const std::string &value,
-                                        const Integer index)
+                                       const std::string &value,
+                                       const Integer index)
 {
    #ifdef DEBUG_SPICE_ATTITUDE_GET_SET
       MessageInterface::ShowMessage(
@@ -618,6 +622,24 @@ bool SpiceAttitude::SetStringParameter(const Integer id,
    return Attitude::SetStringParameter(id, value, index);
 }
 
+//------------------------------------------------------------------------------
+//  bool  SetStringParameter(const std::string label, const std::string value,
+//                           const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter label.
+ *
+ * @param label string label for the requested parameter.
+ * @param value string value for the requested parameter.
+ * @param index index into the string array
+ *
+ * @exception <AttitudeException> thrown if value is out of range
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SpiceAttitude::SetStringParameter(const std::string label,
                                        const std::string &value,
                                        const Integer index)
@@ -625,18 +647,17 @@ bool SpiceAttitude::SetStringParameter(const std::string label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const Integer id) const
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Gets the requested string array.
  *
  * @param id The integer ID for the parameter.
  *
- * @return The requested StringArray; throws an exception if the parameter is
- * not a StringArray.
+ * @return The requested StringArray
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const StringArray& SpiceAttitude::GetStringArrayParameter(const Integer id) const
 {
    if (id == ATTITUDE_KERNEL_NAME)
@@ -650,10 +671,9 @@ const StringArray& SpiceAttitude::GetStringArrayParameter(const Integer id) cons
 }
 
 
-
-//---------------------------------
+//------------------------------------------------------------------------------
 //  protected methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
@@ -668,17 +688,17 @@ const StringArray& SpiceAttitude::GetStringArrayParameter(const Integer id) cons
 void SpiceAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
    #ifdef __USE_SPICE__
-      reader->GetTargetOrientation(scName, naifId, refFrameNaifId, atTime, cosMat, angVel);
+      reader->GetTargetOrientation(scName, naifId, refFrameNaifId, atTime, dcm, angVel);
    #else
-      std::string errmsg = "Error - attempting to use SpiceAttitude when SPICE is not included in the GMAT build.\n";
+      std::string errmsg = "Error - attempting to use SpiceAttitude when ";
+      errmsg += "SPICE is not included in the GMAT build.\n";
       throw AttitudeException(errmsg);
    #endif
 
 }
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  private methods
-//---------------------------------
+//------------------------------------------------------------------------------
 // none
-

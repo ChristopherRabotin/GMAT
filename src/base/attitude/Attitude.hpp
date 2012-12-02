@@ -16,6 +16,10 @@
 //
 /**
  * Class definition for the Attitude base class.
+ * This class is the base class for classes representing spacecraft attitude
+ * for GMAT.
+ *
+ * @note The current builds of GMAT only contain kinematic attitude modeling.
  * 
  * @note The time passed in for the epoch or passed into the methods 
  *       should be an A1Mjd (though its type is currently Real).
@@ -24,7 +28,6 @@
  *       assume/expect radians and radians/sec.
  */
 //------------------------------------------------------------------------------
-
 
 #ifndef Attitude_hpp
 #define Attitude_hpp
@@ -55,14 +58,9 @@
    };
  };
  
-/**
- * Base class used for Attitude classes.
- * 
- * This class is the base class for classes representing spacecraft attitude
- * for GMAT.
- *  
- * @note The current builds of GMAT only contain kinematic attitude modeling.
- */
+ //------------------------------------------------------------------------------
+ // class Attitude definition
+ //------------------------------------------------------------------------------
 class GMAT_API Attitude : public GmatBase 
 {
 public:
@@ -107,7 +105,7 @@ public:
    // END static methods for conversion
 
 
-   // Constructor
+   // constructor
    Attitude(const std::string &typeStr, const std::string &itsName = "");
    // copy constructor
    Attitude(const Attitude& att);
@@ -115,34 +113,37 @@ public:
    Attitude& operator=(const Attitude& att);
    // destructor
    virtual ~Attitude();
-   // Initialize the Attitude
+
+   /// Method to initialize the Attitude
    virtual bool       Initialize();
    
+   /// Methods to get/set the epoch and the reference coordinate system name
    Real               GetEpoch() const;
    void               SetEpoch(Real toEpoch); // A1Mjd time
    virtual bool       SetReferenceCoordinateSystemName(
                          const std::string &refName);
-   
+   /// Method to get the Euler sequence list (as strings)
    const StringArray&         GetEulerSequenceList() const;
-   // get the attitude as a Quaternion
+   /// Method to get the attitude as a Quaternion
    virtual const Rvector&     GetQuaternion(Real atTime);
-   // get the attitude as a set of Euler angles, using the Euler 
-   // sequence provided by the user (an exception will be thrown if the
-   // sequence has not been set
+   /// Method to get the attitude as a set of Euler angles, using the Euler
+   /// sequence provided by the user (an exception will be thrown if the
+   /// sequence has not been set
    virtual const Rvector3&    GetEulerAngles(Real atTime);
-   // get the attitude as a set of Euler angles, using the input Euler sequence
+   /// Method to get the attitude as a set of Euler angles,
+   /// using the input Euler sequence
    virtual const Rvector3&    GetEulerAngles(Real atTime,  Integer seq1, 
                                      Integer seq2, Integer seq3);
-   // get the attitude as a Direction Cosine Matrix
+   /// Method to get the attitude as a Direction Cosine Matrix
    virtual const Rmatrix33&   GetCosineMatrix(Real atTime);
    
    virtual const Rvector3&    GetAngularVelocity(Real atTime);
    virtual const Rvector3&    GetEulerAngleRates(Real atTime);
    
-   // return the type of attitude model it is
+   /// Method returning the type of the attitude model
    std::string         GetAttitudeModelName() const;
    
-   // methods to access object parameters
+   /// methods to access object parameters
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
@@ -154,7 +155,7 @@ public:
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
                                     
-   // methods to get/set parameter values
+   /// methods to get/set parameter values
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -266,28 +267,30 @@ protected:
        EndOtherReps
    };
    
-   static const std::string PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount];
+   static const std::string
+                        PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount];
    
-   static const Gmat::ParameterType PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType
+                        PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount];
  
-   static const std::string OTHER_REP_TEXT[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
+   static const std::string
+                        OTHER_REP_TEXT[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
    
-   static const Gmat::ParameterType OTHER_REP_TYPE[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
+   static const Gmat::ParameterType
+                        OTHER_REP_TYPE[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
  
    static const std::string EULER_SEQ_LIST[12];
-   static const Real TESTACCURACY;
-   static const Real QUAT_MIN_MAG;
-   static const Real ATTITUDE_TIME_TOLERANCE;
-   static const Real EULER_ANGLE_TOLERANCE;
-   static const Real DCM_ORTHONORMALITY_TOLERANCE;
-   static const Integer OTHER_REPS_OFFSET;
+   static const Real        TESTACCURACY;
+   static const Real        QUAT_MIN_MAG;
+   static const Real        ATTITUDE_TIME_TOLERANCE;
+   static const Real        EULER_ANGLE_TOLERANCE;
+   static const Real        DCM_ORTHONORMALITY_TOLERANCE;
+   static const Integer     OTHER_REPS_OFFSET;
 
 
    
-   GmatAttitude::AttitudeStateType
-                         inputAttitudeType;
-   GmatAttitude::AttitudeRateStateType
-                         inputAttitudeRateType;
+   GmatAttitude::AttitudeStateType     inputAttitudeType;
+   GmatAttitude::AttitudeRateStateType inputAttitudeRateType;
                          
    std::string           attitudeDisplayType; 
    std::string           attitudeRateDisplayType;
@@ -295,7 +298,7 @@ protected:
    bool                  isInitialized;
    bool                  needsReinit;
    /// the list of possible euler sequences
-   StringArray eulerSequenceList;
+   StringArray           eulerSequenceList;
    
    /// initial user-supplied epoch as an A1Mjd time (as Real)
    Real                  epoch;
@@ -311,29 +314,29 @@ protected:
    /// the input rotation matrix (from Fi to Fb) computed, on
    /// initialization (from quaternion or euler angles/sequence 
    /// if necessary)
-   Rmatrix33 RBi;  // Identity Matrix by default
+   Rmatrix33             RBi;  // Identity Matrix by default
    /// the input angular velocity computed, on initialization 
    /// (from euler angle rates if necessary)
-   Rvector3  wIBi;   
+   Rvector3              wIBi;
    
    /// the current rotation matrix (from inertial to body)
-   Rmatrix33 cosMat;
+   Rmatrix33             dcm;
    /// the current angular velocity, with respect to the inertial frame
    /// (radians/second)
-   Rvector3  angVel;
+   Rvector3              angVel;
    /// last time that the CosineMatrix and angular velocity
    /// were computed                     
-   Real      attitudeTime;
+   Real                  attitudeTime;
    /// the last computed quaternion
-   Rvector   quaternion;
+   Rvector               quaternion;
    /// the last computed MRPs - Dunn Added
-   Rvector3  mrps;
+   Rvector3              mrps;
    /// the last computed euler angles (radians)
-   Rvector3  eulerAngles;
+   Rvector3              eulerAngles;
    /// the last computed euler angle rates  (radians/second)
-   Rvector3  eulerAngleRates;
+   Rvector3              eulerAngleRates;
    
-   std::string attitudeModelName;
+   std::string           attitudeModelName;
  
 
    
@@ -341,12 +344,12 @@ protected:
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
    //------------------------------------------------------------------------------
    /**
-    * This mothod computes the current CosineMatrix at the input time atTime.
+    * This method computes the current CosineMatrix at the input time atTime.
     *
     * @param atTime the A1Mjd time at which to compute the attitude.
     *
     * @note This method will update the currentRBI and currentwIBB members
-    *       if the class.
+    *       in the class.
     * @note This method is pure virtual and will need to be implemented in
     *       the 'leaf' classes.
     */
@@ -355,7 +358,8 @@ protected:
    
 private:
    // default constructor - not implemented
-   Attitude(); 
+   Attitude();
+
    bool      ValidateCosineMatrix(const Rmatrix33 &mat);
    bool      ValidateEulerSequence(const std::string &seq);
    bool      ValidateEulerSequence(const UnsignedIntArray &eulAng);

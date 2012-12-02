@@ -16,6 +16,8 @@
 //
 /**
  * Class definition for the SpiceAttitude attitude class.
+ * This class calls the spice utility(ies) to get the attitude (pointing) data
+ * for an object (currently, for spacecraft only).
  *
  * @note The time passed in for the epoch or passed into the methods
  *       should be an A1Mjd (though its type is currently Real).
@@ -24,7 +26,6 @@
  *       assume/expect radians and radians/sec.
  */
 //------------------------------------------------------------------------------
-
 
 #ifndef SpiceAttitude_hpp
 #define SpiceAttitude_hpp
@@ -38,51 +39,44 @@
 #endif
 
 
-/**
- * Class used for SPICE Attitude classes.
- *
- * This class calls the spice utility(ies) to get the attitude (pointing) data
- * for an object (currently, for spacecraft only).
- */
 class GMAT_API SpiceAttitude : public Attitude
 {
 public:
-   // Constructor
+   /// Constructor
    SpiceAttitude(const std::string &attName = "");
-   // copy constructor
+   /// copy constructor
    SpiceAttitude(const SpiceAttitude& att);
-   // operator =
+   /// operator =
    SpiceAttitude& operator=(const SpiceAttitude& att);
-   // destructor
+   /// destructor
    virtual ~SpiceAttitude();
 
-   // Initialize the SpiceAttitude attitude
+   /// Initialize the SpiceAttitude attitude
    virtual bool Initialize();
 
-   // inherited from GmatBase
+   /// inherited from GmatBase
    virtual GmatBase* Clone() const;
 
-   // Set the object's identifying information
+   /// Set the object's identifying information
    virtual void SetObjectID(const std::string &objName, Integer objNaifId, Integer objRefFrameNaifId);
 
    // override these from Attitude class to ensure the value is obtained
    // regardless of the delta time since the last attitude update
 
-   // get the attitude as a Quaternion
+   /// get the attitude as a Quaternion
    virtual const Rvector&     GetQuaternion(Real atTime);
-   // get the attitude as a set of Euler angles, using the Euler
-   // sequence provided by the user (an exception will be thrown if the
-   // sequence has not been set
+   /// get the attitude as a set of Euler angles, using the Euler
+   /// sequence provided by the user (an exception will be thrown if the
+   /// sequence has not been set
    virtual const Rvector3&    GetEulerAngles(Real atTime);
-   // get the attitude as a set of Euler angles, using the input Euler sequence
+   /// get the attitude as a set of Euler angles, using the input Euler sequence
    virtual const Rvector3&    GetEulerAngles(Real atTime,  Integer seq1,
                                      Integer seq2, Integer seq3);
-   // get the attitude as a Direction Cosine Matrix
+   /// get the attitude as a Direction Cosine Matrix
    virtual const Rmatrix33&   GetCosineMatrix(Real atTime);
 
    virtual const Rvector3&    GetAngularVelocity(Real atTime);
    virtual const Rvector3&    GetEulerAngleRates(Real atTime);
-
 
    // inherited from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -101,7 +95,6 @@ public:
                                            const Integer index);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
-
 
 protected:
    enum

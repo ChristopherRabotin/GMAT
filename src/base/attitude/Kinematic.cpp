@@ -15,7 +15,7 @@
 // Order 124.
 //
 /**
- * Class implementation for the Kinematic base class.
+ * Implementation for the Kinematic base class.
  */
 //------------------------------------------------------------------------------
 
@@ -26,9 +26,9 @@
 #include "AttitudeException.hpp"
 #include "Kinematic.hpp"
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 // none 
 
 //------------------------------------------------------------------------------
@@ -39,7 +39,7 @@
 //  Kinematic(const std::string &typeStr, const std::string &itsName)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the Kinematic class (Constructor).
+ * This method creates an object of the Kinematic class (constructor).
  * The default value is the (0,0,0,1) quaternion.
  */
 //------------------------------------------------------------------------------
@@ -47,7 +47,6 @@ Kinematic::Kinematic(const std::string &typeStr, const std::string &itsName) :
    Attitude(typeStr, itsName)
 {
    parameterCount = KinematicParamCount;
-   //objectTypes.push_back(Gmat::KINEMATIC); - need to add to gmatdefs?
    objectTypeNames.push_back("Kinematic");
  }
  
@@ -88,7 +87,7 @@ Kinematic& Kinematic::operator=(const Kinematic& att)
 //  ~Kinematic()
 //------------------------------------------------------------------------------
 /**
- * Destructor for the Kinematic class.
+ * Destroys the Kinematic class (destructor).
  */
 //------------------------------------------------------------------------------
 Kinematic::~Kinematic()
@@ -96,13 +95,12 @@ Kinematic::~Kinematic()
    // nothing really to do here ... la la la la la
 }
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  protected methods
-//---------------------------------
+//------------------------------------------------------------------------------
 // none 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  private methods
-//---------------------------------
+//------------------------------------------------------------------------------
 // none 
-

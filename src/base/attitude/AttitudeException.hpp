@@ -15,14 +15,14 @@
 // Created: 2006.02.16
 //
 /**
- * This class provides an exception class for the Attitude classes
+ * This class provides an exception class for the Attitude classes.
  */
 //------------------------------------------------------------------------------
 #ifndef AttitudeException_hpp
 #define AttitudeException_hpp
 
 #include "gmatdefs.hpp"
-#include "BaseException.hpp" // inheriting class's header file
+#include "BaseException.hpp" // inherited class's header file
 
 class GMAT_API AttitudeException : public BaseException
 {
