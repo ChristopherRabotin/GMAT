@@ -21,6 +21,8 @@
 #include "GmatDialog.hpp"
 #include "GmatMainFrame.hpp"
 #include "GmatAppData.hpp"
+#include "FileUtil.hpp"
+#include "StringUtil.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
@@ -258,6 +260,20 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
 	   #endif
+
+       // if path is relative, try to append it to gmat root 
+	   if (GmatFileUtil::IsPathRelative(objLink.c_str()))
+	   {
+			FileManager *fm = FileManager::Instance();
+			if (GmatStringUtil::EndsWithPathSeparator(fm->GetRootPath()))
+				objLink = fm->GetRootPath().c_str() + objLink;
+			else
+			{
+			   wxString pathSep = GmatFileUtil::GetPathSeparator().c_str();
+				objLink = fm->GetRootPath().c_str() + pathSep + objLink;
+			}
+
+	   }
 	   wxLaunchDefaultBrowser(objLink);
 	}
    
