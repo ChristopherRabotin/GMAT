@@ -2279,13 +2279,17 @@ AxisSystem* Validator::CreateAxisSystem(std::string type, GmatBase *owner)
    
    // Get AxisSystem from the CoordinateSystem
    AxisSystem *ownedAxis = (AxisSystem *)(owner->GetRefObject(Gmat::AXIS_SYSTEM, ""));
+   #ifdef DEBUG_AXIS_SYSTEM
+   MessageInterface::ShowMessage
+      ("   ownedAxis=<%p><%s>'%s', usingPrimary=%d\n", ownedAxis,
+       ownedAxis ? ownedAxis->GetTypeName().c_str() : "NULL", 
+       ownedAxis ? ownedAxis->GetName().c_str() : "NULL", ownedAxis->UsesPrimary());
+   #endif
    if (ownedAxis != NULL)
    {
       #ifdef DEBUG_AXIS_SYSTEM
       MessageInterface::ShowMessage
-         ("   ownedAxis=<%p><%s>'%s', usingPrimary=%d\n", ownedAxis,
-          ownedAxis->GetTypeName().c_str(), 
-          ownedAxis->GetName().c_str(), ownedAxis->UsesPrimary());
+         ("   Cloning axis system from <%p>\n", ownedAxis);
       #endif
       
       if (type == ownedAxis->GetTypeName())
@@ -3041,9 +3045,33 @@ bool Validator::CreateCoordSystemProperty(GmatBase *obj, const std::string &prop
        obj, obj->GetName().c_str(), prop.c_str(), value.c_str());
    #endif
    
-   AxisSystem *axis = CreateAxisSystem(value, obj);
-   if (axis == NULL)
-      return false;
+   // If axis is not NULL and not creating inside a function, just return
+   AxisSystem *axis = (AxisSystem *)(obj->GetRefObject(Gmat::AXIS_SYSTEM, ""));
+   if (axis != NULL && theFunction == NULL)
+   {
+      #ifdef DEBUG_COORD_SYS_PROP
+      MessageInterface::ShowMessage
+         ("Validator::CreateCoordSystemProperty() returning true, AxisSystem<%p><%s>'%s' "
+          "already created in the main script\n", axis, axis->GetTypeName().c_str(),
+          axis->GetName().c_str());
+      #endif
+      return true;
+   }
+   
+   // Created axis if axis is NULL or axis is not NULL and creating inside a function
+   if (axis == NULL || axis != NULL && theFunction != NULL)
+   {
+      axis = CreateAxisSystem(value, obj);
+      if (axis == NULL)
+      {
+         #ifdef DEBUG_COORD_SYS_PROP
+         MessageInterface::ShowMessage
+            ("Validator::CreateCoordSystemProperty() returning false, failed to create "
+             "AxisSystem of '%s'\n", value.c_str());
+         #endif
+         return false;
+      }
+   }
    
    #ifdef DEBUG_COORD_SYS_PROP
    MessageInterface::ShowMessage

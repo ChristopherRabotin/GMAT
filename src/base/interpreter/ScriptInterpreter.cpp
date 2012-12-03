@@ -137,6 +137,7 @@ bool ScriptInterpreter::Interpret()
    
    inCommandMode = false;
    inRealCommandMode = false;
+   beginMissionSeqFound = false;
    userParameterLines.clear();
    
    // Before parsing script, check for unmatching control logic
@@ -929,7 +930,7 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    }
    
    #ifdef DEBUG_PARSE
-   MessageInterface::ShowMessage("   => Now start decopose by block type\n");
+   MessageInterface::ShowMessage("   => Now start decomposing by block type\n");
    #endif
    // Decompose by block type
    StringArray chunks;
@@ -1883,11 +1884,11 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    
    #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage
-      ("    After checking for math, inCommandMode=%d, inFunctionMode=%d\n",
-       inCommandMode, inFunctionMode);
+      ("    After checking for math, inCommandMode=%d, inFunctionMode=%d, "
+       "beginMissionSeqFound=%d\n", inCommandMode, inFunctionMode, beginMissionSeqFound);
    #endif
    
-   bool createAssignment = true;
+   bool createAssignmentCommand = true;
    
    if (inCommandMode)
    {
@@ -1904,8 +1905,12 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             if ((tempObj) &&
                 (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
                  (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
-               createAssignment = false;
+               createAssignmentCommand = false;
          }
+         
+         // Since we introduced BeginMissionSequence command, check for this flag
+         if (beginMissionSeqFound)
+            createAssignmentCommand = true;
       }
    }
    else
@@ -1917,25 +1922,29 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       if (lhsObj != NULL && lhsObj->IsOfType("Variable"))
       {
          StringArray varNames = GmatStringUtil::GetVarNames(rhs);
-         createAssignment = false; // Forgot to set to false (loj: 2008.08.08)
+         createAssignmentCommand = false; // Forgot to set to false (loj: 2008.08.08)
          for (UnsignedInt i=0; i<varNames.size(); i++)
          {
             if (varNames[i] == lhs)
             {
-               createAssignment = true;
+               createAssignmentCommand = true;
                break;
             }
          }
       }
       else
-         createAssignment = false;
+         createAssignmentCommand = false;
+      
+      // Since we introduced BeginMissionSequence command, check for this flag
+      if (beginMissionSeqFound)
+         createAssignmentCommand = true;
    }
    
    #ifdef DEBUG_PARSE_ASSIGNMENT
-   MessageInterface::ShowMessage("   createAssignment=%d\n", createAssignment);
+   MessageInterface::ShowMessage("   createAssignmentCommand=%d\n", createAssignmentCommand);
    #endif
    
-   if (createAssignment)
+   if (createAssignmentCommand)
    {
       #ifdef DEBUG_PARSE_ASSIGNMENT
       MessageInterface::ShowMessage("   Calling CreateAssignmentCommand()\n");

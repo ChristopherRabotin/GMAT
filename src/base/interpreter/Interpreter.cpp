@@ -121,6 +121,7 @@ Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
 {
    inCommandMode = false;
    inRealCommandMode = false;
+   beginMissionSeqFound = false;
    initialized = false;
    continueOnError = true;
    parsingDelayedBlock = false;
@@ -1862,7 +1863,11 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    }
    
    if (IsCommandType(type1))
+   {
       commandFound = true;
+      if (type1 == "BeginMissionSequence")
+         beginMissionSeqFound = true;
+   }
    
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage

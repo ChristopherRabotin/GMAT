@@ -181,6 +181,7 @@ protected:
    
    bool         inCommandMode;
    bool         inRealCommandMode;
+   bool         beginMissionSeqFound;
    bool         initialized;
    bool         parsingDelayedBlock;
    bool         ignoreError;
