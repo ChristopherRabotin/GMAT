@@ -16,7 +16,7 @@
 // Author: Waka Waktola (and heavily modified by Wendy C. Shoan)
 // Created: 2006/03/01 (2007.06.12)
 /**
- * This class contains information needed to setup users spacecraft attitude
+ * This class contains information needed to setup users' spacecraft attitude
  * parameters.
  */
 //------------------------------------------------------------------------------
@@ -72,20 +72,20 @@ private:
    
    wxStaticText *spiceMessage;
 
-   wxTextCtrl *st1TextCtrl;
-   wxTextCtrl *st2TextCtrl;
-   wxTextCtrl *st3TextCtrl;
-   wxTextCtrl *st4TextCtrl;
-   wxTextCtrl *st5TextCtrl;
-   wxTextCtrl *st6TextCtrl;
-   wxTextCtrl *st7TextCtrl;
-   wxTextCtrl *st8TextCtrl;
-   wxTextCtrl *st9TextCtrl;
-   wxTextCtrl *st10TextCtrl;
+   wxTextCtrl   *st1TextCtrl;
+   wxTextCtrl   *st2TextCtrl;
+   wxTextCtrl   *st3TextCtrl;
+   wxTextCtrl   *st4TextCtrl;
+   wxTextCtrl   *st5TextCtrl;
+   wxTextCtrl   *st6TextCtrl;
+   wxTextCtrl   *st7TextCtrl;
+   wxTextCtrl   *st8TextCtrl;
+   wxTextCtrl   *st9TextCtrl;
+   wxTextCtrl   *st10TextCtrl;
 
-   wxTextCtrl *str1TextCtrl;
-   wxTextCtrl *str2TextCtrl;
-   wxTextCtrl *str3TextCtrl;
+   wxTextCtrl   *str1TextCtrl;
+   wxTextCtrl   *str2TextCtrl;
+   wxTextCtrl   *str3TextCtrl;
 
    wxStaticText *attUnits1;
    wxStaticText *attUnits2;
@@ -95,59 +95,56 @@ private:
    wxStaticText *rateUnits2;
    wxStaticText *rateUnits3;
 
-   wxComboBox *config1ComboBox;
-   wxComboBox *config2ComboBox;
-   wxComboBox *config3ComboBox;
-   wxComboBox *config4ComboBox;
-   wxComboBox *stateTypeComboBox;
-   wxComboBox *stateRateTypeComboBox;
+   wxComboBox   *config1ComboBox;
+   wxComboBox   *config2ComboBox;
+   wxComboBox   *config3ComboBox;
+   wxComboBox   *config4ComboBox;
+   wxComboBox   *stateTypeComboBox;
+   wxComboBox   *stateRateTypeComboBox;
 
-   // objects needed
+   /// objects needed
    GmatPanel      *theScPanel;
    Spacecraft     *theSpacecraft;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    Attitude       *theAttitude;
    
-   // coordinate system and converter data
+   /// coordinate system and converter data
    CoordinateConverter cc;
    CoordinateSystem    *attCS;
    CoordinateSystem    *toCS;
    CoordinateSystem    *fromCS;
    
-   // arrays of strings needed as input to the combo boxes
-   StringArray modelArray;
-   StringArray eulerSeqArray;
-   StringArray stateTypeArray;
-   StringArray stateRateTypeArray;
-   //StringArray coordSysArray;
-   //StringArray kinematicArray;
+   /// arrays of strings needed as input to the combo boxes
+   StringArray         modelArray;
+   StringArray         eulerSeqArray;
+   StringArray         stateTypeArray;
+   StringArray         stateRateTypeArray;
 
-   // those strings as wxString arrays for the combo boxes
-   wxString *attitudeModelArray; 
-   wxString *eulerSequenceArray;
-   wxString *stateArray;
-   wxString *stateRateArray;
+   /// those strings as wxString arrays for the combo boxes
+   wxString            *attitudeModelArray;
+   wxString            *eulerSequenceArray;
+   wxString            *stateArray;
+   wxString            *stateRateArray;
    
-   // string versions of values in text boxes
-   wxString *cosineMatrix[9];
-   wxString *quaternion[4];
-   wxString *eulerAngles[3];
-   wxString *MRPs[3]; // Dunn Added
-   wxString *angVel[3];
-   wxString *eulerAngleRates[3];
+   /// string versions of values in text boxes
+   wxString            *cosineMatrix[9];
+   wxString            *quaternion[4];
+   wxString            *eulerAngles[3];
+   wxString            *MRPs[3]; // Dunn Added
+   wxString            *angVel[3];
+   wxString            *eulerAngleRates[3];
    
-   // string versions of current data on combo boxes
-   std::string      attitudeModel;
-   std::string      attCoordSystem;
-   std::string      eulerSequence;
-   std::string      attStateType;
-   std::string      attRateStateType;
-   //std::string      attitudeType;   // for later use - Kinematic, etc.
+   /// string versions of current data on combo boxes
+   std::string         attitudeModel;
+   std::string         attCoordSystem;
+   std::string         eulerSequence;
+   std::string         attStateType;
+   std::string         attRateStateType;
 
-   // flags for data modification
-   bool dataChanged;
-   bool canClose;
+   /// flags for data modification
+   bool                dataChanged;
+   bool                canClose;
    
    // local values of attitude data
    // NOTE - only currently-displayed representations will be up-to-date;
@@ -207,7 +204,7 @@ private:
 
    wxString ToString(Real rval); // ??
    
-   // Event Handling
+   /// Event Handling
    DECLARE_EVENT_TABLE();
    /// when user types in a new state value
    void OnStateTextUpdate(wxCommandEvent &event);
@@ -225,7 +222,7 @@ private:
    void OnAttitudeModelSelection(wxCommandEvent &event);
    
    
-   // IDs for the controls and the menu commands
+   /// IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 50000,
@@ -248,7 +245,7 @@ private:
       QUATERNION,
       DCM,
       MRPS,
-      attStateTypeCount,
+      AttStateTypeCount,
    };
    
    // IDs for state rate type
@@ -256,11 +253,11 @@ private:
    {
       EULER_ANGLE_RATES = 0,
       ANGULAR_VELOCITY,
-      attStateRateTypeCount,  // Dunn renamed from StateRateTypeCount
+      AttStateRateTypeCount,  // Dunn renamed from StateRateTypeCount
    };
    
-   static const std::string STATE_TEXT[attStateTypeCount];
-   static const std::string STATE_RATE_TEXT[attStateRateTypeCount];
+   static const std::string STATE_TEXT[AttStateTypeCount];
+   static const std::string STATE_RATE_TEXT[AttStateRateTypeCount];
    
    static const Integer STARTUP_STATE_TYPE_SELECTION;
    static const Integer STARTUP_RATE_STATE_TYPE_SELECTION;

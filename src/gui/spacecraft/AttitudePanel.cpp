@@ -24,7 +24,7 @@
 // Date:      2010/08/15
 //
 /**
- * This class contains information needed to setup users spacecraft attitude
+ * This class contains information needed to setup users' spacecraft attitude
  * parameters in the GUI Spacecraft Attitude TAB.
  */
 //------------------------------------------------------------------------------
@@ -47,12 +47,7 @@
 // static data
 //------------------------------------------------------------------------------
 
-// These labels show up in the following location in the GUI:
-// - "Spacecraft" Dialog Box
-// - "Attitude" Tab
-// - "Attitude Initial Conditions" Static Box
-// - "Attitude State Type" Combo Box
-const std::string AttitudePanel::STATE_TEXT[attStateTypeCount] = 
+const std::string AttitudePanel::STATE_TEXT[AttStateTypeCount] =
 {
    "EulerAngles",
    "Quaternion",
@@ -60,18 +55,13 @@ const std::string AttitudePanel::STATE_TEXT[attStateTypeCount] =
    "MRPs",                    // Dunn added MRPs
 };
 
-// These labels show up in the following location in the GUI:
-// - "Spacecraft" Dialog Box
-// - "Attitude" Tab
-// - "Attitude Rate Initial Conditions" Static Box
-// - "Attitude Rate State Type" Combo Box
-const std::string AttitudePanel::STATE_RATE_TEXT[attStateRateTypeCount] = 
+const std::string AttitudePanel::STATE_RATE_TEXT[AttStateRateTypeCount] =
 {
    "EulerAngleRates",
    "AngularVelocity",
 };
 
-// initial selections in combo boxes
+// initial selections in combo boxes on set-up (before LoadData)
 const Integer AttitudePanel::STARTUP_STATE_TYPE_SELECTION      = EULER_ANGLES;
 const Integer AttitudePanel::STARTUP_RATE_STATE_TYPE_SELECTION = EULER_ANGLE_RATES;
 
@@ -91,15 +81,15 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_COMBOBOX(ID_CB_MODEL,        AttitudePanel::OnAttitudeModelSelection)
 END_EVENT_TABLE()
 
-//------------------------------
+//------------------------------------------------------------------------------
 // public methods
-//------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // AttitudePanel(GmatPanel *scPanel, xWindow *parent, Spacecraft *spacecraft)
 //------------------------------------------------------------------------------
 /**
- * Constructs AttitudePanel object.
+ * Constructs AttitudePanel object (constructor)
  */
 //------------------------------------------------------------------------------
 AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
@@ -125,8 +115,6 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    eulerSeqArray.clear();
    stateTypeArray.clear();
    stateRateTypeArray.clear();
-   //coordSysArray.clear();
-   //kinematicArray.clear();
    
    unsigned int defSeq[3] = {3, 2, 1};  // Dunn changed from 312 to 321
    seq.push_back(defSeq[0]);
@@ -138,7 +126,6 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    eulerSequence       = "321";  // Dunn changed from 312 to 321
    attStateType        = "";
    attRateStateType    = "";
-   //attitudeType        = "";  // currently not used
    
    stateTypeModified     = false;
    rateStateTypeModified = false;
@@ -158,6 +145,10 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 //------------------------------------------------------------------------------
 // ~AttitudePanel()
 //------------------------------------------------------------------------------
+/**
+ * Destroys the AttitudePanel object (destructor)
+ */
+//------------------------------------------------------------------------------
 AttitudePanel::~AttitudePanel()
 {
    theGuiManager->UnregisterComboBox("CoordinateSystem", config2ComboBox);
@@ -167,12 +158,16 @@ AttitudePanel::~AttitudePanel()
    #endif
 }
 
-//-------------------------------
+//------------------------------------------------------------------------------
 // private methods
-//-------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the widgets for the panel.
+ */
 //------------------------------------------------------------------------------
 void AttitudePanel::Create()
 { 
@@ -250,16 +245,16 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
 
-   for (ii = 0; ii < attStateTypeCount; ii++)
+   for (ii = 0; ii < AttStateTypeCount; ii++)
       stateTypeArray.push_back(STATE_TEXT[ii]);
    
-   stateArray = new wxString[attStateTypeCount];
-   for (ii=0; ii<attStateTypeCount; ii++)
+   stateArray = new wxString[AttStateTypeCount];
+   for (ii=0; ii<AttStateTypeCount; ii++)
       stateArray[ii] = stateTypeArray[ii].c_str();
    
    stateTypeComboBox = 
       new wxComboBox( this, ID_CB_STATE, wxT(stateArray[STARTUP_STATE_TYPE_SELECTION]),
-         wxDefaultPosition, wxSize(180,20), attStateTypeCount, stateArray, 
+         wxDefaultPosition, wxSize(180,20), AttStateTypeCount, stateArray,
          wxCB_DROPDOWN|wxCB_READONLY );
    stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
    
@@ -311,17 +306,17 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Rate State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
 
-   for (ii = 0; ii < attStateRateTypeCount; ii++)
+   for (ii = 0; ii < AttStateRateTypeCount; ii++)
       stateRateTypeArray.push_back(STATE_RATE_TEXT[ii]);
 
-   stateRateArray = new wxString[attStateRateTypeCount];
-   for (ii=0; ii< attStateRateTypeCount; ii++)
+   stateRateArray = new wxString[AttStateRateTypeCount];
+   for (ii=0; ii< AttStateRateTypeCount; ii++)
       stateRateArray[ii] = stateRateTypeArray[ii].c_str();
 
    stateRateTypeComboBox =
       new wxComboBox( this, ID_CB_STATE_RATE, 
          wxT(stateRateArray[STARTUP_RATE_STATE_TYPE_SELECTION]), wxDefaultPosition, 
-         wxSize(180,20), attStateRateTypeCount, stateRateArray, 
+         wxSize(180,20), AttStateRateTypeCount, stateRateArray,
          wxCB_DROPDOWN|wxCB_READONLY );                  
    stateRateTypeComboBox->SetToolTip(pConfig->Read(_T("RateStateTypeHint")));
    
@@ -475,6 +470,10 @@ void AttitudePanel::Create()
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data from the attitude object into the widgets for the panel.
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::LoadData()
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -528,10 +527,6 @@ void AttitudePanel::LoadData()
       config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
-      //if (newAttitude) attCS = NULL;
-      //else             attCS = (CoordinateSystem*) theAttitude->
-      //                 GetRefObject(Gmat::COORDINATE_SYSTEM, 
-      //                 attCoordSystem);
       if (attitudeModel == "CoordinateSystemFixed")
       {
          EnableAll();
@@ -550,10 +545,8 @@ void AttitudePanel::LoadData()
          spiceMessage->Show(false);
       }
       
-      //if (attStateType == STATE_TEXT[EULER_ANGLES])
       if (attStateType == "EulerAngles")
       {
-         //Rvector eaVal = theAttitude->GetRvectorParameter(STATE_TEXT[EULER_ANGLES]);
          Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
          for (x = 0; x < 3; ++x)
          {
@@ -626,6 +619,10 @@ void AttitudePanel::LoadData()
 
 //------------------------------------------------------------------------------
 // void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the widgets to the attitude object.
+ */
 //------------------------------------------------------------------------------
 void AttitudePanel::SaveData()
 {
@@ -797,6 +794,16 @@ void AttitudePanel::SaveData()
 //------------------------------------------------------------------------------
 // bool IsStateModified(const std::string which = "Both")
 //------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the state has been modified by the
+ * user.
+ *
+ * @param   which   indicates for which to return the flag - attitude and/or
+ *                  rate
+ *
+ * @return has the specified state(s) been modified?
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::IsStateModified(const std::string which)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -848,6 +855,13 @@ bool AttitudePanel::IsStateModified(const std::string which)
 // void ResetStateFlags(const std::string which = "Both",
 //                      bool discardEdits = false)
 //------------------------------------------------------------------------------
+/**
+ * Resets the modified flags; on option, discards user edits.
+ *
+ * @param   which   indicates for which to reset the flags - attitude and/or
+ *                  rate
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::ResetStateFlags(const std::string which,
                                     bool discardEdits)
 {
@@ -897,6 +911,14 @@ void AttitudePanel::ResetStateFlags(const std::string which,
 
 //------------------------------------------------------------------------------
 // bool ValidateState(const std::string which = "Both")
+//------------------------------------------------------------------------------
+/**
+ * Validates the state specified.
+ *
+ * @param   which   indicates which to validate - attitude and/or rate
+ *
+ * @return is the state specified valid?
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::ValidateState(const std::string which)
 {
@@ -1110,6 +1132,14 @@ bool AttitudePanel::ValidateState(const std::string which)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// void DisableInitialAttitudeRate()
+//------------------------------------------------------------------------------
+/**
+ * Disables the initial attitude rate widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::DisableInitialAttitudeRate()
 {
    stateTypeRate4StaticText->Disable();
@@ -1129,6 +1159,14 @@ void AttitudePanel::DisableInitialAttitudeRate()
    rateUnits3->Disable();
 }
 
+//------------------------------------------------------------------------------
+// void EnableInitialAttitudeRate()
+//------------------------------------------------------------------------------
+/**
+ * Enables the initial attitude rate widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::EnableInitialAttitudeRate()
 {
    stateTypeRate4StaticText->Enable();
@@ -1147,6 +1185,15 @@ void AttitudePanel::EnableInitialAttitudeRate()
    rateUnits2->Enable();
    rateUnits3->Enable();
 }
+
+//------------------------------------------------------------------------------
+// void DisableAll()
+//------------------------------------------------------------------------------
+/**
+ * Disables the widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::DisableAll()
 {
    DisableInitialAttitudeRate();
@@ -1183,6 +1230,14 @@ void AttitudePanel::DisableAll()
    st1TextCtrl->Disable();
 }
 
+//------------------------------------------------------------------------------
+// void EnableAll()
+//------------------------------------------------------------------------------
+/**
+ * Enables all the widgets.
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::EnableAll()
 {
    EnableInitialAttitudeRate();
@@ -1222,12 +1277,25 @@ void AttitudePanel::EnableAll()
 //------------------------------------------------------------------------------
 // void DisplaySpiceReminder()
 //------------------------------------------------------------------------------
+/**
+ * Displays the SPICE reminder message.
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::DisplaySpiceReminder()
 {
 }
 
 //------------------------------------------------------------------------------
 // void ResizeTextCtrl1234(bool forQuaternion = false)
+//------------------------------------------------------------------------------
+/**
+ * Resizes the four text controls.
+ *
+ * @param forQuaternion flag indicating whether or not these text controls
+ *                      are for the quaternion
+ *
+ */
 //------------------------------------------------------------------------------
 void AttitudePanel::ResizeTextCtrl1234(bool forQuaternion)
 {
@@ -1255,6 +1323,14 @@ void AttitudePanel::ResizeTextCtrl1234(bool forQuaternion)
 //------------------------------------------------------------------------------
 // wxString ToString(Real rval)
 //------------------------------------------------------------------------------
+/**
+ * Converts a real value to a string.
+ *
+ * @param rval   real value
+ *
+ * @return string representation of the input real value
+ */
+//------------------------------------------------------------------------------
 wxString AttitudePanel::ToString(Real rval)
 {
    return theGuiManager->ToWxString(rval);
@@ -1264,9 +1340,15 @@ wxString AttitudePanel::ToString(Real rval)
 //------------------------------------------------------------------------------
 // void OnStateTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles case when user updates the state text.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
 {
-   //if (!canClose) return; // ??
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::OnStateTextUpdate() entered\n");
    #endif
@@ -1315,6 +1397,13 @@ void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnStateRateTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles case when user updates the state rate text.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::OnStateRateTextUpdate(wxCommandEvent &event)
 {
    //if (!canClose) return;  // ??
@@ -1345,6 +1434,13 @@ void AttitudePanel::OnStateRateTextUpdate(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnCoordinateSystemSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user selects the coordinate system from the combo box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
 //------------------------------------------------------------------------------
 void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
 {
@@ -1385,6 +1481,13 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAttitudeModelSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles case when user updates the attitude model.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -1422,6 +1525,13 @@ void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnEulerSequenceSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles case when user updates euler sequence selection from the combo box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::OnEulerSequenceSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -1441,6 +1551,13 @@ void AttitudePanel::OnEulerSequenceSelection(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnStateTypeSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user selects the state type.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
 {
@@ -1488,6 +1605,13 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnStateTypeRateSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles case when user selects the state rate type.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
 {
    bool OK = true;
@@ -1530,6 +1654,11 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // bool DisplayEulerAngles()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Euler angles.
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::DisplayEulerAngles()
 {
@@ -1595,6 +1724,11 @@ bool AttitudePanel::DisplayEulerAngles()
 
 //------------------------------------------------------------------------------
 // bool DisplayQuaternion()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Quaternion.
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::DisplayQuaternion()
 {
@@ -1663,6 +1797,13 @@ bool AttitudePanel::DisplayQuaternion()
 
 //------------------------------------------------------------------------------
 // bool DisplayDCM()
+//------------------------------------------------------------------------------
+/**
+ * Displays the direction cosine matrix.
+ *
+ * @return  success flag
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::DisplayDCM()
 {
@@ -1742,12 +1883,19 @@ bool AttitudePanel::DisplayDCM()
 //------------------------------------------------------------------------------
 // bool DisplayModifiedRodriguesParameters() - Added by Dunn
 //------------------------------------------------------------------------------
+/**
+ * Displays the modified Rodrigues parameters.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::DisplayMRPs()
 {
    bool retval = true;
-#ifdef DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::DisplayMRPs() entered\n");
-#endif
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::DisplayMRPs() entered\n");
+   #endif
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
@@ -1807,6 +1955,13 @@ bool AttitudePanel::DisplayMRPs()
 //------------------------------------------------------------------------------
 // bool DisplayEulerAngleRates()
 //------------------------------------------------------------------------------
+/**
+ * Displays the euler angle rates.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::DisplayEulerAngleRates()
 {
    bool retval = true;
@@ -1845,6 +2000,13 @@ bool AttitudePanel::DisplayEulerAngleRates()
 
 //------------------------------------------------------------------------------
 // bool DisplayAngularVelocity()
+//------------------------------------------------------------------------------
+/**
+ * Displays the angular velocity.
+ *
+ * @return  success flag
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::DisplayAngularVelocity()
 {
@@ -1886,6 +2048,13 @@ bool AttitudePanel::DisplayAngularVelocity()
 //------------------------------------------------------------------------------
 // bool UpdateCosineMatrix()
 //------------------------------------------------------------------------------
+/**
+ * Updates the direction cosine matrix.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::UpdateCosineMatrix()
 {
    bool retval = true;
@@ -1926,6 +2095,13 @@ bool AttitudePanel::UpdateCosineMatrix()
 //------------------------------------------------------------------------------
 // bool UpdateQuaternion()
 //------------------------------------------------------------------------------
+/**
+ * Updates the quaternion.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::UpdateQuaternion()
 {
    bool retval = true;
@@ -1962,6 +2138,13 @@ bool AttitudePanel::UpdateQuaternion()
 
 //------------------------------------------------------------------------------
 // bool UpdateEulerAngles()
+//------------------------------------------------------------------------------
+/**
+ * Updates the Euler angles.
+ *
+ * @return  success flag
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateEulerAngles()
 {
@@ -2006,6 +2189,13 @@ bool AttitudePanel::UpdateEulerAngles()
 //------------------------------------------------------------------------------
 // bool UpdateMRPs() - Added by Dunn
 //------------------------------------------------------------------------------
+/**
+ * Updates the MRPs.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::UpdateMRPs()
 {
 #ifdef DEBUG_ATTITUDE_PANEL
@@ -2045,6 +2235,13 @@ bool AttitudePanel::UpdateMRPs()
 //------------------------------------------------------------------------------
 // bool UpdateAngularVelocity()
 //------------------------------------------------------------------------------
+/**
+ * Updates the angular velocity.
+ *
+ * @return  success flag
+ *
+ */
+//------------------------------------------------------------------------------
 bool AttitudePanel::UpdateAngularVelocity()
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -2076,6 +2273,13 @@ bool AttitudePanel::UpdateAngularVelocity()
 
 //------------------------------------------------------------------------------
 // bool UpdateEulerAngleRates()
+//------------------------------------------------------------------------------
+/**
+ * Updates the Euler angle rates.
+ *
+ * @return  success flag
+ *
+ */
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateEulerAngleRates()
 {

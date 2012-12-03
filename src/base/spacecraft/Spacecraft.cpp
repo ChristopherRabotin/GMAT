@@ -344,7 +344,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
 
    parameterCount = SpacecraftParamCount;
 
-   // Create a default unnamed attitude (LOJ: 2009.03.10)
+   // Create a default unnamed attitude
    attitude = new CSFixed("");
    attitude->SetEpoch(state.GetEpoch());
    ownedObjectCount++;
@@ -1102,7 +1102,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    refObjectTypes.push_back(Gmat::HARDWARE);
-   // Now Attitude is local object it will be created all the time (LOJ:2009.09.24)
+   // Now Attitude is local object it will be created all the time
    //refObjectTypes.push_back(Gmat::ATTITUDE);
    return refObjectTypes;
 }
