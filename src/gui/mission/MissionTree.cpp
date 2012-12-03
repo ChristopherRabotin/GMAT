@@ -105,6 +105,7 @@
 //#define DEBUG_COMMAND_COUNTER
 //#define DEBUG_RENAME
 //#define DEBUG_NODE_NAME
+//#define DEBUG_UPDATE_GUI_MANAGER
 //#define DEBUG_CMD_SUMMARY
 
 //------------------------------

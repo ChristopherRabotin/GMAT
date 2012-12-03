@@ -5405,6 +5405,9 @@ void GuiItemManager::UpdateSubscriberList()
    }
    
    theNumReportFile = theReportFileList.GetCount();
+   #if DBGLVL_GUI_ITEM_SUBS
+   MessageInterface::ShowMessage("   theNumReportFile=%d\n", theNumReportFile);
+   #endif
    
    // Update ReportFile list
    for (int i=0; i<theNumSubscriber; i++)

@@ -81,6 +81,7 @@ Report::Report() :
    hasExecuted  (false)
 {
    // GmatBase data
+   objectTypeNames.push_back("SubscriberCommand");
    objectTypeNames.push_back("Report");
 }
 
