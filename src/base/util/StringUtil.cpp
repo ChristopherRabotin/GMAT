@@ -1806,6 +1806,11 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trim
    if (str2.length() == 0)
       return false;
 
+   // if string is just + or - with no number, return false
+   if ((str2.length() == 1) &&
+	   ((str2[0] == '-') || (str2[0] == '+')))
+	   return false;
+
    if (str2[0] != '-' && !isdigit(str2[0]))
       return false;
 
