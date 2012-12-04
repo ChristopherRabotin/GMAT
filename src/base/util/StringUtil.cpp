@@ -42,6 +42,7 @@
 //#define DEBUG_BALANCED_BRACKETS
 //#define DEBUG_MATH_EQ 2
 //#define DEBUG_VALID_NAME
+//#define DEBUG_VALID_NUMBER
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
 //#define DEBUG_REPLACE_NAME
@@ -115,7 +116,7 @@ std::string GmatStringUtil::RemoveAllBlanks(const std::string &str, bool ignoreS
 // std::string RemoveLastNumber(const std::string &str, Integer &lastNumber)
 //------------------------------------------------------------------------------
 /* This method returns string without numbers appended to string.
- * It will set lastNumber to 0 if there is no number appended.
+ * It will set lastNumber to 0 if there is no number appended or real number.
  *
  * @param str input string
  * @param lastNumber the number appended to string to output
@@ -125,23 +126,43 @@ std::string GmatStringUtil::RemoveAllBlanks(const std::string &str, bool ignoreS
  * For example,
  *    justString will return justString and set lastNumber to 0
  *    someString123 will return someString and set lastNumber to 123
- *    some1String2 will return soma1String and set lastNumber to 2
+ *    some1String2 will return some1String and set lastNumber to 2
+ *    someString(123.567 will return someString( and set lastNumber to 0
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::RemoveLastNumber(const std::string &str,
                                              Integer &lastNumber)
 {
+   #ifdef DEBUG_REMOVE_LAST_NUMBER
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::RemoveLastNumber() entered, str='%s'\n", str.c_str());
+   #endif
+   
    lastNumber = 0;
-   UnsignedInt index = str.find_last_not_of("0123456789");
+   // Separate name and numbers
+   // (LOJ: added dot(.) for real number handling to fix GMT-3285)
+   UnsignedInt index = str.find_last_not_of("0123456789.");
    if (index == str.size())
       return str;
-
+   
    std::string str1 = str.substr(index+1);
-
+   
+   #ifdef DEBUG_REMOVE_LAST_NUMBER
+   MessageInterface::ShowMessage("   Numbers='%s'\n", str1.c_str());
+   #endif
+   
    if (!ToInteger(str1, lastNumber))
       lastNumber = 0;
-
-   return str.substr(0, index+1);
+   
+   str1 = str.substr(0, index+1);
+   
+   #ifdef DEBUG_REMOVE_LAST_NUMBER
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::RemoveLastNumber() returning, str='%s', number=%d\n",
+       str1.c_str(), lastNumber);
+   #endif
+   
+   return str1;
 }
 
 
