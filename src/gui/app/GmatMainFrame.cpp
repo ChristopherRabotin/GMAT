@@ -167,6 +167,7 @@
 //#define DEBUG_CONFIG_DATA
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_REPOSITION_CHILDREN
+//#define DEBUG_SCREEN_SHOT
 
 using namespace GmatMenu;
 
@@ -2810,7 +2811,6 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
    
    // Check if animation is running
-   wxToolBar *toolBar = GetToolBar();
    if (IsAnimationRunning())
    {
       int answer =
@@ -5185,28 +5185,60 @@ void GmatMainFrame::EnableNotebookAndMissionTree(bool enable)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
 {
-   char ImageFilename[255] = {0};
-   char ImagePath[255] = {0};
-   char VerNum[] = {"_%03d.png"};
-   char NameVer[12] = {0};
+   #ifdef DEBUG_SCREEN_SHOT
+   MessageInterface::ShowMessage("GmatMainFrame::OnScreenshot() entered\n");
+   #endif
+   char imageFilename[255] = {0};
+   char imagePath[255] = {0};
+   char verNum[] = {"_%03d.png"};
+   char nameVer[12] = {0};
    // Retrieve an instance of the file manager
    FileManager *fm = FileManager::Instance();
-
+   std::string outputPath = fm->GetPathname(FileManager::OUTPUT_PATH);
+   std::string screenShotFile = fm->GetPathname("SCREENSHOT_FILE");
+   
+   // If no screenshot file name found, give it default name to SCREEN_SHOT (LOJ: 2012.12.03)
+   if (GmatFileUtil::ParseFileName(screenShotFile) == "")
+      screenShotFile = "SCREEN_SHOT";
+   
+   #ifdef DEBUG_SCREEN_SHOT
+   MessageInterface::ShowMessage
+      ("   outputPath='%s', screenShotFile='%s'\n", outputPath.c_str(), screenShotFile.c_str());
+   #endif
+   
    // Keep looking until we do not find an existing file
-   for (int ii = 1; ii < 1000; ii++){
-      strcpy(ImagePath, fm->GetPathname(FileManager::OUTPUT_PATH).c_str());
-      if (!wxDirExists(ImagePath))
-         wxMkdir(ImagePath);
-      strcpy(ImageFilename, fm->GetFilename("SCREENSHOT_FILE").c_str());
-     // Look in the output path for the screenshot file with the current version number
-      sprintf(NameVer, VerNum, ii);
-      strncat(ImageFilename, NameVer, strlen(NameVer));
-      strcat(ImagePath, ImageFilename);
+   for (int ii = 1; ii < 1000; ii++)
+   {
+      strcpy(imagePath, outputPath.c_str());
+      
+      // If output path does not exist then create
+      if (!wxDirExists(imagePath))
+         wxMkdir(imagePath);
+      
+      strcpy(imageFilename, screenShotFile.c_str());
+      
+      // Look in the output path for the screenshot file with the current version number
+      sprintf(nameVer, verNum, ii);
+      strncat(imageFilename, nameVer, strlen(nameVer));
+      strcat(imagePath, imageFilename);
+      
       // If the file isn't there, we've found the next file index and break
-      if (!wxFileExists(ImagePath))
+      if (!wxFileExists(imagePath))
          break;
    }
-   ScreenShotSave(ImagePath);
+   
+   #ifdef DEBUG_SCREEN_SHOT
+   MessageInterface::ShowMessage
+      ("   Calling GmatOpenGLSupport::ScreenShotSave() to save image to '%s'\n", imagePath);
+   #endif
+   
+   ScreenShotSave(imagePath);
+   
+   MessageInterface::ShowMessage
+      ("**** INFO **** The screen shot image saved to '%s'\n", imagePath);
+   #ifdef DEBUG_SCREEN_SHOT
+   MessageInterface::ShowMessage("GmatMainFrame::OnScreenshot() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -6229,7 +6261,6 @@ void GmatMainFrame::CompareFiles(Integer compareType)
    wxString filepath;
    wxArrayString baseFileNameArray;
    wxArrayString noPrefixNameArray;
-   size_t prefixLen = basePrefix.Len();
    
    GetBaseFilesToCompare(compareType, baseDir, basePrefix, baseFileNameArray,
                          noPrefixNameArray);
