@@ -3059,7 +3059,7 @@ bool Validator::CreateCoordSystemProperty(GmatBase *obj, const std::string &prop
    }
    
    // Created axis if axis is NULL or axis is not NULL and creating inside a function
-   if (axis == NULL || axis != NULL && theFunction != NULL)
+   if (axis == NULL || (axis != NULL && theFunction != NULL))
    {
       axis = CreateAxisSystem(value, obj);
       if (axis == NULL)

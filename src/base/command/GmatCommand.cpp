@@ -2944,6 +2944,20 @@ void GmatCommand::ShowCommand(const std::string &prefix,
 
 
 //------------------------------------------------------------------------------
+// virtual void ShowWrapper(const std::string &prefix, const std::string &title,
+//                          ElementWrapper *wrapper)
+//------------------------------------------------------------------------------
+void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &title,
+                              ElementWrapper *wrapper)
+{
+   MessageInterface::ShowMessage
+      ("%s%s wrapper=<%p>, type=%2d, desc='%s'\n", prefix.c_str(), title.c_str(),
+       wrapper, wrapper ? wrapper->GetWrapperType() : -1,
+       wrapper ? wrapper->GetDescription().c_str() : "NULL");
+}
+
+
+//------------------------------------------------------------------------------
 // void ShowObjectMaps(const std::string &str)
 //------------------------------------------------------------------------------
 /**
@@ -3230,10 +3244,23 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
             if (name == "")
                continue;
             
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage
+               ("GmatCommand::SetWrapperReferences() throwing an exception, could not find object '%s'\n",
+                name.c_str());
+            #endif
+            
             throw CommandException(
                   "GmatCommand::SetWrapperReferences failed to find object named \"" + 
                   name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
          }
+         
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage
+            ("      Found object <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+         MessageInterface::ShowMessage("      Now setting wrapper reference object to <%p>\n", obj);
+         #endif
+         
          if (wrapper.SetRefObject(obj) == false)
          {
             MessageInterface::ShowMessage
@@ -3242,14 +3269,20 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
             return false;
          }
          #ifdef DEBUG_WRAPPER_CODE
-            MessageInterface::ShowMessage("      Set reference object \"%s\"\n", 
+            MessageInterface::ShowMessage("      Successfully set reference object \"%s\"\n", 
                name.c_str());
          #endif
       }
    }
    else
+   {
+      #ifdef DEBUG_WRAPPER_CODE
+      MessageInterface::ShowMessage
+         ("GmatCommand::SetWrapperReferences() throwing an exception, wrapper is NULL\n");
+      #endif
       throw CommandException("GmatCommand::SetWrapperReferences was passed a "
          "NULL object instead of a wrapper in:\n   \"" + generatingString + "\"\n");
+   }
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage("GmatCommand::SetWrapperReferences() returning true\n");
@@ -3345,8 +3378,7 @@ void GmatCommand::DeleteOldWrappers()
    {
       wrapper = wrappersToDelete[i];
       #ifdef DEBUG_WRAPPER_CODE
-      MessageInterface::ShowMessage
-         ("   wrapper=<%p>'%s'\n", wrapper, wrapper ? wrapper->GetDescription().c_str() : "NULL");
+      ShowWrapper("   ", "wrapper:", wrapper);
       #endif
       if (wrapper)
       {

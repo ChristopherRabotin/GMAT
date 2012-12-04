@@ -437,6 +437,9 @@ bool Assignment::InterpretAction()
    lhs = chunks[0];
    rhs = chunks[1]; 
    
+   #ifdef DEBUG_ASSIGNMENT_IA
+   MessageInterface::ShowMessage("Checking if LHS has single quote or invalid brackets\n");
+   #endif
    // check if there is single quote in LHS(loj: 2008.07.22)
    if (lhs.find("'") != lhs.npos)
       throw CommandException("An assignment command is not allowed to contain "
@@ -447,6 +450,9 @@ bool Assignment::InterpretAction()
          "brackets, braces, or parentheses (except to indicate an array "
          "element) on the left-hand-side");
    
+   #ifdef DEBUG_ASSIGNMENT_IA
+   MessageInterface::ShowMessage("Checking if LHS has unexpected commas\n");
+   #endif
    // check for unexpected commas on the left-hand-side
    Integer commaPos = -1;
    if (lhs.find(',') != lhs.npos)
@@ -481,29 +487,28 @@ bool Assignment::InterpretAction()
    }
    else
    {
-      // check for common use of ./ (path) in GmatFunction to avoid creating
+      // Check for common use of ./ (path) in GmatFunction to avoid creating
       // MathTree for divide
       if (rhs.find("./") != rhs.npos ||
           GmatStringUtil::StartsWith(rhs, "'") || GmatStringUtil::EndsWith(rhs, "'"))
       {
          isRhsString = true;
-         
-         // Since FILENAME_TYPE is used for path or filename,
-         // these lines can be comment this out (LOJ: 2010.10.08)
-         //if (currentFunction != NULL &&
-         //    (!GmatStringUtil::IsEnclosedWith(rhs, "'")))
-         //   throw CommandException("The string literal \"" + rhs + "\" must be "
-         //                          "enclosed with single quotes");
       }
    }
    
-   // it there is still ; then report error since ; should have been removed
+   // If there is still ; then report error since ; should have been removed
    if (rhs.find(";") != rhs.npos)
       throw CommandException("Is there a missing \"%\" for inline comment?");
    
+   #ifdef DEBUG_ASSIGNMENT_IA
+   MessageInterface::ShowMessage("RHS %s a string\n", isRhsString ? "is" : "is not");
+   #endif
    // Check if rhs is an equation
    if (!isRhsString)
    {
+      #ifdef DEBUG_ASSIGNMENT_IA
+      MessageInterface::ShowMessage("Calling MathParser::IsEquation()\n");
+      #endif
       MathParser mp = MathParser();
       if (mp.IsEquation(rhs, false))
       {
@@ -521,8 +526,8 @@ bool Assignment::InterpretAction()
                ("   topNode=%s\n", topNode->GetTypeName().c_str());
          #endif
          
-         // check if string has missing start quote (loj: 2008.07.23)
-         // it will be an error only if rhs with blank space removed matches with
+         // Check if string has missing start quote.
+         // It will be an error if rhs with blank space removed matches with
          // any GmatFunction name without letter case
          std::string str1 = rhs;
          if (GmatStringUtil::EndsWith(str1, "'"))
@@ -559,28 +564,11 @@ bool Assignment::InterpretAction()
       }
       else // if not an equation, check for unexpected commas on the right-hand-side
       {
-         // Braces are allowed for lists of names, but brackets shouldn't be allowed
-         // Assignment command should handle something like: 
-         // "plot.ViewPointVector = [ 0 0 30000];", so commented out (loj: 2008.06.05)
-         //if ((rhs.find('[') != rhs.npos) || (rhs.find(']') != rhs.npos))
-         //   throw CommandException(
-         //      "An assignment command is not allowed to contain brackets on the right-hand side"); 
-         //if (!GmatStringUtil::AreAllBracketsBalanced(rhs, "({)}"))
+         // Check if all brackets are balanced
          if (!GmatStringUtil::AreAllBracketsBalanced(rhs, "[({])}"))
             throw CommandException
                ("Parentheses or braces are unbalanced on the right-hand-side of "
                 "an assignment command"); 
-         
-         // We want to allow the following scripts in the Assignment command.
-         //    Create Formation Formation1;
-         //    GMAT Formation1.Add = {Spacecraft1, Spacecraft2};
-         // So commented out (loj: 2008.03.24)
-         //if (rhs.find(',') != rhs.npos)
-         //{
-         //   GmatStringUtil::GetArrayCommaIndex(rhs, commaPos);
-         //   if (commaPos == -1)
-         //      throw CommandException("Command contains an unexpected comma on right-hand-side");
-         //}
       }
    }
    
@@ -669,12 +657,10 @@ bool Assignment::Validate()
          {
             #ifdef DEBUG_VALIDATION
                MessageInterface::ShowMessage("Wrapper types don't match:\n");
-               MessageInterface::ShowMessage("   lhsWrapper: %d type, \"%s\", lhsDataType: %d\n",
-                     lhsWrapper->GetWrapperType(), lhsWrapper->GetDescription().c_str(),
-                     lhsDataType);
-               MessageInterface::ShowMessage("   rhsWrapper: %d type, \"%s\", rhsDataType: %d\n",
-                     rhsWrapper->GetWrapperType(), rhsWrapper->GetDescription().c_str(),
-                     rhsDataType);
+               MessageInterface::ShowMessage
+                  ("   lhsDataType: %d, rhsDataType: %d\n", lhsDataType, rhsDataType);
+               ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
+               ShowWrapper("   ", "rhsWrapper:", rhsWrapper);               
                MessageInterface::ShowMessage("   Checking compatibility of %s "
                      "with %s\n", PARAM_TYPE_STRING[lhsDataType].c_str(),
                      PARAM_TYPE_STRING[rhsDataType].c_str());
@@ -936,10 +922,8 @@ bool Assignment::Initialize()
    MessageInterface::ShowMessage
       ("Assignment::Initialize() entered for <%s>, It's%s a math equation\n",
        generatingString.c_str(), (mathTree == NULL ? " not" : ""));
-   MessageInterface::ShowMessage
-      ("   lhsWrapper=<%p><%s>\n   rhsWrapper=<%p><%s>\n",
-       lhsWrapper, lhsWrapper ? lhsWrapper->GetDescription().c_str() : "NULL",
-       rhsWrapper, rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
+   ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
+   ShowWrapper("   ", "rhsWrapper:", rhsWrapper);
    #endif
    #ifdef DEBUG_OBJECT_MAP
    ShowObjectMaps();
@@ -1041,7 +1025,6 @@ bool Assignment::Initialize()
    #endif
    
    return true;
-   
 }
 
 
@@ -1054,7 +1037,7 @@ bool Assignment::Initialize()
  * Derived classes implement this method to perform their actions on 
  * GMAT objects.
  *
- * @return true if the GmatCommand runs to completion, false if an error 
+ * @return true if the Assignment command runs to completion, false if an error 
  *         occurs. 
  */
 //------------------------------------------------------------------------------
@@ -1246,10 +1229,10 @@ bool Assignment::Execute()
       delete outWrapper;
       outWrapper = NULL;
    }
-
+   
    // Update clones
    PassToClones();
-
+   
    // Build command summary
    BuildCommandSummary(true);
    
@@ -1291,6 +1274,7 @@ void Assignment::RunComplete()
  * 
  * @return true if the command can skip polling; false if polling is needed.
  */
+//------------------------------------------------------------------------------
 bool Assignment::SkipInterrupt()
 {
    return true;
@@ -1422,8 +1406,8 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    ElementWrapper *rhsNewWrapper = NULL;
    
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage
-      ("   lhsWrapper=<%p>, rhsWrapper=<%p>\n", lhsWrapper, rhsWrapper);
+   ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
+   ShowWrapper("   ", "rhsWrapper:", rhsWrapper);
    #endif
    
    if (withName == lhs)
@@ -1436,7 +1420,7 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
           (withName.find(".") != withName.npos &&
            toWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT))
       {
-         // to handle Count = Count + 1, old lhsWrapper cannot be deleted here
+         // To handle Count = Count + 1, old lhsWrapper cannot be deleted here
          if (lhsWrapper != toWrapper)
          {
             lhsOldWrapper = lhsWrapper;
@@ -1461,8 +1445,8 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    }
    
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage
-      ("   lhsWrapper=<%p>, rhsWrapper=<%p>\n", lhsWrapper, rhsWrapper);
+   ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
+   ShowWrapper("   ", "rhsWrapper:", rhsWrapper);
    #endif
    
    if (mathTree == NULL)
@@ -1487,15 +1471,10 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
       MessageInterface::ShowMessage("   Checking RHS and it is a math tree...\n");
       std::map<std::string, ElementWrapper *>::iterator ewi;
       for (ewi = mathWrapperMap.begin(); ewi != mathWrapperMap.end(); ++ewi)
-         if (ewi->second != NULL)
-            MessageInterface::ShowMessage
-               ("   name=<%s>, wrapper=<%p>, type=%d\n", (ewi->first).c_str(), ewi->second,
-                (ewi->second)->GetWrapperType());
-         else
-            MessageInterface::ShowMessage
-               ("   name=<%s>, wrapper=<%p>\n", (ewi->first).c_str(), ewi->second);
+         ShowWrapper("   ", ewi->first, ewi->second);
       #endif
-      // if name found in the math wrapper map
+      
+      // If name found in the math wrapper map
       if (mathWrapperMap.find(withName) != mathWrapperMap.end())
       {
          #ifdef DEBUG_WRAPPER_CODE
@@ -1521,11 +1500,11 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    }
    
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage
-      ("   lhsOldWrapper=<%p>, rhsOldWrapper=<%p>\n", lhsOldWrapper, rhsOldWrapper);
-   MessageInterface::ShowMessage
-      ("   lhsWrapper=<%p>, rhsWrapper=<%p>, rhsNewWrapper=<%p>\n",
-       lhsWrapper, rhsWrapper, rhsNewWrapper);
+   ShowWrapper("   ", "lhsOldWrapper:", lhsOldWrapper);
+   ShowWrapper("   ", "rhsOldWrapper:", rhsOldWrapper);
+   ShowWrapper("   ", "   lhsWrapper:", lhsWrapper);
+   ShowWrapper("   ", "   rhsWrapper:", rhsWrapper);
+   ShowWrapper("   ", "rhsNewWrapper:", rhsNewWrapper);
    #endif
    
    // now delete old wrappers
@@ -1729,7 +1708,7 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
          #endif
          std::string oldWrapperName = wrapperName;
          wrapperName = GmatStringUtil::ReplaceName(wrapperName, oldName, newName);
-
+         
          // If name changed then replace and remove old one
          if (oldWrapperName != wrapperName)
          {
@@ -1795,7 +1774,6 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
       generatingString = lhs + " = " + rhs + ";";
       return generatingString;
    }
-   
    
    std::string gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
    
@@ -1881,9 +1859,10 @@ bool Assignment::ValidateArrayElement(ElementWrapper *lhsWrapper,
    ElementWrapper* rhsRowWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetRowWrapper();
    ElementWrapper* rhsColWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetColumnWrapper();
    #ifdef DEBUG_VALIDATION
-   MessageInterface::ShowMessage
-      ("   lhsRowWrapper=<%p>, lhsColWrapper=<%p>, rhsRowWrapper=<%p>, rhsColWrapper=<%p>\n",
-       lhsRowWrapper, lhsColWrapper, rhsRowWrapper, rhsColWrapper);
+   ShowWrapper("   ", "lhsRowWrapper:", lhsRowWrapper);
+   ShowWrapper("   ", "lhsColWrapper:", lhsColWrapper);
+   ShowWrapper("   ", "rhsRowWrapper:", rhsRowWrapper);
+   ShowWrapper("   ", "rhscolWrapper:", rhsColWrapper);
    #endif
    
    // Check for valid array index if index is a number. We cannot validate other
@@ -1911,9 +1890,8 @@ bool Assignment::ValidateArrayElement(ElementWrapper *lhsWrapper,
          #ifdef DEBUG_VALIDATION
          MessageInterface::ShowMessage
             ("   lhsRowCount=%d, lhsColCount=%d, rhsRowCount=%d, rhsColCount=%d, "
-             "lhsRow=%f, lhsCol=%f, rhsRow=%f, rhsCol=%f\n",
-             lhsRowCount, lhsColCount, rhsRowCount, rhsColCount,
-             lhsRow, lhsCol, rhsRow, rhsCol);
+             "lhsRow=%f, lhsCol=%f, rhsRow=%f, rhsCol=%f\n", lhsRowCount,
+             lhsColCount, rhsRowCount, rhsColCount, lhsRow, lhsCol, rhsRow, rhsCol);
          #endif
          
          // Check lhs array index for out of bounds
