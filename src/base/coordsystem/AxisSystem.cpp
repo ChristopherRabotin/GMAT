@@ -1454,7 +1454,18 @@ Real AxisSystem::SetRealParameter(const Integer id, const Real value)
    }
    if (id == UPDATE_INTERVAL)
    {
-      updateInterval = value;
+      /// @todo - when this is removed from the system, remember to remove the
+      /// UsesNutationUpdateInterval method everywhere in base/coordsys and
+      /// gui/cordSys as well
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"UpdateInterval\" on AxisSystems is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+//      updateInterval = value;
       return true;
    }
    return CoordinateBase::SetRealParameter(id,value);
@@ -1548,7 +1559,15 @@ bool AxisSystem::SetBooleanParameter(const Integer id,
 {
    if (id == OVERRIDE_ORIGIN_INTERVAL)
    {
-      overrideOriginInterval = value;
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"OverrideOriginInterval\" on AxisSystems is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+//      overrideOriginInterval = value;
       return true;
    }
    return CoordinateBase::SetBooleanParameter(id, value);

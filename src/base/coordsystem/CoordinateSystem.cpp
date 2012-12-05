@@ -1354,8 +1354,17 @@ Real CoordinateSystem::SetRealParameter(const Integer id, const Real value)
    
    if (id == UPDATE_INTERVAL)
    {
-      if (axes)
-         return axes->SetRealParameter("UpdateInterval", value);
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"UpdateInterval\" on Coordinate Systems is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+      return true;
+//      if (axes)
+//         return axes->SetRealParameter("UpdateInterval", value);
    }
    else if (id == EPOCH)
    {
@@ -1522,10 +1531,19 @@ bool CoordinateSystem::SetBooleanParameter(const Integer id,
 {
    if (id == OVERRIDE_ORIGIN_INTERVAL)
    {
-      if (axes)
-         return axes->SetBooleanParameter("OverrideOriginInterval", value);
-      else  
-         return false;  // or throw an exception here?
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"OverrideOriginInterval\" on Coordinate Systems is ignored and will be "
+             "removed from a future build\n");
+         writeIgnoredMessage = false;
+      }
+      return true;
+//      if (axes)
+//         return axes->SetBooleanParameter("OverrideOriginInterval", value);
+//      else
+//         return false;  // or throw an exception here?
    }
    return CoordinateBase::SetBooleanParameter(id, value);
 }
