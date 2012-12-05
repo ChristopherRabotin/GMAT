@@ -403,13 +403,15 @@ void SpiceAttitudeKernelReader::GetTargetOrientation(const std::string &objectNa
       delete [] err;
       throw UtilityException(errmsg);
    }
-   #ifdef DEBUG_CK_READING
-      MessageInterface::ShowMessage("First, check for coverage for object \"%s\", with NAIF ID %d\n",
-         objectName.c_str(), naifID);
-   #endif
-   Real beginCov = 0.0;
-   Real endCov   = 0.0;
-   GetCoverageStartAndEnd(loadedKernels, forFrameNaifId, beginCov, endCov, false);
+   // the following lines are commented out for performance.  Running the check on coverage slows
+   // down a run to about 30 times it's normal run time.
+//   #ifdef DEBUG_CK_READING
+//      MessageInterface::ShowMessage("First, check for coverage for object \"%s\", with NAIF ID %d\n",
+//         objectName.c_str(), naifID);
+//   #endif
+//   Real beginCov = 0.0;
+//   Real endCov   = 0.0;
+//   GetCoverageStartAndEnd(loadedKernels, forFrameNaifId, beginCov, endCov, false);
 
    // Now get the C-matrix and angular velocity at the requested time
    SpiceDouble    cmat[3][3];
