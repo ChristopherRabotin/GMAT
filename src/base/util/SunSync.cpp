@@ -21,7 +21,7 @@
 
 #include "SunSync.hpp"
 #include "GmatDefaults.hpp" 
-#include "math.h"
+#include <math.h>
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
@@ -30,12 +30,37 @@
 //------------------------------------------------------------------------------
 // SunSync()
 //------------------------------------------------------------------------------
-// A constructor.
+/**
+ * This method creates an object of the SunSync class
+ * (default constructor).
+ *
+ */
 //------------------------------------------------------------------------------
 SunSync::SunSync()
 {
+   elements.SMA = 0.0;
+   elements.ALT = 0.0;
+   elements.ECC = 0.0;
+   elements.INC = 0.0;
+   elements.ROP = 0.0;
+   elements.ROA = 0.0;
+   elements.P   = 0.0;
+
+   errormsg     = "";
+   isError      = false;
 }
 
+//------------------------------------------------------------------------------
+// SunSync()
+//------------------------------------------------------------------------------
+/**
+ * This method creates an object of the SunSync class
+ * constructor).
+ *
+ * @param  a, alt, e, i, rop, roa, p    initial values for the elements
+ *
+ */
+//------------------------------------------------------------------------------
 SunSync::SunSync(Real a, Real alt, Real e, Real i, Real rop, Real roa, Real p)
 {
    elements.SMA = a;
@@ -44,25 +69,43 @@ SunSync::SunSync(Real a, Real alt, Real e, Real i, Real rop, Real roa, Real p)
    elements.INC = i;
    elements.ROP = rop;
    elements.ROA = roa;
-   elements.P = p;
+   elements.P   = p;
+
+   errormsg     = "";
+   isError      = false;
 }
 
 //------------------------------------------------------------------------------
 // ~SunSync()
+//------------------------------------------------------------------------------
+/**
+ * This method destroys the object of the SunSync class
+ * (destructor).
+ *
+ */
 //------------------------------------------------------------------------------
 SunSync::~SunSync()
 {
 }
 
 //------------------------------------------------------------------------------
-// CalculateSunSync()
+// void CalculateSunSync(bool aVal, Real a, bool altVal, Real alt,
+//                       bool eVal,  Real e, bool iVal, Real i, bool ropVal,
+//                       Real RoP,  bool roaVal, Real RoA, bool pVal,
+//                       Real P)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the SunSync values.
+ *
+ */
 //------------------------------------------------------------------------------
 void SunSync::CalculateSunSync(bool aVal, Real a, bool altVal, Real alt, 
-	                           bool eVal, Real e, bool iVal, Real i, bool ropVal, 
-							   Real RoP, bool roaVal, Real RoA, bool pVal, Real P)
+	                            bool eVal,  Real e, bool iVal, Real i, bool ropVal,
+							          Real RoP,  bool roaVal, Real RoA, bool pVal,
+							          Real P)
 {
    errormsg = "";
-   isError = false;
+   isError  = false;
 
    //check if 2 inputs given
    if ((aVal+eVal+iVal+ropVal+roaVal+pVal+altVal)<2)
@@ -358,8 +401,8 @@ void SunSync::CalculateSunSync(bool aVal, Real a, bool altVal, Real alt,
    if (isError)
    {
       a = -1; 
-	  e = -1; 
-	  i = -1;
+      e = -1;
+      i = -1;
    }
    //find a from e, i
    else if (eVal && iVal)
@@ -440,51 +483,131 @@ void SunSync::CalculateSunSync(bool aVal, Real a, bool altVal, Real alt,
    elements.P = P;
 }
 
+//------------------------------------------------------------------------------
+// Real GetSMA()
+//------------------------------------------------------------------------------
+/**
+ * Returns SMA value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetSMA()
 {
    return elements.SMA;
 }
 
+//------------------------------------------------------------------------------
+// Real GetALT()
+//------------------------------------------------------------------------------
+/**
+ * Returns ALT value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetALT()
 {
    return elements.ALT;
 }
 
+//------------------------------------------------------------------------------
+// Real GetECC()
+//------------------------------------------------------------------------------
+/**
+ * Returns ECC value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetECC()
 {
    return elements.ECC;
 }
 
+//------------------------------------------------------------------------------
+// Real GetINC()
+//------------------------------------------------------------------------------
+/**
+ * Returns INC value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetINC()
 {
    return elements.INC;
 }
 
+//------------------------------------------------------------------------------
+// Real GetROA()
+//------------------------------------------------------------------------------
+/**
+ * Returns ROA value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetROA()
 {
    return elements.ROA;
 }
 
+//------------------------------------------------------------------------------
+// Real GetROP()
+//------------------------------------------------------------------------------
+/**
+ * Returns ROP value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetROP()
 {
    return elements.ROP;
 }
 
+//------------------------------------------------------------------------------
+// Real GetP()
+//------------------------------------------------------------------------------
+/**
+ * Returns P value.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::GetP()
 {
    return elements.P;
 }
 
+//------------------------------------------------------------------------------
+// bool IsError()
+//------------------------------------------------------------------------------
+/**
+ * Returns indicating whether or not there has been an error.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SunSync::IsError()
 {
    return isError;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetError()
+//------------------------------------------------------------------------------
+/**
+ * Returns the error message.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string SunSync::GetError()
 {
 	return errormsg;
 }
 
+//------------------------------------------------------------------------------
+// Real SolveA(Real e, Real i, bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Solves for A, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::SolveA(Real e, Real i, bool flag)
 {
    Real a, e_low, e_high, rp, e_rp, a_1, a_0, i_low, i_high;
@@ -518,17 +641,17 @@ Real SunSync::SolveA(Real e, Real i, bool flag)
       if (e_rp<e_high) 
 	     e_high = e_rp;
       if (e_low>e_high)
-	  {
+	   {
          double x = e_low; 
-		 e_low = e_high; 
-		 e_high = x;
+		   e_low    = e_high;
+		   e_high   = x;
 	  }
       if (e_low<0) 
 	  {
 	     e_low = 0;
-         a_1 = 1; 
-		 a_0 = a; 
-		 count = 0;
+        a_1   = 1;
+		  a_0   = a;
+		  count = 0;
 	  }
       while ((a_1*(1-e_high) < 
 		     (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+100))
@@ -589,6 +712,14 @@ Real SunSync::SolveA(Real e, Real i, bool flag)
    return a;
 }
 
+//------------------------------------------------------------------------------
+// Real SolveE(Real a, Real i, bool flag, bool altFlag)
+//------------------------------------------------------------------------------
+/**
+ * Solves for E, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::SolveE(Real a, Real i, bool flag, bool altFlag)
 {
    Real e, check, i_high, i_low, a_high, rp, e_rp, a_low;
@@ -739,6 +870,15 @@ Real SunSync::SolveE(Real a, Real i, bool flag, bool altFlag)
    return e;
 }
 
+//------------------------------------------------------------------------------
+// Real SolveI(Real a, Real e, bool flag, bool roaFlag, bool ropFlag,
+//             bool eFlag, bool aFlag, bool pFlag, bool altFlag)
+//------------------------------------------------------------------------------
+/**
+ * Solves for I, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 Real SunSync::SolveI(Real a, Real e, bool flag, bool roaFlag, bool ropFlag, 
 	                 bool eFlag, bool aFlag, bool pFlag, bool altFlag)
 {
@@ -1133,6 +1273,14 @@ Real SunSync::SolveI(Real a, Real e, bool flag, bool roaFlag, bool ropFlag,
 }
 
 
+//------------------------------------------------------------------------------
+// Real SolvePAE(Real P, Real i, Real &a, Real &e)
+//------------------------------------------------------------------------------
+/**
+ * Solves for PAE, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 void SunSync::SolvePAE(Real P, Real i, Real &a, Real &e)
 {
    Real n, n_lo, n_hi, P_low, P_high, i_high, i_low, check;
@@ -1277,6 +1425,14 @@ void SunSync::SolvePAE(Real P, Real i, Real &a, Real &e)
 
 }
 
+//------------------------------------------------------------------------------
+// Real SolveRoAAE(Real RoA, Real i, Real &a, Real &e)
+//------------------------------------------------------------------------------
+/**
+ * Solves for RoAAE, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 void SunSync::SolveRoAAE(Real RoA, Real i, Real &a, Real &e)
 {
    Real diff, tol, aNew, eNew, RoA_low, RoA_high, e_hi, i_high;
@@ -1352,6 +1508,14 @@ void SunSync::SolveRoAAE(Real RoA, Real i, Real &a, Real &e)
 
 }
 
+//------------------------------------------------------------------------------
+// Real SolveRoPAE(Real RoP, Real i, Real &a, Real &e)
+//------------------------------------------------------------------------------
+/**
+ * Solves for RoPAE, given inputs.
+ *
+ */
+//------------------------------------------------------------------------------
 void SunSync::SolveRoPAE(Real RoP, Real i, Real &a, Real &e)
 {
    Real diff, tol, aNew, eNew, RoP_high, RoP_low, e_hi, i_high;

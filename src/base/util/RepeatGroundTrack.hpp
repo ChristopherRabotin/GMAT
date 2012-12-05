@@ -35,7 +35,7 @@ public:
                                    Real daysToRepeat, bool rpdVal, 
                                    Real revsPerDay);
 
-   //accessor functions
+   //accessor methods
    Real GetSMA();
    Real GetALT();
    Real GetECC();

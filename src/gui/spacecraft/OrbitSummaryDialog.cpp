@@ -28,7 +28,11 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // OrbitSummaryDialog()
 //------------------------------------------------------------------------------
-// A constructor.
+/**
+ * This method creates an object of the OrbitSummaryDialog class
+ * (default constructor).
+ *
+ */
 //------------------------------------------------------------------------------
 OrbitSummaryDialog::OrbitSummaryDialog(wxWindow *parent, wxString &summary)
    : GmatDialog(parent, -1, wxString(_T("Orbit Summary")))
@@ -44,13 +48,29 @@ OrbitSummaryDialog::OrbitSummaryDialog(wxWindow *parent, wxString &summary)
    ShowData();
 }
 
+//------------------------------------------------------------------------------
+// ~OrbitSummaryDialog()
+//------------------------------------------------------------------------------
+/**
+ * This method destroys the object of the OrbitSummaryDialog class
+ * (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 OrbitSummaryDialog::~OrbitSummaryDialog()
 {
 }
 
+//------------------------------------------------------------------------------
+// private methods
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the widgets for the panel.
+ */
 //------------------------------------------------------------------------------
 void OrbitSummaryDialog::Create()
 {
@@ -60,14 +80,35 @@ void OrbitSummaryDialog::Create()
    theMiddleSizer->Add(orbitSummary, 1, wxGROW|wxALL, 3);
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from the attitude object into the widgets for the panel.
+ */
+//------------------------------------------------------------------------------
 void OrbitSummaryDialog::LoadData()
 {
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the widgets to the object, if applicable.
+ */
+//------------------------------------------------------------------------------
 void OrbitSummaryDialog::SaveData()
 {
 }
 
+//------------------------------------------------------------------------------
+// void ResetData()
+//------------------------------------------------------------------------------
+/**
+ * Resets the data.
+ */
+//------------------------------------------------------------------------------
 void OrbitSummaryDialog::ResetData()
 {
 }

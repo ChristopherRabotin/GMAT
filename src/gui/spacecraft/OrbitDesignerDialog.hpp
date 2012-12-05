@@ -57,7 +57,6 @@ public:
    bool updateOrbit;
    
 private:
-   UserInputValidator validator;
 
    bool mIsOrbitChanged;
 
@@ -105,6 +104,10 @@ private:
    wxString summaryString;
 
    //orbit type objects
+   /// @todo   these should all be pointers and not set until the constructor
+   /// and then deleted in the destructor;
+   /// then the unneeded default constructors for all of these items can be
+   /// removed
    Spacecraft *theSpacecraft;
    SunSync orbitSS;
    RepeatSunSync orbitRSS;

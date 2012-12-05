@@ -53,8 +53,12 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // OrbitDesignerDialog()
 //--------------------------------------------------------------------------------
-// A constructor.
-//--------------------------------------------------------------------------------
+/**
+ * This method creates an object of the OrbitDesignerDialog class
+ * (default constructor).
+ *
+ */
+//------------------------------------------------------------------------------
 OrbitDesignerDialog::OrbitDesignerDialog(wxWindow *parent, Spacecraft *spacecraft)
    : GmatDialog(parent, -1, wxString(_T("OrbitDesignerDialog")))
 {
@@ -76,12 +80,26 @@ OrbitDesignerDialog::OrbitDesignerDialog(wxWindow *parent, Spacecraft *spacecraf
 //------------------------------------------------------------------------------
 // ~OrbitDesignerDialog()
 //------------------------------------------------------------------------------
+/**
+ * This method destroys the object of the OrbitDesignerDialog class
+ * (destructor).
+ *
+ */
+//------------------------------------------------------------------------------
 OrbitDesignerDialog::~OrbitDesignerDialog()
 {
 }
 
 //------------------------------------------------------------------------------
+// private methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the widgets for the panel.
+ */
 //------------------------------------------------------------------------------
 void OrbitDesignerDialog::Create()
 {
@@ -410,6 +428,10 @@ void OrbitDesignerDialog::Create()
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data from the attitude object into the widgets for the panel.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::LoadData()
 {
    //default = sun sync
@@ -421,6 +443,10 @@ void OrbitDesignerDialog::LoadData()
 
 //------------------------------------------------------------------------------
 // void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the widgets to the object, if applicable.
+ */
 //------------------------------------------------------------------------------
 void OrbitDesignerDialog::SaveData()
 {
@@ -437,13 +463,24 @@ void OrbitDesignerDialog::SaveData()
 //------------------------------------------------------------------------------
 // virtual void ResetData()
 //------------------------------------------------------------------------------
+/**
+ * Resets the data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::ResetData()
 {
-        updateOrbit = false;
+   updateOrbit = false;
 }
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from a combo box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
 //------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnComboBoxChange(wxCommandEvent& event)
 {
@@ -506,6 +543,16 @@ void OrbitDesignerDialog::OnComboBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP1CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P1 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP1CheckBoxChange(wxCommandEvent& event)
 {
    paramOneVal = paramOneCheckBox->GetValue();
@@ -641,6 +688,16 @@ void OrbitDesignerDialog::OnP1CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP2CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P2 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP2CheckBoxChange(wxCommandEvent& event)
 {
    paramTwoVal = paramTwoCheckBox->GetValue();
@@ -814,6 +871,16 @@ void OrbitDesignerDialog::OnP2CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP3CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P3 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP3CheckBoxChange(wxCommandEvent& event)
 {
    paramThreeVal = paramThreeCheckBox->GetValue();
@@ -1081,6 +1148,16 @@ void OrbitDesignerDialog::OnP3CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP4CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P4 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP4CheckBoxChange(wxCommandEvent& event)
 {
    paramFourVal = paramFourCheckBox->GetValue();
@@ -1348,6 +1425,16 @@ void OrbitDesignerDialog::OnP4CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP5CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P5 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP5CheckBoxChange(wxCommandEvent& event)
 {
    paramFiveVal = paramFiveCheckBox->GetValue();
@@ -1577,6 +1664,16 @@ void OrbitDesignerDialog::OnP5CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP6CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P6 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP6CheckBoxChange(wxCommandEvent& event)
 {
    paramSixVal = paramSixCheckBox->GetValue();
@@ -1768,6 +1865,16 @@ void OrbitDesignerDialog::OnP6CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnP7CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the P7 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnP7CheckBoxChange(wxCommandEvent& event)
 {
    paramSevenVal = paramSevenCheckBox->GetValue();
@@ -1959,6 +2066,16 @@ void OrbitDesignerDialog::OnP7CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnTP1CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the TP1 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnTP1CheckBoxChange(wxCommandEvent& event)
 {
    timeParamOneVal = timeParamOneCheckBox->GetValue();
@@ -1992,6 +2109,16 @@ void OrbitDesignerDialog::OnTP1CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnTP2CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the TP2 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnTP2CheckBoxChange(wxCommandEvent& event)
 {
    timeParamTwoVal = timeParamTwoCheckBox->GetValue();
@@ -2009,6 +2136,16 @@ void OrbitDesignerDialog::OnTP2CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnTP3CheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a selection from the TP3 check box.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnTP3CheckBoxChange(wxCommandEvent& event)
 {
    timeParamThreeVal = timeParamThreeCheckBox->GetValue();
@@ -2026,6 +2163,16 @@ void OrbitDesignerDialog::OnTP3CheckBoxChange(wxCommandEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnParamChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user makes a change to the parameter.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnParamChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == param1TextCtrl)
@@ -2079,6 +2226,16 @@ void OrbitDesignerDialog::OnParamChange(wxCommandEvent& event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnFindOrbit(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user selects the Find Orbit button.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
 {
    canClose = true;
@@ -2223,12 +2380,12 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
       if ((epochType == "UTCGregorian") || (epochType == "A1Gregorian") || 
           (epochType == "TAIGregorian") || (epochType == "TTGregorian"))
       {
-         if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Epoch"))
+         if(!CheckTimeFormatAndValue("UTCGregorian", str, "Epoch"))
             return;
       }
       else
       {
-         if(!validator.CheckTimeFormatAndValue("UTCModJulian", str, "Epoch"))
+         if(!CheckTimeFormatAndValue("UTCModJulian", str, "Epoch"))
             return;
       }
       if (orbitType == "Geostationary")
@@ -2239,7 +2396,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
          if (!timeParamTwoVal && timeParamThreeVal)
          {
             str = "01 Jan 2000 " + time3TextCtrl->GetValue();
-            if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Initial Local Sidereal Time"))
+            if(!CheckTimeFormatAndValue("UTCGregorian", str, "Initial Local Sidereal Time"))
                return;
             orbitTime.FindRAAN();
             if (orbitTime.IsError())
@@ -2344,6 +2501,16 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnSummary(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user selects the Summary button.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
 {
    summaryString = "";
@@ -2431,6 +2598,13 @@ void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
    summaryDlg.ShowModal();
 }
 
+//------------------------------------------------------------------------------
+// void DisplaySunSync()
+//------------------------------------------------------------------------------
+/**
+ * Displays the SunSync data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplaySunSync()
 {
    //show inputs
@@ -2598,6 +2772,13 @@ void OrbitDesignerDialog::DisplaySunSync()
    unitsOut9StaticText->Show(false);
 }
 
+//------------------------------------------------------------------------------
+// void DisplayRepeatSunSync()
+//------------------------------------------------------------------------------
+/**
+ * Displays the RepeatSunSync data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayRepeatSunSync()
 {
    //show inputs
@@ -2731,6 +2912,13 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    unitsOut9StaticText->Show(false);
 }
 
+//------------------------------------------------------------------------------
+// void DisplayRepeatGroundTrack()
+//------------------------------------------------------------------------------
+/**
+ * Displays the RepeatGroundTrack data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayRepeatGroundTrack()
 {
    //show inputs
@@ -2876,6 +3064,13 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    unitsOut9StaticText->Show(false);
 }
 
+//------------------------------------------------------------------------------
+// void DisplayGeostationary()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Geostationary data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayGeostationary()
 {
    Real SMA = 
@@ -3045,6 +3240,13 @@ void OrbitDesignerDialog::DisplayGeostationary()
    mIsOrbitChanged = true;
 }
 
+//------------------------------------------------------------------------------
+// void DisplayMolniya()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Molniya data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayMolniya()
 {
    //show inputs
@@ -3139,6 +3341,13 @@ void OrbitDesignerDialog::DisplayMolniya()
    mIsOrbitChanged = true;
 }
 
+//------------------------------------------------------------------------------
+// void DisplayFrozen()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Frozen data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayFrozen()
 {
    //show inputs
@@ -3236,6 +3445,13 @@ void OrbitDesignerDialog::DisplayFrozen()
    unitsOut9StaticText->Show(false);
 }
 
+//------------------------------------------------------------------------------
+// void DisplayTime()
+//------------------------------------------------------------------------------
+/**
+ * Displays the Time data.
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerDialog::DisplayTime()
 {
    timeParamOneCheckBox->Show(true);
@@ -3309,6 +3525,15 @@ void OrbitDesignerDialog::DisplayTime()
    timeUnitsOut4StaticText->Show(false);
 }
 
+//------------------------------------------------------------------------------
+// wxArrayString GetElementsString()
+//------------------------------------------------------------------------------
+/**
+ * Returns the elements as a string.
+ *
+ * @return orbital elements, as a string
+ */
+//------------------------------------------------------------------------------
 wxArrayString OrbitDesignerDialog::GetElementsString()
 {
    wxString str;
@@ -3406,6 +3631,15 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    return elements;
 }
 
+//------------------------------------------------------------------------------
+// Rvector6 GetElementsDouble()
+//------------------------------------------------------------------------------
+/**
+ * Returns the elements as a Real array.
+ *
+ * @return orbital elements, as a real array.
+ */
+//------------------------------------------------------------------------------
 Rvector6 OrbitDesignerDialog::GetElementsDouble()
 {
    Rvector6 elementVector;
@@ -3452,11 +3686,29 @@ Rvector6 OrbitDesignerDialog::GetElementsDouble()
    return elementVector;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetEpochFormat()
+//------------------------------------------------------------------------------
+/**
+ * Returns the epoch format.
+ *
+ * @return epoch format
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerDialog::GetEpochFormat()
 {
    return orbitTime.GetEpochFormat();
 }
 
+//------------------------------------------------------------------------------
+// std::string GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Returns the epoch as a string
+ *
+ * @return epoch
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerDialog::GetEpoch()
 {
    return orbitTime.GetEpoch();

@@ -28,17 +28,30 @@
 //------------------------------------------------------------------------------
 // OrbitDesignerTime()
 //------------------------------------------------------------------------------
-// A constructor.
+/**
+ * This method creates an object of the OrbitDesignerTime class
+ * (constructor) using the input values.
+ *
+ */
 //------------------------------------------------------------------------------
 OrbitDesignerTime::OrbitDesignerTime(std::string epochFormat, std::string epoch,
-	                                 double RAAN, std::string startTime)
+	                                  double RAAN, std::string startTime)
 {
 }
 
+//------------------------------------------------------------------------------
+// OrbitDesignerTime()
+//------------------------------------------------------------------------------
+/**
+ * This method creates an object of the OrbitDesignerTime class
+ * (constructor) using the input values.
+ *
+ */
+//------------------------------------------------------------------------------
 OrbitDesignerTime::OrbitDesignerTime(std::string epochStr, 
-	                                 std::string epochFormatStr, bool raanVal, 
-									 Real raan, bool startTimeVal, 
-									 std::string startTimeStr)
+                                     std::string epochFormatStr, bool raanVal,
+                                     Real raan, bool startTimeVal,
+                                     std::string startTimeStr)
 {
    epoch = epochStr;
    epochFormat = epochFormatStr;
@@ -50,17 +63,33 @@ OrbitDesignerTime::OrbitDesignerTime(std::string epochStr,
 	  startTime = startTimeStr;
    else 
 	  startTime = "12:00:00.0";
+
+   errormsg     = "";
+   isError      = false;
 }
 
 //------------------------------------------------------------------------------
 // ~OrbitDesignerTime()
+//------------------------------------------------------------------------------
+/**
+ * This method destroys the object of the OrbitDesignerTime class
+ * (destructor).
+ *
+ */
 //------------------------------------------------------------------------------
 OrbitDesignerTime::~OrbitDesignerTime()
 {
 }
 
 //------------------------------------------------------------------------------
-// findRAAN()
+// Real FindRAAN()
+//------------------------------------------------------------------------------
+/**
+ * Finds the RAAN value.
+ *
+ * @return  RAAN value
+ *
+ */
 //------------------------------------------------------------------------------
 Real OrbitDesignerTime::FindRAAN()
 {
@@ -179,7 +208,14 @@ Real OrbitDesignerTime::FindRAAN()
 }
 
 //------------------------------------------------------------------------------
-// FindStartTime()
+// std::string FindStartTime()
+//------------------------------------------------------------------------------
+/**
+ * Finds the Start Time value.
+ *
+ * @return  time value as a string
+ *
+ */
 //------------------------------------------------------------------------------
 std::string OrbitDesignerTime::FindStartTime(bool flag, Real lon)
 {
@@ -337,49 +373,130 @@ std::string OrbitDesignerTime::FindStartTime(bool flag, Real lon)
    return startTime;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetRAAN()
+//------------------------------------------------------------------------------
+/**
+ * Sets the RAAN value.
+ *
+ * @param  RAAN value to use
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerTime::SetRAAN(Real val)
 {
    RAAN = val;
 }
 
+//------------------------------------------------------------------------------
+// void SetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Sets the Epoch value.
+ *
+ * @param  Epoch value to use, as a string
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerTime::SetEpoch(std::string val)
 {
    epoch = val;
 }
 
+//------------------------------------------------------------------------------
+// void SetStart()
+//------------------------------------------------------------------------------
+/**
+ * Sets the start time.
+ *
+ * @param  Start time to use, as a string
+ *
+ */
+//------------------------------------------------------------------------------
 void OrbitDesignerTime::SetStart(std::string val)
 {
    startTime = val;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//accessor functions
-//////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+// accessor methods
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Real GetRAAN()
+//------------------------------------------------------------------------------
+/**
+ * Returns RAAN value.
+ *
+ */
+//------------------------------------------------------------------------------
 double OrbitDesignerTime::GetRAAN()
 {
    return RAAN;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStartTime()
+//------------------------------------------------------------------------------
+/**
+ * Returns start time value as a string.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerTime::GetStartTime()
 {
    return startTime;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Returns epoch value as a string.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerTime::GetEpoch()
 {
    return epoch;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetEpochFormat()
+//------------------------------------------------------------------------------
+/**
+ * Returns epoch format as a string.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerTime::GetEpochFormat()
 {
    return epochFormat;
 }
 
+//------------------------------------------------------------------------------
+// bool IsError()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not there has been an error.
+ *
+ */
+//------------------------------------------------------------------------------
 bool OrbitDesignerTime::IsError()
 {
    return isError;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetError()
+//------------------------------------------------------------------------------
+/**
+ * Returns the error message.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string OrbitDesignerTime::GetError()
 {
    return errormsg;

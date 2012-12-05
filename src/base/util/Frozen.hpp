@@ -46,7 +46,7 @@ private:
    struct orbitElements 
    {
       Real SMA;
-          Real ALT;
+      Real ALT;
       Real ECC;
       Real INC;
       Real AALT;
@@ -59,4 +59,3 @@ private:
 };
 
 #endif
-

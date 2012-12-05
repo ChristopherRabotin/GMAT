@@ -35,7 +35,7 @@ public:
                          Real e, bool iVal, Real i, bool ropVal, Real RoP, 
                          bool roaVal, Real RoA, bool pVal, Real P);
    
-   //accessor functions
+   //accessor methods
    Real GetSMA();
    Real GetALT();
    Real GetECC();
@@ -73,4 +73,3 @@ private:
 };
 
 #endif
-
