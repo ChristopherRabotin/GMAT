@@ -2843,6 +2843,37 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
       }
    }
    
+   if (action == "ClearForcesOfType")
+   {
+      std::vector<PhysicalModel*> deleteList;
+
+      // Build a list of forces to delete
+      for (std::vector<PhysicalModel*>::iterator i =  forceList.begin();
+            i != forceList.end(); ++i)
+      {
+         if ((*i)->IsOfType(actionData))
+            deleteList.push_back(*i);
+      }
+
+      #ifdef DEBUG_FORCE_MANAGEMENT
+         MessageInterface::ShowMessage("Removing %d forces of type %s\n",
+               deleteList.size(), actionData.c_str());
+      #endif
+
+      // Delete them by...
+      for (UnsignedInt i = 0; i < deleteList.size(); ++i)
+      {
+         // ...finding the item,
+         std::vector<PhysicalModel*>::iterator item =
+               find(forceList.begin(), forceList.end(), deleteList[i]);
+         // ...removing it from the list, and
+         if (item != forceList.end())
+            forceList.erase(item);
+         // deleting it
+         delete deleteList[i];
+      }
+   }
+
    return true;
 }
 

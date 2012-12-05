@@ -6344,7 +6344,11 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       retval = true;
       StringArray bodies = theTextParser.SeparateBrackets(value, "{}", " ,");
       
-      for (UnsignedInt i=0; i<bodies.size(); i++)
+      // Clear the old point mass forces if a new list is found
+      if (pmType == "PointMasses")
+         forceModel->TakeAction("ClearForcesOfType", "PointMassForce");
+
+      for (UnsignedInt i = 0; i < bodies.size(); ++i)
       {
          #ifdef DEBUG_SET_FORCE_MODEL
          MessageInterface::ShowMessage("   bodies[%d]=%s\n", i, bodies[i].c_str());

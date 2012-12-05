@@ -118,6 +118,8 @@ PointMassForce::PointMassForce(const std::string &name) :
    dimension = 6 * satCount;
    body = NULL;
    
+   objectTypeNames.push_back("PointMassForce");
+
    // create default body
    bodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
    
