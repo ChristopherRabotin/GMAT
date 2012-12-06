@@ -3729,10 +3729,9 @@ void Propagate::PrepareStoppingConditions()
             Real delta = stopWhen[i]->GetStopDifference();
             if (delta * direction < 0.0)
             {
-               std::string msg = "Error in a time based stopping condition.\n";
-               msg = msg + "The stopping condition " + stopWhen[i]->GetName() +
-                     " cannot be met; propagation runs in the wrong direction "
-                     "on the line\n   \"" +
+               std::string msg = "Warning: The stopping condition " +
+                     stopWhen[i]->GetName() + " cannot be met; propagation "
+                     "runs in the wrong direction in line\n   \"" +
                      GetGeneratingString(Gmat::SCRIPTING) + "\"";
                MessageInterface::ShowMessage("%s\n", msg.c_str());
             }
