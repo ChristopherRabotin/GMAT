@@ -2241,9 +2241,10 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
    {
       GmatTree::ItemType itemType = currItem->GetItemType();
       GmatTree::ItemType solverItemType = itemType;
+      wxTreeItemId branchId;
       GmatCommand *branchCmd = NULL;
       // Get parent branch command if exist
-      IsInsideSolver(currId, itemType, solverItemType, &branchCmd);
+      IsInsideSolverBranch(currId, itemType, solverItemType, branchId, &branchCmd);
       cmd = CreateCommand(cmdTypeName, branchCmd);
       
       if (cmd != NULL)
@@ -2344,9 +2345,10 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
    {
       GmatTree::ItemType itemType = currItem->GetItemType();
       GmatTree::ItemType solverItemType = itemType;
+      wxTreeItemId branchId;
       GmatCommand *branchCmd = NULL;
       // Get parent branch command if exist
-      IsInsideSolver(currId, itemType, solverItemType, &branchCmd);
+      IsInsideSolverBranch(currId, itemType, solverItemType, branchId, &branchCmd);
       cmd = CreateCommand(cmdTypeName, branchCmd);
       
       // Set parentId, currId, prevId properly to pass to InsertCommand()
@@ -2812,6 +2814,7 @@ void MissionTree::OnItemRightClick(wxTreeEvent& event)
    //wxWidgets-2.6.3 does not need this but wxWidgets-2.8.0 needs to SelectItem
    SelectItem(event.GetItem());
    mLastClickPoint = event.GetPoint();
+   mLastRightClickItemId = event.GetItem();
    ShowMenu(event.GetItem(), event.GetPoint());
 }
 
@@ -2970,7 +2973,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          else if (itemType == GmatTree::OPTIMIZE)
          {
             menu.Append(MT_APPEND, wxT("Append"),
-                        CreateOptimizeSubMenu(itemType, APPEND));
+                        CreateOptimizeSubMenu(itemType, id, APPEND));
             menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                         CreateSubMenu(itemType, INSERT_BEFORE));
             menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
@@ -2986,15 +2989,16 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          else if (itemType == GmatTree::END_OPTIMIZE)
          {
             menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
-                        CreateOptimizeSubMenu(itemType, INSERT_BEFORE));
+                        CreateOptimizeSubMenu(itemType, GetItemParent(id), INSERT_BEFORE));
             menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
                         CreateSubMenu(itemType, INSERT_AFTER));
          }
          else 
          {
             GmatTree::ItemType solverItemType = itemType;
+            wxTreeItemId branchId;
             GmatCommand *branchCmd = NULL;
-            if (IsInsideSolver(id, itemType, solverItemType, &branchCmd))
+            if (IsInsideSolverBranch(id, itemType, solverItemType, branchId, &branchCmd))
             {
                #if DEBUG_MISSION_TREE_MENU
                MessageInterface::ShowMessage("   ===> item is inside a Solver command\n");
@@ -3009,9 +3013,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                else if (solverItemType == GmatTree::OPTIMIZE)
                {
                   menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
-                              CreateOptimizeSubMenu(itemType, INSERT_BEFORE));
+                              CreateOptimizeSubMenu(itemType, branchId, INSERT_BEFORE));
                   menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
-                              CreateOptimizeSubMenu(itemType, INSERT_AFTER));
+                              CreateOptimizeSubMenu(itemType, branchId, INSERT_AFTER));
                }
             }
             else
@@ -3044,8 +3048,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             #endif
             
             GmatTree::ItemType solverItemType = itemType;
+            wxTreeItemId branchId;
             GmatCommand *branchCmd = NULL;
-            if (IsInsideSolver(id, itemType, solverItemType, &branchCmd))
+            if (IsInsideSolverBranch(id, itemType, solverItemType, branchId, &branchCmd))
             {
                #ifdef DEBUG_MISSION_TREE_MENU
                MessageInterface::ShowMessage("   ===> Inserting Append menu inside Solver command\n");
@@ -3058,7 +3063,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                else if (solverItemType == GmatTree::OPTIMIZE)
                {
                   menu.Insert(insertPos, MT_APPEND, wxT("Append"),
-                              CreateOptimizeSubMenu(itemType, APPEND));   
+                              CreateOptimizeSubMenu(itemType, branchId, APPEND));   
                }
             }
             else
@@ -3266,20 +3271,37 @@ wxMenu* MissionTree::CreateTargetSubMenu(GmatTree::ItemType type, ActionType act
 
 
 //------------------------------------------------------------------------------
-// wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType action)
+// wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, wxTreeItemId solverBranchId,
+//                               ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType action)
+wxMenu* MissionTree::CreateOptimizeSubMenu(GmatTree::ItemType type, wxTreeItemId solverBranchId,
+                                           ActionType action)
 {
+   #ifdef DEBUG_MISSION_TREE_MENU
+   MessageInterface::ShowMessage
+      ("MissionTree::CreateOptimizeSubMenu() entered, type=%d, action=%d, mUsingViewLevel=%d\n",
+       type, action, mUsingViewLevel);
+   #endif
+   
    wxMenu *menu;
    
    menu = CreateSubMenu(type, action);
    
    if (mUsingViewLevel)
    {
+      // Check if Minimize is already in the Optimize branch since only one Minimize
+      // is allowed.      
+      wxTreeItemId minimizeId = FindChild(solverBranchId, "Minimize", true, true);
       menu->Append(GetMenuId("Vary", action), "Vary");
-      menu->Append(GetMenuId("Minimize", action), "Minimize");
+      if (!minimizeId.IsOk())
+         menu->Append(GetMenuId("Minimize", action), "Minimize");
       menu->Append(GetMenuId("NonlinearConstraint", action), "NonlinearConstraint");
    }
+   
+   #ifdef DEBUG_MISSION_TREE_MENU
+   MessageInterface::ShowMessage
+      ("MissionTree::CreateOptimizeSubMenu() returning menu<%p>\n", menu);
+   #endif
    
    return menu;
 }
@@ -4122,6 +4144,21 @@ wxString MissionTree::GetCommandString(GmatCommand *cmd, const wxString &currStr
 
 
 //------------------------------------------------------------------------------
+// GmatCommand* GetCommand(wxTreeItemId nodeId)
+//------------------------------------------------------------------------------
+/**
+ * Returns GmatCommand pointer at given tree node.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* MissionTree::GetCommand(wxTreeItemId nodeId)
+{
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(nodeId);
+   GmatCommand *currCmd = currItem->GetCommand();
+   return currCmd;
+}
+
+
+//------------------------------------------------------------------------------
 // GmatTree::ItemType GetCommandId(const wxString &cmd)
 //------------------------------------------------------------------------------
 GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
@@ -4468,25 +4505,28 @@ int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
 
 //------------------------------------------------------------------------------
 // wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
-//                        bool useSummaryName)
+//                        bool useSummaryName, bool onlyCheckCmdType)
 //------------------------------------------------------------------------------
 /*
- * Finds a item from the parent node of the tree. It compares item command name
+ * Finds a first item from the parent node of the tree. It compares item command name
  * and cmdName for finding the item.
  *
  * @param  parentId  Parent item id
- * @param  cmdName   Comand name to find
- * @param  useSummaryName  If this flag is set it will use summary name to find
+ * @param  cmdName   Comand name or type name to find. If using command type name,
+ *                         set onlyCheckCmdType flag to true
+ * @param  useSummaryName  If this flag is set, it will use summary name to find
  *                         the item [false]
+ * @param  onlyCheckCmdType If this flag is set, it will only check for the command
+ *                         type name [false]
  *
  */
 //------------------------------------------------------------------------------
 wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
-                                    bool useSummaryName)
+                                    bool useSummaryName, bool onlyCheckCmdType)
 {
    #if DEBUG_MISSION_TREE_FIND
    MessageInterface::ShowMessage
-      ("\nMissionTree::FindChild() parentId=<%s>, cmd=<%s>\n",
+      ("\nMissionTree::FindChild() entered, parentId=<%s>, cmd=<%s>\n",
        GetItemText(parentId).c_str(), cmd.c_str());
    #endif
    
@@ -4501,8 +4541,9 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
       
       while (childId.IsOk())
       {
-         MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(childId);
-         GmatCommand *currCmd = currItem->GetCommand();
+         //MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(childId);
+         //GmatCommand *currCmd = currItem->GetCommand();
+         GmatCommand *currCmd = GetCommand(childId);
          wxString currCmdType = currCmd->GetTypeName().c_str();
          wxString currCmdName = currCmd->GetName().c_str();
          if (useSummaryName)
@@ -4511,10 +4552,13 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
          childText = GetItemText(childId);
          
          #if DEBUG_MISSION_TREE_FIND > 1
-         WriteNode(1, "---> ", false, "childId     ", childId);
-         MessageInterface::ShowMessage("     cmdTypeName ='%s'\n", currCmdType.c_str());
-         MessageInterface::ShowMessage("     cmdName     ='%s'\n", currCmdType.c_str());
+         WriteNode(1, "---> ", false, "childId", childId);
+         MessageInterface::ShowMessage("     cmdType = '%s'\n", currCmdType.c_str());
+         MessageInterface::ShowMessage("     cmdName = '%s'\n", currCmdName.c_str());
          #endif
+         
+         if (onlyCheckCmdType && currCmdType == cmd)
+            break;
          
          if (currCmdName == cmd)
             break;
@@ -4525,6 +4569,11 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
          childId = GetNextChild(parentId, cookie);
       }
    }
+   
+   #if DEBUG_MISSION_TREE_FIND
+   MessageInterface::ShowMessage("MissionTree::FindChild() returning ");
+   WriteNode(1, "", false, "childId", childId);
+   #endif
    
    return childId;
 }
@@ -4642,7 +4691,7 @@ bool MissionTree::IsElseNode(wxTreeItemId itemId)
 
 
 //------------------------------------------------------------------------------
-// bool IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType, ...)
+// bool IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &itemType, ...)
 //------------------------------------------------------------------------------
 /*
  * Checks if an item is inside of solver (Target, Optimize) branch and
@@ -4652,17 +4701,18 @@ bool MissionTree::IsElseNode(wxTreeItemId itemId)
  * @parameter  currId  Id of the current node
  * @parameter  itemType  Item type of the current node
  * @parameter  solverItemType  Item type of the solver branch returned
+ * @parameter  branchId  Id of the solver branch node returned
  * @parameter  branchCmd  Pointer of the solver branch command pointer returned
  *
  * @return  true if item is inside a solver branch
  */
 //------------------------------------------------------------------------------
-bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType,
-                                 GmatTree::ItemType &solverItemType,
-                                 GmatCommand **branchCmd)
+bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &itemType,
+                                       GmatTree::ItemType &solverItemType,
+                                       wxTreeItemId &branchId, GmatCommand **branchCmd)
 {
    #if DEBUG_FIND_ITEM_PARENT
-   WriteNode(1, "MissionTree::IsInsideSolver() ", "currId", currId);
+   WriteNode(1, "MissionTree::IsInsideSolverBranch() ", "currId", currId);
    #endif
    
    wxTreeItemId parentId = GetItemParent(currId);
@@ -4684,11 +4734,12 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
       if (parentType == GmatTree::TARGET || parentType == GmatTree::OPTIMIZE)
       {
          #if DEBUG_FIND_ITEM_PARENT
-         WriteNode(1, "MissionTree::IsInsideSolver() returning true ",
+         WriteNode(1, "MissionTree::IsInsideSolverBranch() returning true ",
                    "parentId", parentId);
          #endif
          
          solverItemType = parentType;
+         branchId = parentId;
          *branchCmd = parentItem->GetCommand();
          return true;
       }
@@ -4697,14 +4748,14 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
    }
    
    #if DEBUG_FIND_ITEM_PARENT
-   MessageInterface::ShowMessage("MissionTree::IsInsideSolver() returning false\n");
+   MessageInterface::ShowMessage("MissionTree::IsInsideSolverBranch() returning false\n");
    #endif
    
    return false;
 }
 
 
-// for Debug
+// For Debug
 //------------------------------------------------------------------------------
 // void ShowCommands(const wxString &msg = "")
 //------------------------------------------------------------------------------
@@ -4772,7 +4823,6 @@ void MissionTree::ShowSubCommands(GmatCommand* brCmd, Integer level)
       
       ++childNo;
    }
-   
 }
 
 
@@ -4788,18 +4838,18 @@ void MissionTree::WriteNode(int itemCount, const std::string &prefix, bool appen
    if (itemCount == 1)
       MessageInterface::ShowMessage
          ("%s%s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Bad node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node");
    else if (itemCount == 2)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Bad node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Bad node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node");
    else if (itemCount == 3)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Bad node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Bad node",
-          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).c_str() : "Bad node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node",
+          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).c_str() : "Unknown Node");
    if (appendEol)
       MessageInterface::ShowMessage("\n");
 }

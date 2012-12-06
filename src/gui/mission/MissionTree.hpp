@@ -82,7 +82,7 @@ private:
    
    wxArrayString mCommandList;
    wxArrayString mCommandListForViewControl;
-   wxWindow *mParent;
+   wxWindow      *mParent;
    
    wxTreeItemId mMissionSeqTopId;
    wxTreeItemId mMissionSeqSubId;
@@ -90,6 +90,7 @@ private:
    wxTreeItemId mNewTreeId;
    
    wxPoint      mLastClickPoint;
+   wxTreeItemId mLastRightClickItemId;
    
    bool inScriptEvent;
    bool inFiniteBurn;
@@ -191,13 +192,15 @@ private:
    
    wxMenu* CreateSubMenu(GmatTree::ItemType type, ActionType action);
    wxMenu* CreateTargetSubMenu(GmatTree::ItemType type, ActionType action);
-   wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType action);
+   wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, wxTreeItemId solverBranchId,
+                                 ActionType action);
    wxMenu* CreateControlLogicSubMenu(GmatTree::ItemType type, ActionType action);
    
    void OpenItem(wxTreeItemId currId);
    
    wxString ComposeNodeName(GmatCommand *cmd, int cmdCount);
    wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
+   GmatCommand* GetCommand(wxTreeItemId nodeId);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    void ResetCommandCounter(const wxString &cmd, bool resetAll = false);
    int  GetCommandCounter(GmatCommand *cmd);
@@ -210,13 +213,13 @@ private:
    
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
    wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
-                          bool useSummaryName = false);
+                          bool useSummaryName = false, bool onlyCheckCmdType = false);
    wxTreeItemId FindElse(wxTreeItemId parentId);
    int  FindItemPosition(wxTreeItemId parentId, wxTreeItemId itemId);
    bool IsElseNode(wxTreeItemId itemId);
-   bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType,
-                       GmatTree::ItemType &solverItemType,
-                       GmatCommand **branchCmd);
+   bool IsInsideSolverBranch(wxTreeItemId itemId, GmatTree::ItemType &itemType,
+                             GmatTree::ItemType &solverItemType, wxTreeItemId &branchId,
+                             GmatCommand **branchCmd);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");
