@@ -113,7 +113,7 @@ const std::string Interpreter::defaultIndicator = "DFLT__";
 /**
  * Default constructor.
  *
- * @param  ss  The solar system to be used for findnig bodies
+ * @param  ss  The solar system to be used for finding bodies
  * @param  objMap  The object map to be used for finding object 
  */
 //------------------------------------------------------------------------------

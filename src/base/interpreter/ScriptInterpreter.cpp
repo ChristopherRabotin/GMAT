@@ -43,6 +43,8 @@
 //#define DEBUG_SCRIPT_WRITING_COMMANDS
 //#define DBGLVL_SCRIPT_READING 1
 //#define DBGLVL_GMAT_FUNCTION 1
+//#define DEBUG_COMMAND_MODE_TOGGLE
+
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -208,6 +210,11 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
        functionMode);
    #endif
    
+   #ifdef DEBUG_COMMAND_MODE_TOGGLE
+      MessageInterface::ShowMessage("Line %s set inCommandMode to true\n",
+            inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+
    // Since this method is called from ScriptEvent or InterpretGmatFunction,
    // set command mode to true
    inFunctionMode = functionMode;
@@ -688,7 +695,13 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    Initialize();
    
    if (inFunctionMode)
+   {
+      #ifdef DEBUG_COMMAND_MODE_TOGGLE
+         MessageInterface::ShowMessage("Line %s set inCommandMode to true\n",
+               inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      #endif
       inCommandMode = true;
+   }
    
    // Read header comment and first logical block.
    // If input command is NULL, this method is called from GUI to interpret
@@ -780,6 +793,12 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    // Parse delayed blocks here
    Integer delayedCount = delayedBlocks.size();
    bool retval2 = true;
+
+   #ifdef DEBUG_COMMAND_MODE_TOGGLE
+      MessageInterface::ShowMessage("Setting inCommandMode to false for delayed"
+            " blocks\n");
+   #endif
+
    inCommandMode = false;
    
    #ifdef DEBUG_DELAYED_BLOCK
@@ -1566,6 +1585,18 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
    std::string preStr = theTextParser.GetPrefaceComment();
    std::string inStr = theTextParser.GetInlineComment();
    
+   #ifdef DEBUG_COMMAND_MODE_TOGGLE
+      if (!inCommandMode)
+      {
+         std::string chunkString;
+         for (UnsignedInt i = 0; i < chunks.size(); ++i)
+            chunkString = chunkString + chunks[i] + "  ";
+         MessageInterface::ShowMessage("Line chunks %s set inCommandMode to "
+               "true\n", chunkString.c_str());
+      }
+   #endif
+
+
    Integer count = chunks.size();
    bool retval = true;
    inCommandMode = true;
@@ -1683,6 +1714,11 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    WriteStringArray("ParseAssignmentBlock()", "", chunks);
    #endif
    
+   #ifdef DEBUG_COMMAND_MODE_TOGGLE
+      bool commandModeAtStart = inCommandMode;
+   #endif
+
+
    Integer count = chunks.size();
    bool retval = true;
    
@@ -1819,7 +1855,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    MessageInterface::ShowMessage
       ("   Before checking for math, inCommandMode=%d\n", inCommandMode);
    #endif
-   
+
    if (!inCommandMode)
    {
       // check for math operators/functions
@@ -2004,7 +2040,20 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage("ParseAssignmentBlock() returning %d\n", retval);
    #endif
-   
+
+   #ifdef DEBUG_COMMAND_MODE_TOGGLE
+   if (commandModeAtStart != inCommandMode)
+   {
+      std::string unchunked;
+      for (UnsignedInt i = 0; i < chunks.size(); ++i)
+         unchunked = unchunked + chunks[i] + "  ";
+      MessageInterface::ShowMessage(
+            "Parsing assignment block for chunks [  %s] "
+            "set inCommandMode to %s\n",
+            unchunked.c_str(), (inCommandMode ? "true" : "false"));
+   }
+   #endif
+
    return retval;
 }
 
