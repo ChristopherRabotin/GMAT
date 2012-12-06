@@ -74,6 +74,9 @@ const Real For::DEFAULT_START       = 1;
 const Real For::DEFAULT_END         = 10;
 const Real For::DEFAULT_INCREMENT   = 1;
 
+bool       For::writeInvalidLoopMessage = true;
+
+
 //------------------------------------------------------------------------------
 //  For()
 //------------------------------------------------------------------------------
@@ -511,22 +514,22 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
    if (indexWrapper) 
    {
       indexWrapper->RenameObject(oldName, newName);
-       indexName  = indexWrapper->GetDescription();
+      indexName  = indexWrapper->GetDescription();
    }
    if (startWrapper) 
    {
       startWrapper->RenameObject(oldName, newName);
-       startName  = startWrapper->GetDescription();
+      startName  = startWrapper->GetDescription();
    }
    if (endWrapper) 
    {
       endWrapper->RenameObject(oldName, newName);
-       endName  = endWrapper->GetDescription();
+      endName  = endWrapper->GetDescription();
    }
    if (incrWrapper) 
    {
       incrWrapper->RenameObject(oldName, newName);
-       incrName  = incrWrapper->GetDescription();
+      incrName  = incrWrapper->GetDescription();
    }
    BranchCommand::RenameRefObject(type, oldName, newName);
    
@@ -951,6 +954,7 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
          }
       }
       startWrapper = toWrapper;
+      writeInvalidLoopMessage = true;
       retval = true;
    }
    if (endName == withName)
@@ -966,6 +970,7 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
          #endif
       }
       endWrapper = toWrapper;
+      writeInvalidLoopMessage = true;
       retval = true;
    }
    if (incrName == withName)
@@ -981,6 +986,7 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
          #endif
       }
       incrWrapper = toWrapper;
+      writeInvalidLoopMessage = true;
       retval = true;
    }
    
@@ -1128,15 +1134,21 @@ bool For::StillLooping()
           ((stepSize > 0.0) && (startValue > endValue)) ||
                   ((stepSize < 0.0) && (startValue < endValue)) )
       {
-         /**
-          * This method sets the element wrapper for the object with the input name.
-          *
-          * @param toWrapper   pointer to the wrapper
-          * @param withName    name of the object
-          *
-          * @return    success flag
-          */
-         //------------------------------------------------------------------------------
+         if (writeInvalidLoopMessage)
+         {
+            std::string namePartOfMsg = "";
+            if (summaryName != "")
+            {
+               namePartOfMsg = "for For command \"" + summaryName;
+               namePartOfMsg += "\" ";
+            }
+            MessageInterface::ShowMessage
+               ("*** WARNING *** Loop start(%d):increment(%d):end(%d) values %s"
+                "would result in an infinite loop.  Loop not executed.\n",
+                (Integer) startValue, (Integer) stepSize, (Integer) endValue,
+                namePartOfMsg.c_str());
+            writeInvalidLoopMessage = false;
+         }
          commandComplete = true;
          return false;
       }

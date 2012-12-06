@@ -121,6 +121,8 @@ protected:
    static const Real DEFAULT_END;
    static const Real DEFAULT_INCREMENT;
 
+   static bool       writeInvalidLoopMessage;
+
    /// Start value for the For loop
    Real           startValue;
    /// End value for the For loop
