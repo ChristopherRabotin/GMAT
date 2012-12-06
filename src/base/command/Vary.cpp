@@ -21,6 +21,7 @@
 
 
 #include "Vary.hpp"
+#include "ParameterException.hpp"
 #include "DifferentialCorrector.hpp"
 #include "Parameter.hpp"
 #include "StringUtil.hpp"  // for Replace()
@@ -1282,7 +1283,21 @@ bool Vary::Execute()
          variableUpper->EvaluateReal());
    #endif
 
-   variable->SetReal(var);
+   try
+   {
+      variable->SetReal(var);
+   }
+   catch (ParameterException &pe)
+   {
+      #ifdef DEBUG_VARY_PARSING
+         MessageInterface::ShowMessage("Parameter assignment error:\n   %s\n",
+               pe.GetFullMessage().c_str());
+      #endif
+      throw CommandException("**** ERROR **** Error "
+            "scripting the variable in the Vary command: Coordinate systems "
+            "and Central Bodies are not supported on the left hand side at "
+            "this time in line:\n" + GetGeneratingString(Gmat::NO_COMMENTS));
+   }
    solver->SetUnscaledVariable(variableID, var);
    
    BuildCommandSummary(true);
