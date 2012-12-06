@@ -769,6 +769,8 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
                 "\nPlease enter valid Initial Epoch before changing the Epoch Format\n");
          }
       }
+      else
+         newInitialEpoch = shownEpoch.c_str();
 
       // End epoch
       shownEpoch = finalEpochComboBox->GetValue();
@@ -813,6 +815,8 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
                 "\nPlease enter valid Final Epoch before changing the Epoch Format\n");
          }
        }
+      else
+         newFinalEpoch = shownEpoch.c_str();
 
       if (!epochError)
       {
