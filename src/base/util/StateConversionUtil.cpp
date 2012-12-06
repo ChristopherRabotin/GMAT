@@ -1439,6 +1439,14 @@ Real StateConversionUtil::TrueToMeanAnomaly(Real taRadians, Real ecc, bool modBy
    {
       Real ea = TrueToEccentricAnomaly(taRadians, ecc);
       ma = ea - ecc * Sin(ea);
+      // Only mod it to be between 0 and twopi when the orbit is elliptical
+      if (ma < 0.0)
+         ma = ma + TWO_PI;
+      if (modBy2Pi)
+      {
+         while (ma > TWO_PI)
+            ma -= TWO_PI;
+      }
    }
    else if (ecc > (1.0 + GmatOrbitConstants::KEP_TOL))
    {
@@ -1457,14 +1465,6 @@ Real StateConversionUtil::TrueToMeanAnomaly(Real taRadians, Real ecc, bool modBy
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToMeanAnomaly() returning %f\n", ma);
    #endif
-
-   if (ma < 0.0)
-      ma = ma + TWO_PI;
-   if (modBy2Pi)
-   {
-      while (ma > TWO_PI)
-         ma -= TWO_PI;
-   }
 
    return ma;
 }
@@ -1721,7 +1721,8 @@ Real StateConversionUtil::ConvertFromTrueAnomaly(const std::string toType, Real 
  * @return  anomaly of specified type
  */
 //---------------------------------------------------------------------------
-Real StateConversionUtil::ConvertFromTrueAnomaly(AnomalyType toType,       Real taRadians, Real ecc, bool modBy2Pi)
+Real StateConversionUtil::ConvertFromTrueAnomaly(AnomalyType toType,
+                          Real taRadians, Real ecc, bool modBy2Pi)
 {
    switch (toType)
    {
