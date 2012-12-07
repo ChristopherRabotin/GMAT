@@ -105,6 +105,11 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
    #endif
 
    std::string str = logicalBlock;
+
+   // Replace tabs with spaces to make parsing simpler
+   std::replace(str.begin(), str.end(), '\t', ' ');
+   length = str.length();
+
    std::string block;
    Integer lastPos = 0;
    Integer lineCounter = 0;
@@ -251,7 +256,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             keyword = str.substr(index1);
          }
 
-         // remove any eol or semicoln from keyword
+         // remove any eol or semicolon from keyword
          keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true, true);
 
          // make sure keyword is before open parenthesis
@@ -358,6 +363,26 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    // remove ending ; from the instruction
    theInstruction =
       GmatStringUtil::Trim(theInstruction, GmatStringUtil::TRAILING, true, true);
+
+   // Replace tabs with spaces in theInstruction
+   // Convert tab characters to a single space
+   #ifdef DEBUG_WHITESPACE
+      MessageInterface::ShowMessage("Before: \"%s\"\n", theInstruction.c_str());
+   #endif
+   if (theInstruction != "")
+   {
+      std::replace(theInstruction.begin(), theInstruction.end(), '\t', ' ');
+
+      // Strip off leading and trailing whitespace
+      std::string whitespace = " \t";
+      Integer strBegin = theInstruction.find_first_not_of(whitespace);
+      Integer strEnd = theInstruction.find_last_not_of(whitespace);
+      Integer strRange = strEnd - strBegin + 1;
+      theInstruction = theInstruction.substr(strBegin, strRange);
+   }
+   #ifdef DEBUG_WHITESPACE
+      MessageInterface::ShowMessage("After:  \"%s\"\n", theInstruction.c_str());
+   #endif
 
    theChunks.clear();
    theChunks.push_back(prefaceComment);
