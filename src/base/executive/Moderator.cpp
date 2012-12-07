@@ -1391,7 +1391,8 @@ const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
       StringArray csObjNames = theConfigManager->GetListOfItems(type);
       for (UnsignedInt i=0; i<csObjNames.size(); i++)
          if (csObjNames[i] != "EarthMJ2000Eq" && csObjNames[i] != "EarthMJ2000Ec" &&
-             csObjNames[i] != "EarthFixed")
+ 			 //csObjNames[i] != "EarthFixed")											// made changes by TUAN NGUYEN
+             csObjNames[i] != "EarthFixed" && csObjNames[i] != "EarthICRF")				// made changes by TUAN NGUYEN
             tempObjectNames.push_back(csObjNames[i]);
       return tempObjectNames;
    }
