@@ -1119,15 +1119,18 @@ void PropagationConfigPanel::SaveData()
             //loj: 2007.10.26
             // Do we need to check empty potential file?
             // Fow now allow to use default coefficients from the body.
-            //else if (primaryBodyList[i]->gravType == "Other" &&
-            //         primaryBodyList[i]->potFilename == "")
-            //{
-            //   MessageInterface::PopupMessage
-            //      (Gmat::WARNING_, "Please select potential file for %s\n",
-            //       primaryBodyList[i]->bodyName.c_str());
-            //   canClose = false;
-            //   return;
-            //}
+//            else if (primaryBodyList[i]->gravType == "Other" &&
+//                     primaryBodyList[i]->potFilename == "")
+            else if (primaryBodyData->gravType == "Other" &&
+                     primaryBodyData->potFilename == "")
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "Please select a potential file for %s\n",
+                   primaryBodyData->bodyName.c_str());
+//               primaryBodyList[i]->bodyName.c_str());
+               canClose = false;
+               return;
+            }
          }
          else
          {
