@@ -650,6 +650,14 @@ bool HarmonicField::SetStringParameter(const Integer id,
 {
    if (id == FILENAME)
    {
+      if (GmatStringUtil::IsBlank(value))
+      {
+         ODEModelException ome;
+         ome.SetDetails(errorMessageFormatUnnamed.c_str(),
+                       value.c_str(), "PotentialFile", "non-blank file name");
+         throw ome;
+      }
+
       std::string newValue = value;
       // if value has no file extension, add .cof as default (loj: 2008.10.14)
       if (value.find(".") == value.npos)
