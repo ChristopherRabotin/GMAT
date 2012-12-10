@@ -115,6 +115,7 @@ protected:
    
    virtual void         FreeArrays();
    virtual void         WriteToTextFile(SolverState stateToUse = UNDEFINED_STATE);
+   virtual std::string  GetProgressString();
    
    virtual bool         OpenConnection();
    virtual void         CloseConnection();

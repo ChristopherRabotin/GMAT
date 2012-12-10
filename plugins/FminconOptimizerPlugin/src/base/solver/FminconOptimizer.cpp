@@ -16,7 +16,6 @@
 //
 /**
  * Implementation for the FminconOptimizer class.
- *
  */
 //------------------------------------------------------------------------------
 
@@ -290,7 +289,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0;i<variableCount;i++)
          variable.at(i) = vars.at(i);
       #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
-         MessageInterface::ShowMessage("   Starting nominal pass...");
+         MessageInterface::ShowMessage("   Starting fmincon pass...");
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       RunNominal();
       #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
@@ -961,6 +960,192 @@ void FminconOptimizer::FreeArrays()
 
 
 //------------------------------------------------------------------------------
+//  std::string GetProgressString()
+//------------------------------------------------------------------------------
+/**
+ * Generates a string that reporting the current differential corrector state.
+ */
+//------------------------------------------------------------------------------
+std::string FminconOptimizer::GetProgressString()
+{
+   StringArray::iterator current;
+   Integer i;
+   std::stringstream progress;
+   progress.str("");
+   progress.precision(12);
+
+   if (isInitialized)
+   {
+      switch (currentState)
+      {
+         case INITIALIZING:
+            // This state is basically a "paused state" used for the Optimize
+            // command to finalize the initial data for the variables and
+            // goals.  All that is written here is the header information.
+            {
+               Integer localVariableCount = variableNames.size();
+               Integer localEqCount       = eqConstraintNames.size();
+               Integer localIneqCount     = ineqConstraintNames.size();
+               progress << "************************************************"
+                        << "********\n"
+                        << "*** Performing "
+                        << typeName 
+                        << " Optimization "
+                        << "(using \"" << instanceName << "\")\n";
+
+               // Write out the setup data
+               progress << "*** " << localVariableCount << " variables; "
+                        << localEqCount << " equality constraints; "
+                        << localIneqCount << " inequality constraints\n   Variables:  ";
+
+               // Iterate through the variables and goals, writing them to
+               // the file
+               for (current = variableNames.begin(), i = 0;
+                    current != variableNames.end(); ++current)
+               {
+                  if (current != variableNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               if (localEqCount > 0)
+               {
+                  progress << "\n   Equality Constraints:  ";
+   
+                  for (current = eqConstraintNames.begin(), i = 0;
+                       current != eqConstraintNames.end(); ++current)
+                  {
+                     if (current != eqConstraintNames.begin())
+                        progress << ", ";
+                     progress << *current;
+                  }
+               }
+               
+               if (localIneqCount > 0)
+               {
+                  progress << "\n   Inequality Constraints:  ";
+   
+                  for (current = ineqConstraintNames.begin(), i = 0;
+                       current != ineqConstraintNames.end(); ++current)
+                  {
+                     if (current != ineqConstraintNames.begin())
+                        progress << ", ";
+                     progress << *current;
+                  }
+               }
+               
+               progress << "\n****************************"
+                        << "****************************";
+            }
+            break;
+
+         case NOMINAL:
+            progress << instanceName << " Control Sequence Pass " << iterationsTaken+1
+                     << "; Fmincon Pass\n   Variables:  ";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               if (current != variableNames.begin())
+                  progress << ", ";
+               progress << *current << " = " << variable[i++];
+            }
+            break;
+
+         case PERTURBING:  // does this apply to optimization??
+            progress << "   Completed Control Sequence Pass " << iterationsTaken
+                     << ", pert " << pertNumber+1 << " ("
+                     << variableNames[pertNumber] << " = "
+                     << variable[pertNumber] << ")\n";
+            break;
+
+         case CALCULATING:
+            // Just forces a blank line
+            break;
+
+         case CHECKINGRUN:
+            // Iterate through the constraints, writing them to the file
+            progress << "   Equality Constraints and achieved values:\n      ";
+
+            for (current = eqConstraintNames.begin(), i = 0;
+                 current != eqConstraintNames.end(); ++current)
+            {
+               if (current != eqConstraintNames.begin())
+                  progress << ",  ";
+                  // does this make sense???
+               //progress << *current << "  Desired: " << eqConstaint[i]
+               //         << "  Achieved: " << nominal[i];
+               ++i;
+            }
+
+           progress << "   Inequality Constraints and achieved values:\n      ";
+
+            for (current = ineqConstraintNames.begin(), i = 0;
+                 current != ineqConstraintNames.end(); ++current)
+            {
+               if (current != ineqConstraintNames.begin())
+                  progress << ",  ";
+                  // does this make sense???
+               //progress << *current << "  Desired: " << eqConstaint[i]
+               //         << "  Achieved: " << nominal[i];
+               ++i;
+            }
+
+            break;
+
+         case RUNEXTERNAL:
+            progress << instanceName << " Control Sequence Pass " << iterationsTaken+1
+                     << "; External Run\n   Variables:  ";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               if (current != variableNames.begin())
+                  progress << ", ";
+               progress << *current << " = " << variable[i++];
+            }
+            break;
+
+         case FINISHED:
+            if (converged)
+               progress << "\n*** Optimization Completed in " << iterationsTaken
+                        << " passes through the Solver Control Sequence\n"
+                        << "*** The Optimizer Converged!";
+            else
+               progress << "\n*** Optimization did not converge in "
+                        << iterationsTaken
+                        << " passes through the Solver Control Sequence";
+                     
+            if ((iterationsTaken >= maxIterations) && (converged == false))
+               progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                        << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                        << "!!! WARNING: Optimizer did NOT converge in "
+                        << maxIterations << " passes!"
+                        << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                        << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+            
+            progress << "\nFinal Variable values:\n";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+               progress << "   " << *current << " = " << variable[i++] << "\n";
+            break;
+
+         case ITERATING:     // Intentional fall through
+         default:
+            throw SolverException(
+               "Solver state not supported for the optimizer");
+      }
+   }
+   else
+      return Solver::GetProgressString();
+      
+   return progress.str();
+
+}
+
+
+//------------------------------------------------------------------------------
 // void WriteToTextFile(SolverState stateToUse)
 //------------------------------------------------------------------------------
 void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
@@ -1040,7 +1225,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             break;
 
          case NOMINAL:
-//            message << "Iteration " << iterationsTaken
+//            message << "Pass " << iterationsTaken
 //                     << "\n   Variable Values: [";
 //            // Iterate through the variables, writing them to the file
 //            for (current = variableNames.begin(), i = 0;
@@ -1049,8 +1234,8 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
 //               message << " " << unscaledVariable[i++] << " ";
 //            }
 //            message << "]" << std::endl;
-                 message << instanceName << " Iteration " << iterationsTaken+1
-                      << "; Nominal Pass\n   Variables:  ";
+                 message << instanceName << " Control Sequence Pass " << iterationsTaken+1
+                      << "; Fmincon Pass\n   Variables:  ";
              // Iterate through the variables, writing them to the string
              for (current = variableNames.begin(), i = 0;
                   current != variableNames.end(); ++current)
@@ -1148,7 +1333,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                   message << "\n****************************"
                            << "****************************\n"
                            << "*** Optimization Converged in " << iterationsTaken
-                           << " iterations"
+                           << " Control Sequence Passes"
                            << "\n****************************"
                            << "****************************\n"
                            << std::endl
@@ -1170,7 +1355,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             break;
 
          case RUNEXTERNAL:
-            message << "Iteration " << iterationsTaken+1
+            message << "Control Sequence Pass " << iterationsTaken+1
                      << "\nExternal Run\nVariables:\n   ";
             // Iterate through the variables, writing them to the file
             for (current = variableNames.begin(), i = 0;
@@ -1390,7 +1575,7 @@ bool FminconOptimizer::OpenConnection()
             throw SolverException(
             "Error attempting to access GMAT server (to MATLAB)");
 
-         // Shoue I cd to initial directory?
+         // Should I cd to initial directory?
          //RunCdCommand(currPath);
 
          // ********* BEGIN temporary prototype, testing, etc. *****************************//
