@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Stop" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Stop"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -23,38 +24,96 @@
   <refnamediv>
     <refname>Stop</refname>
 
-    <refpurpose>Perform a stop command</refpurpose>
+    <refpurpose>Stop mission execution</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis></synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The Stop command simply ends a mission in GMAT. Whether placed in
-    the script or GUI, Stop will halt the execution of the mission and have
-    GMAT report back that the Command Sequence was intentionally
-    interrupted.</para>
+    <para>
+      The <guilabel>Stop</guilabel> command stops execution of the current mission at the point that the
+      command is encountered and returns control to the GMAT interface. The effect is
+      similar to that of the <guilabel>Stop</guilabel> button on the GUI toolbar.
+    </para>
+
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      The <guilabel>Stop</guilabel> command can be inserted
+      and deleted using the Mission tree,
+      but the command has no GUI panel of its own.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para>
+      The <guilabel>Stop</guilabel> command stops execution of the current mission,
+      not the GMAT application. All data displayed to the point, at which the script was stopped
+      (e.g. OrbitView plots, GroundTrack plots), remain available for manipulation. Using the <guilabel>Stop</guilabel>
+      command within a loop or solver structure will stop execution at the first iteration during
+      which the command is encountered.
+    </para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <refsection>
-      <title>Script Syntax</title>
+    <informalexample>
+      <para>Stopping the execution of a script between commands:</para>
 
-      <programlisting><code>Stop</code></programlisting>
-    </refsection>
+      <programlisting>
+        <code>
+  Create Spacecraft aSat
+  Create ForceModel aForceModel
+  Create Propagator aProp
+  aProp.FM = aForceModel
 
-    <refsection>
-      <title>Script Examples</title>
+  BeginMissionSequence
 
-      <programlisting><code>% Stop between propagation sequences
-Propagate DefaultProp(DefaultSC) DefaultSC.ElapsedSecs = 8640.0;
-Stop;
-Propagate DefaultProp(DefaultSC) DefaultSC.ElapsedDays = 10.0;</code></programlisting>
-    </refsection>
+  Propagate aProp(aSat) {aSat.ElapsedDays = 30};
+  Stop
+  Propagate aProp(aSat) {aSat.ElapsedDays = 30};
+        </code>
+      </programlisting>
+      
+      <para>
+        Stopping the execution of a solver structure for further investigation:
+      </para>
+      
+      <programlisting>
+        <code>
+  Create FuelTank aTank
+  Create ForceModel aForceModel
+  Create DifferentialCorrector aDC
+
+  Create Spacecraft aSat
+  aSat.Tanks = {aTank}
+
+  Create Propagator aProp
+  aProp.FM = aForceModel
+
+  Create ImpulsiveBurn anIB
+  anIB.DecrementMass = true
+  anIB.Tanks = {aTank}
+
+  BeginMissionSequence
+
+  Target aDC
+    Vary aDC(anIB.Element1 = 0.5)
+    Maneuver anIB(aSat)
+    Propagate aProp(aSat) {aSat.Periapsis}
+    If aSat.aTank.FuelMass &lt; 10
+    Stop
+    EndIf
+    Achieve aDC(aSat.Altitude = 1000)
+
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>
