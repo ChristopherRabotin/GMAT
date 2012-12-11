@@ -211,18 +211,18 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
       {
          #ifdef DEBUG_GMAT_KEYWORDS
          MessageInterface::ShowMessage
-            ("   ==> Found GMAT language, so setting new keywords for python "
+            ("   ==> Found GMAT language, so setting new keywords for matlab "
              "style (see EditorPreference.cpp)\n");
          #endif
          //@note LEX language for GMAT is set in globalLanguagePrefs in EditorPreference.cpp,
-         // it is currently set to PYTHON
-         #if 0
+         // it is currently set to MATLAB
+         #if 1
          // wxSTC_LEX_MATLAB (Matlab style) (Why this doesn't show colors for keywords)
          //curInfo->styles[2].words = mGmatCommandTypes.c_str(); // COMMAND
          //curInfo->styles[4].words = mGmatObjectTypes.c_str();  // KEYWORDS
          curInfo->styles[4].words = gmatKeyWords.c_str();  // KEYWORDS
          #endif
-         #if 1
+         #if 0
          // wxSTC_LEX_PYTHON (Python style)
          // Why I cannot set two types of keywords?
          //curInfo->styles[5].words = mGmatCommandTypes.c_str(); // WORD
