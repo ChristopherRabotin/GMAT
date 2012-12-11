@@ -99,6 +99,7 @@
 //#define DEBUG_MISSION_TREE_MENU 1
 //#define DEBUG_MISSION_TREE 1
 //#define DEBUG_ADD_ICONS
+//#define DEBUG_COMMAND_LIST
 //#define DEBUG_BUILD_TREE_ITEM 1
 //#define DEBUG_VIEW_COMMANDS 1
 //#define DEBUG_VIEW_LEVEL
@@ -246,7 +247,6 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandListForViewControl.Add("Vary");
    mCommandListForViewControl.Add("Minimize");
    mCommandListForViewControl.Add("NonlinearConstraint");
-   mCommandListForViewControl.Add("CallMatlabFunction");
    
    //mCommandListForViewControl.Add("EndTarget");
    //mCommandListForViewControl.Add("EndOptimize");
@@ -1226,7 +1226,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
 {
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("MissionTree::AppendCommand('%s') type = \"%s\" and name = \"%s\"\n",
+      ("MissionTree::AppendCommand('%s') entered, type = \"%s\" and name = \"%s\"\n",
        GetItemText(parent).c_str(),  cmd->GetTypeName().c_str(), 
        cmd->GetName().c_str());
    #endif
@@ -1234,21 +1234,32 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
    wxTreeItemId node;
-   MissionTreeItemData *parentItem = (MissionTreeItemData *) GetItemData(parent);
-   GmatCommand *parentCmd = parentItem->GetCommand();
-   wxString parentName = (parentCmd->GetName()).c_str();
+   //MissionTreeItemData *parentItem = (MissionTreeItemData *) GetItemData(parent);
+   //GmatCommand *parentCmd = parentItem->GetCommand();
+   //wxString parentName = (parentCmd->GetName()).c_str();
+   bool hasNoCommandName = true;
+   if (nodeName != "")
+      hasNoCommandName = false;
    
-   // compose node name
+   #if DEBUG_APPEND_COMMAND
+   MessageInterface::ShowMessage
+      ("MissionTree::AppendCommand() cmdTypeName='%s', nodeName='%s'\n",
+       cmdTypeName.c_str(), nodeName.c_str());
+   #endif
+   // Compose node name
    // Changed node name of End and Else to append parent's name
    // (LOJ: 2010.01.27 for bug GMT-209 fix)
    // Note: Else is also BranchEnd so it will have If's counter if unnamed
    if (cmd->IsOfType("BranchEnd"))
    {
-      if (parentName.Trim() != "")
-      {
-         nodeName.Printf("End %s", parentName.c_str());
-      }
-      else if (nodeName.Trim() == "")
+      // Actually we need to first check for command name exist or not.
+      // So commented out (LOJ: 2012.12.11)
+      //if (parentName.Trim() != "")
+      //{
+      //   nodeName.Printf("End %s", parentName.c_str());
+      //}
+      //else if (nodeName.Trim() == "")
+      if (nodeName.Trim() == "")
       {
          // Use branch summary name for counter so that nested branch end command
          // matches with its branch command. (GMT-209 fix)(LOJ: 2012.02.27)
@@ -1256,11 +1267,15 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          wxString branchTypeName = branch->GetTypeName().c_str();
          wxString label = branch->GetSummaryName().c_str();
          label.Replace(branchTypeName, cmdTypeName);
-		 // replace first End with End+Space
-		 // (TGG: 2012.07.17 for bug GMT-2901)
+         // Replace first End with End+Space
+         // (TGG: 2012.07.17 for bug GMT-2901)
          label.Replace("End", "End ", false);
          nodeName.Printf("%s", label.c_str());
       }
+      
+      // If command has no name and it is Else command, Show "Else" (LOJ: 2012.12.11)
+      if (hasNoCommandName && cmd->IsOfType("Else"))
+         nodeName.Replace("End", "Else");
    }
    else
    {
@@ -1268,13 +1283,23 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    }
    
-   // Show "ScriptEvent" instead of "BeginScript" to be more clear for user
-   if (nodeName.Contains("BeginScript"))
-      nodeName.Replace("BeginScript", "ScriptEvent");
+   #if DEBUG_APPEND_COMMAND
+   MessageInterface::ShowMessage
+      ("   After composing node name, nodeName='%s'\n", nodeName.c_str());
+   #endif
    
-   // Show "Equation" instead of "GMAT" to be more clear for user
-   if (nodeName.Contains("GMAT"))
-      nodeName.Replace("GMAT", "Equation");
+   // If a command has no name, replace for GUI name
+   if (hasNoCommandName)
+   {
+      // Show "ScriptEvent" instead of "BeginScript" to be more clear for user if
+      // command has no name
+      if (hasNoCommandName && nodeName.Contains("BeginScript"))
+         nodeName.Replace("BeginScript", "ScriptEvent");
+      
+      // Show "Equation" instead of "GMAT" to be more clear for user
+      if (nodeName.Contains("GMAT"))
+         nodeName.Replace("GMAT", "Equation");
+   }
    
    // Show command string as node label(loj: 2007.11.13)
    nodeName = GetCommandString(cmd, nodeName);
@@ -1283,13 +1308,15 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("MissionTree::AppendCommand() cmdTypeName='%s', nodeName='%s'\n",
-       cmdTypeName.c_str(), nodeName.c_str());
+      ("   After replacing command name, nodeName='%s'\n", nodeName.c_str());
    #endif
    
    node = AppendItem(parent, nodeName, icon, -1,
                      new MissionTreeItemData(nodeName, type, nodeName, cmd));
-
+   
+   #if DEBUG_APPEND_COMMAND
+   WriteNode(1, "", false, "MissionTree::AppendCommand() returning", node);
+   #endif
    return node;
 }
 

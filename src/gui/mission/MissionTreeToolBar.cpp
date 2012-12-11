@@ -41,6 +41,7 @@
 #include "bitmaps/mtc_ClearFilters.xpm"
 
 //#define DEBUG_MORE_VIEW_OPTIONS
+//#define DEBUG_MISSION_VIEW_CONTROL
 
 BEGIN_EVENT_TABLE(MissionTreeToolBar, wxToolBar)
    EVT_TOOL (TOOL_CLEAR_FILTERS, MissionTreeToolBar::OnViewByCategory)
@@ -103,7 +104,6 @@ void MissionTreeToolBar::ResetMissionTreeTools()
    ResetMissionTreeIncludeCategory();
    ResetMissionTreeExcludeCategory();
    ToggleTool(TOOL_CLEAR_FILTERS, true);
-
 }
 
 
@@ -369,6 +369,11 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnViewByCategory(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles event with filter by category tools. It constructs command array
+ * as filter view commands tools are selected.
+ */
+//------------------------------------------------------------------------------
 void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
 {
    wxArrayString cmdsToInclude;
@@ -381,7 +386,7 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
    
    #ifdef DEBUG_MISSION_VIEW_CONTROL
    MessageInterface::ShowMessage
-      ("MissionTreeToolBar::OnViewByCategory() eventId = %d, mLastIncCategoryClicked = %d, "
+      ("MissionTreeToolBar::OnViewByCategory() entered, eventId = %d, mLastIncCategoryClicked = %d, "
        "mLastExcCategoryClicked = %d\n", eventId, mLastIncCategoryClicked,
        mLastExcCategoryClicked);
    #endif
@@ -397,7 +402,7 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       }
       
       ResetMissionTreeTools();
-	  cmdsToInclude.Add("All");
+      cmdsToInclude.Add("All");
       mMissionTree->SetViewCommands(cmdsToInclude);
 
       break;
@@ -405,17 +410,21 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
    case TOOL_INC_SOLVER:
    case TOOL_INC_SCRIPT:
    case TOOL_INC_CONTROL:
-      // Stay toggled on if the last one reclicked      
+      // Stay toggled on if the last one reclicked
+      // Actually it should be toggled off and remove all filters which shows
+      // all levels (LOJ: 2012.12.10)
       if (eventId == mLastIncCategoryClicked)
       {
-         ToggleTool(eventId, true);
+         //ToggleTool(eventId, true);
+         ToggleTool(eventId, false);
+         ResetMissionTreeTools();
+         cmdsToInclude.Add("All");
+         mMissionTree->SetViewCommands(cmdsToInclude);
          return;
       }
       
-//      ResetMissionTreeLevel();
       ResetMissionTreeExcludeCategory();
-	  ToggleTool(TOOL_CLEAR_FILTERS, false);
-
+      ToggleTool(TOOL_CLEAR_FILTERS, false);
       
       // Include Physics based
       if (GetToolState(TOOL_INC_PHYSICS))
@@ -460,16 +469,28 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
    case TOOL_EXC_PLOT:
    case TOOL_EXC_CALL:
       // Stay toggled on if the same one reclicked      
+      // Actually it should be toggled off and remove all filters which shows
+      // all levels (LOJ: 2012.12.10)
       if (eventId == mLastExcCategoryClicked)
       {
-         ToggleTool(eventId, true);
+         //ToggleTool(eventId, true);
+         ToggleTool(eventId, false);
+         ResetMissionTreeTools();
+         cmdsToInclude.Add("All");
+         mMissionTree->SetViewCommands(cmdsToInclude);
          return;
       }
       
-//      ResetMissionTreeLevel();
       ResetMissionTreeIncludeCategory();
-	  ToggleTool(TOOL_CLEAR_FILTERS, false);
+      ToggleTool(TOOL_CLEAR_FILTERS, false);
       cmdsToInclude = mMissionTree->GetCommandList(true);
+      
+      #ifdef DEBUG_MISSION_VIEW_CONTROL
+      MessageInterface::ShowMessage
+         ("Before exclusion: cmdsToInclude has %d commands\n", cmdsToInclude.GetCount());
+      for (unsigned int i = 0; i < cmdsToInclude.size(); i++)
+         MessageInterface::ShowMessage("   '%s'\n", cmdsToInclude[i].c_str());
+      #endif
       
       // Exclude Report
       if (GetToolState(TOOL_EXC_REPORT))
@@ -499,6 +520,15 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       }
       
       mLastExcCategoryClicked = GetOnlyOneClicked(2);
+      
+      #ifdef DEBUG_MISSION_VIEW_CONTROL
+      MessageInterface::ShowMessage
+         (" After exclusion: cmdsToInclude has %d commands\n", cmdsToInclude.GetCount());
+      for (unsigned int i = 0; i < cmdsToInclude.size(); i++)
+         MessageInterface::ShowMessage("   '%s'\n", cmdsToInclude[i].c_str());
+      MessageInterface::ShowMessage("==> Calling mMissionTree->SetViewCommands()\n");
+      #endif
+      
       mMissionTree->SetViewCommands(cmdsToInclude);
       break;
       
@@ -506,6 +536,10 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       break;
    }
    
+   #ifdef DEBUG_MISSION_VIEW_CONTROL
+   MessageInterface::ShowMessage
+      ("MissionTreeToolBar::OnViewByCategory() leaving\n");
+   #endif
 }
 
 
