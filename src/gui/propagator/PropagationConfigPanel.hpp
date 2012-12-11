@@ -194,6 +194,10 @@ private:
    wxStaticText *propagatorEpochFormatStaticText;
    wxComboBox *propagatorEpochFormatComboBox;
    wxStaticText *startEpochStaticText;
+
+   // Kludge to check if the control indexing broke the test complete tests
+   wxTextCtrl *startEpochTextCtrl;
+
    wxComboBox *startEpochCombobox;
    wxArrayString startEpochChoices;
 

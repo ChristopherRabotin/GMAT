@@ -318,6 +318,13 @@ void PropagationConfigPanel::Create()
    startEpochStaticText =
          new wxStaticText( this, ID_TEXT, wxT("Start Epoch"),
                            wxDefaultPosition, wxDefaultSize );
+
+   // Kludge to check if the control indexing broke the test complete tests
+   startEpochTextCtrl =
+         new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
+                         wxDefaultPosition, wxSize(160,-1), 0);
+   startEpochTextCtrl->Hide();
+
    startEpochCombobox = new wxComboBox( this, ID_CB_PROP_EPOCHSTART, wxT(""),
          wxDefaultPosition, wxSize(160,-1), startEpochChoices, wxCB_DROPDOWN );
    startEpochCombobox->SetToolTip(pConfig->Read(_T("StartEpochHint")));
@@ -360,6 +367,10 @@ void PropagationConfigPanel::Create()
    intFlexGridSizer->Add( 20, 0, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( startEpochStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( startEpochCombobox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+
+   // Kludge to check if the control indexing broke the test complete tests
+   intFlexGridSizer->Add( startEpochTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+
    intFlexGridSizer->Add( 20, 0, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
    intFlexGridSizer->Add( theStopCheckBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
