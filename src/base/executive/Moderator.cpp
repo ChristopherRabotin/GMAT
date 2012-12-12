@@ -5668,6 +5668,24 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          id = cmd->GetParameterID("Tolerance");
          cmd->SetStringParameter(id, "0.1");
       }
+      else if (type == "Minimize")
+      {
+         // Get Optimizer as default solver
+         Solver *solver = GetDefaultOptimizer();
+         
+         #if DEBUG_DEFAULT_COMMAND
+         MessageInterface::ShowMessage
+            ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
+             cmd->GetTypeName().c_str(), solver->GetTypeName().c_str());
+         #endif
+         
+         id = cmd->GetParameterID("OptimizerName");
+         cmd->SetStringParameter(id, solver->GetName());
+         
+         // Set spacecraft RMAG as default ObjectiveName
+         id = cmd->GetParameterID("ObjectiveName");
+         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".Earth.RMAG");
+      }
       else if (type == "NonlinearConstraint")
       {
          // Set default value: DefaultSC.SMA = 7000 (for bug 2045 fix)
