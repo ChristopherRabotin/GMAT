@@ -976,7 +976,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       {
          if ((name != "EarthMJ2000Eq") && 
              (name != "EarthMJ2000Ec") && 
-             (name != "EarthFixed"))
+             (name != "EarthFixed")    &&
+             (name != "EarthICRF"))
          {
             obj = FindObject(name);
             // Since System Parameters are created automatically as they are referenced,

@@ -1898,7 +1898,7 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       if (objName == "EarthMJ2000Eq" || objName == "EarthMJ2000Ec" ||
-          objName == "EarthFixed")
+          objName == "EarthFixed" || objName == "EarthICRF")
       {
          AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_COORDINATE_SYSTEM, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::PREDEFINED_COORDINATE_SYSTEM));

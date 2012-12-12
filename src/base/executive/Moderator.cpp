@@ -1391,8 +1391,7 @@ const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
       StringArray csObjNames = theConfigManager->GetListOfItems(type);
       for (UnsignedInt i=0; i<csObjNames.size(); i++)
          if (csObjNames[i] != "EarthMJ2000Eq" && csObjNames[i] != "EarthMJ2000Ec" &&
- 			 //csObjNames[i] != "EarthFixed")											// made changes by TUAN NGUYEN
-             csObjNames[i] != "EarthFixed" && csObjNames[i] != "EarthICRF")				// made changes by TUAN NGUYEN
+             csObjNames[i] != "EarthFixed" && csObjNames[i] != "EarthICRF")
             tempObjectNames.push_back(csObjNames[i]);
       return tempObjectNames;
    }
@@ -1496,7 +1495,7 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
       StringArray csObjNames = theConfigManager->GetListOfItems(typeName);
       for (UnsignedInt i=0; i<csObjNames.size(); i++)
          if (csObjNames[i] != "EarthMJ2000Eq" && csObjNames[i] != "EarthMJ2000Ec" &&
-             csObjNames[i] != "EarthFixed")
+             csObjNames[i] != "EarthFixed" && csObjNames[i] != "EarthICRF")
             tempObjectNames.push_back(csObjNames[i]);
       return tempObjectNames;
    }
@@ -7493,7 +7492,7 @@ void Moderator::CreateDefaultCoordSystems()
          bfcs->Initialize();
       }
 
-      // EarthICRF			// made changes by TUAN NGUYEN
+      // EarthICRF
       CoordinateSystem *earthICRFcs = GetCoordinateSystem("EarthICRF");
       defaultCoordSystemNames.push_back("EarthICRF");
       if (earthICRFcs == NULL)
@@ -7508,7 +7507,7 @@ void Moderator::CreateDefaultCoordSystems()
          icrfAxis->SetEopFile(theEopFile);
          icrfAxis->SetCoefficientsFile(theItrfFile);
          earthICRFcs->SetStringParameter("Origin", "Earth");
-         earthICRFcs->SetStringParameter("J2000Body", "Earth");
+         bfcs->SetJ2000BodyName("Earth");
          earthICRFcs->SetRefObject(icrfAxis, Gmat::AXIS_SYSTEM, icrfAxis->GetName());
          earthICRFcs->SetOrigin(earth);
          earthICRFcs->SetJ2000Body(earth);

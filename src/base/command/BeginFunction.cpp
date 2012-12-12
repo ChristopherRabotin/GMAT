@@ -805,7 +805,8 @@ bool BeginFunction::Initialize()
          std::string csName = obj->GetName();
          if ((csName == "EarthMJ2000Eq") ||
              (csName == "EarthMJ2000Ec") ||
-             (csName == "EarthFixed"))
+             (csName == "EarthFixed")    ||
+             (csName == "EarthICRF"))
             SetRefObject(obj, obj->GetType(), obj->GetName());
       }
    }
