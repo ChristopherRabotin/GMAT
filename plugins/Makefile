@@ -20,12 +20,12 @@ all:
 	cd GmatFunctionPlugin; make all;
 
 rebuild: 
-	cd CInterfacePlugin; make clean; make all;
-	cd EphemPropagatorPlugin; make clean; make all;
-	cd EstimationPlugin; make clean; make all;
-	cd EventLocatorPlugin; make clean; make all;
-	cd ExtraPropagatorsPlugin; make clean; make all;
-	cd GmatFunctionPlugin; make clean; make all;
+	cd CInterfacePlugin; make rebuild;
+	cd EphemPropagatorPlugin; make rebuild;
+	cd EstimationPlugin; make rebuild;
+	cd EventLocatorPlugin; make rebuild;
+	cd ExtraPropagatorsPlugin; make rebuild;
+	cd GmatFunctionPlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
@@ -50,14 +50,14 @@ all:
 	cd MatlabInterfacePlugin; make all;
 
 rebuild: 
-	cd CInterfacePlugin; make clean; make all;
-	cd EphemPropagatorPlugin; make clean; make all;
-	cd EstimationPlugin; make clean; make all;
-	cd EventLocatorPlugin; make clean; make all;
-	cd ExtraPropagatorsPlugin; make clean; make all;
-	cd FminconOptimizerPlugin; make clean; make all;
-	cd GmatFunctionPlugin; make clean; make all;
-	cd MatlabInterfacePlugin; make clean; make all;
+	cd CInterfacePlugin; make rebuild;
+	cd EphemPropagatorPlugin; make rebuild;
+	cd EstimationPlugin; make rebuild;
+	cd EventLocatorPlugin; make rebuld;
+	cd ExtraPropagatorsPlugin; make rebuild;
+	cd FminconOptimizerPlugin; make rebuild;
+	cd GmatFunctionPlugin; make rebuild;
+	cd MatlabInterfacePlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
