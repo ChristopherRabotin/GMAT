@@ -1239,6 +1239,17 @@ bool Vary::Execute()
       asf = additiveScaleFactor->EvaluateReal();
       msf = 1.0 / multiplicativeScaleFactor->EvaluateReal();
 
+      if (msf <= 0.0)
+      {
+         std::stringstream msg;
+         msg << "Error in the Vary command; The multiplicative scale factor "
+             << "has the value "
+             << multiplicativeScaleFactor->EvaluateReal()
+             << ", but multiplicative scale factors must be greater than 0 on "
+             << "the line\n" << GetGeneratingString(Gmat::SCRIPTING);
+         throw CommandException(msg.str());
+      }
+
       varData[5] = initialValue->EvaluateReal();                // Initial value
 
       // scale by using Eq. 13.5 of Architecture document
