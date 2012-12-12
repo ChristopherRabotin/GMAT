@@ -3446,7 +3446,12 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
             data << "Create " << tname << " " << nomme << ";\n";
          else
             data << "";
+         // We no longer write out GMAT prefix (see GMT-3233)
+         #ifdef __WRITE_GMAT_PREFIX__
          preface = "GMAT ";
+         #else
+         preface = "";
+         #endif
       }
       else
       {
@@ -3475,8 +3480,13 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
          {
             data << "\n";
          }
-
+         
+         // We no longer write out GMAT prefix (see GMT-3233)
+         #ifdef __WRITE_GMAT_PREFIX__
          preface = "GMAT ";
+         #else
+         preface = "";
+         #endif
       }
    }
 
@@ -4238,8 +4248,14 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
             {
                if (GetRealParameter(id, i, j) != 0.0)
                {
+                  // We no longer write out GMAT prefix (see GMT-3233)
+                  #ifdef __WRITE_GMAT_PREFIX__
                   stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
                      ") = " << GetRealParameter(id, i, j) << ";\n";
+                  #else
+                  stream << instanceName << "(" << i+1 << ", " << j+1 <<
+                     ") = " << GetRealParameter(id, i, j) << ";\n";
+                  #endif
                }
             }
          }

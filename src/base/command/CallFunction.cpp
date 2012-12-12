@@ -427,7 +427,14 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    
    // Build the local string
    if (mode != Gmat::NO_COMMENTS)
+   {
+      // We no longer write out GMAT prefix (see GMT-3233)
+      #ifdef __WRITE_GMAT_PREFIX__
       gen = prefix + "GMAT ";
+      #else
+      gen = prefix;
+      #endif
+   }
    
    if (mOutputNames.size() > 0)
    {

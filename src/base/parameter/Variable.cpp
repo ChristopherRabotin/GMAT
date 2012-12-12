@@ -600,7 +600,12 @@ const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
    {
       //generatingString = "GMAT " + GetName() + " = " + mExpr + ";";
       //generatingString = "GMAT " + GetName() + " = " + mInitialValue + ";";
+      // We no longer write out GMAT prefix (see GMT-3233)
+      #ifdef __WRITE_GMAT_PREFIX__
       generatingString = "GMAT " + GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
+      #else
+      generatingString = GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
+      #endif
       generatingString = generatingString + inlineComment + "\n";
    }
    

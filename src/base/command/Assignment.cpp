@@ -1775,7 +1775,12 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
       return generatingString;
    }
    
+   // We no longer write out GMAT prefix (see GMT-3233)
+   #ifdef __WRITE_GMAT_PREFIX__
    std::string gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
+   #else
+   std::string gen = prefix + lhs + " = " + rhs + ";";
+   #endif
    
    #ifdef DEBUG_ASSIGNMENT_SCRIPTING
    MessageInterface::ShowMessage("Assignment command generator is \"%s\"\n",

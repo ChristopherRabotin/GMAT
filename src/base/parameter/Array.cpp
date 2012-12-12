@@ -944,7 +944,12 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
       data << "Create " << tname << " " << nomme 
            << "[" << mNumRows << "," << mNumCols << "];\n";
       
+      // We no longer write out GMAT prefix (see GMT-3233)
+      #ifdef __WRITE_GMAT_PREFIX__
       preface = "GMAT ";
+      #else
+      preface = "";
+      #endif
    }
    
    nomme += ".";
@@ -1016,7 +1021,6 @@ std::string Array::GetInitialValueString(const std::string &prefix)
          MessageInterface::ShowMessage("   value = %f\n", realVal);
          #endif
          
-         //if (GetRealParameter(SINGLE_VALUE, i, j) != 0.0)
          if (realVal != 0.0)
          {
             //========================================================
@@ -1024,8 +1028,14 @@ std::string Array::GetInitialValueString(const std::string &prefix)
             //========================================================
             
             // This writes out actual value
+            // We no longer write out GMAT prefix (see GMT-3233)
+            #ifdef __WRITE_GMAT_PREFIX__
             data << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
                ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
+            #else
+            data << instanceName << "(" << i+1 << ", " << j+1 <<
+               ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
+            #endif
             data << GetInlineComment() + "\n";
             
             //========================================================
@@ -1064,8 +1074,12 @@ std::string Array::GetInitialValueString(const std::string &prefix)
             
             if (writeData)
             {
-               data << prefix << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 << ") = "
-                    << initialVal;
+               // We no longer write out GMAT prefix (see GMT-3233)
+               #ifdef __WRITE_GMAT_PREFIX__
+               data << prefix << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
+               #else
+               data << prefix << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
+               #endif
                data << GetInlineComment() + "\n";
             }
             
