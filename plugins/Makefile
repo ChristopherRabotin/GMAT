@@ -77,7 +77,6 @@ all:
 	cd EstimationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
-	cd FminconOptimizerPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 
@@ -87,7 +86,6 @@ rebuild:
 	cd EstimationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
-	cd FminconOptimizerPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 
@@ -97,7 +95,6 @@ clean:
 	cd EphemPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
-	cd FminconOptimizerPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 
