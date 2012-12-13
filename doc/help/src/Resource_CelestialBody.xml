@@ -1,0 +1,1474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0"
+          xml:id="CelestialBody"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>CelestialBody</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>CelestialBody</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2012a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>CelestialBody</refname>
+
+    <refpurpose>
+      A celestial body model
+    </refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>
+      Model for orbital motion, physical properties, and orientation.
+    </para>
+
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="SolarSystem"/>, 
+      <xref linkend="Barycenter"/>,
+      <xref linkend="LibrationPoint"/>,
+      <xref linkend="CoordinateSystem"/>
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
+
+        <colspec colnum="2"
+                 colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>FileName</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                Texture map used in <guilabel>OrbitView</guilabel> graphics.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      FileName
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Valid file of type
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      '../data/graphics/texture/GenericCelestialBody.jpg'
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>EquatorialRadius </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The body's equatorial radius.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      6378.1363
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      km
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Flattening</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The body's polar flattening.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt;= 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      0.0033527
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Mu</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The body's gravitational parameter.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      398600.4415
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      km^3/s^2
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>NutationUpdateInterval </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The interval between updates for Earth nutation matrix. 
+                If NutationUpdateInterval = 3600, then GMAT only updated nutation on an hourly basis.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Range &gt;= 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      60
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      sec.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>RotationConstant </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The body's spin angle at the orientation epoch.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      190.147
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>RotationRate</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The body's spin rate.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      360.9856235
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg/day
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SpinAxisDECConstant</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The declination of the body's spin axis at the orientation epoch.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      90
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SpinAxisDECRate</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The rate of change of the body's declination.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      -0.5570
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg/day
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SpinAxisRAConstant</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The right ascension of the body's spin axis at the orientation epoch.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      -0.641
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SpinAxisRARate</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The rate of change of the body's right ascension.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      -0.641
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      deg/day
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>OrientationEpoch</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The reference epoch for orientation data.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      6116.0 &lt;= Epoch &lt;= 58127.5
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      21545.0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      A1 Mod Julian Epoch
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>PosVelSource </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The model for the bodies orbit ephemeredes.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      'SPICE'
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      'DE405' for build in bodies. 'SPICE' for user defined bodies.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>RotationDataSource</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                For Earth default is 'FK5IAU1980', for Luna default is DE405, for selected build it bodies 
+                IAU2000, and for selected built in bodies and all user defined bodies, default is IAUSimplified.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      'IAUSimplified', 'DE405' 'FK5IAU1980', 'IAU2000'
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      For Earth default is 'FK5IAU1980', for Luna default is DE405, 
+                      for selected build it bodies IAU2000, and for selected built in 
+                      bodies and all user defined bodies, default is IAUSimplified.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>OrbitSpiceKernelName</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                List of SPK kernels.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      StringArray
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Valid SPK kernel
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+          
+          <row>
+            <entry>
+              <guilabel>CentralBody</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The central body of the celestial body. The central body field is used primarily by the GUI.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      UserDefString
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Celestial Body
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      For Comet, Planet, Asteroid, the default is Sun. For Moon, the default is Earth.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>NAIFId</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                NAIF Integer ID for body.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      UserDefString
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Integer
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      -123456789
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_1.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Figure 1 CelestialBody Properties Tab
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_2.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Figure 2 Unique Earth Fields
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_3.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Figure 3 CelestialBody Orbit tab
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_4.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Figure 4 CelestialBody Orientation Tab
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_5.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Figure 5 Luna Orientation Tab
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Overview of Celestial Body Orientation Model</title>
+
+      <programlisting>
+        <code>
+  GMAT asdf.OrientationEpoch = 21545;
+  GMAT asdf.SpinAxisRAConstant = 0;
+  GMAT asdf.SpinAxisRARate = -0.641;
+  GMAT asdf.SpinAxisDECConstant = 90;
+  GMAT asdf.SpinAxisDECRate = -0.5570000000000001;
+  GMAT asdf.RotationConstant = 190.147;
+  GMAT asdf.RotationRate = 360.9856235;
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Physical Properties</title>
+
+      <programlisting>
+        <code>
+  GMAT asdf.Flattening = 0.0033527;
+  GMAT asdf.EquatorialRadius = 6378.1363;
+  GMAT asdf.Mu = 398600.4415;
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Orbit Ephemeridies</title>
+
+      <programlisting>
+        <code>
+  GMAT asdf.NAIFId = -123456789;
+  GMAT Earth.SourceFilename = '../data/planetary_ephem/de/leDE1941.405';
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Unique fields Earth and Moon</title>
+
+      <programlisting>
+        <code>
+  GMAT Earth.RotationDataSource = 'FK5IAU1980';
+  GMAT Earth.NutationUpdateInterval = 60;
+  Luna.RotationDataSource
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Use Custom Texture Map</title>
+
+      <programlisting>
+        <code>
+  GMAT Earth.TextureMapFileName = '../data/graphics/texture/ModifiedBlueMarble.jpg';
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Obsolete</title>
+
+      <programlisting>
+        <code>
+  GMAT asdf.PosVelSource = 'SPICE';
+  GMAT asdf.CentralBody = 'Earth';
+  GMAT asdf.RotationDataSource = 'IAUSimplified';
+        </code>
+      </programlisting>
+    </refsection>
+    
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>
+        Configure a <guilabel>CelestialBody</guilabel> to model the asteroid RQ236.
+      </para>
+
+      <programlisting>
+        <code>
+          
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Configure a <guilabel>CelestialBody</guilabel> to model the Mars’ moon Phobos.
+      </para>
+
+      <programlisting>
+        <code>
+          
+        </code>
+      </programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

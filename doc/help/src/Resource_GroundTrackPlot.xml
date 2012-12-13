@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="GroundTrackPlot"
+<refentry version="5.0"
+          xml:id="GroundTrackPlot"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,443 +8,847 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>GroundTrackPlot</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>GroundTrackPlot</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>GroundTrack Plot</refname>
+    <refname>GroundTrackPlot</refname>
 
-    <refpurpose>A GroundTrack Plot.</refpurpose>
+    <refpurpose>
+      <guilabel>GroundTrackPlot</guilabel> is a user-defined resource that draws longitude and latitude time-history of a spacecraft
+    </refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create GroundTrackPlot <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>A <guiicon>GroundTrackPlot</guiicon> is a graphical display of the
-    locus of subsatellite latitude and longitude points. The
-    <guibutton>GroundTrackPlot</guibutton> in GMAT allows you to view a
-    spacecraft's subsatellite point as illustrated by a spacecraft icon and
-    the label for the spacecraft. Similarly, <guiicon>GroundStation</guiicon>
-    locations are indicated with a ground station icon and label. The
-    <guibutton>GroundTrackPlot</guibutton> object can display the ground track
-    for multiple spacecraft simultaneously and can animate the ground track
-    evolution after a GMAT run is complete. Like other graphical dispaly
-    objects in GMAT, you can control how data is written to a ground track
-    plot in iterative processes.</para>
+    <para>
+      The <guilabel>GroundTrackPlot</guilabel> resource allows you to draw spacecraft’s longitude
+      and latitude time-history onto the texture map of a user-selected central body.
+      GMAT allows you to draw ground track plots of any number of spacecraft onto a single
+      texture map. You can also create multiple <guilabel>GroundTrackPlots</guilabel> by using either the GUI or
+      script interface of GMAT. GMAT also provides the option of when to plot and stop plotting
+      ground track to a <guilabel>GroundTrackPlot</guilabel> through the <guilabel>Toggle On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section
+      below for detailed discussion of the interaction between <guilabel>GroundTrackPlot</guilabel> object and the <guilabel>Toggle</guilabel>
+      command. <guilabel>GroundTrackPlot</guilabel> resource also allows you to display any number of user-defined ground
+      stations onto the texture map of the central body.
+    </para>
+    
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>:
+      <xref linkend="Toggle"/>,
+      <xref linkend="GroundStation"/>
+    </para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <refsection>
-      <title>Fields Associated with Plot Options</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>DataCollectFrequency</term>
-
-          <listitem>
-            <para>The <systemitem>DataCollectFrequency</systemitem> field
-            allows you to select a subset of the ephemeris data for drawing to
-            a <guiicon>GroundTrackPlot</guiicon>. It is often inefficient to
-            draw every ephemeris point associated with a trajectory and
-            drawing a subset of the data provides a smooth groundtrack plot
-            with faster execution times. The
-            <varname>DataCollectFrequency</varname> is an integer that
-            represents how many ephemeris points to skip between plotted data
-            points in a <guiicon>GroundTrackPlot</guiicon>. If
-            <varname>DataCollectFrequency</varname> is set to 10, then data is
-            collected every 10 integration steps.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>1</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer ≥ 1</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>Integration Steps</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>UpdatePlotFrequency</term>
-
-          <listitem>
-            <para>The UpdatePlotFrequency field allows you to specify the
-            number of ephemiris data points to collect before updating a
-            GroundTrackPlot with new latitude and longitude data. Data is
-            collected every N propagation steps where N is defined by
-            DataCollectFrequency. After M points are collected, where M is
-            defined by UpdatePlotFrequency, the GroundTrackPlot is updated
-            with new data. For example, if UpdatePlotFrequency is set to 10
-            and DataCollectFrequency is set to 2, then the plot is updated
-            with new data every 20 (10*2) integration steps.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>50</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer ≥ 1</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>Integration Steps</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>NumPointsToRedraw</term>
-
-          <listitem>
-            <para>When NumPointsToRedraw is set to zero, all collected
-            ephemeris points are drawn. When NumPointsToRedraw is set to a
-            positive integer, say 10 for example, only the last 10 collected
-            data points are drawn. See DataCollectFrequency and
-            UpdatePlotFrequency for an explanation of how data is collected
-            for a GroundTrackPlotx.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer ≥ 0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>Integration Steps</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>ShowPlot</term>
-
-          <listitem>
-            <para>The ShowPlot field allows you to turn off the
-            GroundTrackPlot display window without deleting the plot object or
-            removing it from the script. If you select true, then the plot
-            will be displayed. If you select false, then the plot will not be
-            displayed.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>true</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>true , false</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
-
-    <refsection>
-      <title>Fields Associated with Drawing Options</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>Add</term>
-
-          <listitem>
-            <para>The Add field allows you to add Spacecraft and
-            GroundStations to a GroundTrackPlot.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>DefaultSC, Earth</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>SpacecraftName CelestialBodyName</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Central Body</term>
-
-          <listitem>
-            <para>The CentralBody field allows you to specify the central body
-            of a GroundTrackPlot. Currently, GMAT</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Earth</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>CelestialBodyName</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
-
-    <refsection>
-      <title>Fields Associated with Other Options</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>SolverIterations</term>
-
-          <listitem>
-            <para>The SolverIterations field determines if and how perturbed
-            trajectories are drawn to a GroundTrackPlot during iterative a
-            solver sequences. When SolverIterations is set to All, all solver
-            iterations perturbations and iterations are shown on the plot.
-            When SolverIterations is set to Current, only the current solver
-            pass is shown on the plot and the iteration history is not
-            retained. When SolverIterations is set to None, no perturbations
-            or iterations are drawn and the GroundTrackPlot is not updated
-            until the solver has converged.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Current</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>All, Current, None</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>TextureMap</term>
-
-          <listitem>
-            <para>The TextureMap field allows you to define a custom map file
-            for use in a GroundTrackPlot.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Current</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Texture map in jpg or bmp file.</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
+
+        <colspec colnum="2"
+                 colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>Add</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>Add</guilabel> field allows the user to pick selected objects such as <guilabel>Spacecraft(s)</guilabel> or 
+                <guilabel>GroundStation(s)</guilabel> whose ground track is drawn in <guilabel>GroundTrackPlot</guilabel>. To select multiple
+                <guilabel>Spacecrafts</guilabel> or <guilabel>GroundStations</guilabel>, seperate the list by comma and enclose the list in curly brackets. 
+                For Example: DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton, bGroundStation};
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      a list of data types from the Data Type column of
+                      the Field Spec
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      a range spec of list of allowed values from the
+                      Range column of the Field Spec
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get, or only one (from the Access column of the
+                      Field Spec)
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      value from the Default Value column of the Field
+                      Spec
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>the unit or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script, or only one</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>CentralBody</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The central body of the Ground track plot
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Sun, Mercury, Venus, Earth, Luna, Mars,Jupiter, Saturn, Uranus, Neptune, Pluto
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      Earth
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>DataCollectFrequency</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The number of integration steps to skip between plot point
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Integer
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      integer >= 1
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>NumPointsToRedraw</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The number of plot points to retain and redraw during propagation and animation. 0 indicates to redraw all.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Integer
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      integer >= 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>ShowPlot</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>ShowPlot</guilabel> field specifies whether to show ground track plot during a mission run.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      True, False
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      True
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SolverIterations</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>SolverIterations</guilabel> field determines whether or not ground track 
+                data associated with perturbed trajectories during a solver (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>) 
+                sequence is displayed in the <guilabel>GroundTrackPlot</guilabel>. When <guilabel>SolverIterations</guilabel> is set to <guilabel>All</guilabel>, 
+                all perturbations/iterations are plotted in the <guilabel>GroundTrackPlot</guilabel>. When <guilabel>SolverIterations</guilabel> 
+                is set to <guilabel>Current</guilabel>, only the current solution or perturbation is plotted in <guilabel>GroundTrackPlot</guilabel>. 
+                When <guilabel>SolverIterations</guilabel> is set to <guilabel>None</guilabel>, only the final nominal run is plotted on the <guilabel>GroundTrackPlot</guilabel>.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      All, Current, None
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      Current
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>TextureMap</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>TextureMap</guilabel> field allows you to enter or select any user-defined texture map image for the central body
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      FileName
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Valid File Path and Name
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      ../data/graphics/texture/ModifiedBlueMarble.jpg
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>UpdatePlotFrequency</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The number of plot points to collect before updating a ground track plot.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Integer
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      integer > 1
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      50
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row> 
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
-    <title>Additional Information</title>
+    <title>GUI</title>
 
-    <para>When working in the GroundTrackPlot GUI, if you change the
-    CentralBody field, the TextureMap field will automatically change to the
-    default texture map for the new central body. If you have specified a
-    custom texture map file and path, that information will be lost when you
-    change the CentralBody field.</para>
+    <para>
+        Default Name and Settings for the GroundTrackPlot Object Dialog Box
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_GroundTrackPlot.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
   </refsection>
 
   <refsection>
-    <title>Interactions</title>
+    <title>Remarks</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Spacecraft</term>
+    <refsection>
+      <title>Behavior when using GroundTrackPlot Resource &amp; Toggle Command</title>
 
-        <listitem>
-          <para>Any spacecraft in your mission is available to a
-          GroundTrackPlot for display.</para>
-        </listitem>
-      </varlistentry>
+      <para>
+        The <guilabel>GroundTrackPlot</guilabel> resource draws the longitude and latitude time-history 
+        of a spacecraft at each propagation step of the entire mission duration. 
+        If you want to report data to a <guilabel>GroundTrackPlot</guilabel> at specific points in your mission, 
+        then a <guilabel>Toggle On</guilabel>/<guilabel>Off</guilabel> command can be inserted into the mission sequence to control when the 
+        <guilabel>GroundTrackPlot</guilabel> is to draw data. When <guilabel>Toggle Off</guilabel> command is issued for a <guilabel>GroundTrackPlot</guilabel>, 
+        no ground track data is drawn until a Toggle On command is issued. Similarly when a <guilabel>Toggle On</guilabel> 
+        command is used, ground track data is drawn at each integration step until a <guilabel>Toggle Off</guilabel> command is used.
+      </para>
 
-      <varlistentry>
-        <term>GroundStations</term>
+      <para>
+        Below is an example script snippet that shows how to use <guilabel>Toggle Off</guilabel> 
+        and <guilabel>Toggle On</guilabel> command while using the <guilabel>GroundTrackPlot</guilabel> resource. 
+        <guilabel>GroundTrackPlot</guilabel> is turned off for the first 2 days of the propagation:
+      </para>
 
-        <listitem>
-          <para>Any GroundSation in your mission is available to a
-          GroundTrackPlot for display.</para>
-        </listitem>
-      </varlistentry>
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
 
-      <varlistentry>
-        <term>PenUp/PenDown Commands</term>
+  Create GroundTrackPlot aGroundTrackPlot;
+  GMAT aGroundTrackPlot.Add = {aSat};
 
-        <listitem>
-          <para>You can use the PenUp and PenDown commands to control when
-          data is written to a GroundTrackPlot</para>
-        </listitem>
-      </varlistentry>
+  BeginMissionSequence;
 
-      <varlistentry>
-        <term>Toggle Command</term>
+  Toggle aGroundTrackPlot Off;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+  Toggle aGroundTrackPlot On;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+        </code>
+      </programlisting>
+    </refsection>
 
-        <listitem>
-          <para>You can use the Toggle command to control when data is written
-          to a GroundTrackPlot</para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+    <refsection>
+      <title>Behavior when plotting data in Iterative Processes</title>
+
+      <para>
+        GMAT allows you to specify how data is plotted onto a plot during iterative processes 
+        such as differential correction or optimization. The <guilabel>SolverIterations</guilabel> field of 
+        <guilabel>GroundTrackPlot</guilabel> resource supports 3 options which are described in the table below:
+      </para>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>SolverIterations options</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>Current</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows only current iteration/perturbation in an
+                  iterative process and draws current iteration to a <guilabel>GroundTrackPlot</guilabel>
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>All</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows all iterations/perturbations in an iterative process
+                  and draws all iterations/perturbations to a <guilabel>GroundTrackPlot</guilabel>
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>None</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows only the final solution after the end of an iterative
+                  process and draws only final solution to <guilabel>GroundTrackPlot</guilabel>
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Behavior when plotting longitude and latitude time-history of a Spacecraft</title>
+
+      <para>
+        GMAT’s <guilabel>GroundTrackPlot</guilabel> resource allows you to draw longitude and latitude time-history of a spacecraft. 
+        You can choose to draw ground track plot of multiple spacecrafts onto a single texture map of a central body.
+      </para>
+
+      <warning>
+        <para>
+          The longitude and latitude of a spacecraft is drawn as an approximation that includes 
+          straight line segments and longitude/latitude data does not 
+          takes into account central body shape or its oblateness.
+        </para>
+      </warning>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <programlisting><code>Create GroundTrackPlot GroundTrackPlot1;
-GMAT GroundTrackPlot1.CentralBody = Earth;
-GMAT GroundTrackPlot1.Add = {Sat, Earth};
-GMAT GroundTrackPlot1.SolverIterations = Current;
-GMAT GroundTrackPlot1.DataCollectFrequency = 1;
-GMAT GroundTrackPlot1.UpdatePlotFrequency = 50;
-GMAT GroundTrackPlot1.NumPointsToRedraw = 0;
-GMAT GroundTrackPlot1.ShowPlot = true;
-GMAT GroundTrackPlot1.TextureMap = '../MyMaps/MyTexture.jpg';
-GMAT GroundTrackPlot1.UpperLeft = [ 0 0 ];
-GMAT GroundTrackPlot1.Size = [ 0 0 ];
-GMAT GroundTrackPlot1.RelativeZOrder = 0;
-</code></programlisting>
+    <informalexample>
+      <para>
+        This example shows how to use GroundTrackPlot resource. A single spacecraft and a
+        Ground Station is added to the GroundTrackPlot. Spacecraft’s ground track is plotted 
+        for one day of propagation: 
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create GroundStation aGroundStation;
+
+  Create GroundTrackPlot aGroundTrackPlot;
+  GMAT aGroundTrackPlot.Add = {aSat, aGroundStation};
+
+  BeginMissionSequence;
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Propagate a spacecraft for two days around a 
+        non-default central body. Spacecraft’s ground track is plotted on planet Mars:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  GMAT aSat.CoordinateSystem = MarsJ2000Eq;
+  GMAT aSat.SMA = 8000;
+  GMAT aSat.ECC = 0.0003;
+
+  Create ForceModel aFM;
+  GMAT aFM.CentralBody = Mars;
+  GMAT aFM.PointMasses = {Mars};
+
+  Create Propagator aProp;
+  GMAT aProp.FM = aFM
+
+  Create CoordinateSystem MarsJ2000Eq;
+  GMAT MarsJ2000Eq.Origin = Mars;
+  GMAT MarsJ2000Eq.Axes = MJ2000Eq;
+
+  Create GroundTrackPlot aGroundTrackPlot;
+  GMAT aGroundTrackPlot.Add = {aSat};
+  GMAT aGroundTrackPlot.CentralBody = Mars;
+
+  BeginMissionSequence;
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

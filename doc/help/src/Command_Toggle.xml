@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Toggle" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0"
+          xml:id="Toggle"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -23,126 +25,317 @@
   <refnamediv>
     <refname>Toggle</refname>
 
-    <refpurpose>Perform a toggle command</refpurpose>
+    <refpurpose>
+      The Toggle Command allows you to turn data output off or on
+    </refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis></synopsis>
+    <title>Script Syntax</title>
+
+    <synopsis>
+      <literal>Toggle</literal> <replaceable>OutputNames</replaceable> <replaceable>Arg</replaceable>
+
+      <replaceable>OutputNames</replaceable>
+        <replaceable>OutputNames</replaceable> is the list of subscribers that are to be toggled. 
+        When multiple subscribers are being toggled in the <replaceable>OutputNames</replaceable>, 
+        then they need to be separated by a space.
+      <replaceable>Arg</replaceable>
+        <replaceable>Arg</replaceable> option allows you to turn off or on the data output to 
+        the selected subscribers listed in the <replaceable>OutputNames</replaceable>.
+    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The Toggle command is useful in turning on/off certain plots so that
-    they do not become unintelligible. They are particularly useful if a
-    mission requires multiple sequences to fine-tune the answer. If this is
-    the case, it might be better to turn off a plot until the final or
-    second-to-last sequence so that the rougher sequences don't obstruct the
-    view of what is going on in the finesse sequences.</para>
+    <para>
+      The <guilabel>Toggle</guilabel> Command allows you to turn data output off or on for the objects that you select such as 
+      <guilabel>ReportFile</guilabel>, <guilabel>XYPlot</guilabel>, 
+      <guilabel>OrbitView</guilabel>, <guilabel>GroundTrackPlot</guilabel> and <guilabel>EphemerisFile</guilabel>. 
+      GMAT allows you to insert <guilabel>Toggle</guilabel> 
+      Command into the <guilabel>Mission</guilabel> tree at any location and data output can be turned off or on at any point in your 
+      mission. <guilabel>Toggle</guilabel> command can be used through GMAT’s GUI or the script interface.
+    </para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>OutputNames</term>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
 
-        <listitem>
-          <para>The Toggle option allows the user to assign the Plot/Report(s)
-          to be toggled. When more than one Plot/Report is being toggled they
-          need to be separated by a space.</para>
+        <colspec colnum="2"
+                 colwidth="3*"/>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+        <thead>
+          <row>
+            <entry>Option</entry>
 
-              <listitem>
-                <para>DefaultOpenGL</para>
-              </listitem>
-            </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-            <varlistentry>
-              <term>Limits</term>
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>OutputNames</guilabel>
+            </entry>
 
-              <listitem>
-                <para>Any OpenGL, Report, XYplot, or any other Plot/Report
-                type</para>
-              </listitem>
-            </varlistentry>
+            <entry>
+              <para>
+                The <guilabel>Toggle</guilabel> option allows the user to assign subscribers such as <guilabel>ReportFile</guilabel>, 
+                <guilabel>XYPlot</guilabel>, <guilabel>OrbitView</guilabel>, <guilabel>GrounTrackPlot</guilabel> or <guilabel>EphemerisFile</guilabel> to be toggled. When 
+                more than one subscriber is being toggled they need to be separated by a space.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      Subscriber(s)
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-      <varlistentry>
-        <term>Arg</term>
+                  <listitem>
+                    <para>
+                      Any ReportFile, XYPlot, OrbitView, GroundTrackPlot or EphemerisFile
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-        <listitem>
-          <para>The Arg option allows the user to turn off or on the data
-          output to a Plot/Report.</para>
+                <varlistentry>
+                  <term>Default Value</term>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+                  <listitem>
+                    <para>
+                      DefaultOrbitView
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>On</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Required</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>On or Off</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Interfaces</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+          <row>
+            <entry>
+              <guilabel>Arg</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>Arg</guilabel> option allows the user to turn 
+                off or on the data output to the selected subscriber.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      On, Off
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      On
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
-    <title>Exmaples</title>
+    <title>GUI</title>
+    
+    <para>
+      Figure below shows default settings for Toggle command:
+    </para>
+    
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_Toggle_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-    <refsection>
-      <title>Script Syntax</title>
+    
+  </refsection>
 
-      <programlisting><code>Toggle OutputNames Arg</code></programlisting>
-    </refsection>
+  <refsection>
+    <title>Remarks</title>
 
-    <refsection>
-      <title>Script Examples</title>
+    <para>
+      The subscribers such as <guilabel>ReportFile</guilabel>, <guilabel>XYPlot</guilabel>, <guilabel>OrbitView</guilabel>, <guilabel>GroundTrackPlot</guilabel> and <guilabel>EphemerisFile</guilabel> 
+      report or plot data at each propagation step of the entire mission duration. If you want to 
+      report data to any of these subscribers at specific points in your mission, then a <guilabel>Toggle On</guilabel>/<guilabel>Off</guilabel> 
+      command can be inserted into the mission sequence to control when a subscriber reports or plots data. For example,
+      when a <guilabel>Toggle Off</guilabel> command is issued for a <guilabel>XYPlot</guilabel>, no data is plotted onto the X and Y axis of the 
+      graph until a <guilabel>Toggle On</guilabel> command is issued. Similarly when a <guilabel>Toggle On</guilabel> command is used, data is plotted 
+      onto the X and Y axis at each integration step until a <guilabel>Toggle Off</guilabel> command is used.
+    </para>
+  </refsection>
 
-      <programlisting><code>% Turn off Report file for the first day of propagation
-Toggle ReportFile1 Off
-Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
-Toggle ReportFile1 On
-Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
 
-% Turn off XYPlot and Report file for the first day of propagation 
-Toggle XYPlot1 ReportFile1 Off
-Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
+  <refsection>
+    <title>Examples</title>
 
-Toggle XYPlot1 ReportFile1 On
-Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1})</code></programlisting>
-    </refsection>
+    <informalexample>
+      <para>
+        This example shows how to use <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel> command 
+        while using the XYPlot resource. Spacecraft’s position magnitude and 
+        semi-major-axis are plotted as a function of time. XYPlot is turned off 
+        for the first 2 days of the propagation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create XYPlot aPlot;
+  GMAT aPlot.XVariable = aSat.ElapsedDays;
+  GMAT aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA};
+
+  BeginMissionSequence;
+
+  Toggle aPlot Off;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+  Toggle aPlot On;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        This example shows how to use <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel> command while 
+        using the <guilabel>ReportFile</guilabel> resource. Spacecraft’s cartesian position vector is 
+        reported to the report file. Report file is turned off for the first day of the propagation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create ReportFile aReport;
+  GMAT aReport.Filename = 'ReportFile1.txt';
+  aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z};
+
+  BeginMissionSequence;
+
+  Toggle aReport Off;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+  Toggle aReport On;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        This example shows how to toggle multiple subscribers. 
+        <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel> command is used on multiple subscribers 
+        like <guilabel>ReportFile</guilabel>, <guilabel>XYPlot</guilabel> and <guilabel>EphemerisFile</guilabel>. Subscribers are turned off 
+        for first 3 days of the propagation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create ReportFile aReport;
+  GMAT aReport.Filename = 'ReportFile1.txt';
+  aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z};
+
+  Create XYPlot aPlot;
+  GMAT aPlot.XVariable = aSat.ElapsedDays;
+  GMAT aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA};
+
+  Create EphemerisFile aEphemerisFile;
+  GMAT aEphemerisFile.Spacecraft = aSat;
+
+  BeginMissionSequence;
+
+  Toggle aReport aPlot aEphemerisFile Off;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 3};
+  Toggle aReport aPlot aEphemerisFile On;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

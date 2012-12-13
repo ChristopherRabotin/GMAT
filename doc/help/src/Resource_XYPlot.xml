@@ -1,281 +1,932 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="XYPlot" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0"
+          xml:id="XYPlot"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>XYPlot</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>XYPlot</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>XY Plot</refname>
+    <refname>XYPlot</refname>
 
-    <refpurpose>A XY Plot.</refpurpose>
+    <refpurpose>
+      XYPlot is a user-defined resource that plots data onto the X and Y axes of a graph
+    </refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create XYPlot <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The XY Plot is a graph under the Plots/Reports folder in the
-    resource tree that plots data onto the X and Y axes of the graph. Any two
-    parameters can be chosen to plot from the Parameter Select dialog box when
-    the View radio button is clicked. The plot has the capability to be turned
-    on and/or off throughout the mission if desirable.</para>
-  </refsection>
+    <para>
+      The <guilabel>XYPlot</guilabel> resource allows you to plot data onto the X and Y axis of the graph.
+      You can choose to plot any number of parameters as a function of a single independent variable. 
+      GMAT allows you to plot user-defined variables, array elements, or spacecraft parameters.
+      You can create multiple <guilabel>XYPlots</guilabel> by using either the GUI or script interface of GMAT. 
+      GMAT also provides the option of when to plot and stop plotting data to a XYPlot through the 
+      <guilabel>Toggle On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section below, for detailed discussion of the interaction 
+      between an <guilabel>XYPlot</guilabel> object and the <guilabel>Toggle</guilabel> command. 
+      GMAT’s <guilabel>Spacecraft</guilabel> and <guilabel>XYPlot</guilabel> objects also interact 
+      with each other throughout the entire mission duration. Discussion of the interaction between 
+      <guilabel>Spacecraft</guilabel> and <guilabel>XYPlot</guilabel> resources is also mentioned in Remarks section.
+    </para>
 
-  <refsection>
-    <title>Interactions</title>
-
-    <variablelist>
-      <varlistentry>
-        <term>Spacecraft</term>
-
-        <listitem>
-          <para>Spacecraft interact with an XY Plot throughout the entire
-          mission. The data retrieved from the spacecraft, as it carries out
-          the command, is what gets plotted onto the graph.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>Toggle Command</term>
-
-        <listitem>
-          <para>A Toggle can be inserted into the mission sequence to control
-          when the XY Plot is to plot data by subscribing it to the Toggle
-          list. If it is necessary to only plot data at a certain point during
-          the mission, besides at the beginning or end points, then two Toggle
-          commands can be added to switch it on and off.</para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="Toggle"/>, 
+      <xref linkend="Spacecraft"/>
+    </para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>IndVar</term>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
 
-        <listitem>
-          <para>The IndVar field allows the user to define the independent
-          variable for an xy-plot. Only one variable can be defined as an
-          independent variable. For example, the line MyXYPlot.IndVar =
-          DefaultSC.A1ModJulian sets the independent variable to be the epoch
-          of DefaultSC in the A1 time system and modified Julian
-          format.</para>
+        <colspec colnum="2"
+                 colwidth="3*"/>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+        <thead>
+          <row>
+            <entry>Field</entry>
 
-              <listitem>
-                <para>DefaultSC.A1ModJulian</para>
-              </listitem>
-            </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-            <varlistentry>
-              <term>Limits</term>
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>Maximized</guilabel>
+            </entry>
 
-              <listitem>
-                <para>Any user variable, array element, or spacecraft
-                parameter</para>
-              </listitem>
-            </varlistentry>
+            <entry>
+              <para>
+                The <guilabel>Maximized</guilabel> field allows 
+                the user to maximize the <guilabel>XYPlot</guilabel> window.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-      <varlistentry>
-        <term>Add</term>
+                  <listitem>
+                    <para>
+                      true,false
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-        <listitem>
-          <para>The Add field allows the user to add dependent variables to an
-          xy-plot. All dependent variables are plotted on the y-axisvs the
-          independent variable defined by IndVar. To define multiple dependent
-          variables, they should be included in curly braces. For example,
-          MyXYPlot.Add = DefaultSC.EarthMJ2000Eq.Y ,
-          DefaultSC.EarthMJ2000Eq.Z. The GUI's Selected field is the
-          equivalent of the script's Add field. In the event of no Add command
-          or no objects in the Selected field, GMAT should run without the
-          XYPlot and a warning message displayed in the message window. The
-          following warning message is sufficient: XYPlot will be turned off.
-          No object has been selected for plotting.</para>
+                <varlistentry>
+                  <term>Access</term>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>DefaultSC.EarthMJ2000Eq.X</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Default Value</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>
+                      false
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Any user variable, array element, or spacecraft
-                parameter</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Units</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                <varlistentry>
+                  <term>Interfaces</term>
 
-      <varlistentry>
-        <term>Grid</term>
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
 
-        <listitem>
-          <para>When the Grid field is set to On, then a grid is drawn on an
-          xy-plot. When the Grid field is set to Off, then a grid is not
-          drawn.</para>
+          <row>
+            <entry>
+              <guilabel>UpperLeft</guilabel>
+            </entry>
+              
+            <entry>
+              <para>
+                The <guilabel>UpperLeft</guilabel> field allows the user to pan the <guilabel>XYPlot</guilabel> display window in any direction. 
+                First value in [0 0] matrix helps to pan the <guilabel>XYPlot</guilabel> window horizontally
+                and second value helps to pan the window vertically.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>On</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>
+                      Any Real number
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>On, Off</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Access</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                <varlistentry>
+                  <term>Default Value</term>
 
-      <varlistentry>
-        <term>SolverIterations</term>
+                  <listitem>
+                    <para>
+                      [0 0]
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-        <listitem>
-          <para>The SolverIterations field determines whether or not perturbed
-          trajectories are plotted during a solver (Targeter, Optimize)
-          sequence. When SolverIterations is set to On, solver iterations are
-          shown on the plot. When SolverIterations is set to Off, solver
-          iterations are not shown on the plot.</para>
+                <varlistentry>
+                  <term>Units</term>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Off</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Interfaces</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
 
-              <listitem>
-                <para>On, Off</para>
-              </listitem>
-            </varlistentry>
+          <row>
+            <entry>
+              <guilabel>RelativeZOrder</guilabel>
+            </entry>
 
-            <varlistentry>
-              <term>Units</term>
+            <entry>
+              <para>
+                <guilabel>RelativeZOrder</guilabel> field allows the user to select which <guilabel>XYPlot</guilabel> window to
+                display first on the screen. The <guilabel>XYPlot</guilabel> with lowest
+                <guilabel>RelativeZOrder</guilabel> value will be displayed last while <guilabel>XYPlot</guilabel> with
+                highest <guilabel>RelativeZOrder</guilabel> value will be displayed first.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-      <varlistentry>
-        <term>ShowPlot</term>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-        <listitem>
-          <para>The ShowPlot field allows the user to turn off a plot for a
-          particular run, without deleting the plot object, or removing it
-          from the script. If you select true, then the plot will be shown. If
-          you select false, then the plot will not be shown.</para>
+                  <listitem>
+                    <para>
+                      Any Real number
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+                <varlistentry>
+                  <term>Access</term>
 
-              <listitem>
-                <para>true</para>
-              </listitem>
-            </varlistentry>
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-            <varlistentry>
-              <term>Limits</term>
+                <varlistentry>
+                  <term>Default Value</term>
 
-              <listitem>
-                <para>true, false</para>
-              </listitem>
-            </varlistentry>
+                  <listitem>
+                    <para>
+                      0
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-            <varlistentry>
-              <term>Units</term>
+                <varlistentry>
+                  <term>Units</term>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>ShowGrid</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                When the <guilabel>ShowGrid</guilabel> field is set to <guilabel>True</guilabel>, then a
+                grid is drawn on an xy-plot. When the <guilabel>ShowGrid</guilabel> field is set to 
+                <guilabel>False</guilabel>, then a grid is not drawn.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      True,False
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      True
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>ShowPlot</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      The <guilabel>ShowPlot</guilabel> field allows the user to turn off a plot for a
+                      particular run, without deleting the plot object, or removing it
+                      from the script. If you select true, then the plot will be shown. If
+                      you select false, then the plot will not be shown.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      True,False
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      True
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Size</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      The <guilabel>Size</guilabel> field allows the user to control the 
+                      display size of <guilabel>XYPlot</guilabel> window. First value in [0 0] 
+                      matrix controls horizonal size and second value controls 
+                      vertical size of <guilabel>XYPlot</guilabel> display window.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any Real number
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      [ 0 0 ]
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>SolverIterations</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>SolverIterations</guilabel> field determines whether or not data associated with 
+                perturbed trajectories during a solver (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>) sequence is displayed 
+                in the XY plot. When <guilabel>SolverIterations</guilabel> is set to <guilabel>All</guilabel>, all perturbations/iterations are 
+                plotted in the XY Plot. When <guilabel>SolverIterations</guilabel> is set to <guilabel>Current</guilabel>, only the current solution 
+                or perturbation is plotted in XY Plot. When <guilabel>SolverIterations</guilabel> is set to <guilabel>None</guilabel>, only the final 
+                nominal run is plotted on the <guilabel>XYPlot</guilabel>.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Current, All, None
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      Current
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>XVariable</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The <guilabel>XVariable</guilabel> field allows the user to define the independent 
+                variable for an xy-plot. Only one variable can be defined as an 
+                independent variable. For example, the line <guilabel>MyXYPlot.XVariable = DefaultSC.A1ModJulian </guilabel>
+                sets the independent variable to be the epoch of <guilabel>DefaultSC</guilabel> in the A1 time system and 
+                modified Julian format.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      UserDefString
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any user variable, array element, or 
+                      spacecraft parameter that evaluates to a real number
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      get, set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DefaultSC.A1ModJulian
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>YVariables</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      The <guilabel>YVariables</guilabel> field allows the user to add dependent variables to an xy-plot. 
+                      All dependent variables are plotted on the y-axis vs the independent variable defined 
+                      by <guilabel>XVariable</guilabel>. The dependent variable(s) should always be included in curly braces. 
+                      For example, MyXYPlot.YVariables = {DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z}.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any user variable, array element, or spacecraft parameter that evaluates to a real number
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      get, set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DefaultSC.EarthMJ2000Eq.X
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      The figure below shows the default settings for the XYPlot resource:
+    </para>
+    
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_XYPlot_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+    <refsection>
+      <title>Behavior when using XYPlot Resource &amp; Toggle Command</title>
+
+      <para>
+        The <guilabel>XYPlot</guilabel> resource plots data onto the X and Y axis of the graph at 
+        each propagation step of the entire mission duration. If you want to report 
+        data to a <guilabel>XYPlot</guilabel> at specific points in your mission, then a <guilabel>Toggle On</guilabel>/<guilabel>Off</guilabel> command 
+        can be inserted into the mission sequence to control when the <guilabel>XYPlot</guilabel> is to plot data. 
+        When <guilabel>Toggle Off</guilabel> command is issued for a <guilabel>XYPlot</guilabel>, no data is plotted onto the X and Y axis 
+        of the graph until a <guilabel>Toggle On</guilabel> command is issued. Similarly when a <guilabel>Toggle On</guilabel> command is used, 
+        data is plotted onto the X and Y axis at each integration step until a <guilabel>Toggle Off</guilabel> command is used.
+      </para>
+
+      <para>
+        Below is an example script snippet that shows how to use 
+        <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel> command while using the <guilabel>XYPlot</guilabel> resource.
+        <guilabel>Spacecraft’s</guilabel> position magnitude and semi-major-axis are plotted as a function of time.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create XYPlot aPlot;
+  GMAT aPlot.XVariable = aSat.ElapsedDays;
+  GMAT aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA};
+
+  BeginMissionSequence;
+
+  Toggle aPlot Off;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+  Toggle aPlot On;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+        </code>
+      </programlisting>
+    </refsection>
+    <refsection>
+      <title>Behavior when using XYPlot &amp; Spacecraft resources</title>
+
+      <para>
+        <guilabel>Spacecraft</guilabel> resource contains information about spacecraft’s orbit, 
+        its attitude, physical parameters (such as mass and drag coefficient) 
+        and any attached hardware, including thrusters and fuel tanks. <guilabel>Spacecraft</guilabel> 
+        resource interacts with <guilabel>XYPlot</guilabel> throughout the entire mission duration. 
+        The data retrieved from the spacecraft is what gets plotted onto the X and Y axis 
+        of the graph at each propagation step of the entire mission duration.
+      </para>
+    </refsection>
+    <refsection>
+      <title>Behavior when reporting data in Iterative Processes</title>
+
+      <para>
+        GMAT allows you to specify how data is plotted onto a plot
+        during iterative processes such as differential correction or optimization. 
+        The <guilabel>SolverIterations</guilabel> field of an <guilabel>XYPlot</guilabel> resource supports three options 
+        which are described in the table below:
+      </para>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>SolverIterations options</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>Current</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows only current iteration/perturbation
+                  in an iterative process and plots current iteration to a plot.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>All</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows all iterations/perturbations in an
+                  iterative process and plots all iterations/perturbations to a plot.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>None</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Shows only the final solution after the end of an
+                  iterative process and plots only that final solution to the plot.
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+    
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <programlisting><code>Create XYPlot XYPlot1;
-GMAT XYPlot1.SolverIterations = Current;
-GMAT XYPlot1.IndVar = Sat.A1ModJulian;
-GMAT XYPlot1.Add = {Sat.EarthMJ2000Eq.X};
-GMAT XYPlot1.Grid = On;
-GMAT XYPlot1.ShowPlot = true;</code></programlisting>
+    <informalexample>
+      <para>
+        Propagate an orbit and plot the spacecraft’s altitude as a function of time at every integrator step:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create XYPlot aPlot;
+  GMAT aPlot.XVariable = aSat.ElapsedSecs;
+  GMAT aPlot.YVariables = {aSat.Earth.Altitude};
+
+  BeginMissionSequence;
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Plotting data during an iterative process. 
+        Notice <guilabel>SolverIterations</guilabel> field is selected as All. This means all iterations/perturbations will be plotted.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create Propagator aProp;
+
+  Create ImpulsiveBurn TOI;
+  Create DifferentialCorrector aDC;
+
+  Create XYPlot aPlot;
+  GMAT aPlot.SolverIterations = All;
+  GMAT aPlot.XVariable = aSat.ElapsedDays;
+  GMAT aPlot.YVariables = {aSat.Earth.RMAG};
+
+  BeginMissionSequence;
+
+  Propagate aProp(aSat) {aSat.Earth.Periapsis};
+  Target aDC;
+    Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, Upper 
+      = 3.14159, MaxStep = 0.5});
+    Maneuver TOI(aSat);
+    Propagate aProp(aSat) {aSat.Earth.Apoapsis};
+    Achieve aDC(aSat.Earth.RMAG = 42165);
+  EndTarget;
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

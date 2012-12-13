@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="FuelTank"
+<refentry version="5.0"
+          xml:id="FuelTank"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,12 +8,16 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>FuelTank</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>FuelTank</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
@@ -20,428 +25,870 @@
   <refnamediv>
     <refname>FuelTank</refname>
 
-    <refpurpose>A fuel tank.</refpurpose>
+    <refpurpose>
+      <guilabel>FuelTank</guilabel> is a model of a chemical fuel tank
+    </refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create FuelTank <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>A FuelTank is a thermodynamc model of a tank and is required for
-    finite burn modelling or for implusive burns that use mass depletion. The
-    thermodynamic properties of the tank are modelled using the ideal gas law
-    and assume that there is no energy transfer into or out of the tank as
-    fuel is depleted. To use a FuelTank, you must first create the tank, and
-    then attach it to the desired spacecraft and associate it with a thruster
-    as shown in the examples below.</para>
-	
-	<para> When working in the script, you must add tanks to spacecraft before the 
-	begin mission sequence command.
-	</para>
+    <para>
+      A <guilabel>FuelTank</guilabel> is a thermodynamic model of a tank and is required for finite burn 
+      modeling or for impulsive burns that use mass depletion.  The thermodynamic properties 
+      of the tank are modeled using Boyle’s law and assume that there is no temperature change 
+      in the tank as fuel is depleted. To use a <guilabel>FuelTank</guilabel>, you must first create the tank, and 
+      then attach it to the desired spacecraft and associate it with a thruster as shown in the 
+      example below.
+    </para>
+
+    <para>
+      When working in the script, you must add tanks to spacecraft before the begin mission sequence
+      command.
+    </para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Pressure</term>
-
-        <listitem>
-          <para>The pressure in the tank.</para>
-
-          <variablelist spacing="compact">
-		  
-		     <varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Number</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>1500</para>
-              </listitem>
-            </varlistentry>
-
-			<varlistentry>
-			  <term>Limits</term>
-
-			  <listitem>
-				<informalequation>
-				  <mathphrase> Pressure &gt; 0 </mathphrase>
-				</informalequation>
-			  </listitem>
-			</varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>kPa.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>Temperature</term>
-
-        <listitem>
-          <para>The temperature of the fuel and ullage in the tank. GMAT
-          currently assumes ullage and fuel are always at the same
-          temperature.</para>
-
-          <variablelist spacing="compact">
-		  
-		  	<varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Number</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>20</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <informalequation>
-				  <mathphrase> Temperature &gt; -273.15 </mathphrase>
-				</informalequation>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>C.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>FuelMass</term>
-
-        <listitem>
-          <para>The FuelMass field is the mass of fuel in the tank.<caution>
-              <para>By default, GMAT will not allow the fuel mass to be
-              negative. However, occasionally in iterative processes such as
-              targeting, a solver will try values of a maneuver parameter that
-              result in total fuel depletion. Using the default tank settings
-              this will throw an excpeption stopping the run unless you set
-              the AllowNegativeFuelMass flag to true.</para>
-            </caution></para>
-
-          <variablelist spacing="compact">
-		  
-		    <varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Number</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>756</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <informalequation>
-				  <mathphrase> FuelMass &gt; 0 </mathphrase>
-				</informalequation>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>kg.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-
-    <variablelist spacing="compact">
-      <varlistentry>
-        <term>ReferenceTemperature</term>
-
-        <listitem>
-          <para>The temperature of the tank when fuel was loaded.</para>
-
-          <variablelist spacing="compact">
-		  
-		  	<varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Number</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>20</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Options</term>
-
-              <listitem>
-                <informalequation>
-				  <mathphrase> ReferenceTemperature >=; 0 </mathphrase>
-				</informalequation>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>C.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>Volume</term>
-
-        <listitem>
-          <para>The volume of the tank. GMAT checks to ensure that the volume
-          of the tank is larger than the volume of fuel loaded in the tank and
-          throws an exception in the case that the fuel volume is larger than
-          the tank volume.</para>
-
-          <variablelist spacing="compact">
-		  
-		  	<varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Number</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>0.75</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Options</term>
-
-              <listitem>
-                <para>Real Number &gt; 0 such that fuel volume is &lt; tank
-                volume.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>m<superscript>3</superscript>.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>FuelDensity</term>
-
-        <listitem>
-          <para>The density of the fuel.</para>
-
-          <variablelist spacing="compact">
-		          
-  		    <varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Real Numer</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>1260</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Real Number &gt; 0</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>kg/m<superscript>3</superscript>.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-
-    <variablelist spacing="compact">
-      <varlistentry>
-        <term>PressureModel</term>
-
-        <listitem>
-          <para>The pressure model describes how pressure in the tank changes
-          as fuel is depleted.</para>
-
-          <variablelist spacing="compact">
-		  
-		  	<varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Enumeration</para>
-              </listitem>
-            </varlistentry>
-			
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>PressureRegulated</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>PressureRegulated, BlowDown</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>N/A</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>AllowNegativeFuelMass</term>
-
-        <listitem>
-          <para>This field allows the fuel tank to have negagive fuel mass
-          which can be useful in optimization and targeting sequences before
-          convergences has occurred.</para>
-
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>false</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Options</term>
-
-              <listitem>
-                <para>true, false.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>N/A</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
+
+        <colspec colnum="2"
+                 colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>AllowNegativeFuelMass </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                This field allows the fuel tank to have negative fuel 
+                mass which can be useful in optimization and targeting sequences 
+                before convergence has occurred.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Boolean_Type
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      true, false
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      FALSE
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>PressureModel</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                Description
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      The pressure model describes how pressure in 
+                      the tank changes as fuel is depleted.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      PressureRegulated, BlowDown
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      PressureRegulated
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>FuelDensity </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The density of the fuel.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1260
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      kg/m^3
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>FuelMass</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The mass of fuel in the tank.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      756
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      kg
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Pressure</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The pressure in the tank.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1500
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      kPa
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>RefTemperature</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The temperature of the tank when fuel was loaded.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      Real
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; -273.15, |Real| &gt; 0.01
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      20
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      C
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Temperature</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                Description
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      The temperature of the fuel and ullage in the tank. 
+                      GMAT currently assumes ullage and fuel are always at the same temperature.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; -273.15
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      20
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      C
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Volume </guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The volume of the tank. GMAT checks to 
+                ensure that the input volume of the tank is larger 
+                than the calculated volume of fuel loaded in the tank 
+                and throws an exception in the case that the calculated fuel 
+                volume is larger than the input tank volume.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      datatype
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real &gt; 0 such that calculated fuel volume is &lt; input tank Volume.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set, get
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      0.75
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>
+                      m^3
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      The <guilabel>FuelTank</guilabel> dialog box allows you to specify properties of a fuel tank including fuel mass,
+      density, and temperature as well as tank pressure and volume.
+      The layout of the <guilabel>FuelTank</guilabel> dialog box is shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_1.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      The <guilabel>Thruster</guilabel> resource is closely related to the <guilabel>FuelTank</guilabel> resource and thus,
+      we also discuss it here. The <guilabel>Thruster</guilabel> dialog box allows you to specify properties of a thruster
+      including the coordinate system of the Thrust acceleration direction vector, the thrust magnitude and Isp.
+      The layout of the <guilabel>Thruster</guilabel> dialog box is shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_2.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      When performing a finite burn, you will typically want to model fuel depletion.
+      To do this, select the Decrement Mass button and then select the previously created <guilabel>FuelTank</guilabel> as shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_3.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Thus far, we have created both a <guilabel>FuelTank</guilabel> and a <guilabel>Thruster</guilabel>, and we have associated
+      a <guilabel>FuelTank</guilabel> with our <guilabel>Thruster</guilabel>. We are not done yet.
+      We must tell GMAT that we want to attach both the Fuel Tank and the <guilabel>Thruster</guilabel> to a particular spacecraft.
+      To do this, double click on the desired spacecraft under the <guilabel>Spacecraft</guilabel> resource to bring up the associated GUI panel.
+      Then click on the Tanks tab to bring up the following GUI display.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_4.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Next, select the desired <guilabel>FuelTank</guilabel> and use the right arrow
+      button to attach the <guilabel>FuelTank</guilabel> to the spacecraft.  Then, click the Apply button as shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_5.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Similarly, to attach a <guilabel>Thruster</guilabel> to a spacecraft, double click on the desired spacecraft
+      under the <guilabel>Spacecraft</guilabel> resource and then select the Actuators tab.
+      Then select the desired thruster and use the right arrow to attach the thruster to the spacecraft.
+      Finally, click the Apply button as shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FuelTank_GUI_6.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+    <refsection>
+      <title>Behavior When Configuring Tank and Attached Tank Properties</title>
+
+      <para>
+        Create a default <guilabel>FuelTank</guilabel> and attach it to a <guilabel>Spacecraft</guilabel> and <guilabel>Thruster</guilabel>.
+      </para>
+
+      <programlisting>
+        <code>
+  %  Create the Fuel Tank Object
+  Create FuelTank aTank;
+  aTank.AllowNegativeFuelMass = false;
+  aTank.FuelMass = 756;
+  aTank.Pressure = 1500;
+  aTank.Temperature = 20;
+  aTank.RefTemperature = 20;
+  aTank.Volume = 0.75;
+  aTank.FuelDensity = 1260;
+  aTank.PressureModel = PressureRegulated;
+  %  Create a Thruster and assign it a FuelTank
+  Create Thruster aThruster;
+  aThruster.Tank = {aTank};
+
+  %  Add the FuelTank and Thruster to a Spacecraft
+  Create Spacecraft aSpacecraft
+  aSpacecraft.Tanks = {aTank};
+  aSpacecraft.Thrusters = {aThruster};
+        </code>
+      </programlisting>
+
+      <para>
+        As exhibited below, there are some subtleties associated with setting and getting parent vs. cloned objects. 
+        In the example above, aTank is the parent ‘<guilabel>FuelTank</guilabel>’ object and the field aSpacecraft. Tanks is populated with a cloned copy of aTank.
+      </para>
+
+      <para>
+        Create a second spacecraft and attach a fuel tank using the 
+        same procedure used in the previous example. 
+        Set the <guilabel>FuelMass</guilabel> in the parent object, aTank, to 900 kg.
+      </para>
+
+      <programlisting>
+        <code>
+  %  Add the FuelTank and Thruster to a second Spacecraft
+  Create Spacecraft bSpacecraft
+  bSpacecraft.Tanks = {aTank};
+  bSpacecraft.Thrusters = {aThruster};
+  aTank.FuelMass = 900;    %Can be performed in both resource and command modes
+        </code>
+      </programlisting>
+
+      <para>
+        Note that, in the example above, setting the value of the parent object, aTank, changes the 
+        fuel mass value in both cloned fuel tank objects.  More specifically, the value of both aSpacecraft.aTank.FuelMass 
+        and bSpacecraft.aTank.FuelMass are both now equal to the new value of 900 kg.  We note that the assignment command 
+        for the parent object, aTank.FuelMass, can be performed in both resource and command modes.
+      </para>
+
+      <para>
+        To change the value of the fuel mass in only the first created spacecraft, aSpacecraft, we do the following.
+      </para>
+
+      <programlisting>
+        <code>
+  %  Create the Fuel Tank Object
+  aTank.FuelMass = 756;       %Fuel tank mass in both spacecraft set back to default
+  aSpacecraft.aTank.FuelMass = 1000;   %Can only be performed in command mode.
+        </code>
+      </programlisting>
+
+      <para>
+        As a result of the commands in the previous example, the value of 
+        aSpacecraft.aTank.FuelMass is 1000 kg and the value of bSpacecraft.aTank.FuelMass 
+        is 756 kg. We note that the assignment command for the cloned object, aSpacecraft.aTank.FuelMass, can only be performed in command mode.
+      </para>
+
+      <para>
+        <literal>Caution:  Value of AllowNegativeFuelMass flag can affect iterative processes</literal>
+      </para>
+
+      <para>
+        By default, GMAT will not allow the fuel mass to be negative. However, occasionally 
+        in iterative processes such as targeting, a solver will try values of a maneuver parameter 
+        that result in total fuel depletion. Using the default tank settings, this will throw an exception 
+        stopping the run unless you set the AllowNegativeFuelMass flag to true.  GMAT will not allow the the 
+        total spacecraft mass to be negative. If DryMass + FuelMass is negative GMAT will throw an exception and stop.
+      </para>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <example>
-      <title>Creating a default FuelTank and attaching it to a
-      Spacecraft</title>
+    <informalexample>
+      <para>
+        Create a default <guilabel>FuelTank</guilabel> and 
+        attach it to a <guilabel>Spacecraft</guilabel> and <guilabel>Thruster</guilabel>.
+      </para>
 
-      <programlisting>%  Create the Fuel Tank Object
-Create FuelTank aTank;
-aTank.AllowNegativeFuelMass = false;
-aTank.FuelMass = 756;
-aTank.Pressure = 1500;
-aTank.Temperature = 20;
-aTank.RefTemperature = 20;
-aTank.Volume = 0.75;
-aTank.FuelDensity = 1260;
-aTank.PressureModel = PressureRegulated;
+      <programlisting>
+        <code>
+  %  Create the Fuel Tank Object
+  Create FuelTank aTank;
+  aTank.AllowNegativeFuelMass = false;
+  aTank.FuelMass = 756;
+  aTank.Pressure = 1500;
+  aTank.Temperature = 20;
+  aTank.RefTemperature = 20;
+  aTank.Volume = 0.75;
+  aTank.FuelDensity = 1260;
+  aTank.PressureModel = PressureRegulated;
 
-%  Create a Thruster and assign it a FuelTank
-Create Thruster aThruster;
-aThruster.Tank = {aTank};
+  %  Create a Thruster and assign it a FuelTank
+  Create Thruster aThruster;
+  aThruster.Tank = {aTank};
 
-%  Add the FuelTank and Thruster to a Spacecraft
-Create Spacecraft aSpacecraft
-aSpacecraft.Tanks = {aTank};
-aSpacecraft.Thrusters = {aThruster};
+  %  Add the FuelTank and Thruster to a Spacecraft
+  Create Spacecraft aSpacecraft
+  aSpacecraft.Tanks = {aTank};
+  aSpacecraft.Thrusters = {aThruster};
 
-</programlisting>
-    </example>
+  BeginMissionSequence
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

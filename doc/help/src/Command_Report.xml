@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Report" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0"
+          xml:id="Report"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -23,116 +25,132 @@
   <refnamediv>
     <refname>Report</refname>
 
-    <refpurpose>Output a report</refpurpose>
+    <refpurpose>
+      The Report Command allows you to write data to a text file.
+    </refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis></synopsis>
+    <title>Script Syntax</title>
+
+    <synopsis>
+      <literal>Report</literal>  <replaceable>ReportName</replaceable>  <replaceable>DataList</replaceable>
+
+      <replaceable>ReportName</replaceable>
+          <replaceable>ReportName</replaceable> option allows you to specify the 
+          ReportFile for data output.
+      <replaceable>DataList</replaceable>
+          <replaceable>DataList</replaceable> option allows you to output data to the Filename 
+          specified by the <replaceable>ReportName</replaceable>. 
+          Multiple objects can be written in the <replaceable>DataList</replaceable> 
+          when they are separated by spaces.
+    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The report command allows the user find parameters of the orbit and
-    the spacecraft at particular moments in time. This command is inserted
-    into the mission tree at various locations in the mission tree. The
-    parameters found by this command are placed into a report file that can be
-    accessed at a later time.</para>
+    <para>
+      The <guilabel>Report</guilabel> command allows you to report data at specific points in your mission sequence. 
+      GMAT allows you to insert <guilabel>Report</guilabel> command into the <guilabel>Mission</guilabel> tree at various locations. <guilabel>Report</guilabel> 
+      command can be used through GMAT’s GUI or the script interface. The parameters reported by <guilabel>Report</guilabel> 
+      command are placed into a report file that can be accessed at a later time.
+    </para>
+
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="ReportFile"/>
+    </para>
   </refsection>
 
   <refsection>
-    <title>Options</title>
+    <title>GUI</title>
+    
+    <para>
+      Figure below shows default settings for Report command:
+    </para>
 
-    <variablelist>
-      <varlistentry>
-        <term>ReportName</term>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_Report_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
 
-        <listitem>
-          <para>The ReportName option allows the user to specift the
-          ReportFile for data output.</para>
-
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Any ReportFile created</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>DataList</term>
-
-        <listitem>
-          <para>The DataList option allows the user to output data to the
-          Filename specified by the ReportName. Multiple objects can be in the
-          DataList when they are separated by spaces.</para>
-
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Spacecraft parameter, Array, Variable, String, or any
-                other single user defined parameter</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+  <refsection>
+    <title>Remarks</title>
+    
+    <para>
+      <guilabel>Report</guilabel> command only allows you to report data to a report file at specific 
+      points in your mission. If you want data to be reported at each propagation 
+      step of the entire mission duration, then you should not use <guilabel>Report</guilabel> command. 
+      Instead you should use <guilabel>ReportFile</guilabel> resource. See <guilabel>ReportFile</guilabel> resource section for 
+      details on the syntax that allows you to report data at each propagation step.
+    </para>
+    
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <refsection>
-      <title>Script Syntax</title>
+    <informalexample>
+      <para>
+        Propagate an orbit for two days and report epoch and 
+        selected orbital elements to a report file using the Report command.
+      </para>
 
-      <programlisting><code>Report  ReportName  DataList</code></programlisting>
-    </refsection>
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  Create ReportFile aReport;
 
-    <refsection>
-      <title>Script Examples</title>
+  Create Propagator aProp;
 
-      <programlisting><code>%Report the time and position of DefaultSC
+  BeginMissionSequence;
 
-Report DefaultReport DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z;</code></programlisting>
-    </refsection>
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Report user-defined parameters such as variables,
+        array elements and a string to a report file, using the Report command.
+      </para>
+
+      <programlisting>
+        <code>
+  Create ReportFile aReport;
+
+  Create Variable aVar aVar2
+  GMAT aVar = 100;
+  GMAT aVar2 = 2000;
+
+  Create Array aArray[2,2];
+  GMAT aArray(1, 1) = 2;
+  GMAT aArray(1, 2) = 3;
+  GMAT aArray(2, 1) = 4;
+  GMAT aArray(2, 2) = 5;
+
+  Create String aString
+  GMAT aString = 'GMAT is awesome';
+
+  BeginMissionSequence;
+
+  Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) aArray(2,2) aString;
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>
