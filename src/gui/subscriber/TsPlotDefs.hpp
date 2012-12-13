@@ -19,7 +19,7 @@
 
 #include <wx/wx.h>
 
-// The following block manages the cahange in deprecated functions between 
+// The following block manages the change in deprecated functions between
 // wx 2.6 and 2.8
 #if wxCHECK_VERSION(2, 8, 0)
 
