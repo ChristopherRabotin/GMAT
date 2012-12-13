@@ -260,12 +260,22 @@ bool BodyFixedPoint::Initialize()
    flattening            = theBody->GetRealParameter("Flattening");
    meanEquatorialRadius  = theBody->GetRealParameter("EquatorialRadius");
 
+   // @todo: This should work, but doesn't.  It needs to be figured out
+   //        eventually, I think.
+   //
+   //        One clue: When walking through this code in nemiver (Linux
+   //        debugger), I saw a covariance matrix destructor being called,
+   //        and did not expect that.  Maybe there is something around that
+   //        piece...
+   
    // set up local coordinate systems - delete the old ones if they have already been created
-   if (mj2kcs)   delete mj2kcs;
-   if (bfcs)     delete bfcs;
-   mj2kcs  = CoordinateSystem::CreateLocalCoordinateSystem("mj2kcs", "MJ2000Eq", theBody,
+   //if (mj2kcs)   delete mj2kcs;
+   //if (bfcs)     delete bfcs;
+   if (!mj2kcs)
+      mj2kcs  = CoordinateSystem::CreateLocalCoordinateSystem("mj2kcs", "MJ2000Eq", theBody,
                                                            NULL, NULL, theBody->GetJ2000Body(), solarSystem);
-   bfcs    = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", theBody,
+   if (!bfcs)
+      bfcs    = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", theBody,
                                                            NULL, NULL, theBody->GetJ2000Body(), solarSystem);
 
    // Calculate the body-fixed Cartesian position
