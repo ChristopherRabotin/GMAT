@@ -3625,8 +3625,15 @@ void MissionTree::OnShowDetail(wxCommandEvent &event)
 //--------------------------------------------------------------------------
 void MissionTree::OnShowMissionSequence(wxCommandEvent &event)
 {
+   #ifdef DEBUG_SHOW_MISSION_SEQ
+   MessageInterface::ShowMessage("MissionTree::OnShowMissionSequence() entered\n");
+   #endif
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
    std::string str = GmatCommandUtil::GetCommandSeqString(cmd, false, false, true, "   ");
+   
+   #ifdef DEBUG_SHOW_MISSION_SEQ
+   MessageInterface::ShowMessage("CommandSeqString =%s", str.c_str());
+   #endif
    
    if (str == "")
       return;
@@ -3638,6 +3645,9 @@ void MissionTree::OnShowMissionSequence(wxCommandEvent &event)
    vtf->AppendText(str.c_str());
    vtf->Show(true);
    
+   #ifdef DEBUG_SHOW_MISSION_SEQ
+   MessageInterface::ShowMessage("MissionTree::OnShowMissionSequence() leaving\n");
+   #endif
 }
 
 //---------------------------------------------------------------------------
@@ -4114,8 +4124,8 @@ wxString MissionTree::ComposeNodeName(GmatCommand *cmd, int cmdCount)
    wxString nodeName = cmd->GetName().c_str();
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    #ifdef DEBUG_NODE_NAME
-   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - nodeName    = %s\n", nodeName.c_str());
-   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - cmdTypeName = %s\n", cmdTypeName.c_str());
+   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - nodeName    = '%s'\n", nodeName.c_str());
+   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - cmdTypeName = '%s'\n", cmdTypeName.c_str());
    #endif
    
    if (cmdTypeName == "GMAT")
@@ -4127,10 +4137,10 @@ wxString MissionTree::ComposeNodeName(GmatCommand *cmd, int cmdCount)
    if (nodeName.Trim() == "" || nodeName == cmdTypeName)
       nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    
-   // Show command string as node label
-   cmd->SetSummaryName(nodeName.c_str());
    // Get long or short label
    nodeName = GetCommandString(cmd, nodeName);
+   // Set summary name after getting new nodeName (Fix for GMT-2893, LOJ: 2012.12.13)
+   cmd->SetSummaryName(nodeName.c_str());
    
    #ifdef DEBUG_NODE_NAME
    MessageInterface::ShowMessage
