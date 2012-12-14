@@ -647,7 +647,9 @@ void OrbitPanel::Create()
    orbitDesignerButton = new wxButton
       (this, ID_BUTTON, wxT("Orbit Designer"), wxDefaultPosition, wxDefaultSize, 0);
    elementSizer->Add(orbitDesignerButton, 0, wxALIGN_RIGHT|wxALIGN_BOTTOM, bsize );
-   
+   // tgg 2012-12-14 Remove At-risk Orbit Designer feature, GMT-3383
+   orbitDesignerButton->Show(false);
+
    orbitSizer->Add( orbitDefSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    orbitSizer->Add( elementSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    
