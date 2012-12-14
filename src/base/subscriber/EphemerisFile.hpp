@@ -105,7 +105,7 @@ protected:
    Interpolator           *interpolator; // owned object
    SpiceOrbitKernelWriter *spkWriter;    // owned object
    
-   // for buffering ephemeris data
+   // for buffering ephemeris data for SPK file
    EpochArray  a1MjdArray;
    StateArray  stateArray;
    
@@ -137,9 +137,11 @@ protected:
    std::string metaDataStartStr;
    std::string metaDataStopStr;
    Integer     writeMetaDataOption;
-   std::ofstream::pos_type metaDataPosition;
+   std::ofstream::pos_type metaDataBegPosition;
+   std::ofstream::pos_type metaDataEndPosition;
    
    Integer     interpolationOrder;
+   Integer     interpolatorStatus;
    Integer     initialCount;
    Integer     waitCount;
    
@@ -249,6 +251,7 @@ protected:
    
    // CCSDS file writing for debug and actual
    bool         OpenCcsdsEphemerisFile();
+   void         ClearLastCcsdsOemMetaData(const std::string &comments = "");
    void         WriteCcsdsHeader();
    void         WriteCcsdsOrbitDataSegment();
    void         WriteCcsdsOemMetaData();

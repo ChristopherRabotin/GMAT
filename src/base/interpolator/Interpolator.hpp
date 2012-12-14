@@ -46,6 +46,7 @@ public:
    virtual bool    AddPoint(const Real ind, const Real *data);
    virtual void    Clear();
    virtual Integer GetBufferSize();
+   virtual Integer GetPointCount();
    
    //---------------------------------------------------------------------------
    // bool Interpolate(const Real ind, Real *results)

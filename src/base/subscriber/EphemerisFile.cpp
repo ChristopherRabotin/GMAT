@@ -52,6 +52,7 @@
 //#define DEBUG_EPHEMFILE_WRITE
 //#define DEBUG_EPHEMFILE_RESTART
 //#define DEBUG_EPHEMFILE_COMMENTS
+//#define DEBUG_EPHEMFILE_HEADER
 //#define DEBUG_EPHEMFILE_METADATA
 //#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
@@ -151,8 +152,10 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    metaDataStartStr    (""),
    metaDataStopStr     (""),
    writeMetaDataOption (0),
-   metaDataPosition    (0),
+   metaDataBegPosition (0),
+   metaDataEndPosition (0),
    interpolationOrder  (7),
+   interpolatorStatus  (-1),
    initialCount        (0),
    waitCount           (0),
    stepSizeInA1Mjd     (-999.999),
@@ -199,7 +202,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    fileFormatList.clear();
    fileFormatList.push_back("CCSDS-OEM");
    // CCSDS-AEM not allowed in 2010 release (bug 2219)
-//   fileFormatList.push_back("CCSDS-AEM");
+   //fileFormatList.push_back("CCSDS-AEM");
    fileFormatList.push_back("SPK");
    
    epochFormatList.clear();
@@ -324,8 +327,10 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    metaDataStartStr    (ef.metaDataStartStr),
    metaDataStopStr     (ef.metaDataStopStr),
    writeMetaDataOption (0),
-   metaDataPosition    (0),
+   metaDataBegPosition (0),
+   metaDataEndPosition (0),
    interpolationOrder  (ef.interpolationOrder),
+   interpolatorStatus  (ef.interpolatorStatus),
    initialCount        (ef.initialCount),
    waitCount           (ef.waitCount),
    stepSizeInA1Mjd     (ef.stepSizeInA1Mjd),
@@ -399,8 +404,10 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    metaDataStartStr    = ef.metaDataStartStr;
    metaDataStopStr     = ef.metaDataStopStr;
    writeMetaDataOption = 0;
-   metaDataPosition    = 0;
+   metaDataBegPosition = 0;
+   metaDataEndPosition = 0;
    interpolationOrder  = ef.interpolationOrder;
+   interpolatorStatus  = ef.interpolatorStatus;
    initialCount        = ef.initialCount;
    waitCount           = ef.waitCount;
    stepSizeInA1Mjd     = ef.stepSizeInA1Mjd;
@@ -616,7 +623,8 @@ bool EphemerisFile::Initialize()
    
    // Initialize data
    writeMetaDataOption = 0;
-   metaDataPosition = 0;
+   metaDataBegPosition = 0;
+   metaDataEndPosition = 0;
    firstTimeWriting = true;
    firstTimeMetaData = true;
    saveMetaDataStart = true;
@@ -1790,7 +1798,6 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
    
    // Write data for the rest of time on waiting, pass false to indicate that is not
    // the end of data receive.
-   //FinishUpWriting(false);
    FinishUpWriting(canFinalize);
    
    // For CCSDS data, comments are written from
@@ -2105,9 +2112,10 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
-      ("EphemerisFile::FinishUpWriting() entered, canFinalize=%d, isFinalized=%d, "
-       "continuousSegment=%d\n   lastEpochWrote= %.15f, currEpochInSecs=%.15f\n",
-       canFinalize, isFinalized, continuousSegment, lastEpochWrote, currEpochInSecs);
+      ("EphemerisFile::FinishUpWriting() '%s' entered, canFinalize=%d, isFinalized=%d, "
+       "interpolatorStatus=%d, continuousSegment=%d\n   lastEpochWrote= %.15f, "
+       "currEpochInSecs=%.15f\n", GetName().c_str(), canFinalize, isFinalized, interpolatorStatus,
+       continuousSegment, lastEpochWrote, currEpochInSecs);
    if (lastEpochWrote != -999.999)
       DebugWriteTime("   last    ", lastEpochWrote);
    if (currEpochInSecs != -999.999)
@@ -2129,6 +2137,35 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       {
          if (interpolator != NULL)
          {
+            #ifdef DEBUG_INTERPOLATOR_TRACE
+            MessageInterface::ShowMessage
+               ("===> FinishUpWriting() checking for not enough data points\n"
+                "   metaDataStartStr='%s', currEpochInSecs='%s'\n", metaDataStartStr.c_str(),
+                ToUtcGregorian(currEpochInSecs));
+            #endif
+            // First check for not enough data points for interpolation
+            if (canFinalize && interpolatorStatus == -1)
+            {
+               isFinalized = true;
+               
+               // Clear last MetaData with COMMENT
+               ClearLastCcsdsOemMetaData
+                  ("There is not enough data available to generate spacecraft "
+                   "ephemeris data at the requested interpolation order. "
+                   "There should be at least one data point more than interpolation order.");
+               
+               // Throw an exception
+               std::stringstream ss("");
+               ss << "There is not enough data to generate ephmeris data to "
+                  "EphemerisFile: \"" << fileName << "\". Number of required points is "
+                  << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
+               ss << ".  There should be at least one data point more than interpolation order.";
+               
+               SubscriberException se;
+               se.SetDetails(ss.str());
+               throw se;
+            }
+            
             #ifdef DEBUG_INTERPOLATOR_TRACE
             MessageInterface::ShowMessage
                ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
@@ -2321,6 +2358,7 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
          ("===> ProcessEpochsOnWaiting() calling interpolator->IsInterpolationFeasible(reqEpochInSecs)\n");
       #endif
       Integer retval = interpolator->IsInterpolationFeasible(reqEpochInSecs);
+      interpolatorStatus = retval;
       
       #ifdef DEBUG_EPHEMFILE_ORBIT
       MessageInterface::ShowMessage
@@ -2799,6 +2837,61 @@ bool EphemerisFile::OpenCcsdsEphemerisFile()
 
 
 //------------------------------------------------------------------------------
+// void ClearLastCcsdsOemMetaData(const std::string &comments)
+//------------------------------------------------------------------------------
+void EphemerisFile::ClearLastCcsdsOemMetaData(const std::string &comments)
+{
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ClearLastCcsdsOemMetaData() entered\n   comments='%s', "
+       "firstTimeMetaData=%d\n", comments.c_str(), firstTimeMetaData);
+   #endif
+   
+   //=================================================================
+   #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
+   //=================================================================
+   
+   // Go to beginning of the last meta data position
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("===> metaDataBegPosition=%ld, metaDataEndPosition=%ld\n",
+       (long)metaDataBegPosition, (long)metaDataEndPosition);
+   #endif
+   dstream.seekp(metaDataBegPosition, std::ios_base::beg);
+   
+   std::stringstream ss("");
+   ss << std::endl;
+   
+   if (comments != "")
+      WriteComments(comments);
+   
+   // Clear with blanks
+   long length = (long)metaDataEndPosition - (long)metaDataBegPosition;
+   for (long i = 0; i < length; i++)
+      ss << " ";
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage("   ==> Writing following META data:\n%s\n", ss.str().c_str());
+   #endif
+   
+   WriteString(ss.str());
+   
+   //=================================================================
+   #endif
+   //=================================================================
+   
+   // Is there a way to clear last meta data using CcsdsEphemerisFile?
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ClearLastCcsdsOemMetaData() leaving, firstTimeMetaData=%d\n",
+       firstTimeMetaData);
+   #endif
+
+}
+
+
+//------------------------------------------------------------------------------
 // void WriteCcsdsHeader()
 //------------------------------------------------------------------------------
 void EphemerisFile::WriteCcsdsHeader()
@@ -2843,9 +2936,10 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
 {
    #ifdef DEBUG_EPHEMFILE_CCSDS
    MessageInterface::ShowMessage
-      ("=====> WriteCcsdsOrbitDataSegment() entered, writeMetaDataOption=%d, "
-       "saveMetaDataStart=%d, firstTimeMetaData=%d, continuousSegment=%d\n",
-       writeMetaDataOption, saveMetaDataStart, firstTimeMetaData, continuousSegment);
+      ("=====> WriteCcsdsOrbitDataSegment() entered\n   writeMetaDataOption=%d, "
+       "saveMetaDataStart=%d, firstTimeMetaData=%d, continuousSegment=%d, "
+       "a1MjdArray.size()=%d\n", writeMetaDataOption, saveMetaDataStart, firstTimeMetaData,
+       continuousSegment, a1MjdArray.size());
    #endif
    
    if (a1MjdArray.empty())
@@ -2867,10 +2961,6 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
       return;
    }
    
-   //LOJ: 2012.01.25
-   // Made metaDataStart and metaDataStop member data
-   //Real metaDataStart = (a1MjdArray.front())->GetReal();
-   //Real metaDataStop  = (a1MjdArray.back())->GetReal();
    if (saveMetaDataStart)
    {
       metaDataStart = (a1MjdArray.front())->GetReal();
@@ -2892,8 +2982,7 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
    
    if (writeMetaDataOption == 2)
    {
-      //dstream.seekp(83);
-      dstream.seekp(metaDataPosition, std::ios_base::beg);
+      dstream.seekp(metaDataBegPosition, std::ios_base::beg);
       
       WriteCcsdsOemMetaData();
       firstTimeMetaData = false;
@@ -2926,15 +3015,17 @@ void EphemerisFile::WriteCcsdsOemMetaData()
       ("EphemerisFile::WriteCcsdsOemMetaData() entered, firstTimeMetaData=%d\n",
        firstTimeMetaData);
    #endif
-   
+
+   //=================================================================
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
+   //=================================================================
    
-   // save meta data position
-   metaDataPosition = dstream.tellp();
+   // Save meta data begin position
+   metaDataBegPosition = dstream.tellp();
    
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage
-      ("===> Setting metaDataPosition=%ld\n", (long)metaDataPosition);
+      ("===> Setting metaDataBegPosition=%ld\n", (long)metaDataBegPosition);
    #endif
    
    std::string origin = "UNKNOWN";
@@ -2973,15 +3064,22 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    
    WriteString(ss.str());
    
-   #else
+   // Save meta data end position
+   metaDataEndPosition = dstream.tellp();
    
-   #ifdef DEBUG_EPHEMFILE_METADATA
-   MessageInterface::ShowMessage("   ==> No META data is written out\n");
-   #endif
+   // //=================================================================
+   // #else
+   // //=================================================================
    
+   // #ifdef DEBUG_EPHEMFILE_METADATA
+   // MessageInterface::ShowMessage("   ==> No META data is written out\n");
+   // #endif
+   
+   //=================================================================
    #endif
-
-   //LOJ: Why calling WriteRealCcsdsOemMetaData() here and in WriteCcsdsOrbitDataSegment()?
+   //=================================================================
+   
+   // Write CCSDS OEM META using CcsdsEphemerisFile plugin
    WriteRealCcsdsOemMetaData();
    
    #ifdef DEBUG_EPHEMFILE_METADATA

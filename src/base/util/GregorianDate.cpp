@@ -25,6 +25,8 @@
 #include "MessageInterface.hpp"
 #include <algorithm>
 
+//#define DEBUG_GREGORIAN_VALIDATE 1
+
 //-------------------------------------
 // public methods
 //-------------------------------------
@@ -231,7 +233,6 @@ void GregorianDate::Initialize(const std::string &str)
    isValid = false;
 }
 
-
 //---------------------------------------------------------------------------
 //  void ParseOut(const std::string &str) 
 //---------------------------------------------------------------------------
@@ -242,7 +243,7 @@ void GregorianDate::Initialize(const std::string &str)
 void GregorianDate::ParseOut(const std::string &str) 
 {
    #if DEBUG_GREGORIAN_VALIDATE
-   //MessageInterface::ShowMessage("==> GregorianDate::ParseOut() str=%s\n", str.c_str());
+   MessageInterface::ShowMessage("GregorianDate::ParseOut() str=%s\n", str.c_str());
    #endif
    
    // Check if non-empty string then parse out; otherwise, nothing. 
@@ -335,14 +336,14 @@ void GregorianDate::ParseOut(const std::string &str)
                   "\nWarning: invalid Gregorian time for seconds format(SS.mmm)\n"); 
                return;
             }
-
+            
             // Get hour and minute
             Integer hour, minute;
             hour = ToInteger(timeToken.GetToken(0)); 
             minute = ToInteger(timeToken.GetToken(1)); 
-           
+            
             tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1);
-
+            
             // Finally start with seconds
             std::string strSeconds = timeToken.GetToken(2);
             timeToken.Set(strSeconds,"."); 
@@ -358,12 +359,12 @@ void GregorianDate::ParseOut(const std::string &str)
             }
             
             tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1);
-
+            
             // Get real number in seconds
             Real second = ToReal(strSeconds); 
-   #if DEBUG_GREGORIAN_VALIDATE
-            //MessageInterface::ShowMessage
-            //   ("==> GregorianDate::ParseOut() second=%.10f\n", second);
+            #if DEBUG_GREGORIAN_VALIDATE
+            MessageInterface::ShowMessage
+               ("GregorianDate::ParseOut() second=%.10f\n", second);
             #endif
             
             // Finally check validity for the date  

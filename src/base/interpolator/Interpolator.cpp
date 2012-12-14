@@ -380,3 +380,18 @@ Integer Interpolator::GetBufferSize()
 {
    return bufferSize;
 }
+
+
+//------------------------------------------------------------------------------
+//  Integer GetPointCount()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the pointCount parameter.
+ * 
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetPointCount()
+{
+   return pointCount;
+}

@@ -169,6 +169,7 @@ Integer LagrangeInterpolator::IsInterpolationFeasible(Real ind)
    // If not enough data points, throw an exception
    if (pointCount < requiredPoints)
    {
+      // Just return error code so that caller can handle it (LOJ: 2012.12.12)
       #if 0
       InterpolatorException ie;
       ie.SetDetails
@@ -198,6 +199,7 @@ Integer LagrangeInterpolator::IsInterpolationFeasible(Real ind)
    
    if (ind < range[0])
    {
+      // Just return error code so that caller can handle it (LOJ: 2012.12.12)
       #if 0
       InterpolatorException ie;
       ie.SetDetails
@@ -219,6 +221,7 @@ Integer LagrangeInterpolator::IsInterpolationFeasible(Real ind)
    // If independent data not within the range, throw an exception
    if (ind > range[1])
    {
+      // Just return error code so that caller can handle it (LOJ: 2012.12.12)
       #if 0
       InterpolatorException ie;
       ie.SetDetails
@@ -599,7 +602,6 @@ void LagrangeInterpolator::UpdateBeginAndEndIndex(Real ind)
    }
    
    dataIndex = dataIndex - 1;
-   bool retval = false;
    Integer begin = dataIndex - (order/2);
    Integer end = dataIndex + (order/2);
    

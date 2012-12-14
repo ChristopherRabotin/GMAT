@@ -1,4 +1,4 @@
-//$Id:  $
+//$Id$
 //------------------------------------------------------------------------------
 //                              CalculationUtilities
 //------------------------------------------------------------------------------
@@ -156,29 +156,33 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 
                                         const Real &originMu, const Rvector3 &originToSunUnit)
 {
    #ifdef DEBUG_ANGULAR_DATA
-      MessageInterface::ShowMessage("Entering CalculateAngularData with item = %s, state = %s, originMu = %12.10f\n",
-            item.c_str(), state.ToString().c_str(), originMu);
+   MessageInterface::ShowMessage
+      ("Entering CalculateAngularData with item = %s, originMu = %12.10f\n   state = %s   "
+       "originToSunUnit = %s", item.c_str(), originMu, state.ToString().c_str(),
+       originToSunUnit.ToString().c_str());
    #endif
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
-
+   
    Rvector3 hVec3 = Cross(pos, vel);
-   Real     h     = Sqrt(hVec3 * hVec3);
-
+   // Changed to sue GetMagnitude() (LOJ: 2012.10.23)
+   //Real     hMag  = Sqrt(hVec3 * hVec3);
+   Real     hMag  = hVec3.GetMagnitude();
+   
    #ifdef DEBUG_ANGULAR_DATA
-      MessageInterface::ShowMessage("... pos = %s, vel = %s, hVec3 = %s, h = %12.10f\n",
-            pos.ToString().c_str(), vel.ToString().c_str(), hVec3.ToString().c_str(), h);
+      MessageInterface::ShowMessage("   pos = %s   vel = %s   hVec3 = %s   hMag = %12.10f\n",
+            pos.ToString().c_str(), vel.ToString().c_str(), hVec3.ToString().c_str(), hMag);
    #endif
    if (item == "SemilatusRectum")
    {
-      if (h < GmatOrbitConstants::KEP_TOL)
+      if (hMag < GmatOrbitConstants::KEP_TOL)
          return 0.0;
       else
-         return (h / originMu) * h;
+         return (hMag / originMu) * hMag;
    }
    else if (item == "HMag")
    {
-      return h;
+      return hMag;
    }
    else if (item == "HX")
    {
@@ -195,8 +199,14 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 
    else if (item == "BetaAngle")
    {
       hVec3.Normalize();
-      Real betaAngle = ASin(hVec3*originToSunUnit) * GmatMathConstants::DEG_PER_RAD;
-      return betaAngle;
+      Real betaAngleRad = ASin(hVec3*originToSunUnit);
+      Real betaAngleDeg = betaAngleRad * GmatMathConstants::DEG_PER_RAD;
+      #ifdef DEBUG_ANGULAR_DATA
+      MessageInterface::ShowMessage
+         ("   hVec3Unit = %s   betaAngleRad = %.12f, betaAngleDeg = %.12f\n",
+          hVec3.ToString().c_str(), betaAngleRad, betaAngleDeg);
+      #endif
+      return betaAngleDeg;
    }
    else if ((item == "RLA") || (item == "DLA"))
    {
@@ -207,14 +217,15 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 
       Real     ecc   = e.GetMagnitude();
       if (Abs(ecc) < 1.0 + GmatOrbitConstants::KEP_ECC_TOL)
          return GmatMathConstants::QUIET_NAN;
-
+      
+      // It is already computed above, so commented out (LOJ: 2012.10.23)
       // Compute orbit normal unit vector
-      Rvector3 hVec3 = Cross(pos, vel);
-      Real     h     = hVec3.GetMagnitude();
-
+      //Rvector3 hVec3 = Cross(pos, vel);
+      //Real     hMag  = hVec3.GetMagnitude();
+      
       // Compute C3
       Real     C3    = v * v - (2.0 * originMu) / r;
-      Real     s_1   = 1.0 / (1.0 + C3 * (h / originMu) * (h / originMu));
+      Real     s_1   = 1.0 / (1.0 + C3 * (hMag / originMu) * (hMag / originMu));
       Rvector3 s     = s_1 * ((Sqrt(C3) / originMu) * Cross(hVec3, e) - e);
       if (item == "RLA")
          return ATan2(s[1], s[0]) * GmatMathConstants::DEG_PER_RAD;
