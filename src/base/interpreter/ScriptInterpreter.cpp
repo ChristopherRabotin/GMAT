@@ -645,7 +645,7 @@ bool ScriptInterpreter::ReadFirstPass()
          ("     %d: %s\n", lineNumbers[i], controlLines[i].c_str());
    #endif
    
-   // Check for unbalaced branch command Begin/End
+   // Check for unbalanced branch command Begin/End
    bool retval = CheckBranchCommands(lineNumbers, controlLines);
    
    #ifdef DEBUG_READ_FIRST_PASS
