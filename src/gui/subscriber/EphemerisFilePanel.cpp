@@ -656,7 +656,9 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
    {
       valueString = interpolationOrderTextCtrl->GetValue().c_str();
       if (CheckInteger(valueInteger, valueString, "InterpolationOrder",
-                       "Integer Number > 0.0", false, true, true, false))
+                       // Turned off range checking to false so thae base code can check it (LOJ: 2012.12.14)
+                       //"Integer Number > 0.0", false, true, true, false)) 
+                       "Integer Number > 0.0", false, false, true, false))
          clonedObj->SetIntegerParameter(paramId, valueInteger);
    }
    else if (label == "StepSize")
