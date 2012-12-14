@@ -436,15 +436,7 @@ void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
    if (!CanPaste())
       return;
    
-   #ifdef __WXMSW__
-   // Set EOL mode to wxSTC_EOL_CRLF to make sure endings are correct
-   int m = GetEOLMode();
-   SetEOLMode(wxSTC_EOL_CRLF);
    Paste();
-   SetEOLMode(m);
-   #else
-   Paste();
-   #endif
 }
 
 
@@ -1626,7 +1618,13 @@ bool Editor::SaveFile()
  */
 bool Editor::SaveFile(const wxString &filename)
 {
-	return wxStyledTextCtrl::SaveFile(filename);
+   #ifdef __WXMSW__
+   // Convert line endings to wxSTC_EOL_CRLF to make sure endings are correct
+   ConvertEOLs(wxSTC_EOL_CRLF);
+   #else
+   ConvertEOLs(wxSTC_EOL_LF);
+   #endif
+   return wxStyledTextCtrl::SaveFile(filename);
 }
 
 
