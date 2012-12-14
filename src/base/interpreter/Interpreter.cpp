@@ -7520,7 +7520,8 @@ bool Interpreter::IsBranchCommand(const std::string &str)
        parts[0] == "While" || parts[0] == "EndWhile" ||
        parts[0] == "Target" || parts[0] == "EndTarget" ||
        parts[0] == "Optimize" || parts[0] == "EndOptimize" ||
-       parts[0] == "BeginScript" || parts[0] == "EndScript")
+       parts[0] == "BeginScript" || parts[0] == "EndScript" ||
+       parts[0] == "Else")
       return true;
    else
       return false;
@@ -7547,12 +7548,13 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
       MessageInterface::ShowMessage("%d: %s\n", lineNumbers[i], lines[i].c_str());
    #endif
    
-   // Check for unbalaced branch commands
+   // Check for unbalanced branch commands
    
    debugMsg = "In CheckBranchCommands()";
    std::stack<std::string> controlStack;
    std::string expEndStr, str, str1;
    bool retval = true;
+   bool elseIsOk = true;
    
    #ifdef DEBUG_CHECK_BRANCH
    MessageInterface::ShowMessage("   Now start checking\n");
@@ -7586,6 +7588,52 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
             expEndStr = "End" + str1;
          
          if (expEndStr != str)
+         {
+            InterpreterException ex;
+            if ((str1 == "If") && (elseIsOk))
+            {
+               ex.SetDetails(
+                  "Expecting \"Else\" or \"EndIf\" but found \"" + str + "\"");
+            }
+            else
+            {
+               ex.SetDetails(
+                  "Expecting \"" + expEndStr + "\" but found \"" + str + "\"");
+            }
+            HandleErrorMessage(ex, GmatStringUtil::ToString(lineNumbers[i]), str);
+            retval = false;
+            break;
+         }
+         if (str1 == "If")
+            elseIsOk = true;  // Else is OK to find in the next If/EndIf
+      }
+      else if (GmatStringUtil::StartsWith(str, "Else"))
+      {
+         if (controlStack.empty())
+         {
+            InterpreterException ex("Found \"Else\" without corresponding \"If\"");
+            HandleErrorMessage(ex, GmatStringUtil::ToString(lineNumbers[i]), str);
+            retval = false;
+            break;
+         }
+
+         str1 = controlStack.top();
+         // don't pop If off because we still need it for checking against the EndIf
+         if (str1 != "If")
+         {
+            controlStack.pop();
+         }
+         else
+         {
+            elseIsOk = false;
+         }
+
+         if (str1 == "BeginScript")
+            expEndStr = "EndScript";
+         else
+            expEndStr = "End" + str1;
+
+         if (expEndStr != "EndIf")
          {
             InterpreterException ex
                ("Expecting \"" + expEndStr + "\" but found \"" + str + "\"");
