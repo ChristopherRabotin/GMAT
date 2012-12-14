@@ -516,6 +516,14 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             GmatGlobal::Instance()->SetWriteParameterInfo(true);
          }
       }
+      else if (type == "WRITE_GMAT_KEYWORD")
+      {
+         if (name == "OFF")
+         {
+            mWriteGmatKeyword = name;
+            GmatGlobal::Instance()->SetWriteGmatKeyword(false);
+         }
+      }
       else
       {
          // Ignore old VERSION specification (2011.03.18)
@@ -684,6 +692,22 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    
    if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
        mDebugMatlab != "" || mDebugMissionTree != "" || mWriteParameterInfo != "")
+      outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write WRITE_GMAT_KEYWORD if not blank
+   //---------------------------------------------
+   if (mWriteGmatKeyword != "")
+   {
+      #ifdef DEBUG_WRITE_STARTUP_FILE
+      MessageInterface::ShowMessage("   .....Writing PARAMETER_INFO\n");
+      #endif
+      outStream << std::setw(22) << "WRITE_GMAT_KEYWORD" << " = " << mWriteGmatKeyword << "\n";
+   }
+   
+   if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
+       mDebugMatlab != "" || mDebugMissionTree != "" || mWriteParameterInfo != "" ||
+       mWriteGmatKeyword != "" )
       outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
@@ -2078,6 +2102,7 @@ void FileManager::RefreshFiles()
    mDebugMatlab = "";
    mDebugMissionTree = "";
    mWriteParameterInfo = "";
+   mWriteGmatKeyword = "";
    mPathMap.clear();
    mGmatFunctionPaths.clear();
    mMatlabFunctionPaths.clear();

@@ -23,8 +23,9 @@
 #include "ParameterException.hpp"
 #include "ExpressionParser.hpp"
 #include "MessageInterface.hpp"
-#include "Linear.hpp"             // for ToString()
-#include "StringUtil.hpp"         // for Replace()
+#include "Linear.hpp"              // for ToString()
+#include "StringUtil.hpp"          // for Replace()
+#include "GmatGlobal.hpp"          // for IsWritingGmatKeyword()
 #include <sstream>
 
 //#define DEBUG_VARIABLE_SET
@@ -600,12 +601,13 @@ const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
    {
       //generatingString = "GMAT " + GetName() + " = " + mExpr + ";";
       //generatingString = "GMAT " + GetName() + " = " + mInitialValue + ";";
-      // We no longer write out GMAT prefix (see GMT-3233)
-      #ifdef __WRITE_GMAT_PREFIX__
-      generatingString = "GMAT " + GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
-      #else
-      generatingString = GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
-      #endif
+      bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
+      // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+      if (writeGmatKeyword)
+         generatingString = "GMAT " + GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
+      else
+         generatingString = GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
+      
       generatingString = generatingString + inlineComment + "\n";
    }
    

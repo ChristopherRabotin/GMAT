@@ -117,6 +117,10 @@ public:
    // Debug Parameters
    bool IsWritingParameterInfo();
    void SetWriteParameterInfo(bool flag);
+
+   // Write GMAT keyword when saving to script or showing script
+   bool IsWritingGmatKeyword();
+   void SetWriteGmatKeyword(bool flag);
    
    void SetEventLocationAvailable(bool flag);
    bool IsEventLocationAvailable();
@@ -232,6 +236,7 @@ private:
    bool isMatlabDebugOn;
    bool isMissionTreeDebugOn;
    bool isWritingParameterInfo;
+   bool isWritingGmatKeyword;
    
    bool isEventLocationAvailable;
 

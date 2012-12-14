@@ -23,6 +23,7 @@
 #include "Array.hpp"
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"          // for SeparateBy(), GetArrayIndexVar()
+#include "GmatGlobal.hpp"          // for IsWritingGmatKeyword()
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -917,6 +918,7 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    std::stringstream data;
+   bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
    
    // Crank up data precision so we don't lose anything
    data.precision(GetDataPrecision()); 
@@ -944,12 +946,11 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
       data << "Create " << tname << " " << nomme 
            << "[" << mNumRows << "," << mNumCols << "];\n";
       
-      // We no longer write out GMAT prefix (see GMT-3233)
-      #ifdef __WRITE_GMAT_PREFIX__
-      preface = "GMAT ";
-      #else
-      preface = "";
-      #endif
+      // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+      if (writeGmatKeyword)
+         preface = "GMAT ";
+      else
+         preface = "";
    }
    
    nomme += ".";
@@ -1007,6 +1008,7 @@ std::string Array::GetInitialValueString(const std::string &prefix)
    #endif
    
    std::stringstream data;
+   bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
    
    Integer row = GetIntegerParameter("NumRows");
    Integer col = GetIntegerParameter("NumCols");
@@ -1028,14 +1030,13 @@ std::string Array::GetInitialValueString(const std::string &prefix)
             //========================================================
             
             // This writes out actual value
-            // We no longer write out GMAT prefix (see GMT-3233)
-            #ifdef __WRITE_GMAT_PREFIX__
-            data << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
-               ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
-            #else
-            data << instanceName << "(" << i+1 << ", " << j+1 <<
-               ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
-            #endif
+            // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+            if (writeGmatKeyword)
+               data << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+                  ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
+            else
+               data << instanceName << "(" << i+1 << ", " << j+1 <<
+                  ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
             data << GetInlineComment() + "\n";
             
             //========================================================
@@ -1074,12 +1075,11 @@ std::string Array::GetInitialValueString(const std::string &prefix)
             
             if (writeData)
             {
-               // We no longer write out GMAT prefix (see GMT-3233)
-               #ifdef __WRITE_GMAT_PREFIX__
-               data << prefix << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
-               #else
-               data << prefix << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
-               #endif
+               // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+               if (writeGmatKeyword)
+                  data << prefix << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
+               else
+                  data << prefix << instanceName << "(" << i+1 << ", " << j+1 << ") = " << initialVal;
                data << GetInlineComment() + "\n";
             }
             

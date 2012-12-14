@@ -369,6 +369,22 @@ void GmatGlobal::SetWriteParameterInfo(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool IsWritingGmatKeyword()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsWritingGmatKeyword()
+{
+   return isWritingGmatKeyword;
+}
+
+//------------------------------------------------------------------------------
+// void SetWriteGmatKeyword(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetWriteGmatKeyword(bool flag)
+{
+   isWritingGmatKeyword = flag;
+}
+
+//------------------------------------------------------------------------------
 // bool IsScientific()
 //------------------------------------------------------------------------------
 bool GmatGlobal::IsScientific()
@@ -659,6 +675,7 @@ GmatGlobal::GmatGlobal()
    isEventLocationAvailable = false;
    isMissionTreeDebugOn = false;
    isWritingParameterInfo = false;
+   isWritingGmatKeyword = true;
    runMode = NORMAL;
    guiMode = NORMAL_GUI;
    plotMode = NORMAL_PLOT;

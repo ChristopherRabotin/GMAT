@@ -37,7 +37,7 @@
 
 
 #include "GmatBase.hpp"
-#include "GmatGlobal.hpp"  // for GetDataPrecision()
+#include "GmatGlobal.hpp"  // for GetDataPrecision(), IsWritingGmatKeyword()
 #include <sstream>         // for StringStream
 #include "StringUtil.hpp"
 
@@ -3410,7 +3410,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    std::stringstream data;
-
+   bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
+   
    data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
@@ -3446,12 +3447,11 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
             data << "Create " << tname << " " << nomme << ";\n";
          else
             data << "";
-         // We no longer write out GMAT prefix (see GMT-3233)
-         #ifdef __WRITE_GMAT_PREFIX__
-         preface = "GMAT ";
-         #else
-         preface = "";
-         #endif
+         // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+         if (writeGmatKeyword)
+            preface = "GMAT ";
+         else
+            preface = "";
       }
       else
       {
@@ -3481,15 +3481,14 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
             data << "\n";
          }
          
-         // We no longer write out GMAT prefix (see GMT-3233)
-         #ifdef __WRITE_GMAT_PREFIX__
-         preface = "GMAT ";
-         #else
-         preface = "";
-         #endif
+         // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+         if (writeGmatKeyword)
+            preface = "GMAT ";
+         else
+            preface = "";
       }
    }
-
+   
    nomme += ".";
 
    if (mode == Gmat::OWNED_OBJECT) 
@@ -4148,6 +4147,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
    Integer precision = GmatGlobal::Instance()->GetDataPrecision();
+   bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
    
    #ifdef DEBUG_WRITE_PARAM
    MessageInterface::ShowMessage
@@ -4248,14 +4248,13 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
             {
                if (GetRealParameter(id, i, j) != 0.0)
                {
-                  // We no longer write out GMAT prefix (see GMT-3233)
-                  #ifdef __WRITE_GMAT_PREFIX__
-                  stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
-                     ") = " << GetRealParameter(id, i, j) << ";\n";
-                  #else
-                  stream << instanceName << "(" << i+1 << ", " << j+1 <<
-                     ") = " << GetRealParameter(id, i, j) << ";\n";
-                  #endif
+                  // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+                  if (writeGmatKeyword)
+                     stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+                        ") = " << GetRealParameter(id, i, j) << ";\n";
+                  else
+                     stream << instanceName << "(" << i+1 << ", " << j+1 <<
+                        ") = " << GetRealParameter(id, i, j) << ";\n";
                }
             }
          }

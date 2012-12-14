@@ -38,6 +38,7 @@
 #include "FunctionManager.hpp"
 #include "MessageInterface.hpp"
 #include "ObjectPropertyWrapper.hpp"
+#include "GmatGlobal.hpp"               // for IsWritingGmatKeyword()
 
 //#define DEBUG_RENAME
 //#define DEBUG_EVAL_RHS
@@ -1775,12 +1776,13 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
       return generatingString;
    }
    
-   // We no longer write out GMAT prefix (see GMT-3233)
-   #ifdef __WRITE_GMAT_PREFIX__
-   std::string gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
-   #else
-   std::string gen = prefix + lhs + " = " + rhs + ";";
-   #endif
+   std::string gen;
+   bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
+   // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+   if (writeGmatKeyword)
+      gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
+   else
+      gen = prefix + lhs + " = " + rhs + ";";
    
    #ifdef DEBUG_ASSIGNMENT_SCRIPTING
    MessageInterface::ShowMessage("Assignment command generator is \"%s\"\n",

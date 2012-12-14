@@ -25,6 +25,7 @@
 #include "FileUtil.hpp"            // for ParseFileName()
 #include "FileManager.hpp"         // for GetAllMatlabFunctionPaths()
 #include "MessageInterface.hpp"
+#include "GmatGlobal.hpp"          // for IsWritingGmatKeyword()
 #include <sstream>
 
 
@@ -428,12 +429,12 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    // Build the local string
    if (mode != Gmat::NO_COMMENTS)
    {
-      // We no longer write out GMAT prefix (see GMT-3233)
-      #ifdef __WRITE_GMAT_PREFIX__
-      gen = prefix + "GMAT ";
-      #else
-      gen = prefix;
-      #endif
+      bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
+      // We now write out GMAT prefix on option from the startup file (see GMT-3233)
+      if (writeGmatKeyword)
+         gen = prefix + "GMAT ";
+      else
+         gen = prefix;
    }
    
    if (mOutputNames.size() > 0)
