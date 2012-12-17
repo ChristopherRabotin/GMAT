@@ -243,6 +243,9 @@ public:
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
+   virtual void         UpdateClonedObjectParameter(GmatBase *obj,
+                                                    Integer updatedParameterId);
+
 
    // Interface added for the C Interface to force epoch updates
    bool                 SetEpoch(const GmatEpoch newEpoch); 

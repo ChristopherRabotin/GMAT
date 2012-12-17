@@ -3851,7 +3851,8 @@ void GmatBase::CopyParameters(const GmatBase &a)
    bool bVal;
    Gmat::ParameterType parmType;
 
-   for (i = 0; i < parameterCount; ++i) {
+   for (i = 0; i < parameterCount; ++i)
+   {
       parmType = a.GetParameterType(i);
 
       if (parmType == Gmat::REAL_TYPE)
@@ -3879,6 +3880,57 @@ void GmatBase::CopyParameters(const GmatBase &a)
       }
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void CopyParameter(const GmatBase&fromObject, const Integer forParameter)
+//------------------------------------------------------------------------------
+/**
+ * Sets an internal parameter value to match the input object's setting
+ *
+ * @param fromObject The input object
+ * @param forParameter The ID of the parameter
+ */
+//------------------------------------------------------------------------------
+void GmatBase::CopyParameter(const GmatBase& fromObject,
+      const Integer forParameter)
+{
+
+   if (fromObject.GetType() != type)
+      throw GmatBaseException("In GmatBase::CopyParameter, the input object "
+            "type must exactly match the object receiving the call, but the "
+            "call was sent to a " + typeName + "(" + instanceName +
+            ") with an input object of type " +
+            fromObject.GetTypeName() + " named " +
+            fromObject.GetName());
+
+   Gmat::ParameterType parmType = fromObject.GetParameterType(forParameter);
+
+   if (parmType == Gmat::REAL_TYPE)
+   {
+      Real rVal = fromObject.GetRealParameter(forParameter);
+      SetRealParameter(forParameter, rVal);
+   }
+
+   if (parmType == Gmat::INTEGER_TYPE)
+   {
+      Integer iVal = fromObject.GetIntegerParameter(forParameter);
+      SetIntegerParameter(forParameter, iVal);
+   }
+
+   if ((parmType == Gmat::STRING_TYPE) || (parmType == Gmat::FILENAME_TYPE))
+   {
+      std::string sVal = fromObject.GetStringParameter(forParameter);
+      SetStringParameter(forParameter, sVal);
+   }
+
+   if (parmType == Gmat::BOOLEAN_TYPE)
+   {
+      bool bVal = fromObject.GetBooleanParameter(forParameter);
+      SetBooleanParameter(forParameter, bVal);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void WriteParameters(Gmat::WriteMode mode, std::string &prefix,
@@ -4377,6 +4429,24 @@ void GmatBase::UpdateClonedObject(GmatBase *obj)
 {
    MessageInterface::ShowMessage("UpdateClonedObject called in GmatBase; does "
          "the override exist in the %s class?\n", typeName.c_str());
+}
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void GmatBase::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+   MessageInterface::ShowMessage("UpdateClonedObjectParameter called in "
+         "GmatBase; does the override exist in the %s class?\n",
+         typeName.c_str());
 }
 
 

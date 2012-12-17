@@ -50,7 +50,6 @@
 //#define DEBUG_SS_CLONING
 //#define DEBUG_EVENTLOCATION
 //#define DEBUG_CLONE_UPDATES
-
 //#define REPORT_CLONE_UPDATE_STATUS
 
 //#ifndef DEBUG_MEMORY
@@ -814,6 +813,7 @@ bool Sandbox::Execute()
    #endif
    
    bool rv = true;
+   Integer cloneIndex;
 
    state = RUNNING;
    Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
@@ -882,6 +882,14 @@ bool Sandbox::Execute()
          {
             // Manage owned clones
             GmatBase *obj = current->GetUpdatedObject();
+            cloneIndex = current->GetUpdatedObjectParameterIndex();
+
+            #ifdef DEBUG_CLONE_UPDATES
+               if (obj && (cloneIndex >= 0))
+                  MessageInterface::ShowMessage("   Index %d is for %s\n",
+                        cloneIndex, obj->GetParameterText(cloneIndex).c_str());
+            #endif
+
             if (obj != NULL)
             {
                if (obj->BlockCommandModeAssignment())
@@ -891,6 +899,8 @@ bool Sandbox::Execute()
                         current->GetGeneratingString(Gmat::NO_COMMENTS));
             }
          }
+         else
+            cloneIndex = -1;
 
          rv = current->Execute();
          
@@ -912,11 +922,12 @@ bool Sandbox::Execute()
          {
             // Manage owned clones
             GmatBase *obj = current->GetUpdatedObject();
+
             if (obj != NULL)
             {
                runMode retState = state;
                state = REFRESH;
-               UpdateClones(obj);
+               UpdateClones(obj, cloneIndex);
                state = retState;
 
                if (obj->IsInitialized() == false)
@@ -1574,25 +1585,26 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
 
 
 //------------------------------------------------------------------------------
-// void UpdateClones(GmatBase *obj)
+// void UpdateClones(GmatBase *obj, Integer updatedParameterIndex)
 //------------------------------------------------------------------------------
 /**
  * Entry method for updates to owned clone objects
  *
  * @param obj The updates object that needs to pass parameters to owned clones,
  *            if there are any
+ * @param updatedParameterIndex The index of the parameter that was updated
  */
 //------------------------------------------------------------------------------
-void Sandbox::UpdateClones(GmatBase *obj)
+void Sandbox::UpdateClones(GmatBase *obj, Integer updatedParameterIndex)
 {
    switch (cloneUpdateStyle)
    {
       case PASS_TO_ALL:
-         PassToAll(obj);
+         PassToAll(obj, updatedParameterIndex);
          break;
 
       case PASS_TO_REGISTERED:
-         PassToRegisteredClones(obj);
+         PassToRegisteredClones(obj, updatedParameterIndex);
          break;
 
       case SKIP_UPDATES:
@@ -1612,16 +1624,17 @@ void Sandbox::UpdateClones(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// void PassToAll(GmatBase *obj)
+// void PassToAll(GmatBase *obj, Integer updatedParameterIndex)
 //------------------------------------------------------------------------------
 /**
  * Brute force method for updating owned clones
  *
  * @param obj The updates object that needs to pass parameters to owned clones,
  *            if there are any
+ * @param updatedParameterIndex The index of the parameter that was updated
  */
 //------------------------------------------------------------------------------
-void Sandbox::PassToAll(GmatBase *obj)
+void Sandbox::PassToAll(GmatBase *obj, Integer updatedParameterIndex)
 {
    #ifdef REPORT_CLONE_UPDATE_STATUS
       MessageInterface::ShowMessage("Clone update requested for %s; "
@@ -1649,7 +1662,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       #endif
 
       if (listObj->HasLocalClones())
-         UpdateAndInitializeCloneOwner(obj, listObj);
+         UpdateAndInitializeCloneOwner(obj, listObj, updatedParameterIndex);
 
       ++current;
    }
@@ -1673,7 +1686,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       #endif
 
       if (listObj->HasLocalClones())
-         UpdateAndInitializeCloneOwner(obj, listObj);
+         UpdateAndInitializeCloneOwner(obj, listObj, updatedParameterIndex);
 
       ++current;
    }
@@ -1694,11 +1707,12 @@ void Sandbox::PassToAll(GmatBase *obj)
                "has local clones" : "has no local clones"));
       #endif
       if (currentCmd->HasLocalClones())
-         UpdateAndInitializeCloneOwner(obj, currentCmd);
+         UpdateAndInitializeCloneOwner(obj, currentCmd, updatedParameterIndex);
 
       if (currentCmd->IsOfType("BranchCommand"))
       {
-         PassToBranchCommand(obj, (BranchCommand*)currentCmd);
+         PassToBranchCommand(obj, (BranchCommand*)currentCmd,
+               updatedParameterIndex);
          currentCmd = ((BranchCommand*)currentCmd)->GetNextWhileExecuting();
       }
       else
@@ -1708,16 +1722,18 @@ void Sandbox::PassToAll(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// void PassToRegisteredClones(GmatBase *obj)
+// void PassToRegisteredClones(GmatBase *obj, Integer updatedParameterIndex)
 //------------------------------------------------------------------------------
 /**
  * Owned clone update method that only updates registered clones
  *
  * @param obj The updated object that needs to pass parameters to owned clones,
  *            if there are any
+ * @param updatedParameterIndex The index of the parameter that was updated
  */
 //------------------------------------------------------------------------------
-void Sandbox::PassToRegisteredClones(GmatBase *obj)
+void Sandbox::PassToRegisteredClones(GmatBase *obj,
+      Integer updatedParameterIndex)
 {
    #ifdef REPORT_CLONE_UPDATE_STATUS
       MessageInterface::ShowMessage("Clone update requested for %s; "
@@ -1729,7 +1745,8 @@ void Sandbox::PassToRegisteredClones(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// void PassToBranchCommand(GmatBase *theClone, GmatCommand* theBranchCommand)
+// void PassToBranchCommand(GmatBase *theClone, GmatCommand* theBranchCommand,
+//       Integer updatedParameterIndex)
 //------------------------------------------------------------------------------
 /**
  * Passes potential owned clones into branch command branches.
@@ -1739,10 +1756,11 @@ void Sandbox::PassToRegisteredClones(GmatBase *obj)
  * @param theClone The object that may be an owned clone
  * @param theBranchCommand The branch command that that manages the branch
  *                         control sequence
+ * @param updatedParameterIndex The index of the parameter that was updated
  */
 //------------------------------------------------------------------------------
 void Sandbox::PassToBranchCommand(GmatBase *theClone,
-                                  BranchCommand* theBranchCommand)
+      BranchCommand* theBranchCommand, Integer updatedParameterIndex)
 {
    #ifdef DEBUG_CLONE_UPDATES
       MessageInterface::ShowMessage("Clone management for a %s branch "
@@ -1762,7 +1780,7 @@ void Sandbox::PassToBranchCommand(GmatBase *theClone,
                   "command\n", branch, cmd->GetTypeName().c_str());
          #endif
          if (cmd->HasLocalClones())
-            UpdateAndInitializeCloneOwner(theClone, cmd);
+            UpdateAndInitializeCloneOwner(theClone, cmd, updatedParameterIndex);
 
          if ((cmd->IsOfType("BranchCommand")) && (cmd != theBranchCommand))
          {
@@ -1770,7 +1788,8 @@ void Sandbox::PassToBranchCommand(GmatBase *theClone,
                MessageInterface::ShowMessage("Nesting PassToBranchCommands; "
                      "passing %p from %p\n", cmd, this);
             #endif
-            PassToBranchCommand(theClone, (BranchCommand*)cmd);
+            PassToBranchCommand(theClone, (BranchCommand*)cmd,
+                  updatedParameterIndex);
          }
 
          if (cmd->IsOfType("BranchCommand"))
@@ -1783,7 +1802,6 @@ void Sandbox::PassToBranchCommand(GmatBase *theClone,
 }
 
 
-
 //------------------------------------------------------------------------------
 // void UpdateAndInitializeCloneOwner(GmatBase *theClone, GmatBase* theOwner)
 //------------------------------------------------------------------------------
@@ -1792,40 +1810,55 @@ void Sandbox::PassToBranchCommand(GmatBase *theClone,
  *
  * @param theClone The object that may affect an owned clone
  * @param theOwner The object that might own the clone
+ * @param updatedParameterIndex The index of the parameter that was updated
  */
 //------------------------------------------------------------------------------
 void Sandbox::UpdateAndInitializeCloneOwner(GmatBase *theClone,
-         GmatBase* theOwner)
+         GmatBase* theOwner, Integer updatedParameterIndex)
 {
    bool incomingInitState = theOwner->IsInitialized();
 
-   theOwner->UpdateClonedObject(theClone);
-
-   if ((theOwner->IsInitialized() == false) && incomingInitState)
+   if (updatedParameterIndex >= 0)
    {
       #ifdef DEBUG_CLONE_UPDATES
          MessageInterface::ShowMessage("In Sandbox::UpdateAndInitializeClone"
-               "Owner(%s, %s), %s must be reinitialized\n",
+               "Owner(%s, %s, %d), %s may not need reinitialization\n",
                theClone->GetName().c_str(), theOwner->GetName().c_str(),
-               theOwner->GetName().c_str());
+               updatedParameterIndex, theOwner->GetName().c_str());
       #endif
 
-      ObjectInitializer *objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap,
-               internalCoordSys, true);
-      objInit->BuildReferences(theOwner);
-      objInit->BuildAssociations(theOwner);
-      delete objInit;
+      theOwner->UpdateClonedObjectParameter(theClone, updatedParameterIndex);
+   }
+   else
+   {
+      theOwner->UpdateClonedObject(theClone);
 
-      #ifdef DEBUG_CLONE_UPDATES
-         bool retval =
-      #endif
+      if ((theOwner->IsInitialized() == false) && incomingInitState)
+      {
+         #ifdef DEBUG_CLONE_UPDATES
+            MessageInterface::ShowMessage("In Sandbox::UpdateAndInitializeClone"
+                  "Owner(%s, %s, %d), %s must be reinitialized\n",
+                  theClone->GetName().c_str(), theOwner->GetName().c_str(),
+                  updatedParameterIndex, theOwner->GetName().c_str());
+         #endif
 
-      theOwner->Initialize();
+         ObjectInitializer *objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap,
+                  internalCoordSys, true);
+         objInit->BuildReferences(theOwner);
+         objInit->BuildAssociations(theOwner);
+         delete objInit;
 
-      #ifdef DEBUG_CLONE_UPDATES
-         if (retval == false)
-            MessageInterface::ShowMessage("%s needs initialization, but "
-                  "initialization fails\n", theOwner->GetName().c_str());
-      #endif
+         #ifdef DEBUG_CLONE_UPDATES
+            bool retval =
+         #endif
+
+         theOwner->Initialize();
+
+         #ifdef DEBUG_CLONE_UPDATES
+            if (retval == false)
+               MessageInterface::ShowMessage("%s needs initialization, but "
+                     "initialization fails\n", theOwner->GetName().c_str());
+         #endif
+      }
    }
 }

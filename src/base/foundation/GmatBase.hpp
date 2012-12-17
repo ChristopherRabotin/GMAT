@@ -460,7 +460,10 @@ public:
    // Cloned object update management
    virtual bool HasLocalClones() = 0;
    virtual void UpdateClonedObject(GmatBase *obj);
+   virtual void UpdateClonedObjectParameter(GmatBase *obj,
+         Integer updatedParameterId);
    bool BlockCommandModeAssignment();
+   void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
 
 protected:
    /// Parameter IDs

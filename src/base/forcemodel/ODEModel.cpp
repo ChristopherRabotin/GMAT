@@ -3741,6 +3741,10 @@ bool ODEModel::HasLocalClones()
  * Updates cloned objects that are copies of the object passed in
  *
  * @param obj The object with setting updates
+ *
+ * @note: This code currently does nothing.  If the code is set to make changes,
+ *        there may be matching needs in ODEModel::UpdateClonedObjectParameter(
+ *           GmatBase *obj, Integer updatedParameterId).
  */
 //------------------------------------------------------------------------------
 void ODEModel::UpdateClonedObject(GmatBase *obj)
@@ -3756,6 +3760,27 @@ void ODEModel::UpdateClonedObject(GmatBase *obj)
 //            "cloning issue: Check cloned coordinate systems passed into the "
 //            "ODE model for local clones in the member forces\n");
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ *
+ * @note: This code currently does nothing, but is in place as a partner to
+ *        ODEModel::UpdateClonedObject(GmatBase *obj).  If that code is set to
+ *        make changes, there may be matching needs here.
+ */
+//------------------------------------------------------------------------------
+void ODEModel::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+
 }
 
 

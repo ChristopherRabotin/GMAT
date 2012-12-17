@@ -208,7 +208,8 @@ public:
    // Cloned object update management
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
-
+   virtual void UpdateClonedObjectParameter(GmatBase *obj,
+         Integer updatedParameterId);
 
 protected:
    enum SC_Param_ID

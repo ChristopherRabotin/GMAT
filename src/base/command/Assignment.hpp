@@ -92,6 +92,7 @@ public:
 
    virtual bool         AffectsClones();
    virtual GmatBase*    GetUpdatedObject();
+   virtual Integer      GetUpdatedObjectParameterIndex();
 
    DEFAULT_TO_NO_CLONES
 

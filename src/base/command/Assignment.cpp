@@ -1077,7 +1077,7 @@ bool Assignment::Execute()
    #ifdef DEBUG_CLONE_UPDATES
       GmatBase *ptr = lhsWrapper->GetRefObject();
       MessageInterface::ShowMessage("Assignment LHS object is %s <%p>\n",
-            ptr->GetName().c_str(), ptr);
+            (ptr != NULL ? ptr->GetName().c_str() : "Null PTR"), ptr);
    #endif
 
    try
@@ -1846,6 +1846,35 @@ GmatBase* Assignment::GetUpdatedObject()
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer     GetUpdatedObjectParameterIndex()
+//------------------------------------------------------------------------------
+/**
+ * Returns updated parameter index for an updated object that may have clones
+ *
+ * Owned clone updates might change an entire object, or they might just change
+ * a single object parameter.  If the change is to a single parameter, this
+ * method returned the parameter index for the changed parameter so that that
+ * field, and only that field, can be updated, minimizing disruptions to the
+ * underlying class infrastructure.
+ *
+ * @return The parameter index, or -1 if the change is for the whole object.
+ */
+//------------------------------------------------------------------------------
+Integer Assignment::GetUpdatedObjectParameterIndex()
+{
+   Integer parmIndex = (lhsOwnerID >= 0 ? lhsOwnerID : -1);
+
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("Parameter index for assignment update: "
+            "%d\n", parmIndex);
+   #endif
+
+   return parmIndex;
+}
+
+
 //---------------------------------
 // protected
 //---------------------------------
@@ -2114,8 +2143,9 @@ void Assignment::PassToClones()
       {
          GmatBase *theClone = current->GetClone(i);
          #ifdef DEBUG_CLONE_UPDATES
-            MessageInterface::ShowMessage("Clone %d: %s <%p>\n", i, (theClone == NULL ?
-                  "is NULL" : theClone->GetName().c_str()), theClone);
+            MessageInterface::ShowMessage("Clone %d: %s <%p>\n", i,
+                  (theClone == NULL ? "is NULL" :
+                   theClone->GetName().c_str()), theClone);
          #endif
          if (theClone == NULL)
             continue;
@@ -2123,10 +2153,32 @@ void Assignment::PassToClones()
          if (theClone->GetName() == lhsOwner->GetName())
          {
             if (lhsOwnerID < 0)
+            {
+               #ifdef DEBUG_CLONE_UPDATES
+                  MessageInterface::ShowMessage("Performing whole object "
+                        "update for %s\n", theClone->GetName().c_str());
+               #endif
                (*theClone) = (*lhsOwner);
+            }
             else
+            {
+               #ifdef DEBUG_CLONE_UPDATES
+                  MessageInterface::ShowMessage("Matching attribute %d <%s> "
+                        "on the clone named %s\n", lhsOwnerID,
+                        theClone->GetParameterText(lhsOwnerID).c_str(),
+                        theClone->GetName().c_str());
+               #endif
                MatchAttribute(lhsOwnerID, lhsOwner, theClone);
+            }
          }
+         #ifdef DEBUG_CLONE_UPDATES
+            else
+            {
+               MessageInterface::ShowMessage("Clone \"%s\" has a different "
+                     "name from owner \"%s\"\n", theClone->GetName().c_str(),
+                     lhsOwner->GetName().c_str());
+            }
+         #endif
       }
 
       // Prevent infinite looping!

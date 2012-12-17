@@ -60,6 +60,8 @@ public:
 
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
+   virtual void UpdateClonedObjectParameter(GmatBase *obj,
+         Integer updatedParameterId);
 
 protected:
    // todo: Merge the propagator objects in the Propagate command into this code

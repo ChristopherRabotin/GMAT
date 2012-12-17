@@ -1534,6 +1534,41 @@ void PropSetup::UpdateClonedObject(GmatBase *obj)
 }
 
 
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void PropSetup::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+   #ifdef DEBUG_CLONES
+      MessageInterface::ShowMessage("PropSetup::UpdateClonedObject(%s) "
+            "called\n", obj->GetName().c_str());
+   #endif
+
+   if ((obj->IsOfType(Gmat::ODE_MODEL) && (mODEModel != NULL)) ||
+       obj->IsOfType(Gmat::PROP_SETUP))
+   {
+      #ifdef DEBUG_CLONES
+         MessageInterface::ShowMessage("Setting parameter on %s on Propsetup "
+               "%s\n", obj->GetTypeName().c_str(), instanceName.c_str());
+      #endif
+      if (obj->GetName() == mODEModel->GetName())
+      {
+
+         mODEModel->CopyParameter(*obj, updatedParameterId);
+         isInitialized = false;
+      }
+   }
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------

@@ -4154,7 +4154,10 @@ bool Spacecraft::HasLocalClones()
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateClonedObject(GmatBase *obj)
 {
-// MessageInterface::ShowMessage("***Spacecraft clone update for %s on %s\n", obj->GetName().c_str(), instanceName.c_str());
+   #ifdef DEBUG_CLONES
+      MessageInterface::ShowMessage("***Spacecraft clone update for %s on %s\n",
+            obj->GetName().c_str(), instanceName.c_str());
+   #endif
 
    if (obj->IsOfType(Gmat::HARDWARE))
    {
@@ -4224,6 +4227,56 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       attitude->SetEpoch(state.GetEpoch());
       isInitialized = false;
    }
+}
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+   #ifdef DEBUG_CLONES
+      MessageInterface::ShowMessage("Spacecraft::UpdateClonedObject(%s) "
+            "called\n", obj->GetName().c_str());
+   #endif
+
+   GmatBase *theClone = NULL;
+
+   if (obj->IsOfType(Gmat::HARDWARE))
+   {
+      Gmat::ObjectType objType = obj->GetType();
+
+      // updates for fueltank
+      if (objType == Gmat::FUEL_TANK)
+         for (UnsignedInt i = 0; i < tanks.size(); ++i)
+            if (obj->GetName() == tanks[i]->GetName())
+               theClone = tanks[i];
+
+      // updates for thruster
+      if (objType == Gmat::THRUSTER)
+         for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+            if (obj->GetName() == thrusters[i]->GetName())
+               theClone = thrusters[i];
+
+      // updates for other hardware
+      if (objType == Gmat::HARDWARE)
+         for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
+            if (obj->GetName() == hardwareList[i]->GetName())
+               theClone = hardwareList[i];
+   }
+
+   if (theClone != NULL)
+      theClone->CopyParameter(*obj, updatedParameterId);
+
+   if (obj->IsOfType(Gmat::ATTITUDE))
+      UpdateClonedObject(obj);
 }
 
 

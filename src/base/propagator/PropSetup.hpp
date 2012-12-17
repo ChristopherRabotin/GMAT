@@ -179,6 +179,8 @@ public:
    
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
+   virtual void UpdateClonedObjectParameter(GmatBase *obj,
+                                            Integer updatedParameterId);
 
 private:
    

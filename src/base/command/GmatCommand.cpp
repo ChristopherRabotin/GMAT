@@ -2869,6 +2869,27 @@ GmatBase* GmatCommand::GetUpdatedObject()
 
 
 //------------------------------------------------------------------------------
+// Integer     GetUpdatedObjectParameterIndex()
+//------------------------------------------------------------------------------
+/**
+ * Returns updated parameter index for an updated object that may have clones
+ *
+ * Owned clone updates might change an entire object, or they might just change
+ * a single object parameter.  If the change is to a single parameter, this
+ * method returned the parameter index for the changed parameter so that that
+ * field, and only that field, can be updated, minimizing disruptions to the
+ * underlying class infrastructure.
+ *
+ * @return The parameter index, or -1 if the change is for the whole object.
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::GetUpdatedObjectParameterIndex()
+{
+   return -1;
+}
+
+
+//------------------------------------------------------------------------------
 // virtual void InsertCommandName(std::string &genString)
 //------------------------------------------------------------------------------
 /**

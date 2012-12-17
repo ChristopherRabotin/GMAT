@@ -142,15 +142,17 @@ private:
    void      ShowObjectMap(ObjectMap &om, const std::string &title);
    bool      AddOwnedSubscriber(Subscriber *sub);
    
-   void      UpdateClones(GmatBase *obj);
-   void      PassToAll(GmatBase *obj);
-   void      PassToRegisteredClones(GmatBase *obj);
+   void      UpdateClones(GmatBase *obj, Integer updatedParameterIndex);
+   void      PassToAll(GmatBase *obj, Integer updatedParameterIndex);
+   void      PassToRegisteredClones(GmatBase *obj, Integer updatedParameterIndex);
 
    void      PassToBranchCommand(GmatBase *theClone,
-                                 BranchCommand *theBranchCommand);
+                                 BranchCommand *theBranchCommand,
+                                 Integer updatedParameterIndex);
 
    void      UpdateAndInitializeCloneOwner(GmatBase *theClone,
-                                           GmatBase *theOwner);
+                                           GmatBase *theOwner,
+                                           Integer updatedParameterIndex);
 
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;

@@ -1183,6 +1183,25 @@ void SolverBranchCommand::UpdateClonedObject(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+   if (obj->GetName() == solverName)
+      if (obj->GetTypeName() == theSolver->GetTypeName())
+         theSolver->CopyParameter(*obj, updatedParameterId);
+}
+
+
+//------------------------------------------------------------------------------
 // void PrepareToPublish(bool publishAll)
 //------------------------------------------------------------------------------
 /**

@@ -513,7 +513,41 @@ void PropagationEnabledCommand::UpdateClonedObject(GmatBase *obj)
          }
       }
    }
+}
 
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * This method changes a single parameter on an owned clone
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void PropagationEnabledCommand::UpdateClonedObjectParameter(GmatBase *obj,
+      Integer updatedParameterId)
+{
+   GmatBase *theClone = NULL;
+   if (obj->IsOfType(Gmat::PROP_SETUP))
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+         if (obj->GetName() == propagators[i]->GetName())
+            theClone = propagators[i];
+
+   if (obj->IsOfType(Gmat::ODE_MODEL))
+   {
+      for (UnsignedInt j = 0; j < fm.size(); ++j)
+         if (obj->GetName() == fm[j]->GetName())
+            theClone = fm[j];
+
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+         if (obj->GetName() == propagators[i]->GetName())
+            theClone = propagators[i];
+   }
+
+   if (theClone != NULL)
+      theClone->CopyParameter(*obj, updatedParameterId);
 }
 
 
