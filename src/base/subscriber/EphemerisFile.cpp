@@ -568,7 +568,7 @@ void EphemerisFile::ValidateParameters()
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
-      ("EphemerisFile::ValidateParameters() leaving, spacecraft=<%p>'%s'\n"
+      ("EphemerisFile::ValidateParameters() leaving, spacecraft=<%p>'%s'\n   "
        "outCoordSystem=<%p>'%s', theDataCoordSystem=<%p>'%s'\n",
        spacecraft, spacecraft->GetName().c_str(), outCoordSystem,
        outCoordSystem->GetName().c_str(), theDataCoordSystem,
@@ -699,9 +699,9 @@ bool EphemerisFile::Initialize()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::Initialize() <%p>'%s' returning true, writeOrbit=%d, "
-       "writeAttitude=%d, writeDataInDataCS=%d, initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f\n",
-       this, GetName().c_str(), writeOrbit, writeAttitude, writeDataInDataCS,
-       initialEpochA1Mjd, finalEpochA1Mjd);
+       "writeAttitude=%d\n   useStepSize=%d, writeDataInDataCS=%d, initialEpochA1Mjd=%.15f, "
+       "finalEpochA1Mjd=%.15f\n", this, GetName().c_str(), writeOrbit, writeAttitude,
+       useStepSize, writeDataInDataCS, initialEpochA1Mjd, finalEpochA1Mjd);
    #endif
    
    return true;
@@ -1218,6 +1218,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
           stepSizeList.end())
       {
          stepSize = value;
+         useStepSize = false;
          return true;
       }
       else
