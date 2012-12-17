@@ -30,6 +30,7 @@
 //#define DEBUG_IMPBURN_OBJECT
 //#define DEBUG_IMPBURN_FIRE
 //#define DEBUG_IMPBURN_DECMASS
+//#define DEBUG_IMPBURN_RENAME
 
 //---------------------------------
 // static data
@@ -854,12 +855,36 @@ bool ImpulsiveBurn::RenameRefObject(const Gmat::ObjectType type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {
-   if (type == Gmat::FUEL_TANK)
+   #ifdef DEBUG_IMPBURN_RENAME
+      MessageInterface::ShowMessage(
+            "Entering ImpulsiveBurn::RenameRefObject with oldName = %s and newName = %s\n",
+            oldName.c_str(), newName.c_str());
+      MessageInterface::ShowMessage(
+            "Entering ImpulsiveBurn::RenameRefObject with type = %d\n",
+            (Integer) type);
+   #endif
+   if ((type == Gmat::FUEL_TANK) || (type == Gmat::HARDWARE))
    {
-      StringArray::iterator pos;
-      pos == find(tankNames.begin(), tankNames.end(), oldName);
-      if (pos != tankNames.end())
-         *pos = newName;
+      for (unsigned int ii = 0; ii < tankNames.size(); ii++)
+      {
+         if (tankNames.at(ii) == oldName)
+         {
+            tankNames.at(ii) = newName;
+            #ifdef DEBUG_IMPBURN_RENAME
+               MessageInterface::ShowMessage(
+                     "Entering ImpulsiveBurn::RenameRefObject -- tank oldName (%s) FOUND\n",
+                     oldName.c_str());
+            #endif
+         }
+         #ifdef DEBUG_IMPBURN_RENAME
+         else
+         {
+            MessageInterface::ShowMessage(
+                  "Entering ImpulsiveBurn::RenameRefObject -- tank oldName (%s) NOT found\n",
+                  oldName.c_str());
+         }
+         #endif
+      }
    }
    
    return Burn::RenameRefObject(type, oldName, newName);
