@@ -49,8 +49,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;__BUILD_GMAT_FUNCTION__;__BUILD_MATLAB_FUNCTION__;__BUILD_FMINCON_OPTIMIZER__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;$(CSPICE_VC32)\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;__BUILD_GMAT_FUNCTION__;__BUILD_MATLAB_FUNCTION__;__BUILD_FMINCON_OPTIMIZER__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -62,12 +62,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wxbase28.lib;wxmsw28_core.lib;wxmsw28_adv.lib;wxmsw28_gl.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;glu32.lib;opengl32.lib;libeng.lib;libmx.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxbase28.lib;wxmsw28_core.lib;wxmsw28_adv.lib;wxmsw28_gl.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;glu32.lib;opengl32.lib;libeng.lib;libmx.lib;libmat.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;$(MATLAB32)\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;$(MATLAB32)\extern\lib\win32\microsoft;$(CSPICE_VC32)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +112,7 @@
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\SpiceAttitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Spinner.cpp" />
     <ClCompile Include="..\..\..\src\base\burn\Burn.cpp" />
     <ClCompile Include="..\..\..\src\base\burn\BurnException.cpp" />
@@ -474,6 +477,12 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
@@ -570,6 +579,7 @@
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp" />
@@ -642,6 +652,7 @@
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\SpiceAttitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Spinner.hpp" />
     <ClInclude Include="..\..\..\src\base\burn\Burn.hpp" />
     <ClInclude Include="..\..\..\src\base\burn\BurnException.hpp" />
@@ -1022,6 +1033,12 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
@@ -1120,6 +1137,7 @@
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp" />

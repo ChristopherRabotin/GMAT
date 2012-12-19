@@ -1749,6 +1749,30 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp">
       <Filter>Source Files\base\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\SpiceAttitude.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3409,6 +3433,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp">
       <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\SpiceAttitude.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
