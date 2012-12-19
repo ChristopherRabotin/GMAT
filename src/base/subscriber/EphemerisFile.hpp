@@ -144,7 +144,7 @@ protected:
    Integer     interpolatorStatus;
    Integer     initialCount;
    Integer     waitCount;
-   
+   Integer     afterFinalEpochCount;
    Real        stepSizeInA1Mjd;
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
@@ -171,6 +171,9 @@ protected:
    bool        useStepSize;
    bool        writeOrbit;
    bool        writeAttitude;
+   bool        processData;
+   bool        finalEpochReached;
+   bool        handleFinalEpoch;
    bool        writeDataInDataCS;
    bool        processingLargeStep;
    bool        spkWriteFailed;
