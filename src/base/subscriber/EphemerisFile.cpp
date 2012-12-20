@@ -170,6 +170,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    prevEpochInSecs      (-999.999),
    prevProcTime         (-999.999),
    lastEpochWrote       (-999.999),
+   attEpoch             (-999.999),
    maneuverEpochInDays  (-999.999),
    eventEpochInSecs     (-999.999),
    firstTimeWriting     (true),
@@ -349,6 +350,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    prevEpochInSecs      (ef.prevEpochInSecs),
    prevProcTime         (ef.prevProcTime),
    lastEpochWrote       (ef.lastEpochWrote),
+   attEpoch             (ef.attEpoch),
    maneuverEpochInDays  (ef.maneuverEpochInDays),
    eventEpochInSecs     (ef.eventEpochInSecs),
    firstTimeWriting     (ef.firstTimeWriting),
@@ -430,6 +432,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    prevEpochInSecs      = ef.prevEpochInSecs;
    prevProcTime         = ef.prevProcTime;
    lastEpochWrote       = ef.lastEpochWrote;
+   attEpoch             = ef.attEpoch;
    maneuverEpochInDays  = ef.maneuverEpochInDays;
    eventEpochInSecs     = ef.eventEpochInSecs;
    firstTimeWriting     = ef.firstTimeWriting;
@@ -663,7 +666,6 @@ bool EphemerisFile::Initialize()
          #endif
          throw SubscriberException
             ("Failed to open EphemerisFile \"" + GetFileName() + "\"\n");
-         //return false;
       }
       
       isInitialized = true;
@@ -887,7 +889,6 @@ std::string EphemerisFile::GetParameterTypeString(const Integer id) const
       return EphemerisFile::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return Subscriber::GetParameterTypeString(id);
-
 }
 
 
@@ -975,8 +976,6 @@ const StringArray& EphemerisFile::GetPropertyEnumStrings(const Integer id) const
       return stepSizeList;
    case STATE_TYPE:
       return stateTypeList;
-//   case WRITE_EPHEMERIS:                      This parameter has boolean type, not string             // made a change
-//      return writeEphemerisList;      
    case INTERPOLATOR:
       return interpolatorTypeList;
    default:
@@ -984,18 +983,19 @@ const StringArray& EphemerisFile::GetPropertyEnumStrings(const Integer id) const
    }
 }
 
+
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool EphemerisFile::GetBooleanParameter(const Integer id) const
 {
-        switch (id)
-        {
-        case WRITE_EPHEMERIS:
-                return writeEphemeris;
-        default:
-                return Subscriber::GetBooleanParameter(id);
-        }
+   switch (id)
+   {
+   case WRITE_EPHEMERIS:
+      return writeEphemeris;
+   default:
+      return Subscriber::GetBooleanParameter(id);
+   }
 }
 
 
@@ -1004,17 +1004,15 @@ bool EphemerisFile::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool EphemerisFile::SetBooleanParameter(const Integer id, const bool value)
 {
-        switch (id)
-        {
-        case WRITE_EPHEMERIS:
-                writeEphemeris = value;
-                return writeEphemeris;
-        default:
+   switch (id)
+   {
+   case WRITE_EPHEMERIS:
+      writeEphemeris = value;
+      return writeEphemeris;
+   default:
       return Subscriber::SetBooleanParameter(id, value);
    }
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -1143,6 +1141,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       spacecraftName = value;
       return true;
    case FILENAME:
+   {
       #ifdef DEBUG_EPHEMFILE_SET
       MessageInterface::ShowMessage
          ("EphemerisFile::SetStringParameter() Setting filename '%s' to "
@@ -1166,7 +1165,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
          filePath = oututPath + fileName;
       
       return true;
-
+   }
    // Interpolator is now set along with file format (bug 2219)
    case FILE_FORMAT:
       if (find(fileFormatList.begin(), fileFormatList.end(), value) !=
@@ -1483,7 +1482,6 @@ void EphemerisFile::CreateSpiceKernelWriter()
       spkWriter = NULL;
    }
    
-//   std::string name = instanceName;
    std::string name = spacecraft->GetName();
    std::string centerName = spacecraft->GetOriginName();
    Integer objNAIFId = spacecraft->GetIntegerParameter("NAIFId");
@@ -1492,7 +1490,7 @@ void EphemerisFile::CreateSpiceKernelWriter()
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
       ("   Creating SpiceOrbitKernelWriter with name='%s', centerName='%s', "
-       "objNAIFId=%d, centerNAIFId=%d, fileName='%s', interpolationOrder=%d\n",
+       "objNAIFId=%d, centerNAIFId=%d\n   fileName='%s', interpolationOrder=%d\n",
        name.c_str(), centerName.c_str(), objNAIFId, centerNAIFId,
        fileName.c_str(), interpolationOrder);
    #endif
@@ -1501,7 +1499,7 @@ void EphemerisFile::CreateSpiceKernelWriter()
    {
       spkWriter =
          new SpiceOrbitKernelWriter(name, centerName, objNAIFId, centerNAIFId,
-                               fileName, interpolationOrder, "J2000");
+                                    fileName, interpolationOrder, "J2000");
    }
    catch (BaseException &e)
    {
@@ -2971,7 +2969,6 @@ void EphemerisFile::ClearLastCcsdsOemMetaData(const std::string &comments)
       ("EphemerisFile::ClearLastCcsdsOemMetaData() leaving, firstTimeMetaData=%d\n",
        firstTimeMetaData);
    #endif
-
 }
 
 
