@@ -1392,6 +1392,21 @@ Function* Interpreter::GetFunction()
    return currentFunction;
 }
 
+//------------------------------------------------------------------------------
+// void SetContinueOnError(bool flag)
+//------------------------------------------------------------------------------
+void Interpreter::SetContinueOnError(bool flag)
+{
+   continueOnError = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool GetContinueOnError()
+//------------------------------------------------------------------------------
+bool Interpreter::GetContinueOnError()
+{
+   return continueOnError;
+}
 
 //------------------------------------------------------------------------------
 // bool CheckUndefinedReference(GmatBase *obj, bool writeLine)
@@ -1436,8 +1451,9 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
 {
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::ValidateCommand() cmd=<%p><%s>, inFunctionMode=%d\n", cmd,
-       cmd->GetTypeName().c_str(), inFunctionMode);
+      ("Interpreter::ValidateCommand() cmd=<%p><%s>, continueOnError=%d, "
+       "inFunctionMode=%d\n", cmd, cmd->GetTypeName().c_str(), continueOnError,
+       inFunctionMode);
    #endif
    
    debugMsg = "In ValidateCommand()";

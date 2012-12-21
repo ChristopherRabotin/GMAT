@@ -176,15 +176,21 @@ void ForPanel::Create()
 void ForPanel::LoadData()
 {
    #if DEBUG_FOR_PANEL_LOAD
-   MessageInterface::ShowMessage("ForPanel::LoadData() entered\n");
+   MessageInterface::ShowMessage
+      ("ForPanel::LoadData() entered, theForCommand=<%p>\n", theForCommand);
    #endif
    
    // Set the pointer for the "Show Script" button
    mObject = theForCommand;
    
    if (theForCommand == NULL)
+   {
+      #if DEBUG_FOR_PANEL_LOAD
+      MessageInterface::ShowMessage("ForPanel::LoadData() leaving, the command is NULL\n");
+      #endif
       return;
-      
+   }
+   
    try
    {
       Integer paramId;
@@ -212,6 +218,11 @@ void ForPanel::LoadData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   #if DEBUG_FOR_PANEL_LOAD
+   MessageInterface::ShowMessage("ForPanel::LoadData() leaving\n");
+   #endif
+
 }
 
 //------------------------------------------------------------------------------
@@ -242,29 +253,55 @@ void ForPanel::SaveData()
                  "Real Number, Variable, Array element, plottable Parameter", true);
    
    if (!canClose)
+   {
+      #if DEBUG_FOR_PANEL_SAVE
+      MessageInterface::ShowMessage("ForPanel::SaveData() leaving, error encountered\n");
+      #endif
       return;
+   }
+
    
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
    try
    {
+      // Since validation is not done until element wrappers are created,
+      // need to create a clone
+      For *clonedForCommand = (For*)theForCommand->Clone();
+      
       Integer paramId;
-      paramId = theForCommand->GetParameterID("IndexName");
-      theForCommand->SetStringParameter(paramId, mIndexString.c_str());
+      paramId = clonedForCommand->GetParameterID("IndexName");
+      clonedForCommand->SetStringParameter(paramId, mIndexString.c_str());
       
-      paramId = theForCommand->GetParameterID("StartName");
-      theForCommand->SetStringParameter(paramId, mStartString.c_str());
+      paramId = clonedForCommand->GetParameterID("StartName");
+      clonedForCommand->SetStringParameter(paramId, mStartString.c_str());
       
-      paramId = theForCommand->GetParameterID("EndName");
-      theForCommand->SetStringParameter(paramId, mEndString.c_str());
+      paramId = clonedForCommand->GetParameterID("EndName");
+      clonedForCommand->SetStringParameter(paramId, mEndString.c_str());
       
-      paramId = theForCommand->GetParameterID("IncrementName");
-      theForCommand->SetStringParameter(paramId, mIncrString.c_str());
+      paramId = clonedForCommand->GetParameterID("IncrementName");
+      clonedForCommand->SetStringParameter(paramId, mIncrString.c_str());
       
-      if (!theGuiInterpreter->ValidateCommand(theForCommand))
+      bool contOnError = theGuiInterpreter->GetContinueOnError();
+      theGuiInterpreter->SetContinueOnError(false);
+      if (!theGuiInterpreter->ValidateCommand(clonedForCommand))
          canClose = false;
+      theGuiInterpreter->SetContinueOnError(contOnError);
       
+      // Copy cloned command to original and validate if cloned validation was successful
+      if (canClose)
+      {
+         #if DEBUG_FOR_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   Copying cloned <%p> to original <%p>, and validating command to create wrppers\n",
+             clonedForCommand, theForCommand);
+         #endif
+         theForCommand->Copy(clonedForCommand);
+         theGuiInterpreter->ValidateCommand(theForCommand);
+      }
+      
+      delete clonedForCommand;
    }
    catch (BaseException &e)
    {
@@ -272,6 +309,9 @@ void ForPanel::SaveData()
       canClose = false;
    }
    
+   #if DEBUG_FOR_PANEL_SAVE
+   MessageInterface::ShowMessage("ForPanel::SaveData() leaving, canClose=%d\n", canClose);
+   #endif
 }
 
 //------------------------------------------------------------------------------

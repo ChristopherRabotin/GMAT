@@ -118,6 +118,9 @@ public:
    void SetFunction(Function *func);
    Function* GetFunction();
    
+   void SetContinueOnError(bool flag);
+   bool GetContinueOnError();
+   
    const StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}

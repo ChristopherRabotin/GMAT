@@ -90,8 +90,8 @@ For::For() :
    endValue        (DEFAULT_END),
    stepSize        (DEFAULT_INCREMENT),
    currentValue    (UNINITIALIZED_VALUE),
-   numPasses       (UNINITIALIZED_VALUE),
-   currentPass     (UNINITIALIZED_VALUE),
+   numPasses       ((int)UNINITIALIZED_VALUE),
+   currentPass     ((int)UNINITIALIZED_VALUE),
    indexWrapper    (NULL),
    startWrapper    (NULL),
    endWrapper      (NULL),
@@ -157,16 +157,28 @@ For& For::operator=(const For& f)
    stepSize      = f.stepSize;
    currentValue  = f.currentValue;
    numPasses     = f.numPasses;
+   // Wrappers must be recreated, so set to NULL (partial fix for GMT-2525 LOJ: 2012.12.20)
+   indexWrapper  = NULL; //f.indexWrapper;
+   startWrapper  = NULL; //f.startWrapper;
+   incrWrapper   = NULL; //f.incrWrapper;
+   endWrapper    = NULL; //f.endWrapper;
    currentPass   = f.currentPass;
-   indexWrapper  = f.indexWrapper;
-   startWrapper  = f.startWrapper;
-   endWrapper    = f.endWrapper;
-   incrWrapper   = f.incrWrapper;
    incrPositive  = f.incrPositive;
    indexName     = f.indexName;
    startName     = f.startName;
    endName       = f.endName;
    incrName      = f.incrName;
+   
+   #ifdef DEBUG_ASSIGNMENT_OP
+   MessageInterface::ShowMessage("For::operator=() this=<%p> leaving with following value:\n", this);
+   MessageInterface::ShowMessage("   indexName  = '%s'\n", indexName.c_str());
+   MessageInterface::ShowMessage("   startName  = '%s'\n", startName.c_str());
+   MessageInterface::ShowMessage("   incrName   = '%s'\n", incrName.c_str());
+   MessageInterface::ShowMessage("   endName    = '%s'\n", endName.c_str());
+   MessageInterface::ShowMessage("   startValue = %.12f\n", startValue);
+   MessageInterface::ShowMessage("   stepSize   = %.12f\n", stepSize);
+   MessageInterface::ShowMessage("   endValue   = %.12f\n", endValue);
+   #endif
    return *this;
 }
 
@@ -400,6 +412,14 @@ GmatBase* For::Clone() const
 }
 
 //------------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
+void For::Copy(const GmatBase* orig)
+{
+   operator=(*((For *)(orig)));
+}
+
+//------------------------------------------------------------------------------
 //  const std::string& GetGeneratingString(Gmat::WriteMode mode,
 //                                         const std::string &prefix,
 //                                         const std::string &useName)
@@ -427,7 +447,11 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    #ifdef DEBUG_GEN_STRING
-      MessageInterface::ShowMessage("Entering For::GetGenStr\n");
+      MessageInterface::ShowMessage("Entering For::GetGeneratingString() this=<%p>\n", this);
+      MessageInterface::ShowMessage("... indexName  = '%s'\n", indexName.c_str());
+      MessageInterface::ShowMessage("... startName  = '%s'\n", startName.c_str());
+      MessageInterface::ShowMessage("... incrName   = '%s'\n", incrName.c_str());
+      MessageInterface::ShowMessage("... endName    = '%s'\n", endName.c_str());
       MessageInterface::ShowMessage("... startValue = %.12f\n", startValue);
       MessageInterface::ShowMessage("... stepSize   = %.12f\n", stepSize);
       MessageInterface::ShowMessage("... endValue   = %.12f\n", endValue);

@@ -51,9 +51,10 @@ public:
    virtual bool         Initialize();
    virtual bool         Execute();
    virtual void         RunComplete();
-
+   
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
                                             const std::string &prefix = "",
@@ -139,8 +140,8 @@ protected:
    /// Wrappers for index, start, end, and increment
    ElementWrapper *indexWrapper;
    ElementWrapper *startWrapper;
-   ElementWrapper *endWrapper;
    ElementWrapper *incrWrapper;
+   ElementWrapper *endWrapper;
    
    /// Are we incrementing the loop variable in a positive direction? i.e. is the stepsize positive?
    bool           incrPositive;
