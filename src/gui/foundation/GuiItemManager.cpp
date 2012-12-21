@@ -604,7 +604,6 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    
    int validStatus = 0;
    bool checkForParameter = false;
-   bool checkForObjectProperty = false;
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
    
    // If name has a system Parameter type and owner object exist, create
@@ -1684,7 +1683,6 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    
    wxArrayString array;
    std::string paramName;
-   bool add = false;
    wxString objTypeName, ownedObjTypeName;
    Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT;
    Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT;
