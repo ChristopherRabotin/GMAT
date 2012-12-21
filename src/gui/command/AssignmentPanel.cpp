@@ -157,6 +157,11 @@ void AssignmentPanel::SaveData()
    std::string newLhs = mLhsTextCtrl->GetValue().c_str();
    std::string newRhs = mRhsTextCtrl->GetValue().c_str();
    
+   #if DEBUG_ASSIGNMENT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("   newLhs='%s', newRhs='%s'\n", newLhs.c_str(), newRhs.c_str());
+   #endif
+   
    //-----------------------------------------------------------------
    // check values from text field
    //-----------------------------------------------------------------
@@ -188,7 +193,13 @@ void AssignmentPanel::SaveData()
    }
    
    if (!canClose)
+   {
+      #if DEBUG_ASSIGNMENT_PANEL_SAVE
+      MessageInterface::ShowMessage
+         ("AssignmentPanel::SaveData() leaving, user input error encountered\n");
+      #endif
       return;
+   }
    
    //-----------------------------------------------------------------
    // save values to base, base code should do the validation

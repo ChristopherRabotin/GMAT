@@ -449,7 +449,15 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
          MessageInterface::ShowMessage
             ("   name='%s', row=%d, col=%d\n", name.c_str(), row, col);
          #endif
-         if ((row >= 0 && row < rowCount) && (col >= 0 && col < colCount))
+         
+         // We need to allow Variable index such as array(I,J), so check it
+         if (row == -1 && col == -1)
+            isValid = true;
+         else if ((row >= 0 && row < rowCount) && col == -1)
+            isValid = true;
+         else if ((col >= 0 && col < colCount) && row == -1)
+            isValid = true;
+         else if ((row >= 0 && row < rowCount) && (col >= 0 && col < colCount))
             isValid = true;
          else
          {
