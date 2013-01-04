@@ -622,7 +622,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
       
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_PLOTTABLE, 0, false,
-                                     false, true, true, true, objType, true, true, true);
+                                     false, true, true, true, true, objType,
+                                     true, true, true);
       
       paramDlg.ShowModal();
       

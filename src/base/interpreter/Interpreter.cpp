@@ -59,7 +59,7 @@
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
 //#define DEBUG_CREATE_COMMAND
-//#define DEBUG_CREATE_CALLFUNCTION
+//#define DEBUG_CREATE_CALL_FUNCTION
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_WRAPPERS
 //#define DEBUG_MAKE_ASSIGNMENT
@@ -1920,7 +1920,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          }
       }
       
-      #ifdef DEBUG_CREATE_CALLFUNCTION
+      #ifdef DEBUG_CREATE_CALL_FUNCTION
       MessageInterface::ShowMessage
          ("   1 Now creating <%s> command and setting GenString to <%s>\n",
           type1.c_str(), std::string(type1 + " " + desc).c_str());
@@ -1940,7 +1940,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    {
       StringArray parts = theTextParser.SeparateSpaces(desc1);
       
-      #ifdef DEBUG_CREATE_CALLFUNCTION
+      #ifdef DEBUG_CREATE_CALL_FUNCTION
       WriteStringArray("Calling IsObjectType()", "", parts);
       #endif
       
@@ -1977,7 +1977,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             }
          }
          
-         #ifdef DEBUG_CREATE_CALLFUNCTION
+         #ifdef DEBUG_CREATE_CALL_FUNCTION
          MessageInterface::ShowMessage
             ("   2 Now creating <%s> command and setting GenString to <%s>\n",
              type1.c_str(), std::string(type1 + " " + desc).c_str());
@@ -1996,7 +1996,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       {
          std::string funcName = GmatStringUtil::ParseFunctionName(desc);
          
-         #ifdef DEBUG_CREATE_CALLFUNCTION
+         #ifdef DEBUG_CREATE_CALL_FUNCTION
          MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
          #endif
          
@@ -2004,7 +2004,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          {
             GmatBase *funcPtr = FindObject(funcName);
             
-            #ifdef DEBUG_CREATE_CALLFUNCTION
+            #ifdef DEBUG_CREATE_CALL_FUNCTION
             MessageInterface::ShowMessage("   funcPtr=<%p>\n", funcPtr);
             MessageInterface::ShowMessage
                ("   matlabFunctionNames.size()=%d\n", matlabFunctionNames.size());
@@ -2044,7 +2044,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          StringArray parts = GmatStringUtil::SeparateBy(desc, " ");
          if (parts.size() == 2)
          {
-            #ifdef DEBUG_CREATE_CALLFUNCTION
+            #ifdef DEBUG_CREATE_CALL_FUNCTION
             MessageInterface::ShowMessage
                ("   Adding '%s' to matlabFunctionNames\n", parts[1].c_str());
             #endif
@@ -2052,7 +2052,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          }
       }
       
-      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)      
+      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALL_FUNCTION)      
       MessageInterface::ShowMessage("   3 Now creating <%s> command\n", type1.c_str());
       #endif
       
@@ -2064,7 +2064,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       if (cmd != NULL && !cmd->IsOfType("CallFunction"))
          nameParsed = ParseAndSetCommandName(cmd, type1, desc, realDesc);
       
-      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)      
+      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALL_FUNCTION)      
       MessageInterface::ShowMessage
          ("   Setting GenString to <%s>\n", std::string(type1 + " " + realDesc).c_str());
       #endif
@@ -2226,8 +2226,11 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          retval3 = ValidateCommand(cmd);
       else
       {
-         InterpreterException ex("Failed to parse " + cmdStr);
-         HandleError(ex);
+         if (!ignoreError)
+         {
+            InterpreterException ex("Failed to parse " + cmdStr);
+            HandleError(ex);
+         }
       }
       
       retFlag = retval1 && retval3;
@@ -2301,6 +2304,7 @@ GmatCommand* Interpreter::AppendCommand(const std::string &type, bool &retFlag,
 //------------------------------------------------------------------------------
 bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
 {
+   ignoreError = false;
    bool retval = false;
    std::string type = cmd->GetTypeName();
    
@@ -2342,6 +2346,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    #endif
    
    debugMsg = "In AssembleCallFunctionCommand()";
+   std::string cmdTypeName = cmd->GetTypeName();
    bool retval = true;
    
    // Output
@@ -2402,6 +2407,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       InterpreterException ex("Found blank function name");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2410,6 +2416,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       InterpreterException ex("Found invalid function name \"" + funcName + "\"");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2446,35 +2453,26 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    WriteStringArray("CallFunction Input", "", inArray);
    #endif
    
+   //-----------------------------------------------------------------
    // Set input to CallFunction
+   //-----------------------------------------------------------------
    bool validInput = false;
    Real rval;
+   std::string errmsg = "disallowed";
    
    if (inArray.size() == 0) //if no inputs, set validInput to true
       validInput = true;
    
    for (UnsignedInt i=0; i<inArray.size(); i++)
    {            
-      // If input is single item, set it to CallFunction, otherwise set "" (loj: 2008.08.22)
-      // Should we do this here? Just hold off for now
-      //==============================================================
-      // The old way
-      //==============================================================
-      #if 0
-      retval = cmd->SetStringParameter("AddInput", inArray[i]);
-      #endif
-      //==============================================================
-      
-      
-      //==============================================================
-      // The new way
-      //==============================================================
-      #if 1
       std::string input = inArray[i];
-      if (GmatStringUtil::IsEnclosedWith(inArray[i], "'"))
+      
+      if (GmatStringUtil::IsEnclosedWith(input, "'"))
          retval = cmd->SetStringParameter("AddInput", input);
       else
       {
+         // Get variable names from input
+         // arr33(var1, var2) should return arr33, var1, var2
          StringArray varNames = GmatStringUtil::GetVarNames(input);
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
@@ -2483,58 +2481,92 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
             MessageInterface::ShowMessage("   varNames[%d] = '%s'\n", i, varNames[i].c_str());
          #endif
          
+         // Currently array element cannot be passed to CallMatlabFunction and
+         // array element with variable index cannot be passed to CallGmatFunction.
+         // If array element index is other than number, set input to "" so thatn
+         // CallFunction will return false. Array element with numeric index will
+         // be checked below.
          if (varNames.size() > 1)
             input = "";
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
          MessageInterface::ShowMessage
-            ("   Setting <%s> as input to CallFunction\n", input.c_str());
+            ("   Setting <%s> as input to %s\n", input.c_str(), cmdTypeName.c_str());
          #endif
          
          retval = cmd->SetStringParameter("AddInput", input);
+         if (!retval)
+            validInput = false;
       }
-      #endif
-      //==============================================================
       
-      // Check for valid input parameter
-      validInput = false;
-      
-      // Check for number before object property.
-      // This fixes Bug1903 (Failed to pass number and literal to a function)
-      
-      // String literal
-      if (GmatStringUtil::IsEnclosedWith(inArray[i], "'"))
+      // If no error from CallFunction command, do more checking on input
+      if (retval)
       {
-         validInput = true;
-      }
-      // Number
-      else if (GmatStringUtil::ToReal(inArray[i], rval))
-      {
-         validInput = true;
-      }
-      // Parameter or object property
-      else if (inArray[i].find('.') != std::string::npos)
-      {
-         // if input parameter is a system Parameter then create
-         if (IsParameterType(inArray[i]))
+         // Check for valid input parameter
+         validInput = false;
+         
+         // Check for number before object property.
+         // This fixes Bug1903 (Failed to pass number and literal to a function)
+         
+         // String literal
+         if (GmatStringUtil::IsEnclosedWith(inArray[i], "'"))
          {
-            Parameter *param = CreateSystemParameter(inArray[i]);
-            if (param != NULL)
-            {
-               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-               MessageInterface::ShowMessage
-                  ("   The parameter <%s> is created\n", inArray[i].c_str());
-               #endif
+            if (cmdTypeName == "CallGmatFunction")
                validInput = true;
+         }
+         // Number
+         else if (GmatStringUtil::ToReal(inArray[i], rval))
+         {
+            if (cmdTypeName == "CallGmatFunction")
+               validInput = true;
+         }
+         // Parameter or object property
+         else if (inArray[i].find('.') != std::string::npos)
+         {
+            // if input parameter is a system Parameter then create
+            if (IsParameterType(inArray[i]))
+            {
+               Parameter *param = CreateSystemParameter(inArray[i]);
+               if (param != NULL)
+               {
+                  #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("   The parameter <%s> is created\n", inArray[i].c_str());
+                  #endif
+                  validInput = true;
+               }
+            }
+            else
+            {
+               if (cmdTypeName == "CallGmatFunction")
+                  validInput = true;
             }
          }
-      }
-      // Whole object
-      else
-      {
-         GmatBase *obj = FindObject(inArray[i]);
-         if (obj != NULL)
-            validInput = true;
+         // Whole object
+         else
+         {
+            // Only allow Variable, whole Array, String, and Parameter as
+            // CallMatlabFunction input parameter.
+            // (For GMT-3316/3324 fix - LOJ: 2012.12.26)
+            GmatBase *obj = FindObject(inArray[i]);
+            if (!obj) errmsg = "nonexistent";
+            if (obj != NULL)
+            {
+               validInput = true;
+               
+               if (cmdTypeName == "CallMatlabFunction")
+               {
+                  if (obj->IsOfType("UserParameter"))
+                  {
+                     #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+                     MessageInterface::ShowMessage("   <%s> is an UserParameter\n", input.c_str());
+                     #endif
+                  }
+                  else
+                     validInput = false;
+               }
+            }
+         }
       }
       
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
@@ -2542,39 +2574,114 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          ("   <%s> is %svalid input\n", inArray[i].c_str(), validInput ? "" : "not ");
       #endif
       
-      // if in function mode, ignore invalid parameter
-      if (inFunctionMode)
+      // If in function mode, ignore invalid parameter
+      if (retval && inFunctionMode)
          validInput = true;
       
-      // if not in function mode, throw exception if invalid parameter
-      if (!validInput)
+      // If not in function mode, throw exception if invalid inputparameter
+      if (!retval || !validInput)
       {
          InterpreterException ex
-            ("Nonexistent or disallowed CallFunction Input Parameter: \"" +
-             inArray[i] +  "\"");
+            ("\"" + inArray[i] + "\" is " + errmsg + " " + cmdTypeName + " Input Parameter. "
+             "The allowed input values are : [Variable, Array, Array Element, String, Parameter]");
          HandleError(ex);
+         ignoreError = true;
+         
+         #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+         MessageInterface::ShowMessage
+            ("Interpreter::AssembleCallFunctionCommand() returning false, "
+             "retval=%d, validInput=%d\n", retval, validInput);
+         #endif
          return false;
       }
-   }
+   }   
    
-   if (!retval || !validInput)
-   {
-      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-      MessageInterface::ShowMessage
-         ("Interpreter::AssembleCallFunctionCommand() returning false, "
-          "retval=%d, validInput=%d\n", retval, validInput);
-      #endif
-      return false;
-   }
-   
+   //-----------------------------------------------------------------
    // Set output to CallFunction
+   //-----------------------------------------------------------------
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting output\n");
    WriteStringArray("CallFunction Output", "", outArray);
    #endif
    
+   bool validOutput = false;
+   errmsg = "disallowed";
+   
    for (UnsignedInt i=0; i<outArray.size(); i++)
+   {
       retval = cmd->SetStringParameter("AddOutput", outArray[i]);
+      if (retval && cmd->GetTypeName() == "CallGmatFunction")
+      {
+         validOutput = true;
+      }
+      // Validate output for CallMatlabFunction
+      // Currently whole Array, Variable, String, and Parameter are allowed
+      else if (retval && cmd->GetTypeName() == "CallMatlabFunction")
+      {
+         // If Parameter or object field, check further
+         if (outArray[i].find('.') != std::string::npos)
+         {
+            // Currently CallMatlabFunction cannot handle object field
+            // If output parameter is a system Parameter then create
+            if (IsParameterType(outArray[i]))
+            {
+               Parameter *param = CreateSystemParameter(outArray[i]);
+               if (param != NULL)
+               {
+                  #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("   The parameter <%s> is created\n", inArray[i].c_str());
+                  #endif
+                  validOutput = true;
+               }
+               else
+               {
+                  if (cmdTypeName == "CallGmatFunction")
+                     validOutput = true;
+               }
+            }
+         }
+         else
+         {
+            // Only allow Variable, whole Array, String, and Parameter as
+            // CallMatlabFunction output parameter
+            // (For GMT-3316/3324 fix - LOJ: 2012.12.26)
+            GmatBase *obj = FindObject(outArray[i]);
+            if (!obj) errmsg = "nonexistent";
+            if (obj != NULL)
+            {
+               validOutput = true;
+               
+               if (obj->IsOfType("UserParameter"))
+               {
+                  #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("   <%s> is not an UserParameter\n", outArray[i].c_str());
+                  #endif
+               }
+               else
+                  validOutput = false;
+            }
+         }
+      }
+      
+      // If not in function mode, throw exception if invalid output parameter
+      if (!retval || !validOutput)
+      {
+         InterpreterException ex
+            ("\"" + outArray[i] + "\" is " + errmsg + " " + cmdTypeName + " Output Parameter. "
+             "The allowed output values are : [Variable, Array, Array Element, String, Parameter]");
+         HandleError(ex);
+         ignoreError = true;
+         
+         #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+         MessageInterface::ShowMessage
+            ("Interpreter::AssembleCallFunctionCommand() returning false, "
+             "retval=%d, validInput=%d, validOuput=%d\n", retval, validInput, validOutput);
+         #endif
+         return false;
+      }
+   }
    
    // if in function mode, just return retval
    if (inFunctionMode)
@@ -2631,6 +2738,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
          "parentheses (except to indicate an array element)";
       InterpreterException ex(msg);
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2648,6 +2756,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       {
          InterpreterException ex("The Command has unbalanced parentheses");
          HandleError(ex);
+         ignoreError = true;
          return false;
       }
    }
@@ -2700,6 +2809,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       {
          InterpreterException ex("Missing field or operator in command");
          HandleError(ex);
+         ignoreError = true;
          return false;
       }
       std::string strUpper = GmatStringUtil::ToUpper(parts.at(ii));         
@@ -2707,12 +2817,14 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       {
          InterpreterException ex("\"OR\" is not a valid relational operator");
          HandleError(ex);
+         ignoreError = true;
          return false;
       }
       if (strUpper.find(" AND ") != strUpper.npos)
       {
          InterpreterException ex("\"AND\" is not a valid relational operator");
          HandleError(ex);
+         ignoreError = true;
          return false;
       }
    }
@@ -2722,6 +2834,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    {
       InterpreterException ex("The Command has an invalid number of conditions");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2786,6 +2899,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    {
       InterpreterException ex(e.GetFullMessage());
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2819,6 +2933,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
          "parentheses (except to indicate an array element)";
       InterpreterException ex(msg);
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2829,6 +2944,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    {
       InterpreterException ex("Cannot find equal sign (=) for For loop control");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2840,6 +2956,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    {
       InterpreterException ex("Missing colon (:) for For loop control");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2852,6 +2969,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    {
       InterpreterException ex("Too many colons (:) for For loop control");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    #ifdef DEBUG_ASSEMBLE_FOR
@@ -2865,6 +2983,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    {
       InterpreterException ex("Missing field, colon (:), or equal sign (=) for For loop control");
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -2987,6 +3106,7 @@ bool Interpreter::AssembleTargetCommand(GmatCommand *cmd, const std::string &des
          "parentheses";
       InterpreterException ex(msg);
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    
@@ -3057,6 +3177,7 @@ bool Interpreter::AssembleOptimizeCommand(GmatCommand *cmd, const std::string &d
          "parentheses";
       InterpreterException ex(msg);
       HandleError(ex);
+      ignoreError = true;
       return false;
    }
    

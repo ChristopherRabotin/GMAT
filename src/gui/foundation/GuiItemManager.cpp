@@ -1678,10 +1678,24 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    MessageInterface::ShowMessage
       ("GuiItemManager::GetPropertyList() entered, objName='%s', ownedObjName='%s', "
        "showOption=%d, showSettableOnly=%d, forStopCondition\n", objName.c_str(),
-       ownedObjName.c_str(), showOption, showSettableOnly, bool forStopCondition);
+       ownedObjName.c_str(), showOption, showSettableOnly, forStopCondition);
    #endif
    
    wxArrayString array;
+   
+   if (objName == "")
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** There are no objects of ImpulsiveBurn\n");
+      
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning empty properties\n");
+      #endif
+      
+      return array;
+   }
+   
    std::string paramName;
    wxString objTypeName, ownedObjTypeName;
    Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT;
@@ -1747,12 +1761,20 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
          array.Add("Periapsis");
       }
       
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning Spacecraft properties\n");
+      #endif
       return array;
    }
    else if (objTypeName == "ImpulsiveBurn")
    {
       // for now all impulsive burn parameters are reportable and plottable
       array = theImpBurnPropertyList;
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning ImpulsiveBurn properties\n");
+      #endif
       return array;
    }
    else
@@ -1760,6 +1782,11 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
       MessageInterface::ShowMessage
          ("*** WARNING *** Property list for '%s' is not available at this time.\n",
           objTypeName.c_str());
+      
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning empty properties\n");
+      #endif
       
       return array;
    }
@@ -1797,6 +1824,13 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
                                                   const wxSize &size,
                                                   const wxArrayString objectTypeList)
 {
+   #ifdef DEBUG_OBJECT_TYPE_COMBOBOX
+   MessageInterface::ShowMessage("GuiItemManager::GetObjectTypeComboBox() entered\n");
+   MessageInterface::ShowMessage("There are %d object types\n", objectTypeList.size());
+   for (unsigned int i = 0; i < objectTypeList.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", objectTypeList[i].c_str());
+   #endif
+   
    wxArrayString emptyList;
    wxComboBox *cb =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, emptyList,
@@ -1819,6 +1853,10 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
    }
    
    cb->SetSelection(0);
+   
+   #ifdef DEBUG_OBJECT_TYPE_COMBOBOX
+   MessageInterface::ShowMessage("==> GuiItemManager::GetObjectTypeComboBox() leaving\n");
+   #endif
    
    return cb;
 }
@@ -3664,19 +3702,19 @@ wxSizer* GuiItemManager::CreateParameterSizer
     wxButton **removeAllButton, wxWindowID removeAllButtonId,
     wxListBox **selectedListBox, wxWindowID selectedListBoxId,
     const wxArrayString &objectTypeList, int showOption,
-    int showObjectOption, bool showSettableOnly,
-    bool allowMultiSelect, bool showString,
-    bool showSysParam, bool showVariable, bool showArray,
-    bool forStopCondition, const wxString &objectType,
+    int showObjectOption, bool showSettableOnly, bool allowMultiSelect,
+    bool showString, bool showSysParam, bool showVariable, bool showArray,
+    bool showArrayElement, bool forStopCondition, const wxString &objectType,
     const wxString configSection)
 {
    #if DEBUG_PARAM_SIZER
    MessageInterface::ShowMessage
       ("GuiItemManager::CreateParameterSizer() entered\n"
        "   showOption=%d, showObjectOption=%d, allowMultiSelect=%d, showString=%d, "
-       "showSysParam=%d\n   showVariable=%d, showArray=%d, forStopCondition=%d, objectType=%s\n",
-       showOption, showObjectOption, allowMultiSelect, showString,
-       showSysParam, showVariable, showArray, forStopCondition, objectType.c_str());
+       "showSysParam=%d\n   showVariable=%d, showArray=%d, showArrayElement=%d, "
+       "forStopCondition=%d, objectType=%s\n", showOption, showObjectOption,
+       allowMultiSelect, showString, showSysParam, showVariable, showArray,
+       showArrayElement, forStopCondition, objectType.c_str());
    #endif
    
    int bsize = 1;
@@ -3703,7 +3741,23 @@ wxSizer* GuiItemManager::CreateParameterSizer
    
    // add more object types to the list
    if (showSysParam || (showObjectOption == 1))
-      tmpObjTypeList = objectTypeList;
+   {
+      // Add object types to list only if there are objects of that type is available
+      // (LOJ: 2012.12.28)
+      //tmpObjTypeList = objectTypeList;
+      StringArray objList;
+      for (unsigned int i = 0; i < objectTypeList.size(); i++)
+      {
+         #if DEBUG_PARAM_SIZER
+         MessageInterface::ShowMessage
+            ("   objectTypeList[%d] = '%s'\n", i, objectTypeList[i].c_str());
+         #endif
+         
+         objList = theGuiInterpreter->GetListOfObjects(objectTypeList[i].c_str());
+         if (objList.size() > 0)
+            tmpObjTypeList.Add(objectTypeList[i]);
+      }
+   }
    
    if (showVariable)
       tmpObjTypeList.Add("Variable");
@@ -3784,25 +3838,29 @@ wxSizer* GuiItemManager::CreateParameterSizer
    //-----------------------------------------------------------------
    // Array row and column
    //-----------------------------------------------------------------
-   *rowStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Row [xx]"));
-   *colStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Col [xx]"));
-   
-   *rowTextCtrl =
-      new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
-   (*rowTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayRowHint")));
-   
-   *colTextCtrl =
-      new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
-   (*colTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayColHint")));
-   
    //----- arrayIndexSizer
    wxFlexGridSizer *arrayIndexSizer = new wxFlexGridSizer(3);
-   arrayIndexSizer->Add(*rowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrayIndexSizer->Add(10, 10);
-   arrayIndexSizer->Add(*colStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrayIndexSizer->Add(*rowTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrayIndexSizer->Add(10, 10);
-   arrayIndexSizer->Add(*colTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   if (showArrayElement)
+   {
+      *rowStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Row [xx]"));
+      *colStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Col [xx]"));
+      
+      *rowTextCtrl =
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+      (*rowTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayRowHint")));
+      
+      *colTextCtrl =
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+      (*colTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayColHint")));
+      
+      //----- arrayIndexSizer
+      arrayIndexSizer->Add(*rowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+      arrayIndexSizer->Add(10, 10);
+      arrayIndexSizer->Add(*colStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+      arrayIndexSizer->Add(*rowTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+      arrayIndexSizer->Add(10, 10);
+      arrayIndexSizer->Add(*colTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   }
    
    //----- objectSizer
    GmatStaticBoxSizer *objectSizer =
@@ -3818,7 +3876,8 @@ wxSizer* GuiItemManager::CreateParameterSizer
    objectSizer->Add(20, 2);
    objectSizer->Add(hardwareSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    objectSizer->Add(20, 2);
-   objectSizer->Add(arrayIndexSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   if (showArrayElement)
+      objectSizer->Add(arrayIndexSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //-----------------------------------------------------------------
    // Object properties

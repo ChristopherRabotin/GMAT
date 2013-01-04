@@ -278,7 +278,7 @@ int MatlabInterface::PutRealArray(const std::string &matlabVarName,
  * @param <matlabVarName> variable name in the MATLAB workspace
  * @param <numElements> number of elements to receive from MATLAB
  * @param <outArray> array to receive double array from MATLAB
- * @Return 1 = no error, 0 = error
+ * @Return 0 on error; else number of elemnets received from MATLAB
  * @exception <InterfaceException> thrown if empty output was received
  */
 //------------------------------------------------------------------------------
@@ -294,11 +294,11 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
    // get the variable from the MATLAB workspace
    mxArray *mxArrayPtr = NULL;
    mxArrayPtr = engGetVariable(enginePtr, matlabVarName.c_str());
-
+   
    #ifdef DEBUG_MATLAB_GET_REAL
    MessageInterface::ShowMessage("   mxArrayPtr is <%p>\n", mxArrayPtr);
    #endif
-
+   
    if (mxArrayPtr == NULL)
    {
       #ifdef DEBUG_MATLAB_GET_REAL
@@ -307,7 +307,12 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
       #endif
       return 0;
    }
-
+   
+   size_t numElementsReceived = mxGetNumberOfElements(mxArrayPtr);
+   #ifdef DEBUG_MATLAB_GET_REAL
+   MessageInterface::ShowMessage("   numElementsReceived=%d\n", numElementsReceived);
+   #endif
+   
    if (mxIsDouble(mxArrayPtr))
    {
       #ifdef DEBUG_MATLAB_GET_REAL
@@ -323,16 +328,16 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
       
       memcpy((char*)outArray, (char*)mxGetPr(mxArrayPtr),
              numElements*sizeof(double));
-           
+      
       #ifdef DEBUG_MATLAB_GET_REAL
       MessageInterface::ShowMessage("      outArray  = \n");
-      for (Integer ii=0; ii < numElements; ii++)
+      for (unsigned int ii=0; ii < numElementsReceived; ii++)
          MessageInterface::ShowMessage("         %.12f\n", outArray[ii]);
       MessageInterface::ShowMessage("   Now destroying mxArrayPtr <%p>\n", mxArrayPtr);
       #endif
       
       mxDestroyArray(mxArrayPtr);
-      return 1;
+      return numElementsReceived;
    }
    // Added to handle logical scalar data (Bug 2376 fix)
    else if (mxIsLogicalScalar(mxArrayPtr))
@@ -549,9 +554,9 @@ bool MatlabInterface::IsOpen(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void RunMatlabString(std::string evalString)
+// void RunMatlabString(const std::string &evalString)
 //------------------------------------------------------------------------------
-void MatlabInterface::RunMatlabString(std::string evalString)
+void MatlabInterface::RunMatlabString(const std::string &evalString)
 {
    #ifdef DEBUG_MATLAB_EVAL
    MessageInterface::ShowMessage

@@ -25,10 +25,6 @@
 #include "Parameter.hpp"
 #include "ParameterSelectDialog.hpp"
 
-// To show input and output as Grid, otherwise input and output field
-// is multiple line TextCtrl
-//#define __USE_GRID_FOR_INPUT_OUTPUT__
-
 //#define DEBUG_CALLFUNCTION_PANEL 1
 //#define DEBUG_CALLFUNCTION_PANEL_LOAD 1
 //#define DEBUG_CALLFUNCTION_PANEL_SAVE 1
@@ -40,7 +36,6 @@
 BEGIN_EVENT_TABLE(CallFunctionPanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBO, CallFunctionPanel::OnComboChange)
    EVT_BUTTON(ID_BUTTON, CallFunctionPanel::OnButtonClick)
-   EVT_GRID_CELL_RIGHT_CLICK(CallFunctionPanel::OnCellRightClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -175,66 +170,6 @@ void CallFunctionPanel::Create()
                      new wxStaticText( this, ID_TEXT, wxT("  Function  "),
                      wxDefaultPosition, wxDefaultSize, 0 );
    
-   //-----------------------------------------------------------------
-   #ifdef __USE_GRID_FOR_INPUT_OUTPUT__
-   //-----------------------------------------------------------------
-   
-   // Get available function ComboBox from theGuiManager
-   theFunctionComboBox =
-      theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(280, -1));
-   
-   theInputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS );
-   
-   theInputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
-   theInputGrid->SetColSize(0, 290);
-   theInputGrid->SetRowSize(0, 23);
-   theInputGrid->SetColLabelSize(0);
-   theInputGrid->SetRowLabelSize(0);
-   theInputGrid->SetMargins(0, 0);
-   theInputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
-   theInputGrid->EnableEditing(false);
-   
-   theOutputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS );
-   
-   theOutputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
-   theOutputGrid->SetColSize(0, 290);
-   theOutputGrid->SetRowSize(0, 23);
-   theOutputGrid->SetColLabelSize(0);
-   theOutputGrid->SetRowLabelSize(0);
-   theOutputGrid->SetMargins(0, 0);
-   theOutputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
-   theOutputGrid->EnableEditing(false);
-   
-   wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
-   outputSizer->Add(outLeftBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
-   outputSizer->Add(theOutputGrid, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   outputSizer->Add(outRightBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   wxBoxSizer *inputSizer = new wxBoxSizer(wxHORIZONTAL);
-   inputSizer->Add(inLeftBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
-   inputSizer->Add(theInputGrid, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   inputSizer->Add(inRightBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   wxBoxSizer *functionSizer = new wxBoxSizer(wxHORIZONTAL);
-   functionSizer->Add(equalSign, 0, wxALIGN_CENTRE|wxALL, bsize);
-   functionSizer->Add(theFunctionComboBox, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   
-   wxFlexGridSizer *pageSizer = new wxFlexGridSizer( 2, 0, 0 );
-   pageSizer->Add(outputSizer, 1, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(outStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(functionSizer, 1, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(functionStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(inputSizer, 1, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(inStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   //-----------------------------------------------------------------
-   #else
-   //-----------------------------------------------------------------
-   
    // Get available function ComboBox from theGuiManager
    theFunctionComboBox =
       theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(300, -1));
@@ -276,10 +211,6 @@ void CallFunctionPanel::Create()
    pageSizer->Add(theInputViewButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   //-----------------------------------------------------------------
-   #endif
-   //-----------------------------------------------------------------
 }
 
 //------------------------------------------------------------------------------
@@ -309,7 +240,7 @@ void CallFunctionPanel::LoadData()
       ("   Function name is: <%s>\n", functionName.c_str());
    #endif
    
-   // get input parameters
+   // Get input parameters
    StringArray inputList = theCommand->GetStringArrayParameter("AddInput");
    mNumInput = inputList.size();
    mInputWxStrings.Clear();
@@ -324,36 +255,21 @@ void CallFunctionPanel::LoadData()
    if (mNumInput > 0)
    {
       wxString *inputNames = new wxString[mNumInput];
-      GmatBase *param;
-      wxString cellValue = "";
+      wxString inputText = "";
       wxString delimiter = ", ";
       
       for (int i=0; i<mNumInput; i++)
-      {
+      {         
          inputNames[i] = inputList[i].c_str();
-         
-         #ifdef DEBUG_CALLFUNCTION_PANEL_LOAD
-         MessageInterface::ShowMessage("   Looking up " + inputList[i] + "\n");
-         #endif
-         
-         param = theGuiInterpreter->GetConfiguredObject(inputList[i]);
          
          if (i == mNumInput-1)
             delimiter = "";
          
-         if (param != NULL)
-         {
-            cellValue = cellValue + param->GetName().c_str() + delimiter;
-            mInputWxStrings.Add(param->GetName().c_str());
-         }
+         inputText = inputText + inputList[i].c_str() + delimiter;
+         mInputWxStrings.Add(inputList[i].c_str());
       }
       
-      #ifdef __USE_GRID_FOR_INPUT_OUTPUT__
-      theInputGrid->SetCellValue(0, 0, cellValue);
-      #else
-      theInputTextCtrl->SetValue(cellValue);
-      #endif
-      
+      theInputTextCtrl->SetValue(inputText);
       delete [] inputNames;
    }
    
@@ -372,39 +288,23 @@ void CallFunctionPanel::LoadData()
    if (mNumOutput > 0)
    {
       wxString *outputNames = new wxString[mNumOutput];
-      GmatBase *param;
-      wxString cellValue = "";
+      wxString outputText = "";
       wxString delimiter = ", ";
       
       for (int i=0; i<mNumOutput; i++)
-      {
+      {         
          outputNames[i] = outputList[i].c_str();
-         
-         #ifdef DEBUG_CALLFUNCTION_PANEL_LOAD
-         MessageInterface::ShowMessage("   Looking up " + outputList[i] + "\n");
-         #endif
-         
-         param = theGuiInterpreter->GetConfiguredObject(outputList[i]);
          
          if (i == mNumOutput-1)
             delimiter = "";
          
-         if (param != NULL)
-         {
-            cellValue = cellValue + param->GetName().c_str() + delimiter;
-            mOutputWxStrings.Add(param->GetName().c_str());
-         }
+         outputText = outputText + outputList[i].c_str() + delimiter;
+         mOutputWxStrings.Add(outputList[i].c_str());
       }
       
-      #ifdef __USE_GRID_FOR_INPUT_OUTPUT__
-      theOutputGrid->SetCellValue(0, 0, cellValue);
-      #else
-      theOutputTextCtrl->SetValue(cellValue);
-      #endif
-      
+      theOutputTextCtrl->SetValue(outputText);
       delete [] outputNames;
    }
-
 }
 
 
@@ -498,98 +398,6 @@ void CallFunctionPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
-// void OnCellRightClick(wxGridEvent& event)
-//------------------------------------------------------------------------------
-void CallFunctionPanel::OnCellRightClick(wxGridEvent& event)
-{    
-   #ifdef DEBUG_CALLFUNCTION_PANEL
-   MessageInterface::ShowMessage
-      ("CallFunctionPanel::OnCellRightClick() entered\n");
-   #endif
-   
-   unsigned int row = event.GetRow();
-   unsigned int col = event.GetCol();
-   
-   #ifdef DEBUG_CALLFUNCTION_PANEL
-   MessageInterface::ShowMessage("   row = %d, col = %d\n", row, col);
-   #endif
-   
-   if (event.GetEventObject() == theInputGrid)
-   {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE, 1, 
-                                     true, true);
-      theOutputGrid->DeselectRow(0);
-      paramDlg.SetParamNameArray(mInputWxStrings);
-      paramDlg.ShowModal();
-      
-      #ifdef DEBUG_CALLFUNCTION_PANEL
-      MessageInterface::ShowMessage
-         ("   Has new input selection made? %d\n", paramDlg.HasSelectionChanged());
-      #endif
-      
-      if (paramDlg.HasSelectionChanged())
-      {
-         EnableUpdate(true);
-         mInputWxStrings = paramDlg.GetParamNameArray();
-         wxString cellValue = "";
-         wxString delimiter = ", ";
-         
-         if (mInputWxStrings.Count() > 0)
-         {
-            cellValue = cellValue + mInputWxStrings[0];
-         
-            for (unsigned int i=1; i<mInputWxStrings.Count(); i++)
-               cellValue = cellValue + delimiter + mInputWxStrings[i];
-         
-            theInputGrid->SetCellValue(row, col, cellValue);
-         }
-         else     // no selections
-         {
-            theInputGrid->SetCellValue(row, col, "");
-         }         
-      }
-   }
-   else if (event.GetEventObject() == theOutputGrid)
-   {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true);
-      theInputGrid->DeselectRow(0);
-      paramDlg.SetParamNameArray(mOutputWxStrings);
-      paramDlg.ShowModal();
-      
-      #ifdef DEBUG_CALLFUNCTION_PANEL
-      MessageInterface::ShowMessage
-         ("   Has new output selection made? %d\n", paramDlg.HasSelectionChanged());
-      #endif
-      
-      if (paramDlg.HasSelectionChanged())
-      {
-         EnableUpdate(true);
-         mOutputWxStrings = paramDlg.GetParamNameArray();
-         wxString cellValue = "";
-         wxString delimiter = ", ";
-         
-         if (mOutputWxStrings.Count() > 0)
-         {
-            cellValue = cellValue + mOutputWxStrings[0];
-            
-            for (unsigned int i=1; i<mOutputWxStrings.Count(); i++)
-               cellValue = cellValue + delimiter + mOutputWxStrings[i];
-            
-            theOutputGrid->SetCellValue(row, col, cellValue);
-         }
-         else     // no selections
-         {
-            theOutputGrid->SetCellValue(row, col, "");
-         }         
-      }
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // void OnComboChange()
 //------------------------------------------------------------------------------
 /**
@@ -619,7 +427,7 @@ void CallFunctionPanel::OnButtonClick(wxCommandEvent& event)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true);
+                                     2, true, true, true, true, true, true);
       
       paramDlg.SetParamNameArray(mInputWxStrings);
       paramDlg.ShowModal();
@@ -653,7 +461,7 @@ void CallFunctionPanel::OnButtonClick(wxCommandEvent& event)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true);
+                                     2, true, true, true, true, true, true);
       
       paramDlg.SetParamNameArray(mOutputWxStrings);
       paramDlg.ShowModal();

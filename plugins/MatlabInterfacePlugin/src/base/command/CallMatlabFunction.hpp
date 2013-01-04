@@ -49,9 +49,9 @@ protected:
    MatlabInterface *matlabIf;
    
    bool ExecuteMatlabFunction();
-   void SendInParam(Parameter *param);
+   void SendInParam(Parameter *param, const std::string &inStr);
    void GetOutParams();
-   void EvalMatlabString(std::string evalString);
+   void EvalMatlabString(const std::string &evalString);
    void ClearInputParameters();
    void ClearOutputParameters();
    void UpdateObject(GmatBase *obj, char *buffer);

@@ -345,8 +345,8 @@ public:
           int showObjectOption = 0, bool showSettableOnly = false,
           bool allowMultiSelect = false, bool showString = false,
           bool showSysParam = true, bool showVariable = false,
-          bool showArray = false, bool forStopCondition = false,
-          const wxString &onwer = "Spacecraft",
+          bool showArray = false, bool showArrayElement = false,
+          bool forStopCondition = false, const wxString &onwer = "Spacecraft",
           const wxString configSection = "Parameter Select");
    
    wxSizer*

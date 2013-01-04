@@ -57,28 +57,29 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 /* Shows parameter selection dialog.
  *
- * @param *parent          parent window pointer
- * @param &objectTypeList  list of object types to show in the type ComboBox
- * @param showOption       one of GuiItemManager::ShowParamOption for object
- *                           properties (SHOW_PLOTTABLE)
- * @param showObjectOption 0 = do not allow any whole object
- *                         1 = allow any whole object
- *                         2 = allow only whole array
- * @param allowMultiSelect true if multiple selection is allowed [false]
- * @param allowString      true if selection of String is allowed [false]
- * @param allowSysParam    true if selection of system parameter is allowed [true]
- * @param allowVariable    true if selection of Varialbe is allowed [true]
- * @param allowArray       true if selection of Array is allowed [true]
- * @param &objectType      default object type to show ("Spacecraft")
- * @param createParam      true if to create non-existant system parameter [true]
- * @param skipDependency   true if skipping dependency object when creating Parameter name [false]
- * @param forStopCondition true if this dialog is for stopping condition for propagation [false]
+ * @param *parent           parent window pointer
+ * @param &objectTypeList   list of object types to show in the type ComboBox
+ * @param showOption        one of GuiItemManager::ShowParamOption for object
+ *                            properties (SHOW_PLOTTABLE)
+ * @param showObjectOption  0 = do not allow any whole object
+ *                          1 = allow any whole object
+ *                          2 = allow only whole array and array element
+ * @param allowMultiSelect  true if multiple selection is allowed [false]
+ * @param allowString       true if selection of String is allowed [false]
+ * @param allowSysParam     true if selection of system parameter is allowed [true]
+ * @param allowVariable     true if selection of Varialbe is allowed [true]
+ * @param allowArray        true if selection of whole Array is allowed [true]
+ * @param allowArrayElement true if selection of Array Element is allowed [true]
+ * @param &objectType       default object type to show ("Spacecraft")
+ * @param createParam       true if to create non-existant system parameter [true]
+ * @param skipDependency    true if skipping dependency object when creating Parameter name [false]
+ * @param forStopCondition  true if this dialog is for stopping condition for propagation [false]
  */
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog
      (wxWindow *parent, const wxArrayString &objectTypeList, int showOption,
       int showWholeObjOption, bool allowMultiSelect, bool allowString,
-      bool allowSysParam, bool allowVariable, bool allowArray, 
+      bool allowSysParam, bool allowVariable, bool allowArray, bool allowArrayElement,
       const wxString &objectType, bool createParam, bool showSettableOnly,
       bool skipDependency, bool forStopCondition)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
@@ -95,6 +96,7 @@ ParameterSelectDialog::ParameterSelectDialog
    mAllowString = allowString;
    mAllowVariable = allowVariable;
    mAllowArray = allowArray;
+   mAllowArrayElement = allowArrayElement;
    mAllowSysParam = allowSysParam;
    mCreateParam = createParam;
    mShowSettableOnly = showSettableOnly;
@@ -115,11 +117,11 @@ ParameterSelectDialog::ParameterSelectDialog
    MessageInterface::ShowMessage
       ("ParameterSelectDialog() mShowOption=%d, mShowOjectOption=%d, "
        "mAllowMultiSelect=%d, mAllowString=%d, mAllowSysParam=%d, mAllowVariable=%d\n"
-       "   mAllowArray=%d, mObjectType=%s, mCreateParam=%d, mShowSettableOnly=%d, "
-       "mSkipDependency=%d, mForStopCondition=%d\n", mShowOption, mShowObjectOption,
-       mAllowMultiSelect, mAllowString, mAllowSysParam, mAllowVariable, mAllowArray,
-       mObjectType.c_str(), mCreateParam, mShowSettableOnly, mSkipDependency,
-       mForStopCondition);
+       "   mAllowArray=%d, mAllowArrayElement=%d, mObjectType=%s, mCreateParam=%d, "
+       "mShowSettableOnly=%d, mSkipDependency=%d, mForStopCondition=%d\n", mShowOption,
+       mShowObjectOption, mAllowMultiSelect, mAllowString, mAllowSysParam, mAllowVariable,
+       mAllowArray, mAllowArrayElement, mObjectType.c_str(), mCreateParam, mShowSettableOnly,
+       mSkipDependency, mForStopCondition);
    #endif
    
    Create();
@@ -256,7 +258,8 @@ void ParameterSelectDialog::Create()
                            mShowObjectOption, mShowSettableOnly,
                            mAllowMultiSelect, mAllowString,
                            mAllowSysParam, mAllowVariable,
-                           mAllowArray, mForStopCondition, mObjectType,
+                           mAllowArray, mAllowArrayElement,
+                           mForStopCondition, mObjectType,
                            "Parameter Select");
    
    //------------------------------------------------------
@@ -518,7 +521,7 @@ void ParameterSelectDialog::OnListBoxSelect(wxCommandEvent& event)
             ShowObjectProperties();
          }
          else if (objType == "Array")
-         {         
+         {
             // Show array element if not showing whole array
             ShowArrayIndex(!mAllowWholeObject);
          }
@@ -1254,7 +1257,7 @@ void ParameterSelectDialog::ShowArrays()
    // Show or hide entire object option
    mEntireObjectCheckBox->Hide();
    mAllowWholeObject = false;
-   if (mShowObjectOption != 0)
+   if (mShowObjectOption != 0 && mAllowArrayElement)
    {
       mEntireObjectCheckBox->Show();
       mAllowWholeObject = mEntireObjectCheckBox->IsChecked();
@@ -1321,8 +1324,17 @@ void ParameterSelectDialog::ShowArrayIndex(bool show)
 {
    #ifdef DEBUG_SHOW_ARRAY_INDEX
    MessageInterface::ShowMessage
-      ("ShowArrayIndex() entered, show=%d, mAllowWholeObject=%d\n", show, mAllowWholeObject);
+      ("ShowArrayIndex() entered, show=%d, mAllowWholeObject=%d, mAllowArrayElement=%d\n",
+       show, mAllowWholeObject, mAllowArrayElement);
    #endif
+   
+   if (!mAllowArrayElement)
+   {
+      #ifdef DEBUG_SHOW_ARRAY_INDEX
+      MessageInterface::ShowMessage("ShowArrayIndex() leaving, since array element is not allowed\n");
+      #endif
+      return;
+   }
    
    mParameterSizer->Show(mRowStaticText, show, true);
    mParameterSizer->Show(mColStaticText, show, true);
@@ -1779,8 +1791,20 @@ wxString ParameterSelectDialog::GetPropertySelection()
 wxString ParameterSelectDialog::FormArrayElement()
 {
    #ifdef DEBUG_PARAMETER
-   MessageInterface::ShowMessage("FormArrayElement() entered\n");
+   MessageInterface::ShowMessage
+      ("FormArrayElement() entered, mAllowArrayElement=%d\n", mAllowArrayElement);
    #endif
+   
+   if (!mAllowArrayElement)
+   {
+      wxString arrayStr = GetObjectSelection();
+      #ifdef DEBUG_PARAMETER
+      MessageInterface::ShowMessage
+         ("FormArrayElement() returning '%s', since array element is not allowd\n",
+          arrayStr.c_str());
+      #endif
+      return arrayStr;
+   }
    
    wxString rowStr = mRowTextCtrl->GetValue();
    wxString colStr = mColTextCtrl->GetValue();

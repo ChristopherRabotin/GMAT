@@ -44,10 +44,7 @@ private:
    wxArrayString mObjectTypeList;
    int  mNumInput;
    int  mNumOutput;
-   
-   wxGrid *theInputGrid;
-   wxGrid *theOutputGrid;
-   
+      
    wxComboBox *theFunctionComboBox;
    
    wxTextCtrl *theInputTextCtrl;
@@ -63,7 +60,6 @@ private:
    
    // event handling
    void OnComboChange(wxCommandEvent &event);
-   void OnCellRightClick(wxGridEvent &event);
    void OnButtonClick(wxCommandEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
@@ -77,9 +73,6 @@ private:
       ID_BUTTON,
       ID_CHECKBOX,
       ID_GRID,
-      MENU_INSERT_P,
-      MENU_DELETE_P,
-      MENU_CLEAR_P,
       ID_TEXT,
    };
 };

@@ -67,7 +67,7 @@ public:
    Integer       SetOutputBuffer(Integer size);
    char*         GetOutputBuffer();
    bool          IsOpen(const std::string &engineName = "");
-   void          RunMatlabString(std::string evalString); 
+   void          RunMatlabString(const std::string &evalString); 
    void          SetMatlabMode(Integer mode);
    Integer       GetMatlabMode();
    

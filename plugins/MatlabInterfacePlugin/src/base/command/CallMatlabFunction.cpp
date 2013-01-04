@@ -109,7 +109,8 @@ CallMatlabFunction& CallMatlabFunction::operator=(const CallMatlabFunction& cf)
 //------------------------------------------------------------------------------
 // std::string FormEvalString()
 //  String format
-//    [Out1, Out2] = FunctionName(In1, In2, In3);
+//    [Out1, Out2] = FunctionName(In1, In2, In3) or
+//    [arrA(3,3)] = FunctionName(arrB(2,2)) - Implemented on 2013.01.04 by LOJ
 //------------------------------------------------------------------------------
 std::string CallMatlabFunction::FormEvalString()
 {
@@ -124,22 +125,28 @@ std::string CallMatlabFunction::FormEvalString()
    if (mOutputList.size() > 1)
    {
       evalString = evalString + "[";
-      Parameter *param = (Parameter *)mOutputList[0];
-      evalString = evalString + param->GetName();
-      
-      for (unsigned int i=1; i<mOutputList.size(); i++)
+      //Parameter *param = (Parameter *)mOutputList[0];
+      //evalString = evalString + param->GetName();
+      std::string outName = mOutputNames[0];
+      evalString = evalString + outName;
+      //for (unsigned int i=1; i<mOutputList.size(); i++)
+      for (unsigned int i=1; i<mOutputNames.size(); i++)
       {
-         param = (Parameter *)mOutputList[i];
-         evalString = evalString +", " + param->GetName();
+         //param = (Parameter *)mOutputList[i];
+         //evalString = evalString + ", " + param->GetName();
+         outName = mOutputNames[i];
+         evalString = evalString + ", " + outName;
       }
       
       evalString = evalString + "] = ";
    }
    else if (mOutputList.size() == 1)
    {
-      Parameter *param = (Parameter *)mOutputList[0];
-      evalString = "[" + evalString + param->GetName() + "]";
-      evalString = evalString +" = ";
+      //Parameter *param = (Parameter *)mOutputList[0];
+      //evalString = "[" + evalString + param->GetName() + "]";
+      std::string outName = mOutputNames[0];
+      evalString = "[" + evalString + outName + "]";
+      evalString = evalString + " = ";
    }
    else if (mOutputList.size() == 0)
    {
@@ -154,18 +161,21 @@ std::string CallMatlabFunction::FormEvalString()
    // right hand side of evaluation string
    // function name and left parenthesis
    evalString = evalString + mFunction->GetName().c_str() + "(";
-
-
+   
    // input parameters
    if (mInputList.size() > 0)
    {
-      Parameter *param = (Parameter *)mInputList[0];
-      evalString = evalString + param->GetName();
-
-      for (unsigned int i=1; i<mInputList.size(); i++)
+      //Parameter *param = (Parameter *)mInputList[0];
+      //evalString = evalString + param->GetName();
+      std::string inName = mInputNames[0];
+      evalString = evalString + inName;
+      //for (unsigned int i=1; i<mInputList.size(); i++)
+      for (unsigned int i=1; i<mInputNames.size(); i++)
       {
-         param = (Parameter *)mInputList[i];
-         evalString = evalString + ", " + param->GetName();
+         //param = (Parameter *)mInputList[i];
+         //evalString = evalString + ", " + param->GetName();
+         inName = mInputNames[i];
+         evalString = evalString + ", " + inName;
       }
    }
    
@@ -489,7 +499,7 @@ bool CallMatlabFunction::ExecuteMatlabFunction()
          (".....Sending input parameter <%p> '%s', %d out of %d\n", param,
           mInputNames[i].c_str(), i+1, mNumInputParams);
       #endif
-      SendInParam(param);
+      SendInParam(param, mInputNames[i]);
    }
    
    //  Eval String
@@ -511,12 +521,14 @@ bool CallMatlabFunction::ExecuteMatlabFunction()
 
 
 //------------------------------------------------------------------------------
-// void SendInParam(Parameter *param)
+// void SendInParam(Parameter *param, const std::string &inStr)
 //------------------------------------------------------------------------------
-void CallMatlabFunction::SendInParam(Parameter *param)
+void CallMatlabFunction::SendInParam(Parameter *param, const std::string &inStr)
 {
    #ifdef DEBUG_SEND_PARAM
-   MessageInterface::ShowMessage("CallMatlabFunction::SendInParam()");
+   MessageInterface::ShowMessage
+      ("CallMatlabFunction::SendInParam() entered, param=<%p>'%s', inStr='%s'\n",
+       param, param ? param->GetName().c_str() : "NULL", inStr.c_str());
    #endif
    
    if (param == NULL)
@@ -545,6 +557,30 @@ void CallMatlabFunction::SendInParam(Parameter *param)
          ("numRows=%d, numCols=%d\nrmatrix=\n%s\n", numRows, numCols,
           rmatrix.ToString(16).c_str());
       #endif
+      
+      // If sending array element, use EvalString (GMT-3324 fix, LOJ:2013.01.04)
+      if (GmatStringUtil::IsParenPartOfArray(inStr))
+      {
+         std::string name, rowStr, colStr;
+         Integer row, col;
+         GmatStringUtil::GetArrayIndex(inStr, rowStr, colStr, row, col, name);
+         
+         #ifdef DEBUG_SEND_PARAM
+         MessageInterface::ShowMessage
+            ("'%s' is an array element, rows=%d, cols=%d\n", inStr.c_str(), row, col);
+         #endif
+         
+         if (row == -1 || col == -1)
+         {
+            std::string msg =
+               "Input array element index is invalid, it must be greater than 0 in " + inStr;
+            #ifdef DEBUG_SEND_PARAM
+            MessageInterface::ShowMessage("CallMatlabFunction::SendInParam() " + msg + "\n");
+            #endif
+            throw CommandException(msg);
+         }
+      }
+      
       
       //----------------------------------------------------
       #ifdef __USE_EVAL_STRING__
@@ -601,7 +637,7 @@ void CallMatlabFunction::SendInParam(Parameter *param)
       os.precision(18);
       os << param->EvaluateReal();
       
-      std::string inParamString = paramName +" = " + os.str() +";";
+      std::string inParamString = paramName + " = " + os.str() + ";";
       
       #ifdef DEBUG_SEND_PARAM
       MessageInterface::ShowMessage
@@ -650,16 +686,24 @@ void CallMatlabFunction::SendInParam(Parameter *param)
             param->EvaluateReal();
             inParamString = paramName + " = " + param->ToString();
          }
+         else if (returnType == Gmat::STRING_TYPE)
+         {
+            // Evaluate Parameter first then get String value
+            param->EvaluateString();
+            inParamString = paramName + " = " + "'" + param->ToString() + "'";
+         }
          else
          {
             MessageInterface::ShowMessage
-               ("**** ERROR **** Sendng non-REAL type of Parameter has not been implemented yet.\n");
+               ("**** ERROR **** Sendng non-REAL or non-STRING type of Parameter "
+                "has not been implemented yet.\n");
          }
       }
       else
       {
          #ifdef DEBUG_SEND_PARAM
-         MessageInterface::ShowMessage("It is not a Parameter, so calling GetGeneratingString()\n");
+         MessageInterface::ShowMessage
+            ("It is not a Parameter, so calling GetGeneratingString()\n");
          #endif
          
          if (param->GetTypeName() == "Spacecraft")
@@ -693,11 +737,12 @@ void CallMatlabFunction::GetOutParams()
       {
          Parameter *param = (Parameter *)mOutputList[i];
          std::string varName = param->GetName();
+         std::string outStr = mOutputNames[i];
          
          #ifdef DEBUG_GET_OUTPUT
          MessageInterface::ShowMessage
-            ("CallMatlabFunction::GetOutParams() OutParamType=%s, name=%s\n",
-             param->GetTypeName().c_str(), varName.c_str());
+            ("CallMatlabFunction::GetOutParams() OutParamType=%s, name=%s, outStr=%s\n",
+             param->GetTypeName().c_str(), varName.c_str(), outStr.c_str());
          #endif
          
          if (param->GetTypeName() == "Array")
@@ -715,9 +760,13 @@ void CallMatlabFunction::GetOutParams()
             
             #ifdef DEBUG_GET_OUTPUT
             MessageInterface::ShowMessage
+               ("numRows=%d, numCols=%d, totalCells=%d\n", numRows, numCols, totalCells);
+            MessageInterface::ShowMessage
                ("CallMatlabFunction::GetOutParams() calling MI::GetRealArray()\n");
             #endif
-            if (matlabIf->GetRealArray(varName, totalCells, outArray) == 0)
+            
+            Integer numReceived = matlabIf->GetRealArray(varName, totalCells, outArray);
+            if (numReceived == 0)
             {
                std::string msg =
                   "CallMatlabFunction::GetOutParams() error occurred in matlabIf->GetRealArray()";
@@ -730,9 +779,9 @@ void CallMatlabFunction::GetOutParams()
             #ifdef DEBUG_GET_OUTPUT
             MessageInterface::ShowMessage("outArray  = \n");
             for (Integer i=0; i < totalCells; i++)
-               MessageInterface::ShowMessage("   %f.12\n", outArray[i]);
+               MessageInterface::ShowMessage("   %.12f\n", outArray[i]);
             #endif
-            
+                           
             // Since MATLAB stores array in column major order, it needs to take transpose
             // before putting array to matrix.
             Rmatrix colMajorMat(numCols, numRows);
@@ -741,7 +790,7 @@ void CallMatlabFunction::GetOutParams()
                   colMajorMat(i,j) = outArray[i*numRows+j];
             
             #ifdef DEBUG_SHOW_ARRAY
-            MessageInterface::ShowMessage("colMajorMat=\n%s\n", colMajorMat.ToString(16));
+            MessageInterface::ShowMessage("colMajorMat=\n%s\n", colMajorMat.ToString(16).c_str());
             #endif
             
             // Create row major matrix
@@ -751,9 +800,39 @@ void CallMatlabFunction::GetOutParams()
             #ifdef DEBUG_SHOW_ARRAY
             MessageInterface::ShowMessage("rowMajorMat=\n%s\n", rowMajorMat.ToString(16).c_str());
             #endif
-            
-            // assign rowMajorMat to array
-            array->SetRmatrixParameter("RmatValue", rowMajorMat);
+                        
+            // Handle array element here (GMT-3324 fix, LOJ:2013.01.04)
+            if (GmatStringUtil::IsParenPartOfArray(outStr))
+            {
+               std::string name, rowStr, colStr;
+               Integer row, col;
+               GmatStringUtil::GetArrayIndex(outStr, rowStr, colStr, row, col, name);
+               
+               #ifdef DEBUG_GET_OUTPUT
+               MessageInterface::ShowMessage
+                  ("'%s' is an array element, rows=%d, cols=%d\n", outStr.c_str(), row, col);
+               #endif
+               
+               if (row == -1 || col == -1)
+               {
+                  std::string msg =
+                     "Output array element index is invalid, it must be greater than 0 in " + outStr;
+                  #ifdef DEBUG_SEND_PARAM
+                  MessageInterface::ShowMessage("CallMatlabFunction::GetOutParams() " + msg + "\n");
+                  #endif
+                  throw CommandException(msg);
+               }
+               else
+               {
+                  // Set array element
+                  array->SetRealParameter("SingleValue", rowMajorMat(row, col), row, col);
+               }
+            }
+            else
+            {
+               // Assign rowMajorMat to array
+               array->SetRmatrixParameter("RmatValue", rowMajorMat);
+            }
             
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
@@ -869,9 +948,9 @@ void CallMatlabFunction::GetOutParams()
 
 
 //------------------------------------------------------------------------------
-// void EvalMatlabString(std::string evalString)
+// void EvalMatlabString(const std::string &evalString)
 //------------------------------------------------------------------------------
-void CallMatlabFunction::EvalMatlabString(std::string evalString)
+void CallMatlabFunction::EvalMatlabString(const std::string &evalString)
 {
    #ifdef DEBUG_MATLAB_EVAL
    MessageInterface::ShowMessage
@@ -879,7 +958,7 @@ void CallMatlabFunction::EvalMatlabString(std::string evalString)
        "======================================================================\n"
        "%s\n\n", evalString.c_str());
    #endif
-
+   
    matlabIf->RunMatlabString(evalString);
 }
 
@@ -920,7 +999,7 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
       return;
    }
    
-   StringTokenizer st(buffer, ": \n");
+   StringTokenizer st(buffer, "=\n");
    StringArray tokens = st.GetAllTokens();
    int numTokens = tokens.size();
    
@@ -929,20 +1008,22 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
       ("CallMatlabFunction::UpdateObject() entered, obj=<%p><%s>'%s', numTokens=%d\n",
        obj, obj->GetTypeName().c_str(), obj->GetName().c_str(), numTokens);
    for (int i=0; i<numTokens; i++)
-      MessageInterface::ShowMessage("tokens[%d]=<%s>\n", i, tokens[i].c_str());
+      MessageInterface::ShowMessage("tokens[%2d]=<%s>\n", i, tokens[i].c_str());
    #endif
    
    int id;
    Gmat::ParameterType type;
    std::string objName = obj->GetName();
-   std::string param, value, newValue;
-   Rvector Q(4);
-   bool q1Set = false, q2Set = false, q3Set = false, q4Set = false;
+   std::string name, value, newValue;
    
-   // If answer is returned
-   if (tokens[0] == "ans")
+   // If answer is returned for Parameter
+   if (tokens[0] == "ans ")
    {
-      value = tokens[2];
+      value = tokens[1];
+      value = GmatStringUtil::Strip(value);
+      #ifdef DEBUG_UPDATE_OBJECT
+      MessageInterface::ShowMessage("   Received ans = %s\n", value.c_str());
+      #endif
       if (obj->IsOfType(Gmat::PARAMETER))
       {
          Parameter *param = (Parameter*)obj;
@@ -950,21 +1031,41 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
          {
             if (param->GetReturnType() == Gmat::REAL_TYPE)
             {
-               Real rval = atof(value.c_str());
+               Real rval;
+               if (GmatStringUtil::ToReal(value, rval))
+               {
+                  #ifdef DEBUG_UPDATE_OBJECT
+                  MessageInterface::ShowMessage
+                     ("   Setting rval: %f to object named '%s'\n", rval, objName.c_str());
+                  #endif
+                  param->SetReal(rval);
+               }
+               else
+                  MessageInterface::ShowMessage
+                     ("**** ERROR **** Cannot set \"" + value + "\" to Parameter '" +
+                      objName + "'; The value cannot be converted to Real number\n");
+            }
+            else if (param->GetReturnType() == Gmat::STRING_TYPE)
+            {
+               
                #ifdef DEBUG_UPDATE_OBJECT
-               MessageInterface::ShowMessage("   Setting rval: %f to '%s'\n", rval, objName.c_str());
+               MessageInterface::ShowMessage
+                  ("   Setting string: '%s' to object named '%s'\n", value.c_str(), objName.c_str());
                #endif
-               param->SetReal(rval);
+               param->SetString(value);
             }
             else
             {
                MessageInterface::ShowMessage
-                  ("**** ERROR **** Setting of other type has not been implemented yet.\n");
+                  ("**** ERROR **** Cannot set \"" + value + "\" to Parameter \"" +
+                   objName + "\"; Setting value of non-REAL or non-STRING type has "
+                   "not been implemented yet\n");
             }
          }
          else
             MessageInterface::ShowMessage
-               ("**** ERROR **** The Parameter '%s' is not settable.\n", objName.c_str());
+               ("**** ERROR **** Cannot set \"" + value + "\" to Parameter \"" +
+                objName + "\"; The Parameter is not settable\n");
       }
       #ifdef DEBUG_UPDATE_OBJECT
       MessageInterface::ShowMessage("CallMatlabFunction::UpdateObject() leaving\n");
@@ -972,160 +1073,152 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
       return;
    }
    
-   // Actual parameter starts at 2
-   for (int i=2; i<numTokens; i+=2)
+   //======================================================================
+   // The following is the sample spacecraft output received from the MATLAB
+   //sat2 = 
+   //
+   //                    X: 7123
+   //         UTCGregorian: '01 Jan 2012 11:59:28.000'
+   //                   Q1: 1
+   //                   Q2: 0
+   //                   Q3: 0
+   //                   Q4: 0
+   //           Quaternion: '[ 1 0 0 0]'
+   //======================================================================
+   
+   // Handle whole object here
+   StringArray names;
+   StringArray values;
+   std::string line, sval;
+   
+   // Parse object field names and values
+   #ifdef DEBUG_UPDATE_OBJECT
+   MessageInterface::ShowMessage("===> Parsing object fields and values\n");
+   #endif
+   for (int i = 2; i < numTokens; i++)
    {
-      param = tokens[i];
-      value = (i+1 < numTokens) ? tokens[i+1] : "unknown";
+      line = tokens[i];
+      std::string::size_type index = line.find_first_of(":");
+      name = line.substr(0, index);
+      sval = line.substr(index+1);
+      name = GmatStringUtil::Strip(name);
+      sval = GmatStringUtil::Strip(sval);
+      names.push_back(name);
+      values.push_back(sval);
       #ifdef DEBUG_UPDATE_OBJECT
-      MessageInterface::ShowMessage("\nparam=%s, value=%s\n", param.c_str(), value.c_str());
+      MessageInterface::ShowMessage
+         ("   name = %30s, value = %s\n", name.c_str(), sval.c_str());
       #endif
+   }
+   
+   // Now set object field and its value
+   #ifdef DEBUG_UPDATE_OBJECT
+   MessageInterface::ShowMessage("===> Setting values to object fields\n");
+   #endif
+   
+   std::string fieldType;
+   for (unsigned int i = 0; i < names.size(); i++)
+   {
+      name = names[i];
+      value = values[i];
       
-      id = obj->GetParameterID(param);
-      type = obj->GetParameterType(id);
-      
-      #ifdef DEBUG_UPDATE_OBJECT
-      MessageInterface::ShowMessage("id=%d, type=%d\n", id, type);
-      #endif
-      
-      switch (type)
+      try
       {
-      case Gmat::STRING_TYPE:
-      {
-         #ifdef DEBUG_UPDATE_OBJECT
-         MessageInterface::ShowMessage
-            ("STRING_TYPE: value=<%s>, length=%d\n", value.c_str(), value.length());
-         #endif
-         
-         if (((value.c_str())[0] == '\'') &&
-            ((value.c_str())[value.length()-1] == '\''))
-         {
-            newValue = value.substr(1, value.length()-2);
-         }
-         else if ((value.c_str())[0] == '\'')
-         {
-            // assume it is a gregorian date then DD MMM YYYY hh:mm:ss.sss
-            // this probably isn't the best way, but it will do for now...
-            
-            // DD
-            newValue = value.substr(1, value.length()-1) + " ";
-            i++;
-            
-            // MMM
-            newValue = newValue + value.substr(0, value.length()) + " "; 
-            i++;
-            
-            // YYYY
-            newValue = newValue + value.substr(0, value.length()) + " "; 
-            i++;
-            
-            // hh:
-            newValue = newValue + value.substr(0, value.length()) + ":"; 
-            i++;
-            
-            // mm:                          
-            newValue = newValue + value.substr(0, value.length()) + ":"; 
-            i++;
-
-            // ss.sss
-            newValue = newValue + value.substr(0, value.length()-1); 
-
-         }
-         else
-            newValue = value.substr(1, value.length()-2);
+         id = obj->GetParameterID(name);
+         type = obj->GetParameterType(id);
          
          #ifdef DEBUG_UPDATE_OBJECT
-         MessageInterface::ShowMessage("newValue=<%s>\n", newValue.c_str());
-         #endif
-         obj->SetStringParameter(id, newValue);
-         break;
-      }
-      case Gmat::REAL_TYPE:
-      {
-         Real rval = atof(value.c_str());
-         #ifdef DEBUG_UPDATE_OBJECT
          MessageInterface::ShowMessage
-            ("REAL_TYPE: value=%s, rval=%f\n", value.c_str(), rval);
+            ("   name=%s, value=%s, id=%d, type=%d\n", name.c_str(), value.c_str(), id, type);
          #endif
-         // Special handling for Quaternion
-         if (obj->IsOfType(Gmat::SPACECRAFT) &&
-             (param == "Q1" || param == "Q2" || param == "Q3" || param == "Q4"))
+         
+         switch (type)
          {
-            if (param == "Q1")
-            {
-               Q(0) = rval;
-               q1Set = true;
-            }
-            else if (param == "Q2")
-            {
-               Q(1) = rval;
-               q2Set = true;
-            }
-            else if (param == "Q3")
-            {
-               Q(2) = rval;
-               q3Set = true;
-            }
-            else
-            {
-               Q(3) = rval;
-               q4Set = true;
-            }
-            
-            if (q1Set && q2Set && q3Set && q4Set)
+         case Gmat::REAL_TYPE:
+         {
+            Real rval;
+            if (GmatStringUtil::ToReal(value, rval))
             {
                #ifdef DEBUG_UPDATE_OBJECT
-               MessageInterface::ShowMessage("Setting Quaternion = [%s]\n", Q.ToString().c_str());
+               MessageInterface::ShowMessage
+                  ("      REAL_TYPE: value=%s, rval=%f\n", value.c_str(), rval);
                #endif
-               Integer qid = obj->GetParameterID("Quaternion");
-               obj->SetRvectorParameter(qid, Q);
+               obj->SetRealParameter(id, rval);
             }
+            else
+               MessageInterface::ShowMessage
+                  ("**** ERROR **** Cannot convert \"" + value + "\" to Real number\n");
+            break;
          }
-         else
+         case Gmat::INTEGER_TYPE:
+            Integer ival;
+            if (GmatStringUtil::ToInteger(value, ival))
+            {
+               #ifdef DEBUG_UPDATE_OBJECT
+               MessageInterface::ShowMessage
+                  ("      INTEGER_TYPE: value=%s, ival=%d\n", value.c_str(), ival);
+               #endif
+               obj->SetIntegerParameter(id, ival);
+            }
+            else
+               MessageInterface::ShowMessage
+                  ("**** ERROR **** Cannot convert \"" + value + "\" to Integer number\n");
+            break;
+         case Gmat::STRING_TYPE:
+            fieldType = "STRING_TYPE";
+         case Gmat::RVECTOR_TYPE:
+            if (type != Gmat::STRING_TYPE)
+               fieldType = "RVECTOR_TYPE";
+         case Gmat::ENUMERATION_TYPE:
+            if (type != Gmat::STRING_TYPE && type != Gmat::RVECTOR_TYPE)
+               fieldType = "ENUMERATION_TYPE";
+         case Gmat::OBJECT_TYPE:
+            if (type != Gmat::STRING_TYPE && type != Gmat::RVECTOR_TYPE &&
+                type != Gmat::ENUMERATION_TYPE)
+               fieldType = "OBJECT_TYPE";
+         case Gmat::FILENAME_TYPE:
+            if (type != Gmat::STRING_TYPE && type != Gmat::RVECTOR_TYPE &&
+                type != Gmat::ENUMERATION_TYPE && type != Gmat::OBJECT_TYPE)
+               fieldType = "FILENAME_TYPE";
+            
+            newValue = GmatStringUtil::RemoveEnclosingString(value, "'");
+            #ifdef DEBUG_UPDATE_OBJECT
+            MessageInterface::ShowMessage
+               ("      %s: value=<%s>, newValue=<%s>\n", fieldType.c_str(),
+                value.c_str(), newValue.c_str());
+            #endif
+            obj->SetStringParameter(id, newValue);
+            break;
+         case Gmat::BOOLEAN_TYPE:
          {
-            obj->SetRealParameter(id, rval);
+            bool bval = false;
+            if (value == "1")
+               bval = true;
+            #ifdef DEBUG_UPDATE_OBJECT
+            MessageInterface::ShowMessage
+               ("      BOOLEAN_TYPE: value=<%s>, bval=%d\n", value.c_str(), bval);
+            #endif
+            obj->SetBooleanParameter(id, bval);
+            break;
          }
-         break;
+         default:
+            throw CommandException
+               ("Currently CallMatlabFunction cannot update output object for " + name + 
+                " of parameter type: " + GmatBase::PARAM_TYPE_STRING[type]);
+         }
       }
-      case Gmat::INTEGER_TYPE:
-         #ifdef DEBUG_UPDATE_OBJECT
-         MessageInterface::ShowMessage
-            ("INTEGER_TYPE: value=%s, rval=%f\n", value.c_str(), atof(value.c_str()));
-         #endif
-         obj->SetIntegerParameter(id, atoi(value.c_str()));
-         break;
-      case Gmat::ENUMERATION_TYPE:
-      case Gmat::OBJECT_TYPE:
-      case Gmat::FILENAME_TYPE:
-         newValue = GmatStringUtil::RemoveEnclosingString(value, "'");
-         #ifdef DEBUG_UPDATE_OBJECT
-         MessageInterface::ShowMessage
-            ("ENUMERATION_TYPE: value=<%s>, newValue=<%s>\n", value.c_str(), newValue.c_str());
-         #endif
-         obj->SetStringParameter(id, newValue);
-         break;
-      case Gmat::BOOLEAN_TYPE:
+      catch (BaseException &e)
       {
-         bool bval = false;
-         if (value == "1")
-            bval = true;
-         #ifdef DEBUG_UPDATE_OBJECT
+         // Should we ignore unknown fields?
          MessageInterface::ShowMessage
-            ("BOOLEAN_TYPE: value=<%s>, bval=%d\n", value.c_str(), bval);
-         #endif
-         obj->SetBooleanParameter(id, bval);
-         break;
-      }
-      default:
-         throw CommandException
-            ("Currently CallMatlabFunction cannot update output object for " + param + 
-             " of parameter type: " + GmatBase::PARAM_TYPE_STRING[type]);
+            ("*** WARNING *** The field \"%s\" is not defined in the object named \"%s\", so ignoring\n",
+             name.c_str(), objName.c_str());
       }
    }
    
    #ifdef DEBUG_UPDATE_OBJECT
    MessageInterface::ShowMessage
-      ("new %s=\n%s\n", obj->GetName().c_str(),
+      ("CallMatlabFunction::UpdateObject() leaving, new %s =\n%s\n", obj->GetName().c_str(),
        obj->GetGeneratingString(Gmat::MATLAB_STRUCT).c_str());
    #endif
 }

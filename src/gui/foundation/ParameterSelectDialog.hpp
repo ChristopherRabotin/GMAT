@@ -38,6 +38,7 @@ public:
                          bool allowSysParam = true,
                          bool allowVariable = true,
                          bool allowArray = true,
+                         bool allowArrayElement = true,
                          const wxString &objectType = "Spacecraft",
                          bool createParam = true,
                          bool showSettableOnly = false,
@@ -68,6 +69,7 @@ protected:
    bool mAllowSysParam;
    bool mAllowVariable;
    bool mAllowArray;
+   bool mAllowArrayElement;
    bool mAllowString;
    bool mAllowMultiSelect;
    bool mCreateParam;
