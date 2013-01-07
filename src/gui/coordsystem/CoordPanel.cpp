@@ -535,44 +535,44 @@ bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
    else if (xStr.Contains("R") && (yStr.Contains("R") || zStr.Contains("R")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    else if (xStr.Contains("V") && (yStr.Contains("V") || zStr.Contains("V")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    else if (xStr.Contains("N") && (yStr.Contains("N") || zStr.Contains("N")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    
    if (yStr.Contains("R") && zStr.Contains("R"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    else if (yStr.Contains("V") && zStr.Contains("V"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    else if (yStr.Contains("N") && zStr.Contains("N"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    else if (yStr.IsSameAs("") && zStr.IsSameAs(""))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
+         (Gmat::WARNING_, "The X, Y, and Z axes must be orthogonal.");
       return false;
    }
    
@@ -821,11 +821,14 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
 {
    #ifdef DEBUG_COORD_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("oordPanel::SaveData() entered, coordName=%s, epochFormat=%s, epoch = %s\n",
+      ("CoordPanel::SaveData() entered, coordName=%s, epochFormat=%s, epoch = %s\n",
        coordName.c_str(), epochFormat.c_str(), epochValue.c_str());
+   MessageInterface::ShowMessage("   and axis <%p> of type %s\n", axis, axis->GetTypeName().c_str());
    #endif
    
-   bool canClose       = true;
+   bool canClose              = true;
+   CoordinateSystem *coordSys = NULL;
+   CoordinateSystem *csClone  = NULL;
    
    try
    {
@@ -836,17 +839,22 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                         "The allowed values are: [%s].";                        
 
       // create CoordinateSystem if not exist
-      CoordinateSystem *coordSys =
+      coordSys =
          (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(coordName);
       
       if (coordSys == NULL)
       {
+         #ifdef DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() coordName=%s NOT FOUND in configuration, so must create.\n",
+             coordName.c_str());
+         #endif
          coordSys = (CoordinateSystem*)
             theGuiInterpreter->CreateObject("CoordinateSystem", coordName);
          
          if (coordSys)
          {
-            #ifdef DEBUG_COORD_PANEL
+            #ifdef DEBUG_COORD_PANEL_SAVE
             MessageInterface::ShowMessage
                ("CoordPanel::SaveData() coordName=%s created.\n",
                 coordName.c_str());
@@ -854,11 +862,27 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          }
          else
          {
+            #ifdef DEBUG_COORD_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("CoordPanel::SaveData() coordName %s was not able to be created.\n",
+                coordName.c_str());
+            #endif
             canClose = false;
             return false;
          }
       }
-      
+      #ifdef DEBUG_COORD_PANEL_SAVE
+      else
+      {
+      MessageInterface::ShowMessage
+         ("CoordPanel::SaveData() coordName=%s WAS FOUND in configuration at <%p>!!!\n",
+          coordName.c_str(), coordSys);
+      }
+      #endif
+
+      // Save the original coordSys, so we can get back to it if there are errors
+      csClone = (CoordinateSystem*) coordSys->Clone();
+
       //-------------------------------------------------------
       // set Axis and Origin
       //-------------------------------------------------------
@@ -868,6 +892,11 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
       coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
       coordSys->SetOrigin(origin);
+      #ifdef DEBUG_COORD_PANEL_SAVE
+      MessageInterface::ShowMessage
+         ("CoordPanel::SaveData() axis set on coordSys %s, and origin set to %s <%p>.\n",
+          coordName.c_str(), originName.c_str(), origin);
+      #endif
       
       CelestialBody *j2000body =
          (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth"); // @todo this will need to be changed when we have
@@ -885,14 +914,28 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       //-------------------------------------------------------
       // set primary and secondary 
       //-------------------------------------------------------
+      #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+         MessageInterface::ShowMessage("CoordPanel::SD, primary enabled? %s\n",
+               (primaryComboBox->IsEnabled()? "YES" : "no"));
+         MessageInterface::ShowMessage("CoordPanel::SD, secondary enabled? %s\n",
+               (secondaryComboBox->IsEnabled()? "YES" : "no"));
+      #endif
       // Set primary body if exist
       if (primaryComboBox->IsEnabled())
       {
          wxString primaryName = primaryComboBox->GetValue().Trim();
          SpacePoint *primary = (SpacePoint*)theGuiInterpreter->
             GetConfiguredObject(primaryName.c_str());
-         
-         axis->SetStringParameter("Primary", primaryName.c_str());
+         #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+            MessageInterface::ShowMessage("CoordPanel::SD, primary name = %s\n",
+                  primaryName.c_str());
+            MessageInterface::ShowMessage("CoordPanel::SD, primary object is %s\n",
+                  (primary? "NOT NULL" : "NULL"));
+            MessageInterface::ShowMessage("CoordPanel::SD, axis pointer (%s) is %p\n",
+                  axis->GetTypeName().c_str(), axis);
+         #endif
+         Integer primaryID = axis->GetParameterID("Primary");
+         axis->SetStringParameter(primaryID, primaryName.c_str());
          axis->SetPrimaryObject(primary);
       }
       
@@ -962,11 +1005,14 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
             canClose = false;
          }
       }
-      
+
       // set solar system
       coordSys->SetSolarSystem(theGuiInterpreter->GetSolarSystemInUse());
       try
       {
+         #ifdef DEBUG_COORD_PANEL_SAVE
+            MessageInterface::ShowMessage("In CoordPanel::SaveData, about to initialize coordSys\n");
+         #endif
          coordSys->Initialize();
       }
       catch (BaseException &be)
@@ -974,6 +1020,11 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          // Need to popup this error here
          MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage().c_str());
          canClose = false;
+         if (csClone != NULL)
+         {
+            coordSys->Copy(csClone);
+            delete csClone;
+         }
          return canClose;
       }
    }
@@ -982,6 +1033,11 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       MessageInterface::ShowMessage
          ("*** Error *** %s\n", e.GetFullMessage().c_str());
       canClose = false;
+      if (csClone != NULL)
+      {
+         coordSys->Copy(csClone);
+         delete csClone;
+      }
    }
 
    #ifdef DEBUG_COORD_PANEL_SAVE

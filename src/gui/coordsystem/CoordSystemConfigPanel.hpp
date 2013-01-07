@@ -55,6 +55,8 @@ private:
    virtual void LoadData();
    virtual void SaveData();
    
+   virtual void ResetFlags();
+
    // data handling methods
    void OnTextUpdate(wxCommandEvent& event);
    void OnComboUpdate(wxCommandEvent& event);

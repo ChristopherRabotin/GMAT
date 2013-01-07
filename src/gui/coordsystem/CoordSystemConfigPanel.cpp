@@ -283,6 +283,7 @@ void CoordSystemConfigPanel::SaveData()
             origin->SetJ2000Body(j2000body);
          }
       }
+      ResetFlags();
 
    }
    catch (BaseException &e)
@@ -292,6 +293,19 @@ void CoordSystemConfigPanel::SaveData()
    }
 }
 
+//------------------------------------------------------------------------------
+// void ResetFlags()
+//------------------------------------------------------------------------------
+/**
+ * resets modified flags
+ */
+//------------------------------------------------------------------------------
+void CoordSystemConfigPanel::ResetFlags()
+{
+   mOriginChanged = false;
+   mObjRefChanged = false;
+   mEpochChanged  = false;
+}
 
 //------------------------------------------------------------------------------
 // void OnTextUpdate(wxCommandEvent& event)
