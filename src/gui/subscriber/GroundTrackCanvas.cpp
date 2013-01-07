@@ -830,7 +830,17 @@ void GroundTrackCanvas::DrawFrame()
       Refresh(false);
    }
    
-   // final refresh, in case number of points is less than 50
+   // Draw final point if not drawn (GMT-3264 fix)
+   if (mNumData < numberOfData)
+   {
+      mNumData = numberOfData;
+      #if DEBUG_ANIMATION
+      MessageInterface::ShowMessage("   ==> Drawing final point\n");
+      #endif
+      ComputeRingBufferIndex();
+   }
+   
+   // Final refresh, in case number of points is less than 50
    Refresh(false);
    
    mNumData = numberOfData;
