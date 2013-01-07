@@ -1773,6 +1773,9 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp">
       <Filter>Source Files\gui\spacecraft</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
