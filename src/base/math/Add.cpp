@@ -145,7 +145,7 @@ void Add::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
          colCount = col1;
       }
       else
-         throw MathException("Dimentions are not the same, can not add.\n");    
+         throw MathException("Dimensions are not the same, cannot add.\n");
    }
    else
    {
