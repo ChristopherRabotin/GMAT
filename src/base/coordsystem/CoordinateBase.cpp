@@ -737,3 +737,36 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
 }
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames the specified reference object to the specified new name.
+ *
+ * @param type type of the reference object to rename
+ * @param oldName old name of the object
+ * @param newName new name of the object
+ *
+ * @return true if rename is successful or not necessary because the
+ *         axis system does not contain a reference to the object;
+ *         false otherwise
+ */
+//---------------------------------------------------------------------------
+bool CoordinateBase::RenameRefObject(const Gmat::ObjectType type,
+                                     const std::string &oldName,
+                                     const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("CoordinateBase::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+
+   if (originName == oldName)
+      originName = newName;
+
+   return true;
+}
+

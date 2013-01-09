@@ -1189,11 +1189,12 @@ bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type == Gmat::CALCULATED_POINT || type == Gmat::SPACECRAFT)
-      if (originName == oldName)
-         originName = newName;
-   
-   return true;
+   if (!CoordinateBase::RenameRefObject(type, oldName, newName))
+      return false;
+   if (axes)
+      return axes->RenameRefObject(type, oldName, newName);
+   else
+      return true;
 }
 
 

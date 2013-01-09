@@ -33,7 +33,7 @@
 //#define DEBUG_OR_AXES
 //#define DEBUG_ROT_MATRIX
 //#define DEBUG_REFERENCE_SETTING
-
+//#define DEBUG_RENAME
 
 #ifdef DEBUG_OR_AXES
 #include <iostream>
@@ -493,14 +493,11 @@ bool ObjectReferencedAxes::RenameRefObject(const Gmat::ObjectType type,
                                            const std::string &oldName,
                                            const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("ObjectReferencedAxes::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
-
-   if (type != Gmat::CALCULATED_POINT)
-      return true;
 
    if (primaryName == oldName)
       primaryName = newName;
@@ -508,7 +505,7 @@ bool ObjectReferencedAxes::RenameRefObject(const Gmat::ObjectType type,
    if (secondaryName == oldName)
       secondaryName = newName;
 
-   return true;
+   return AxisSystem::RenameRefObject(type, oldName, newName);
 }
 
 
