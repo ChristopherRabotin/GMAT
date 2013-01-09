@@ -234,6 +234,8 @@ protected:
    
    static const Integer MAX_NUM_TANKS;
 
+   static const std::string MISSION_CHANGE_MESSAGE;
+
 
    /// Map containing names and associated types
    ObjectTypeMap        association;

@@ -93,6 +93,10 @@ const Gmat::ParameterType
 
 const Integer GmatCommand::MAX_NUM_TANKS = 20;
 
+const std::string GmatCommand::MISSION_CHANGE_MESSAGE =
+         "*** Changes made to the mission will not be reflected in the data "
+         "displayed until the mission is rerun ***\n\n";
+
 Integer GmatCommand::satEpochID = -1;
 Integer GmatCommand::satCdID;
 Integer GmatCommand::satDragAreaID;
@@ -1166,11 +1170,6 @@ bool GmatCommand::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 std::string GmatCommand::GetStringParameter(const Integer id) const
 {
-//   if (id == COMMENT)
-//   {
-//      return comment;
-//   }
-         
    if (id == SUMMARY)
    {
       // This call is not const, so need to break const-ness here:
@@ -1191,6 +1190,7 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
          MessageInterface::ShowMessage("Mission Summary:\n%s\n",
                missionSummary.c_str());
       #endif
+      missionSummary = MISSION_CHANGE_MESSAGE + missionSummary;
       return missionSummary;
    }
          
@@ -2255,6 +2255,8 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    // Write the separator and the name and type of the command first
    if (summaryForEntireMission)
       data << "======  ";
+   else
+      data << MISSION_CHANGE_MESSAGE;
 
    // Handle special case of EndScript -> we want ScriptEvent for individual command summary
    if ((!summaryForEntireMission) && (typeName == "EndScript"))
@@ -2664,9 +2666,8 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
          MessageInterface::ShowMessage("... about to ask for summary for command %s of type %s\n",
                next->GetSummaryName().c_str(), next->GetTypeName().c_str());
       #endif
-      missionSummary += next->GetStringParameter("MissionSummary");
+      missionSummary += next->BuildMissionSummaryString(next);
    }
-   
    return missionSummary;
 }
 

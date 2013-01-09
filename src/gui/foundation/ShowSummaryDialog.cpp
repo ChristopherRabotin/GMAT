@@ -131,7 +131,7 @@ void ShowSummaryDialog::Create()
 //      w = (w + 200 > 1000 ? 1000 : w + 200);
 //      h = (h > 700 ? 700 : h);
       #ifdef __WXMAC__
-         scriptPanelSize.Set(635, 735);
+         scriptPanelSize.Set(658, 735);
       #else
          scriptPanelSize.Set(775, 735);
       #endif
