@@ -2979,7 +2979,7 @@ bool Propagate::Initialize()
             LocateObjectEvents(mapObj, els);
 
             if (so->GetType() == Gmat::FORMATION)
-               ((Formation*)(so))->BuildState();
+               ((FormationInterface*)(so))->BuildState();
 //            FillFormation(so, owners, elements);
 //            else
 //            {
@@ -3264,7 +3264,7 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
          SetNames(el->GetName(), owners, elements);
    }
 
-   ((Formation*)(so))->BuildState();
+   ((FormationInterface*)(so))->BuildState();
 }
 
 

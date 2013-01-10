@@ -30,9 +30,10 @@
 
 // Headers for the referenced classes
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
+#include "FormationInterface.hpp"
+
 
 //#define DUMP_PLANET_DATA
 

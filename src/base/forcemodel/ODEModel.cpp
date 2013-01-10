@@ -51,14 +51,12 @@
 // ***************************************************************************
 
 #include "ODEModel.hpp"
-#include "Formation.hpp"
 #include "MessageInterface.hpp"
 #include "PropagationStateManager.hpp"
 #include "TimeTypes.hpp"
 
 #include "GravityField.hpp"
-//#include "PointMassForce.hpp"
-//#include "Formation.hpp"      // for BuildState()
+#include "FormationInterface.hpp"
 
 #include <string.h> 
 #include <algorithm>    // for find()
@@ -109,6 +107,7 @@ std::ofstream debugFile;
 #ifdef DEBUG_FIRST_CALL
 static bool firstCallFired = false;
 #endif
+
 
 const std::string
 ODEModel::PARAMETER_TEXT[ODEModelParamCount - PhysicalModelParamCount] =
@@ -1005,7 +1004,7 @@ void ODEModel::UpdateSpaceObject(Real newEpoch)
    // Update elements for each Formation
    for (UnsignedInt i = 0; i < stateObjects.size(); ++i)
       if (stateObjects[i]->IsOfType(Gmat::FORMATION))
-         ((Formation*)stateObjects[i])->UpdateElements();
+         ((FormationInterface*)stateObjects[i])->UpdateElements();
    
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage
@@ -1039,7 +1038,7 @@ void ODEModel::UpdateFromSpaceObject()
    // Update elements for each Formation
    for (UnsignedInt i = 0; i < stateObjects.size(); ++i)
       if (stateObjects[i]->IsOfType(Gmat::FORMATION))
-         ((Formation*)stateObjects[i])->UpdateState();
+         ((FormationInterface*)stateObjects[i])->UpdateState();
 
    psm->MapObjectsToVector();
    GmatState *state = psm->GetState();
@@ -1187,7 +1186,7 @@ bool ODEModel::BuildModelFromMap()
          currentObject = (*map)[index]->object;
          if (currentObject->IsOfType(Gmat::FORMATION))
          {
-            Formation *form = (Formation*)currentObject;
+            FormationInterface *form = (FormationInterface*)currentObject;
             ObjectArray oa = form->GetRefObjectArray(Gmat::SPACEOBJECT);
             Integer fc = oa.size();
             objectCount += fc;

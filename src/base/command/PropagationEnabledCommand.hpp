@@ -28,7 +28,7 @@
 #include "Propagator.hpp"
 
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
+#include "FormationInterface.hpp"
 #include "RootFinder.hpp"
 
 
@@ -38,6 +38,7 @@ typedef std::vector<GmatBase*> PropObjectArray;
 
 #define TIME_ROUNDOFF 1.0e-6
 #define DEFAULT_STOP_TOLERANCE 1.0e-7
+
 
 
 /**
@@ -117,7 +118,7 @@ protected:
    /// formBuffer let us restore the Spacecraft and Formations to the state
    /// needed for the last step
    std::vector<Spacecraft *>    satBuffer;
-   std::vector<Formation *>     formBuffer;
+   std::vector<FormationInterface *>     formBuffer;
 
    // Event location management structures
    /// Number of active events in the current propagation

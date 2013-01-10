@@ -28,7 +28,6 @@
 #include "Moderator.hpp"
 
 // factories
-#include "AssetFactory.hpp"
 #include "AtmosphereFactory.hpp"
 #include "AttitudeFactory.hpp"
 #include "AxisSystemFactory.hpp"
@@ -243,7 +242,6 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new SubscriberFactory());
 
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
-      theFactoryManager->RegisterFactory(new AssetFactory());
             
       // Create publisher
       thePublisher = Publisher::Instance();

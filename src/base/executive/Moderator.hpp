@@ -43,7 +43,6 @@
 #include "ODEModel.hpp"
 #include "Propagator.hpp"
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
 #include "Parameter.hpp"
 #include "StopCondition.hpp"
 #include "Solver.hpp"

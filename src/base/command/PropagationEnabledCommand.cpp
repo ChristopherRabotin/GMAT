@@ -966,8 +966,8 @@ void PropagationEnabledCommand::AddToBuffer(SpaceObject *so)
    }
    else if (so->IsOfType(Gmat::FORMATION))
    {
-      Formation *form = (Formation*)so;
-      Formation *clonedForm = (Formation *)(so->Clone());
+      FormationInterface *form = (FormationInterface*)so;
+      FormationInterface *clonedForm = (FormationInterface *)(so->Clone());
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (clonedForm, clonedForm->GetName(), "Propagate::AddToBuffer()",
@@ -1007,7 +1007,7 @@ void PropagationEnabledCommand::EmptyBuffer()
    }
    satBuffer.clear();
 
-   for (std::vector<Formation *>::iterator i = formBuffer.begin();
+   for (std::vector<FormationInterface *>::iterator i = formBuffer.begin();
         i != formBuffer.end(); ++i)
    {
       #ifdef DEBUG_MEMORY
@@ -1032,7 +1032,7 @@ void PropagationEnabledCommand::EmptyBuffer()
 void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
 {
    Spacecraft *fromSat, *toSat;
-   Formation *fromForm, *toForm;
+   FormationInterface *fromForm, *toForm;
    std::string soName;
 
    for (std::vector<Spacecraft *>::iterator i = satBuffer.begin();
@@ -1077,7 +1077,7 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
       #endif
    }
 
-   for (std::vector<Formation *>::iterator i = formBuffer.begin();
+   for (std::vector<FormationInterface *>::iterator i = formBuffer.begin();
         i != formBuffer.end(); ++i)
    {
       soName = (*i)->GetName();
@@ -1087,13 +1087,13 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
       #endif
       if (fillingBuffer)
       {
-         fromForm = (Formation *)FindObject(soName);
+         fromForm = (FormationInterface *)FindObject(soName);
          toForm = *i;
       }
       else
       {
          fromForm = *i;
-         toForm = (Formation *)FindObject(soName);
+         toForm = (FormationInterface *)FindObject(soName);
       }
 
       #ifdef DEBUG_STATE_BUFFERING

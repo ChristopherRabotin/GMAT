@@ -453,9 +453,6 @@
     <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\solarsys\SolarSystemWindow.cpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
@@ -918,9 +915,6 @@
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\solarsys\SolarSystemWindow.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp">
