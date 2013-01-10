@@ -1333,6 +1333,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    lat1 *= GmatMathConstants::DEG_PER_RAD;
    lon2 *= GmatMathConstants::DEG_PER_RAD;
    lat2 *= GmatMathConstants::DEG_PER_RAD;
+   Real latM = (lat1 + lat2) / 2.0;
    
    #if DEBUG_DRAW_LINE
    MessageInterface::ShowMessage
@@ -1347,52 +1348,56 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    // Why  it doesn't use alpha?
    //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
    glLineWidth(0.5);
-   
-   Integer dir1 = GmatMathUtil::SignOf(v1[1] * r1[0] - v1[0] * r1[1]);
-   Integer dir2 = GmatMathUtil::SignOf(v2[1] * r2[0] - v2[0] * r2[1]);
-   Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
+      
    Real plusLon1 = GmatMathUtil::Mod(lon1, GmatMathConstants::TWO_PI_DEG);
-   Real minusLon2 = GmatMathUtil::Mod(lon2, -GmatMathConstants::TWO_PI_DEG);
+   Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
    Real minusLon1 = GmatMathUtil::Mod(lon1, -GmatMathConstants::TWO_PI_DEG);
+   Real minusLon2 = GmatMathUtil::Mod(lon2, -GmatMathConstants::TWO_PI_DEG);
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage
+      ("   plusLon1=%f, plusLon2=%f, minusLon1=%f, minusLon2=%f\n",
+       plusLon1, plusLon2, minusLon1, minusLon2);
+   #endif
+   
+   bool atLhsBorder = false;
+   bool atRhsBorder = false;
    Real m1, lat3;
+   if ((GmatMathUtil::SignOf(lon1) == -1 && GmatMathUtil::SignOf(lon2) == 1) &&
+       ((lon2 - lon1) > 180))
+      atLhsBorder = true;
+   if ((GmatMathUtil::SignOf(lon1) == 1 && GmatMathUtil::SignOf(lon2) == -1) &&
+       ((lon1 - lon2) > 180))
+      atRhsBorder = true;
    
    #if DEBUG_DRAW_LINE
    MessageInterface::ShowMessage
-      ("   plusLon2=%f, plusLon1=%f, minusLon2=%f, minusLon1=%f\n",
-       plusLon2, plusLon1, minusLon2, minusLon1);
+      ("   atLhsBorder=%d, atRhsBorder=%d\n", atLhsBorder, atRhsBorder);
    #endif
    
-   #if DEBUG_DRAW_LINE
-   MessageInterface::ShowMessage("   dir1=%d, dir2=%d\n", dir1, dir2);
-   #endif
-   
-   // New point wrapps off RHS border
-   if (dir2 == 1 && dir1 == 1 &&
-       plusLon1 < GmatMathConstants::PI_DEG &&
-       plusLon2 > GmatMathConstants::PI_DEG)
-   {
-      m1 = (lat2 - lat1) / (plusLon2 - plusLon1);
-      lat3 = m1 * (GmatMathConstants::PI_DEG - plusLon2) + lat2;
-      #if DEBUG_DRAW_LINE
-      MessageInterface::ShowMessage("------> at RHS border, lat3=%f\n", lat3);
-      #endif
-      
-      DrawLine(lon1, lat1, GmatMathConstants::PI_DEG, lat3);
-      DrawLine(-GmatMathConstants::PI_DEG, lat3, lon2, lat2);
-   }
-   // New point wrapps off LHS border
-   else if (dir2 == -1 && dir1 == -1 &&
-            minusLon2 < -GmatMathConstants::PI_DEG &&
-            minusLon1 > -GmatMathConstants::PI_DEG)
+   if (atLhsBorder)
    {
       m1 = (lat2 - lat1) / (minusLon2 - minusLon1);
       lat3 = m1 * (-GmatMathConstants::PI_DEG - minusLon2) + lat2;
+      
       #if DEBUG_DRAW_LINE
-      MessageInterface::ShowMessage("   ------> at LHS border, lat3=%f\n", lat3);
+      MessageInterface::ShowMessage
+         ("------> at LHS border, m1=%f, lat3=%f\n", lonDiff, latDiff, m1, lat3);
       #endif
       
       DrawLine(lon1, lat1, -GmatMathConstants::PI_DEG, lat3);
       DrawLine(GmatMathConstants::PI_DEG, lat3, lon2, lat2);
+   }
+   else if (atRhsBorder)
+   {
+      m1 = (lat2 - lat1) / (plusLon2 - plusLon1);
+      lat3 = m1 * (GmatMathConstants::PI_DEG - plusLon2) + lat2;
+            
+      #if DEBUG_DRAW_LINE
+      MessageInterface::ShowMessage("------> at RHS border, m1=%f, lat3=%f\n", m1, lat3);
+      #endif
+      
+      DrawLine(lon1, lat1, GmatMathConstants::PI_DEG, lat3);
+      DrawLine(-GmatMathConstants::PI_DEG, lat3, lon2, lat2);
    }
    else
    {
