@@ -160,7 +160,7 @@ HEADERS = -Iinclude \
 OBJECTS = \
     asset/AssetException.o \
     asset/BodyFixedPoint.o \
-    asset/GroundStation.o \
+    asset/GroundstationInterface.o \
     attitude/Attitude.o \
     attitude/AttitudeException.o \
     attitude/CSFixed.o \
@@ -215,7 +215,6 @@ OBJECTS = \
     command/PropagationEnabledCommand.o \
     command/Report.o \
     command/RunSolver.o \
-    command/Save.o \
     command/SaveMission.o \
     command/SolverBranchCommand.o \
     command/SolverSequenceCommand.o \
@@ -273,7 +272,6 @@ OBJECTS = \
     executive/SandboxException.o \
     executive/Sandbox.o \
     factory/AtmosphereFactory.o \
-    factory/AssetFactory.o \
     factory/AttitudeFactory.o \
     factory/AxisSystemFactory.o \
     factory/BurnFactory.o \
@@ -485,7 +483,7 @@ OBJECTS = \
     solver/Gradient.o \
     solver/Jacobian.o \
     solver/LineSearch.o \
-    spacecraft/Formation.o \
+    spacecraft/FormationInterface.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
     spacecraft/TextTrajectoryFile.o \
