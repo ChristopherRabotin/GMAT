@@ -303,7 +303,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\asset\AssetException.cpp" />
     <ClCompile Include="..\..\..\src\base\asset\BodyFixedPoint.cpp" />
-    <ClCompile Include="..\..\..\src\base\asset\GroundStation.cpp" />
+    <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
@@ -364,7 +364,6 @@
     <ClCompile Include="..\..\..\src\base\command\PropagationEnabledCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Report.cpp" />
     <ClCompile Include="..\..\..\src\base\command\RunSolver.cpp" />
-    <ClCompile Include="..\..\..\src\base\command\Save.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SolverBranchCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp" />
@@ -421,7 +420,6 @@
     <ClCompile Include="..\..\..\src\base\executive\PublisherException.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Sandbox.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\SandboxException.cpp" />
-    <ClCompile Include="..\..\..\src\base\factory\AssetFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\AttitudeFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\AxisSystemFactory.cpp" />
@@ -644,7 +642,7 @@
     <ClCompile Include="..\..\..\src\base\solver\Optimizer.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\Solver.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\SteepestDescent.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp" />
+    <ClCompile Include="..\..\..\src\base\spacecraft\FormationInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
@@ -749,7 +747,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\asset\AssetException.hpp" />
     <ClInclude Include="..\..\..\src\base\asset\BodyFixedPoint.hpp" />
-    <ClInclude Include="..\..\..\src\base\asset\GroundStation.hpp" />
+    <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
@@ -810,7 +808,6 @@
     <ClInclude Include="..\..\..\src\base\command\PropagationEnabledCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Report.hpp" />
     <ClInclude Include="..\..\..\src\base\command\RunSolver.hpp" />
-    <ClInclude Include="..\..\..\src\base\command\Save.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SolverBranchCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp" />
@@ -867,7 +864,6 @@
     <ClInclude Include="..\..\..\src\base\executive\PublisherException.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Sandbox.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\SandboxException.hpp" />
-    <ClInclude Include="..\..\..\src\base\factory\AssetFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\AtmosphereFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\AttitudeFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\AxisSystemFactory.hpp" />
@@ -1089,7 +1085,7 @@
     <ClInclude Include="..\..\..\src\base\solver\Solver.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\SolverException.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\SteepestDescent.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\FormationInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObject.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp" />

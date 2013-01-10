@@ -26,7 +26,7 @@
 #include "FormationSetupPanel.hpp"
 #include "GmatAppData.hpp"
 #include "ResourceTree.hpp"
-#include "Formation.hpp"
+#include "FormationInterface.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include <wx/config.h>
@@ -193,7 +193,7 @@ void FormationSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::LoadData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
+   FormationInterface *form = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
    StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
 
    // Set object pointer for "Show Script"
@@ -216,7 +216,7 @@ void FormationSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::SaveData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
+   FormationInterface *form = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
    form->SetBooleanParameter("Clear", true);
    
    int soCount = mSoSelectedListBox->GetCount();

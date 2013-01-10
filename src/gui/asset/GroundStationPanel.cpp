@@ -66,7 +66,7 @@ GroundStationPanel::GroundStationPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {           
    std::string groundName = std::string(name.c_str());
-   theGroundStation = (GroundStation*)theGuiInterpreter->GetConfiguredObject(groundName);
+   theGroundStation = (GroundstationInterface*)theGuiInterpreter->GetConfiguredObject(groundName);
 
    guiManager     = GuiItemManager::GetInstance();
    guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
@@ -106,7 +106,7 @@ GroundStationPanel::~GroundStationPanel()
 void GroundStationPanel::Create()
 {
    // create local copy of ground station
-   localGroundStation = new GroundStation(*theGroundStation);
+   localGroundStation = (GroundstationInterface*)theGroundStation->Clone();
 
     // Border size
    int minLabelSize;
@@ -128,7 +128,9 @@ void GroundStationPanel::Create()
       new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"ID") );
    stationIDTextCtrl =
       new wxTextCtrl( this, ID_STATION_ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0 );
-   stationIDTextCtrl->SetToolTip(pConfig->Read(_T((GroundStation::PARAMETER_TEXT[GroundStation::STATION_ID-GroundStation::STATION_ID]+"Hint").c_str())));
+   // Since Groundstation is now in plugin, this no longer works:
+//   stationIDTextCtrl->SetToolTip(pConfig->Read(_T((GroundStation::PARAMETER_TEXT[GroundStation::STATION_ID-GroundStation::STATION_ID]+"Hint").c_str())));
+   stationIDTextCtrl->SetToolTip(pConfig->Read(_T("IdHint")));
    
    // Central Body
    wxStaticText *centralBodyLabel =
@@ -300,7 +302,9 @@ void GroundStationPanel::LoadData()
 
    try
    {
-      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
+   // Since Groundstation is now in plugin, this no longer works:
+//      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
+      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(localGroundStation->GetParameterID("Id")).c_str()));
       centralBodyComboBox->SetValue(ToWxString(localGroundStation->GetStringParameter(BodyFixedPoint::CENTRAL_BODY).c_str()));
       currentStateType = localGroundStation->GetStringParameter(BodyFixedPoint::STATE_TYPE);
       stateTypeComboBox->SetValue(ToWxString(currentStateType.c_str()));
@@ -378,7 +382,9 @@ void GroundStationPanel::SaveData()
    {
       // Station ID
       text = stationIDTextCtrl->GetValue().c_str();
-      localGroundStation->SetStringParameter(GroundStation::STATION_ID, text);
+      // Since Groundstation is now in plugin, this no longer works:
+//      localGroundStation->SetStringParameter(GroundStation::STATION_ID, text);
+      localGroundStation->SetStringParameter(localGroundStation->GetParameterID("Id"), text);
    }
    catch (BaseException &ex)
    {

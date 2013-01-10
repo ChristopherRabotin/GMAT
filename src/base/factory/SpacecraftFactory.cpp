@@ -23,7 +23,6 @@
 #include "Factory.hpp"
 #include "SpacecraftFactory.hpp"
 #include "Spacecraft.hpp" 
-#include "Formation.hpp"
 
 //---------------------------------
 //  public methods
@@ -47,8 +46,6 @@ SpaceObject* SpacecraftFactory::CreateSpacecraft(const std::string &ofType,
 {
    if (ofType == "Spacecraft")
       return new Spacecraft(withName);
-   if (ofType == "Formation")
-      return new Formation(Gmat::FORMATION, "Formation", withName);
    return NULL;   
 }
 
@@ -68,7 +65,6 @@ SpacecraftFactory::SpacecraftFactory()
    if (creatables.empty())
    {
       creatables.push_back("Spacecraft");
-      creatables.push_back("Formation");
    }
 }
 
@@ -89,7 +85,6 @@ SpacecraftFactory::SpacecraftFactory(StringArray createList)
    if (creatables.empty())
    {
       creatables.push_back("Spacecraft");
-      creatables.push_back("Formation");
    }
 }
 
@@ -109,7 +104,6 @@ Factory(fact)
    if (creatables.empty())
    {
       creatables.push_back("Spacecraft");
-      creatables.push_back("Formation");
    }
 }
 
@@ -131,7 +125,6 @@ SpacecraftFactory& SpacecraftFactory::operator= (const SpacecraftFactory &fact)
    if (creatables.empty())
    {
       creatables.push_back("Spacecraft");
-      creatables.push_back("Formation");
    }
    return *this;
 }

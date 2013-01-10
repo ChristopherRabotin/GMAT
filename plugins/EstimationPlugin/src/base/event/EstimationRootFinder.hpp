@@ -33,7 +33,7 @@
 #include "Event.hpp"
 
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
+#include "FormationInterface.hpp"
 
 
 /**
@@ -62,7 +62,7 @@ protected:
    /// Buffer of Spacecraft used to restore the initial data
    std::vector<Spacecraft *>    satBuffer;
    /// Buffer of Formations used to restore the initial data
-   std::vector<Formation *>     formBuffer;
+   std::vector<FormationInterface *>     formBuffer;
    /// The current set of events that the EstimationRootFinder is using
    std::vector<Event*> *events;
 

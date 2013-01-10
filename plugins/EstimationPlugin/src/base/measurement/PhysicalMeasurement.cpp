@@ -23,7 +23,7 @@
 #include "PhysicalMeasurement.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
-#include "GroundStation.hpp"
+#include "GroundStationInterface.hpp"
 
 
 //#define DEBUG_DERIVATIVES

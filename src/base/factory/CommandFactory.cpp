@@ -41,9 +41,8 @@
 #include "EndWhile.hpp"       // for EndFor command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Report.hpp"         // for Report command
-#include "Save.hpp"           // for Save command  
 #include "SaveMission.hpp"    // for SaveMission command  
-#include "Stop.hpp"           // for Save command  
+#include "Stop.hpp"           // for Stop command  
 #include "CallGmatFunction.hpp"   // for CallGmatFunction command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
@@ -133,8 +132,6 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new Assignment;
     else if (ofType == "Report")
         return new Report;
-    else if (ofType == "Save")
-        return new Save;
     else if (ofType == "SaveMission")
         return new SaveMission;
     // Actual creating of CallFunction is not allowed, but it should
@@ -233,7 +230,6 @@ CommandFactory::CommandFactory() :
       creatables.push_back("PenDown");
       creatables.push_back("Propagate");
       creatables.push_back("Report");
-      creatables.push_back("Save");
       creatables.push_back("SaveMission");
       creatables.push_back("ScriptEvent");
       creatables.push_back("Stop");

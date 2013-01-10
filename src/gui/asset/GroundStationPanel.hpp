@@ -29,7 +29,7 @@
 #include "GmatPanel.hpp"
 #include "gmatdefs.hpp"
 #include "GmatStaticBoxSizer.hpp"
-#include "GroundStation.hpp"
+#include "GroundstationInterface.hpp"
 #include "BodyFixedPoint.hpp"
 #include "GmatAppData.hpp"
 #include "GuiItemManager.hpp"
@@ -68,8 +68,8 @@ private:
    void OnStateTypeComboBoxChange(wxCommandEvent &event);
    void OnHorizonReferenceComboBoxChange(wxCommandEvent &event);
    
-   GroundStation* theGroundStation;
-   GroundStation* localGroundStation;
+   GroundstationInterface* theGroundStation;
+   GroundstationInterface* localGroundStation;
    
    wxTextCtrl *stationIDTextCtrl;
    wxTextCtrl *hardwareTextCtrl;

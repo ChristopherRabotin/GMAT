@@ -256,7 +256,7 @@ Real EstimationRootFinder::FindRoot(Integer whichOne)
 void EstimationRootFinder::BufferSatelliteStates(bool fillingBuffer)
 {
    Spacecraft *fromSat = NULL, *toSat = NULL;
-   Formation *fromForm = NULL, *toForm = NULL;
+   FormationInterface *fromForm = NULL, *toForm = NULL;
    std::string soName;
 
    for (std::vector<Spacecraft *>::iterator i = satBuffer.begin();
@@ -301,7 +301,7 @@ void EstimationRootFinder::BufferSatelliteStates(bool fillingBuffer)
       #endif
    }
 
-   for (std::vector<Formation *>::iterator i = formBuffer.begin();
+   for (std::vector<FormationInterface *>::iterator i = formBuffer.begin();
         i != formBuffer.end(); ++i)
    {
       soName = (*i)->GetName();

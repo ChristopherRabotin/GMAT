@@ -909,23 +909,33 @@ void ResourceTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
 
    //----- Formations
-   mFormationItem =
-      AppendItem(resource, wxT("Formations"), GmatTree::RESOURCE_ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Formations"),
-                                      GmatTree::FORMATION_FOLDER));
+   // Only do this if the Formation object is available
+   StringArray scos = theGuiInterpreter->GetListOfFactoryItems(Gmat::SPACECRAFT);
+   if (find(scos.begin(), scos.end(), "Formation") != scos.end())
+   {
+      mFormationItem =
+         AppendItem(resource, wxT("Formations"), GmatTree::RESOURCE_ICON_FOLDER, -1,
+                    new GmatTreeItemData(wxT("Formations"),
+                                         GmatTree::FORMATION_FOLDER));
 
-   SetItemImage(mFormationItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
-                wxTreeItemIcon_Expanded);
+      SetItemImage(mFormationItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
+                   wxTreeItemIcon_Expanded);
+   }
 
    //----- GroundStation
-   mGroundStationItem =
-      AppendItem(resource, wxT("Ground Station"), GmatTree::RESOURCE_ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Ground Station"),
-                                      GmatTree::GROUND_STATION_FOLDER));
+   // Only do this if the groundstation object is available
+   StringArray bfos = theGuiInterpreter->GetListOfFactoryItems(Gmat::SPACE_POINT);
+   if (find(bfos.begin(), bfos.end(), "GroundStation") != bfos.end())
+   {
+      mGroundStationItem =
+         AppendItem(resource, wxT("Ground Station"), GmatTree::RESOURCE_ICON_FOLDER, -1,
+                    new GmatTreeItemData(wxT("Ground Station"),
+                                         GmatTree::GROUND_STATION_FOLDER));
 
-   SetItemImage(mGroundStationItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
-                wxTreeItemIcon_Expanded);
-   
+      SetItemImage(mGroundStationItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
+                   wxTreeItemIcon_Expanded);
+   }
+
    //----- Hardware
    mHardwareItem = 
       AppendItem(resource, wxT("Hardware"), GmatTree::RESOURCE_ICON_FOLDER, -1,

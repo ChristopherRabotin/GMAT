@@ -23,11 +23,11 @@
 
 #include "SolverBranchCommand.hpp"
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
 #include "Vary.hpp"                // For SetInitialValue() method
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
 #include "EventLocator.hpp"
+#include "FormationInterface.hpp"
 
 #include <sstream>                 // for <<
 
@@ -41,6 +41,7 @@
 #ifdef DEBUG_MEMORY
 #include "MemoryTracker.hpp"
 #endif
+
 
 //------------------------------------------------------------------------------
 //  SolverBranchCommand(const std::string &typeStr)
@@ -234,8 +235,8 @@ void SolverBranchCommand::StoreLoopData()
       }
       if (obj->GetType() == Gmat::FORMATION)
       {
-         Formation *orig = (Formation*)(obj);
-         Formation *form  = new Formation(*orig);
+         FormationInterface *orig = (FormationInterface*)(obj);
+         FormationInterface *form = (FormationInterface*)orig->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             ((GmatBase*)form, "cloned local form", "SolverBranchCommand::StoreLoopData()",
@@ -294,8 +295,8 @@ void SolverBranchCommand::StoreLoopData()
       }
       if (obj->GetType() == Gmat::FORMATION)
       {
-         Formation *orig = (Formation*)(obj);
-         Formation *form  = new Formation(*orig);
+         FormationInterface *orig = (FormationInterface*)(obj);
+         FormationInterface *form  = (FormationInterface*)orig->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             ((GmatBase*)form, "cloned local form",
@@ -332,7 +333,7 @@ void SolverBranchCommand::StoreLoopData()
 void SolverBranchCommand::ResetLoopData()
 {
    Spacecraft *sc;
-   Formation  *fm;
+   FormationInterface *fm;
    EventLocator *el;
    std::string name;
     
@@ -350,8 +351,8 @@ void SolverBranchCommand::ResetLoopData()
          }
          else if (gb->GetType() == Gmat::FORMATION)
          {
-            fm = (Formation*)gb;
-            *fm = *((Formation*)(*i));
+            fm = (FormationInterface*)gb;
+            *fm = *((FormationInterface*)(*i));
          }
          else if (gb->GetType() == Gmat::EVENT_LOCATOR)
          {

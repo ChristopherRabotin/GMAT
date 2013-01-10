@@ -24,7 +24,7 @@
 #include "EventException.hpp"
 #include "PropSetup.hpp"
 #include "Spacecraft.hpp"
-#include "Formation.hpp"
+//#include "Formation.hpp"
 #include "MessageInterface.hpp"
 
 

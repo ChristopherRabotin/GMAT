@@ -22,7 +22,7 @@
 
 #include "Elevation.hpp"
 #include "EventException.hpp"
-#include "GroundStation.hpp"
+#include "GroundstationInterface.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ bool Elevation::Initialize()
 
       if (station->IsOfType(Gmat::GROUND_STATION))
       {
-         bfcs = ((GroundStation*)station)->GetBodyFixedCoordinateSystem();
+         bfcs = ((GroundstationInterface*)station)->GetBodyFixedCoordinateSystem();
          // Get j2k CS too?
       }
       else
