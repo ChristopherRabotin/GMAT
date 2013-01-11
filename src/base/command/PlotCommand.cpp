@@ -45,7 +45,7 @@ PlotCommand::PARAMETER_TYPE[PlotCommandParamCount - GmatCommandParamCount] =
 
 
 //------------------------------------------------------------------------------
-// ~PlotCommand()
+// PlotCommand(const std::string &plotTypeName)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -54,8 +54,8 @@ PlotCommand::PARAMETER_TYPE[PlotCommandParamCount - GmatCommandParamCount] =
 PlotCommand::PlotCommand(const std::string &plotTypeName) :
    GmatCommand(plotTypeName)
 {
-   plotNameList.clear();
-   thePlotList.clear();
+   objectTypeNames.push_back("SubscriberCommand");
+   objectTypeNames.push_back("PlotCommand");
 }
 
 
@@ -87,8 +87,7 @@ PlotCommand::PlotCommand(const PlotCommand &c) :
    plotNameList   (c.plotNameList),
    thePlotList    (c.thePlotList)
 {
-   objectTypeNames.push_back("SubscriberCommand");
-   objectTypeNames.push_back("PlotCommand");
+   thePlotList.clear();
 }
 
 //------------------------------------------------------------------------------

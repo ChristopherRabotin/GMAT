@@ -5495,7 +5495,13 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "ClearPlot" || type == "MarkPoint" ||
                type == "PenUp" || type == "PenDown")
       {
-         Subscriber *defSub = GetDefaultSubscriber("XYPlot", false, false);
+         Subscriber *defSub = NULL;
+         // Create default XYPlot if XYPlot not found for ClearPlot or MarkPoint
+         if (type == "ClearPlot" || type == "MarkPoint")
+            defSub = GetDefaultSubscriber("XYPlot", false, true);
+         else
+            defSub = GetDefaultSubscriber("XYPlot", false, false);
+         
          if (defSub != NULL)
          {
             // Set default XYPlot
@@ -5507,8 +5513,9 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          {
             if (type == "PenUp" || type == "PenDown")
             {
-               // default XYPlot not found so set default GroundTrackPlot
-               defSub = GetDefaultSubscriber("GroundTrackPlot", false, false);          
+               // Default XYPlot not found, so set default GroundTrackPlot
+               // Create default GroundTrackPlot if not found
+               defSub = GetDefaultSubscriber("GroundTrackPlot", false, true);          
                if (defSub != NULL)
                   cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
                                           defSub->GetName(), 0);
@@ -8714,6 +8721,9 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
       sub->SetStringParameter("YVariables", "DefaultSC.EarthMJ2000Eq.Y", 1);
       sub->SetStringParameter("YVariables", "DefaultSC.EarthMJ2000Eq.Z", 2);
       sub->Activate(true);
+      
+      // To validate and create element wrappers
+      theScriptInterpreter->ValidateSubscriber(sub);
    }
    else if (type == "ReportFile")
    {
