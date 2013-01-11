@@ -46,13 +46,13 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
-   mShowPrimaryBody = false;
+   mShowPrimaryBody   = false;
    mShowSecondaryBody = false;
-   mShowEpoch = false;
-   mShowXyz = false;
-   mShowUpdate = false;
+   mShowEpoch         = false;
+   mShowXyz           = false;
+   mShowUpdate        = false;
    
-   mEnableAll = enableAll;
+   mEnableAll         = enableAll;
    
    Create();
    LoadData();
@@ -1020,6 +1020,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          // Need to popup this error here
          MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage().c_str());
          canClose = false;
+         // Since there was an error, copy the clone's data back to the object
          if (csClone != NULL)
          {
             coordSys->Copy(csClone);
@@ -1033,6 +1034,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       MessageInterface::ShowMessage
          ("*** Error *** %s\n", e.GetFullMessage().c_str());
       canClose = false;
+      // Since there was an error, copy the clone's data back to the object
       if (csClone != NULL)
       {
          coordSys->Copy(csClone);
