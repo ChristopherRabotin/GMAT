@@ -321,9 +321,6 @@
     <ClCompile Include="..\..\..\src\base\command\RunSolver.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\Save.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
@@ -452,9 +449,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\executive\SandboxException.cpp">
       <Filter>Source Files\base\executive</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\AssetFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp">
       <Filter>Source Files\base\factory</Filter>
@@ -1038,9 +1032,6 @@
     <ClCompile Include="..\..\..\src\base\plugin\DynamicLibrary.cpp">
       <Filter>Source Files\base\plugin</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClCompile>
@@ -1183,9 +1174,6 @@
       <Filter>Source Files\base\asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\asset\BodyFixedPoint.cpp">
-      <Filter>Source Files\base\asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\asset\GroundStation.cpp">
       <Filter>Source Files\base\asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp">
@@ -1776,6 +1764,12 @@
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
       <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\FormationInterface.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -1940,9 +1934,6 @@
     <ClInclude Include="..\..\..\src\base\command\RunSolver.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\Save.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
@@ -2071,9 +2062,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\executive\SandboxException.hpp">
       <Filter>Source Files\base\executive</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\AssetFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\factory\AtmosphereFactory.hpp">
       <Filter>Source Files\base\factory</Filter>
@@ -2678,9 +2666,6 @@
     <ClInclude Include="..\..\..\src\base\plugin\DynamicLibrary.hpp">
       <Filter>Source Files\base\plugin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClInclude>
@@ -2856,9 +2841,6 @@
       <Filter>Source Files\base\asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\asset\BodyFixedPoint.hpp">
-      <Filter>Source Files\base\asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\asset\GroundStation.hpp">
       <Filter>Source Files\base\asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp">
@@ -3460,6 +3442,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp">
       <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\FormationInterface.hpp">
+      <Filter>Source Files\base\foundation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
