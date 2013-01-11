@@ -200,8 +200,6 @@ OrbitView::OrbitView(const OrbitView &ov)
    mEnableStars = ov.mEnableStars;
    mEnableConstellations = ov.mEnableConstellations;
    mStarCount = ov.mStarCount;
-      
-//    mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
    mViewPointRefName = ov.mViewPointRefName;
@@ -254,10 +252,7 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mEnableStars = ov.mEnableStars;
    mEnableConstellations = ov.mEnableConstellations;
    mStarCount = ov.mStarCount;
-   
-   // View coordinate system name
-//    mViewCoordSysName = ov.mViewCoordSysName;
-   
+      
    // viewpoint
    mViewPointRefName = ov.mViewPointRefName;
    mViewPointRefType = ov.mViewPointRefType;
@@ -826,7 +821,7 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
    switch (id)
    {
    case STAR_COUNT:
-      if (value >= 0)
+      if (value > 0)
       {
          mStarCount = value;
          return value;
@@ -836,7 +831,8 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
          SubscriberException se;
          se.SetDetails(errorMessageFormat.c_str(),
                        GmatStringUtil::ToString(value, 1).c_str(),
-                       "StarCount", "Integer Value >= 0");
+                       "StarCount", "Integer Value > 0");
+         throw se;
       }
    case MIN_FOV:
       mMinFOV = value;
@@ -1088,8 +1084,6 @@ std::string OrbitView::GetStringParameter(const Integer id) const
    
    switch (id)
    {
-//    case COORD_SYSTEM:
-//       return mViewCoordSysName;
    case VIEWPOINT_REF:      
       WriteDeprecatedMessage(id);
       if (mViewPointRefType == "Vector")
@@ -1154,9 +1148,6 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
-//    case COORD_SYSTEM:
-//       mViewCoordSysName = value;
-//       return true;
    case VIEWPOINT_REF:
       WriteDeprecatedMessage(id);
       mViewPointRefName = value;
@@ -1414,18 +1405,8 @@ bool OrbitView::SetOnOffParameter(const std::string &label,
 std::string OrbitView::GetRefObjectName(const Gmat::ObjectType type) const
 {
    #if DBGLVL_OBJ
-   MessageInterface::ShowMessage
-      ("OrbitView::GetRefObjectName() type: %s\n",
-       GmatBase::GetObjectTypeString(type).c_str());
-   #endif
-   
-//    if (type == Gmat::COORDINATE_SYSTEM)
-//    {
-//       return mViewCoordSysName; //just return this
-//    }
-   
-   #if DBGLVL_OBJ
-   std::string msg = "type: " + GmatBase::GetObjectTypeString(type) + " not found";
+   std::string msg = "type: " + GmatBase::GetObjectTypeString(type) +
+      " not found, so returning OrbitPlot::GetRefObjectName(type)";
    MessageInterface::ShowMessage
       ("OrbitView::GetRefObjectName() %s\n", msg.c_str());
    #endif
@@ -1484,7 +1465,6 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-//       refObjectNames.push_back(mViewCoordSysName);
       refObjectNames.push_back(mViewUpCoordSysName);
    }
    else if (type == Gmat::SPACE_POINT)
@@ -1519,10 +1499,7 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
          ("mViewPointRefType=%s, mViewPointVecType=%s, mViewDirectionType=%s\n",
           mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
       #endif
-      
-//       refObjectNames = mAllSpNameArray;      
-//       refObjectNames.push_back(mViewCoordSysName);
-      
+            
       refObjectNames.insert(refObjectNames.end(), mAllSpNameArray.begin(),
                             mAllSpNameArray.end());
       
@@ -1571,8 +1548,6 @@ GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-//       if (name == mViewCoordSysName)
-//          return mViewCoordSystem;
       if (name == mViewUpCoordSysName)
          return mViewUpCoordSystem;
    }
@@ -1618,14 +1593,9 @@ bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-//       if (realName == mViewCoordSysName)
-//          mViewCoordSystem = (CoordinateSystem*)obj;
       if (realName == mViewUpCoordSysName)
          mViewUpCoordSystem = (CoordinateSystem*)obj;
-      
-//       return true;
    }
-   
    
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {

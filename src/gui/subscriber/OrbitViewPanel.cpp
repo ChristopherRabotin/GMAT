@@ -1076,7 +1076,7 @@ void OrbitViewPanel::SaveData()
                    "NumPointsToRedraw", "Integer Number >= 0", false, true, true, true);
       
       CheckInteger(starCount, mStarCountTextCtrl->GetValue().c_str(),
-                   "StarCount", "Integer Number >= 0", false, true, true);
+                   "StarCount", "Integer Number > 0", false, true, true);
       
       #ifdef __ENABLE_FOV__
       CheckInteger(initialFOV, mFovTextCtrl->GetValue().c_str(),
