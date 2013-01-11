@@ -10,17 +10,16 @@
 #                 Copyright (c) 2012, Thinking Systems, Inc.
 #                 Usage under Academic Free Licence permitted
 
-CPP = g++
+include ../SaveCommandEnv.mk
 
-GMAT_SRC_LOCATION = /Users/djc/TS_Code/GmatDevelopment/src/base
-GMAT_LIB_LOCATION = /Users/djc/TS_Code/GmatDevelopment/application/bin
+CPP = g++
 
 PLATFORM_FLAGS=-fPIC -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
 MAC_ARCHITECTURE_FLAGS = -arch i386
 
 SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    -undefined dynamic_lookup \
-                   -L$(GMAT_LIB_LOCATION) -lGmatBase $(PLATFORM_FLAGS)\
+                   -L$(GMAT_BIN_LOCATION) -lGmatBase $(PLATFORM_FLAGS)\
                    $(MAC_ARCHITECTURE_FLAGS)
                    
 #AVRO_FLAGS = -D_THREAD_SAFE -I$(AVRO_LOCATION)/include -D_THREAD_SAFE \
@@ -29,7 +28,7 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
            -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
 
-TARGET = ../lib/libConsolePrint.dylib
+TARGET = ../lib/libSaveCommand.dylib
 
 all: $(TARGET)
 
@@ -38,8 +37,8 @@ clean:
 	rm -rf $(TARGET)
 
 OBJECTS = \
-          command/ConsolePrint.o \
-          factory/PrintFactory.o \
+          command/Save.o \
+          factory/SaveCommandFactory.o \
           plugin/GmatPluginFunctions.o
 
 INCLUDES = \
@@ -47,27 +46,27 @@ INCLUDES = \
           -Icommand \
           -Ifactory \
           -Iplugin \
-          -I$(GMAT_SRC_LOCATION)/include \
-          -I$(GMAT_SRC_LOCATION)/util \
-          -I$(GMAT_SRC_LOCATION)/foundation \
-          -I$(GMAT_SRC_LOCATION)/coordsystem \
-          -I$(GMAT_SRC_LOCATION)/solarsys \
-          -I$(GMAT_SRC_LOCATION)/command \
-          -I$(GMAT_SRC_LOCATION)/executive \
-          -I$(GMAT_SRC_LOCATION)/factory \
-          -I$(GMAT_SRC_LOCATION)/subscriber \
-          -I$(GMAT_SRC_LOCATION)/asset \
-          -I$(GMAT_SRC_LOCATION)/attitude \
-          -I$(GMAT_SRC_LOCATION)/hardware \
-          -I$(GMAT_SRC_LOCATION)/parameter \
-          -I$(GMAT_SRC_LOCATION)/spacecraft
+          -I$(GMAT_CODE_LOCATION)/base/include \
+          -I$(GMAT_CODE_LOCATION)/base/util \
+          -I$(GMAT_CODE_LOCATION)/base/foundation \
+          -I$(GMAT_CODE_LOCATION)/base/coordsystem \
+          -I$(GMAT_CODE_LOCATION)/base/solarsys \
+          -I$(GMAT_CODE_LOCATION)/base/command \
+          -I$(GMAT_CODE_LOCATION)/base/executive \
+          -I$(GMAT_CODE_LOCATION)/base/factory \
+          -I$(GMAT_CODE_LOCATION)/base/subscriber \
+          -I$(GMAT_CODE_LOCATION)/base/asset \
+          -I$(GMAT_CODE_LOCATION)/base/attitude \
+          -I$(GMAT_CODE_LOCATION)/base/hardware \
+          -I$(GMAT_CODE_LOCATION)/base/parameter \
+          -I$(GMAT_CODE_LOCATION)/base/spacecraft
 
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET): $(OBJECTS)
 	mkdir -p ../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
 	install_name_tool -change lib/libGmatBase.dylib ../bin/libGmatBase.dylib $(TARGET)
-	mv $(TARGET) $(GMAT_LIB_LOCATION)/../plugins
+	mv $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../../lib

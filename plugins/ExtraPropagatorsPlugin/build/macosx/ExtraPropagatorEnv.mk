@@ -1,7 +1,7 @@
 # $Id$
 # Environment settings for the Verner plugin
-GMAT_CODE_LOCATION = /Users/djc/TS_Code/GMAT_Development/src
-GMAT_BIN_LOCATION  = /Users/djc/TS_Code/GMAT_Development/application/bin
+GMAT_CODE_LOCATION = /Users/djc/gsfccode/GMAT_Development/src
+GMAT_BIN_LOCATION  = /Users/djc/gsfccode/GMAT_Development/application/bin
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 1
