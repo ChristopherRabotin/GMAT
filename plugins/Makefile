@@ -18,6 +18,9 @@ all:
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
 	cd GmatFunctionPlugin; make all;
+	cd FormationPlugin; make all;
+	cd SaveCommandPlugin; make all;
+	cd StationPlugin; make all;
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild;
@@ -26,6 +29,9 @@ rebuild:
 	cd EventLocatorPlugin; make rebuild;
 	cd ExtraPropagatorsPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
+	cd FormationPlugin; make rebuild;
+	cd SaveCommandPlugin; make rebuild;
+	cd StationPlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
@@ -34,6 +40,9 @@ clean:
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
+	cd FormationPlugin; make clean;
+	cd SaveCommandPlugin; make clean;
+	cd StationPlugin; make clean;
 
 else
 
@@ -48,6 +57,9 @@ all:
 	cd FminconOptimizerPlugin; make all;
 	cd GmatFunctionPlugin; make all;
 	cd MatlabInterfacePlugin; make all;
+	cd FormationPlugin; make all;
+	cd SaveCommandPlugin; make all;
+	cd StationPlugin; make all;
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild;
@@ -58,6 +70,9 @@ rebuild:
 	cd FminconOptimizerPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
 	cd MatlabInterfacePlugin; make rebuild;
+	cd FormationPlugin; make rebuild;
+	cd SaveCommandPlugin; make rebuild;
+	cd StationPlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
@@ -68,6 +83,9 @@ clean:
 	cd FminconOptimizerPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
 	cd MatlabInterfacePlugin; make clean;
+	cd FormationPlugin; make clean;
+	cd SaveCommandPlugin; make clean;
+	cd StationPlugin; make clean;
 
 else
 
@@ -79,6 +97,9 @@ all:
 	cd ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd FormationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd SaveCommandPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd StationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -88,6 +109,9 @@ rebuild:
 	cd ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd FormationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd SaveCommandPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd StationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 
 clean:
 	cd CInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
@@ -97,6 +121,9 @@ clean:
 	cd ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd FormationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd SaveCommandPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd StationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 
 endif
 
