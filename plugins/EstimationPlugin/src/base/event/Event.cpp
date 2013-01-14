@@ -332,7 +332,8 @@ bool Event::CheckZero()
    // Implement the epoch guess; the default, here, just linear interpolates
    if (bufferFillCount == 1)
       for (UnsignedInt i = 0; i < value[0].size(); ++i)
-         if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero
+         //if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero			// made changes my TUAN NGUYEN
+		 if (GmatMathUtil::Abs(value[0][i]) < tolerance)  // "at" a zero			// made changes my TUAN NGUYEN
             retval = true;
 
    if (bufferFillCount > 1)
