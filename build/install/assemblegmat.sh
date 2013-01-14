@@ -44,7 +44,7 @@ END
 }
 
 # File sources
-sfrepo='https://gmat.svn.sourceforge.net/svnroot/gmat'
+sfrepo='svn://svn.code.sf.net/p/gmat/code'
 jazzrepo='https://gs580s-jazz.ndc.nasa.gov/svn/GMAT' 
 apppath="$sfrepo/trunk/application"
 
