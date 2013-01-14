@@ -22,7 +22,7 @@
 #ifndef Spacecraft_hpp
 #define Spacecraft_hpp
 
-#include <valarray>
+//#include <valarray>
 #include "SpaceObject.hpp"
 #include "Rvector6.hpp"
 #include "GmatState.hpp"
@@ -33,7 +33,7 @@
 #include "TimeSystemConverter.hpp"
 #include "Attitude.hpp"
 
-#include <map>
+//#include <map>
 
 class GMAT_API Spacecraft : public SpaceObject
 {
