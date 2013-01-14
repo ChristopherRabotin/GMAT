@@ -1,4 +1,4 @@
-# $Id: SampleEnv.mk 35 2012-10-08 16:30:01Z djcinsb $
+# $Id$
 # Sample Mac OS X environment settings for a GMAT plugin
 GMAT_CODE_LOCATION = ../../../../src
 GMAT_BIN_LOCATION  = ../../../../application/bin

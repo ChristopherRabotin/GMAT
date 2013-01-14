@@ -1,4 +1,4 @@
-# $Id: Makefile 35 2012-10-08 16:30:01Z djcinsb $
+# $Id$
 # Makefile for plugin command to write to the GMAT console or message window
 #
 # This is not production code, and must not be treated as if it were!

@@ -1,4 +1,4 @@
-# $Id: SampleEnv.mk 35 2012-10-08 16:30:01Z djcinsb $
+# $Id$
 # Linux environment settings for the Station GMAT plugin
 GMAT_CODE_LOCATION = ../../../../src
 GMAT_BIN_LOCATION  = ../../../../application/bin
