@@ -14,9 +14,7 @@ include ../StationEnv.mk
 
 CPP = g++
 
-GMAT_SRC_LOCATION = /Users/djc/TS_Code/GmatDevelopment/src/base
-GMAT_LIB_LOCATION = /Users/djc/TS_Code/GmatDevelopment/application/bin
-
+ifeq ($(MAC_SPECIFIC), 1)
 PLATFORM_FLAGS=-fPIC -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
 MAC_ARCHITECTURE_FLAGS = -arch i386
 
@@ -24,14 +22,14 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    -undefined dynamic_lookup \
                    -L$(GMAT_BIN_LOCATION) -lGmatBase $(PLATFORM_FLAGS)\
                    $(MAC_ARCHITECTURE_FLAGS)
-                   
-#AVRO_FLAGS = -D_THREAD_SAFE -I$(AVRO_LOCATION)/include -D_THREAD_SAFE \
-#                       -L$(AVRO_LOCATION)/lib -lz
-                   
+TARGET = ../lib/libStation.dylib
+else
+TARGET = ../lib/libStation.so
+endif
+
+
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
            -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
-
-TARGET = ../lib/libStation.dylib
 
 all: $(TARGET)
 
@@ -72,7 +70,7 @@ $(TARGET): $(OBJECTS)
 	mv $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 else
 $(TARGET) : $(OBJECTS)
-	mkdir -p ../../lib
+	mkdir -p ../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 endif

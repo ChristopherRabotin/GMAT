@@ -1,7 +1,7 @@
 # $Id: SampleEnv.mk 35 2012-10-08 16:30:01Z djcinsb $
-# Sample Linux environment settings for a GMAT plugin
-GMAT_CODE_LOCATION = /home/djc/GsfcCode/GmatDevelopment/src
-GMAT_BIN_LOCATION  = /home/djc/GsfcCode/GmatDevelopment/application/bin
+# Linux environment settings for the SaveCommand GMAT plugin
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION  = ../../../../application/bin
 
 DEBUG_BUILD = 0
 

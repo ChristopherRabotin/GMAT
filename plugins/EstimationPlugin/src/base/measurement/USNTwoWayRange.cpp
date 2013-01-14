@@ -26,7 +26,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "Spacecraft.hpp"
-#include "GroundStationInterface.hpp"
+#include "GroundstationInterface.hpp"
 #include "Antenna.hpp"
 #include "Transmitter.hpp"
 #include "Receiver.hpp"
