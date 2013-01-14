@@ -24,6 +24,9 @@
 
 #include "SpaceObject.hpp"
 
+/**
+ * Interface definition for Formations, implemented in libFormation.
+ */
 class GMAT_API FormationInterface : public SpaceObject
 {
 public:

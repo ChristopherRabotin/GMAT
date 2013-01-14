@@ -24,8 +24,20 @@
 #include "FormationInterface.hpp"
 
 
+//------------------------------------------------------------------------------
+// FormationInterface(Gmat::ObjectType typeId, const std::string &typeStr,
+//       const std::string &instName)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param typeId The object's ObjectType
+ * @param typeStr The text type of the object
+ * @param instName The object's name
+ */
+//------------------------------------------------------------------------------
 FormationInterface::FormationInterface(Gmat::ObjectType typeId, 
-      const std::string &typeStr, const std::string &instName) :
+	  const std::string &typeStr, const std::string &instName) :
    SpaceObject    (typeId, typeStr, instName)
 {
    objectTypes.push_back(Gmat::FORMATION);
@@ -33,16 +45,44 @@ FormationInterface::FormationInterface(Gmat::ObjectType typeId,
 }
 
 
+//------------------------------------------------------------------------------
+// ~FormationInterface()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 FormationInterface::~FormationInterface()
 {
 }
 
 
+//------------------------------------------------------------------------------
+// FormationInterface(const FormationInterface& fi)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param fi The interface copied here
+ */
+//------------------------------------------------------------------------------
 FormationInterface::FormationInterface(const FormationInterface& fi) :
    SpaceObject       (fi)
 {
 }
 
+
+//------------------------------------------------------------------------------
+// FormationInterface& operator=(const FormationInterface& fi)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param fi The interface copied here
+ *
+ * @return this object set to look like fi.
+ */
+//------------------------------------------------------------------------------
 FormationInterface& FormationInterface::operator=(const FormationInterface& fi)
 {
    if (this != &fi)

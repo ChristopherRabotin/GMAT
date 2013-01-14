@@ -24,7 +24,9 @@
 
 #include "BodyFixedPoint.hpp"
 
-
+/**
+ * Defines interfaces used in the Groundstation, contained in libStation.
+ */
 class GMAT_API GroundstationInterface : public BodyFixedPoint
 {
 public:
