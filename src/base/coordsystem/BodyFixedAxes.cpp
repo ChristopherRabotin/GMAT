@@ -658,6 +658,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    {
       #ifdef DEBUG_BF_RECOMPUTE
          MessageInterface::ShowMessage("   RECOMPUTING!!! - and the body name is %s\n", originName.c_str());
+		 MessageInterface::ShowMessage("   IAUSimplified method\n");
       #endif
       Real Wderiv[9];
       Real R13[3][3];
@@ -689,6 +690,31 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                               Sin(W), Cos(W),0.0,
                                  0.0,    0.0,1.0};
       
+	  #ifdef DEBUG_BF_RECOMPUTE
+	     MessageInterface::ShowMessage("At time: %f\n",atEpoch.GetReal());
+	     MessageInterface::ShowMessage(" RA = %f rad\n", rot1 - GmatMathConstants::PI_OVER_TWO);
+		 MessageInterface::ShowMessage(" DEC = %f rad\n", -rot2 + GmatMathConstants::PI_OVER_TWO);
+		 MessageInterface::ShowMessage(" W = %f rad\n", W);
+		 MessageInterface::ShowMessage("R3T(Pi/2+RA) = [\n");
+		 for (int i=0; i < 3; ++i)
+		 {
+			 MessageInterface::ShowMessage("  %e,   %e,   %e\n", R3leftT[i*3], R3leftT[i*3+1], R3leftT[i*3+2]);
+		 }
+		 MessageInterface::ShowMessage("]\n");
+		 MessageInterface::ShowMessage("R1T(Pi/2-DEC) = [\n");
+		 for (int i=0; i < 3; ++i)
+		 {
+			 MessageInterface::ShowMessage("  %e,   %e,   %e\n", R1middleT[i*3], R1middleT[i*3+1], R1middleT[i*3+2]);
+		 }
+		 MessageInterface::ShowMessage("]\n");
+		 MessageInterface::ShowMessage("R3T(W) = [\n");
+		 for (int i=0; i < 3; ++i)
+		 {
+			 MessageInterface::ShowMessage("  %e,   %e,   %e\n", R3rightT[i*3], R3rightT[i*3+1], R3rightT[i*3+2]);
+		 }
+		 MessageInterface::ShowMessage("]\n");
+      #endif
+
       Integer p3 = 0;
       for (Integer p = 0; p < 3; ++p)
       {
