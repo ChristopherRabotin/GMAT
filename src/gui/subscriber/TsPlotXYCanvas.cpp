@@ -20,6 +20,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INTERFACE
+//#define DEBUG_PENUP_PENDOWN
 
 
 TsPlotXYCanvas::TsPlotXYCanvas(wxWindow* parent, wxWindowID id, 

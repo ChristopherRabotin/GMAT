@@ -31,7 +31,6 @@ bool TsPlotCanvas::defaultLabels = false;
 
 //#define DEBUG_TS_CANVAS 1
 //#define DEBUG_INTERFACE 1
-//#define DEBUG_TS_CANVAS 1
 
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
