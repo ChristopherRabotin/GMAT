@@ -22,6 +22,7 @@ usage() {
 cat <<END
 Usage: $0 [option] ...
 Options:
+  -b binfiles   Path to daily binary files
   -d dest       Place files in specified directory dest (default: ./gmat)
   -j jazzpath   Path to a working copy of <Jazz>/trunk/code
   -n netpath    Path to \\mesa-file\595\GMAT network mount
@@ -30,9 +31,10 @@ END
 }
 
 # Argument handling
-while getopts d:j:n: o
+while getopts b:d:j:n: o
 do
     case "$o" in
+        b) binfiles="$OPTARG";;
         d) dest="$OPTARG";;
         j) jazz="$OPTARG";;
         n) netpath="$OPTARG";;
@@ -40,6 +42,7 @@ do
     esac
 done
 
+echo "binfiles="$binfiles
 echo "dest="$dest
 echo "jazz="$jazz
 echo "netpath="$netpath
@@ -50,12 +53,11 @@ then
     mkdir -p "$dest"
 fi
 
-# Copy application files
-cp -av ${cur}/../../application/* "$dest"
+# Copy static application files
+svn export --force ${cur}/../../application "$dest"
 
-# Remove build files
-find "$dest" -iname '*.exp' -delete
-find "$dest" -iname '*.lib' -delete
+# Copy bin files
+cp -av "$binfiles"/* "$dest"
 
 # Copy support libraries
 cp -av \
