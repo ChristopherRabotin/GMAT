@@ -157,6 +157,78 @@
     <Filter Include="Source Files\base\interface">
       <UniqueIdentifier>{7bf28b16-f8a5-442d-a881-92a06bef6da6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\base\factory\EphemPropagatorPlugin">
+      <UniqueIdentifier>{b047b499-70f5-4bae-8df3-4775ebaf3125}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\EstimationPlugin">
+      <UniqueIdentifier>{1d44d2f2-7927-41b1-a9d6-d1a5abe44c9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\FminconOptimizerPlugin">
+      <UniqueIdentifier>{92b288f2-3447-4212-b85a-0365a3345536}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\FormationPlugin">
+      <UniqueIdentifier>{87875282-d3fd-42f0-b293-8a2c8baaa771}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\GmatFunctionPlugin">
+      <UniqueIdentifier>{f19e3bf7-4594-4d23-a05a-a7cd7395d106}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\MatlabInterfacePlugin">
+      <UniqueIdentifier>{db29d4a7-e6ab-49b9-be16-7a138821d466}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\StationPlugin">
+      <UniqueIdentifier>{88ef9350-3e0e-4c5a-abd7-a3870ea5575b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\SaveCommandPlugin">
+      <UniqueIdentifier>{c40893cd-72a6-40de-b09b-98345073deeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory\EventLocatorPlugin">
+      <UniqueIdentifier>{a284cb33-d95d-4b26-9eb4-442ae5a3a87e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\event\EventLocatorPlugin">
+      <UniqueIdentifier>{98ec45dd-a399-461a-9274-1bf9beef02f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\locator">
+      <UniqueIdentifier>{9a93cf08-33e8-4bae-a9b8-f323b16d9766}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\locator\EventLocatorPlugin">
+      <UniqueIdentifier>{e51aac6a-79ec-44f4-86b5-cd8024f8ab03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurement">
+      <UniqueIdentifier>{d84792b4-2c01-4c29-8d6d-3ee5a0be7ca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurement\EstimationPlugin">
+      <UniqueIdentifier>{ff8db989-4ba9-4cc7-8201-f8502ab4b080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurement\EstimationPlugin\Ionosphere">
+      <UniqueIdentifier>{310d099e-f409-40d9-b86f-a74845fa3569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurement\EstimationPlugin\Troposphere">
+      <UniqueIdentifier>{d473cebe-6785-4130-b8b8-4673b8f32a01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\event\EstimationPlugin">
+      <UniqueIdentifier>{2e409663-9367-40d4-b114-18cf6dbef60d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\trackingsystem">
+      <UniqueIdentifier>{97217b9e-0013-4d90-bbe5-739a7a9105c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\trackingsystem\EstimationPlugin">
+      <UniqueIdentifier>{ea0a0bd3-0d8f-4ae2-a621-b0b16a27f115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurementfile">
+      <UniqueIdentifier>{ddbd98b5-1a45-4507-9d68-6b2c9006fd6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\measurementfile\EstimationPlugin">
+      <UniqueIdentifier>{84be8c15-c32d-456f-9887-537aba4c0f4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\hardware\EstimationPlugin">
+      <UniqueIdentifier>{5eef5a7d-a91f-47e5-8f60-ee0ea61e2237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\estimator">
+      <UniqueIdentifier>{185720e7-1170-432c-8f04-f43d1c4f4326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\estimator\EstimationPlugin">
+      <UniqueIdentifier>{6b79a637-92ae-476c-97ad-4e164f8fde84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
@@ -222,9 +294,6 @@
     <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\CallGmatFunction.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
@@ -271,9 +340,6 @@
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\For.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\Global.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp">
@@ -1608,9 +1674,6 @@
     <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
@@ -1692,9 +1755,6 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp">
       <Filter>Source Files\base\coordsystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.cpp">
       <Filter>Source Files\base\function</Filter>
     </ClCompile>
@@ -1716,20 +1776,8 @@
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\solver\FminconOptimizer.cpp">
       <Filter>Source Files\base\solver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp">
       <Filter>Source Files\base\forcemodel</Filter>
@@ -1769,6 +1817,315 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\FormationInterface.cpp">
       <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\FormationPlugin\src\base\formation\Formation.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\StationPlugin\src\base\station\GroundStation.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BuiltinPluginManager.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\CallGmatFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\Global.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunEstimator.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunSimulator.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EventFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\DataFileFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimationCommandFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimatorFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimatorHardwareFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\MeasurementFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\MeasurementModelFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\ObTypeFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\TrackingDataFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\TrackingSystemFactory.cpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.cpp">
+      <Filter>Source Files\base\factory\EphemPropagatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.cpp">
+      <Filter>Source Files\base\factory\FminconOptimizerPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\FormationPlugin\src\base\factory\FormationFactory.cpp">
+      <Filter>Source Files\base\factory\FormationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionCommandFactory.cpp">
+      <Filter>Source Files\base\factory\GmatFunctionPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.cpp">
+      <Filter>Source Files\base\factory\GmatFunctionPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.cpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\StationPlugin\src\base\factory\StationFactory.cpp">
+      <Filter>Source Files\base\factory\StationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\SaveCommandPlugin\src\base\factory\SaveCommandFactory.cpp">
+      <Filter>Source Files\base\factory\SaveCommandPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\factory\EventLocatorFactory.cpp">
+      <Filter>Source Files\base\factory\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Contact.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Eclipse.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Elevation.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\LineOfSight.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Penumbra.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Umbra.cpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\locator\ContactLocator.cpp">
+      <Filter>Source Files\base\locator\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\locator\EclipseLocator.cpp">
+      <Filter>Source Files\base\locator\EventLocatorPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\TriggerManager.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\AveragedDoppler.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\CoreMeasurement.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricAzEl.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricMeasurement.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRADec.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRangeRate.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementData.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementManager.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModel.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MediaCorrection.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TwoWayRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\USNTwoWayRange.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.c">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.cpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Troposphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\Event.cpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.cpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.cpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.cpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.cpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\DSNTrackingSystem.cpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\OpticalTrackingSystem.cpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TDRSSTrackingSystem.cpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TrackingSystem.cpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\USNTrackingSystem.cpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\B3_obtype.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFile.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFileAdapter.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatObType.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObservationData.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObType.cpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Antenna.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Receiver.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\RFHardware.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Sensor.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Signal.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Transmitter.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Transponder.cpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimator.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorInv.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorSVD.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\EstimationStateManager.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\Estimator.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\EstimatorException.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\ExtendedKalmanInv.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\SequentialEstimator.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\Simulator.cpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1835,9 +2192,6 @@
     <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\CallGmatFunction.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
@@ -1884,9 +2238,6 @@
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\For.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\Global.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp">
@@ -3290,9 +3641,6 @@
     <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
       <Filter>Source Files\base\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp">
       <Filter>Source Files\base\event</Filter>
     </ClInclude>
@@ -3374,9 +3722,6 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp">
       <Filter>Source Files\base\coordsystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.hpp">
       <Filter>Source Files\base\function</Filter>
     </ClInclude>
@@ -3398,20 +3743,8 @@
     <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\solver\FminconOptimizer.hpp">
       <Filter>Source Files\base\solver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp">
       <Filter>Source Files\base\forcemodel</Filter>
@@ -3448,6 +3781,324 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\FormationInterface.hpp">
       <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\FormationPlugin\src\base\formation\Formation.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\StationPlugin\src\base\station\GroundStation.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BuiltinPluginManager.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\CallGmatFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\Global.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunEstimator.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunSimulator.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EventFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\DataFileFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimationCommandFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimatorFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\EstimatorHardwareFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\MeasurementFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\MeasurementModelFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\ObTypeFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\TrackingDataFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\TrackingSystemFactory.hpp">
+      <Filter>Source Files\base\factory\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.hpp">
+      <Filter>Source Files\base\factory\EphemPropagatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.hpp">
+      <Filter>Source Files\base\factory\FminconOptimizerPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\FormationPlugin\src\base\factory\FormationFactory.hpp">
+      <Filter>Source Files\base\factory\FormationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionCommandFactory.hpp">
+      <Filter>Source Files\base\factory\GmatFunctionPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.hpp">
+      <Filter>Source Files\base\factory\GmatFunctionPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.hpp">
+      <Filter>Source Files\base\factory\MatlabInterfacePlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\StationPlugin\src\base\factory\StationFactory.hpp">
+      <Filter>Source Files\base\factory\StationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\SaveCommandPlugin\src\base\factory\SaveCommandFactory.hpp">
+      <Filter>Source Files\base\factory\SaveCommandPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\factory\EventLocatorFactory.hpp">
+      <Filter>Source Files\base\factory\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Contact.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Eclipse.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Elevation.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\LineOfSight.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Penumbra.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Umbra.hpp">
+      <Filter>Source Files\base\event\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\locator\ContactLocator.hpp">
+      <Filter>Source Files\base\locator\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\locator\EclipseLocator.hpp">
+      <Filter>Source Files\base\locator\EventLocatorPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\TriggerManager.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\AveragedDoppler.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\CoreMeasurement.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\EstimationDefs.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricAzEl.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricMeasurement.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRADec.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRangeRate.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementData.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementException.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementManager.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModel.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MediaCorrection.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TwoWayRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\USNTwoWayRange.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.h">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.hpp">
+      <Filter>Source Files\base\measurement\EstimationPlugin\Troposphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\Event.hpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.hpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.hpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.hpp">
+      <Filter>Source Files\base\event\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\DSNTrackingSystem.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\OpticalTrackingSystem.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TDRSSTrackingSystem.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TrackingSystem.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TrackingSystemException.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\USNTrackingSystem.hpp">
+      <Filter>Source Files\base\trackingsystem\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\B3_obtype.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFile.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFileAdapter.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatObType.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObservationData.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObType.hpp">
+      <Filter>Source Files\base\measurementfile\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Antenna.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Receiver.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\RFHardware.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Sensor.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Signal.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Transmitter.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\hardware\Transponder.hpp">
+      <Filter>Source Files\base\hardware\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimator.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorInv.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorSVD.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\EstimationStateManager.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\Estimator.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\EstimatorException.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\ExtendedKalmanInv.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\SequentialEstimator.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\Simulator.hpp">
+      <Filter>Source Files\base\estimator\EstimationPlugin</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

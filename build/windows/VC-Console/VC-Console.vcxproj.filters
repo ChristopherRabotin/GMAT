@@ -26,9 +26,6 @@
     <Filter Include="Source Files\base\executive">
       <UniqueIdentifier>{dfad589e-1a68-4c51-8736-6ba64a33c4e2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\base\factory">
-      <UniqueIdentifier>{2d1246ee-8939-4894-b339-2bff1dc4412e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\base\forcemodel">
       <UniqueIdentifier>{24a6542f-ebbf-4d57-82f2-b0ae1cea6dc7}</UniqueIdentifier>
     </Filter>
@@ -100,6 +97,9 @@
     <Filter Include="Source Files\base\forcemodel\harmonic">
       <UniqueIdentifier>{e5a91c57-7903-47be-acf5-b2e76dd7bd41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\base\factory">
+      <UniqueIdentifier>{a910c42b-b13f-48e3-a1aa-ea61667021cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
@@ -165,9 +165,6 @@
     <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\CallGmatFunction.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
@@ -216,9 +213,6 @@
     <ClCompile Include="..\..\..\src\base\command\For.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\Global.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
@@ -262,9 +256,6 @@
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\RunSolver.cpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\Save.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp">
@@ -396,81 +387,6 @@
     <ClCompile Include="..\..\..\src\base\executive\SandboxException.cpp">
       <Filter>Source Files\base\executive</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\AssetFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\AttitudeFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\AxisSystemFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\BurnFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\CalculatedPointFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\CelestialBodyFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\CommandFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\CoordinateSystemFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\Factory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\ODEModelFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\ParameterFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\PhysicalModelFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\PropagatorFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\PropSetupFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\SolarSystemFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\SolverFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\SpacecraftFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp">
       <Filter>Source Files\base\forcemodel</Filter>
     </ClCompile>
@@ -529,12 +445,6 @@
       <Filter>Source Files\base\function</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp">
       <Filter>Source Files\base\function</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp">
@@ -777,13 +687,7 @@
     <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\BulirschStoer.cpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\EphemerisPropagator.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp">
@@ -999,28 +903,13 @@
     <ClCompile Include="..\..\..\src\base\plugin\DynamicLibrary.cpp">
       <Filter>Source Files\base\plugin</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\Converter.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateConverter.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateVector.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp">
@@ -1059,9 +948,6 @@
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Anomaly.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -1069,12 +955,6 @@
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\Date.cpp">
@@ -1098,13 +978,7 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Keplerian.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
@@ -1120,9 +994,6 @@
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp">
@@ -1171,9 +1042,6 @@
       <Filter>Source Files\base\asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\asset\BodyFixedPoint.cpp">
-      <Filter>Source Files\base\asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\asset\GroundStation.cpp">
       <Filter>Source Files\base\asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp">
@@ -1257,6 +1125,129 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp">
       <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\CallGmatFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\Global.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFFile.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AssetFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AttitudeFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AxisSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\BurnFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CalculatedPointFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CelestialBodyFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CommandFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CoordinateSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\Factory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\InterfaceFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ODEModelFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ParameterFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PhysicalModelFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PropagatorFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PropSetupFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SolarSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SolverFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SpacecraftFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\FormationInterface.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\StationPlugin\src\base\station\GroundStation.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -1322,9 +1313,6 @@
     <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\CallGmatFunction.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
@@ -1373,9 +1361,6 @@
     <ClInclude Include="..\..\..\src\base\command\For.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\Global.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
@@ -1419,9 +1404,6 @@
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\RunSolver.hpp">
-      <Filter>Source Files\base\command</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\Save.hpp">
       <Filter>Source Files\base\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp">
@@ -1553,78 +1535,6 @@
     <ClInclude Include="..\..\..\src\base\executive\SandboxException.hpp">
       <Filter>Source Files\base\executive</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\AssetFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\AttitudeFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\AxisSystemFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\BurnFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\CalculatedPointFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\CelestialBodyFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\CommandFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\CoordinateSystemFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\Factory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\ODEModelFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\ParameterFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\PhysicalModelFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\PropagatorFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\PropSetupFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\SolarSystemFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\SolverFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\SpacecraftFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp">
       <Filter>Source Files\base\forcemodel</Filter>
     </ClInclude>
@@ -1683,12 +1593,6 @@
       <Filter>Source Files\base\function</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp">
       <Filter>Source Files\base\function</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp">
@@ -1937,13 +1841,7 @@
     <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\BulirschStoer.hpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\EphemerisPropagator.hpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp">
@@ -2174,13 +2072,7 @@
     <ClInclude Include="..\..\..\src\base\plugin\DynamicLibrary.hpp">
       <Filter>Source Files\base\plugin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\Converter.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\Epoch.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp">
@@ -2192,19 +2084,10 @@
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateConverter.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateVector.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp">
-      <Filter>Source Files\base\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\TimeConverter.hpp">
       <Filter>Source Files\base\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp">
@@ -2249,9 +2132,6 @@
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Anomaly.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -2264,13 +2144,7 @@
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\Date.hpp">
@@ -2297,13 +2171,7 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Keplerian.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
@@ -2319,9 +2187,6 @@
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp">
@@ -2385,9 +2250,6 @@
       <Filter>Source Files\base\asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\asset\BodyFixedPoint.hpp">
-      <Filter>Source Files\base\asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\asset\GroundStation.hpp">
       <Filter>Source Files\base\asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp">
@@ -2470,6 +2332,129 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp">
       <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\CallGmatFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\command\Global.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFFile.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AssetFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AtmosphereFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AttitudeFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AxisSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\BurnFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CalculatedPointFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CelestialBodyFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CommandFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CoordinateSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\Factory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\InterfaceFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ODEModelFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ParameterFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PhysicalModelFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PropagatorFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PropSetupFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SolarSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SolverFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SpacecraftFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\FormationInterface.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\StationPlugin\src\base\station\GroundStation.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
