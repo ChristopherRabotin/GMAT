@@ -2326,6 +2326,13 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          OpenScript();
       
       UpdateGuiScriptSyncStatus(1, 3);
+      
+      // Load minimum resource on script failure (GMT-3390, GMT-356)
+      theGuiInterpreter->LoadMinimumResource();
+      
+      // Update trees
+      gmatAppData->GetResourceTree()->UpdateResource(true);
+      gmatAppData->GetMissionTree()->UpdateMission(true);
    }
    
    wxSafeYield();
@@ -2333,7 +2340,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
-      ("GmatMainFrame::InterpretScript() returning %d\n", success);
+      ("GmatMainFrame::InterpretScript() returning success=%d, mScriptFilename='%s'\n\n",
+       success, mScriptFilename.c_str());
    #endif
    
    return success;
@@ -3268,11 +3276,10 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    }
 
    CloseCurrentProject();
-   //mScriptFilename = "$gmattempscript$.script";
    mScriptFilename = mTempScriptName;
    theGuiInterpreter->LoadDefaultMission();
    mInterpretFailed = false;
-
+   
    // Update trees
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);

@@ -162,6 +162,10 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
 //------------------------------------------------------------------------------
 // int GetGuiStatus()
 //------------------------------------------------------------------------------
+/**
+ * Retrieves GUI status: 1 = clean, 2 = dirty, 3 = error
+ */
+//------------------------------------------------------------------------------
 int GuiItemManager::GetGuiStatus()
 {
    return mGuiStatus;
@@ -174,7 +178,7 @@ int GuiItemManager::GetGuiStatus()
 /**
  * Sets status of GUI
  *
- * @param  status  1 = clean, 2 = dirty
+ * @param  status  1 = clean, 2 = dirty, 3 = error
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::SetGuiStatus(int status)
@@ -185,6 +189,10 @@ void GuiItemManager::SetGuiStatus(int status)
 
 //------------------------------------------------------------------------------
 // int  GetActiveScriptStatus()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves active script status: 1 = clean, 2 = dirty, 3 = error
+ */
 //------------------------------------------------------------------------------
 int GuiItemManager::GetActiveScriptStatus()
 {
@@ -198,7 +206,7 @@ int GuiItemManager::GetActiveScriptStatus()
 /**
  * Sets status of active script
  *
- * @param  status  1 = clean, 2 = dirty
+ * @param  status  1 = clean, 2 = dirty, 3 = error
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::SetActiveScriptStatus(int status)

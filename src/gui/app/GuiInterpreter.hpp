@@ -124,6 +124,7 @@ public:
    
    // Resource
    bool ClearResource();
+   bool LoadMinimumResource();
    
    // Command sequence
    bool LoadDefaultMission();

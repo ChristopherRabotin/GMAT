@@ -78,6 +78,7 @@ protected:
    bool mShowScriptActiveStatus;
    bool mIsScriptActive;
    bool mSyncGui;
+   bool mDelayBuild;
    
    wxString mFilename;
    wxString mScriptFilename;

@@ -36,18 +36,6 @@
 #include "CommandFactory.hpp"
 #include "CoordinateSystemFactory.hpp"
 #include "ODEModelFactory.hpp"
-//#include "FunctionFactory.hpp"
-#ifdef __BUILD_GMAT_FUNCTION__
-#include "GmatFunctionFactory.hpp"
-#endif
-#ifdef __BUILD_MATLAB_FUNCTION__
-#include "MatlabInterfaceFactory.hpp"
-#include "MatlabFunctionFactory.hpp"
-#include "CallMatlabFunctionFactory.hpp"
-#endif
-#ifdef __BUILD_FMINCON_OPTIMIZER__
-#include "FminconOptimizerFactory.hpp"
-#endif
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -81,7 +69,10 @@
 #include <algorithm>                // for sort(), set_difference()
 #include <ctime>                    // for clock()
 
-
+// This symbol is only needed for static link build
+#ifdef __INCLUDE_BUILTIN_PLUGINS__
+#include "BuiltinPluginManager.hpp"
+#endif
 
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
@@ -218,18 +209,6 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new CommandFactory());
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
       theFactoryManager->RegisterFactory(new ODEModelFactory());
-//      theFactoryManager->RegisterFactory(new FunctionFactory());
-      #ifdef __BUILD_GMAT_FUNCTION__
-      theFactoryManager->RegisterFactory(new GmatFunctionFactory());
-      #endif
-      #ifdef __BUILD_MATLAB_FUNCTION__
-      theFactoryManager->RegisterFactory(new MatlabInterfaceFactory());
-      theFactoryManager->RegisterFactory(new MatlabFunctionFactory());
-      theFactoryManager->RegisterFactory(new CallMatlabFunctionFactory());
-      #endif
-      #ifdef __BUILD_FMINCON_OPTIMIZER__
-      theFactoryManager->RegisterFactory(new FminconOptimizerFactory());
-      #endif
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
@@ -240,9 +219,12 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new SpacecraftFactory());
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
-
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
-            
+      
+      #ifdef __INCLUDE_BUILTIN_PLUGINS__
+      ForStaticLinkBuild::RegisterBuiltinPluginFactories(theFactoryManager);
+      #endif
+      
       // Create publisher
       thePublisher = Publisher::Instance();
       
@@ -6335,6 +6317,35 @@ bool Moderator::ClearResource()
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool LoadMinimumResource()
+//------------------------------------------------------------------------------
+bool Moderator::LoadMinimumResource()
+{
+   #if DEBUG_SEQUENCE_CLEARING
+   MessageInterface::ShowMessage("Moderator::LoadMinimumResource() entered\n");
+   #endif
+   
+   theScriptInterpreter->SetHeaderComment("");
+   theScriptInterpreter->SetFooterComment("");
+   
+   ClearCommandSeq(true, true);
+   ClearResource();
+   
+   // Set object manage option to configuration
+   objectManageOption = 1;
+   
+   CreateMinimumResource();
+   
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("Moderator::LoadMinimumResource() leaving\n");
+   #endif
+   
+   return true;
+}
+
+
 // Command Sequence
 //------------------------------------------------------------------------------
 // bool ClearCommandSeq(bool leaveFirstCmd, bool callRunComplete,
@@ -6818,6 +6829,10 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       }
       else
       {
+         #if DEBUG_INTERPRET
+         MessageInterface::ShowMessage
+            ("Moderator::InterpretScript() failed to interprete the script\n");
+         #endif
          MessageInterface::ShowMessage("\n========================================\n");
       }
    }
@@ -6893,6 +6908,11 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       #endif
 
    }
+   
+   #if DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() returning isGoodScript=%d\n", isGoodScript);
+   #endif
    
    return isGoodScript;
 }
@@ -7244,6 +7264,42 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
        "======================================================================\n");
    #endif
 } // PrepareNextScriptReading
+
+
+//------------------------------------------------------------------------------
+// void CreateMinimumResource()
+//------------------------------------------------------------------------------
+/**
+ * Creates minimum resource: solar system, default coordinate system.
+ */
+//------------------------------------------------------------------------------
+void Moderator::CreateMinimumResource()
+{
+   #if DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator creating minimum resource...\n");
+   #endif
+   
+   try
+   {
+      // Create solar system in use
+      CreateSolarSystemInUse();
+      
+      // Create default coordinate systems
+      CreateDefaultCoordSystems();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "*** Error occurred during minimum resource creation.\n    Message: " +
+          e.GetFullMessage());
+   }
+   
+   #if DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Moderator successfully created minimum resource\n");
+   #endif
+}
 
 
 //------------------------------------------------------------------------------
@@ -7948,35 +8004,7 @@ void Moderator::CreateDefaultMission()
          MessageInterface::ShowMessage("-->default hardware created\n");
          #endif
       }
-      
-      // Create VNB CoordinateSystem
-      #ifdef __CREATE_VNB_COORD__
-      CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
-      ObjectReferencedAxes *orAxis =
-         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
-                                                 "ObjectReferenced");
-      orAxis->SetEopFile(theEopFile);
-      orAxis->SetCoefficientsFile(theItrfFile);
-      orAxis->SetStringParameter("XAxis", "V");
-      orAxis->SetStringParameter("YAxis", "N");
-      orAxis->SetStringParameter("Primary", "Earth");
-      orAxis->SetStringParameter("Secondary", "DefaultSC");
-      vnb->SetStringParameter("Origin", "Earth");
-      vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
-      
-      // Since CoordinateSystem clones AxisSystem, delete it from here
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (orAxis, "localAxes", "Moderator::CreateDefaultMission()",
-          "deleting localAxes");
-      #endif
-      delete orAxis;
-      
-      #if DEBUG_DEFAULT_MISSION > 0
-      MessageInterface::ShowMessage("-->default vnb coordinate system created\n");
-      #endif
-      #endif
-      
+            
       // ImpulsiveBurn
       GetDefaultBurn("ImpulsiveBurn");
       #if DEBUG_DEFAULT_MISSION > 0

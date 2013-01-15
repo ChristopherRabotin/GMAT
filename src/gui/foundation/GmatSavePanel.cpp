@@ -71,6 +71,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    mShowScriptActiveStatus = showScriptActiveStatus;
    mIsScriptActive = isScriptActive;
    mSyncGui = false;
+   mDelayBuild = false;
    theParent = parent;
    SetName("GmatSavePanel");
    
@@ -190,6 +191,7 @@ void GmatSavePanel::Show()
 //------------------------------------------------------------------------------
 void GmatSavePanel::OnSave(wxCommandEvent &event)
 {
+   // scriptStatus: 1 = clean, 2 = dirty, 3 = error
    int scriptStatus = theGuiManager->GetActiveScriptStatus();
    int guiStatus = theGuiManager->GetGuiStatus();
    
@@ -199,7 +201,7 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
        "scriptStatus=%d, guiStatus=%d\n", mSyncGui, mFilename.c_str(),
        GmatAppData::Instance()->GetTempScriptName().c_str(), scriptStatus, guiStatus);
    #endif
-
+   
    // If it is active script and both script and GUI is clean, there is nothing to save
    if (mIsScriptActive && scriptStatus == 1 && guiStatus == 1)
    {
@@ -260,7 +262,8 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    }
    
    #ifdef DEBUG_SAVE
-   MessageInterface::ShowMessage("   saveScript=%d, mSyncGui=%d\n", saveScript, mSyncGui);
+   MessageInterface::ShowMessage
+      ("   saveScript=%d, mSyncGui=%d\n", saveScript, mSyncGui);
    #endif
    
    if (saveScript)
@@ -268,7 +271,8 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::OnSave() leaving, mFilename='%s'\n", mFilename.c_str());
+      ("GmatSavePanel::OnSave() leaving, mFilename='%s', mSyncGui=%d\n",
+       mFilename.c_str(), mSyncGui);
    #endif
 }
 
@@ -516,13 +520,20 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
    
    bool saveScript = true;
    mSyncGui = false;
+   mDelayBuild = false;
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
    if (event.GetEventObject() == mSaveSyncButton ||
        event.GetEventObject() == mSaveSyncRunButton)
    {
+      #ifdef DEBUG_ACTIVE_SCRIPT
+      MessageInterface::ShowMessage("   Event is SaveSyncButton or SaveSyncRunButton\n");
+      #endif
       if (gmatAppData->GetMainFrame()->IsAnimationRunning())
       {
+         #ifdef DEBUG_ACTIVE_SCRIPT
+         MessageInterface::ShowMessage("   Animation is running\n");
+         #endif
          // @todo - Figure out why following happens. (LOJ: 2012.07.18)
          // It always runs mission before updating the resource tree.
          // It sometimes crashes when I tried SaveSyncRun again.
@@ -562,11 +573,21 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
          #endif
          //===========================================================
       }
-      
+      else
+      {
+         #ifdef DEBUG_ACTIVE_SCRIPT
+         MessageInterface::ShowMessage("   Animation is not running\n");
+         #endif
+      }
       mSyncGui = true;
+      mDelayBuild = true;
    }
    
    wxYield();
+   
+   #ifdef DEBUG_ACTIVE_SCRIPT
+   MessageInterface::ShowMessage("   mIsScriptActive=%d\n", mIsScriptActive);
+   #endif
    
    // If this is not an active script, prompt the user for setting active
    if (!mIsScriptActive)
@@ -601,6 +622,12 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       }
    }
    
+   #ifdef DEBUG_ACTIVE_SCRIPT
+   MessageInterface::ShowMessage
+      ("   mSyncGui=%d, saveScript=%d, mScriptFilename='%s'\n", mSyncGui, saveScript,
+       mScriptFilename.c_str());
+   #endif
+   
    // No action is performed if user said No.
    // See GMAT Software Specification, Script Editor section (LOJ: 2012.02.22)
    //if (isScriptModified)
@@ -615,14 +642,25 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       if (event.GetEventObject() == mSaveSyncButton)
       {
          if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+         {
+            #ifdef DEBUG_ACTIVE_SCRIPT
+            MessageInterface::ShowMessage
+               ("   ==> Calling GmatMainFrame::OnScriptBuildObject()\n");
+            #endif
             gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
+         }
       }
       else if (event.GetEventObject() == mSaveSyncRunButton)
       {
          if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+         {
+            #ifdef DEBUG_ACTIVE_SCRIPT
+            MessageInterface::ShowMessage
+               ("   ==> Calling GmatMainFrame::OnScriptBuildAndRun()\n");
+            #endif
             gmatAppData->GetMainFrame()->OnScriptBuildAndRun(event);
+         }
       }
-      
       // Make current script active script (Fix for GMT-206, LOJ: 2012.02.09)
       UpdateScriptActiveStatus(true);
       mSyncGui = false;
@@ -713,7 +751,7 @@ void GmatSavePanel::SaveAndBuildScript(wxCommandEvent &event)
    gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
    
    // If script is active, build the script 
-   if (mIsScriptActive)
+   if (mIsScriptActive & !mDelayBuild)
    {
       if (gmatAppData->GetMainFrame()->SetScriptFileName(mFilename.c_str()))
          gmatAppData->GetMainFrame()->OnScriptBuildObject(event);

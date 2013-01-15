@@ -835,6 +835,15 @@ bool GuiInterpreter::ClearResource()
 
 
 //------------------------------------------------------------------------------
+// bool LoadMinimumResource()
+//------------------------------------------------------------------------------
+bool GuiInterpreter::LoadMinimumResource()
+{
+   return theModerator->LoadMinimumResource();
+}
+
+
+//------------------------------------------------------------------------------
 // bool LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::LoadDefaultMission()

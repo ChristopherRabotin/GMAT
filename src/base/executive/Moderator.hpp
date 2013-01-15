@@ -378,6 +378,7 @@ public:
    
    // Resource
    bool ClearResource();
+   bool LoadMinimumResource();
    
    // Mission sequence
    bool ClearCommandSeq(bool leaveFirstCmd = true, bool callRunComplete = true,
@@ -411,14 +412,17 @@ public:
 
 private:
    
-   // initialization
+   // Initialization
    void CreatePlanetaryCoeffFile();
    void CreateTimeFile();
    
-   // prepare next script reading
+   // Preparing next script reading
    void PrepareNextScriptReading(bool clearObjs = true);
    
-   // create default objects
+   // Minimum resource
+   void CreateMinimumResource();
+   
+   // Creating default objects
    void CreateSolarSystemInUse();
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
@@ -430,7 +434,7 @@ private:
    void CheckParameterType(Parameter *param, const std::string &type,
                            const std::string &ownerName);
    
-   // object map
+   // Object map
    GmatBase* FindObject(const std::string &name);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
@@ -442,7 +446,7 @@ private:
    std::string starterList;
    const StringArray& GetSequenceStarters();
    
-   // default objects
+   // Default objects
    Spacecraft* GetDefaultSpacecraft();
    PropSetup*  GetDefaultPropSetup();
    Burn*       GetDefaultBurn(const std::string &type);
@@ -456,7 +460,7 @@ private:
    Parameter*  GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
    
-   // sandbox
+   // Sandbox
    void AddSolarSystemToSandbox(Integer index);
    void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
@@ -467,7 +471,7 @@ private:
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);
    
-   // for Debug
+   // For Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
