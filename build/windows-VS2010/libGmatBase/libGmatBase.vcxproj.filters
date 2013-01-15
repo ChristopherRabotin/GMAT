@@ -894,9 +894,6 @@
     <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\CallGmatFunction.cpp">
-      <Filter>Source Files\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
@@ -943,9 +940,6 @@
       <Filter>Source Files\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\For.cpp">
-      <Filter>Source Files\command</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\command\Global.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp">
@@ -2129,9 +2123,6 @@
     <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\CallGmatFunction.hpp">
-      <Filter>Source Files\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
@@ -2178,9 +2169,6 @@
       <Filter>Source Files\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\For.hpp">
-      <Filter>Source Files\command</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\command\Global.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp">

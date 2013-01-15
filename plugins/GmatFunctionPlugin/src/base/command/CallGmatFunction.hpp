@@ -21,9 +21,10 @@
 #ifndef CallGmatFunction_hpp
 #define CallGmatFunction_hpp
 
+#include "GmatFunction_defs.hpp"
 #include "CallFunction.hpp"
 
-class GMAT_API CallGmatFunction : public CallFunction
+class GMATFUNCTION_API CallGmatFunction : public CallFunction
 {
 public:
    CallGmatFunction();

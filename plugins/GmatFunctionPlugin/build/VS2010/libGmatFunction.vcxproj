@@ -11,11 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\base\command\CallGmatFunction.cpp" />
+    <ClCompile Include="..\..\src\base\command\Global.cpp" />
+    <ClCompile Include="..\..\src\base\factory\GmatFunctionCommandFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\GmatFunctionFactory.cpp" />
     <ClCompile Include="..\..\src\base\function\GmatFunction.cpp" />
     <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\base\command\CallGmatFunction.hpp" />
+    <ClInclude Include="..\..\src\base\command\Global.hpp" />
+    <ClInclude Include="..\..\src\base\factory\GmatFunctionCommandFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\GmatFunctionFactory.hpp" />
     <ClInclude Include="..\..\src\base\function\GmatFunction.hpp" />
     <ClInclude Include="..\..\src\base\include\GmatFunctionIntro.hpp" />
@@ -60,7 +66,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\function;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\command;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\executive;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\function;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\command;..\..\src\base\factory;..\..\src\base\function;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\command;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\executive;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\function;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\parameter;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMATFUNCTION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4231;4251</DisableSpecificWarnings>
     </ClCompile>
@@ -77,7 +83,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\function;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\command;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\executive;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\function;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\command;..\..\src\base\factory;..\..\src\base\function;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\command;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\executive;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\function;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\parameter;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMATFUNCTION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4231;4251</DisableSpecificWarnings>
     </ClCompile>

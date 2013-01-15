@@ -23,13 +23,14 @@
 #ifndef Global_hpp
 #define Global_hpp
 
+#include "GmatFunction_defs.hpp"
 #include "ManageObject.hpp"
 
 
 /**
  * Declaration of the Global command
  */
-class GMAT_API Global : public ManageObject
+class GMATFUNCTION_API Global : public ManageObject
 {
 public:
    Global();

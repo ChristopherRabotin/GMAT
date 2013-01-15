@@ -330,7 +330,6 @@
     <ClCompile Include="..\..\..\src\base\command\BeginScript.cpp" />
     <ClCompile Include="..\..\..\src\base\command\BranchCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp" />
-    <ClCompile Include="..\..\..\src\base\command\CallGmatFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\command\CommandException.cpp" />
     <ClCompile Include="..\..\..\src\base\command\CommandUtil.cpp" />
@@ -347,7 +346,6 @@
     <ClCompile Include="..\..\..\src\base\command\EndTarget.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndWhile.cpp" />
     <ClCompile Include="..\..\..\src\base\command\For.cpp" />
-    <ClCompile Include="..\..\..\src\base\command\Global.cpp" />
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\If.cpp" />
     <ClCompile Include="..\..\..\src\base\command\ManageObject.cpp" />
@@ -774,7 +772,6 @@
     <ClInclude Include="..\..\..\src\base\command\BeginScript.hpp" />
     <ClInclude Include="..\..\..\src\base\command\BranchCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp" />
-    <ClInclude Include="..\..\..\src\base\command\CallGmatFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\command\CommandException.hpp" />
     <ClInclude Include="..\..\..\src\base\command\CommandUtil.hpp" />
@@ -791,7 +788,6 @@
     <ClInclude Include="..\..\..\src\base\command\EndTarget.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndWhile.hpp" />
     <ClInclude Include="..\..\..\src\base\command\For.hpp" />
-    <ClInclude Include="..\..\..\src\base\command\Global.hpp" />
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\If.hpp" />
     <ClInclude Include="..\..\..\src\base\command\ManageObject.hpp" />
