@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 #include "GmatFunctionFactory.hpp"
+#include "GmatFunctionCommandFactory.hpp"
 
 extern "C"
 {
@@ -37,7 +38,7 @@ extern "C"
    //---------------------------------------------------------------------------
    Integer GetFactoryCount()
    {
-      return 1;
+      return 2;
    }
 
    //---------------------------------------------------------------------------
@@ -61,12 +62,16 @@ extern "C"
 
       switch (index)
       {
-         case 0:
-            factory = new GmatFunctionFactory;
-            break;
+      case 0:
+         factory = new GmatFunctionFactory;
+         break;
 
-         default:
-            break;
+      case 1:
+         factory = new GmatFunctionCommandFactory;
+         break;
+
+      default:
+         break;
       }
 
       return factory;

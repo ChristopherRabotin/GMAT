@@ -43,7 +43,7 @@
 #include "Report.hpp"         // for Report command
 #include "SaveMission.hpp"    // for SaveMission command  
 #include "Stop.hpp"           // for Stop command  
-#include "CallGmatFunction.hpp"   // for CallGmatFunction command
+//#include "CallGmatFunction.hpp"   // for CallGmatFunction command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
 #include "BeginScript.hpp"    // for BeginScript command
@@ -57,7 +57,7 @@
 #include "PenUp.hpp"          // for PenUp command
 #include "PenDown.hpp"        // for PenDown command
 #include "MarkPoint.hpp"      // for MarkPoint command
-#include "Global.hpp"         // for Global command
+//#include "Global.hpp"         // for Global command
 #include "Create.hpp"         // for Create command
 
 //******************************************************************************
@@ -139,8 +139,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
     // with creating proper CallGmatFunction
     //else if (ofType == "CallFunction")
     //   return new CallFunction;
-    else if (ofType == "CallGmatFunction")
-        return new CallGmatFunction;
+//    else if (ofType == "CallGmatFunction")
+//        return new CallGmatFunction;
     else if (ofType == "BeginFiniteBurn")
         return new BeginFiniteBurn;
     else if (ofType == "EndFiniteBurn")
@@ -167,8 +167,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new PenDown;
     else if (ofType == "MarkPoint")
         return new MarkPoint;
-    else if (ofType == "Global")
-        return new Global;
+//    else if (ofType == "Global")
+//        return new Global;
     else if (ofType == "Create")
         return new Create;
    // add more here .......
@@ -201,7 +201,7 @@ CommandFactory::CommandFactory() :
       sequenceStarters.push_back("BeginMissionSequence");
       creatables.push_back("BeginScript");
       creatables.push_back("CallFunction");
-      creatables.push_back("CallGmatFunction");
+//      creatables.push_back("CallGmatFunction");
       creatables.push_back("ClearPlot");
       creatables.push_back("Create");
       creatables.push_back("Else");
@@ -219,7 +219,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("For");
       creatables.push_back("If");
       creatables.push_back("GMAT");
-      creatables.push_back("Global");
+//      creatables.push_back("Global");
       creatables.push_back("Maneuver");
       creatables.push_back("MarkPoint");
       creatables.push_back("Minimize");

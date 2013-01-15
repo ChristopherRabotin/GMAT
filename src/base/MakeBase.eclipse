@@ -182,7 +182,6 @@ OBJECTS = \
     command/BeginScript.o \
     command/BranchCommand.o \
     command/CallFunction.o \
-    command/CallGmatFunction.o \
     command/CommandException.o \
     command/GmatCommand.o \
     command/CommandUtil.o \
@@ -199,7 +198,6 @@ OBJECTS = \
     command/EndTarget.o \
     command/EndWhile.o \
     command/For.o \
-    command/Global.o \
     command/If.o \
     command/ManageObject.o \
     command/Maneuver.o \

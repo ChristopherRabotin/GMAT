@@ -16,6 +16,7 @@ prep:
 HEADERS = -Iinclude \
           -Iplugin \
           -Ifactory \
+          -Icommand \
           -Ifunction \
           -I$(GMAT_CODE_LOCATION)/base/include \
           -I$(GMAT_CODE_LOCATION)/base/foundation \
@@ -26,6 +27,7 @@ HEADERS = -Iinclude \
           -I$(GMAT_CODE_LOCATION)/base/propagator \
           -I$(GMAT_CODE_LOCATION)/base/solarsys \
           -I$(GMAT_CODE_LOCATION)/base/spacecraft \
+          -I$(GMAT_CODE_LOCATION)/base/parameter \
           -I$(GMAT_CODE_LOCATION)/base/coordsystem \
           -I$(GMAT_CODE_LOCATION)/base/attitude \
           -I$(GMAT_CODE_LOCATION)/base/command \
@@ -49,6 +51,9 @@ archclean :
 OBJECTS = \
     plugin/GmatPluginFunctions.o \
     factory/GmatFunctionFactory.o \
+    factory/GmatFunctionCommandFactory.o \
+    command/CallGmatFunction.o \
+    command/Global.o \
     function/GmatFunction.o
    
 ifeq ($(MAC_SPECIFIC), 1)

@@ -1,91 +1,92 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                         SaveCommandFactory
+//                       GmatFunctionCommandFactory
 //------------------------------------------------------------------------------
-// GMAT: General Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2012 Thinking Systems, Inc.
-// Free usage granted to all users; this is shell code.  Adapt and enjoy.  
-// Attribution is appreciated.
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS 
+// contract, Task Order 28
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
-// Created: September 20, 2012
-//
+// Created: Jan 14, 2013
 /**
- * Implementation of a factory used in a GMAT plugin
- *
- * Replace code in the indicated places for your Factory
+ * Factory for commands associated with GMAT functions
  */
 //------------------------------------------------------------------------------
 
+#include "GmatFunctionCommandFactory.hpp"
+#include "CallGmatFunction.hpp"
+#include "Global.hpp"
 
-#include "SaveCommandFactory.hpp"
-#include "Save.hpp"
 
 //------------------------------------------------------------------------------
-// SaveCommandFactory()
+// GmatFunctionCommandFactory()
 //------------------------------------------------------------------------------
 /**
  * Constructor
- *
- * Replace the type Gmat::COMMAND in the base class call with the factory type 
- * you need.
  */
 //------------------------------------------------------------------------------
-SaveCommandFactory::SaveCommandFactory() :
-   Factory           (Gmat::COMMAND)
+GmatFunctionCommandFactory::GmatFunctionCommandFactory() :
+Factory           (Gmat::COMMAND)
 {
    if (creatables.empty())
    {
-      creatables.push_back("Save");
+      creatables.push_back("CallGmatFunction");
+      creatables.push_back("Global");
    }
 }
 
 
 //------------------------------------------------------------------------------
-// ~SaveCommandFactory()
+// ~GmatFunctionCommandFactory()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-SaveCommandFactory::~SaveCommandFactory()
+GmatFunctionCommandFactory::~GmatFunctionCommandFactory()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// SaveCommandFactory(const SaveCommandFactory& elf)
+// GmatFunctionCommandFactory(const GmatFunctionCommandFactory& elf)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
  *
- * @param elf The factory copied here
+ * @param elf The factory that is copied to the new one
  */
 //------------------------------------------------------------------------------
-SaveCommandFactory::SaveCommandFactory(const SaveCommandFactory& elf) :
+GmatFunctionCommandFactory::GmatFunctionCommandFactory(
+      const GmatFunctionCommandFactory& elf) :
    Factory           (elf)
 {
    if (creatables.empty())
    {
-      creatables.push_back("Save");
+      creatables.push_back("CallGmatFunction");
+      creatables.push_back("Global");
    }
 }
 
 
 //------------------------------------------------------------------------------
-// SaveCommandFactory& operator=(const SaveCommandFactory& elf)
+// GmatFunctionCommandFactory& operator=(const GmatFunctionCommandFactory& elf)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
  *
- * @param elf The factory copied to this one
+ * @param elf The factory that is copied to this one
  *
- * @return this instance, set to match elf
+ * @return This factory, set to look like elf
  */
 //------------------------------------------------------------------------------
-SaveCommandFactory& SaveCommandFactory::operator=(
-      const SaveCommandFactory& elf)
+GmatFunctionCommandFactory& GmatFunctionCommandFactory::operator=(
+      const GmatFunctionCommandFactory& elf)
 {
    if (this != &elf)
    {
@@ -93,9 +94,8 @@ SaveCommandFactory& SaveCommandFactory::operator=(
 
       if (creatables.empty())
       {
-         // Replace the SampleClass string here with your class name.  For multiple 
-         // classes of the same type, push back multiple names here
-         creatables.push_back("Save");
+         creatables.push_back("CallGmatFunction");
+         creatables.push_back("Global");
       }
    }
 
@@ -108,20 +108,22 @@ SaveCommandFactory& SaveCommandFactory::operator=(
 //       const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Creation method for GMAT commands
+ * Method used to create the supported commands
  *
- * @param ofType The subtype of the command
- * @param withName The new command's name
+ * @param ofType The type of command being created
+ * @param withName The command's name
  *
- * @return A newly created GmatCommand (or NULL if this factory doesn't create
- *         the requested type)
+ * @return The new command
  */
 //------------------------------------------------------------------------------
-GmatCommand* SaveCommandFactory::CreateCommand(const std::string &ofType,
-                                     const std::string &withName)
+GmatCommand* GmatFunctionCommandFactory::CreateCommand(
+      const std::string &ofType, const std::string &withName)
 {
-   if (ofType == "Save")
-      return new Save();
+   if (ofType == "CallGmatFunction")
+      return new CallGmatFunction;
+
+   else if (ofType == "Global")
+      return new Global();
    // add more here .......
 
    return NULL;   // doesn't match any type of Command known by this factory
