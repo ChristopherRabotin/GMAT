@@ -10,7 +10,7 @@ files are not listed.
 
 The placeholders used below are:
     <network>:  \\mesa-file\595\GMAT
-    <sf>:       https://gmat.svn.sourceforge.net/svnroot/gmat
+    <sf>:       svn://svn.code.sf.net/p/gmat/code
     <jazz>:     https://gs580s-jazz.ndc.nasa.gov/svn/GMAT
 
 bin/ (Windows)
