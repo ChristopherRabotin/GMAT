@@ -6432,31 +6432,6 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    Integer id;
    Gmat::ParameterType type;
    
-   // Current ForceModel scripting, SRP is on for central body.
-   //GMAT FM.CentralBody = Earth;
-   //GMAT FM.PrimaryBodies = {Earth, Luna};
-   //GMAT FM.PointMasses = {Sun, Jupiter}; 
-   //GMAT FM.Drag = None; // deprecated (2011.07.22)
-   //GMAT FM.SRP = On;
-   //GMAT FM.GravityField.Earth.Degree = 20;
-   //GMAT FM.GravityField.Earth.Order = 20;
-   //GMAT FM.GravityField.Earth.Model = JGM2.cof;
-   //GMAT FM.GravityField.Luna.Degree = 4;
-   //GMAT FM.GravityField.Luna.Order = 4;
-   //GMAT FM.GravityField.Luna.PotentialFile = LP165P.cof;
-   
-   // New Drag force script (2011.07.20)
-   // GMAT FM.Drag = None; // deprecated
-   // FM.Drag.AtmosphereModel = 'MarsGRAM2005'
-   // FM.Drag.DensityModel = Mean
-   // FM.Drag.InputFile = 'INPUT.nml' 
-   // FM.Drag.F107 = 150 
-   
-   // For future scripting we want to specify body for Drag and SRP
-   // e.g. FM.Drag.Earth = JacchiaRoberts;
-   //      FM.Drag.Mars = MarsAtmos;
-   //      FM.SRP.ShadowBodies = {Earth,Moon}
-   
    ODEModel *forceModel = (ODEModel*)obj;
    std::string forceType = ODEModel::GetScriptAlias(pmType);
    std::string centralBodyName = forceModel->GetStringParameter("CentralBody");
@@ -6525,6 +6500,12 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             forceModel->TakeAction("ClearDefaultForce");
             forceModel->AddForce(pm);
             
+            #ifdef DEBUG_SET_FORCE_MODEL
+               MessageInterface::ShowMessage
+                  ("   ... %s has been added to ForceModel %s\n",
+                   pm->GetName().c_str(), forceModel->GetName().c_str());
+            #endif
+
             // Use JGM2 for default Earth gravity file, in case it is not
             // specified in the script
             if (pmType == "PrimaryBodies" && bodies[i] == "Earth")
@@ -7865,8 +7846,8 @@ bool Interpreter::FinalPass()
       
       #if DBGLVL_FINAL_PASS > 1
       MessageInterface::ShowMessage
-         ("Checking ref. object on %s:%s\n", obj->GetTypeName().c_str(),
-          obj->GetName().c_str());
+         ("Checking ref. object on %s:%s -> retval = ",
+               obj->GetTypeName().c_str(), obj->GetName().c_str());
       #endif
       
       // check System Parameters separately since it follows certain naming
@@ -7999,6 +7980,12 @@ bool Interpreter::FinalPass()
             #endif
          }
       }
+
+      #if DBGLVL_FINAL_PASS > 1
+      MessageInterface::ShowMessage
+         ("%s\n", retval ? "True" : "False");
+      #endif
+
    }
    
    //-------------------------------------------------------------------
