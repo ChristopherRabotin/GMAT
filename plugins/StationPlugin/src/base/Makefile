@@ -24,7 +24,7 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    $(MAC_ARCHITECTURE_FLAGS)
 TARGET = ../lib/libStation.dylib
 else
-TARGET = ../lib/libStation.so
+TARGET = ../lib/libStation$(SHARED_EXTENSION)
 endif
 
 

@@ -54,9 +54,9 @@ all:
 	cd EstimationPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
-	cd FminconOptimizerPlugin; make all;
 	cd GmatFunctionPlugin; make all;
 	cd MatlabInterfacePlugin; make all;
+	cd FminconOptimizerPlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
 	cd StationPlugin; make all;
@@ -67,9 +67,9 @@ rebuild:
 	cd EstimationPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuld;
 	cd ExtraPropagatorsPlugin; make rebuild;
-	cd FminconOptimizerPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
 	cd MatlabInterfacePlugin; make rebuild;
+	cd FminconOptimizerPlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
 	cd StationPlugin; make rebuild;
@@ -80,9 +80,9 @@ clean:
 	cd EstimationPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
-	cd FminconOptimizerPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
 	cd MatlabInterfacePlugin; make clean;
+	cd FminconOptimizerPlugin; make clean;
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
 	cd StationPlugin; make clean;

@@ -24,7 +24,7 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    $(MAC_ARCHITECTURE_FLAGS)
 TARGET = ../lib/libSaveCommand.dylib
 else
-TARGET = ../lib/libSaveCommand.so
+TARGET = ../lib/libSaveCommand$(SHARED_EXTENSION)
 endif
                    
                    
