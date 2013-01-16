@@ -2992,6 +2992,14 @@ const StringArray& ODEModel::GetRefObjectNameArray(const Gmat::ObjectType type)
                centralBodyName) == forceReferenceNames.end())
          forceReferenceNames.push_back(centralBodyName);
       
+      // Add GravityFields
+      StringArray gfList = BuildBodyList("GravityField");
+
+      for (UnsignedInt i = 0; i < gfList.size(); ++i)
+         if (find(forceReferenceNames.begin(), forceReferenceNames.end(),
+               gfList[i]) == forceReferenceNames.end())
+            forceReferenceNames.push_back(gfList[i]);
+
       return forceReferenceNames;      
    }
    
