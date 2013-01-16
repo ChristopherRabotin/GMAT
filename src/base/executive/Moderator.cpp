@@ -5474,40 +5474,25 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          cmd->SetStringParameter("ObjectNames", GetDefaultSpacecraft()->GetName());
       }
-      else if (type == "ClearPlot" || type == "MarkPoint" ||
-               type == "PenUp" || type == "PenDown")
+      else if (type == "ClearPlot" || type == "MarkPoint")
       {
-         Subscriber *defSub = NULL;
-         // Create default XYPlot if XYPlot not found for ClearPlot or MarkPoint
-         if (type == "ClearPlot" || type == "MarkPoint")
-            defSub = GetDefaultSubscriber("XYPlot", false, true);
-         else
-            defSub = GetDefaultSubscriber("XYPlot", false, false);
-         
+         // Set default XYPlot, create default XYPlot if it is not found
+         Subscriber *defSub = GetDefaultSubscriber("XYPlot", false, true);
          if (defSub != NULL)
-         {
-            // Set default XYPlot
-            if (defSub != NULL)
-               cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
-                                       defSub->GetName(), 0);
-         }
-         else
-         {
-            if (type == "PenUp" || type == "PenDown")
-            {
-               // Default XYPlot not found, so set default GroundTrackPlot
-               // Create default GroundTrackPlot if not found
-               defSub = GetDefaultSubscriber("GroundTrackPlot", false, true);          
-               if (defSub != NULL)
-                  cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
-                                          defSub->GetName(), 0);
-            }
-         }
+            cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                                    defSub->GetName(), 0);
+      }
+      else if (type == "PenUp" || type == "PenDown")
+      {
+         Subscriber *defSub = GetDefaultSubscriber("PenUpDownSubscriber", false, false);
+         cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                                 defSub->GetName(), 0);
       }
       else if (type == "Toggle")
       {
+         Subscriber *defSub = GetDefaultSubscriber("ToggleSubscriber", false, false);
          cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
-                                 GetDefaultSubscriber("ToggleSubscriber", false, false)->GetName());
+                                 defSub->GetName());
       }
       else if (type == "Report")
       {
@@ -8700,10 +8685,24 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
    }
    
    // If not ToggleSubscriber and not creating default subscriber, just return NULL
-   if (type != "ToggleSubscriber" && !createIfNoneFound)
+   if ((type != "ToggleSubscriber" && type != "PenUpDownSubscriber") && !createIfNoneFound)
       return NULL;
    
-   if (type == "ToggleSubscriber")
+   if (type == "PenUpDownSubscriber")
+   {
+      // First look for Subscribers for PenUp/Down command in the order of
+      // OrbitView, GroundTrackPlot, XYPlot
+      Subscriber *orbitView = GetDefaultSubscriber("OrbitView", true, false);
+      Subscriber *groundTrack = GetDefaultSubscriber("GroundTrackPlot", true, false);
+      Subscriber *xyPlot = GetDefaultSubscriber("XYPlot", true, false);
+      if (orbitView)         return orbitView;
+      else if (groundTrack)  return groundTrack;
+      else if (xyPlot)       return xyPlot;
+      
+      // If none found, create OrbitView as default toggle subscriber
+      return GetDefaultSubscriber("OrbitView", true, true);
+   }
+   else if (type == "ToggleSubscriber")
    {
       // First look for Subscribers for Toggle command in the order of
       // OrbitView, GroundTrackPlot, XYPlot, ReportFile, and EphemerisFile.
