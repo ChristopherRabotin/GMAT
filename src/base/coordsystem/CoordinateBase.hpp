@@ -104,8 +104,14 @@ public:
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile()               = 0;
       
    // initializes the CoordinateBase
-   virtual bool Initialize();
+   virtual bool                  Initialize();
+
+   virtual void                  SetModifyFlag(bool modFlag);
+   virtual bool                  GetModifyFlag() const;
    
+   virtual void                  SetIsBuiltIn(bool builtInFlag);
+   virtual bool                  IsBuiltIn() const;
+
    virtual bool                  RequiresCelestialBodyOrigin() const = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
@@ -165,6 +171,11 @@ protected:
    std::string     j2000BodyName;
    /// pointer to the solar system
    SolarSystem     *solar;
+   /// flag indicating whether or not this CoordinateBase object is a built-in one
+   bool          isBuiltIn;
+   /// flag indicating whether or not this CS can currently be modified (generally
+   /// only set to false for built-in CSs when the script is being interpreted)
+   bool          allowModify;
 
 };
 #endif // CoordinateBase_hpp

@@ -86,7 +86,8 @@ void CoordSystemConfigPanel::Create()
    std::string coordSysName = theCoordSys->GetName();
 
    // if CoordinateSystem is non-default, allow user to edit
-   if (theGuiInterpreter->IsDefaultCoordinateSystem(coordSysName))
+//   if (theGuiInterpreter->IsDefaultCoordinateSystem(coordSysName))
+   if (theCoordSys->IsBuiltIn())
       mCoordPanel = new CoordPanel(this, false);
    else
       mCoordPanel = new CoordPanel(this, true);

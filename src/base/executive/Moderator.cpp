@@ -59,6 +59,7 @@
 #include "Barycenter.hpp"
 #include "TimeSystemConverter.hpp"  // for SetLeapSecsFileReader(), SetEopFile()
 #include "BodyFixedAxes.hpp"        // for SetEopFile(), SetCoefficientsFile()
+#include "ICRFAxes.hpp"
 #include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"          // for GetCommandSeq()
@@ -7441,7 +7442,6 @@ void Moderator::CreateInternalCoordSystem()
 //------------------------------------------------------------------------------
 // void CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
-#include "ICRFAxes.hpp"
 void Moderator::CreateDefaultCoordSystems()
 {
    #if DEBUG_INITIALIZE
@@ -7571,7 +7571,7 @@ void Moderator::CreateDefaultCoordSystems()
          icrfAxis->SetEopFile(theEopFile);
          icrfAxis->SetCoefficientsFile(theItrfFile);
          earthICRFcs->SetStringParameter("Origin", "Earth");
-         bfcs->SetJ2000BodyName("Earth");
+         earthICRFcs->SetJ2000BodyName("Earth");
          earthICRFcs->SetRefObject(icrfAxis, Gmat::AXIS_SYSTEM, icrfAxis->GetName());
          earthICRFcs->SetOrigin(earth);
          earthICRFcs->SetJ2000Body(earth);
@@ -7595,6 +7595,11 @@ void Moderator::CreateDefaultCoordSystems()
          earthICRFcs->SetSolarSystem(ss);
          earthICRFcs->Initialize();
       }
+      // Mark these as built-in coordinate systems
+      eqcs->SetIsBuiltIn(true);
+      eccs->SetIsBuiltIn(true);
+      bfcs->SetIsBuiltIn(true);
+      earthICRFcs->SetIsBuiltIn(true);
    }
    catch (BaseException &e)
    {

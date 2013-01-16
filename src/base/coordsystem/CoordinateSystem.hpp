@@ -87,9 +87,10 @@ public:
    virtual bool                  AreAxesOfType(const std::string &ofType) const;
    virtual std::string           GetBaseSystem() const;
    
-   
    // initializes the CoordinateSystem
-   virtual bool Initialize();
+   virtual bool                  Initialize();
+
+   virtual void                  SetModifyFlag(bool modFlag);
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
    virtual Rvector ToBaseSystem(const A1Mjd &epoch, const Rvector &inState,

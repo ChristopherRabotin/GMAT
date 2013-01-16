@@ -974,11 +974,11 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // If object to be managed, give warning if name already exist
       if (manage == 1)
       {
-         if ((name != "EarthMJ2000Eq") && 
-             (name != "EarthMJ2000Ec") && 
-             (name != "EarthFixed")    &&
-             (name != "EarthICRF"))
-         {
+//         if ((name != "EarthMJ2000Eq") &&
+//             (name != "EarthMJ2000Ec") &&
+//             (name != "EarthFixed")    &&
+//             (name != "EarthICRF"))
+//         {
             obj = FindObject(name);
             // Since System Parameters are created automatically as they are referenced,
             // do not give warning if creating a system parameter
@@ -992,7 +992,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
                HandleError(ex, true, true);
                return obj;
             }
-         }
+//         }
       }
    }
    #ifdef DEBUG_CREATE_CELESTIAL_BODY
@@ -3524,7 +3524,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
       if (find(defaultCSNames.begin(), defaultCSNames.end(), name1) != defaultCSNames.end())
       {
          std::string msg = 
-            "The default CoordinateSystem \"" + name1 + "\" is automatic "
+            "The default CoordinateSystem \"" + name1 + "\" is an automatic "
             "global object and was already created, so ignoring";
          InterpreterException ex(msg);
          HandleError(ex, true, true);
@@ -5880,6 +5880,11 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
             
             if (ownedObj)
             {
+               // Need to catch the disallowed setting on the built-in coordinate system here
+               if ((obj->IsOfType("CoordinateSystem")) && (obj->GetParameterText(id) == "Axes"))
+               {
+                  obj->SetStringParameter(id, ownedObj->GetTypeName().c_str());
+               }
                #ifdef DEBUG_SET
                MessageInterface::ShowMessage
                   ("   Calling '%s'->SetRefObject(%s(%p), %d)\n", obj->GetName().c_str(),

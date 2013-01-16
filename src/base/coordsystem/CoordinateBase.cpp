@@ -31,6 +31,7 @@
 
 //#define DEBUG_SET_SS
 //#define DEBUG_SET_REF
+//#define DEBUG_CB_SET
 
 //---------------------------------
 // static data
@@ -79,7 +80,9 @@ CoordinateBase::CoordinateBase(Gmat::ObjectType ofType,
    originName     ("Earth"),
    j2000Body      (NULL),
    j2000BodyName  ("Earth"),
-   solar          (NULL)
+   solar          (NULL),
+   isBuiltIn      (false),
+   allowModify    (true)
 {
    objectTypeNames.push_back("CoordinateBase");
    parameterCount = CoordinateBaseParamCount;
@@ -102,7 +105,9 @@ GmatBase(coordBase),
    originName    (coordBase.originName),
    j2000Body     (NULL),
    j2000BodyName (coordBase.j2000BodyName),
-   solar         (NULL)
+   solar         (NULL),
+   isBuiltIn     (coordBase.isBuiltIn),
+   allowModify   (coordBase.allowModify)
 {
 }
 
@@ -129,6 +134,9 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    j2000BodyName = coordBase.j2000BodyName;
    solar         = coordBase.solar;
    
+   isBuiltIn     = coordBase.isBuiltIn;
+   allowModify   = coordBase.allowModify;
+
    return *this;
 }
 
@@ -217,6 +225,16 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void CoordinateBase::SetOriginName(const std::string &toName)
 {
+   #ifdef DEBUG_CB_SET
+      MessageInterface::ShowMessage("Entering CB::SetOriginName for %, setting to %s and allowModify = %s\n",
+            instanceName.c_str(), toName.c_str(), (allowModify? "true" : "false"));
+   #endif
+//   if (!allowModify)
+//   {
+//      std::string errmsg = "Modifications to built-in coordinate system ";
+//      errmsg += instanceName + " are not allowed.\n";
+//      throw CoordinateSystemException(errmsg);
+//   }
    originName = toName;
 }
 
@@ -232,6 +250,15 @@ void CoordinateBase::SetOriginName(const std::string &toName)
 //------------------------------------------------------------------------------
 void CoordinateBase::SetOrigin(SpacePoint *originPtr)
 {
+   #ifdef DEBUG_CB_SET
+      MessageInterface::ShowMessage("Entering SetOrigin for %s\n", instanceName.c_str());
+   #endif
+//   if (!allowModify)
+//   {
+//      std::string errmsg = "Modifications to built-in coordinate system ";
+//      errmsg += instanceName + " are not allowed.\n";
+//      throw CoordinateSystemException(errmsg);
+//   }
    origin = originPtr;
 }
 
@@ -382,6 +409,72 @@ bool CoordinateBase::Initialize()
             instanceName);
    return true;
 }
+
+//---------------------------------------------------------------------------
+// void SetModifyFlag(bool modFlag)
+//---------------------------------------------------------------------------
+/**
+ * Sets the allowModify flag for the coordinate system (meant for the
+ * built-in systems)
+ *
+ * @param modFlag  flag indicating whether or not this coordinate
+ *                 system is a built-in system
+ *
+ */
+//---------------------------------------------------------------------------
+void CoordinateBase::SetModifyFlag(bool modFlag)
+{
+   allowModify = modFlag;
+}
+
+//---------------------------------------------------------------------------
+// bool GetModifyFlag() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the allowModify flag for the coordinate system
+ *
+ * @return allowModify flag indicating whether or not this coordinate system
+ *                     cannot currently be modified by the user
+ *
+ */
+//---------------------------------------------------------------------------
+bool CoordinateBase::GetModifyFlag() const
+{
+   return allowModify;
+}
+
+//---------------------------------------------------------------------------
+// void SetIsBuiltIn(bool builtInFlag)
+//---------------------------------------------------------------------------
+/**
+ * Sets the isBuiltIn flag for the coordinate system
+ *
+ * @param builtInFlag  flag indicating whether or not this coordinate
+ *                     system is a built-in system
+ *
+ */
+//---------------------------------------------------------------------------
+void CoordinateBase::SetIsBuiltIn(bool builtInFlag)
+{
+   isBuiltIn = builtInFlag;
+}
+
+//---------------------------------------------------------------------------
+// bool IsBuiltIn() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the isBuiltIn flag for the coordinate system
+ *
+ * @return isBuiltIn flag indicating whether or not this coordinate system
+ *                   is a built-in system
+ *
+ */
+//---------------------------------------------------------------------------
+bool CoordinateBase::IsBuiltIn() const
+{
+   return isBuiltIn;
+}
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
@@ -544,6 +637,16 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
  bool CoordinateBase::SetStringParameter(const Integer id, 
                                          const std::string &value)
 {
+   #ifdef DEBUG_CB_SET
+      MessageInterface::ShowMessage("Entering CB::SetStringParameter for %s with id = %d, values = %s, allowModify = %s\n",
+            instanceName.c_str(), id, value.c_str(), (allowModify? "true" : "false"));
+   #endif
+    if (!allowModify)
+    {
+       std::string errmsg = "Modifications to built-in coordinate system ";
+       errmsg += instanceName + " are not allowed.\n";
+       throw CoordinateSystemException(errmsg);
+    }
     if (id == ORIGIN_NAME) 
     {
        originName    = value; 

@@ -635,6 +635,12 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
        id, value.c_str());
    #endif
    bool OK = false;
+   if (!allowModify)
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
    if ((UsesXAxis() != GmatCoordinate::NOT_USED) && (id == X_AXIS))
    {
       xAxis = value;

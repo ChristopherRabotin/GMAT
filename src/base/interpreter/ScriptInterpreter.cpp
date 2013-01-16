@@ -137,26 +137,44 @@ bool ScriptInterpreter::Interpret()
    
    Initialize();
    
+   StringArray defaultCSNames;
+
    inCommandMode = false;
    inRealCommandMode = false;
    beginMissionSeqFound = false;
    userParameterLines.clear();
    
+   // Grab the built-in coordinate system list; mark them as Do Not Modify while
+   // interpreting the script
+   defaultCSNames = theModerator->GetDefaultCoordinateSystemNames();
+   for (StringArray::iterator i = defaultCSNames.begin(); i != defaultCSNames.end(); ++i)
+   {
+      CoordinateSystem *cs = (CoordinateSystem*)FindObject(*i);
+      cs->SetModifyFlag(false);
+   }
+
    // Before parsing script, check for unmatching control logic
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage("   Calling ReadFirstPass()\n");
    #endif
-   
+
    bool retval0 = ReadFirstPass();
    bool retval1 = false;
    bool retval2 = false;
-   
+
    if (retval0)
    {
       retval1 = ReadScript();
       retval2 = FinalPass();
    }
-   
+
+   // Mark the built-in coordinate systems as modifiable again
+   for (StringArray::iterator i = defaultCSNames.begin(); i != defaultCSNames.end(); ++i)
+   {
+      CoordinateSystem *cs = (CoordinateSystem*)FindObject(*i);
+      cs->SetModifyFlag(true);
+   }
+
    // Write any error messages collected
    std::string errorMsg;
    std::string truncMsg = " .......... Message is too long so truncated.\n";

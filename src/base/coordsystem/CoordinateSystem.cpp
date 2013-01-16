@@ -47,6 +47,7 @@
 //#define DEBUG_TRANSLATION
 //#define DEBUG_CS_CREATE
 //#define DEBUG_CS_SET_AXIS
+//#define DEBUG_CS_SET
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -177,7 +178,7 @@ const CoordinateSystem& CoordinateSystem::operator=(
    }
    else
       axes = NULL;
-   
+
    return *this;
 }
 
@@ -200,13 +201,15 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 
    if (axes == NULL)
    {
-      if (coordSys.axes == NULL) return true;
+      if (coordSys.axes == NULL)
+         return true;
       else                       return false;
    }
 
    if (axes->GetType() == (coordSys.axes)->GetType())
    {
-      if (origin == coordSys.origin) return true;
+      if (origin == coordSys.origin)
+         return true;
       // need to check j2000Body too?
    }
    
@@ -456,7 +459,19 @@ bool CoordinateSystem::HasCelestialBodyOrigin() const
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)
 {
-   if (axes) axes->SetPrimaryObject(prim);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetPrimaryObject for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetPrimaryObject(prim);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -471,7 +486,19 @@ void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetSecondaryObject(SpacePoint *second)
 {
-   if (axes) axes->SetSecondaryObject(second);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetSecondaryObject for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetSecondaryObject(second);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -486,7 +513,19 @@ void CoordinateSystem::SetSecondaryObject(SpacePoint *second)
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetEpoch(const A1Mjd &toEpoch)
 {
-   if (axes) axes->SetEpoch(toEpoch);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetEpoch for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetEpoch(toEpoch);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -501,7 +540,19 @@ void CoordinateSystem::SetEpoch(const A1Mjd &toEpoch)
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetXAxis(const std::string &toValue)
 {
-   if (axes) axes->SetXAxis(toValue);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetXAxis for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetXAxis(toValue);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -516,7 +567,19 @@ void CoordinateSystem::SetXAxis(const std::string &toValue)
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetYAxis(const std::string &toValue)
 {
-   if (axes) axes->SetYAxis(toValue);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetYAxis for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetYAxis(toValue);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -531,7 +594,19 @@ void CoordinateSystem::SetYAxis(const std::string &toValue)
 //---------------------------------------------------------------------------
 void CoordinateSystem::SetZAxis(const std::string &toValue)
 {
-   if (axes) axes->SetZAxis(toValue);
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetZAxis for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetZAxis(toValue);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -862,6 +937,27 @@ bool CoordinateSystem::Initialize()
    return true;
 }
 
+//---------------------------------------------------------------------------
+// void SetModifyFlag(bool modFlag)
+//---------------------------------------------------------------------------
+/**
+ * Sets the allowModify flag for the coordinate system
+ *
+ * @param modFlag  flag indicating whether or not this coordinate
+ *                 system is a built-in system and cannot be
+ *                 modified by the user
+ *
+ */
+//---------------------------------------------------------------------------
+void CoordinateSystem::SetModifyFlag(bool modFlag)
+{
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("CS::SetModifyFlag setting flag for %s to %s\n",
+            instanceName.c_str(), (modFlag? "true" : "false"));
+   #endif
+   CoordinateBase::SetModifyFlag(modFlag);
+   if (axes) axes->SetModifyFlag(modFlag);
+}
 
 //------------------------------------------------------------------------------
 //  Rvector  ToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
@@ -1353,6 +1449,12 @@ Real CoordinateSystem::SetRealParameter(const Integer id, const Real value)
        "value=%f\n", axes, id, value);
    #endif
    
+   if (!allowModify)
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
    if (id == UPDATE_INTERVAL)
    {
       static bool writeIgnoredMessage = true;
@@ -1426,6 +1528,9 @@ Real CoordinateSystem::SetRealParameter(const std::string &label, const Real val
 //------------------------------------------------------------------------------
 std::string CoordinateSystem::GetStringParameter(const Integer id) const
 {
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering GetStringParameter for %s\n", instanceName.c_str());
+   #endif
    if (id == AXES)
    {
       if (axes)
@@ -1467,6 +1572,16 @@ std::string CoordinateSystem::GetStringParameter(const std::string &label) const
 bool CoordinateSystem::SetStringParameter(const Integer id,
                                           const std::string &value)
 {
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering CS::SetStringParameter for %s with id = %d, values = %s, allowModify = %s\n",
+            instanceName.c_str(), id, value.c_str(), (allowModify? "true" : "false"));
+   #endif
+   if (!allowModify)
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
    switch (id)
    {
    case AXES:
@@ -1530,6 +1645,15 @@ bool CoordinateSystem::GetBooleanParameter(const std::string &label) const
 bool CoordinateSystem::SetBooleanParameter(const Integer id,
                                            const bool value)
 {
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering GetBooleanParameter for %s\n", instanceName.c_str());
+   #endif
+   if (!allowModify)
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
    if (id == OVERRIDE_ORIGIN_INTERVAL)
    {
       static bool writeIgnoredMessage = true;
