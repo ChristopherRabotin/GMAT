@@ -85,8 +85,15 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string label,
+                                           const std::string &value);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
