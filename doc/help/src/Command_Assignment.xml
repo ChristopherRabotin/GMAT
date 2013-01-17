@@ -221,7 +221,9 @@
         <para>
           Mathematical expressions are recognized by the presence of any of the operators or
           built-in functions described below. Before execution, all white space (e.g. spaces and tabs)
-          is removed from the expression.
+          is removed from the expression. Mathematical expressions are <emphasis>ONLY</emphasis>
+          allowed in the context of the assignment operator. They cannot be used inside an Array
+          reference, inside a command, or as a function parameter.
         </para>
       </refsection>
 
