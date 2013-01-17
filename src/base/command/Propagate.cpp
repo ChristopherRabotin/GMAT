@@ -2694,9 +2694,16 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
       // create goal parameter
       std::string component = rhs;
 
-      GmatStringUtil::ParseParameter(rhs, paramType, paramObj, paramSystem);
+      if (!GmatStringUtil::IsNumber(rhs))
+         GmatStringUtil::ParseParameter(rhs, paramType, paramObj, paramSystem);
+      else
+         paramObj = rhs;
+
       #ifdef DEBUG_PROPAGATE_ASSEMBLE
       MessageInterface::ShowMessage("rhs paramObj='%s'\n", paramObj.c_str());
+      MessageInterface::ShowMessage("rhs = '%s' %s a number\n",
+            rhs.c_str(),
+            GmatStringUtil::IsNumber(rhs) ? "is" : "is not");
       #endif
 
       if (paramObj != "" && !GmatStringUtil::IsNumber(paramObj))
