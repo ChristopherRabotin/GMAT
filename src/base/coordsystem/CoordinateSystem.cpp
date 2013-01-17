@@ -1455,21 +1455,9 @@ Real CoordinateSystem::SetRealParameter(const Integer id, const Real value)
       errmsg += instanceName + " are not allowed.\n";
       throw CoordinateSystemException(errmsg);
    }
-   if (id == UPDATE_INTERVAL)
-   {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** \"UpdateInterval\" on Coordinate Systems is ignored and will be "
-             "removed from a future build\n");
-         writeIgnoredMessage = false;
-      }
-      return true;
-//      if (axes)
-//         return axes->SetRealParameter("UpdateInterval", value);
-   }
-   else if (id == EPOCH)
+//   if (id == UPDATE_INTERVAL)  // removed
+//   }
+   if (id == EPOCH)
    {
       if (axes)
          return axes->SetRealParameter("Epoch", value);
@@ -1654,22 +1642,9 @@ bool CoordinateSystem::SetBooleanParameter(const Integer id,
       errmsg += instanceName + " are not allowed.\n";
       throw CoordinateSystemException(errmsg);
    }
-   if (id == OVERRIDE_ORIGIN_INTERVAL)
-   {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** \"OverrideOriginInterval\" on Coordinate Systems is ignored and will be "
-             "removed from a future build\n");
-         writeIgnoredMessage = false;
-      }
-      return true;
-//      if (axes)
-//         return axes->SetBooleanParameter("OverrideOriginInterval", value);
-//      else
-//         return false;  // or throw an exception here?
-   }
+//   if (id == OVERRIDE_ORIGIN_INTERVAL) // removed
+//   {
+//   }
    return CoordinateBase::SetBooleanParameter(id, value);
 }
 
