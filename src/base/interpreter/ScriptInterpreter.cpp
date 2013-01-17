@@ -166,6 +166,13 @@ bool ScriptInterpreter::Interpret()
    {
       retval1 = ReadScript();
       retval2 = FinalPass();
+
+      #if DBGLVL_SCRIPT_READING
+         MessageInterface::ShowMessage("In ScriptInterpreter::Interpret(), "
+               "retvals are rv1 = %s and rv2 = %s; numErrors = %d\n",
+               retval1 ? "true" : "false", retval2 ? "true" : "false",
+               errorList.size());
+      #endif
    }
 
    // Mark the built-in coordinate systems as modifiable again
