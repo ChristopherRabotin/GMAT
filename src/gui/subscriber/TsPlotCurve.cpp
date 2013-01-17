@@ -93,7 +93,10 @@ void TsPlotCurve::AddData(double x, double y, double high, double low)
       // Include error bars in top and bottom values
       Real yt = y + high, yb = y - (low == 0.0 ? high : low);
 
-      if (abscissa.size() == 0) 
+      double lx, ly;
+      int asize = abscissa.size();
+
+      if (asize == 0)
       {
          #ifdef DEBUG_FIRST_POINT
             MessageInterface::ShowMessage("Adding initial data: [%lf, %lf]",
@@ -109,38 +112,49 @@ void TsPlotCurve::AddData(double x, double y, double high, double low)
          minY = yb;
          rangeChanged = true;
          domainChanged = true;
+         lx = x - 1.0;
+         ly = y - 1.0;
       }
-         
-      abscissa.push_back(x);
-      ordinate.push_back(y);
-      if (high > 0.0)
+      else
       {
-         highError.push_back(high);
-         if (low > 0.0)
-            lowError.push_back(low);
+         lx = abscissa[asize-1];
+         ly = ordinate[asize-1];
       }
-   
-      if (x < minX)
+
+      // Only add points that do not match the previous point
+      if ((x != lx) && (y != ly))
       {
-         minX = x;
-         domainChanged = true;
+         abscissa.push_back(x);
+         ordinate.push_back(y);
+         if (high > 0.0)
+         {
+            highError.push_back(high);
+            if (low > 0.0)
+               lowError.push_back(low);
+         }
+
+         if (x < minX)
+         {
+            minX = x;
+            domainChanged = true;
+         }
+         if (x > maxX)
+         {
+            maxX = x;
+            domainChanged = true;
+         }
+         if (yb < minY)
+         {
+            minY = yb;
+            rangeChanged = true;
+         }
+         if (yt > maxY)
+         {
+            maxY = yt;
+            rangeChanged = true;
+         }
       }
-      if (x > maxX)
-      {
-         maxX = x;
-         domainChanged = true;
-      }
-      if (yb < minY)
-      {
-         minY = yb;
-         rangeChanged = true;
-      }
-      if (yt > maxY)
-      {
-         maxY = yt;
-         rangeChanged = true;
-      }
-   
+
       #if DEBUG_XY_PLOT_CURVE_ADD
          MessageInterface::ShowMessage
             ("TsPlotCurve::AddData() size = %d, x = %lf, y = %lf\n",
