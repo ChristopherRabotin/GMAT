@@ -11,7 +11,7 @@ GMAT Sat.DateFormat = UTCGregorian;
 GMAT Sat.Epoch = '22 Jul 2014 11:29:10.811';
 GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.DisplayStateType = Keplerian;
-GMAT Sat.SMA = 83474.31800000001;
+GMAT Sat.SMA = 83474.318;
 GMAT Sat.ECC = 0.89652;
 GMAT Sat.INC = 12.4606;
 GMAT Sat.RAAN = 292.8362;
@@ -46,6 +46,10 @@ GMAT Sat.AngularVelocityX = 0;
 GMAT Sat.AngularVelocityY = 0;
 GMAT Sat.AngularVelocityZ = 0;
 
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
 Create ForceModel LowEarthProp_ForceModel;
 GMAT LowEarthProp_ForceModel.CentralBody = Earth;
 GMAT LowEarthProp_ForceModel.PrimaryBodies = {Earth};
@@ -57,15 +61,12 @@ GMAT LowEarthProp_ForceModel.GravityField.Earth.Degree = 10;
 GMAT LowEarthProp_ForceModel.GravityField.Earth.Order = 10;
 GMAT LowEarthProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT LowEarthProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
-GMAT LowEarthProp_ForceModel.Drag.AtmosphereModel = 'JacchiaRoberts';
+GMAT LowEarthProp_ForceModel.SRP.Flux = 1367;
+GMAT LowEarthProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+GMAT LowEarthProp_ForceModel.Drag.AtmosphereModel = JacchiaRoberts;
 GMAT LowEarthProp_ForceModel.Drag.F107 = 150;
 GMAT LowEarthProp_ForceModel.Drag.F107A = 150;
 GMAT LowEarthProp_ForceModel.Drag.MagneticIndex = 3;
-GMAT LowEarthProp_ForceModel.Drag.JacchiaRoberts.F107 = 150;
-GMAT LowEarthProp_ForceModel.Drag.JacchiaRoberts.F107A = 150;
-GMAT LowEarthProp_ForceModel.Drag.JacchiaRoberts.MagneticIndex = 3;
-GMAT LowEarthProp_ForceModel.SRP.Flux = 1367;
-GMAT LowEarthProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
 
 %----------------------------------------
 %---------- Propagators
@@ -105,6 +106,7 @@ GMAT DefaultOrbitView.SolverIterations = Current;
 GMAT DefaultOrbitView.UpperLeft = [ 0 0 ];
 GMAT DefaultOrbitView.Size = [ 0 0 ];
 GMAT DefaultOrbitView.RelativeZOrder = 0;
+GMAT DefaultOrbitView.Maximized = false;
 GMAT DefaultOrbitView.Add = {Sat, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultOrbitView.DrawObject = [ true true ];
