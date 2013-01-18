@@ -1383,17 +1383,17 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
       ("GmatMainFrame::RemoveChild() name=%s, itemType=%d, deleteChild=%d\n",
        name.c_str(), itemType, deleteChild);
    #endif
-
+   
    wxNode *node = theMdiChildren->GetFirst();
    bool childRemoved = false;
    wxString childName, childTitle;
    GmatTree::ItemType childItemType;
    GmatAppData *gmatAppData = GmatAppData::Instance();
-
+   
    while (node)
    {
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
-
+      
       childName = child->GetName();
       childTitle = child->GetTitle();
       childItemType = child->GetItemType();
@@ -1415,7 +1415,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // The count is decremented and object is deleted in the
          // destructors.
          //------------------------------------------------------
-
+         
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage
             ("   removing title: %s\n   name: %s, child=<%p>\n",
@@ -1426,7 +1426,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // sets deleteChild to false
          if (deleteChild)
             delete child;
-
+         
          delete node;
          childRemoved = true;
          break;
@@ -1450,11 +1450,6 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
 
          gmatAppData->GetOutputTree()->RemoveItem(itemType, name);
       }
-      
-      // Change MissionTree node label (loj: 2007.11.15)
-      // I just cannot recall why mission tree node label needs to be changed here.
-      // So commented out (loj: 2011.09.29)
-      //gmatAppData->GetMissionTree()->ChangeNodeLabel(childName);
    }
    
    #ifdef DEBUG_REMOVE_CHILD
@@ -1622,13 +1617,14 @@ void GmatMainFrame::CloseActiveChild()
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
-                                     bool closeReports, bool closeUndockedMissionTree)
+                                     bool closeReports, bool closeUndockedMissionTree,
+                                     bool closingGmat)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("\nGmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d, "
-       "closeReports=%d, closeUndockedMissionTree=%d\n", closeScriptWindow, closePlots,
-       closeReports, closeUndockedMissionTree );
+      ("\nGmatMainFrame::CloseAllChildren() entered, closeScriptWindow=%d, closePlots=%d, "
+       "closeReports=%d, closeUndockedMissionTree=%d, closingGmat=%d\n", closeScriptWindow, closePlots,
+       closeReports, closeUndockedMissionTree, closingGmat);
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
@@ -1659,6 +1655,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    wxString title;
    GmatTree::ItemType type;
    bool canDelete;
+   bool isOutputChild = false;
    wxNode *node = theMdiChildren->GetFirst();
    wxCloseEvent event;
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -1676,15 +1673,16 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage("   ==========> node = %p\n", node);
       #endif
-
+      
       wxSafeYield();
       canDelete = false;
+      isOutputChild = false;
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
-
+      
       title = child->GetTitle();
       name = child->GetName();
       type = child->GetItemType();
-
+      
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage("   name = %s, type = %d\n", name.c_str(), type);
       #endif
@@ -1722,6 +1720,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          // delete output plots
          if (closePlots && type > GmatTree::OUTPUT_BEGIN_PLOT && type < GmatTree::OUTPUT_END_PLOT)
          {
+            isOutputChild = true;
             gmatAppData->GetOutputTree()->UpdateOutput(true, false, true);
             canDelete = true;
          }
@@ -1755,7 +1754,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          #ifdef DEBUG_MAINFRAME_CLOSE
          MessageInterface::ShowMessage("   ==> closing child = %s\n", name.c_str());
          #endif
-
+         
          // If it can exit without confirm, set dirty flag to false
          if (mExitWithoutConfirm)
             child->SetDirty(false);
@@ -1772,8 +1771,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          // In resource or command panel frame, it checks for dirty flag.
          // In output child frame, it checks for mission or animation running flag.
          //-----------------------------------------------------------
+         if (closingGmat)
+            child->SetCanBeDeleted(!isOutputChild);
          child->OnClose(event);
-
+         
          // Delete child if frame can be closed
          if (child->CanClose())
          {
@@ -1787,13 +1788,17 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                ("   ==> cannot close this child, so added to ignore list\n");
             #endif
             ignoreNames.Add(name);
-
+            
             #ifdef __linux
                // Linux needs this; it may make animation flaky (see GMT-2022)
                childDeleted = true;
             #endif
          }
       }
+      
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage("   childDeleted = %d\n", childDeleted);
+      #endif
       
       //-------------------------------------------------
       // Note: The node is deleted from RemoveChild()
@@ -1818,7 +1823,6 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       #endif
       
       node = nextNode;
-
    }
    
    wxSafeYield();
@@ -2847,7 +2851,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
    
    // close all child windows first
-   if (CloseAllChildren(true, true, true, true))
+   if (CloseAllChildren(true, true, true, true, true))
    {
       // If auto exit after run, just skip the event
       if (mAutoExitAfterRun)

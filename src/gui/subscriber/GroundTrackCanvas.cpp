@@ -87,7 +87,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_SHOW_SKIP 1
 //#define DEBUG_ROTATE_BODY 2
 //#define DEBUG_DATA_BUFFERRING
-//#define DEBUG_ORBIT_LINES
+//#define DEBUG_ORBIT_LINES 1
 //#define DEBUG_DRAW_DEBUG 1
 //#define DEBUG_DRAW_SPACECRAFT 1
 
@@ -1205,7 +1205,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       // Just settinig color here for label
       *sIntColor = mObjectColorMap[objName].GetIntColor();
       
-      #ifdef DEBUG_ORBIT_LINES
+      #if DEBUG_ORBIT_LINES > 1
       MessageInterface::ShowMessage
          ("GroundTrackCanvas::DrawOrbitLines() leaving, not drawing '%s'\n", objName.c_str());
       #endif
@@ -1215,7 +1215,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    // If current or previous points are not drawing, just return
    if (!mIsDrawing[i] || !mIsDrawing[i-1])
    {
-      #ifdef DEBUG_ORBIT_LINES
+      #if DEBUG_ORBIT_LINES > 1
       MessageInterface::ShowMessage
          ("GroundTrackCanvas::DrawOrbitLines() just returning, current or previous lines are not drawn\n");
       #endif
@@ -1224,9 +1224,9 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    
    int index1 = 0, index2 = 0;
    
-   // Draw object orbit line based on points
+   // Draw object orbit line based on time
    if ((mTime[i] > mTime[i-1]) ||
-       ((i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2])) //for backprop
+       ((i>2) && (mTime[i] <= mTime[i-1]) && (mTime[i-1] <= mTime[i-2]))) // for backprop
    {
       index1 = objId * MAX_DATA * 3 + (i-1) * 3;
       index2 = objId * MAX_DATA * 3 + i * 3;
@@ -1249,6 +1249,9 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
       #ifdef SKIP_DATA_OVER_LIMIT
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage("   => Skiiping data over 100000 is on\n");
+      #endif
       static Real sMaxDiffDist = 100000.0;
       // if difference is more than sMaxDiffDist skip
       if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
@@ -1296,12 +1299,18 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       
       // save last valid frame to show object at final frame
       mObjLastFrame[objId] = i;
-      
+   }
+   else
+   {
       #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage
-         ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
+      MessageInterface::ShowMessage("   Not drawing ground track lines for '%s'\n", objName.c_str());
       #endif
    }
+   
+   #ifdef DEBUG_ORBIT_LINES
+   MessageInterface::ShowMessage
+      ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
+   #endif
    
    #if DEBUG_DRAW_DEBUG
    DrawDebugMessage(" Leaving DrawOrbitLines  --- ", GmatColor::RED32, 0, 420);
@@ -1380,8 +1389,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
       lat3 = m1 * (-GmatMathConstants::PI_DEG - minusLon2) + lat2;
       
       #if DEBUG_DRAW_LINE
-      MessageInterface::ShowMessage
-         ("------> at LHS border, m1=%f, lat3=%f\n", lonDiff, latDiff, m1, lat3);
+      MessageInterface::ShowMessage("------> at LHS border, m1=%f, lat3=%f\n", m1, lat3);
       #endif
       
       DrawLine(lon1, lat1, -GmatMathConstants::PI_DEG, lat3);

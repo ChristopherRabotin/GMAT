@@ -91,6 +91,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    mCanClose = true;
    mCanSaveLocation = true;
    mIsActiveChild = false;
+   mCanBeDeleted = true;
    mItemType = type;
    theScriptTextCtrl = NULL;
    theMenuBar = NULL;
@@ -318,6 +319,15 @@ void GmatMdiChildFrame::SetDirty(bool dirty)
 
 
 //------------------------------------------------------------------------------
+// void SetCanBeDeleted(bool flag)
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetCanBeDeleted(bool flag)
+{
+   mCanBeDeleted = flag;
+}
+
+
+//------------------------------------------------------------------------------
 // void OverrideDirty(bool flag)
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::OverrideDirty(bool flag)
@@ -510,25 +520,42 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    }
    
    #ifdef DEBUG_CLOSE
-   MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
+   MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() Saving position and size\n");
    #endif
    SaveChildPositionAndSize();
-
+   
    GmatSavePanel* panel = ((GmatSavePanel*) GetAssociatedWindow());
+   #ifdef DEBUG_CLOSE
+   MessageInterface::ShowMessage("   Associated window = <%p>\n", panel);
+   #endif
    if (panel != NULL)
    {
 	   if (!panel->UpdateStatusOnClose()) 
 	   {
+         event.Veto();
 		   mCanClose = false;
+         #ifdef DEBUG_CLOSE
+         MessageInterface::ShowMessage
+            ("GmatMdiChildFrame::OnClose() leaving, window cannot be closed\n");
+         #endif
 		   return;
 	   }
    }
-
-   // remove from list of frames
-   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
-   wxSafeYield();
    
+   // Remove from the list of mdi children, but do not delete output child in the
+   // GmatMainFrame::RemoveChild() (2012.01.17 LOJ: This fixes crash when file->exit)
+   #ifdef DEBUG_CLOSE
+   MessageInterface::ShowMessage
+      ("GmatMdiChildFrame::OnClose() calling GetMainFrame::RemoveChild()\n");
+   #endif
+   
+   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);   
+   wxSafeYield();
+   event.Skip();
+   
+   #ifdef DEBUG_CLOSE
+   MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() leaving\n");
+   #endif
 }
 
 
@@ -720,12 +747,12 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
       return;
    
    bool isAnimatable = ((GmatMainFrame*)theParent)->IsAnimatable();
-   bool isAnimationRunning = ((GmatMainFrame*)theParent)->IsAnimationRunning();
    
    #ifdef DEBUG_UPDATE_GUI_ITEM
+   bool isAnimationRunning = ((GmatMainFrame*)theParent)->IsAnimationRunning();
    MessageInterface::ShowMessage
-      ("   IsMissionRunning=%d, IsAnimationRunning=%d\n",
-       isMissionRunning, isAnimationRunning);
+      ("   IsMissionRunning=%d, IsAnimationRunning=%d, isAnimatable=%d\n",
+       isMissionRunning, isAnimationRunning, isAnimatable);
    #endif
    
    int editIndex = theMenuBar->FindMenu("Edit");

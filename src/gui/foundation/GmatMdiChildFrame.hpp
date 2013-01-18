@@ -69,6 +69,7 @@ public:
    
    void SetDirty(bool dirty);
    void OverrideDirty(bool flag);
+   void SetCanBeDeleted(bool flag);
    bool IsDirty();
    bool CanClose();
    
@@ -94,14 +95,15 @@ protected:
    static Integer maxZOrder;
    Integer        relativeZOrder;
    bool           usingSavedConfiguration;
-
+   
    wxString mChildName;
-
+   
    bool mDirty;
    bool mOverrideDirty;
    bool mCanClose;
    bool mCanSaveLocation;
    bool mIsActiveChild;
+   bool mCanBeDeleted;
    GmatTree::ItemType mItemType;
    wxTextCtrl *theScriptTextCtrl;
    GmatMenuBar *theMenuBar;

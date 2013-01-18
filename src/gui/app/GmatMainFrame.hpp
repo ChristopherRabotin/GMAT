@@ -100,7 +100,8 @@ public:
    void CloseWelcomePanel();
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-                         bool closeReports = true, bool closeUndockedMissionTree = true);
+                         bool closeReports = true, bool closeUndockedMissionTree = true,
+                         bool closingGmat = false);
    void MinimizeChildren();
    void ComputeReportPositionAndSize(const wxString &name, Integer &x,
                                      Integer &y, Integer &w, Integer &h,
