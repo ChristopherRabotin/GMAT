@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="PropagatingSpacecraft"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -79,12 +79,12 @@
     <programlisting>Create ForceModel DefaultProp_ForceModel
 DefaultProp_ForceModel.CentralBody = Earth
 DefaultProp_ForceModel.PrimaryBodies = {Earth}
-DefaultProp_ForceModel.PointMasses = {Jupiter, Luna}
-DefaultProp_ForceModel.Drag.AtmosphereModel = 'MSISE90'
+DefaultProp_ForceModel.PointMasses = {Jupiter, Luna, Sun}
 DefaultProp_ForceModel.SRP = On
 DefaultProp_ForceModel.GravityField.Earth.Degree = 21
 DefaultProp_ForceModel.GravityField.Earth.Order = 21
-DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlisting>
+DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'
+DefaultProp_ForceModel.Drag.AtmosphereModel = MSISE90</programlisting>
   </section>
 
   <section>
@@ -98,8 +98,8 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
 
     <para>This example requires an external ephemeris file for Mars' moons.
     For the following steps to work, download this file from this link:
-    <filename><link
-    xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/mar085.bsp">mar085.bsp</link></filename>.</para>
+    <uri>ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/mar097.bsp</uri>
+    .</para>
 
     <para>First, create Phobos as a <guilabel>Moon</guilabel> resource:</para>
 
@@ -155,7 +155,7 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
               <row>
                 <entry><guilabel>Flattening</guilabel></entry>
 
-                <entry><userinput>0.3185185185185186</userinput></entry>
+                <entry><userinput>0.318</userinput></entry>
               </row>
             </tbody>
           </tgroup>
@@ -227,7 +227,7 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
           <row>
             <entry><guilabel>Flattening</guilabel></entry>
 
-            <entry><userinput>0.3066666666666666</userinput></entry>
+            <entry><userinput>0.31</userinput></entry>
           </row>
 
           <row>
@@ -296,6 +296,36 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
         <para>Click <guilabel>OK</guilabel> to accept these changes.</para>
       </step>
     </procedure>
+
+    <para>The script for the resources configured above is shown
+    below.</para>
+
+    <programlisting>Create Moon Phobos
+Phobos.NAIFId = 401
+Phobos.OrbitSpiceKernelName = {'C:\mar097.bsp'}
+Phobos.EquatorialRadius = 13.5
+Phobos.Flattening = 0.318
+Phobos.Mu = 0.00070934
+Phobos.PosVelSource = 'SPICE'
+Phobos.CentralBody = 'Mars'
+
+Create Moon Deimos
+Deimos.NAIFId = 402
+Deimos.OrbitSpiceKernelName = {'C:\mar097.bsp'}
+Deimos.EquatorialRadius = 7.5
+Deimos.Flattening = 0.31
+Deimos.Mu = 0.000158817
+Deimos.PosVelSource = 'SPICE'
+Deimos.CentralBody = 'Mars'
+
+Create ForceModel DefaultProp_ForceModel
+DefaultProp_ForceModel.CentralBody = Mars
+DefaultProp_ForceModel.PrimaryBodies = {Mars}
+DefaultProp_ForceModel.PointMasses = {Deimos, Jupiter, Phobos, Sun}
+DefaultProp_ForceModel.SRP = On
+DefaultProp_ForceModel.GravityField.Mars.Degree = 4
+DefaultProp_ForceModel.GravityField.Mars.Order = 4
+DefaultProp_ForceModel.GravityField.Mars.PotentialFile = 'Mars50c.cof'</programlisting>
   </section>
 
   <section>
@@ -355,6 +385,11 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
 
     <para>GMAT will propagate the spacecraft for 10 days. Observe the 2D and
     3D plots showing the propagated orbit.</para>
+    
+    <para>The script for the command configured above is shown
+    below.</para>
+
+    <programlisting>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedDays = 10}</programlisting>
   </section>
 
   <section>
@@ -402,11 +437,22 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
 
       <step>
         <para>Click <guibutton>OK</guibutton>, then click
-        <guibutton>Run</guibutton>.</para>
+        <guibutton>Run</guibutton> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"/>
+            </imageobject>
+          </inlinemediaobject></subscript>).</para>
       </step>
     </procedure>
 
     <para>GMAT will propagate the spacecraft until it reaches orbit
     periapsis.</para>
+    
+    <para>The script for the command configured above is shown
+    below.</para>
+
+    <programlisting>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis}</programlisting>
   </section>
 </chapter>

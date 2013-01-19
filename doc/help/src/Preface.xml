@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <preface version="5.0" xml:id="Preface" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -93,12 +93,12 @@
 
     <itemizedlist spacing="compact">
       <listitem>
-        <para>Graphical user interface (GUI) elements are presented in
+        <para>Graphical user interface (GUI) elements and resource and command names are presented in
         <emphasis role="bold">bold</emphasis>.</para>
       </listitem>
 
       <listitem>
-        <para>Filenames, resource and command names, and script examples are
+        <para>Filenames and script examples are
         presented in <code>monospace</code>.</para>
       </listitem>
     </itemizedlist>

@@ -1,4 +1,4 @@
-<!DOCTYPE t:templates [
+﻿<!DOCTYPE t:templates [
 <!ENTITY hsize0 "10pt">
 <!ENTITY hsize1 "12pt">
 <!ENTITY hsize2 "14.4pt">
@@ -159,9 +159,6 @@
            because only the first editor generates the list of editors.
       <editor t:predicate="[position() = 1]"/>
       -->
-      <releaseinfo space-before="5in"
-          text-align="left"
-          color="#0b3d91"/>
     </t:titlepage-content>
 
   <t:titlepage-content t:side="verso">
@@ -170,6 +167,8 @@
 	     font-size="&hsize2;"
 	     font-weight="bold"
 	     font-family="{$title.fontset}"/>
+	     <releaseinfo space-before="0.5in"
+          text-align="left"/>
       <corpauthor/>
       <authorgroup t:named-template="verso.authorgroup"/>
       <!--<author/>-->

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="ReportingData"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -18,7 +18,7 @@
   commands.</para>
 
   <section>
-    <title>Reporting Data During a Propagation Span</title>
+    <title>Reporting Data During Propagation</title>
 
     <para>You can report data at each integration step in the mission sequence
     by creating a <classname>ReportFile</classname> resource and adding data
@@ -26,7 +26,7 @@
 
     <orderedlist spacing="compact">
       <listitem>
-        <para>On the <guilabel>Resources</guilabel> tree, right-click the
+        <para>In the <guilabel>Resources</guilabel> tree, right-click the
         <guilabel>Output</guilabel> folder, point to <guilabel>Add</guilabel>,
         and click <guilabel>ReportFile</guilabel>.</para>
       </listitem>
@@ -66,7 +66,13 @@
       </listitem>
 
       <listitem>
-        <para>Click <guilabel>Run</guilabel>. To view the generated report, on
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"></imagedata>
+            </imageobject>
+          </inlinemediaobject></subscript>). To view the generated report, on
         the <guilabel>Output</guilabel> tree, double-click
         <guilabel>ReportFile1</guilabel>.</para>
       </listitem>
@@ -75,8 +81,8 @@
     <para>The script for the report data configured above is shown
     below.</para>
 
-    <programlisting>Create ReportFile ReportFile1;
-GMAT ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.Earth.Altitude};</programlisting>
+    <programlisting>Create ReportFile ReportFile1
+ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.Earth.Altitude}</programlisting>
   </section>
 
   <section>
@@ -259,7 +265,13 @@ Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude</programlisting>
       </step>
 
       <step>
-        <para>Click <guilabel>Run</guilabel>. The OEM file will be written to
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"></imagedata>
+            </imageobject>
+          </inlinemediaobject></subscript>). The OEM file will be written to
         a file named <filename>EphemerisFile1.eph</filename> in GMAT's output
         folder. By default, this folder is
         <filename><replaceable>&lt;GMAT&gt;</replaceable>/output</filename>,
@@ -267,6 +279,20 @@ Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude</programlisting>
         the path to your GMAT installation.</para>
       </step>
     </procedure>
+    
+    <para>The script for the resource configured above is shown
+    below.</para>
+
+    <programlisting>Create EphemerisFile EphemerisFile1
+EphemerisFile1.Spacecraft = DefaultSC
+EphemerisFile1.Filename = 'EphemerisFile1.eph'
+EphemerisFile1.FileFormat = CCSDS-OEM
+EphemerisFile1.EpochFormat = UTCGregorian
+EphemerisFile1.InitialEpoch = InitialSpacecraftEpoch
+EphemerisFile1.FinalEpoch = FinalSpacecraftEpoch
+EphemerisFile1.StepSize = IntegratorSteps
+EphemerisFile1.InterpolationOrder = 7
+EphemerisFile1.CoordinateSystem = EarthMJ2000Eq</programlisting>
   </section>
 
   <section>
@@ -306,10 +332,30 @@ Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude</programlisting>
       </step>
 
       <step>
-        <para>Click <guilabel>Run</guilabel>. The SPK file will be written to
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"></imagedata>
+            </imageobject>
+          </inlinemediaobject></subscript>). The SPK file will be written to
         a file named <filename>EphemerisFile1.bsp</filename> in GMAT's output
         folder.</para>
       </step>
     </procedure>
+    
+    <para>The script for the resource configured above is shown
+    below.</para>
+
+    <programlisting>Create EphemerisFile EphemerisFile1
+EphemerisFile1.Spacecraft = DefaultSC
+EphemerisFile1.Filename = 'EphemerisFile1.bsp'
+EphemerisFile1.FileFormat = SPK
+EphemerisFile1.EpochFormat = UTCGregorian
+EphemerisFile1.InitialEpoch = InitialSpacecraftEpoch
+EphemerisFile1.FinalEpoch = FinalSpacecraftEpoch
+EphemerisFile1.StepSize = IntegratorSteps
+EphemerisFile1.InterpolationOrder = 7
+EphemerisFile1.CoordinateSystem = EarthMJ2000Eq</programlisting>
   </section>
 </chapter>

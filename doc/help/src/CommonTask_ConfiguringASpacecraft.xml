@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -28,7 +28,7 @@
       </step>
 
       <step>
-        <para>In the <guilabel>EpochFormat</guilabel> list, select
+        <para>In the <guilabel>Epoch Format</guilabel> list, select
         <guilabel>UTCGregorian</guilabel>.</para>
       </step>
 
@@ -280,6 +280,11 @@ DefaultSC.SRPArea = 12.5</programlisting>
       </step>
 
       <step>
+        <para>Click <guibutton>OK</guibutton> or <guibutton>Apply</guibutton>
+        to save your changes.</para>
+      </step>
+
+      <step>
         <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
@@ -290,6 +295,16 @@ DefaultSC.SRPArea = 12.5</programlisting>
         inertially pointed in the graphics window.</para>
       </step>
     </procedure>
+    
+    <para>The script for the settings configured above is shown
+    below.</para>
+
+    <programlisting>Create Spacecraft DefaultSC
+DefaultSC.Attitude = CoordinateSystemFixed
+DefaultSC.AttitudeCoordinateSystem = 'EarthMJ2000Eq'
+DefaultSC.EulerAngle1 = 123
+DefaultSC.EulerAngle2 = 45
+DefaultSC.EulerAngle3 = 157</programlisting>
   </section>
 
   <section>
@@ -337,6 +352,11 @@ DefaultSC.SRPArea = 12.5</programlisting>
         and the <guilabel>Z</guilabel> axis to <guilabel>N</guilabel>. Leave
         the <guilabel>Y</guilabel> axis at its default blank value.</para>
       </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton> or <guibutton>Apply</guibutton>
+        to save your changes.</para>
+      </step>
     </procedure>
 
     <para>Now set the default spacecraft to spin about the X-axis of the
@@ -359,6 +379,11 @@ DefaultSC.SRPArea = 12.5</programlisting>
       </step>
 
       <step>
+        <para>In the <guilabel>Coordinate System</guilabel> list, select
+        <guilabel>Solar</guilabel>.</para>
+      </step>
+
+      <step>
         <para>In the <guilabel>Euler Angle Sequence</guilabel> box, select
         <guilabel>123</guilabel>. This maps the first Euler angle rotation to
         the X-axis of the coordinate system.</para>
@@ -375,6 +400,11 @@ DefaultSC.SRPArea = 12.5</programlisting>
       </step>
 
       <step>
+        <para>Click <guibutton>OK</guibutton> or <guibutton>Apply</guibutton>
+        to save your changes.</para>
+      </step>
+
+      <step>
         <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
@@ -385,5 +415,16 @@ DefaultSC.SRPArea = 12.5</programlisting>
         see the spacecraft spinning about the Sun-Earth line.</para>
       </step>
     </procedure>
+    
+    <para>The script for the settings configured above is shown
+    below.</para>
+
+    <programlisting>Create Spacecraft DefaultSC
+DefaultSC.Attitude = Spinner
+DefaultSC.AttitudeCoordinateSystem = 'Solar'
+DefaultSC.EulerAngleSequence = '123'
+DefaultSC.EulerAngleRate1 = 180
+DefaultSC.EulerAngleRate2 = 0
+DefaultSC.EulerAngleRate3 = 0</programlisting>
   </section>
 </chapter>

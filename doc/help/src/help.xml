@@ -32,7 +32,6 @@
   <xi:include href="ReleaseNotes.xml" />
   -->
 
-
     <part xml:id="CommonTasks">
         <title>Common Tasks</title>
         <xi:include href="CommonTask_ConfiguringASpacecraft.xml"/>

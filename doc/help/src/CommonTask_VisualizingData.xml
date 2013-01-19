@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -104,7 +104,13 @@
 
       <step>
         <para>Click <guibutton>OK</guibutton>, then click
-        <guibutton>Run</guibutton>.</para>
+        <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"></imagedata>
+            </imageobject>
+          </inlinemediaobject></subscript>).</para>
       </step>
     </procedure>
 
@@ -112,6 +118,12 @@
     <guilabel>DefaultGroundTrackPlot</guilabel> window will show the
     trajectory of the default spacecraft and <guilabel>Spacecraft1</guilabel>
     on a map of Earth.</para>
+    
+    <para>The script for the resource configured above is shown
+    below.</para>
+
+    <programlisting>Create GroundTrackPlot DefaultGroundTrackPlot
+DefaultGroundTrackPlot.Add = {DefaultSC, Spacecraft1}</programlisting>
   </section>
 
   <section>
@@ -166,10 +178,23 @@
       </step>
 
       <step>
-        <para>Click <guibutton>Run</guibutton>.</para>
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"></imagedata>
+            </imageobject>
+          </inlinemediaobject></subscript>).</para>
       </step>
     </procedure>
 
     <para>A new plot window will appear.</para>
+    
+    <para>The script for the resource configured above is shown
+    below.</para>
+
+    <programlisting>Create XYPlot XYPlot1
+XYPlot1.XVariable = DefaultSC.A1ModJulian
+XYPlot1.YVariables = {DefaultSC.Earth.Altitude}</programlisting>
   </section>
 </chapter>

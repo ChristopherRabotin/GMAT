@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="SimpleOrbitTransfer"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -372,7 +372,7 @@
                   <row>
                     <entry><guilabel>Propagate</guilabel></entry>
 
-                    <entry><userinput>Prop to Apoapsis</userinput></entry>
+                    <entry><userinput>Prop To Apoapsis</userinput></entry>
                   </row>
 
                   <row>
@@ -435,13 +435,13 @@
       <procedure>
         <step>
           <para>In the <guilabel>Mission</guilabel> tree, right-click
-          <guilabel>EndTarget1</guilabel>, point to <guimenuitem>Insert
+          <guilabel>End Hohmann Transfer</guilabel>, point to <guimenuitem>Insert
           After</guimenuitem>, and click <guimenuitem>Propagate</guimenuitem>.
           A new <guilabel>Propagate3</guilabel> command will appear.</para>
         </step>
 
         <step>
-          <para>Rename <guilabel>Propagate3</guilabel> to <userinput>Prop one
+          <para>Rename <guilabel>Propagate3</guilabel> to <userinput>Prop One
           Day</userinput>.</para>
         </step>
 
@@ -482,44 +482,6 @@
       <para>Now that the structure is created, we need to configure the
       various parts of the <function>Target</function> sequence to do what we
       want.</para>
-
-      <section>
-        <title>Configure the <guilabel>Hohmann Transfer</guilabel>
-        Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Hohmann Transfer</guilabel> to edit
-            its properties.</para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>ExitMode</guilabel> list, click
-            <guilabel>SaveAndContinue. </guilabel>This instructs GMAT to save
-            the final solution of the targeting problem after you run
-            it.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
-          </step>
-        </procedure>
-
-        <figure xml:id="Tut_HohmannTransfer_TargetDialog">
-          <title><guilabel>Hohmann Transfer</guilabel> Command
-          Configuration</title>
-
-          <screenshot>
-            <mediaobject>
-              <imageobject>
-                <imagedata align="center"
-                           fileref="files/images/Tut_SimpleOrbitTransfer_HohmannTransfer.png"
-                           scale="75"></imagedata>
-              </imageobject>
-            </mediaobject>
-          </screenshot>
-        </figure>
-      </section>
 
       <section>
         <title>Configure the <guilabel>Vary TOI</guilabel> Command</title>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="SimulatingAnOrbit"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -144,8 +144,8 @@
 
         <listitem>
           <para>In in the <guilabel>Epoch</guilabel> box, type <userinput>22
-          Jul 2014 11:29:10.811</userinput>. This field is
-          case-sensitive.</para>
+          Jul 2014 11:29:10.811</userinput>. This field is case-sensitive, and
+          must be entered in the exact format shown.</para>
         </listitem>
 
         <listitem>
@@ -380,13 +380,13 @@
 
         <listitem>
           <para>In the three boxes to the right of
-          <guilabel>ViewPointVector</guilabel>, type the values
+          <guilabel>View Point Vector</guilabel>, type the values
           <userinput>-60000</userinput>, <userinput>30000</userinput>, and
           <userinput>20000</userinput> respectively.</para>
         </listitem>
 
         <listitem>
-          <para>In the <guilabel>Drawing Options</guilabel> list, clear
+          <para>Under <guilabel>Drawing Option</guilabel> to the left, clear
           <guilabel>Draw XY Plane</guilabel>. Your screen should now match
           <xref linkend="Tut_PropASpacecraft_OrbitViewDialog"/>.</para>
         </listitem>
@@ -431,7 +431,7 @@
 
       <listitem>
         <para>Under <guilabel>Stopping Conditions</guilabel>, click the
-        (<guibutton>...</guibutton>) button next to
+        (<guibutton>...</guibutton>) button to the left of
         <guilabel>Sat.ElapsedSecs</guilabel>. This will display the
         <guilabel>ParameterSelectDialog</guilabel> window.</para>
       </listitem>
