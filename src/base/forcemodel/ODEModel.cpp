@@ -1798,6 +1798,8 @@ Integer ODEModel::GetOwnedObjectCount()
       ("ODEModel::GetOwnedObjectCount() this=<%p>'%s' returning %d\n",
        this, GetName().c_str(), numForces);
    #endif
+
+   numForces = forceList.size();
    return numForces;
 }
 
