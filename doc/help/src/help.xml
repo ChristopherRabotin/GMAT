@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <book version="5.0" xmlns="http://docbook.org/ns/docbook"
     xmlns:xlink="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -13,7 +13,8 @@
             <phrase condition="ug">User Guide</phrase>
             <phrase condition="tm">Training Manual</phrase>
         </subtitle>
-        <edition>R2012a</edition>
+        <edition>R2013a</edition>
+        <releaseinfo>$Revision$</releaseinfo>
         <author>
             <personname>The GMAT Development Team</personname>
         </author>
@@ -80,7 +81,7 @@
             <xi:include href="Resource_EphemerisFile.xml" />
             <xi:include href="Resource_EphemerisPropagator.xml" />
             <xi:include href="Resource_FiniteBurn.xml" />
-			<xi:include href="Resource_ForceModel.xml" />
+            <xi:include href="Resource_ForceModel.xml" />
             <xi:include href="Resource_Formation.xml" />
             <xi:include href="Resource_FuelTank.xml" />
             <xi:include href="Resource_GmatFunction.xml" />
