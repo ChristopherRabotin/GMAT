@@ -7,6 +7,7 @@ SHELL = /bin/sh
 .SUFFIXES:
 
 # directories
+VPATH = $(srcdir)
 srcdir = ./src
 configdir = ./config
 contribdir = ../build/contrib
@@ -212,3 +213,17 @@ fo.titlepage.templates.xsl: xform/fo.titlepage.templates.xml
 	-IN $< \
 	-XSL $(contribdir)/docbook-xsl-ns/template/titlepage.xsl \
 	-OUT $@
+
+%.pdf: %.fo
+	$(FOP) $< $@
+
+%.fo: %.xml
+	$(XALAN) \
+	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM img.src.path src/ \
+	    -PARAM paper.type USletter \
+	    -IN $< \
+	    -XSL $(fostyle) \
+	    -OUT $@ \
+	    $(ALL_XALANFLAGS)
+	
