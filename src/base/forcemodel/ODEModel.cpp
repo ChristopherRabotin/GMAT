@@ -293,9 +293,9 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
 ODEModel::~ODEModel()
 {
    #ifdef DEBUG_ODEMODEL
-   MessageInterface::ShowMessage
-      ("ODEModel destructor entered, this=<%p>'%s', has %d forces\n",
-       this, GetName().c_str(), forceList.size());
+      MessageInterface::ShowMessage
+         ("ODEModel destructor entered, this=<%p>'%s', has %d forces\n",
+          this, GetName().c_str(), forceList.size());
    #endif
    
 //   if (previousState)
@@ -703,6 +703,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
       else if (!skipAdd)
          forceList.push_back(pPhysicalModel);
    }
+
    numForces = forceList.size();
    
    // Update owned object count
@@ -733,7 +734,6 @@ void ODEModel::DeleteForce(const std::string &name)
       {
          PhysicalModel* pm = *force;
          forceList.erase(force);
-         numForces = forceList.size();
          
          if (!pm->IsTransient())
          {
@@ -747,6 +747,7 @@ void ODEModel::DeleteForce(const std::string &name)
          else
             --transientCount;
 
+         numForces = forceList.size();
          ownedObjectCount = numForces;
          return;
       }
@@ -765,14 +766,18 @@ void ODEModel::DeleteForce(const std::string &name)
 //------------------------------------------------------------------------------
 void ODEModel::DeleteForce(PhysicalModel *pPhysicalModel)
 {
+   #ifdef DEBUG_FORCELIST
+      MessageInterface::ShowMessage("At start of ODEModel::"
+            "DeleteForce(%p)\n", pPhysicalModel);
+   #endif
+
    for (std::vector<PhysicalModel *>::iterator force = forceList.begin();
         force != forceList.end(); ++force) 
    {
       if (*force == pPhysicalModel)
       {
-         PhysicalModel* pm = *force;
+         PhysicalModel *pm = *force;
          forceList.erase(force);
-         numForces = forceList.size();
          
          if (!pm->IsTransient())
          {
@@ -786,10 +791,21 @@ void ODEModel::DeleteForce(PhysicalModel *pPhysicalModel)
          else
             --transientCount;
 
+         numForces = forceList.size();
          ownedObjectCount = numForces;
          return;
       }
    }
+
+      #ifdef DEBUG_FORCELIST
+         MessageInterface::ShowMessage("At end of ODEModel::DeleteForce(), the "
+               "%d forces on %s are:\n", numForces, instanceName.c_str());
+         for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
+              current != forceList.end(); ++current)
+            MessageInterface::ShowMessage("   %s at <%p> named '%s'\n",
+                  (*current)->GetTypeName().c_str(), *current,
+                  (*current)->GetName().c_str());
+      #endif
 }
 
 
@@ -816,11 +832,18 @@ bool ODEModel::HasForce(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// Integer GetNumForces()
+// Integer ODEModel::GetNumForces()
+//------------------------------------------------------------------------------
+/**
+ * Gets the number of forces in the ODEModel
+ *
+ * @return The size of the force vector
+ */
 //------------------------------------------------------------------------------
 Integer ODEModel::GetNumForces()
 {
-    return numForces;
+   numForces = forceList.size();
+   return numForces;
 }
 
 
@@ -1320,7 +1343,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       fillSTM = true;
       if (stmStart == -1)
          stmStart = start;
-      ++stmCount;
+      stmCount = objectCount;
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1397,6 +1420,7 @@ bool ODEModel::Initialize()
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("ODEModel::Initialize() entered\n");
    #endif
+
 //   Integer stateSize = 6;      // Will change if we integrate more variables
 //   Integer satCount = 1;
 //   std::vector<SpaceObject *>::iterator sat;
@@ -1548,13 +1572,14 @@ bool ODEModel::Initialize()
          Real        itsMu;
          ((GravityField*) (*current))->GetBodyAndMu(itsName, itsMu);
          #ifdef DEBUG_MU_MAP
-            MessageInterface::ShowMessage("ODEModel::Initialize - saving mu value of %12.10f for body %s\n",
-                                          itsMu, itsName.c_str());
+            MessageInterface::ShowMessage("ODEModel::Initialize - saving mu "
+                  "value of %12.10f for body %s\n", itsMu, itsName.c_str());
          #endif
          muMap[itsName] = itsMu;
       }
       (*current)->SetState(modelState);
    }
+
    for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
         current != forceList.end(); ++current)
    {
@@ -1567,10 +1592,12 @@ bool ODEModel::Initialize()
             if (pos->first == rcBodyName)
             {
                #ifdef DEBUG_MU_MAP
-                  MessageInterface::ShowMessage("ODEModel::Initialize ---  setting mu value of %12.10f on RC for body %s\n",
-                                                 pos->second, rcBodyName.c_str());
+                  MessageInterface::ShowMessage("ODEModel::Initialize ---  "
+                        "setting mu value of %12.10f on RC for body %s\n",
+                        pos->second, rcBodyName.c_str());
                #endif
-               (*current)->SetRealParameter((*current)->GetParameterID("Mu"), pos->second);
+               (*current)->SetRealParameter((*current)->GetParameterID("Mu"),
+                     pos->second);
             }
          }
       }
@@ -1609,11 +1636,23 @@ bool ODEModel::Initialize()
 
    #ifdef DEBUG_MU_MAP
       std::map<std::string, Real>::iterator pos;
-      MessageInterface::ShowMessage("----> At end of Initialize(), the muMap is:");
+      MessageInterface::ShowMessage("----> At end of Initialize(), the muMap "
+            "is:");
       for (pos = muMap.begin(); pos != muMap.end(); ++pos)
       {
-         MessageInterface::ShowMessage("      %s      %12.10f\n", (pos->first).c_str(), pos->second);
+         MessageInterface::ShowMessage("      %s      %12.10f\n",
+               (pos->first).c_str(), pos->second);
       }
+   #endif
+
+   #ifdef DEBUG_FORCELIST
+      MessageInterface::ShowMessage("At end of ODEModel::Initialize(), the "
+            "forces on %s are:\n", instanceName.c_str());
+      for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
+           current != forceList.end(); ++current)
+         MessageInterface::ShowMessage("   %s at <%p> named '%s'\n",
+               (*current)->GetTypeName().c_str(), *current,
+               (*current)->GetName().c_str());
    #endif
 
    return true;
@@ -1626,8 +1665,23 @@ bool ODEModel::Initialize()
 void ODEModel::ClearForceList(bool deleteTransient)
 {
    #ifdef DEBUG_ODEMODEL_CLEAR
-   MessageInterface::ShowMessage
-      ("ODEModel::ClearForceList() entered, there are %d forces\n", forceList.size());
+      MessageInterface::ShowMessage("ODEModel::ClearForceList() entered, there "
+            "are %d forces\n", forceList.size());
+   #endif
+
+   #ifdef DEBUG_FORCELIST
+      MessageInterface::ShowMessage("In ODEModel::ClearForceList(%s), the "
+            "forces on %s are:\n", deleteTransient ? "true" : "false",
+            instanceName.c_str());
+      int i = 0;
+      for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
+           current != forceList.end(); ++current)
+      {
+         MessageInterface::ShowMessage("   %d: ", ++i);
+         MessageInterface::ShowMessage("%s at <%p> named '%s'\n",
+               (*current)->GetTypeName().c_str(), *current,
+               (*current)->GetName().c_str());
+      }
    #endif
    
    // Delete the owned forces
@@ -1639,14 +1693,15 @@ void ODEModel::ClearForceList(bool deleteTransient)
       forceList.erase(ppm);
       
       #ifdef DEBUG_ODEMODEL_CLEAR
-      MessageInterface::ShowMessage("   Checking if pm<%p> is transient\n", pm);
+         MessageInterface::ShowMessage("   Checking if pm<%p> is transient\n",
+               pm);
       #endif
       
       // Transient forces are managed in the Sandbox.
       if (pm->IsTransient())
          --transientCount;
 
-      if (!pm->IsTransient() || (deleteTransient && pm->IsTransient()))
+      if (!pm->IsTransient()) // || (deleteTransient && pm->IsTransient()))
       {
          #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
@@ -1692,8 +1747,8 @@ void ODEModel::ClearInternalCoordinateSystems()
 /**
  * Manages the allocation of coordinate systems used internally.
  * 
- * @param <csId>        Parameter name for the coordinate system label.
- * @param <currentPm>   Force that needs the CoordinateSystem.
+ * @param csId        Parameter name for the coordinate system label.
+ * @param currentPm   Force that needs the CoordinateSystem.
  */
 //------------------------------------------------------------------------------
 void ODEModel::SetInternalCoordinateSystem(const std::string csId,
@@ -1789,7 +1844,13 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
 
 
 //------------------------------------------------------------------------------
-// Integer ODEModel::GetOwnedObjectCount()
+// Integer GetOwnedObjectCount()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the number of owned objects in the ODEModel
+ *
+ * @return The count
+ */
 //------------------------------------------------------------------------------
 Integer ODEModel::GetOwnedObjectCount()
 {
@@ -1805,7 +1866,15 @@ Integer ODEModel::GetOwnedObjectCount()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* ODEModel::GetOwnedObject(Integer whichOne)
+// GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an owned object for configuration
+ *
+ * @param whichOne Index of the owned object
+ *
+ * @return The object
+ */
 //------------------------------------------------------------------------------
 GmatBase* ODEModel::GetOwnedObject(Integer whichOne)
 {
@@ -2303,6 +2372,19 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       }
    #endif
 
+   // Temporary code: prevent multiple spacecraft in finite burn PropSetup
+   stateObjects.clear();
+   psm->GetStateObjects(stateObjects, Gmat::SPACEOBJECT);
+   if ((transientCount > 0) && (stateObjects.size() > 1))
+      throw ODEModelException("Multiple Spacecraft are not allowed in "
+            "a propagator driving a finite burn; try breaking commands "
+            "of the form \"Propagate prop(sat1, sat2)\" that execute "
+            "with a finite burn on one of the spacecraft into two "
+            "synchronized propagators; e.g. \"Propagate Synchronized "
+            "prop(sat1) prop(sat2)\"\nexiting");
+
+
+
    if (order > 2)
    {
       return false;
@@ -2535,6 +2617,15 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
 }
 
 
+//------------------------------------------------------------------------------
+// bool PrepareDerivativeArray()
+//------------------------------------------------------------------------------
+/**
+ * Sets up the propagation vector for derivative data
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
 bool ODEModel::PrepareDerivativeArray()
 {
    bool retval = true;
@@ -2587,12 +2678,26 @@ bool ODEModel::PrepareDerivativeArray()
 }
 
 
+//------------------------------------------------------------------------------
+// bool CompleteDerivativeCalculations(Real *state)
+//------------------------------------------------------------------------------
+/**
+ * Completes the computations needed for the A-Matrix and STM
+ *
+ * @param state The current state vector
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
 bool ODEModel::CompleteDerivativeCalculations(Real *state)
 {
-   bool retval = true;
+   #ifdef DEBUG_AMATRIX_AND_STM
+      MessageInterface::ShowMessage("Entered ODEModel::CompleteDerivative"
+            "Calculations with stmCount = %d and fillSTM = %s\n", stmCount,
+            fillSTM ? "true" : "false");
+   #endif
 
-   // Convert A to Phi dot for STM pieces
-   // \Phi\dot = A\tilde \Phi
+   bool retval = true;
 
    for (Integer i = 0; i < stmCount; ++i)
    {
@@ -2605,6 +2710,8 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
       if (fillSTM)
       {
+         // Convert A to Phi dot for STM pieces
+         // \Phi\dot = A\tilde \Phi
          for (Integer j = 0; j < 6; ++j)
          {
             for (Integer k = 0; k < 6; ++k)
