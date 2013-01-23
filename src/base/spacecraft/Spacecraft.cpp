@@ -4401,7 +4401,8 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       std::stringstream errmsg;
       errmsg.precision(15);
       errmsg << "Mass update " << massChange
-             << " requested but there are no active thrusters";
+             << " requested for " << instanceName
+             << " but there are no active thrusters";
       throw SpaceObjectException(errmsg.str());
    }
 
