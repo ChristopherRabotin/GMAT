@@ -66,6 +66,9 @@ FiniteThrust::FiniteThrust(const std::string &name) :
 //------------------------------------------------------------------------------
 FiniteThrust::~FiniteThrust()
 {
+   #ifdef DEBUG_STATE_ALLOCATION
+      MessageInterface::ShowMessage("Deleting FiniteThrust at %p\n", this);
+   #endif
 }
 
 
