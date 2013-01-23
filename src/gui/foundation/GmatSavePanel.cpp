@@ -72,6 +72,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    mIsScriptActive = isScriptActive;
    mSyncGui = false;
    mDelayBuild = false;
+   mSaveCanceled = false;
    theParent = parent;
    SetName("GmatSavePanel");
    
@@ -215,7 +216,17 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    
    // if it is temp script file, call OnSaveAs() to bring up file dialog to save
    if (mFilename == GmatAppData::Instance()->GetTempScriptName())
+   {
       OnSaveAs(event);
+      if (mSaveCanceled)
+      {
+         #ifdef DEBUG_SAVE
+         MessageInterface::ShowMessage
+            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n", mFilename.c_str());
+         #endif
+         return;
+      }
+   }
    else if (!mSyncGui)
    {
       // Save inactive script and return
@@ -223,7 +234,7 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       mSyncGui = false;
       #ifdef DEBUG_SAVE
       MessageInterface::ShowMessage
-         ("GmatSavePanel::OnSave() leaving, mFilename='%s'\n", mFilename.c_str());
+         ("GmatSavePanel::OnSave() leaving, inactive script saved, mFilename='%s'\n", mFilename.c_str());
       #endif
       return;
    }
@@ -296,9 +307,9 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
          _T("Script files (*.script, *.m)|*.script;*.m|"\
             "Text files (*.txt, *.text)|*.txt;*.text|"\
             "All files (*.*)|*.*"), wxSAVE);
-
-   bool saveScript = false;
    
+   bool saveScript = false;
+   mSaveCanceled = false;
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString path = dialog.GetPath().c_str();
@@ -318,13 +329,16 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
          saveScript = true;
       }
    }
+   else
+      mSaveCanceled = true;
    
-   if (saveScript)
+   if (saveScript)      
       SaveScript();
-      
+   
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::OnSaveAs() leaving, script = '%s'\n", mFilename.c_str());
+      ("GmatSavePanel::OnSaveAs() leaving, saveScript=%d, mSaveCanceled=%d, script = '%s'\n",
+       saveScript, mSaveCanceled, mFilename.c_str());
    #endif
 }
 
@@ -628,11 +642,20 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
        mScriptFilename.c_str());
    #endif
    
-   // No action is performed if user said No.
+   // No action is performed if user said no to sync GUI
    // See GMAT Software Specification, Script Editor section (LOJ: 2012.02.22)
-   //if (isScriptModified)
    if (saveScript)
+   {
       OnSave(event);
+      if (mSaveCanceled)
+      {
+         #ifdef DEBUG_SAVE
+         MessageInterface::ShowMessage
+            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n", mFilename.c_str());
+         #endif
+         return;
+      }
+   }
    
    wxYield();
    
