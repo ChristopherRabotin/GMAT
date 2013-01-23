@@ -87,7 +87,7 @@ RFHardware::~RFHardware()
 //-----------------------------------------------------------------------------
 RFHardware::RFHardware(const RFHardware & rfh) :
    Sensor               (rfh),
-   primaryAntenna       (rfh.primaryAntenna),
+   primaryAntenna       (NULL),
    primaryAntennaName   (rfh.primaryAntennaName)
 {
 }

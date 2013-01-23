@@ -27,7 +27,7 @@
 #include "CoreMeasurement.hpp"
 #include "Troposphere.hpp"
 
-// #define IONOSPHERE
+#define IONOSPHERE
 
 #ifdef IONOSPHERE
 	#include "Ionosphere.hpp"

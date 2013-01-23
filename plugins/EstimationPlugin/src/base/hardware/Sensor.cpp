@@ -17,7 +17,9 @@
 //------------------------------------------------------------------------------
 #include "Sensor.hpp"
 #include "GmatBaseException.hpp"
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_SET_REAL_PARA
 
 //------------------------------------------------------------------------------
 // Static data
@@ -490,6 +492,10 @@ Real Sensor::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer index)
 {
+   #ifdef DEBUG_SET_REAL_PARA
+	  MessageInterface::ShowMessage("Sensor::SetRealParameter(id = %d, value = %le, index = %d)\n",id, value, index);
+   #endif
+
    switch (id)
    {
       case HARDWARE_DELAY:

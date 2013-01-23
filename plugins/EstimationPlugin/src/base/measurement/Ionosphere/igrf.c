@@ -1149,7 +1149,7 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
 	erad, real *gh, integer *ier, ftnlen fspec_len)
 {
     /* Format strings */
-	static char fmt_667[] = "('./files/IonosphereData/',a12)";	// made changes by Tuan Nguyen
+	static char fmt_667[] = "('./../data/IonosphereData/',a12)";	// made changes by Tuan Nguyen on Jan 11,2013
 
     /* System generated locals */
     integer i__1, i__2;

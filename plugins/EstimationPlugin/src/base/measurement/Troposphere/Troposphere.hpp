@@ -27,9 +27,9 @@ class Troposphere : public MediaCorrection
 public:
 	Troposphere(const std::string& nomme);
 	virtual ~Troposphere();
-   Troposphere(const Troposphere& tps);
-   Troposphere& operator=(const Troposphere& tps);
-   virtual GmatBase*    Clone() const;
+    Troposphere(const Troposphere& tps);
+    Troposphere& operator=(const Troposphere& tps);
+    virtual GmatBase*    Clone() const;
 
 	bool SetTemperature(Real T);
 	bool SetPressure(Real P);
@@ -41,12 +41,12 @@ public:
 	virtual RealArray Correction();		// specify the changes of range, angle, and time
 
 private:
-	Real temperature;
-	Real pressure;
-	Real humidityFraction;
-	Real waveLength;
-	Real elevationAngle;
-	Real range;
+	Real temperature;					// unit: K
+	Real pressure;						// unit: hPa
+	Real humidityFraction;				// unit: no unit. It's range is from 0 to 1
+	Real waveLength;					// unit: m
+	Real elevationAngle;				// unit: radian
+	Real range;							// unit: m
 
    static const Real term2;
 

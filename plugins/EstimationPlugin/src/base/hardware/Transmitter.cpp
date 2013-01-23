@@ -20,6 +20,9 @@
 //------------------------------------------------------------------------------
 
 #include "Transmitter.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_SET_REAL_PARA
 
 //------------------------------------------------------------------------------
 // Static data
@@ -353,6 +356,10 @@ Real Transmitter::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Transmitter::SetRealParameter(const Integer id, const Real value)
 {
+   #ifdef DEBUG_SET_REAL_PARA
+	MessageInterface::ShowMessage("Transmitter::SetRealParameter(id = %d, value = %le)  name of transmiiter = '%s'\n",id, value, GetName().c_str());
+   #endif
+
    switch (id)
    {
       case FREQUENCY:

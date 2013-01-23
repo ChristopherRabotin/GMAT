@@ -19,7 +19,9 @@
 #include "CelestialBody.hpp"
 #include "GmatConstants.hpp"
 #include "MeasurementException.hpp"
+#include "MessageInterface.hpp"
 
+#define DEBUG_TROPOSPHERE_CORRECTION
 
 //------------------------------------------------------------------------------
 // static data
@@ -42,9 +44,9 @@ Troposphere::Troposphere(const std::string& nomme) :
 	objectTypeNames.push_back("Troposphere");
 	model = 1;						// 1 for Troposphere model
 
-	temperature = 286;			// 286K
-	pressure = 938.0;				// 938.0 hPa = 93800 Pa = 0.926 atm
-	humidityFraction = 0.73;
+	temperature = 295.1;		//286;		// 286K
+	pressure = 1013.5;			//938.0;	// 938.0 hPa = 93800 Pa = 0.926 atm
+	humidityFraction = 0.55;	//0.73;		// 73 %
 }
 
 //------------------------------------------------------------------------------
@@ -209,18 +211,32 @@ bool Troposphere::SetWaveLength(Real lambda)
 *  E double containing elevation angle in radians
 *  rho double containing range in m
 *  return double[] containing tropospheric refraction corrections for range (m)
-*  and elevation (arcsec) measurements
+*                             elevation (arcsec) measurements
+*                             media correction time delay (second)
 */
 //------------------------------------------------------------------------------
 RealArray Troposphere::Correction()
 {
    // Determine Re value
    if (!solarSystem)
+   {
+	  MessageInterface::ShowMessage("Troposphere::Correction: Solar System is NULL; Cannot obtain Earth radius\n");
       throw MeasurementException("Troposphere::Correction: Solar System is NULL; Cannot obtain Earth radius\n");
+   }
    CelestialBody *earth= solarSystem->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
    if (!earth)
+   {
+	  MessageInterface::ShowMessage("Troposphere::Correction: Cannot obtain Earth radius\n");
       throw MeasurementException("Troposphere::Correction: Cannot obtain Earth radius\n");
-   Real Re = earth->GetEquatorialRadius();
+   }
+   Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Erath radius in meters
+
+#ifdef DEBUG_TROPOSPHERE_CORRECTION
+   MessageInterface::ShowMessage("Troposphere::Correction():\n");
+   MessageInterface::ShowMessage("   temperature = %f K ,  pressure = %f hPa,  humidity = %f\n", temperature, pressure, humidityFraction);
+   MessageInterface::ShowMessage("   range = %lfm ,  elevationAngle = %lf radian,  waveLenght = %lfm\n", range, elevationAngle, waveLength);
+   MessageInterface::ShowMessage("   earth radius = %lf m\n",Re);
+#endif
 
 	// Specify Ce and Crho:
 	double lambda = waveLength;
@@ -231,6 +247,9 @@ RealArray Troposphere::Correction()
 	double term3 = (173.3 + lp2_inv)/denom;
 	double Crho = Ce * term3;
 
+#ifdef DEBUG_TROPOSPHERE_CORRECTION
+   MessageInterface::ShowMessage("   Ce = %lf ,  Crho = %lf\n", Ce, Crho);
+#endif
 
 	// Specify inputs:
 	double p = pressure;
@@ -318,6 +337,13 @@ RealArray Troposphere::Correction()
 	out.push_back(drho);
 	out.push_back(dE);
 	out.push_back(drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM);
+
+#ifdef DEBUG_TROPOSPHERE_CORRECTION
+	MessageInterface::ShowMessage(" Troposphere correction result:\n");
+	MessageInterface::ShowMessage("   Range correction = %f m\n", drho);
+	MessageInterface::ShowMessage("   Elevation angle correction = %f arcsec", dE);
+	MessageInterface::ShowMessage("   Time correction = %f sec\n", drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM); 
+#endif
 
 	return out;
 }

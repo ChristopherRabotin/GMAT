@@ -32,8 +32,8 @@
 class ESTIMATION_API Sensor : public Hardware
 {
 public:
-	Sensor(const std::string &type, const std::string &name);
-	virtual ~Sensor();
+   Sensor(const std::string &type, const std::string &name);
+   virtual ~Sensor();
    Sensor(const Sensor& sen);
    Sensor& operator=(const Sensor& sen);
 

@@ -8652,7 +8652,7 @@ L1937:
     if (iflag == 0) {
 	o__1.oerr = 0;
 	o__1.ounit = 12;
-	o__1.ofnm = "./files/IonosphereData/ig_rz.dat";				// made changes by Tuan Nguyen
+	o__1.ofnm = "./../data/IonosphereData/ig_rz.dat";				// made changes by Tuan Nguyen on Jan 11, 2013
 	o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 9;	// made changes by Tuan Nguyen
 	o__1.orl = 0;
 	o__1.osta = "old";
@@ -9111,7 +9111,7 @@ e.\002,\002 STORM model is turned off.\002)";
     /* Function Body */
     o__1.oerr = 0;
     o__1.ounit = 13;
-    o__1.ofnm = "./files/IonosphereData/ap.dat";			// made changes by Tuan Nguyen
+    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
     o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 6;// made changes by Tuan Nguyen
     o__1.orl = 39;
     o__1.osta = "OLD";
@@ -9163,7 +9163,7 @@ e.\002,\002 STORM model is turned off.\002)";
 /* file starts at Jan 1, 1958 */
     o__1.oerr = 0;
     o__1.ounit = 13;
-    o__1.ofnm = "./files/IonosphereData/ap.dat";			// made changes by Tuan Nguyen
+    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
     o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
     o__1.orl = 39;
     o__1.osta = "OLD";
@@ -9384,7 +9384,7 @@ L20:
 /* -------------------------------------------------------------------- */
     o__1.oerr = 0;
     o__1.ounit = 13;
-    o__1.ofnm = "./files/IonosphereData/ap.dat";			// made changes by Tuan Nguyen
+    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
     o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
     o__1.orl = 39;
     o__1.osta = "OLD";
@@ -9433,7 +9433,7 @@ L20:
 /* AP.DAT starts at Jan 1, 1958 */
     o__1.oerr = 0;
     o__1.ounit = 13;
-    o__1.ofnm = "./files/IonosphereData/ap.dat";			// made changes by Tuan Nguyen
+    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
     o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
     o__1.orl = 39;
     o__1.osta = "OLD";

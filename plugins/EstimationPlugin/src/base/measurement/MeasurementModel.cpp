@@ -31,6 +31,7 @@
 //#define DEBUG_MEASUREMENT_INITIALIZATION
 //#define DEBUG_HARDWARE
 //#define DEBUG_DERIVATIVES
+//#define DEBUG_SET_CORRECTION
 
 //------------------------------------------------------------------------------
 // Static data initialization
@@ -2059,10 +2060,17 @@ Hardware* MeasurementModel::GetHardware(GmatBase *onObject,
 void MeasurementModel::SetCorrection(const std::string& correctionName,
          const std::string& correctionType)
 {
+   #ifdef DEBUG_SET_CORRECTION
+	  MessageInterface::ShowMessage("Start MeasurementModel::SetCorrection():   correctionName = '%s',   correctionType = '%s'\n", correctionName.c_str(), correctionType.c_str());
+   #endif
+   
    // Only PhysicalModels receive corrections
    if (measurement->IsOfType("PhysicalMeasurement"))
    {
       // We probably ought to also send in the type here
+      #ifdef DEBUG_SET_CORRECTION
+	     MessageInterface::ShowMessage("correctionName = '%s' will be added.\n", correctionName.c_str(), correctionType.c_str());
+      #endif
       ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName);
    }
 }

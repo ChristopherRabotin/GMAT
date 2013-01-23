@@ -313,10 +313,10 @@ ed.\002)";
     static char fmt_9033[] = "(\002Te: Aeros/ISIS model\002)";
     static char fmt_9034[] = "(\002Te: Interkosmos model\002)";
 //    static char fmt_104[] = "(\002ccir\002,i2,\002.asc\002)";
-    static char fmt_104[] = "('./files/IonosphereData/ccir',i2,'.asc')";
+    static char fmt_104[] = "('./../data/IonosphereData/ccir',i2,'.asc')";		// made changes by TUAN NGUYEN on Jan 11, 2013
     static char fmt_4689[] = "(1x,4e15.8)";
 //    static char fmt_1144[] = "(\002ursi\002,i2,\002.asc\002)";
-    static char fmt_1144[] = "('./files/IonosphereData/ursi',i2,'.asc')";
+    static char fmt_1144[] = "('./../data/IonosphereData/ursi',i2,'.asc')";		// made changes by TUAN NGUYEN on Jan 11, 2013
     static char fmt_8449[] = "(1x////,\002 The file \002,a30,\002is not in y\
 our directory.\002)";
     static char fmt_650[] = "(1x,\002*NE* E-REGION VALLEY CAN NOT BE MODEL\

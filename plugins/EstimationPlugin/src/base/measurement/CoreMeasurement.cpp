@@ -27,6 +27,10 @@
 #include "MeasurementException.hpp"
 #include <sstream>                  // for stringstream
 
+#include "GroundStation.hpp"				// made changes by TUAN NGUYEN
+#include "Spacecraft.hpp"					// made changes by TUAN NGUYEN
+
+
 //#define DEBUG_MEASUREMENT_INITIALIZATION
 //#define DEBUG_CALC_RANGE
 //#define DEBUG_HARDWARE
@@ -232,12 +236,37 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
             participants.insert(participants.begin(), (SpacePoint*)obj);
             participantHardware.insert(participantHardware.begin(), hv);
             stationParticipant = true;
+		    
+			// add hardware to participantHardware list:				// made changes by TUAN NGUYEN
+			GroundStation* gs = (GroundStation*)obj;
+			ObjectArray objList = gs->GetRefObjectArray(Gmat::HARDWARE);
+			int index = 0;
+			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
+			{
+				participantHardware[0].push_back((Hardware*)(*i));
+//				MessageInterface::ShowMessage("CoreMeasurement::SetRefObject():  set hardware to participantHardware[0][%d] = '%s'\n", index, participantHardware[0][index]->GetName().c_str());
+				++index;
+			}
+
          }
          else
          {
             participants.push_back((SpacePoint*)obj);
             participantHardware.push_back(hv);
-         }
+			
+			// add hardware to participantHardware list:					// made changes by TUAN NGUYEN
+			Spacecraft* sc = (Spacecraft*)obj;
+			ObjectArray objList = sc->GetRefObjectArray(Gmat::HARDWARE);
+			int index1 = participantHardware.size() - 1;
+			int index2 = 0;
+			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
+			{
+				participantHardware[index1].push_back((Hardware*)(*i));
+//				MessageInterface::ShowMessage("CoreMeasurement::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", index1, index2, participantHardware[index1][index2]->GetName().c_str());
+				++index2;
+			}
+
+		 }
 
          // Set IDs
          currentMeasurement.participantIDs.clear();

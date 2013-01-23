@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                  MATLAB Interface Import/Export Definitions
+//                  ESTIMATION Interface Import/Export Definitions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -15,14 +15,14 @@
 // Created: 2011/03/14
 //
 /**
- * Import/Export Definitions for the MATLAB interface library 
+ * Import/Export Definitions for the ESTIMATION interface library 
  */
 //------------------------------------------------------------------------------
 
 
 
-#ifndef MATLABINTERFACE_DEFS_HPP
-#define MATLABINTERFACE_DEFS_HPP
+#ifndef ESTIMATION_INTERFACE_DEFS_HPP
+#define ESTIMATION_INTERFACE_DEFS_HPP
 
 #ifdef _WIN32  // Windows
    #ifdef _MSC_VER  // Microsoft Visual C++
@@ -65,4 +65,4 @@
    #define ESTIMATION_API
 #endif
 
-#endif // MATLABINTERFACE_DEFS_HPP
+#endif // ESTIMATION_INTERFACE_DEFS_HPP

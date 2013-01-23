@@ -32,7 +32,7 @@
 #include "Transponder.hpp"
 #include "Troposphere.hpp"
 
-//#define DEBUG_RANGE_CALC_WITH_EVENTS
+#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
 //#define DEBUG_DERIVATIVES
@@ -255,7 +255,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
 
    if (objNumber == -1)
       throw MeasurementException(
-            "USNTwoWayRange error - object is neither participant nor "
+            "DSNTwoWayRange error - object is neither participant nor "
             "measurement model.");
 
    RealArray oneRow;
@@ -630,7 +630,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
    {
       // Calculate the corrected range measurement
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("DSN 2-Way Range Calculation:\n");
+         MessageInterface::ShowMessage("\n\n DSN 2-Way Range Calculation:\n");
       #endif
 
       #ifdef VIEW_PARTICIPANT_STATES_WITH_EVENTS
@@ -643,8 +643,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       r1 = downlinkLeg.GetPosition(participants[0]);
       r2 = downlinkLeg.GetPosition(participants[1]);
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage(" r1 = (%f, %f, %f)\n", r1.Get(0), r1.Get(1), r1.Get(2));
-         MessageInterface::ShowMessage(" r2 = (%f, %f, %f)\n", r2.Get(0), r2.Get(1), r2.Get(2));
+	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
+         MessageInterface::ShowMessage("   Ground station position in FK5: r1 = (%f, %f, %f)km\n", r1.Get(0), r1.Get(1), r1.Get(2));
+         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r2 = (%f, %f, %f)km\n", r2.Get(0), r2.Get(1), r2.Get(2));
       #endif
       Rvector3 downlinkVector = r2 - r1;		// rVector = r2 - r1;
       downlinkRange = downlinkVector.GetMagnitude();
@@ -658,8 +659,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       Rvector3 p1V = downlinkLeg.GetVelocity(participants[0]);
       Rvector3 p2V = downlinkLeg.GetVelocity(participants[1]);
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage(" p1V = (%f, %f, %f)\n", p1V.Get(0), p1V.Get(1), p1V.Get(2));
-         MessageInterface::ShowMessage(" p2V = (%f, %f, %f)\n", p2V.Get(0), p2V.Get(1), p2V.Get(2));
+	     MessageInterface::ShowMessage("2. Get downlink leg range rate:\n");
+         MessageInterface::ShowMessage("   Ground station velocity in FK5: p1V = (%f, %f, %f)km/s\n", p1V.Get(0), p1V.Get(1), p1V.Get(2));
+         MessageInterface::ShowMessage("   Spacecraft velocity in FK5    : p2V = (%f, %f, %f)km/s\n", p2V.Get(0), p2V.Get(1), p2V.Get(2));
       #endif
       // @todo Relative origin velocities need to be subtracted when the origins
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
@@ -679,8 +681,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       r3 = uplinkLeg.GetPosition(participants[0]);
       r4 = uplinkLeg.GetPosition(participants[1]);
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage(" r3 = (%f, %f, %f)\n", r3.Get(0), r3.Get(1), r3.Get(2));
-         MessageInterface::ShowMessage(" r4 = (%f, %f, %f)\n", r4.Get(0), r4.Get(1), r4.Get(2));
+	     MessageInterface::ShowMessage("3. Get uplink leg range:\n");
+         MessageInterface::ShowMessage("   Ground station position in FK5: r3 = (%f, %f, %f)km\n", r3.Get(0), r3.Get(1), r3.Get(2));
+         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r4 = (%f, %f, %f)km\n", r4.Get(0), r4.Get(1), r4.Get(2));
       #endif
       Rvector3 uplinkVector = r4 - r3;
       uplinkRange = uplinkVector.GetMagnitude();
@@ -694,8 +697,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       Rvector3 p3V = uplinkLeg.GetVelocity(participants[0]);
       Rvector3 p4V = uplinkLeg.GetVelocity(participants[1]);
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage(" p3V = (%f, %f, %f)\n", p3V.Get(0), p3V.Get(1), p3V.Get(2));
-         MessageInterface::ShowMessage(" p4V = (%f, %f, %f)\n", p4V.Get(0), p4V.Get(1), p4V.Get(2));
+	     MessageInterface::ShowMessage("4. Get uplink leg range rate:\n");
+         MessageInterface::ShowMessage("   Ground station velocity in FK5: p3V = (%f, %f, %f)km/s\n", p3V.Get(0), p3V.Get(1), p3V.Get(2));
+         MessageInterface::ShowMessage("   Spacecraft velocity in FK5    : p4V = (%f, %f, %f)km/s\n", p4V.Get(0), p4V.Get(1), p4V.Get(2));
       #endif
       // @todo Relative origin velocities need to be subtracted when the origins
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
@@ -713,7 +717,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       targetRangeRate = (downlinkRangeRate + uplinkRangeRate) / 2.0;
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("   Target Range Rate:  %.12lf\n",
+			MessageInterface::ShowMessage("   Target Range Rate:  %.12lf km/s\n",
 						targetRangeRate);
 		#endif
 
@@ -732,22 +736,26 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		   // Calculate uplink time and down link time: (Is it needed???)
 		   uplinkTime   = uplinkRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
 		   downlinkTime = downlinkRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
-			#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-				MessageInterface::ShowMessage("    Uplink time = %.12lf s\n",uplinkTime);
-				MessageInterface::ShowMessage("    Downlink time = %.12lf s\n",downlinkTime);
-			#endif
+		   #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+		      MessageInterface::ShowMessage("  Ideal measurement (no hardware delay and no media correction involve):\n");
+			  MessageInterface::ShowMessage("    Uplink time = %.12lf s\n",uplinkTime);
+			  MessageInterface::ShowMessage("    Downlink time = %.12lf s\n",downlinkTime);
+		   #endif
 
 		   // Calculate real range
 		   Real freqFactor = GetFrequencyFactor(frequency);	// Notice that: unit of "frequency" varaibel is Hz (not MHz)
-			#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+		   Real realTravelTime = uplinkTime + downlinkTime + receiveDelay + transmitDelay + targetDelay;	// unit: second
+		   Real realRangeKm = 0.5 *realTravelTime * GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;    // unit: km
+		   Real realRange = realTravelTime * freqFactor;													// unit: no unit
+
+		   #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 		      MessageInterface::ShowMessage("   Frequency = %.12lf MHz (This value is set to the default value in PhysicalMeasurement class due to no hardware used.)\n", frequency/1.0e6);
-				MessageInterface::ShowMessage("   Frequency factor = %.12lf MHz\n", freqFactor/1.0e6);
-			#endif
-			Real realRange = (uplinkTime + downlinkTime + receiveDelay +
-			   		transmitDelay + targetDelay) * freqFactor;
-	      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	         MessageInterface::ShowMessage("   Range = %.12lf (It has no unit)\n", realRange);
-	      #endif
+			  MessageInterface::ShowMessage("   Frequency factor = %.12lf MHz\n", freqFactor/1.0e6);
+	          MessageInterface::ShowMessage("   Range in km = %.12lf km\n", realRangeKm);
+			  MessageInterface::ShowMessage("   uplinkRange = %lfkm   downlinkRange = %lfkm\n", uplinkRange, downlinkRange);
+			  MessageInterface::ShowMessage("   receiveDelay = %lfm   transmitDelay = %lfm   targetDelay = %lfm\n", receiveDelay*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM, transmitDelay*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM, targetDelay*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM);
+	          MessageInterface::ShowMessage("   Range = %.12lf (It has no unit)\n", realRange);
+	       #endif
 
 	      // Set value for currentMeasurement
 		   currentMeasurement.value[0] = realRange;
@@ -824,6 +832,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   }
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+	        MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
 			MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
 				gsTransmitter->GetName().c_str(), gsReceiver->GetName().c_str(),
 				scTransponder->GetName().c_str());
@@ -836,9 +845,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		targetDelay = scTransponder->GetDelay();
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("   Transmitter delay = %.12lf s\n", gsTransmitter->GetDelay());
-			MessageInterface::ShowMessage("   Receiver delay = %.12lf s\n", gsReceiver->GetDelay());
-			MessageInterface::ShowMessage("   Transponder delay = %.12lf s\n", scTransponder->GetDelay());
+			MessageInterface::ShowMessage("   Transmitter delay = %le s\n", gsTransmitter->GetDelay());
+			MessageInterface::ShowMessage("   Receiver delay = %le s\n", gsReceiver->GetDelay());
+			MessageInterface::ShowMessage("   Transponder delay = %le s\n", scTransponder->GetDelay());
 		#endif
 
 
@@ -846,22 +855,19 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		Signal* uplinkSignal = gsTransmitter->GetSignal();
 		Real uplinkFreq = uplinkSignal->GetValue();
 
-		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
-		#endif
 
-
-      // 8. Calculate media correction for uplink leg:
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("      Media correction for uplink leg\n");
-      #endif
-      Real roundTripTime = ((uplinkRange + downlinkRange)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)/GmatTimeConstants::SECS_PER_DAY;
-      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r1, r2, currentMeasurement.epoch - roundTripTime);
-      Real uplinkRangeCorrection = uplinkCorrection[0]/GmatMathConstants::KM_TO_M;
-      Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
+        // 8. Calculate media correction for uplink leg:
+        #ifdef DEBUG_RANGE_CALC_WITH_EVENTS   
+           MessageInterface::ShowMessage("6. Media correction for uplink leg\n");
+		   MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
+        #endif
+        Real roundTripTime = ((uplinkRange + downlinkRange)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)/GmatTimeConstants::SECS_PER_DAY;
+        RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r1, r2, currentMeasurement.epoch - roundTripTime);
+        Real uplinkRangeCorrection = uplinkCorrection[0]/GmatMathConstants::KM_TO_M;
+        Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("      Uplink range correction = %.12lf km\n",uplinkRangeCorrection);
-			MessageInterface::ShowMessage("      Uplink real range = %.12lf km\n",uplinkRealRange);
+			MessageInterface::ShowMessage("   Uplink range correction = %.12lf km\n",uplinkRangeCorrection);
+			MessageInterface::ShowMessage("   Uplink real range = %.12lf km\n",uplinkRealRange);
 		#endif
 
 
@@ -869,7 +875,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   Real uplinkDSFreq = (1 - uplinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*uplinkFreq;
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("    Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
+	        MessageInterface::ShowMessage("7. Transponder input and output frequencies\n");
+			MessageInterface::ShowMessage("   Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
 		#endif
 
 
@@ -894,7 +901,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   Real downlinkFreq = outputSignal->GetValue();
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("    Downlink frequency = %.12lf Mhz\n", downlinkFreq);
+			MessageInterface::ShowMessage("  Downlink frequency = %.12lf Mhz\n", downlinkFreq);
 		#endif
 
 
@@ -902,7 +909,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
 
 	   #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("    Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
+			MessageInterface::ShowMessage("  Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
 		#endif
 
 
@@ -916,20 +923,21 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   {
 	   	 currentMeasurement.isFeasible = false;
 	   	 currentMeasurement.value[0] = 0;
+		 MessageInterface::ShowMessage("The receiver is unfeasible to receive downlink signal.\n");
 	   	 throw new MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
 	   }
 
 
 	   // 16. Calculate media correction for downlink leg:
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("      Media correction for downlink leg\n");
+         MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
 	   RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r3, r4, currentMeasurement.epoch);
 	   Real downlinkRangeCorrection = downlinkCorrection[0]/GmatMathConstants::KM_TO_M;
 	   Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("      Downlink range correction = %.12lf km\n",downlinkRangeCorrection);
-			MessageInterface::ShowMessage("      Downlink real range = %.12lf km\n",downlinkRealRange);
+			MessageInterface::ShowMessage("   Downlink range correction = %.12lf km\n",downlinkRangeCorrection);
+			MessageInterface::ShowMessage("   Downlink real range = %.12lf km\n",downlinkRealRange);
 		#endif
 
 	   // 17. Calculate uplink time and down link time: (Is it needed???)
@@ -937,8 +945,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	   downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("    Uplink time = %.12lf s\n",uplinkTime);
-			MessageInterface::ShowMessage("    Downlink time = %.12lf s\n",downlinkTime);
+	        MessageInterface::ShowMessage("9. Travel time:\n");
+			MessageInterface::ShowMessage("   Uplink time = %.12lf s\n",uplinkTime);
+			MessageInterface::ShowMessage("   Downlink time = %.12lf s\n",downlinkTime);
 		#endif
 
 
@@ -949,20 +958,21 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 	   // Real freqFactor = GetFrequencyFactor(frequency);
 	   Real freqFactor = GetFrequencyFactor(uplinkFreq*1.0e6);		// Notice that: unit of "uplinkFreq" is MHz (not Hz)
-		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("   Frequency factor = %.12lf MHz\n", freqFactor/1.0e6);
-		#endif
+  	   Real realTravelTime = uplinkTime + downlinkTime + receiveDelay + transmitDelay + targetDelay;    // unit: second
+	   Real realRangeKm = 0.5*realTravelTime * GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;		// unit: km
+       Real realRange = realTravelTime * freqFactor;													// unit: no unit
 
-		Real realRange = (uplinkTime + downlinkTime + receiveDelay +
-		   		transmitDelay + targetDelay) * freqFactor;
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("   Calculated real range = %.12lf (It has no unit)\n", realRange);
-      #endif
+	   #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+		  MessageInterface::ShowMessage("   Frequency factor = %.12lf MHz\n", freqFactor/1.0e6);
+		  MessageInterface::ShowMessage("   Calculated real range in km = %.12lf km\n", realRangeKm);
+          MessageInterface::ShowMessage("   Calculated real range = %.12lf (It has no unit)\n", realRange);
+       #endif
 
 
 
 	   // 19. Set value for currentMeasurement
-	   currentMeasurement.value[0] = realRange;
+//	   currentMeasurement.value[0] = realRange;
+      currentMeasurement.value[0] = realRangeKm;
       currentMeasurement.isFeasible = true;
 
       retval = true;

@@ -23,10 +23,14 @@
 #include "PhysicalMeasurement.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
-#include "GroundstationInterface.hpp"
+#include "GroundStation.hpp"
+#include "MeasurementException.hpp"
 
 
 //#define DEBUG_DERIVATIVES
+//#define DEBUG_RANGE_CALC_WITH_EVENTS
+//#define DEBUG_MEDIA_CORRECTION
+#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
 
 //------------------------------------------------------------------------------
 // PhysicalMeasurement(const std::string &type, const std::string &nomme)
@@ -185,27 +189,26 @@ Real PhysicalMeasurement::GetConstantFrequency()
 //----------------------------------------------------------------------
 void PhysicalMeasurement::AddCorrection(const std::string& modelName)
 {
-   #ifdef DEBUG_CORRECTIONS
+   #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("Adding correction named %s\n",
             modelName.c_str());
    #endif
 
 	if (modelName == "HopfieldSaastamoinen")
 	{
-      #ifdef DEBUG_CORRECTIONS
-         MessageInterface::ShowMessage("   Set as troposphere model\n");
-      #endif
-
 	   if (troposphere != NULL)
 	      delete troposphere;
 
-		// Create troposphere correction model
-		troposphere = new Troposphere(modelName);
-	}
+	   // Create troposphere correction model
+	   troposphere = new Troposphere(modelName);
 
-	if (modelName == "IRI2007")
+       #ifdef DEBUG_MEDIA_CORRECTION
+          MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
+       #endif
+	}
+	else if (modelName == "IRI2007")							// made changes by TUAN NGUYEN
 	{
-      #ifdef DEBUG_CORRECTIONS
+      #ifdef DEBUG_MEDIA_CORRECTION
          MessageInterface::ShowMessage("   Set as ionosphere model\n");
       #endif
 
@@ -219,6 +222,16 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName)
 		   throw new GmatBaseException("Ionosphere IRI2007 model currently is not "
 		         "available.\nIt will be be added to GMAT in a future release.\n");
       #endif
+	}
+	else if (modelName == "None")
+	{
+	}
+	else
+	{
+		MessageInterface::ShowMessage("Error: '%s' is not allowed for media correction name.\n", modelName.c_str());
+		MessageInterface::ShowMessage("Only 2 media correction model names are allowed: HopfieldSaastamoinen and IRI2007\n");
+		throw new MeasurementException("Error: media correction model name is not allowed\n"
+			"Only 2 media correction model names are allowed: HopfieldSaastamoinen and IRI2007\n");
 	}
 }
 
@@ -253,7 +266,7 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
 			MessageInterface::ShowMessage("       Apply Troposphere media correction:\n");
 			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
 			MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
-//			MessageInterface::ShowMessage("         .Range correction = %.12lf km\n", rangeCorrection);
+			MessageInterface::ShowMessage("         .Range correction = %.12lf m\n", tropoCorrection[0]);
 		#endif
    }
    else
@@ -274,13 +287,15 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
 /**
  * This function is used to calculate Ionosphere correction.
  *
- * @param freq		The frequency of signal	(unit: MHz)
- * @param r1		Position of ground station
- * @param r2		Position of spacecraft
- * @param epoch	Time at which the signal is transmitted or received from ground station
+ * @param freq		The frequency of signal		(unit: MHz)
+ * @param r1		Position of ground station	(unit: km)
+ * @param r2		Position of spacecraft		(unit:km)
+ * @param epoch	Time at which the signal is transmitted or received from ground station		(unit: Julian day)
  */
 //------------------------------------------------------------------------
 #ifdef IONOSPHERE
+#include "CoordinateConverter.hpp"
+#include "Moderator.hpp"
 RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
 {
    RealArray ionoCorrection;
@@ -288,44 +303,55 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
    if (ionosphere != NULL)
    {
    	// 1. Set wave length:
-   	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
+   	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);		// unit: meter
    	ionosphere->SetWaveLength(wavelength);
 
    	// 2. Set time:
-   	ionosphere->SetTime(epoch);
+   	ionosphere->SetTime(epoch);															// unit: Julian day
 
    	// 3. Set station and spacecraft positions:
    	GroundStation* gs 	= (GroundStation*)participants[0];
    	CoordinateSystem* cs = gs->GetBodyFixedCoordinateSystem();
-   	Rvector bogusIn(6,7000.0,1000.0,6000.0, 0.0, 0.0, 0.0);
-   	Rvector bogusOut 		= cs->FromMJ2000Eq(epoch, bogusIn, true);
-   	Rmatrix33 R_g_j2k    = cs->GetLastRotationMatrix().Transpose();
+   	Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+	Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+//   	Rvector bogusOut 		= cs->FromMJ2000Eq(epoch, bogusIn, true);
+//   	Rmatrix33 R_g_j2k    = cs->GetLastRotationMatrix().Transpose();
+	CoordinateConverter* cv = new CoordinateConverter();
+	A1Mjd time(epoch);
+	CoordinateSystem* fk5cs = Moderator::Instance()->GetCoordinateSystem("EarthMJ2000Eq");
+	cv->Convert(time, inState, cs, outState, fk5cs);				// convert EarthFK5 coordinate system to EarthBodyFixed coordinate system
+	Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix().Transpose();
 //   	MessageInterface::ShowMessage("[ %f  %f  %f\n", R_g_j2k.GetElement(0,0), R_g_j2k.GetElement(0,1), R_g_j2k.GetElement(0,2));
 //   	MessageInterface::ShowMessage("  %f  %f  %f\n", R_g_j2k.GetElement(1,0), R_g_j2k.GetElement(1,1), R_g_j2k.GetElement(1,2));
 //   	MessageInterface::ShowMessage("  %f  %f  %f]\n", R_g_j2k.GetElement(2,0), R_g_j2k.GetElement(2,1), R_g_j2k.GetElement(2,2));
 
-   	ionosphere->SetStationPosition(R_g_j2k*r1);
-   	ionosphere->SetSpacecraftPosition(R_g_j2k*r2);
+   	ionosphere->SetStationPosition(R_g_j2k*r1);											// unit: km
+   	ionosphere->SetSpacecraftPosition(R_g_j2k*r2);										// unit: km
 
    	// 4. Set earth radius:
-   	SpacePoint* sp 	= (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
-   	Real earthRadius 	= sp->GetRealParameter("EquatorialRadius");
-   	ionosphere->SetEarthRadius(earthRadius);
+	SpacePoint* earth 	= (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
+   	Real earthRadius 	= earth->GetRealParameter("EquatorialRadius");
+   	ionosphere->SetEarthRadius(earthRadius);											// unit: km
 
-   	// 5. Run ionosphere correction:
+#ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
+	MessageInterface::ShowMessage("      *Run Ionosphere media correction for:\n");
+	MessageInterface::ShowMessage("         +Earth radius = %lf km\n", earthRadius);
+	MessageInterface::ShowMessage("         +Wave length = %.12lf m\n", wavelength);
+	MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch);
+	MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km):\n"
+		                          "            (%s)", (R_g_j2k*r1).ToString().c_str()); 
+	MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km):\n"
+		                          "            (%s)", (R_g_j2k*r2).ToString().c_str());
+#endif
+
+	// 5. Run ionosphere correction:
    	ionoCorrection = ionosphere->Correction();
-   	Real rangeCorrection = ionoCorrection[0]/GmatMathConstants::KM_TO_M;
+   	Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;				// unit: meter
 
-		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("       Apply Ionosphere media correction:\n");
-			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
-			MessageInterface::ShowMessage("         .Time = %.12lf\n", epoch);
-	   	Real out_r;
-	   	std::string out_s;
-	   	TimeConverterUtil::Convert("A1ModJulian", epoch, "", "UTCGregorian", out_r, out_s, 2);
-	   	MessageInterface::ShowMessage("          time: %s\n",out_s.c_str());
-			MessageInterface::ShowMessage("         .Range correction = %.12lf km\n", rangeCorrection);
-		#endif
+#ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
+	MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
+	MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);
+#endif
    }
    else
    {
@@ -352,12 +378,21 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 //------------------------------------------------------------------------
 RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
 {
-	RealArray mediaCorrection;
+   #ifdef DEBUG_MEDIA_CORRECTION
+      MessageInterface::ShowMessage("start PhysicalMeasurement::CalculateMediaCorrection()\n");
+   #endif
+
+   RealArray mediaCorrection;
 
    // 1. Run Troposphere correction:
-	UpdateRotationMatrix(epoch, "o_j2k");
+   UpdateRotationMatrix(epoch, "o_j2k");
    Rvector3 rangeVector = r2 - r1;
    mediaCorrection = TroposphereCorrection(freq, rangeVector, R_o_j2k);
+
+   #ifdef DEBUG_MEDIA_CORRECTION
+      MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%s')km\n", freq, epoch, (r2-r1).ToString().c_str());
+	  MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", mediaCorrection[0], mediaCorrection[1], mediaCorrection[2]);
+   #endif
 
    #ifdef IONOSPHERE
       // 2. Run Ionosphere correction:

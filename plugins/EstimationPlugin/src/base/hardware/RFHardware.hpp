@@ -68,8 +68,9 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
 
-   virtual const 			ObjectTypeArray& GetRefObjectTypeArray();									// made changes by Tuan Nguyen
-   virtual bool 			HasRefObjectTypeArray();														// made changes by Tuan Nguyen
+   virtual const 		ObjectTypeArray& GetRefObjectTypeArray();					// made changes by Tuan Nguyen
+   virtual bool 		HasRefObjectTypeArray();									// made changes by Tuan Nguyen
+   virtual bool         HasLocalClone() { return true;};							// made changes by Tuan Nguyen
 
    virtual bool         Initialize();
 

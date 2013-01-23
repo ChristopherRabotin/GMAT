@@ -22,6 +22,10 @@
 //#include "f2c.h"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include "MeasurementException.hpp"
+
+#define DEBUG_IONOSPHERE_ELECT_DENSITY
+#define DEBUG_IONOSPHERE_TEC
 
 //------------------------------------------------------------------------------
 // static data
@@ -166,7 +170,7 @@ bool Ionosphere::SetTime(GmatEpoch ep)
 //------------------------------------------------------------------------------
 /**
  * Set station position
- * @param p  Position of station
+ * @param p  Position of station. (unit: km)
  */
 //------------------------------------------------------------------------------
 bool Ionosphere::SetStationPosition(Rvector3 p)
@@ -181,7 +185,7 @@ bool Ionosphere::SetStationPosition(Rvector3 p)
 //------------------------------------------------------------------------------
 /**
  * Set spacecraft position
- * @param p  Position of spacecraft
+ * @param p  Position of spacecraft. (unit: km)
  */
 //------------------------------------------------------------------------------
 bool Ionosphere::SetSpacecraftPosition(Rvector3 p)
@@ -196,7 +200,7 @@ bool Ionosphere::SetSpacecraftPosition(Rvector3 p)
 //------------------------------------------------------------------------------
 /**
  * Set earth radius
- * @param p  radius of earth
+ * @param r  radius of earth. (unit: km)
  */
 //------------------------------------------------------------------------------
 bool Ionosphere::SetEarthRadius(Real r)
@@ -213,20 +217,22 @@ bool Ionosphere::SetEarthRadius(Real r)
  * This function is used to calculate average electron density along
  * 2 positions.
  *
- * @ param pos1 the first position
- * @ param pos2 the second position
+ * @ param pos1 the first position in Earth fixed coordinate system (unit: km)
+ * @ param pos2 the second position in Earth fixed coordinate system (unit: km)
  *
- * return value is electron density (unit: number electrons per m3
+ * return value is electron density (unit: number electrons per m3)
  *
  */
 //---------------------------------------------------------------------------
 float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 {
-   real latitude = (real)(GmatMathConstants::PI_OVER_TWO_DEG - acos(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);
-   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);
+   // the fisrt position's latitude and longitude (unit: degree):
+   //real latitude = (real)(GmatMathConstants::PI_OVER_TWO_DEG - acos(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);	// unit: degree
+   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);	// unit: degree
+   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);			// unit: degree
    
    // mmag  = 0 geographic   =1 geomagnetic coordinates
-   integer jmag = 1;
+   integer jmag = 0;	// 1;
    
    // jf(1:30)     =.true./.false. flags; explained in IRISUB.FOR
    logical jf[31];
@@ -239,8 +245,8 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    jf[29] = FALSE_;
    jf[30] = FALSE_;
    
-   jf[21] = FALSE_;
-   jf[28] = FALSE_;
+//   jf[21] = FALSE_;
+//   jf[28] = FALSE_;
    
    // iy,md        date as yyyy and mmdd (or -ddd)
    // hour         decimal hours LT (or UT+25)
@@ -250,34 +256,45 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    
    // Upper and lower integration limits
    real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
-   real hend = hbeg;  // 1500;
+   real hend = hbeg;
    real hstp = 1.0;
    
    integer error = 0;
 
    real outf[20*501+1];
    real oarr[51];
-   iri_sub(&jf[1], &jmag, &latitude, &longitude, &iy, &md, &hour,
-           &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
-   
+
+
+//   iri_sub(&jf[1], &jmag, &latitude, &longitude, &iy, &md, &hour,
+//           &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
+
+   integer ivar = 1;		// get attitude result
+   integer iut = 1;			// 1 for universal time; 0 for local time
+
+# ifdef DEBUG_IONOSPHERE_ELECT_DENSITY
+   MessageInterface::ShowMessage("           .At time = %lf A1Mjd:",epoch);
+   MessageInterface::ShowMessage("         year = %d   md = %d   hour = %lf h,   time type = %s,\n", iy, md, hour, (iut?"Universal":"Local"));
+   MessageInterface::ShowMessage("              At position (x,y,z) = (%lf,  %lf,  %lf)km in Earth fixed coordinate system: ", pos1[0], pos1[1], pos1[2]);
+   MessageInterface::ShowMessage("(latitude = %lf degree,  longitude = %lf degree,  attitude = %lf km,  ", latitude, longitude, hbeg);
+   MessageInterface::ShowMessage("coordinate system type = %s)\n",(jmag?"Geomagetic":"Geographic"));
+#endif
+   iri_web(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
+	   &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
+
    if (error != 0)
    {
       MessageInterface::ShowMessage("Ionosphere data files not found\n");
-      throw new GmatBaseException("Ionosphere data files not found\n");
+      throw new MeasurementException("Ionosphere data files not found\n");
    }
-   /*
-     for(int j = 0; j <= 4; ++j)
-     {
-     for(int i=1; i <= 20; ++i)
-     MessageInterface::ShowMessage("outf[%d,%d] = %f   ",j,i, outf[j*20 +i]);
-     MessageInterface::ShowMessage("\n");
-     }
-   */
+
    real density = outf[20+1];
    if (density < 0)
       density = 0;
-   
-   //      MessageInterface::ShowMessage("density = %.12lf\n", density);
+
+#ifdef DEBUG_IONOSPHERE_ELECT_DENSITY
+   MessageInterface::ShowMessage("              Electron density at that time and location = %le electrons per m3.\n", density);
+#endif
+
    return density;         //*(pos2-pos1).GetMagnitude();
 }
 
@@ -336,17 +353,30 @@ float Ionosphere::ElectronDensity1(Rvector3 pos2, Rvector3 pos1)
 
 //---------------------------------------------------------------------------
 // Real Ionosphere::TEC()
+// This function is used to calculate number of electron inside a 1 meter 
+// square cross sectioncylinder with its bases on spacecraft and on ground 
+// station.
+//
+//  return value: tec  (unit: number of electorns per 1 meter square)
 //---------------------------------------------------------------------------
 Real Ionosphere::TEC()
 {
+#ifdef DEBUG_IONOSPHERE_TEC
+	MessageInterface::ShowMessage("         It performs calculation electron density along the path\n");
+	MessageInterface::ShowMessage("            from ground station location: (%lf,  %lf,  %lf)km\n", stationLoc[0], stationLoc[1], stationLoc[2]);
+	MessageInterface::ShowMessage("            to spacecraft location:       (%lf,  %lf,  %lf)km\n", spacecraftLoc[0], spacecraftLoc[1], spacecraftLoc[2]);
+#endif
    Rvector3 dR = (spacecraftLoc - stationLoc) / NUM_OF_INTERVALS;
    Rvector3 p1 = stationLoc;
    Rvector3 p2;
+   Real electdensity, ds;
    Real tec = 0.0;
    for(int i = 0; i < NUM_OF_INTERVALS; ++i)
    {
       p2 = p1 + dR;
-      tec += ElectronDensity(p2, p1)*(p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;
+	  electdensity = ElectronDensity(p2, p1);					// unit: electron per m-3
+	  ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;	// unit: m
+      tec += electdensity*ds;
       p1 = p2;
    }
    
@@ -398,15 +428,20 @@ Real Ionosphere::BendingAngle()
 
 //---------------------------------------------------------------------------
 // RealArray Ionosphere::Correction()
+// This function is used to calculate Ionosphere correction
+// Return values:
+//    . Range correction (unit: m)
+//    . Angle correction (unit: radian)
+//    . Time correction  (unit: s)
 //---------------------------------------------------------------------------
 RealArray Ionosphere::Correction()
 {
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
    Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL
-   Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL
+   Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL		// unit: meter
    Real dphi = 0;                     //BendingAngle()*180/GmatConstants::PI;
                                       // It has not been defined yet
-   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;				// unit: s
    
    //MessageInterface::ShowMessage
    //   ("Ionosphere::Correction: freq = %.12lf MHz,  tec = %.12lfe16,  "
