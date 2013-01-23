@@ -1284,7 +1284,9 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    eulerSequence           ("321"),  // Dunn Changed from 312 to 321
    attitudeTime            (0.0),
    quaternion              (Rvector(4,0.0,0.0,0.0,1.0)),
-   attitudeModelName       ("")
+   attitudeModelName       (""),
+   modifyCoordSysAllowed   (true),
+   setInitialAttitudeAllowed (true)
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -1333,7 +1335,9 @@ Attitude::Attitude(const Attitude& att) :
    mrps                    (att.mrps),		   // Dunn Added
    eulerAngles             (att.eulerAngles),
    eulerAngleRates         (att.eulerAngleRates),
-   attitudeModelName       (att.attitudeModelName)
+   attitudeModelName       (att.attitudeModelName),
+   modifyCoordSysAllowed   (att.modifyCoordSysAllowed),
+   setInitialAttitudeAllowed (att.setInitialAttitudeAllowed)
 {
 }
  
@@ -1374,6 +1378,8 @@ Attitude& Attitude::operator=(const Attitude& att)
    eulerAngles             = att.eulerAngles;
    eulerAngleRates         = att.eulerAngleRates;
    attitudeModelName       = att.attitudeModelName;
+   modifyCoordSysAllowed   = att.modifyCoordSysAllowed;
+   setInitialAttitudeAllowed = att.setInitialAttitudeAllowed;
    return *this;
 }
 
@@ -1749,6 +1755,36 @@ std::string Attitude::GetAttitudeModelName() const
    return attitudeModelName;
 }
 
+//---------------------------------------------------------------------------
+//  bool   CSModifyAllowed() const
+//---------------------------------------------------------------------------
+ /**
+ * Returns a flag indicating whether or not modification of the reference
+ * coordinate system is allowed for this attitude model.
+ *
+ * @return is modification of the CS allowed?
+ */
+//---------------------------------------------------------------------------
+bool Attitude::CSModifyAllowed() const
+{
+   return modifyCoordSysAllowed;
+}
+
+//---------------------------------------------------------------------------
+//  bool   SetInitialAttitudeAllowed() const
+//---------------------------------------------------------------------------
+ /**
+ * Returns a flag indicating whether or not setting of the initial
+ * attitude conditions is allowed for this attitude model.
+ *
+ * @return is setting of the attitude allowed?
+ */
+//---------------------------------------------------------------------------
+bool Attitude::SetInitialAttitudeAllowed() const
+{
+   return setInitialAttitudeAllowed;
+}
+
 //------------------------------------------------------------------------------
 //   std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -2058,6 +2094,12 @@ bool Attitude::IsParameterReadOnly(const Integer id) const
    "Entering Attitude::ReadOnly with id = %d (%s)\n", id,
    GetParameterText(id).c_str());
    #endif
+   if ((!modifyCoordSysAllowed) && (id == REFERENCE_COORDINATE_SYSTEM))
+      return true;
+
+   if (!setInitialAttitudeAllowed && IsInitialAttitudeParameter(id,"Any"))
+      return true;
+
    if (id == EULER_SEQUENCE_LIST)
       return true;
    if (id == EPOCH)
@@ -2322,6 +2364,19 @@ Real Attitude::SetRealParameter(const Integer id,
    "ENTERING Att::SetReal with id = %d (%s) and value = %.12f\n", id,
    GetParameterText(id).c_str(), value);
    #endif
+   if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Real"))
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         std::string warnMsg = "*** WARNING *** Setting attitude initial ";
+         warnMsg += "conditions has no affect when attitude mode is ";
+         warnMsg += attitudeModelName + "\n";
+         MessageInterface::ShowMessage(warnMsg);
+         writeIgnoredMessage = false;
+      }
+      return true;
+   }
    if (id == EPOCH)  // this should be an A1Mjd time
    {
       if (epoch != value)
@@ -2771,6 +2826,19 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
       MessageInterface::ShowMessage("Entering SetReal with id = %d (%s), value = %12.10f, index= %d\n",
             id, GetParameterText(id).c_str(), value, index);
    #endif
+   if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rvector"))
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         std::string warnMsg = "*** WARNING *** Setting attitude initial ";
+         warnMsg += "conditions has no affect when attitude mode is ";
+         warnMsg += attitudeModelName + "\n";
+         MessageInterface::ShowMessage(warnMsg);
+         writeIgnoredMessage = false;
+      }
+      return true;
+   }
    if (id == EULER_ANGLES)
    {
       if ((index < 0) || (index > 2))
@@ -3017,6 +3085,19 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
    Integer sz = value.GetSize();
    Integer i;
    
+   if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rvector"))
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         std::string warnMsg = "*** WARNING *** Setting attitude initial ";
+         warnMsg += "conditions has no affect when attitude mode is ";
+         warnMsg += attitudeModelName + "\n";
+         MessageInterface::ShowMessage(warnMsg);
+         writeIgnoredMessage = false;
+      }
+      return angVel;
+   }
    if (id == EULER_ANGLES)
    {
       if (sz != 3) throw AttitudeException(
@@ -3191,6 +3272,19 @@ const Rmatrix& Attitude::GetRmatrixParameter(const std::string &label) const
 const Rmatrix& Attitude::SetRmatrixParameter(const Integer id,
                                              const Rmatrix &value)
 {
+   if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rmatrix"))
+   {
+      static bool writeIgnoredMessage = true;
+      if (writeIgnoredMessage)
+      {
+         std::string warnMsg = "*** WARNING *** Setting attitude initial ";
+         warnMsg += "conditions has no affect when attitude mode is ";
+         warnMsg += attitudeModelName + "\n";
+         MessageInterface::ShowMessage(warnMsg);
+         writeIgnoredMessage = false;
+      }
+      return dcm;
+   }
    if (id == DIRECTION_COSINE_MATRIX) 
    {
       Integer r,c;
@@ -3322,6 +3416,19 @@ bool Attitude::SetStringParameter(const Integer     id,
    }
    if (id == REFERENCE_COORDINATE_SYSTEM)
    {
+      if (!modifyCoordSysAllowed)
+      {
+         static bool writeIgnoredMessage = true;
+         if (writeIgnoredMessage)
+         {
+            std::string warnMsg = "*** WARNING *** Setting coordinate ";
+            warnMsg += "system has no affect when attitude mode is ";
+            warnMsg += attitudeModelName + "\n";
+            MessageInterface::ShowMessage(warnMsg);
+            writeIgnoredMessage = false;
+         }
+         return true;
+      }
        refCSName = value;
        return true;
    }
@@ -3355,6 +3462,20 @@ bool Attitude::SetStringParameter(const Integer     id,
    if ((id == QUATERNION) || (id == EULER_ANGLES)     || (id == DIRECTION_COSINE_MATRIX) ||
        (id == MRPS)       || (id == ANGULAR_VELOCITY) || (id == EULER_ANGLE_RATES))
    {
+      if ((!setInitialAttitudeAllowed) &&
+          (IsInitialAttitudeParameter(id,"Rvector") || (IsInitialAttitudeParameter(id,"Rmatrix"))))
+      {
+         static bool writeIgnoredMessage = true;
+         if (writeIgnoredMessage)
+         {
+            std::string warnMsg = "*** WARNING *** Setting attitude initial ";
+            warnMsg += "conditions has no affect when attitude mode is ";
+            warnMsg += attitudeModelName + "\n";
+            MessageInterface::ShowMessage(warnMsg);
+            writeIgnoredMessage = false;
+         }
+         return true;
+      }
       SetRealArrayFromString(id, value);
       return true;
    }
@@ -3848,3 +3969,54 @@ void Attitude::SetRealArrayFromString(Integer id, const std::string &sval)
       throw AttitudeException(errmsg);
    }
 }
+
+//------------------------------------------------------------------------------
+//  bool  IsInitialAttitudeParameter(Integer id, std::string ofType = "Any") const
+//------------------------------------------------------------------------------
+/**
+ * Returns true if this parameter ID is the ID for an initial attitude parameter.
+ *
+ * @param id      Id of the real array to set
+ * @param ofType  type of parameter
+ *
+ * @return true if it is an initial attitude parameter; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Attitude::IsInitialAttitudeParameter(Integer id, std::string ofType) const
+{
+   if ((ofType == "Real") || (ofType == "Any"))
+   {
+      if ((id == Q_1) || (id == Q_2) || (id == Q_3) || (id == Q_4) ||
+          (id == EULER_ANGLE_1) || (id == EULER_ANGLE_2) ||
+          (id == EULER_ANGLE_3) ||
+          (id == MRP_1)  || (id == MRP_2)  || (id == MRP_3)  ||
+          (id == DCM_11) || (id == DCM_12) || (id == DCM_13) ||
+          (id == DCM_21) || (id == DCM_22) || (id == DCM_23) ||
+          (id == DCM_31) || (id == DCM_32) || (id == DCM_33) ||
+          (id == EULER_ANGLE_RATE_1) || (id == EULER_ANGLE_RATE_2) ||
+          (id == EULER_ANGLE_RATE_3) ||
+          (id == ANGULAR_VELOCITY_X) || (id == ANGULAR_VELOCITY_Y) ||
+          (id == ANGULAR_VELOCITY_Z))
+      {
+         return true;
+      }
+   }
+   if ((ofType == "Rvector") || (ofType == "Any"))
+   {
+      if ((id == QUATERNION)              || (id == EULER_ANGLES)     ||
+          (id == DIRECTION_COSINE_MATRIX) || (id == MRPS)             ||
+          (id == ANGULAR_VELOCITY)        || (id == EULER_ANGLE_RATES))
+      {
+         return true;
+      }
+   }
+   if ((ofType == "Rmatrix") || (ofType == "Any"))
+   {
+      if (id == DIRECTION_COSINE_MATRIX)
+      {
+         return true;
+      }
+   }
+   return false;
+}
+

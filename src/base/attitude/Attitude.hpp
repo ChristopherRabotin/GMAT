@@ -142,6 +142,12 @@ public:
    
    /// Method returning the type of the attitude model
    std::string         GetAttitudeModelName() const;
+   /// Method returning a flag indicating whether or not modification of
+   /// the reference coordinate system is allowed for this attitude model
+   bool                CSModifyAllowed() const;
+   /// Method returning a flag indicating whether or not setting of
+   /// the initial attitude conditions is allowed for this attitude model
+   bool                SetInitialAttitudeAllowed() const;
    
    /// methods to access object parameters
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
@@ -335,8 +341,14 @@ protected:
    Rvector3              eulerAngles;
    /// the last computed euler angle rates  (radians/second)
    Rvector3              eulerAngleRates;
-   
+   /// the name of the attitude model
    std::string           attitudeModelName;
+   /// flag indicating whether or not the user can modify the reference
+   /// coordinate system for this attitude model
+   bool                  modifyCoordSysAllowed;
+   /// flag indicating whether or not the user can modify/set the initial
+   /// attitude for this attitude model
+   bool                  setInitialAttitudeAllowed;
  
 
    
@@ -367,5 +379,7 @@ private:
    bool      ValidateMRPs(const Rvector &mrps);		// Dunn Added
    void      UpdateState(const std::string &rep);
    void      SetRealArrayFromString(Integer id, const std::string &sval);
+
+   bool      IsInitialAttitudeParameter(Integer id, std::string ofType = "Any") const;
 };
 #endif /*Attitude_hpp*/

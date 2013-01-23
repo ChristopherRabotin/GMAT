@@ -50,13 +50,6 @@ public:
    /// inherited from GmatBase
    virtual GmatBase* Clone() const;
 
-   virtual bool        IsParameterReadOnly(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const std::string &label) const;
-
-   virtual bool        SetStringParameter(const Integer id,
-                                          const std::string &value);
-   virtual bool        SetStringParameter(const std::string label,
-                                          const std::string &value);
 protected:
    enum 
    {

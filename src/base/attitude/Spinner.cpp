@@ -52,7 +52,8 @@ Spinner::Spinner(const std::string &itsName) :
 {
    parameterCount    = SpinnerParamCount;
    objectTypeNames.push_back("Spinner");
-   attitudeModelName = "Spinner";
+   attitudeModelName     = "Spinner";
+   modifyCoordSysAllowed = false;
  }
  
  //------------------------------------------------------------------------------
@@ -185,104 +186,6 @@ bool Spinner::Initialize()
 GmatBase* Spinner::Clone() const
 {
    return (new Spinner(*this));
-}
-
-//---------------------------------------------------------------------------
-//  bool IsParameterReadOnly(const Integer id) const
-//---------------------------------------------------------------------------
-/**
- * Checks to see if the requested parameter is read only.
- *
- * @param <id> Description for the parameter.
- *
- * @return true if the parameter is read only, false (the default) if not;
- *         throws an exception if the parameter is out of the valid range
- *         of values.
- */
-//---------------------------------------------------------------------------
-bool Spinner::IsParameterReadOnly(const Integer id) const
-{
-   if (id == REFERENCE_COORDINATE_SYSTEM)
-      return true;
-
-   return Kinematic::IsParameterReadOnly(id);
-}
-
-//---------------------------------------------------------------------------
-//  bool IsParameterReadOnly(const std::string &label) const
-//---------------------------------------------------------------------------
-/**
- * Checks to see if the requested parameter is read only.
- *
- * @param <label> Description for the parameter.
- *
- * @return true if the parameter is read only, false (the default) if not.
- */
-//---------------------------------------------------------------------------
-bool Spinner::IsParameterReadOnly(const std::string &label) const
-{
-   return IsParameterReadOnly(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
-//  bool  SetStringParameter(const Integer id, const std::string value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the string parameter value, given the input
- * parameter ID.
- *
- * @param id    ID for the requested parameter.
- * @param value string value for the requested parameter.
- *
- * @exception <AttitudeException> thrown if value is out of range
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-bool Spinner::SetStringParameter(const Integer id,
-                                 const std::string &value)
-{
-   #ifdef DEBUG_SPINNER
-      MessageInterface::ShowMessage(
-            "Entering Spinner::SetStringParameter with id = %d, value = \"%s\", index = %d\n",
-            id, value.c_str(), index);
-   #endif
-   if (id == REFERENCE_COORDINATE_SYSTEM)
-   {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** Setting coordinate system has no affect when attitude mode is Spinner.\n");
-         writeIgnoredMessage = false;
-      }
-      return true;
-   }
-   return Kinematic::SetStringParameter(id, value);
-}
-
-//------------------------------------------------------------------------------
-//  bool  SetStringParameter(const std::string label, const std::string value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the string parameter value, given the input
- * parameter label.
- *
- * @param label string label for the requested parameter.
- * @param value string value for the requested parameter.
- *
- * @exception <AttitudeException> thrown if value is out of range
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-bool Spinner::SetStringParameter(const std::string label,
-                                 const std::string &value)
-{
-   return SetStringParameter(GetParameterID(label), value);
 }
 
 

@@ -50,7 +50,8 @@ CSFixed::CSFixed(const std::string &itsName) :
 {
    parameterCount = CSFixedParamCount;
    objectTypeNames.push_back("CoordinateSystemFixed");
-   attitudeModelName = "CoordinateSystemFixed";
+   attitudeModelName         = "CoordinateSystemFixed";
+   setInitialAttitudeAllowed = false;
  }
  
  //------------------------------------------------------------------------------
