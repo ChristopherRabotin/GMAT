@@ -10,19 +10,19 @@
 //
 // *** File Name : PhysicalModel.cpp
 // *** Created   : October 1, 2002
-// **************************************************************************
-// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
-// ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
-// ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  This software is subject to the Sofware Usage Agreement described ***
-// ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
-// ***  must be included in any distribution.  Removal of this header is  ***
-// ***  strictly prohibited.                                              ***
-// ***                                                                    ***
-// ***                                                                    ***
-// ***  Header Version: July 12, 2002                                     ***
-// **************************************************************************
+// ***************************************************************************
+// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)      ***
+// ***  For:  Flight Dynamics Analysis Branch (Code 572)                   ***
+// ***  Under Contract:  P.O.  GSFC S-66617-G                              ***
+// ***                                                                     ***
+// ***  This software is subject to the Software Usage Agreement described ***
+// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement     ***
+// ***  must be included in any distribution.  Removal of this header is   ***
+// ***  strictly prohibited.                                               ***
+// ***                                                                     ***
+// ***                                                                     ***
+// ***  Header Version: July 12, 2002                                      ***
+// ***************************************************************************
 // Module Type               : ANSI C++ Source
 // Development Environment   : Visual C++ 7.0
 // Modification History      : 11/26/2002 - D. Conway, Thinking Systems, Inc.
@@ -98,6 +98,9 @@
 //#define PHYSICAL_MODEL_DEBUG_INIT
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PM_CONSTRUCT
+//#define DEBUG_STATE_ALLOCATION
+
+//#define DEBUG_MEMORY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -190,6 +193,10 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
 //------------------------------------------------------------------------------
 PhysicalModel::~PhysicalModel()
 {
+   #ifdef DEBUG_STATE_ALLOCATION
+      MessageInterface::ShowMessage("Deleting PhysicalModel at %p\n", this);
+   #endif
+
    if (rawState != modelState)
       if (rawState)
       {
@@ -197,6 +204,10 @@ PhysicalModel::~PhysicalModel()
          MemoryTracker::Instance()->Remove
             (rawState, "rawState", "PhysicalModel::~PhysicalModel()",
              "deleting rawState", this);
+         #endif
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting rawState at %p\n",
+                  rawState);
          #endif
          delete [] rawState;
       }
@@ -207,6 +218,11 @@ PhysicalModel::~PhysicalModel()
       MemoryTracker::Instance()->Remove
          (modelState, "modelState", "PhysicalModel::~PhysicalModel()",
           "deleting modelState", this);
+      #endif
+
+      #ifdef DEBUG_STATE_ALLOCATION
+         MessageInterface::ShowMessage("Deleting modelState at %p\n",
+               modelState);
       #endif
       delete [] modelState;
    }
@@ -260,7 +276,16 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 {
    if (pm.modelState != NULL) 
    {
+      if (modelState != NULL)
+      {
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting modelState at %p\n",
+                  modelState);
+         #endif
+         delete [] modelState;
+      }
       modelState = new Real[dimension];
+
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (modelState, "modelState", "PhysicalModel::PhysicalModel(copy)",
@@ -272,7 +297,17 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
          isInitialized = false;
    }
    else
-      modelState = NULL;
+   {
+      if (modelState != NULL)
+      {
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting modelState at %p\n",
+                  modelState);
+         #endif
+         delete [] modelState;
+         modelState = NULL;
+      }
+   }
    rawState = modelState;
    
    if (pm.deriv != NULL) 
@@ -347,6 +382,11 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
          MemoryTracker::Instance()->Remove
             (modelState, "modelState", "PhysicalModel::operator=()",
              "deleting modelState", this);
+         #endif
+
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting modelState at %p\n",
+                  modelState);
          #endif
          delete [] modelState;
          modelState = NULL;
@@ -483,6 +523,10 @@ bool PhysicalModel::Initialize()
          (rawState, "rawState", "PhysicalModel::Initialize()",
           "deleting rawState", this);
       #endif
+
+      #ifdef DEBUG_STATE_ALLOCATION
+         MessageInterface::ShowMessage("Deleting rawState at %p\n", rawState);
+      #endif
       delete [] rawState;
       rawState = NULL;
    }
@@ -493,6 +537,11 @@ bool PhysicalModel::Initialize()
       MemoryTracker::Instance()->Remove
          (modelState, "modelState", "PhysicalModel::Initialize()",
           "deleting modelState", this);
+      #endif
+
+      #ifdef DEBUG_STATE_ALLOCATION
+         MessageInterface::ShowMessage("Deleting modelState at %p\n",
+               modelState);
       #endif
       delete [] modelState;
       modelState = NULL;
@@ -586,7 +635,6 @@ void PhysicalModel::SetBodyName(const std::string &theBody)
 Real PhysicalModel::GetErrorThreshold(void) const
 {
    return relativeErrorThreshold;
-   // DJC: Should relativeErrorThreshold be added to the list of parameters? :
 }
 
 //------------------------------------------------------------------------------
@@ -1574,12 +1622,43 @@ bool PhysicalModel::SetRefObject(GmatBase *obj,
    return GmatBase::SetRefObject(obj, type, name);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//       const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Passes reference objects into the model
+ *
+ * @param obj The object
+ * @param type The type of object being passed into the model
+ * @param name The name of the object
+ * @param index The object's index when being set for an array of objects
+ *
+ * @return true if a reference was set, false if not
+ */
+//------------------------------------------------------------------------------
 bool PhysicalModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            const std::string &name, const Integer index)
 {
    return GmatBase::SetRefObject(obj, type, name, index);
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Accesses a reference object
+ *
+ * @param type The type of object being passed into the model
+ * @param name The name of the object
+ * @param index The object's index when being set for an array of objects
+ *
+ * @return The object
+ */
+//------------------------------------------------------------------------------
 GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
                            const std::string &name, const Integer index)
 {
@@ -1589,12 +1668,30 @@ GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
 
 // Support for extra derivative calcs
 
+//------------------------------------------------------------------------------
+// const IntegerArray& GetSupportedDerivativeIds()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the types of derivatives supported by this PhysicalModel
+ *
+ * @return The IDs of the supported derivatives
+ */
+//------------------------------------------------------------------------------
 const IntegerArray& PhysicalModel::GetSupportedDerivativeIds()
 {
    return derivativeIds;
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray&  GetSupportedDerivativeNames()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the types of derivatives supported by this PhysicalModel
+ *
+ * @return The names of the supported derivatives
+ */
+//------------------------------------------------------------------------------
 const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
 {
    return derivativeNames;
