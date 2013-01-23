@@ -28,6 +28,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PW
+//#define DEBUG_PW_POINTER
 //#define DEBUG_PW_REFOBJ
 //#define DEBUG_PARAMETER_WRAPPER
 //#define DEBUG_RENAME
@@ -218,6 +219,12 @@ Real ParameterWrapper::EvaluateReal() const
       MessageInterface::ShowMessage(
       "In ParameterWrapper::EvaluateReal, value is %.12f\n", param->EvaluateReal());
    #endif
+
+   #ifdef DEBUG_PW_POINTER
+      MessageInterface::ShowMessage("ParameterWrapper: Parameter %s is at %p\n",
+            param->GetName().c_str(), param);
+   #endif
+
    return param->EvaluateReal();
 }
 
