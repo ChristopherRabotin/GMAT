@@ -1019,6 +1019,12 @@ Rvector3 Attitude::ToEulerAngleRates(const Rvector3 &angularVel,
             "                         %12.10f  %12.10f  %12.10f\n"
             "                         %12.10f  %12.10f  %12.10f\n",
             Si(0,0), Si(0,1), Si(0,2), Si(1,0), Si(1,1), Si(1,2), Si(2,0), Si(2,1), Si(2,2));
+      Rvector3 earates = Si * angularVel;
+      MessageInterface::ShowMessage(
+            "After computation, euler angle rates =  %12.10f  %12.10f  %12.10f\n",
+            earates[0] * GmatMathConstants::DEG_PER_RAD,
+            earates[1] * GmatMathConstants::DEG_PER_RAD,
+            earates[2] * GmatMathConstants::DEG_PER_RAD);
    #endif
 
    return Si * angularVel;
@@ -1051,6 +1057,18 @@ Rvector3 Attitude::ToAngularVelocity(const Rvector3 &eulerRates,
                                      Integer        seq2, 
                                      Integer        seq3)
 {
+   #ifdef DEBUG_EULER_ANGLE_RATES
+      MessageInterface::ShowMessage("Entering ToAngVel with EulerRates  = %lf  %lf  %lf\n",
+            eulerRates[0] * GmatMathConstants::DEG_PER_RAD,
+            eulerRates[1] * GmatMathConstants::DEG_PER_RAD,
+            eulerRates[2] * GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("                   and EulerAngles = %lf  %lf  %lf\n",
+            eulerAngles[0] * GmatMathConstants::DEG_PER_RAD,
+            eulerAngles[1] * GmatMathConstants::DEG_PER_RAD,
+            eulerAngles[2] * GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("                   and Euler Seq   = %d  %d  %d\n",
+            seq1, seq2, seq3);
+   #endif
    Real s2 = GmatMathUtil::Sin(eulerAngles(1));
    Real c2 = GmatMathUtil::Cos(eulerAngles(1));
    Real s3 = GmatMathUtil::Sin(eulerAngles(2));
@@ -1133,6 +1151,11 @@ Rvector3 Attitude::ToAngularVelocity(const Rvector3 &eulerRates,
        throw AttitudeException(
       "Invalid Euler sequence - cannot compute euler angle rates.");
    
+   #ifdef DEBUG_EULER_ANGLE_RATES
+      Rvector3 av = S * eulerRates;
+      MessageInterface::ShowMessage("Exiting ToAngVel with ang vel  = %lf  %lf  %lf\n",
+            av[0], av[1], av[2]);
+   #endif
    return S * eulerRates;
 }
   
@@ -3911,7 +3934,7 @@ void Attitude::UpdateState(const std::string &rep)
       if (inputAttitudeRateType == GmatAttitude::EULER_ANGLE_RATES_TYPE)
       {
          (const_cast<Attitude*>(this))->UpdateState("EulerAngleRates");
-         angVel            = Attitude::ToAngularVelocity(eulerAngles, eulerAngleRates,
+         angVel            = Attitude::ToAngularVelocity(eulerAngleRates, eulerAngles,
                              (Integer) eulerSequenceArray.at(0),
                              (Integer) eulerSequenceArray.at(1),
                              (Integer) eulerSequenceArray.at(2));
