@@ -6159,6 +6159,10 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    // if value has braces or brackets, setting multiple values
    if (value.find("{") != value.npos || value.find("}") != value.npos)
    {
+      // verify that we accept only OBJECTARRAYTYPE
+	  if ((type != Gmat::OBJECTARRAY_TYPE) &&
+		 (type != Gmat::STRINGARRAY_TYPE))
+		  return retval;
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6180,6 +6184,18 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    }
    else if (value.find("[") != value.npos || value.find("]") != value.npos)
    {
+      // verify that we accept only OBJECTARRAYTYPE
+	  // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
+      //      Long term, we need a GetParameterTypeArray or something
+	  if (((type != Gmat::BOOLEANARRAY_TYPE) &&
+		   (type != Gmat::INTARRAY_TYPE) &&
+		   (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+		   (type != Gmat::RVECTOR_TYPE)) &&
+		   (!((type == Gmat::OBJECT_TYPE) && 
+		      ((obj->GetParameterText(id) == "ViewDirection") ||
+			   (obj->GetParameterText(id) == "ViewPointVector") || 
+			   (obj->GetParameterText(id) == "ViewPointReference") ))))
+		  return retval;
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
