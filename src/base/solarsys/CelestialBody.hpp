@@ -346,8 +346,6 @@ protected:
       CENTRAL_BODY,
       BODY_NUMBER,
       REF_BODY_NUMBER,
-      SOURCE_FILENAME,
-      SOURCE_FILE,
       USE_POTENTIAL_FILE_FLAG,
       POTENTIAL_FILE_NAME,
       ANGULAR_VELOCITY,
@@ -453,9 +451,7 @@ protected:
    std::string              default_posVelSrc;
    /// default value for the central body
    std::string              default_centralBodyName;
-   /// default value for the ephemeris file
-   std::string              default_sourceFilename;
-   /// default values for the SPICe kernel names
+   /// default values for the SPICE kernel names
    StringArray              default_orbitSpiceKernelNames;
    /// default value for rotation data source
    Gmat::RotationDataSource default_rotationSrc; 
@@ -565,8 +561,6 @@ private:
 
    bool isFirstTimeMu;
    bool isFirstTimeRadius;
-
-   void WriteDeprecatedMessage(Integer id) const;
 };
 
 #endif // CelestialBody_hpp

@@ -103,8 +103,6 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "CentralBody",
    "BodyNumber",
    "RefBodyNumber",
-   "SourceFilename",
-   "SourceFile",
    "UsePotentialFileFlag",
    "PotentialFileName",
    "AngularVelocity",
@@ -148,8 +146,6 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::STRING_TYPE,   //"CentralBody",
    Gmat::INTEGER_TYPE,  //"BodyNumber",
    Gmat::INTEGER_TYPE,  //"RefBodyNumber",
-   Gmat::STRING_TYPE,   //"SourceFilename",
-   Gmat::OBJECT_TYPE,   //"SourceFile",
    Gmat::BOOLEAN_TYPE,  //"UsePotentialFileFlag",
    Gmat::STRING_TYPE,   //"PotentialFileName",
    Gmat::RVECTOR_TYPE,  //"AngularVelocity",
@@ -410,7 +406,6 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_mu                    (cBody.default_mu),
    default_posVelSrc             (cBody.default_posVelSrc),
    default_centralBodyName       (cBody.default_centralBodyName),
-   default_sourceFilename        (cBody.default_sourceFilename),
    default_orbitSpiceKernelNames      (cBody.default_orbitSpiceKernelNames),
    default_rotationSrc           (cBody.default_rotationSrc), 
    default_twoBodyEpoch          (cBody.default_twoBodyEpoch),
@@ -531,7 +526,6 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    default_mu                     = cBody.default_mu;
    default_posVelSrc              = cBody.default_posVelSrc;
    default_centralBodyName        = cBody.default_centralBodyName;
-   default_sourceFilename         = cBody.default_sourceFilename;
    default_orbitSpiceKernelNames  = cBody.default_orbitSpiceKernelNames;
    default_rotationSrc            = cBody.default_rotationSrc; 
    default_twoBodyEpoch           = cBody.default_twoBodyEpoch;
@@ -2741,14 +2735,6 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer CelestialBody::GetParameterID(const std::string &str) const
 {
-   if (str == "SourceFilename")
-   {
-      WriteDeprecatedMessage(SOURCE_FILENAME);
-   }
-   if (str == "SourceFile")
-   {
-      WriteDeprecatedMessage(SOURCE_FILE);
-   }
    for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
@@ -3109,11 +3095,6 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
 {
    if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
    if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
-   if ((id == SOURCE_FILENAME) ||(id == SOURCE_FILE))
-   {
-      WriteDeprecatedMessage(id);
-      return sourceFilename;
-   }
 
    if (id == POTENTIAL_FILE_NAME)   return potentialFileName;
    if (id == ATMOS_MODEL_NAME)
@@ -3243,19 +3224,6 @@ bool CelestialBody::SetStringParameter(const Integer id,
             return true;
          }
       return false;
-   }
-   if ((id == SOURCE_FILENAME) || (id == SOURCE_FILE))
-   {
-      if (!(GmatFileUtil::DoesFileExist(value)))
-      {
-         WriteDeprecatedMessage(id);
-         SolarSystemException sse;
-         sse.SetDetails(errorMessageFormat.c_str(),
-                        value.c_str(), "SourceFilename", "File must exist");
-         throw sse;
-      }
-      sourceFilename = value;
-      return true;
    }
    if (id == POTENTIAL_FILE_NAME)
    {
@@ -3862,7 +3830,7 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    // do not write out computed and some other items
    if ((id == BODY_TYPE)               || (id == MASS)                    || (id == POLAR_RADIUS)        || 
        (id == STATE)                   || (id == STATE_TIME)              || (id == HOUR_ANGLE)          ||
-       (id == REF_BODY_NUMBER)         || (id == SOURCE_FILE)             || (id == ORDER)               ||
+       (id == REF_BODY_NUMBER)         || (id == ORDER)                   ||
        (id == DEGREE)                  || (id == ATMOS_MODEL_NAME)        || (id == BODY_NUMBER)         ||
        (id == ANGULAR_VELOCITY)        || (id == TWO_BODY_DATE_FORMAT)    || (id == TWO_BODY_STATE_TYPE) ||
        (id == ORIENTATION_DATE_FORMAT) || (id == USE_POTENTIAL_FILE_FLAG) || (id == POTENTIAL_FILE_NAME)  )
@@ -3895,8 +3863,6 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    {
       return true;
    }
-   // deprecated fields are not written out
-   if (id == SOURCE_FILENAME) return true;
 
    return SpacePoint::IsParameterReadOnly(id);
 }
@@ -3956,13 +3922,6 @@ bool CelestialBody::IsParameterEqualToDefault(const Integer id) const
    if (id == CENTRAL_BODY)
    {
       return (default_centralBodyName == theCentralBodyName);
-   }
-   if (id == SOURCE_FILENAME)
-   {
-      if (userDefined)
-         return (default_sourceFilename == sourceFilename);
-      else  // for default, mods are made at the SolarSystem level
-         return true;
    }
    if (id == ORBIT_SPICE_KERNEL_NAME)
    {
@@ -4044,7 +4003,6 @@ bool CelestialBody::SaveAllAsDefault()
    default_mu                     = mu;
    default_posVelSrc              = Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
    default_centralBodyName        = theCentralBodyName;
-   default_sourceFilename         = sourceFilename;
    default_orbitSpiceKernelNames       = orbitSpiceKernelNames;
    default_rotationSrc            = rotationSrc; 
 //   default_twoBodyFormat          = twoBodyFormat;
@@ -4091,11 +4049,6 @@ bool CelestialBody::SaveParameterAsDefault(const Integer id)
    if (id == CENTRAL_BODY)
    {
       default_centralBodyName = theCentralBodyName;
-      return true;
-   }
-   if (id == SOURCE_FILENAME)
-   {
-      default_sourceFilename = sourceFilename;
       return true;
    }
    if (id == ORBIT_SPICE_KERNEL_NAME)
@@ -4805,44 +4758,4 @@ bool CelestialBody::NeedsOnlyMainSPK()
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// void WriteDeprecatedMessage(Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method writes a message once for each deprecated parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CelestialBody::WriteDeprecatedMessage(Integer id) const
-{
-   // Write only one message per session
-   static bool writeSourceFileName = true;
-   static bool writeSourceFile     = true;
-
-   switch (id)
-   {
-   case SOURCE_FILENAME:
-      if (writeSourceFileName)
-      {
-         MessageInterface::ShowMessage
-            (deprecatedMessageFormat.c_str(), "SourceFilename", GetName().c_str(),
-             "'DEFilename' on SolarSystem");
-         writeSourceFileName = false;
-      }
-      break;
-   case SOURCE_FILE:
-      if (writeSourceFile)
-      {
-         MessageInterface::ShowMessage
-            (deprecatedMessageFormat.c_str(), "SourceFile", GetName().c_str(),
-             "'DEFilename' on SolarSystem");
-         writeSourceFile = false;
-      }
-      break;
-   default:
-      break;
-   }
-}
-
-
+// none
