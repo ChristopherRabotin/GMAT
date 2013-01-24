@@ -27,7 +27,7 @@
 #include "MeasurementException.hpp"
 #include <sstream>                  // for stringstream
 
-#include "GroundStation.hpp"				// made changes by TUAN NGUYEN
+#include "GroundstationInterface.hpp"				// made changes by TUAN NGUYEN
 #include "Spacecraft.hpp"					// made changes by TUAN NGUYEN
 
 
@@ -238,8 +238,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
             stationParticipant = true;
 		    
 			// add hardware to participantHardware list:				// made changes by TUAN NGUYEN
-			GroundStation* gs = (GroundStation*)obj;
-			ObjectArray objList = gs->GetRefObjectArray(Gmat::HARDWARE);
+			ObjectArray objList = obj->GetRefObjectArray(Gmat::HARDWARE);
 			int index = 0;
 			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
 			{

@@ -23,14 +23,18 @@
 #include "PhysicalMeasurement.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
-#include "GroundStation.hpp"
+#include "GroundstationInterface.hpp"
 #include "MeasurementException.hpp"
 
+#ifdef IONOSPHERE
+#include "CoordinateConverter.hpp"
+#include "Moderator.hpp"
+#endif
 
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define DEBUG_MEDIA_CORRECTION
-#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
+//#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
 
 //------------------------------------------------------------------------------
 // PhysicalMeasurement(const std::string &type, const std::string &nomme)
@@ -294,8 +298,6 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
  */
 //------------------------------------------------------------------------
 #ifdef IONOSPHERE
-#include "CoordinateConverter.hpp"
-#include "Moderator.hpp"
 RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
 {
    RealArray ionoCorrection;
@@ -310,7 +312,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
    	ionosphere->SetTime(epoch);															// unit: Julian day
 
    	// 3. Set station and spacecraft positions:
-   	GroundStation* gs 	= (GroundStation*)participants[0];
+   	GroundstationInterface* gs 	= (GroundstationInterface*)participants[0];
    	CoordinateSystem* cs = gs->GetBodyFixedCoordinateSystem();
    	Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
 	Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);

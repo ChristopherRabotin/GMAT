@@ -27,7 +27,14 @@
 #include "CoreMeasurement.hpp"
 #include "Troposphere.hpp"
 
+// Temporary removal of ionosphere from Mac and Linux
+#ifdef _WIN32
+#define __WIN32__
+#endif
+
+#ifdef __WIN32__
 #define IONOSPHERE
+#endif
 
 #ifdef IONOSPHERE
 	#include "Ionosphere.hpp"
