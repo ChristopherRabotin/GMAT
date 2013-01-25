@@ -765,23 +765,59 @@ void CallMatlabFunction::GetOutParams()
                ("CallMatlabFunction::GetOutParams() calling MI::GetRealArray()\n");
             #endif
             
-            Integer numReceived = matlabIf->GetRealArray(varName, totalCells, outArray);
+            Integer numRowsReceived, numColsReceived;
+            Integer numReceived = matlabIf->GetRealArray(varName, totalCells, outArray,
+                                                         numRowsReceived, numColsReceived);
+            
+            // Check if correct number of elements received
             if (numReceived == 0)
             {
-               std::string msg =
-                  "CallMatlabFunction::GetOutParams() error occurred in matlabIf->GetRealArray()";
-               #ifdef DEBUG_GET_OUTPUT
-               MessageInterface::ShowMessage(msg + "\n");
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
+                   "deletinig outArray");
                #endif
-               throw CommandException(msg);
+               delete [] outArray;
+               #ifdef DEBUG_GET_OUTPUT
+               MessageInterface::ShowMessage
+                  ("CallMatlabFunction::GetOutParams() error occurred in "
+                   "matlabIf->GetRealArray(), numReceived(%d) is not totalCells(%d)\n",
+                   numReceived, totalCells);
+               #endif
+               CommandException ce;
+               ce.SetDetails("CallMatlabFunction cannot assign result to \"%s\": type mismatch",
+                             varName.c_str());
+               throw ce;
             }
             
+            // Check if correct number of rows and columns received
+            if (numRows != numRowsReceived || numCols != numColsReceived)
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
+                   "deletinig outArray");
+               #endif
+               delete [] outArray;
+               #ifdef DEBUG_GET_OUTPUT
+               MessageInterface::ShowMessage
+                  ("CallMatlabFunction::GetOutParams() error occurred in "
+                   "matlabIf->GetRealArray(), dimension mismatch\n   numRows=%d, numRowsReceived=%d, "
+                   "numCols=%d, numColsReceived=%d\n", numRows, numRowsReceived, numCols, numColsReceived);
+               #endif
+               CommandException ce;
+               ce.SetDetails("CallMatlabFunction cannot assign result to \"%s\": dimension mismatch",
+                             varName.c_str());
+               throw ce;
+            }
+            
+            // Assign results
             #ifdef DEBUG_GET_OUTPUT
             MessageInterface::ShowMessage("outArray  = \n");
             for (Integer i=0; i < totalCells; i++)
                MessageInterface::ShowMessage("   %.12f\n", outArray[i]);
             #endif
-                           
+            
             // Since MATLAB stores array in column major order, it needs to take transpose
             // before putting array to matrix.
             Rmatrix colMajorMat(numCols, numRows);
@@ -800,7 +836,7 @@ void CallMatlabFunction::GetOutParams()
             #ifdef DEBUG_SHOW_ARRAY
             MessageInterface::ShowMessage("rowMajorMat=\n%s\n", rowMajorMat.ToString(16).c_str());
             #endif
-                        
+            
             // Handle array element here (GMT-3324 fix, LOJ:2013.01.04)
             if (GmatStringUtil::IsParenPartOfArray(outStr))
             {
@@ -815,9 +851,16 @@ void CallMatlabFunction::GetOutParams()
                
                if (row == -1 || col == -1)
                {
+                  #ifdef DEBUG_MEMORY
+                  MemoryTracker::Instance()->Remove
+                     (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
+                      "deletinig outArray");
+                  #endif
+                  delete [] outArray;
+                  
                   std::string msg =
                      "Output array element index is invalid, it must be greater than 0 in " + outStr;
-                  #ifdef DEBUG_SEND_PARAM
+                  #ifdef DEBUG_GET_OUTPUT
                   MessageInterface::ShowMessage("CallMatlabFunction::GetOutParams() " + msg + "\n");
                   #endif
                   throw CommandException(msg);
@@ -855,20 +898,24 @@ void CallMatlabFunction::GetOutParams()
             MessageInterface::ShowMessage
                (".....Calling matlabIf->GetRealArray()\n");
             #endif
-            matlabIf->GetRealArray(varName, 1, outArray);
-            
-            param->SetReal(outArray[0]);
-            std::ostringstream ss;
-            ss.precision(18);
-            ss << outArray[0];
-            param->SetStringParameter("Expression", ss.str());
-            
-            #ifdef DEBUG_UPDATE_VAR
-            MessageInterface::ShowMessage
-               ("The EvaluateReal is %f\n",  param->EvaluateReal());
-            MessageInterface::ShowMessage
-               ("The GetReal is %f\n", param->GetReal());
-            #endif
+            Integer numRowsReceived, numColsReceived;
+            Integer numReceived = matlabIf->GetRealArray(varName, 1, outArray,
+                                                         numRowsReceived, numColsReceived);
+            if (numReceived == 1)
+            {
+               param->SetReal(outArray[0]);
+               std::ostringstream ss;
+               ss.precision(18);
+               ss << outArray[0];
+               param->SetStringParameter("Expression", ss.str());
+               
+               #ifdef DEBUG_UPDATE_VAR
+               MessageInterface::ShowMessage
+                  ("The EvaluateReal is %f\n",  param->EvaluateReal());
+               MessageInterface::ShowMessage
+                  ("The GetReal is %f\n", param->GetReal());
+               #endif
+            }
             
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
@@ -876,6 +923,14 @@ void CallMatlabFunction::GetOutParams()
                 "deletinig outArray");
             #endif
             delete [] outArray;
+            
+            if (numReceived != 1)
+            {
+               CommandException ce;
+               ce.SetDetails("CallMatlabFunction cannot assign result to \"%s\": type mismatch",
+                             varName.c_str());
+               throw ce;
+            }
          }
          else if (param->GetTypeName() == "String")
          {
@@ -902,12 +957,19 @@ void CallMatlabFunction::GetOutParams()
             //----------------------------------------------
             #ifdef DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage
-               (".....Calling matlabIf->GetString()\n");
+               (".....Calling matlabIf->GetString('%s','%s')\n",
+                varName.c_str(), outStr.c_str());
             #endif
             std::string outStr;
-            matlabIf->GetString(varName, outStr);
-            param->SetStringParameter("Expression", outStr);
-            
+            if (matlabIf->GetString(varName, outStr) == 1)
+               param->SetStringParameter("Expression", outStr);
+            else
+            {
+               CommandException ce;
+               ce.SetDetails("CallMatlabFunction cannot assign result to \"%s\": type mismatch",
+                             varName.c_str());
+               throw ce;
+            }
             //----------------------------------------------
             #endif
             //----------------------------------------------

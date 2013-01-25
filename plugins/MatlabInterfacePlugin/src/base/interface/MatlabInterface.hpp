@@ -61,7 +61,8 @@ public:
    Integer       PutRealArray(const std::string &matlabVarName, Integer numRows,
                               Integer numCols, const double *inArray);
    Integer       GetRealArray(const std::string &matlabVarName, Integer numElements,
-                              double outArray[]);
+                              double outArray[], Integer &numRowsReceived,
+                              Integer &numColsReceived);
    Integer       GetString(const std::string &matlabVarName, std::string &outStr);
    Integer       EvalString(const std::string &evalString);
    Integer       SetOutputBuffer(Integer size);

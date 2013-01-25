@@ -502,8 +502,10 @@ bool FminconOptimizer::Optimize()
    double      outArr[1];
    int         OKint = 0;
    std::string resStr    = "exitFlag";
-   OKint                 = matlabIf->GetRealArray(resStr, 1, outArr);
-
+   Integer numRowsReceived = 0;
+   Integer numColsReceived = 0;
+   OKint = matlabIf->GetRealArray(resStr, 1, outArr, numRowsReceived, numColsReceived);
+   
    if (!OKint)
       throw SolverException("Error determining exitFlag from fmincon");
    fminconExitFlag = (Integer) outArr[0];
@@ -1474,7 +1476,9 @@ bool FminconOptimizer::OpenConnection()
    evalStr   = "fminconexist = exist(\'fmincon\');";
    resStr    = "fminconexist";
    matlabIf->RunMatlabString(evalStr);
-   OKint = matlabIf->GetRealArray(resStr, 1, outArr);
+   Integer numRowsReceived = 0;
+   Integer numColsReceived = 0;
+   OKint = matlabIf->GetRealArray(resStr, 1, outArr, numRowsReceived, numColsReceived);
 
    if (!OKint)
       throw SolverException(
@@ -1489,7 +1493,7 @@ bool FminconOptimizer::OpenConnection()
       evalStr   = "startupexist = exist(\'gmat_startup\');";
       resStr    = "startupexist";
       matlabIf->RunMatlabString(evalStr);
-      OKint     = matlabIf->GetRealArray(resStr, 1, outArr2);
+      OKint     = matlabIf->GetRealArray(resStr, 1, outArr2, numRowsReceived, numColsReceived);
       if (!OKint)
          throw SolverException(
                "Error determining existence of MATLAB gmat_startup");
@@ -1531,19 +1535,19 @@ bool FminconOptimizer::OpenConnection()
          evalStr = "driverexist = exist(\'GmatFminconOptimizationDriver\');";
          resStr  = "driverexist";
          matlabIf->RunMatlabString(evalStr);
-         OKint   = matlabIf->GetRealArray(resStr, 1, out1);
+         OKint   = matlabIf->GetRealArray(resStr, 1, out1, numRowsReceived, numColsReceived);
          evalStr = "objectiveexist = exist(\'EvaluateGMATObjective\');";
          resStr  = "objectiveexist";
          matlabIf->RunMatlabString(evalStr);
-         OKint   = matlabIf->GetRealArray(resStr, 1, out2);
+         OKint   = matlabIf->GetRealArray(resStr, 1, out2, numRowsReceived, numColsReceived);
          evalStr = "constraintexist = exist(\'EvaluateGMATConstraints\');";
          resStr  = "constraintexist";
          matlabIf->RunMatlabString(evalStr);
-         OKint   = matlabIf->GetRealArray(resStr, 1, out3);
+         OKint   = matlabIf->GetRealArray(resStr, 1, out3, numRowsReceived, numColsReceived);
          evalStr = "callbackexist = exist(\'CallGMATfminconSolver\');";
          resStr  = "callbackexist";
          matlabIf->RunMatlabString(evalStr);
-         OKint                 = matlabIf->GetRealArray(resStr, 1, out4);
+         OKint   = matlabIf->GetRealArray(resStr, 1, out4, numRowsReceived, numColsReceived);
          if (debugMatlabIF) // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          {
             MessageInterface::ShowMessage(

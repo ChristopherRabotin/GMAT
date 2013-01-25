@@ -270,7 +270,7 @@ int MatlabInterface::PutRealArray(const std::string &matlabVarName,
 
 //------------------------------------------------------------------------------
 // int GetRealArray(const std::string &matlabVarName, int numElements,
-//                  double outArray[])
+//                  double outArray[], Integer &numRowsReceived, Integer &numColsReceived)
 //------------------------------------------------------------------------------
 /**
  * Get arrays from Matlab workspace.
@@ -278,12 +278,15 @@ int MatlabInterface::PutRealArray(const std::string &matlabVarName,
  * @param <matlabVarName> variable name in the MATLAB workspace
  * @param <numElements> number of elements to receive from MATLAB
  * @param <outArray> array to receive double array from MATLAB
+ * @param <numRowsReceived> row dimension of received array to return
+ * @param <numColsReceived> column dimension of received array to return
  * @Return 0 on error; else number of elemnets received from MATLAB
  * @exception <InterfaceException> thrown if empty output was received
  */
 //------------------------------------------------------------------------------
 int MatlabInterface::GetRealArray(const std::string &matlabVarName,
-                                  int numElements, double outArray[])
+                                  int numElements, double outArray[],
+                                  Integer &numRowsReceived, Integer &numColsReceived)
 {
    #ifdef DEBUG_MATLAB_GET_REAL
    MessageInterface::ShowMessage
@@ -309,8 +312,12 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
    }
    
    size_t numElementsReceived = mxGetNumberOfElements(mxArrayPtr);
+   numRowsReceived = (Integer)mxGetM(mxArrayPtr);
+   numColsReceived = (Integer)mxGetN(mxArrayPtr);
    #ifdef DEBUG_MATLAB_GET_REAL
-   MessageInterface::ShowMessage("   numElementsReceived=%d\n", numElementsReceived);
+   MessageInterface::ShowMessage
+      ("   numElementsReceived=%d, numRowsReceived=%d, numColsReceived=%d\n",
+       numElementsReceived, numRowsReceived, numColsReceived);
    #endif
    
    if (mxIsDouble(mxArrayPtr))
@@ -363,12 +370,11 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
    }
    else
    {
-      // Show warning for now (LOJ: 2011.04.01)
-      //#ifdef DEBUG_MATLAB_GET_REAL
+      #ifdef DEBUG_MATLAB_GET_REAL
       MessageInterface::ShowMessage
-         ("*** WARNING *** MatlabInterface::GetRealArray() Matlab variable '%s' "
+         ("MatlabInterface::GetRealArray() Matlab variable '%s' "
           "is not a double array or logical scalar.\n", matlabVarName.c_str());
-      //#endif
+      #endif
       
       return 0;
    }
