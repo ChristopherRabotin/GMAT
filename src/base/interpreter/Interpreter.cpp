@@ -8152,10 +8152,12 @@ bool Interpreter::FinalPass()
          {
             // Checking for undefined ref objects already done for CoordinateSystem
             // so commented out to avoid duplicated message (LOJ: 2009.12.17)
-            //InterpreterException ex
-            //   ("Nonexistent SpacePoint \"" + refNameList[j] +
-            //    "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
-            //HandleError(ex, false);
+            // UNCOMMENTED for GMT-3462 Error message just says error occurred and 
+			// no other detail provided (TGG: 2013-01-25)
+            InterpreterException ex
+               ("Nonexistent SpacePoint \"" + refNameList[j] +
+                "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
+            HandleError(ex, false);
             retval = false;
          }
          else
