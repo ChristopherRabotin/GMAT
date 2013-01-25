@@ -42,6 +42,9 @@ public:
    virtual bool        Execute();
    virtual void        RunComplete();
 
+   // Method override to manage penup/pendown
+   virtual bool        ExecuteBranch(Integer which = 0);
+
    // inherited from GmatBase
    // Method to execute a callback from an external function
    virtual bool        ExecuteCallback();
@@ -55,7 +58,7 @@ public:
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
-   
+
    // Parameter access methods
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -97,6 +100,8 @@ protected:
    bool                optimizerRunOnce;
    /// Flag indicating optimizer in function initialized
    bool                optimizerInFunctionInitialized;
+   /// Flag used to avoid multiple pen downs
+   bool                penIsDown;
    
    StringArray         callbackResults;
    std::string         callbackData;

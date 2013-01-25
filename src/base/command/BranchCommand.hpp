@@ -39,7 +39,7 @@ public:
    void                    AddBranch(GmatCommand *cmd, Integer which = 0);
    void                    AddToFrontOfBranch(GmatCommand *cmd,
                                               Integer which = 0);
-   bool                    ExecuteBranch(Integer which = 0);
+   virtual bool            ExecuteBranch(Integer which = 0);
    
    // Inherited methods that need refinements to handle the branching
    virtual bool            Append(GmatCommand *cmd);

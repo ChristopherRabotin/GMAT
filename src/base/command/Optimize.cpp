@@ -76,6 +76,7 @@ Optimize::Optimize() :
    optimizerConverged               (false),
    optimizerRunOnce                 (false),
    optimizerInFunctionInitialized   (false),
+   penIsDown                        (true),
    optimizerInDebugMode             (false),
    minimizeCount                    (0)
 {
@@ -94,6 +95,7 @@ Optimize::Optimize(const Optimize& o) :
    optimizerConverged               (false),
    optimizerRunOnce                 (false),
    optimizerInFunctionInitialized   (false),
+   penIsDown                        (o.penIsDown),
    optimizerInDebugMode             (o.optimizerInDebugMode),
    minimizeCount                    (0)
 {
@@ -117,7 +119,8 @@ Optimize& Optimize::operator=(const Optimize& o)
    optimizerConverged             = false;
    optimizerRunOnce               = false;
    optimizerInFunctionInitialized = false;
-   optimizerInDebugMode = o.optimizerInDebugMode;
+   penIsDown                      = o.penIsDown;
+   optimizerInDebugMode           = o.optimizerInDebugMode;
    localStore.clear();
    minimizeCount = 0;
 
@@ -609,6 +612,22 @@ void Optimize::RunComplete()
 }
 
 
+bool Optimize::ExecuteBranch(Integer which)
+{
+   #ifdef DEBUG_PENUP_PENDOWN
+      MessageInterface::ShowMessage("ExecuteBranch called; pen %s\n",
+            (penIsDown ? "is down" : "is up"));
+   #endif
+   if (!penIsDown)
+   {
+      PenDownSubscribers();
+      penIsDown = true;
+   }
+
+   return SolverBranchCommand::ExecuteBranch(which);
+}
+
+
 //------------------------------------------------------------------------------
 // bool ExecuteCallback()
 //------------------------------------------------------------------------------
@@ -776,17 +795,17 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
          if (state == Solver::FINISHED)
          {
             #ifndef SKIP_PENUP
-               PenDownSubscribers();
+//            PenDownSubscribers();
             #endif
             LightenSubscribers(1);
             commandComplete = true;
          }
-         else
-         {
-            #ifndef SKIP_PENUP
-               PenUpSubscribers();
-            #endif
-         }
+//         else
+//         {
+//            #ifndef SKIP_PENUP
+//               PenUpSubscribers();
+//            #endif
+//         }
       }
    }
    else
@@ -962,7 +981,8 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                ApplySubscriberBreakpoint();
                ResetLoopData();
                #ifndef SKIP_PENUP
-                  PenDownSubscribers();
+//               PenUpSubscribers();
+//               penIsDown = false;
                #endif
                LightenSubscribers(1);
             }
@@ -977,9 +997,10 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             ApplySubscriberBreakpoint();
             ResetLoopData();
             #ifndef SKIP_PENUP
-               PenDownSubscribers();
+//            PenUpSubscribers();
+//            penIsDown = false;
             #endif
-            LightenSubscribers(4);
+//            LightenSubscribers(4);
             break;
             
          case Solver::CALCULATING:
@@ -1015,11 +1036,13 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                   ("Optimize::Execute - internal solver setting publisher with SOLVEDPASS\n");
                #endif
                ResetLoopData();
+//               PenUpSubscribers();
+//               penIsDown = false;
                branchExecuting = true;
                ApplySubscriberBreakpoint();
-               #ifndef SKIP_PENUP
-                  PenDownSubscribers();
-               #endif
+//               #ifndef SKIP_PENUP
+//                  PenDownSubscribers();
+//               #endif
                LightenSubscribers(1);
                publisher->SetRunState(Gmat::SOLVEDPASS);
             }
