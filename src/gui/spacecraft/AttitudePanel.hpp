@@ -96,7 +96,7 @@ private:
    wxStaticText *rateUnits3;
 
    wxComboBox   *config1ComboBox;
-   wxComboBox   *config2ComboBox;
+   wxComboBox   *coordSysComboBox;
    wxComboBox   *config3ComboBox;
    wxComboBox   *config4ComboBox;
    wxComboBox   *stateTypeComboBox;
@@ -194,11 +194,11 @@ private:
                         bool discardEdits = false);
    bool ValidateState(const std::string which = "Both");
    
-   void DisableInitialAttitudeRate();
-   void EnableInitialAttitudeRate();
+   void DisableInitialAttitudeAndRate();
+   void EnableInitialAttitudeAndRate();
    void DisableAll();
    void EnableAll();
-   void DisplaySpiceReminder();
+   void DisplayDataForModel(const std::string &modelType);
 
    void ResizeTextCtrl1234(bool forQuaternion = false);
 

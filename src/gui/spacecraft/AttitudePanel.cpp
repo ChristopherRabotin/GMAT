@@ -151,7 +151,7 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 //------------------------------------------------------------------------------
 AttitudePanel::~AttitudePanel()
 {
-   theGuiManager->UnregisterComboBox("CoordinateSystem", config2ComboBox);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
@@ -175,6 +175,11 @@ void AttitudePanel::Create()
       MessageInterface::ShowMessage("AttitudePanel::Create() entered\n");
    #endif
    
+   // Need to adjust width of static text because spiceMessage is wrapping and
+   // being clipped
+   // NOTE - this may need to be adjusted for different platforms
+   Integer staticTextWidth = 165;
+
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
@@ -207,7 +212,7 @@ void AttitudePanel::Create()
 
    config1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Model"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    config1ComboBox = 
       new wxComboBox( this, ID_CB_MODEL, wxT(attitudeModelArray[0]), 
          wxDefaultPosition, wxDefaultSize, modelSz, attitudeModelArray, 
@@ -217,10 +222,10 @@ void AttitudePanel::Create()
    // Coordinate System
    config2StaticText =
       new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"),
-         wxDefaultPosition, wxDefaultSize, 0);
-   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_COORDSYS, 
+         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
+   coordSysComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_COORDSYS,
       wxDefaultSize);
-   config2ComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
+   coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
    //Euler Angle Sequence
    eulerSeqArray           = Attitude::GetEulerSequenceStrings();
@@ -234,7 +239,7 @@ void AttitudePanel::Create()
 
    config4StaticText =
       new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Euler Angle Sequence"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    config4ComboBox = new wxComboBox( this, ID_CB_SEQ, wxT(eulerSequenceArray[0]),
                       wxDefaultPosition, wxDefaultSize, 12,
                       eulerSequenceArray, wxCB_DROPDOWN|wxCB_READONLY );
@@ -357,7 +362,7 @@ void AttitudePanel::Create()
    // create the message to be displayed when the user selects "SpiceAttitude"
    spiceMessage =
       new wxStaticText( this, ID_TEXT, wxT("Set data on the SPICE tab."),
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(staticTextWidth,20), 0); //wxDefaultSize, 0);
 
 
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -395,7 +400,7 @@ void AttitudePanel::Create()
    flexGridSizer1->Add(config1StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
    flexGridSizer1->Add(config1ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );        
    flexGridSizer1->Add(config2StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config2ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );         
+   flexGridSizer1->Add(coordSysComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
    flexGridSizer1->Add(config4StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
    flexGridSizer1->Add(config4ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
 
@@ -458,8 +463,7 @@ void AttitudePanel::Create()
    boxSizer1->SetSizeHints( this );
 
    std::string initialModel = config1ComboBox->GetValue().c_str();
-   if (initialModel == "CoordinateSystemFixed")
-      DisableInitialAttitudeRate();
+   DisplayDataForModel(initialModel);
    
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
@@ -524,26 +528,11 @@ void AttitudePanel::LoadData()
       config4ComboBox->SetValue(wxT(eulerSequence.c_str()));
    
       attCoordSystem = theAttitude->GetStringParameter("AttitudeCoordinateSystem");
-      config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
+      coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
-      if (attitudeModel == "CoordinateSystemFixed")
-      {
-         EnableAll();
-         DisableInitialAttitudeRate();
-         spiceMessage->Show(false);
-      }
-      else if (attitudeModel == "SpiceAttitude")
-      {
-         DisableAll();
-         DisplaySpiceReminder();
-         spiceMessage->Show(true);
-      }
-      else
-      {
-         EnableAll();
-         spiceMessage->Show(false);
-      }
+
+      DisplayDataForModel(attitudeModel);
       
       if (attStateType == "EulerAngles")
       {
@@ -680,6 +669,8 @@ void AttitudePanel::SaveData()
         MessageInterface::ShowMessage("   Attitude pointer is NULL\n");
    #endif
 
+   bool canModifyCS    = useAttitude->CSModifyAllowed();
+   bool canSetAttitude = useAttitude->SetInitialAttitudeAllowed();
    try
    {
       if (seqModified || isNewAttitude)
@@ -691,19 +682,22 @@ void AttitudePanel::SaveData()
          useAttitude->SetStringParameter("EulerAngleSequence", eulerSequence);
 
          // set attitude state and rate as well, to match what the user sees on the screen
-         if (attStateType == stateTypeArray[EULER_ANGLES])
-            useAttitude->SetRvectorParameter("EulerAngles", ea);
-         else if (attStateType == stateTypeArray[QUATERNION])
-            useAttitude->SetRvectorParameter("Quaternion", q);
-         else if (attStateType == stateTypeArray[MRPS])
-            useAttitude->SetRvectorParameter("MRPs", mrp);	 // Added by Dunn
-         else
-            useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
+         if (canSetAttitude)
+         {
+            if (attStateType == stateTypeArray[EULER_ANGLES])
+               useAttitude->SetRvectorParameter("EulerAngles", ea);
+            else if (attStateType == stateTypeArray[QUATERNION])
+               useAttitude->SetRvectorParameter("Quaternion", q);
+            else if (attStateType == stateTypeArray[MRPS])
+               useAttitude->SetRvectorParameter("MRPs", mrp);	 // Added by Dunn
+            else
+               useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
 
-         if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
-            useAttitude->SetRvectorParameter("EulerAngleRates", ear);
-         else
-            useAttitude->SetRvectorParameter("AngularVelocity", av);
+            if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
+               useAttitude->SetRvectorParameter("EulerAngleRates", ear);
+            else
+               useAttitude->SetRvectorParameter("AngularVelocity", av);
+         }
          seqModified = false;
       }
 
@@ -713,8 +707,11 @@ void AttitudePanel::SaveData()
             MessageInterface::ShowMessage("   Setting new coordinate system: %s\n",
             attCoordSystem.c_str());
          #endif
-         useAttitude->SetStringParameter("AttitudeCoordinateSystem",attCoordSystem);
-         useAttitude->SetRefObject(attCS, Gmat::COORDINATE_SYSTEM, attCoordSystem);
+         if (canModifyCS)
+         {
+            useAttitude->SetStringParameter("AttitudeCoordinateSystem",attCoordSystem);
+            useAttitude->SetRefObject(attCS, Gmat::COORDINATE_SYSTEM, attCoordSystem);
+         }
          csModified = false;
       }
       
@@ -738,14 +735,17 @@ void AttitudePanel::SaveData()
                      q[0], q[1], q[2], q[3]);
             }
          #endif
-         if (attStateType == stateTypeArray[EULER_ANGLES])
-            useAttitude->SetRvectorParameter("EulerAngles", ea);
-         else if (attStateType == stateTypeArray[QUATERNION])
-            useAttitude->SetRvectorParameter("Quaternion", q);
-         else if (attStateType == stateTypeArray[MRPS])
-            useAttitude->SetRvectorParameter("MRPs", mrp);	// Dunn Added
-         else
-            useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
+         if (canSetAttitude)
+         {
+            if (attStateType == stateTypeArray[EULER_ANGLES])
+               useAttitude->SetRvectorParameter("EulerAngles", ea);
+            else if (attStateType == stateTypeArray[QUATERNION])
+               useAttitude->SetRvectorParameter("Quaternion", q);
+            else if (attStateType == stateTypeArray[MRPS])
+               useAttitude->SetRvectorParameter("MRPs", mrp);	// Dunn Added
+            else
+               useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
+         }
          stateModified = false;
       }
 
@@ -763,10 +763,13 @@ void AttitudePanel::SaveData()
          #ifdef DEBUG_ATTITUDE_PANEL
             MessageInterface::ShowMessage("   Setting new state rate ...\n");
          #endif
-         if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
-            useAttitude->SetRvectorParameter("EulerAngleRates", ear);
-         else
-            useAttitude->SetRvectorParameter("AngularVelocity", av);
+         if (canSetAttitude)
+         {
+            if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
+               useAttitude->SetRvectorParameter("EulerAngleRates", ear);
+            else
+               useAttitude->SetRvectorParameter("AngularVelocity", av);
+         }
          stateRateModified = false;
       }
       
@@ -1133,15 +1136,41 @@ bool AttitudePanel::ValidateState(const std::string which)
 }
 
 //------------------------------------------------------------------------------
-// void DisableInitialAttitudeRate()
+// void DisableInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 /**
  * Disables the initial attitude rate widgets.
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::DisableInitialAttitudeRate()
+void AttitudePanel::DisableInitialAttitudeAndRate()
 {
+   stateTypeStaticText->Disable();
+   stateTypeComboBox->Disable();
+   stateTypeRate4StaticText->Disable();
+   st1StaticText->Disable();
+   st2StaticText->Disable();
+   st3StaticText->Disable();
+   st1TextCtrl->Disable();
+   st2TextCtrl->Disable();
+   st3TextCtrl->Disable();
+
+   if (attStateType == STATE_TEXT[QUATERNION])
+   {
+      st4StaticText->Disable();
+      st4TextCtrl->Disable();
+   }
+   if (attStateType == STATE_TEXT[DCM])
+   {
+      st5TextCtrl->Disable();
+      st6TextCtrl->Disable();
+      st7TextCtrl->Disable();
+      st8TextCtrl->Disable();
+      st9TextCtrl->Disable();
+      st10TextCtrl->Disable();
+   }
+   st1TextCtrl->Disable();
+
    stateTypeRate4StaticText->Disable();
 
    stateRateTypeComboBox->Disable();
@@ -1160,15 +1189,41 @@ void AttitudePanel::DisableInitialAttitudeRate()
 }
 
 //------------------------------------------------------------------------------
-// void EnableInitialAttitudeRate()
+// void EnableInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 /**
  * Enables the initial attitude rate widgets.
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::EnableInitialAttitudeRate()
+void AttitudePanel::EnableInitialAttitudeAndRate()
 {
+   stateTypeStaticText->Enable();
+   stateTypeComboBox->Enable();
+   stateTypeRate4StaticText->Enable();
+   st1StaticText->Enable();
+   st2StaticText->Enable();
+   st3StaticText->Enable();
+   st1TextCtrl->Enable();
+   st2TextCtrl->Enable();
+   st3TextCtrl->Enable();
+
+   if (attStateType == STATE_TEXT[QUATERNION])
+   {
+      st4StaticText->Enable();
+      st4TextCtrl->Enable();
+   }
+   if (attStateType == STATE_TEXT[DCM])
+   {
+      st5TextCtrl->Enable();
+      st6TextCtrl->Enable();
+      st7TextCtrl->Enable();
+      st8TextCtrl->Enable();
+      st9TextCtrl->Enable();
+      st10TextCtrl->Enable();
+   }
+   st1TextCtrl->Enable();
+
    stateTypeRate4StaticText->Enable();
 
    stateRateTypeComboBox->Enable();
@@ -1196,12 +1251,12 @@ void AttitudePanel::EnableInitialAttitudeRate()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisableAll()
 {
-   DisableInitialAttitudeRate();
+   DisableInitialAttitudeAndRate();
 //   config1StaticText->Disable();
    config2StaticText->Disable();
 //   config3StaticText->Disable();
    config4StaticText->Disable();
-   config2ComboBox->Disable();
+   coordSysComboBox->Disable();
    config4ComboBox->Disable();
    stateTypeStaticText->Disable();
    stateTypeComboBox->Disable();
@@ -1240,12 +1295,12 @@ void AttitudePanel::DisableAll()
 //------------------------------------------------------------------------------
 void AttitudePanel::EnableAll()
 {
-   EnableInitialAttitudeRate();
+   EnableInitialAttitudeAndRate();
 //   config1StaticText->Enable();
    config2StaticText->Enable();
 //   config3StaticText->Enable();
    config4StaticText->Enable();
-   config2ComboBox->Enable();
+   coordSysComboBox->Enable();
    config4ComboBox->Enable();
    stateTypeStaticText->Enable();
    stateTypeComboBox->Enable();
@@ -1275,15 +1330,39 @@ void AttitudePanel::EnableAll()
 }
 
 //------------------------------------------------------------------------------
-// void DisplaySpiceReminder()
+// void DisplayDataForModel(const std::string &modelType)
 //------------------------------------------------------------------------------
 /**
- * Displays the SPICE reminder message.
+ * Displays the data that are allowed to be modified for the specified
+ * attitude model type.  Disallowed fields/data are grayed-out.
  *
+ * @param modelType   attitude model type
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::DisplaySpiceReminder()
+void AttitudePanel::DisplayDataForModel(const std::string &modelType)
 {
+   // need to create a temporary attitude object in order to query it
+   Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
+                           CreateObject(modelType, "", 0);
+
+   EnableAll();
+   if (!tmpAttitude->CSModifyAllowed())
+   {
+      coordSysComboBox->Disable();
+   }
+   if (!tmpAttitude->SetInitialAttitudeAllowed())
+   {
+      DisableInitialAttitudeAndRate();
+   }
+   if (modelType == "SpiceAttitude")
+   {
+      spiceMessage->Show(true);
+   }
+   else
+   {
+      spiceMessage->Show(false);
+   }
+   delete tmpAttitude;
 }
 
 //------------------------------------------------------------------------------
@@ -1447,12 +1526,12 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::OnCoordinateSystemSelection() entered\n");
    #endif
-   std::string newCS = config2ComboBox->GetValue().c_str();
+   std::string newCS = coordSysComboBox->GetValue().c_str();
    if (newCS == attCoordSystem) return;
    // first, validate the state
    if (!ValidateState("Both"))
    {
-      config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
+      coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
          "Please enter valid value(s) before changing the Reference Coordinate System\n");
          return;
@@ -1472,7 +1551,7 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
    theScPanel->EnableUpdate(true);
    
    // until know how to convert to new reference coordinate system .........
-//   config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
+//   coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
 //   MessageInterface::PopupMessage(Gmat::WARNING_, +
 //      "Conversion of Attitude to a new Reference Coordinate System not yet implemented\n");
    return;
@@ -1502,24 +1581,8 @@ void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
       attitudeModel = newModel;
       theScPanel->EnableUpdate(true);
     }
-    if (newModel == "CoordinateSystemFixed")
-    {
-       EnableAll();
-       DisableInitialAttitudeRate();
-       spiceMessage->Show(false);
-    }
-    else if (newModel == "SpiceAttitude")
-    {
-       DisableAll();
-       DisplaySpiceReminder();
-       spiceMessage->Show(true);
-    }
-    else
-    {
-       EnableAll();
-       spiceMessage->Show(false);
-    }
-//       EnableInitialAttitudeRate();
+
+    DisplayDataForModel(newModel);
 }
 
 //------------------------------------------------------------------------------
