@@ -349,6 +349,12 @@ protected:
    /// flag indicating whether or not the user can modify/set the initial
    /// attitude for this attitude model
    bool                  setInitialAttitudeAllowed;
+   /// Has the warning about setting the coordinate system having no effect
+   /// been written?
+   bool                  warnNoCSWritten;
+   /// Has the warning about setting the initial attitude having no effect
+   /// been written?
+   bool                  warnNoAttitudeWritten;
  
 
    

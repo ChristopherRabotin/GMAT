@@ -1309,7 +1309,9 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    quaternion              (Rvector(4,0.0,0.0,0.0,1.0)),
    attitudeModelName       (""),
    modifyCoordSysAllowed   (true),
-   setInitialAttitudeAllowed (true)
+   setInitialAttitudeAllowed (true),
+   warnNoCSWritten         (false),
+   warnNoAttitudeWritten   (false)
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -1360,7 +1362,9 @@ Attitude::Attitude(const Attitude& att) :
    eulerAngleRates         (att.eulerAngleRates),
    attitudeModelName       (att.attitudeModelName),
    modifyCoordSysAllowed   (att.modifyCoordSysAllowed),
-   setInitialAttitudeAllowed (att.setInitialAttitudeAllowed)
+   setInitialAttitudeAllowed (att.setInitialAttitudeAllowed),
+   warnNoCSWritten         (att.warnNoCSWritten),
+   warnNoAttitudeWritten   (att.warnNoAttitudeWritten)
 {
 }
  
@@ -1403,6 +1407,9 @@ Attitude& Attitude::operator=(const Attitude& att)
    attitudeModelName       = att.attitudeModelName;
    modifyCoordSysAllowed   = att.modifyCoordSysAllowed;
    setInitialAttitudeAllowed = att.setInitialAttitudeAllowed;
+   warnNoCSWritten         = att.warnNoCSWritten;
+   warnNoAttitudeWritten   = att.warnNoAttitudeWritten;
+
    return *this;
 }
 
@@ -2389,14 +2396,13 @@ Real Attitude::SetRealParameter(const Integer id,
    #endif
    if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Real"))
    {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
+      if (!warnNoAttitudeWritten)
       {
          std::string warnMsg = "*** WARNING *** Setting attitude initial ";
          warnMsg += "conditions has no affect when attitude mode is ";
          warnMsg += attitudeModelName + "\n";
          MessageInterface::ShowMessage(warnMsg);
-         writeIgnoredMessage = false;
+         warnNoAttitudeWritten = true;
       }
       return true;
    }
@@ -2851,14 +2857,13 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
    #endif
    if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rvector"))
    {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
+      if (!warnNoAttitudeWritten)
       {
          std::string warnMsg = "*** WARNING *** Setting attitude initial ";
          warnMsg += "conditions has no affect when attitude mode is ";
          warnMsg += attitudeModelName + "\n";
          MessageInterface::ShowMessage(warnMsg);
-         writeIgnoredMessage = false;
+         warnNoAttitudeWritten = true;
       }
       return true;
    }
@@ -3110,14 +3115,13 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
    
    if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rvector"))
    {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
+      if (!warnNoAttitudeWritten)
       {
          std::string warnMsg = "*** WARNING *** Setting attitude initial ";
          warnMsg += "conditions has no affect when attitude mode is ";
          warnMsg += attitudeModelName + "\n";
          MessageInterface::ShowMessage(warnMsg);
-         writeIgnoredMessage = false;
+         warnNoAttitudeWritten = true;
       }
       return angVel;
    }
@@ -3297,14 +3301,13 @@ const Rmatrix& Attitude::SetRmatrixParameter(const Integer id,
 {
    if ((!setInitialAttitudeAllowed) && IsInitialAttitudeParameter(id,"Rmatrix"))
    {
-      static bool writeIgnoredMessage = true;
-      if (writeIgnoredMessage)
+      if (!warnNoAttitudeWritten)
       {
          std::string warnMsg = "*** WARNING *** Setting attitude initial ";
          warnMsg += "conditions has no affect when attitude mode is ";
          warnMsg += attitudeModelName + "\n";
          MessageInterface::ShowMessage(warnMsg);
-         writeIgnoredMessage = false;
+         warnNoAttitudeWritten = true;
       }
       return dcm;
    }
@@ -3441,14 +3444,13 @@ bool Attitude::SetStringParameter(const Integer     id,
    {
       if (!modifyCoordSysAllowed)
       {
-         static bool writeIgnoredMessage = true;
-         if (writeIgnoredMessage)
+         if (!warnNoCSWritten)
          {
             std::string warnMsg = "*** WARNING *** Setting coordinate ";
             warnMsg += "system has no affect when attitude mode is ";
             warnMsg += attitudeModelName + "\n";
             MessageInterface::ShowMessage(warnMsg);
-            writeIgnoredMessage = false;
+            warnNoCSWritten = true;
          }
          return true;
       }
@@ -3488,14 +3490,13 @@ bool Attitude::SetStringParameter(const Integer     id,
       if ((!setInitialAttitudeAllowed) &&
           (IsInitialAttitudeParameter(id,"Rvector") || (IsInitialAttitudeParameter(id,"Rmatrix"))))
       {
-         static bool writeIgnoredMessage = true;
-         if (writeIgnoredMessage)
+         if (!warnNoAttitudeWritten)
          {
             std::string warnMsg = "*** WARNING *** Setting attitude initial ";
             warnMsg += "conditions has no affect when attitude mode is ";
             warnMsg += attitudeModelName + "\n";
             MessageInterface::ShowMessage(warnMsg);
-            writeIgnoredMessage = false;
+            warnNoAttitudeWritten = true;
          }
          return true;
       }
