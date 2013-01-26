@@ -66,6 +66,8 @@ protected:
    wxStaticText *originLabel;
    wxStaticText *axisLabel;
    wxStaticText *tankLabel;
+   wxStaticText *gravityAccelLabel;
+   wxStaticText *gravityAccelUnit;
    wxStaticText *ispLabel;
    wxStaticText *ispUnit;
    

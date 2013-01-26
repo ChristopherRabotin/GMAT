@@ -284,13 +284,13 @@ void BurnThrusterPanel::Create()
    }
    
    // Gravitational Acceleration
-   wxStaticText *gravityAccelLabel =
+   gravityAccelLabel =
       new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"GravitationalAccel"));
    gravityAccelTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    gravityAccelTextCtrl->SetToolTip(pConfig->Read(_T("GravitationalAccelHint")));
-   wxStaticText *gravityAccelUnit =
+   gravityAccelUnit =
       new wxStaticText(this, ID_TEXT, wxT(" m/s^2"));
    
    // Coefficients for Thruster only
@@ -440,8 +440,14 @@ void BurnThrusterPanel::LoadData()
       // Disable tank combo box if decrement mass is not checked
       if (!decMassCheckBox->IsChecked())
       {
-         tankLabel->Disable();
-         tankComboBox->Disable();
+         // Tanks needed to apply nontrivial coefficients, so don't disable
+         //tankLabel->Disable();
+         //tankComboBox->Disable();
+
+         // g is only used to decrement mass
+         gravityAccelLabel->Disable();
+         gravityAccelTextCtrl->Disable();
+         gravityAccelUnit->Disable();
 
          if (theObject->GetType() == Gmat::IMPULSIVE_BURN)
          {
@@ -449,6 +455,13 @@ void BurnThrusterPanel::LoadData()
             ispTextCtrl->Disable();
             ispUnit->Disable();
          }
+      }
+      else
+      {
+         // g is required to decrement mass
+         gravityAccelLabel->Enable();
+         gravityAccelTextCtrl->Enable();
+         gravityAccelUnit->Enable();
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
@@ -552,13 +565,25 @@ void BurnThrusterPanel::SaveData()
       
       if (coordSysName == "Local")
       {
-         // Origin
-         paramID = theObject->GetParameterID("Origin");
-         theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
+         //// Origin
+         //paramID = theObject->GetParameterID("Origin");
+         //theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
          
          // Axes
          paramID = theObject->GetParameterID("Axes");
          theObject->SetStringParameter(paramID, axesComboBox->GetValue().c_str());
+
+         std::string axisValue = axesComboBox->GetValue().c_str();
+         if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
+         {
+            originLabel->Disable();
+            originComboBox->Disable();
+         }
+         else
+         {
+            originLabel->Enable();
+            originComboBox->Enable();
+         }
       }
       
       // Save ThrustDirections
@@ -653,8 +678,15 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    if (decMassCheckBox->IsChecked())
    {
-      tankLabel->Enable();
-      tankComboBox->Enable();
+      // Disabling disabled so no need to enable
+      //tankLabel->Enable();
+      //tankComboBox->Enable();
+
+      // g is only used to decrement mass
+      gravityAccelLabel->Enable();
+      gravityAccelTextCtrl->Enable();
+      gravityAccelUnit->Enable();
+
       if (theObject->GetType() == Gmat::IMPULSIVE_BURN)
       {
          ispLabel->Enable();
@@ -664,8 +696,15 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
    }
    else
    {
-      tankLabel->Disable();
-      tankComboBox->Disable();
+      // Tanks needed to apply nontrivial coefficients, so don't disable
+      //tankLabel->Disable();
+      //tankComboBox->Disable();
+
+      // g is only used to decrement mass
+      gravityAccelLabel->Disable();
+      gravityAccelTextCtrl->Disable();
+      gravityAccelUnit->Disable();
+
       if (theObject->GetType() == Gmat::IMPULSIVE_BURN)
       {
          ispLabel->Disable();
@@ -702,6 +741,25 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
          tankComboBox->Delete(pos);
       
       EnableUpdate(true);
+   }
+   else if (event.GetEventObject() == axesComboBox)
+   {
+      std::string csName = coordSysComboBox->GetStringSelection().c_str();
+
+      if (csName == "Local")
+      {
+         std::string axisValue = axesComboBox->GetValue().c_str();
+         if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
+         {
+            originLabel->Disable();
+            originComboBox->Disable();
+         }
+         else
+         {
+            originLabel->Enable();
+            originComboBox->Enable();
+         }
+      }
    }
 }
 
@@ -750,10 +808,21 @@ void BurnThrusterPanel::UpdateOriginAxes()
 {
    if (coordSysComboBox->GetValue() == "Local")
    {
-      originLabel->Enable();
-      originComboBox->Enable();
       axisLabel->Enable();
       axesComboBox->Enable();
+
+      std::string axisValue = axesComboBox->GetValue().c_str();
+
+      if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
+      {
+         originLabel->Disable();
+         originComboBox->Disable();
+      }
+      else
+      {
+         originLabel->Enable();
+         originComboBox->Enable();
+      }
    }
    else
    {
