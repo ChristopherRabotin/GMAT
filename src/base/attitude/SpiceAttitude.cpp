@@ -201,8 +201,8 @@ bool SpiceAttitude::Initialize()
    if (fk.empty())
     {
       std::string warnmsg = "Warning - no FK frame kernel(s) set on SpiceAttitude for object ";
-      warnmsg += scName + ".  A Frame Kernel may be necessary.";
-      MessageInterface::PopupMessage(Gmat::WARNING_, warnmsg);
+      warnmsg += scName + ".  A Frame Kernel may be necessary.\n";
+      MessageInterface::ShowMessage(warnmsg.c_str());
     }
 
    #ifdef __USE_SPICE__
