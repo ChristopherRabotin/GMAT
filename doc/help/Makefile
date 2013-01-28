@@ -7,7 +7,7 @@ SHELL = /bin/sh
 .SUFFIXES:
 
 # directories
-VPATH = $(srcdir)
+vpath %.xml $(srcdir)
 srcdir = ./src
 configdir = ./config
 contribdir = ../build/contrib
