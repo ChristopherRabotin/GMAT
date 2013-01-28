@@ -322,7 +322,7 @@
 
   BeginMissionSequence;
 
-  While aSat.ElapsedDays < 1.0
+  While aSat.ElapsedDays &lt; 1.0
    
   Propagate aProp(aSat) {aSat.ElapsedSecs = 60};
     If I == 480

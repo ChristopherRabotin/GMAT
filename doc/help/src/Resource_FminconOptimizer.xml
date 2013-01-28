@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <refentry version="5.0"
-          xml:id="VF13adOptimizer"
+          xml:id="FminconOptimizer"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -9,11 +9,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>VF13adOptimizer</primary>
+    <primary>FminconOptimizer</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>VF13adOptimizer</refentrytitle>
+    <refentrytitle>FminconOptimizer</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -23,10 +23,10 @@
   </refmeta>
 
   <refnamediv>
-    <refname>VF13adOptimizer</refname>
+    <refname>FminconOptimizer</refname>
 
     <refpurpose>
-      The Sequential Quadratic Processor (SQP) optimizer, VF13ad, used to optimize mission parameters
+      The Sequential Quadratic Processor (SQP) optimizer, fmincon, used to optimize mission parameters
     </refpurpose>
   </refnamediv>
 
@@ -34,12 +34,12 @@
     <title>Description</title>
 
     <para>
-      The <guilabel>VF13ad</guilabel> optimizer is a SQP-based Nonlinear Programming solver available in the Harwell Subroutine Library. 
-      <guilabel>VF13ad</guilabel> performs nonlinear constrained optimization and supports both linear and nonlinear constraints.  To use this solver, 
-      you must configure the solver options including convergence criteria, maximum iterations, and gradient computation method.  
-      In the mission sequence, you implement an optimizer such as  VF13ad by using an  <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> sequence.  Within this 
-      sequence, you define optimization variables by using the <guilabel>Vary</guilabel> command, and define cost and constraints by using the <guilabel>Minimize</guilabel> and 
-      <guilabel>NonlinearConstraint</guilabel> commands respectively.
+      <guilabel>fmincon</guilabel> is a Nonlinear Programming solver provided in MATLAB's Optimization Toolbox. <guilabel>fmincon</guilabel> performs nonlinear 
+      constrained optimization and supports linear and nonlinear constraints.  To use this solver, you must configure the
+      solver options including convergence criteria, maximum iterations, and how the gradients will be calculated. In the mission 
+      sequence, you implement an optimizer such as fmincon by using an <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> sequence. Within this sequence, you define 
+      optimization variables by using the <guilabel>Vary</guilabel> command, and define cost and constraints by using the <guilabel>Minimize</guilabel> and <guilabel>NonlinearConstraint</guilabel> 
+      commands respectively.
     </para>
   </refsection>
 
@@ -66,12 +66,14 @@
         <tbody>
           <row>
             <entry>
-              <guilabel>ReportFile</guilabel>
+              <guilabel>DiffMaxChange</guilabel>
             </entry>
 
             <entry>
               <para>
-                The ReportFile field contains the path and file name of the report file.
+                The DiffMaxChange parameter is the upper limit on the perturbation used in MATLAB's finite differencing algorithm. 
+                For fmincon, you don't specify a single perturbation value, but rather give MATLAB a range, and it uses an
+                adaptive algorithm that attempts to find the optimal perturbation.
               </para>
               <variablelist>
                 <varlistentry>
@@ -79,7 +81,7 @@
 
                   <listitem>
                     <para>
-                      FileName
+                      String
                     </para>
                   </listitem>
                 </varlistentry>
@@ -89,8 +91,7 @@
 
                   <listitem>
                     <para>
-
-
+                      Real Number &gt; 0
                     </para>
                   </listitem>
                 </varlistentry>
@@ -100,7 +101,7 @@
 
                   <listitem>
                     <para>
-                      set
+                      
                     </para>
                   </listitem>
                 </varlistentry>
@@ -110,7 +111,7 @@
 
                   <listitem>
                     <para>
-                      Any user-defined file name
+                      0.1
                     </para>
                   </listitem>
                 </varlistentry>
@@ -119,9 +120,149 @@
                   <term>Units</term>
 
                   <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>DiffMinChange</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The DiffMinChange parameter is the lower limit on the perturbation
+                used in MATLAB's finite differencing algorithm. For fmincon, you don't specify a single perturbation value, but rather 
+                give MATLAB a range, and it uses an adaptive algorithm that attempts to find the optimal perturbation.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
                     <para>
-                      None
+                      String
                     </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real Number &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1e-8
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>MaxFunEvals</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The MaxFunEvals parameter allows the user to set the maximum number of cost function evaluations in an attempt to find an optimal solution. 
+                This is equivalent to setting the maximum number of passes through an optimization loop in a GMAT script. 
+                If a solution is not found before the maximum function evaluations, fmincon outputs an ExitFlag of zero, and GMAT continues.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Integer &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1000
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -143,8 +284,8 @@
 
             <entry>
               <para>
-                The MaximumIterations field allows the user to set the
-                maximum allowable number of nominal passes through the Solver Control Sequence.
+                The MaximumIterations field allows the user to set the maximum allowable number of nominal passes through the optimizer.  
+                Note that this is not the same as the number of optimizer iterations that is shown for the VF13AD optimzer.   
               </para>
               <variablelist>
                 <varlistentry>
@@ -152,7 +293,7 @@
 
                   <listitem>
                     <para>
-                      Integer
+                      String
                     </para>
                   </listitem>
                 </varlistentry>
@@ -172,7 +313,7 @@
 
                   <listitem>
                     <para>
-                      set
+
                     </para>
                   </listitem>
                 </varlistentry>
@@ -182,7 +323,7 @@
 
                   <listitem>
                     <para>
-                      200
+                      25
                     </para>
                   </listitem>
                 </varlistentry>
@@ -191,9 +332,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -210,12 +349,12 @@
 
           <row>
             <entry>
-              <guilabel>FeasibilityTolerance</guilabel>
+              <guilabel>ReportFile</guilabel>
             </entry>
 
             <entry>
               <para>
-                The FeasibilityTolerance field specifies the accuracy with which the user desires a constraint to be satisfied.
+                The ReportFile field contains the path and file name of the report file.
               </para>
               <variablelist>
                 <varlistentry>
@@ -223,7 +362,7 @@
 
                   <listitem>
                     <para>
-                      Real
+                      String
                     </para>
                   </listitem>
                 </varlistentry>
@@ -233,7 +372,7 @@
 
                   <listitem>
                     <para>
-                      Real &gt; 0
+                      Any user-defined file name
                     </para>
                   </listitem>
                 </varlistentry>
@@ -243,7 +382,7 @@
 
                   <listitem>
                     <para>
-                      set
+
                     </para>
                   </listitem>
                 </varlistentry>
@@ -253,7 +392,7 @@
 
                   <listitem>
                     <para>
-                      1e-3
+                      FminconOptimizerSQP1.data
                     </para>
                   </listitem>
                 </varlistentry>
@@ -262,80 +401,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
-
-          <row>
-            <entry>
-              <guilabel>Tolerance</guilabel>
-            </entry>
-
-            <entry>
-              <para>
-                The Tolerance field specifies the measure the optimizer will use to determine when an optimal solution has been found based on the value of the goal set in a Minimize command. 
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>
-                      Real
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>
-                      Real &gt; 0
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>
-                      set
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      1e-5
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -357,10 +423,11 @@
 
             <entry>
               <para>
-                The ReportStyle field determines the amount and type of data written to the message window and to the report specified by field 
-                ReportFile for each iteration of the solver (When ShowProgress is true).  Currently, the Normal, debug, and Concise options contain the same 
-                information: the values for the control variables, the constraints, and the objective function.  
-                In addition to this information, the Verbose option also contains values of the optimizer-scaled control variables. 
+                The ReportStyle field determines the amount and type of data written to the message window and 
+                to the report specified by field ReportFile for each iteration of the solver (when ShowProgress is true). 
+                Currently, the Normal, debug, and Concise options contain the same information: the values for the control variables,
+                the constraints, and the objective function.  In addition to this information, the Verbose option also contains values of 
+                the optimizer-scaled control variables. 
               </para>
               <variablelist>
                 <varlistentry>
@@ -388,7 +455,7 @@
 
                   <listitem>
                     <para>
-                      set
+
                     </para>
                   </listitem>
                 </varlistentry>
@@ -398,7 +465,7 @@
 
                   <listitem>
                     <para>
-                      DefaultValue
+                      Normal
                     </para>
                   </listitem>
                 </varlistentry>
@@ -407,9 +474,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      Normal
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -432,8 +497,8 @@
             <entry>
               <para>
                 The ShowProgress field determines whether data pertaining to iterations of the solver is both displayed in the message window and 
-                written to the report specified by the ReportFile field. When ShowProgress is true, the amount of information contained in the message
-                window and written in the report is controlled by the ReportStyle field.
+                written to the report specified by the ReportFile field. When ShowProgress is true, 
+                the amount of information contained in the message window and written in the report is controlled by the ReportStyle field.
               </para>
               <variablelist>
                 <varlistentry>
@@ -461,7 +526,7 @@
 
                   <listitem>
                     <para>
-                      set
+
                     </para>
                   </listitem>
                 </varlistentry>
@@ -480,9 +545,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -499,13 +562,12 @@
 
           <row>
             <entry>
-              <guilabel>UseCentralDifferences</guilabel>
+              <guilabel>TolCon</guilabel>
             </entry>
 
             <entry>
               <para>
-                The UseCentralDifferences field allows the user to choose whether or not to use central differencing for numerically 
-                determining the derivative. For the default, 'false' value of this field, forward differencing is used to calculate the derivative. 
+                The TolCon parameter is the convergence tolerance on the constraint functions.
               </para>
               <variablelist>
                 <varlistentry>
@@ -513,7 +575,7 @@
 
                   <listitem>
                     <para>
-                      DataType
+                      String
                     </para>
                   </listitem>
                 </varlistentry>
@@ -523,7 +585,7 @@
 
                   <listitem>
                     <para>
-                      true, false
+                      Real Number &gt; 0
                     </para>
                   </listitem>
                 </varlistentry>
@@ -533,7 +595,7 @@
 
                   <listitem>
                     <para>
-                      set
+
                     </para>
                   </listitem>
                 </varlistentry>
@@ -543,7 +605,7 @@
 
                   <listitem>
                     <para>
-                      false
+                      1e-4
                     </para>
                   </listitem>
                 </varlistentry>
@@ -552,9 +614,145 @@
                   <term>Units</term>
 
                   <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>TolFun</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The TolFun parameter is the convergence tolerance on the cost function value.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
                     <para>
-                      None
+                      String
                     </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real Number &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1e-4
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>TolX</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The TolX parameter is the termination tolerance on the vector of independent variables, and is used only if the user sets a value for this field. 
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Real Number &gt; 0
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      1e-4
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -577,15 +775,16 @@
     <title>GUI</title>
 
     <para>
-      The <guilabel>VF13ad</guilabel> dialog box allows you to specify properties of a <guilabel>VF13ad</guilabel> such as as maximum iterations, 
-      cost function tolerance, feasibility tolerance, choice of reporting options, and choice of whether 
-      or not to use the central difference derivative method.
+      The <guilabel>FminconOptimizer</guilabel> dialog box allows you to specify properties of a FminconOptimizer such as maximum iterations, 
+      maximum function evaluations, control variable termination tolerance, constraint tolerance, 
+      cost function tolerance, finite difference algorithm parameters, and choice of reporting options.
     </para>
 
     <para>
-      To create a <guilabel>VF13ad</guilabel> resource, navigate to the <guilabel>Resources</guilabel> tree, expand the <guilabel>Solvers</guilabel> folder, highlight and then 
-      right-click on the <guilabel>Optimizers</guilabel> sub-folder, point to Add and then select <guilabel>VF13AD</guilabel>. This will create a new <guilabel>VF13ad</guilabel> resource, 
-      VF13ad1. Double-click on VF13ad1 to bring up the <guilabel>VF13ad</guilabel> dialog box shown below.
+      To create a <guilabel>FminconOptimizer</guilabel> resource, navigate to the <guilabel>Resources</guilabel> tree, expand the <guilabel>Solvers</guilabel> folder, 
+      highlight and then right-click on the <guilabel>Optimizers</guilabel> sub-folder, point to <guilabel>Add</guilabel> and then select <guilabel>SQP</guilabel> (<guilabel>fmincon</guilabel>).  
+      This will create a new <guilabel>FminconOptimizer</guilabel> resource, SQP1.  Double-click on SQP1 to bring up the <guilabel>FminconOptimizer</guilabel> 
+      dialog box shown below.
     </para>
 
     <screenshot>
@@ -593,30 +792,25 @@
         <imageobject>
           <imagedata align="center"
                      contentdepth="100%"
-                     fileref="files/images/Resource_VF13adOptimizer_GUI.png"
+                     fileref="files/images/Resource_fmincon_GUI.png"
                      scalefit="1"
                      width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      A screenshot of the GUI (above) along with a text
-      description.
-    </para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>
-        VF13ad Optimizer Availability
-      </title>
+      <title>fmincon Optimizer Availability</title>
 
       <para>
-        This optimizer is not included as part of the nominal GMAT installation and  
-        is only available if you have created and installed the VF13ad plug-in.
+        This optimizer is only available if you have access to both MATLAB and MATLAB's Optimization toolbox.  GMAT 
+        contains an interface to the fmincon optimizer and it will appear to you that fmincon is a built in optimizer in GMAT. 
+        Field names for this object have been copied from those used in MATLAB’S optimset function for consistency with MATLAB in contrast with other solvers in GMAT.
       </para>
     </refsection>
 
@@ -624,11 +818,12 @@
       <title>Object and Command Interactions</title>
 
       <para>
-        The <guilabel>VF13ad</guilabel> object can only be used in the context of optimization-type commands. Please see the 
-        documentation for <guilabel>Optimize</guilabel>, <guilabel>Vary</guilabel>, <guilabel>NonlinearConstraint</guilabel>, 
-        and <guilabel>Minimize</guilabel> for more information and worked examples.
+        The <guilabel>FminconOptimizer</guilabel> object can only be used in the context of optimization-type commands. Please see the documentation for <guilabel>Optimize</guilabel>, 
+        <guilabel>Vary</guilabel>, <guilabel>NonlinearConstraint</guilabel>, and <guilabel>Minimize</guilabel> for more information and worked examples.
       </para>
     </refsection>
+
+    
   </refsection>
 
   <refsection>
@@ -636,25 +831,28 @@
 
     <informalexample>
       <para>
-        Create a VF13AD resource named VF13ad1.
+        Create a FminconOptimizer resource named SQP1.
       </para>
 
       <programlisting>
         <code>
-  Create VF13ad VF13ad1;
-  GMAT VF13ad1.ShowProgress = true;
-  GMAT VF13ad1.ReportStyle = Normal;
-  GMAT VF13ad1.ReportFile = 'VF13adVF13ad1.data';
-  GMAT VF13ad1.MaximumIterations = 200;
-  GMAT VF13ad1.Tolerance = 1e-005;
-  GMAT VF13ad1.UseCentralDifferences = false;
-  GMAT VF13ad1.FeasibilityTolerance = 1e-003;
+  Create FminconOptimizer SQP1;
+  GMAT SQP1.ShowProgress = true;
+  GMAT SQP1.ReportStyle = Normal;
+  GMAT SQP1.ReportFile = 'FminconOptimizerSQP1.data';
+  GMAT SQP1.MaximumIterations = 25;
+  GMAT SQP1.DiffMaxChange = '0.1000';
+  GMAT SQP1.DiffMinChange = '1.0000e-08';
+  GMAT SQP1.MaxFunEvals = '1000';
+  GMAT SQP1.TolX = '1.0000e-04';
+  GMAT SQP1.TolFun = '1.0000e-04';
+  GMAT SQP1.TolCon = '1.0000e-04';
         </code>
       </programlisting>
     </informalexample>
 
     <para>
-      For an example of how a <guilabel>VF13AD</guilabel> resource can be used within an Optimization sequence, see the <guilabel>Optimize</guilabel> command examples.
+      For an example of how a <guilabel>FminconOptimizer</guilabel> resource can be used within an optimize sequence, see the <guilabel>Optimize</guilabel> Command examples.
     </para>
   </refsection>
 </refentry>

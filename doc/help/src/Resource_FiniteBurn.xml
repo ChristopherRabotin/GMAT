@@ -1,271 +1,328 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="FiniteBurn"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
+<refentry version="5.0"
+          xml:id="FiniteBurn"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>FiniteBurn</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>FiniteBurn</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>Finite Burn</refname>
+    <refname>FiniteBurn</refname>
 
-    <refpurpose>A finite burn.</refpurpose>
+    <refpurpose>
+      A finite burn
+    </refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create FiniteBurn <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The Finite Burn object is used when a continuous propulsion is
-    desired. Impulsive burns happen instantaneously and through a Maneuver
-    command, while finite burns occur until the End Finite Burn command is
-    reached in the mission sequence and are typically coupled with Propagate
-    commands.</para>
+    <para>
+      The <guilabel>Finite Burn</guilabel> object is used when continuous propulsion is desired. Impulsive burns happen instantaneously through the use of the 
+      Maneuver command, while finite burns occur continuously starting at the <guilabel>BeginFiniteBurn</guilabel> command and lasting until the <guilabel>EndFiniteBurn</guilabel> 
+      command is reached in the mission sequence.  
+      In order to apply a non-zero <guilabel>Finite Burn</guilabel>, there must be a 
+      <guilabel>Propagate</guilabel> command between the <guilabel>BeginFiniteBurn</guilabel> and <guilabel>EndFiniteBurn</guilabel> commands.
+    </para>
+    
+
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="FuelTank"/>, 
+      <xref linkend="Thruster"/>,
+      <xref linkend="Spacecraft" />,
+      <xref linkend="BeginFiniteBurn" />,
+      <xref linkend="EndFiniteBurn" />
+    </para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Origin</term>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
 
-        <listitem>
-            <para>Together the
-            Origin and Axes fields describe the coordinate system in which a
-            maneuver is applied. The Origin field determines the origin of the
-            maneuver coordinate system. The ability to define the coordinate
-            system locally avoids having to create many coordinate systems,
-            associated with specific spacecraft, in order to perform finite
-            maneuvers for multiple spacecraft.</para>
-            
-            <variablelist spacing="compact">
-                <varlistentry>
-                    <term>Default</term>
-                    
-                    <listitem>
-                        <para>Earth</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Limits</term>
-                    
-                    <listitem>
-                        <para>Any celestial
-            body, libration point, or barycenter</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Units</term>
-                    
-                    <listitem>
-                        <para>N/A</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term>Axes</term>
+        <colspec colnum="2"
+                 colwidth="3*"/>
 
-        <listitem>
-            <para>The Axes field, together with the Origin field,
-            describe the coordinate system in which a finite maneuver is
-            applied. If VNB is chosen for Axes, a local coordinate system is
-            created such that the x-axis points in the velocity direction of
-            the spacecraft, with respect to the point defined by Origin, the
-            y-axis points in the normal direction of the spacecraft with
-            respect to Origin, and the z-axis completes the right-handed
-            set.</para>
-            
-            <variablelist spacing="compact">
-                <varlistentry>
-                    <term>Default</term>
-                    
-                    <listitem>
-                        <para>VNB</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Limits</term>
-                    
-                    <listitem>
-                        <para>VNB, MJ2000Eq</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Units</term>
-                    
-                    <listitem>
-                        <para>N/A</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term>Thrusters</term>
+        <thead>
+          <row>
+            <entry>Field</entry>
 
-        <listitem>
-            <para>The Thrusters field allows
-            the selection of which thrusters to use when applying a finite
-            maneuver. The user can select more than one thruster, from the
-            list of thrusters previously created, by including all thrusters
-            in curly braces. An example is MyFiniteBurn.Thrusters =
-            Thruster1,Thruster2,Thruster3.</para>
-            
-            <variablelist spacing="compact">
-                <varlistentry>
-                    <term>Default</term>
-                    
-                    <listitem>
-                        <para>No Default</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Limits</term>
-                    
-                    <listitem>
-                        <para>Any
-            thruster created by user</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Units</term>
-                    
-                    <listitem>
-                        <para>N/A</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </listitem>
-      </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-      <varlistentry>
-        <term>BurnScaleFactor</term>
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>Thruster</guilabel>
+            </entry>
 
-        <listitem>
-            <para>The BurnScaleFactor is used to scale the total
-            acceleration before adding the acceleration due to a finite burn
-            into the sum of the accelerations of a spacecraft. The scaling is
-            performed by taking the sum of the accelerations applied by all
-            thrusters specified under the Thrusters field, and multiplying the
-            total thrust by BurnScaleFactor.</para>
-            
-            <variablelist spacing="compact">
+            <entry>
+              <para>
+                The <guilabel>Thruster</guilabel> field allows the selection of which thruster, from a list of previously created thrusters,
+                to use when applying a finite burn. Currently, the user can only select 
+                one thruster to attach to a finite burn.
+              </para>
+              <variablelist>
                 <varlistentry>
-                    <term>Default</term>
-                    
-                    <listitem>
-                        <para>1.0</para>
-                    </listitem>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>
+                      StringList
+                    </para>
+                  </listitem>
                 </varlistentry>
-                
+
                 <varlistentry>
-                    <term>Limits</term>
-                    
-                    <listitem>
-                        <para>Real Number</para>
-                    </listitem>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any thruster created by user
+                    </para>
+                  </listitem>
                 </varlistentry>
-                
+
                 <varlistentry>
-                    <term>Units</term>
-                    
-                    <listitem>
-                        <para>N/A</para>
-                    </listitem>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>
+                      set
+                    </para>
+                  </listitem>
                 </varlistentry>
-            </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      No Default
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script, or only one</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      The <guilabel>FiniteBurn</guilabel> dialog box allows you to specify which thruster to use for the finite burn.  
+      The layout of the <guilabel>FiniteBurn</guilabel> dialog box is shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_FiniteBurn_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>
+        Configuring a FiniteBurn
+      </title>
+
+      <para>
+        To perform a finite burn, the <guilabel>FiniteBurn</guilabel> resource itself and a number of related objects must be properly configured.  
+        You must associate a specific <guilabel>Thruster</guilabel> hardware object with a created FiniteBurn.  You must associate a specific <guilabel>FuelTank</guilabel>
+        hardware object with the chosen thruster.  Finally, you must attach both the chosen <guilabel>Thruster</guilabel> and <guilabel>FuelTank</guilabel> to the desired spacecraft.
+        See the example below for additional details.
+      </para>
+    </refsection>
+
+    <refsection>
+      <title>
+        FiniteBurn using multiple Thrusters
+      </title>
+
+      <para>
+        Using the GUI, a <guilabel>FiniteBurn</guilabel> object must be associated with exactly one <guilabel>Thruster</guilabel>.  
+        Future GMAT GUI versions will allow multiple thrusters to be attached to a single <guilabel>FiniteBurn</guilabel> object.
+      </para>
+
+      <para>
+        Using the scripting interface, one can currently assign
+        multiple thrusters to a single <guilabel>FiniteBurn</guilabel> object.
+      </para>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Interactions</title>
 
-    <variablelist>
-        <varlistentry>
-          <term>Spacecraft</term>
-            
-          <listitem>
-            <para>A spacecraft must be created in order to apply any
-            burn.</para>
-          </listitem>
-        </varlistentry>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth="1*"/>
 
-        <varlistentry>
-          <term>Thruster</term>
+        <colspec colnum="2"
+                 colwidth="4*"/>
 
-          <listitem>
-            <para>Any thruster created in the resource tree can be
-            incorporated into a finite burn to be used on the
-            spacecraft.</para>
-          </listitem>
-        </varlistentry>
+        <thead>
+          <row>
+            <entry>Spacecraft resource</entry>
 
-        <varlistentry>
-          <term>Begin and End Finite Burn command</term>
+            <entry>Must be created in order to apply any burn. </entry>
+          </row>
+        </thead>
 
-          <listitem>
-            <para>After a finite burn is created, to apply it to the mission
-            sequence, a Begin and End Finite Burn command must be appended to
-            the mission tree.</para>
-          </listitem>
-        </varlistentry>
-    </variablelist>
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>Thruster resource</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                As discussed in the <guilabel>Remarks</guilabel>, every finite burn must be associated with at least one <guilabel>Thruster</guilabel>.  
+                Any thruster created in the resource tree can be incorporated into a finite burn to be used on the spacecraft.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>FuelTank resource</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                To perform a FiniteBurn, a FuelTank must be attached to the spacecraft.  
+                (A FuelTank is needed to provide pressure and temperature data used when modeling the thrust and specific impulse. 
+                A FuelTank is also needed if you want to model mass depletion.)
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>BeginFiniteBurn and EndFiniteBurn command</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                After a finite burn is created, to apply it in the mission sequence, 
+                a BeginFiniteBurn and EndFiniteBurn command must be appended to the mission tree.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Propagate command</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                In order to apply a non-zero Finite Burn, there must be a Propagate 
+                command between the BeginFiniteBurn and EndFiniteBurn commands.
+              </para>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
-  
+
   <refsection>
     <title>Examples</title>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Finite Burn Object
-        Dialog Box</title>
-      </info>
+    <informalexample>
+      <para>
+        Create a default <guilabel>Spacecraft</guilabel> and <guilabel>FuelTank</guilabel> Object, Create a default <guilabel>Thruster</guilabel> that allows for fuel depletion
+        from the default <guilabel>FuelTank</guilabel>, Attach <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> to the spacecraft, 
+        Create default <guilabel>ForceModel</guilabel> and <guilabel>Propagator</guilabel>, 
+        Create a <guilabel>Finite Burn</guilabel> that uses the default thruster and apply a 30 minute finite burn to the spacecraft.
+      </para>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_FiniteBurn_Default.jpeg"></imagedata>
-        </imageobject>
+      <programlisting>
+        <code>
+  % Create a default Spacecraft and FuelTank Object
+  Create Spacecraft DefaultSC;
+  Create FuelTank FuelTank1;
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Finite Burn Object
-          Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+  % Create a default Thruster.  Allow for fuel depletion from the default FuelTank.
+  Create Thruster Thruster1;
+  GMAT Thruster1.DecrementMass = true;
+  GMAT Thruster1.Tank = {FuelTank1};
 
-    <programlisting><code>Create FiniteBurn FiniteBurn1;
-GMAT FiniteBurn1.Origin = Earth;
-GMAT FiniteBurn1.Axes = VNB;
-GMAT FiniteBurn1.BurnScaleFactor = 1;</code></programlisting>
+  %  Attach FuelTank and Thruster to the spacecraft
+  GMAT DefaultSC.Thrusters = {Thruster1};
+  GMAT DefaultSC.Tanks = {FuelTank1};
+
+  %  Create default ForceModel and Propagator
+  Create ForceModel DefaultProp_ForceModel;
+  Create Propagator DefaultProp;
+  GMAT DefaultProp.FM = DefaultProp_ForceModel;
+
+  %  Create a Finite Burn that uses the default thruster
+  Create FiniteBurn FiniteBurn1;
+  GMAT FiniteBurn1.Thrusters = {Thruster1};
+
+  BeginMissionSequence;
+
+  %  Implement 30 minute finite burn
+  BeginFiniteBurn FiniteBurn1(DefaultSC);
+  Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800};
+  EndFiniteBurn FiniteBurn1(DefaultSC);
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

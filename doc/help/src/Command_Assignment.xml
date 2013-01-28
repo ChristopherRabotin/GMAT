@@ -63,20 +63,24 @@
 
       <para>
         The left-hand side of the assignment command must be a single item of any of the following types:
-        <itemizedlist>
-          <listitem>
-            allowed resource (e.g. Spacecraft, Variable, Array)
-          </listitem>
-          <listitem>
-            resource field for allowed resources (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)
-          </listitem>
-          <listitem>
-            settable resource parameter (e.g. Spacecraft.X, ReportFile.Precision)
-          </listitem>
-          <listitem>
-            Array or Array element
-          </listitem>
-        </itemizedlist>
+      </para>
+      
+      <itemizedlist>
+        <listitem>
+          <para>allowed resource (e.g. Spacecraft, Variable, Array)</para>
+        </listitem>
+        <listitem>
+          <para>resource field for allowed resources (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)</para>
+        </listitem>
+        <listitem>
+          <para>settable resource parameter (e.g. Spacecraft.X, ReportFile.Precision)</para>
+        </listitem>
+        <listitem>
+          <para>Array or Array element</para>
+        </listitem>
+      </itemizedlist>
+      
+      <para>
         See the script language reference for a list of allowed resources.
       </para>
     </refsection>
@@ -88,22 +92,22 @@
         The right-hand side of the assignment command can consist of any of the following:
         <itemizedlist>
           <listitem>
-            literal value
+            <para>literal value</para>
           </listitem>
           <listitem>
-            resource (e.g. Spacecraft, Variable, Array)
+            <para>resource (e.g. Spacecraft, Variable, Array)</para>
           </listitem>
           <listitem>
-            resource field (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)
+            <para>resource field (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)</para>
           </listitem>
           <listitem>
-            resource parameter (e.g. Spacecraft.X, Thruster.K1)
+            <para>resource parameter (e.g. Spacecraft.X, Thruster.K1)</para>
           </listitem>
           <listitem>
-            Array or Array element
+            <para>Array or Array element</para>
           </listitem>
           <listitem>
-            mathematical expression (see below)
+            <para>mathematical expression (see below)</para>
           </listitem>
         </itemizedlist>
         GMAT and MATLAB function calls are considered distinct from the assignment command.
@@ -221,9 +225,7 @@
         <para>
           Mathematical expressions are recognized by the presence of any of the operators or
           built-in functions described below. Before execution, all white space (e.g. spaces and tabs)
-          is removed from the expression. Mathematical expressions are <emphasis>ONLY</emphasis>
-          allowed in the context of the assignment operator. They cannot be used inside an Array
-          reference, inside a command, or as a function parameter.
+          is removed from the expression.
         </para>
       </refsection>
 
@@ -235,22 +237,22 @@
           (integers or floating-point numbers). This includes the following:
           <itemizedlist>
             <listitem>
-              literal values
+              <para>literal values</para>
             </listitem>
             <listitem>
-              numeric resources (Variable, Array)
+              <para>numeric resources (Variable, Array)</para>
             </listitem>
             <listitem>
-              gettable resource parameters (e.g. Spacecraft.X, Thruster.K1)
+              <para>gettable resource parameters (e.g. Spacecraft.X, Thruster.K1)</para>
             </listitem>
             <listitem>
-              Array elements
+              <para>Array elements</para>
             </listitem>
             <listitem>
-              calculation parameters (e.g. Spacecraft.OrbitPeriod)
+              <para>calculation parameters (e.g. Spacecraft.OrbitPeriod)</para>
             </listitem>
             <listitem>
-              nested mathematical expressions
+              <para>nested mathematical expressions</para>
             </listitem>
           </itemizedlist>
           Several of GMAT’s operators and functions are vectorized,
@@ -380,19 +382,19 @@
           level, operations proceed left-to-right.
           <orderedlist>
             <listitem>
-              parentheses ()
+              <para>parentheses ()</para>
             </listitem>
             <listitem>
-              transpose ('), power (^)
+              <para>transpose ('), power (^)</para>
             </listitem>
             <listitem>
-              unary plus (+), unary minus (-)
+              <para>unary plus (+), unary minus (-)</para>
             </listitem>
             <listitem>
-              multiplication (*), division (/)
+              <para>multiplication (*), division (/)</para>
             </listitem>
             <listitem>
-              addition (+), subtraction (-)
+              <para>addition (+), subtraction (-)</para>
             </listitem>
           </orderedlist>
         </para>
