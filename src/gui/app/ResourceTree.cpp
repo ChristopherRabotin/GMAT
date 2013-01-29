@@ -4230,8 +4230,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    mBuildErrorCount = 0;
    mFailedScriptsList.Clear();
    mScriptFolderRunning = true;
-   wxArrayString failedToRunScripts;
-   wxArrayString runInterruptedScripts;
+   wxArrayString initTimeErrors;
+   wxArrayString unknownInitTimeErrors;
+   wxArrayString runInterrupedByUser;
+   wxArrayString runTimeErrors;
+   wxArrayString unknownRunTimeErrors;
    
    // Set output path for reports and ephemeris files
    try
@@ -4354,17 +4357,25 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
             if (i == 0)
                builtOk = BuildScript(filename, GmatGui::DO_NOT_OPEN_SCRIPT, true,
                                      runFromSavedScripts, savePath, true);
-
+            
             if (builtOk)
             {
                Integer retval = theMainFrame->RunCurrentMission();
-
+               #ifdef DEBUG_RUN_SCRIPT_FOLDER
+               MessageInterface::ShowMessage("==> RunCurrentMission retval = %d\n", retval);
+               #endif
                // if run failed, save to report
                if (retval == -2)
-                  runInterruptedScripts.Add(filename);
-               else if (retval <= -3)
-                  failedToRunScripts.Add(filename);
-
+                  initTimeErrors.Add(filename);
+               else if (retval == -3)
+                  unknownInitTimeErrors.Add(filename);
+               else if (retval == -4)
+                  runInterrupedByUser.Add(filename);
+               else if (retval == -5)
+                  runTimeErrors.Add(filename);
+               else if (retval <= -6)
+                  unknownRunTimeErrors.Add(filename);
+               
                if (compare)
                {
                   absTol = dlg.GetAbsTolerance();
@@ -4429,64 +4440,106 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
 
    // Set batch mode to false
    GmatGlobal::Instance()->SetBatchMode(false);
-
+   
    // Popup errors found message
-   wxString msg1;
-   wxString msg2;
-   wxString msg3;
-   std::string msg1Str;
+   wxString msg1, msg2, msg3, msg4, msg5, msg6;
+   wxString msg1Str;
+   wxString scriptNames;
+   int numFailed = 0;
    
    if (mBuildErrorCount > 0)
    {
-      wxString scriptNames1;
+      scriptNames = "";
       msg1.Printf("Script errors found in the following %d script(s):\n",
                   mBuildErrorCount);
       for (int i = 0; i < mBuildErrorCount; i++)
-         scriptNames1 = scriptNames1 + mFailedScriptsList[i] + "\n";
+         scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
       
-      msg1 = msg1 + scriptNames1;
+      msg1 = msg1 + scriptNames;
    }
    
-   if (failedToRunScripts.GetCount() > 0)
+   if (initTimeErrors.GetCount() > 0)
    {
-      int numFailed = failedToRunScripts.GetCount();
-      wxString scriptNames2;
-      msg2.Printf("\nThe following %d script(s) failed to run to completion:\n",
+      numFailed = initTimeErrors.GetCount();
+      scriptNames = "";
+      msg2.Printf("\nThe following %d script(s) failed to initialize:\n",
                   numFailed);
       
       for (int i = 0; i < numFailed; i++)
-         scriptNames2 = scriptNames2 + failedToRunScripts[i] + "\n";
+         scriptNames = scriptNames + initTimeErrors[i] + "\n";
       
-      msg2 = msg2 + scriptNames2;
+      msg2 = msg2 + scriptNames;
    }
    
-   if (runInterruptedScripts.GetCount() > 0)
+   if (unknownInitTimeErrors.GetCount() > 0)
    {
-      int numInterrupted = runInterruptedScripts.GetCount();
-      wxString scriptNames3;
-      msg3.Printf("\nThe following %d script(s) were interrupted by user:\n",
-                  numInterrupted);
+      numFailed = unknownInitTimeErrors.GetCount();
+      scriptNames = "";
+      msg3.Printf("\nThe following %d script(s) encountered unknown initialization error:\n",
+                  numFailed);
+      
+      for (int i = 0; i < numFailed; i++)
+         scriptNames = scriptNames + unknownInitTimeErrors[i] + "\n";
+      
+      msg3 = msg3 + scriptNames;
+   }
+   
+   if (runInterrupedByUser.GetCount() > 0)
+   {
+      numFailed = runInterrupedByUser.GetCount();
+      scriptNames = "";
+      msg4.Printf("\nThe following %d script(s) were interrupted by user:\n",
+                  numFailed);
       
       // Why following line causes crash?
-      for (int i = 0; i < numInterrupted; i++)
+      for (int i = 0; i < numFailed; i++)
       {
-         scriptNames3 = scriptNames3 + runInterruptedScripts[i] + "\n";
+         scriptNames = scriptNames + runInterrupedByUser[i] + "\n";
       }
       
-      msg3 = msg3 + scriptNames3;
+      msg4 = msg4 + scriptNames;
+   }
+   
+   if (runTimeErrors.GetCount() > 0)
+   {
+      numFailed = runTimeErrors.GetCount();
+      scriptNames = "";
+      msg5.Printf("\nThe following %d script(s) failed to run to completion:\n",
+                  numFailed);
+      
+      for (int i = 0; i < numFailed; i++)
+         scriptNames = scriptNames + runTimeErrors[i] + "\n";
+      
+      msg5 = msg5 + scriptNames;
+   }
+   
+   if (unknownRunTimeErrors.GetCount() > 0)
+   {
+      numFailed = unknownRunTimeErrors.GetCount();
+      scriptNames = "";
+      msg6.Printf("\nThe following %d script(s) encountered unknown run time error:\n",
+                  numFailed);
+      
+      // Why following line causes crash?
+      for (int i = 0; i < numFailed; i++)
+      {
+         scriptNames = scriptNames + unknownRunTimeErrors[i] + "\n";
+      }
+      
+      msg6 = msg6 + scriptNames;
    }
    
    
-   if (msg1 != "" || msg2 != "" || msg3 != "")
+   if (msg1 != "" || msg2 != "" || msg3 != "" || msg4 != "" || msg5 != "" || msg6 != "")
    {
       // Show errors to message window
-      MessageInterface::ShowMessage(msg1 + msg2 + msg3);
+      MessageInterface::ShowMessage(msg1 + msg2 + msg3 + msg4 + msg5 + msg6);
       
       // Show errors to view text dialog
       ViewTextDialog *dlg =
          new ViewTextDialog(this, _T("Information"), false, wxDefaultPosition, wxSize(550, 300));
       wxTextCtrl *text = dlg->GetTextCtrl();
-      wxString msg = msg1 + msg2 + msg3;
+      wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
       text->AppendText(msg);
       dlg->ShowModal();
    }
