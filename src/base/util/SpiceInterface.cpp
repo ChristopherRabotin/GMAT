@@ -31,9 +31,11 @@
 #include "FileManager.hpp"
 
 //#define DEBUG_SPK_LOADING
+//#define DEBUG_SPK_ISLOADED
 //#define DEBUG_SPK_READING
 //#define DEBUG_SPK_GETSTATE
 //#define DEBUG_SPK_PLANETS
+//#define DEBUG_VALID_KERNEL
 
 //---------------------------------
 // static data
@@ -92,10 +94,73 @@ Integer        SpiceInterface::numInstances = 0;
 /// the name (full path) of the leap second kernel to use
 std::string    SpiceInterface::lsKernel = "";
 
+//------------------------------------------------------------------------------
+// static methods
+//------------------------------------------------------------------------------
 
-//---------------------------------
+//------------------------------------------------------------------------------
+//  bool IsValidKernel(const std::string &fileName, const std::string &ofType)
+//------------------------------------------------------------------------------
+/**
+ * This method checks to see if the input file is a valid SPICE kernel of the
+ * specified type.
+ *
+ * @param <ofType>    type of kernel
+ * @param <fileName>  full path of the file (kernel) to check
+ *
+ * @return true if the file (kernel) is a valid kernel of the requested type;
+ *         false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::string &ofType)
+{
+   #ifdef DEBUG_VALID_KERNEL
+      MessageInterface::ShowMessage("Entering SpiceInterface::IsValidKernel with fileName = %s and ofType = %s\n",
+            fileName.c_str(), ofType.c_str());
+   #endif
+   char             kStr[5] = "    ";
+   char             aStr[4] = "   ";
+   SpiceInt         arclen      = 4;
+   SpiceInt         typlen      = 5;
+   ConstSpiceChar   *kernelName = NULL;
+   SpiceChar        *arch;
+   SpiceChar        *kernelType;
+   ConstSpiceChar   *typeToCheck = NULL;
+   // SPICE expects forward slashes for directory separators
+   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
+   kernelName = kName.c_str();
+   // check the type of kernel
+   arch        = aStr;
+   kernelType  = kStr;
+   getfat_c(kernelName, arclen, typlen, arch, kernelType);
+   if (failed_c())
+   {
+      return false;
+   }
+   #ifdef DEBUG_VALID_KERNEL
+      MessageInterface::ShowMessage("In SpiceInterface::IsValidKernel, found file, now checking type ...\n");
+   #endif
+
+   typeToCheck = ofType.c_str();
+
+   if (eqstr_c( kernelType, typeToCheck ))
+   {
+      #ifdef DEBUG_VALID_KERNEL
+         MessageInterface::ShowMessage("In SpiceInterface::IsValidKernel, types match!...\n");
+      #endif
+      return true;
+   }
+   #ifdef DEBUG_VALID_KERNEL
+      MessageInterface::ShowMessage("In SpiceInterface::IsValidKernel, types DO NOT match!...\n");
+   #endif
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // public methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  SpiceInterface()
@@ -128,9 +193,9 @@ SpiceInterface::SpiceInterface(const SpiceInterface &copy) :
    kernelNameSPICE         (NULL)
 {
    numInstances++;
-   // the kernels are all loaded into that one kernel pool, but we need to copy the names
-   loadedKernels = copy.loadedKernels;
-   lsKernel      = copy.lsKernel;
+//   // the kernels are all loaded into that one kernel pool, but we need to copy the names
+//   loadedKernels = copy.loadedKernels;
+//   lsKernel      = copy.lsKernel;
 }
 
 //------------------------------------------------------------------------------
@@ -151,10 +216,10 @@ SpiceInterface& SpiceInterface::operator=(const SpiceInterface &copy)
       return *this;
 
    kernelNameSPICE          = NULL;
-   // the kernels are all loaded into that one kernel pool, but we need to copy the names
-   loadedKernels.clear();
-   loadedKernels = copy.loadedKernels;
-   lsKernel      = copy.lsKernel;
+//   // the kernels are all loaded into that one kernel pool, but we need to copy the names
+//   loadedKernels.clear();
+//   loadedKernels = copy.loadedKernels;
+//   lsKernel      = copy.lsKernel;
 
    // don't modify numInstances - we are not creating a new instance here
    return *this;
@@ -404,7 +469,7 @@ bool SpiceInterface::UnloadAllKernels()
 //------------------------------------------------------------------------------
 bool SpiceInterface::IsLoaded(const std::string &fileName)
 {
-   #ifdef DEBUG_SPK_LOADING
+   #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::Now attempting to find kernel name %s\n", fileName.c_str());
    #endif
    // SPICE expects forward slashes for directory separators
@@ -414,61 +479,15 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    {
       if ((*jj) == kName)
       {
-         #ifdef DEBUG_SPK_LOADING
+         #ifdef DEBUG_SPK_ISLOADED
             MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
          #endif
          return true;
       }
    }
-   #ifdef DEBUG_SPK_LOADING
+   #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());
    #endif
-   return false;
-}
-
-//------------------------------------------------------------------------------
-//  bool IsValidKernel(const std::string &fileName, const std::string &ofType)
-//------------------------------------------------------------------------------
-/**
- * This method checks to see if the input file is a valid SPICE kernel of the
- * specified type.
- *
- * @param <ofType>    type of kernel
- * @param <fileName>  full path of the file (kernel) to check
- *
- * @return true if the file (kernel) is a valid kernel of the requested type;
- *         false otherwise
- *
- */
-//------------------------------------------------------------------------------
-bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::string &ofType)
-{
-   char             kStr[5] = "    ";
-   char             aStr[4] = "   ";
-   SpiceInt         arclen      = 4;
-   SpiceInt         typlen      = 5;
-   ConstSpiceChar   *kernelName = NULL;
-   SpiceChar        *arch;
-   SpiceChar        *kernelType;
-   ConstSpiceChar   *typeToCheck = NULL;
-   // SPICE expects forward slashes for directory separators
-   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
-   kernelName = kName.c_str();
-   // check the type of kernel
-   arch        = aStr;
-   kernelType  = kStr;
-   getfat_c(kernelName, arclen, typlen, arch, kernelType);
-   if (failed_c())
-   {
-      return false;
-   }
-
-   typeToCheck = ofType.c_str();
-
-   if (eqstr_c( kernelType, typeToCheck ))
-   {
-      return true;
-   }
    return false;
 }
 

@@ -55,6 +55,10 @@ extern "C"
 class GMAT_API SpiceInterface
 {
 public:
+   /// static method to check for valid kernels
+   static bool         IsValidKernel(const std::string &fileName, const std::string &ofType);
+
+   /// class methods
    SpiceInterface();
    SpiceInterface(const SpiceInterface &copy);
    SpiceInterface& operator=(const SpiceInterface &copy);
@@ -69,7 +73,6 @@ public:
    virtual bool        UnloadKernels(const StringArray &fileNames);
    virtual bool        UnloadAllKernels();
    virtual bool        IsLoaded(const std::string &fileName);
-   virtual bool        IsValidKernel(const std::string &fileName, const std::string &ofType);
    
    virtual StringArray GetValidAberrationCorrectionFlags();
    virtual StringArray GetValidFrames();

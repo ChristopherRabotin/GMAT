@@ -1024,15 +1024,6 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
    {
       if (id == Gmat::SPICE)
       {
-         #ifdef __USE_SPICE__
-            if (planetarySPK != NULL && (!planetarySPK->IsValidKernel(fileName, "spk")))
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_,
-                   "*** Warning *** The following SPK file is invalid and will not be used: %s.", fileName.c_str());
-               return false;
-            }
-         #endif
          theSPKFilename = fileName;
          thePlanetarySourceNames[id] = fileName;
          status =  true;
@@ -1465,6 +1456,8 @@ void SolarSystem::LoadSpiceKernels()
 {
    try
    {
+      // since we may need to add the path, try to load first, then check
+      // for valid kernel type
       planetarySPK->LoadKernel(theSPKFilename);
       #ifdef DEBUG_SS_SPICE
       MessageInterface::ShowMessage
@@ -2123,6 +2116,15 @@ bool SolarSystem::SetSPKFile(const std::string &spkFile)
    #ifdef DEBUG_PLANETARY_SPK
       MessageInterface::ShowMessage("In SetSPKFile, setting theSPKFilename to %s\n", fullSpkName.c_str());
    #endif
+   #ifdef __USE_SPICE__
+      if (!SpiceInterface::IsValidKernel(fullSpkName, "spk"))
+      {
+         SolarSystemException sse;
+         sse.SetDetails(errorMessageFormat.c_str(),
+                        spkFile.c_str(), "SPKFilename", "Valid SPK kernel");
+         throw sse;
+      }
+   #endif
    theSPKFilename = fullSpkName;
    return true;
 }
@@ -2159,12 +2161,12 @@ bool SolarSystem::SetLSKFile(const std::string &lskFile)
       }
    }
    #ifdef __USE_SPICE__
-      if ((planetarySPK != NULL) && (!planetarySPK->IsValidKernel(fullLskName, "lsk")))
+      if (!SpiceInterface::IsValidKernel(fullLskName, "lsk"))
       {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "*** Warning *** The following LSK file is invalid and will not be used: %s.", fullLskName.c_str());
-         return false;
+         SolarSystemException sse;
+         sse.SetDetails(errorMessageFormat.c_str(),
+                        lskFile.c_str(), "LSKFilename", "Valid LSK kernel");
+         throw sse;
       }
    #endif
    lskKernelName = fullLskName;
