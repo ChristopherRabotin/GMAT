@@ -526,6 +526,7 @@ bool Maneuver::InterpretAction()
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
          MessageInterface::ShowMessage("    %s\n",currentChunks.at(ii).c_str());
    #endif
+
    // ... and the spacecraft that is maneuvered
    currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ",");
    #ifdef DEBUG_MANEUVER_PARSE
@@ -537,6 +538,10 @@ bool Maneuver::InterpretAction()
    if (currentChunks.size() > 1)
       throw CommandException("Unexpected text after spacecraft name in "
             "Maneuver command\n");
+
+   if (currentChunks.size() == 0)
+      throw CommandException("The Spacecraft name is missing in the Maneuver "
+               "command\n");
 
    SetStringParameter(satNameID, currentChunks[0]);
 
