@@ -825,6 +825,24 @@ void PropagatePanel::OnCellValueChange(wxGridEvent& event)
    MessageInterface::ShowMessage
       ("PropagatePanel::OnCellValueChange() row=%d, col=%d, ", row, col);
    #endif
+
+   // Manage user typing directly into the grids
+   if (event.GetEventObject() == propGrid)
+   {
+      wxString propName = propGrid->GetCellValue(row, PROP_NAME_COL);
+      wxString satNames = propGrid->GetCellValue(row, PROP_SOS_COL);
+      
+      #ifdef DEBUG_PROPAGATE_PANEL
+      MessageInterface::ShowMessage
+         ("propName=<%s>, satList=<%s>\n", propName.c_str(), satNames.c_str());
+      #endif
+      
+      if ((col == PROP_NAME_COL) || (col == PROP_SOS_COL))
+      {
+         mPropSatChanged = true;
+         EnableUpdate(true);
+      }
+   }
    
    if (event.GetEventObject() == stopCondGrid)
    {
@@ -1085,7 +1103,70 @@ void PropagatePanel::SaveData()
       else if (propName == "" && soNames != "")
          emptyProps.Add(soNames);
    }
-   
+
+   // Validate that the propagator and spacecraft lists are valid data entries
+   std::string validationMessage;
+   StringArray validationErrors;
+
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
+   {
+      std::string propagator = propGrid->GetCellValue(i, PROP_NAME_COL).c_str();
+      std::string satNames = propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+      StringArray sats;
+
+      if (propagator != "")
+      {
+         #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+            MessageInterface::ShowMessage("Validating propagator %s\n", propagator.c_str());
+         #endif
+
+         GmatBase *theThing = theGuiInterpreter->GetConfiguredObject(propagator);
+
+         if (theThing == NULL)
+         {
+            validationMessage = "The propagator " + propagator + " cannot be found\n";
+            validationErrors.push_back(validationMessage);
+         }
+         else if (theThing->IsOfType("PropSetup") == false)
+         {
+            validationMessage = "The object " + propagator + " is not a Propagator\n";
+            validationErrors.push_back(validationMessage);
+         }
+
+         #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+            MessageInterface::ShowMessage("Validating SpaceObjects %s\n", satNames.c_str());
+         #endif
+
+         // Split up the satellite string and validate its pieces
+         sats = GmatStringUtil::SeparateByComma(satNames);
+         for (UnsignedInt i = 0; i < sats.size(); ++i)
+         {
+            theThing = theGuiInterpreter->GetConfiguredObject(sats[i]);
+
+            if (theThing == NULL)
+            {
+               validationMessage = "The SpaceObject " + sats[i] + " cannot be found\n";
+               validationErrors.push_back(validationMessage);
+            }
+            else if (theThing->IsOfType("SpaceObject") == false)
+            {
+               validationMessage = "The object " + sats[i] + " is not a Spacecraft or Formation\n";
+               validationErrors.push_back(validationMessage);
+            }
+         }
+      }
+   }
+
+   if (validationErrors.size() > 0)
+   {
+      validationMessage = "Propagate command configuration error:\n";
+      for (UnsignedInt i = 0; i < validationErrors.size(); ++i)
+         validationMessage += validationErrors[i];
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, validationMessage);
+      canClose = false;
+   }
+
    // check to see if there is at least one propagator
    if (blankProps == MAX_PROP_ROW)
    {
