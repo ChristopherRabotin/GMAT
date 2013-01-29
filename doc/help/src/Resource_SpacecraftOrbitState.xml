@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0"
+          xml:id="SpacecraftOrbitState"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>SpacecraftOrbitState</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>SpacecraftOrbitState</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2012a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>SpacecraftOrbitState</refname>
+
+    <refpurpose>
+      A one-line fragment describing the resource, without a
+      period
+    </refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+    
+    <para>
+      GMAT supports a suite of state types for defining the orbital state, including Cartesian and Keplerian, among others.  In addtion, you can define the orbital state in
+      different coordinate systems, for example EarthMJ2000Eq and EarthFixed.  GMAT provides three general state types that can be used with any, SphericalAZFPA, and SphericalRADEC.
+      There are three additional state types that can be used with coordinate systems centered at a celestial body: Keplerian, ModifiedKeplerian, and Equinoctial.
+    </para>
+
+    <para>
+      In the Remarks sections below, we describe each state type in detail including state-type definitions, singularities, and how the state fields
+      interact with the CoordinateSystem and Epoch fields.  There are some limitations when setting the orbital state during initialization,
+      which are discussed in the Remarks section. We also include examples for setting each state type in commonly used coordinate systems.
+    </para>
+
+    <para>
+      The epoch of a Spacecraft is the time and date corresponding to the specified orbit state. It defines the start time for propagation using the Propagate command.
+      See the Spacecraft Orbit State section for interactions between the epoch, coordinate system, and spacecraft state fields.
+    </para>   
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_SpacecraftOrbitEpoch_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      The Spacecraft orbit state dialog box allows you to set the epoch, coordinate system, and state type values for the spacecraft orbital state.
+      When you specify an orbital state, you define the state in the representation selected in the StateType menu, with respect to the coordinate system
+      specified in the CoordinateSystem menu, at the epoch defined in the Epoch menu.  If the selected <guilabel>CoordinateSystem</guilabel> is time varying, the epoch of the coordinate system
+      is defined by the Epoch field, and changing the epoch changes the inertial representation of the orbital state.
+    </para>
+
+    <para>
+      A change in Epoch Format causes an immediate update to Epoch to reflect the chosen time system and format.
+    </para>
+
+    <para>
+      The Keplerian, ModifiedKeplerian, and Equinoctial state types cannot be computed if the CoordinateSystem does not have a central body at the origin, or if the <guilabel>CoordinateSystem</guilabel>
+      references the current spacecraft (resulting in a circular reference). For example, if you have selected the Keplerian state type, coordinate systems for which the Keplerian elements
+      cannot be computed do not appear in the CoordinateSystem menu.  Similarly,
+      if you have selected a CoordinateSystem that does not have a celestial body at the origin, Keplerian-based state types will not appear as options in the State Type menu.
+    </para>
+    
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Cartesian State</title>
+
+      <para>
+        The Cartesian state is composed of the position and velocity components expressed with respect to the selected CoordinateSystem.
+      </para>
+    </refsection>
+
+    <refsection>
+      <title>Keplerian and Modified Keplerian State Types</title>
+
+      <para>
+        The Keplerian and ModifiedKeplerian state types use the osculating Keplerian orbital elements with respect to the selected CoordinateSystem.
+        To use either the Keplerian or ModifiedKeplerian state type, the spacecraft’s coordinate system must have a central body at the origin.
+        The two representations differ in how the orbit size and shape are defined.  The Keplerian state type is composed of the following elements: SMA,
+        ECC, INC, RAAN, AOP and TA.  The ModifiedKeplerian state type is composed of the following elements: RadApo, RadPer, INC, RAAN, AOP and TA.
+        The tables and figures below describe each Keplerian state element in detail including singularities. 
+      </para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftOrbitState_Remark_1.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </refsection>
+
+    <refsection>
+      <title>
+        Geometry of the Keplerian Elements
+      </title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftOrbitState_Remark_2.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        The Keplerian and ModifiedKeplerian state types have several singularities.  The table below describes the different singularities and how each is handled in the state conversion algorithms.
+      </para>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Singularity</entry>
+
+              <entry>Comments and Behavior</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>ECC = 1</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  SMA is infinite and cannot be used to define the size of the orbit.  GMAT requires 
+                  ECC &lt; 0.9999999 or ECC &gt; 1.0000001 when setting ECC or when performing conversions.  For transformations performed near these limits, loss of precision may occur. 
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>ECC = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  AOP is undefined.  If ECC &lt;= 1e-11, GMAT sets AOP to zero in the conversion from Cartesian to Keplerian/ModKeplerian and includes all orbital-plane angular displacement in the true anomaly.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>SMA = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Results in a singular conic section.  GMAT requires |SMA| &gt; 1 meter when inputting SMA.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>SMA = INF</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  SMA is infinite and another parameter is required to capture the size of the orbit.  Keplerian elements are not supported.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>INC = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  RAAN is undefined.  If INC &lt; 1e-11, GMAT sets RAAN to 0 degrees in conversion from Cartesian to Keplerian/ModKeplerian. 
+                  Then, if ECC is also &lt; 1e-11, AOP is set to 0 and GMAT includes all angular displacement between the x-axis and the spacecraft
+                  in the true anomaly. If ECC > 1e-11, then AOP is computed as the angle between the eccentricity vector and the x-axis
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>INC = 180</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  RAAN is undefined.  If INC &gt; 180 - 1.0e-11, Keplerian, 
+                  Modified Keplerian, and Equinoctial elements are not supported. For transformations performed near these limits, loss of precision may occur.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>RadPer = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Singular conic section.  GMAT requires RadPer > 1 meter in state conversions.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>RadApo = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Singular conic section.  GMAT requires abs(RadApo) > 1 meter in state conversions.
+                </para>
+              </entry>
+            </row>    
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Spherical State Types</title>
+
+      <para>
+        The SphericalAZFPA and SphericalRADEC state types are composed of the polar coordinates of the spacecraft state expressed with respect to the selected CoordinateSystem.
+        The two spherical representations differ in how the velocity is defined.  The SphericalRADEC state type is composed of the following elements: RMAG, RA, DEC, VMAG, RAV, and DECV.  
+        The SphericalAZFPA state type is composed of the following elements: 
+        RMAG, RA, DEC, VMAG, AZI and FPA.  The tables and figures below describe each spherical state element in detail including singularities.
+      </para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftOrbitState_Remark_3.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </refsection>
+
+    <refsection>
+      <title>Geometry of the Spherical Elements</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftOrbitState_Remark_4.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </refsection>
+
+    <refsection>
+      <title>Singularities in the Spherical Elements</title>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Singularity</entry>
+
+              <entry>Comments and Behavior</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>RMAG = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Results in a singular conic section: declination and flight path angle are undefined.  
+                  GMAT will not allow transformations if RMAG &lt; 1e-10.  For RMAG values greater than, but near 1e-10, loss of precision may occur in transformations.  
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>VMAG = 0</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Results in a singular conic section: velocity declination and flight path angle are undefined. GMAT will not allow transformations if VMAG 
+                  &lt; 1e-10.For VMAG values greater than, but near 1e-10, loss of precision may occur in transformations.
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Equinoctial State Type</title>
+
+      <para>
+        GMAT supports the Equinoctial state representation which is non-singular for elliptic orbits with inclinations less than 180 degrees. 
+        To use either the Equinoctial state type, the spacecraft’s coordinate system must have a central body at the origin.
+      </para>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Element</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>SMA</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  See Keplerian section.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>EquinoctialH</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A measure of the orbital eccentricity and argument of periapsis. EquinoctialH and 
+                  EquinoctialK together govern how elliptical an orbit is and where the periapsis is located.
+                  EquinotialH = ECC * sin(AOP).
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>EquinoctialK</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A measure of the orbital eccentricity and argument of periapsis. EquinoctialH and EquinoctialK 
+                  together govern how eliptical an orbit is and where the periapsis is located.
+                  EquinotialK = ECC * cos(AOP)
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>EquinoctialP</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A measure of the orientation of the orbit. EquinoctialP and 
+                  EquinoctialQ together govern how an orbit is oriented.
+                  EquinotialP = tan(INC/2)*sin(RAAN).
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>EquinoctialQ</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A measure of the orientation of the orbit.  EquinoctialP and EquinoctialQ together govern how an orbit is oriented.
+                  EquinotialQ = tan(INC/2)*cos(RAAN).
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>MLONG</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A measure of the mean location of the spacecraft in its orbit.
+                  MLONG = AOP + RAAN + MA.
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Singularities in the Spherical Elements</title>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Element</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>INC = 180</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  RAAN is undefined.  If INC &gt; 180 - 1.0e-11, GMAT sets RAAN to 0 degrees. GMAT does not support Equinoctial elements for true retrograde orbits.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>ECC &gt; 0.9999999</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Equinoctial elements are not defined for parabolic or hyperbolic orbits.
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>State Component Interactions with the Spacecraft Coordinate System Field</title>
+
+      <para>
+        When you define spacecraft state elements such as SMA, X, or DEC for example, these values are set in coordinates defined by the spacecraft’s CoordinateSystem field.  
+        For example, the following lines result in the X-component of the Cartesian state of MySat to be 1000, in the EarthFixed system.
+      </para>
+
+      <programlisting>
+        <code>
+  aSpacecraft.CoordinateSystem = EarthFixed;
+  aSpacecraft.X = 1000;
+        </code>
+      </programlisting>
+
+
+      <para>
+        When the script lines above are executed in a script, GMAT converts the state to the specified coordinate system,
+        in this case EarthFixed, sets the X component to 1000, and then converts the state back to the internal inertial representation.
+      </para>
+
+      <para>
+        The following example sets SMA to 8000 in the EarthMJ2000Eq system,
+        then sets X to 6000 in the Earth fixed system.  (Note this is NOT allowed in initialization mode; see later remarks for more information).
+      </para>
+
+      <programlisting>
+        <code>
+  aSpacecraft.CoordinateSystem = EarthMJ2000Eq;
+  aSpacecraft.SMA = 8000;
+  aSpacecraft.CoordinateSystem = EarthFixed;
+  aSpacecraft.X = 6000
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>State Component Interactions with the Spacecraft Epoch Field</title>
+
+      <para>
+        When you specify the spacecraft’s epoch, you define the initial epoch of the spacecraft in the specified coordinate system.  
+        If your choice for the spacecraft's coordinate system is a time varying system such as the EarthFixed system, then you define the state in the Earth Fixed system at that epoch. 
+        For example, the following lines would result in the cartesian state of MySat to be set to [7000 0 1300 0 7.35 1] in the EarthFixed system at 01 Dec 2000 12:00:00.000 UTC.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft MySat;
+  MySat.Epoch.UTCGregorian = '01 Dec 2000 12:00:00.000';
+  MySat.CoordinateSystem = EarthFixed;
+  MySat.X = 7000;
+  MySat.Y = 0;
+  MySat.Z = 1300;
+  MySat.VX = 0;
+  MySat.VY = 7.35;
+  MySat.VZ = 1;
+        </code>
+      </programlisting>
+
+      <para>
+        The corresponding EarthMJ2000Eq representation is
+      </para>
+
+      <programlisting>
+        <code>
+  X  = -2320.30266;
+  Y  = -6604.25075;
+  Z  =  1300.02599;
+  VX =  7.41609;
+  VY = -2.60562;
+  VZ =  0.99953;
+        </code>
+      </programlisting>
+
+      <para>
+        You can change the epoch of a spacecraft in the mission sequence using a script line like this:
+      </para>
+
+      <programlisting>
+        <code>
+  MySat.Epoch.TAIGregorian = '02 Dec 2000 12:00:00.000';
+        </code>
+      </programlisting>
+
+      <para>
+        When the above line is executed in the mission sequence, GMAT converts the state to the specified coordinate system and then to the specified state type — 
+        in this case EarthFixed and Cartesian respectively — sets the epoch to the value of 02 Dec 2000 12:00:00.000, and then converts the state back to the internal representation.
+        This behavior is identical to that of the spacecraft orbit dialog box in the GUI.  Because the coordinate system in this case is time varying, changing the spacecraft epoch has
+        resulted in a change in the spacecraft's inertial state representation.   
+        After the epoch is changed to 02 Dec 2000 12:00:00.000, the EarthMJ2000Eq state representation is now:
+      </para>
+
+      <programlisting>
+        <code>
+  X  = -2206.35771;
+  Y  = -6643.18687;
+  Z  =  1300.02073;
+  VX =  7.45981;
+  VY = -2.47767;
+  VZ =  0.99953;
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Scripting Limitations during Initialization</title>
+
+      <para>
+        When setting the spacecraft orbit state in a script, there are a few limitations to be aware of. In the initialization portion of the script 
+        (before the BeginMissionSequence command), you should set the epoch and coordinate system only once;
+        multiple definitions of these parameters will result in either errors or warning messages and may lead to unexpected results.
+      </para>
+
+      <para>
+        Also when setting a state during initialization, you must set the orbit state in a set of fields corresponding to a single state type. For example, 
+        set the orbit state using the X, Y, Z, VX, VY, VZ fields (for the Cartesian state type) or the SMA, ECC, INC, RAAN, AOP, TA fields (for the Keplerian state type), but not a mixture of the two.   
+        If you need to mix state types, coordinate systems,
+        or epochs to define the state of a spacecraft, you must set the state using scripting in the mission sequence (after the BeginMissionSequence command).
+      </para>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>
+        Define a spacecraft’s Earth MJ2000Eq coordinates in the Keplerian representation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.CoordinateSystem = EarthMJ2000Eq;
+  aSpacecraft.SMA  = 7100;
+  aSpacecraft.ECC  = 0.01;
+  aSpacecraft.INC  = 30;
+  aSpacecraft.RAAN = 45;
+  aSpacecraft.AOP  = 90;
+  aSpacecraft.TA   = 270;
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Define a spacecraft’s Earth Fixed coordinates in the Cartesian representation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.CoordinateSystem = EarthFixed;
+  aSpacecraft.X = 7100;
+  aSpacecraft.Y = 0;
+  aSpacecraft.Z = 1300;
+  aSpacecraft.VX = 0;
+  aSpacecraft.VY = 7.35;
+  aSpacecraft.VZ = 1;
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Define a spacecraft’s Moon centered coordinates in ModifiedKeplerian representation.
+      </para>
+
+      <programlisting>
+        <code>
+  Create CoordinateSystem MoonInertial;
+  GMAT MoonInertial.Origin = Luna;
+  GMAT MoonInertial.Axes = BodyInertial;
+
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.CoordinateSystem = MoonInertial;
+  GMAT aSpacecraft.RadPer = 2100;
+  GMAT aSpacecraft.RadApo = 2200;
+  GMAT aSpacecraft.INC = 90;
+  GMAT aSpacecraft.RAAN = 45;
+  GMAT aSpacecraft.AOP = 45;
+  GMAT aSpacecraft.TA = 180;
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Define a spacecraft’s Rotating Libration Point coordinates in the SphericalAZFPA representation:
+      </para>
+
+      <programlisting>
+        <code>
+  Create LibrationPoint ESL1;
+  GMAT ESL1.Primary = Sun;
+  GMAT ESL1.Secondary = Earth;
+  GMAT ESL1.Point = L1;
+
+  Create CoordinateSystem EarthSunL1CS;
+  GMAT EarthSunL1CS.Origin = ESL1;
+  GMAT EarthSunL1CS.Axes = ObjectReferenced;
+  GMAT EarthSunL1CS.XAxis = R;
+  GMAT EarthSunL1CS.ZAxis = N;
+  GMAT EarthSunL1CS.Primary = Sun;
+  GMAT EarthSunL1CS.Secondary = Earth;
+
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.CoordinateSystem = EarthSunL1CS;
+  aSpacecraft.DateFormat = UTCGregorian;
+  aSpacecraft.Epoch = '09 Dec 2005 13:00:00.000';
+  aSpacecraft.RMAG = 1520834.130720907;
+  aSpacecraft.RA = -111.7450242065574;
+  aSpacecraft.DEC = -20.23326432189756;
+  aSpacecraft.VMAG = 0.2519453702907011;
+  aSpacecraft.AZI = 85.22478175803107;
+  aSpacecraft.FPA = 97.97050698644287;
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Set a spacecraft’s Earth MJ2000 ecliptic coordinates in the Equinoctial representation in:
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  GMAT aSpacecraft.CoordinateSystem = EarthMJ2000Ec;
+  GMAT aSpacecraft.SMA = 9100;
+  GMAT aSpacecraft.EquinoctialH = 0.00905;
+  GMAT aSpacecraft.EquinoctialK = 0.00424;
+  GMAT aSpacecraft.EquinoctialP = -0.1059;
+  GMAT aSpacecraft.EquinoctialQ = 0.14949;
+  GMAT aSpacecraft.MLONG = 247.4528;
+        </code>
+      </programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

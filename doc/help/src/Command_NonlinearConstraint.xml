@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="NonlinearConstraint"
+<refentry version="5.0"
+          xml:id="NonlinearConstraint"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -22,153 +23,492 @@
   </refmeta>
 
   <refnamediv>
-    <refname>NonLinearConstraint</refname>
+    <refname>NonlinearConstraint</refname>
 
-    <refpurpose>Apply nonlinear constraint</refpurpose>
+    <refpurpose>
+      Specifies a constraint used during optimization
+    </refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis/>
+    <title>Script Syntax</title>
+
+    <synopsis>
+      <literal>NonLinearConstraint</literal> <replaceable>OptimizerName</replaceable> ({logical expression})
+    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The nonlinear constraints in GMAT allows spacecraft properties,
-    variable or array to apply constraint values, and also NonLinearConstraint
-    can be created in optimize sequences. By using the fmincon optimizer,
-    users can give various nonlinear constraints.</para>
+    <para>
+      The <guilabel>NonlinearConstraint</guilabel> command is used within an <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> 
+      optimization sequence to apply a linear or nonlinear constraint.
+    </para>
 
-    <refsection>
-      <title>Possible Coupling with Other Objects</title>
-
-      <itemizedlist>
-        <listitem>
-          <para>Optimize Command</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>NonLinearConstraints are used in Optimize Command.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Optimizers (Solvers)</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Must set optimizer in order to apply
-              NonLinearConstraints.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </refsection>
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="Vary"/>, 
+      <xref linkend="Optimize"/>,
+      <xref linkend="Minimize"/>
+    </para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>OptimizeName</term>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
 
+        <colspec colnum="2"
+                 colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Option</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>OptimizerName</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The SolverName field specifies the solver/optimizer object used to apply a constraint. 
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      Optimizer
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any vf13ad or fmincon optmizer object.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DefaultSQP
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>LHS</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The SolverName option allows the user to select any single element user defined parameter, except a number, to define the constraint variable.  
+                The constraint function is of the form 'LHS Operator RHS'
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      String
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Spacecraft parameter, Array element, Variable, or any other single element user defined parameter, excluding numbers
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DefaultSC.SMA
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Operator</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                logical operator used to specify the constraint function.  The constraint function is of the form 'LHS Operator RHS'
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      Predefined string
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      &gt;=,  &lt;=, =
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      =
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>RHS</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The RHS option allows the user to select any single element user defined parameter, including a number, to specify the desired value of the constraint variable.  
+                The constraint function is of the form 'LHS Operator RHS'
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      DataType
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Spacecraft parameter, Array element, Variable, or any other single element user defined parameter, including numbers
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      7000
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      You use a NonlinearConstraint command, within an Optimize/EndOptimize 
+      sequence as shown below, to define an equality or inequality constraint that you want to be 
+      satisfied at the end of the optimization process.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_NonLinearConstraint_GUI_1.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      Double click on NonlinearConstraint1 to bring up the NonlinearConstraint command dialog box, shown below.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_NonLinearConstraint_GUI_2.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      You must provide four inputs for the NonlinearConstraint command dialog box above:
+      
+      <itemizedlist>
         <listitem>
-          <para>The OptimizerName option allows the user to specify which
-          solver to use in satisfying nonlinear constraints.</para>
-
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>SQP1</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Any existing fmincon solver</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
+          <para>
+            Choice of optimizer.
+          </para>
         </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>{logical expression}</term>
-
         <listitem>
-          <para>The logical expression field allows the user to specify the
-          constraint to be satisfied upon convergence of the solver given by
-          OptimizerName. Arg1 and Arg2 can be any of the following: Real
-          Number, a 1-D Array (column vector),Array element, Variable,
-          Spacecraft Parameter or any other numeric user defined parameter. If
-          Arg1 is a 1-D Array, then Arg2 must be a 1-D Array with the same
-          dimensions and vice-versa.</para>
-
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>DefaultSC.SMA = 7000</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Arg1 &lt;= Arg2 where &lt;= can be &gt;= ; &lt;= ;
-                =</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
+          <para>
+            Constraint Object.  Click the Edit button to the right of this field to select the type of 
+            constraint object from three possible choices, Spacecraft, Variable, or Array.
+          </para>
         </listitem>
-      </varlistentry>
-    </variablelist>
+        <listitem>
+          <para>
+            Logical operator.  Select one from three choices, =, &lt;=, or &gt;=.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Constraint value.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+    <para>
+      Note that Inputs 2-4 define a logical expression.  In the example above, we have: "DefaultSC.SMA = 7000"
+
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>
+        Number of Vary, NonlinearConstraint, and Minimize commands within an Optimization Sequence
+      </title>
+
+      <para>
+        An Optimization sequence must contain one or more Vary commands. Vary commands must occur before any Minimize or NonlinearConstraint commands.
+      </para>
+
+      <para>
+        Multiple NonlinearConstraint commands are allowed.  There is exactly one NonlinearConstraint command for every constraint.
+      </para>
+
+      <para>
+        It is possible for an Optimize/EndOptimize optimization sequence to contain no NonlinearConstraint commands.   
+        In this case, since every optimization sequence must contain (a) one or more NonlinearConstraint commands and/or (b) a single Minimize command, 
+        the optimization sequence must contain a single Minimize command.
+      </para>
+    </refsection>
+
+    <refsection>
+      <title>
+        Command Interactions
+      </title>
+
+      <para>
+        The Minimize command is only used within an Optimize/EndOptimize Optimization sequence. See the 
+        Optimize command documentation for a complete worked example using the NonlinearConstraint command.
+      </para>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>Optimize command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  NonlinearConstraint commands can only occur within an Optimize/EndOptimize command sequence.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>Vary command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Every Optimization sequence must contain at least one Vary command. Vary commands are used to define the control variables associated with an Optimization sequence.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>Minimize command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A Minimize command is used within an Optimization sequence to define the Objective function that will be minimized. 
+                  Note that an optimization sequence is allowed to contain, at most, one Minimize command.  
+                  (An Optimization sequence is not required to contain  a Minimize command)     
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <refsection>
-      <title>Script Syntax</title>
+    <informalexample>
+      <programlisting>
+        <code>
+  % Constrain SMA of Sat to be 7000 km, using SQP1
+  NonLinearConstraint SQP1( Sat.SMA = 7000 );
 
-      <programlisting><code>NonLinearConstraint OptimizerName ({logical expression})</code></programlisting>
-    </refsection>
+  % Constrain SMA of Sat to be less than or equal to 7000 km,
+  % using SQP1
+  NonLinearConstraint SQP1( Sat.SMA &lt;= 7000 );
 
-    <refsection>
-      <title>Script Examples</title>
-
-      <programlisting><code>% Constrain the SMA of Sat to be 7000 km, using fminconSQP
-NonLinearConstraint fminconSQP( Sat.SMA = 7000 );
-
-% Constrain the SMA of Sat to be less than or equal to 7000 km, using fminconSQP
-NonLinearConstraint fminconSQP( Sat.SMA &lt;= 7000 );
-
-% Constrain the SMA of Sat to be greater than or equal to 7000 km, using fminconSQP
-NonLinearConstraint fminconSQP( Sat.SMA &gt;= 7000a );</code></programlisting>
-    </refsection>
+  % Constrain the SMA of Sat to be greater than or equal to 7000 km,
+  % using VF13ad1
+  NonLinearConstraint VF13ad1( Sat.SMA &gt;= 7000 );
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

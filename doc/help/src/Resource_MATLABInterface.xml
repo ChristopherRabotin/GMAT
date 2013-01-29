@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0"
+          xml:id="MATLABInterface"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>MATLABInterface</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>MATLABInterface</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2012a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>MATLABInterface</refname>
+
+    <refpurpose>
+      Interface to MATLAB system
+    </refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>
+      The MATLAB interface provides a link to the Mathworks MATLAB environment, allowing GMAT to run MATLAB functions as if they were native functions in the GMAT script language.
+    </para>
+
+    <para>
+      The interface cannot be controlled directly through the script language, though it can be in the GMAT GUI. Instead, GMAT starts the interface automatically when it calls a MATLAB function.
+    </para>
+
+    <para>
+      For details on declaring a MATLAB function, see the <guilabel>MatlabFunction</guilabel> reference. For details on calling a function and passing data, see the <guilabel>MATLAB Function Call</guilabel> reference.
+    </para>
+
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: <xref
+        linkend="MatlabFunction"/>, <xref linkend="CallMatlabFunction"/>
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_MATLABInterface_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      The MATLAB interface provides an icon in the Interfaces folder in the Resources tree that can be used to control the interface. 
+      Right-clicking the icon shows two options: <guilabel>Open</guilabel> and <guilabel>Close</guilabel>.
+    </para>
+
+    <para>
+      The <guilabel>Open</guilabel> menu item causes GMAT to open a connection to the MATLAB Engine, which in turns displays a MATLAB command window in the background. 
+      This connection is then used for all communication between GMAT and MATLAB until the connection is closed. Only one connection can be open at a time.
+    </para>
+
+    <para>
+      The <guilabel>Close</guilabel> menu item causes GMAT to close any open connection to the MATLAB Engine. If no connection is open, it has no effect.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Interface Setup</title>
+
+      <para>
+        The following conditions must be true for GMAT to successfully initiate communication with MATLAB. All conditions must be true for the same instance of MATLAB.
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>
+            A compatible, licensed version of MATLAB must be installed on the 
+            same machine on which GMAT is running. GMAT officially supports the current version of MATLAB at the time of release, though versions R2006b and newer have been known to work.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The architecture (32-bit or 64-bit) of GMAT and the installed version of MATLAB must match.
+            For example, the 32-bit version of GMAT is compatible only with the 32-bit version of MATLAB.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            On Windows:
+            
+            <itemizedlist>
+              <listitem>
+                <para>
+                  The following path (where &lt;MATLAB&gt; is the path to the installed version of MATLAB) must
+                  be present in the Path environment variable. For some older versions of MATLAB, this path must be present before the default Windows paths.
+                  
+                  <itemizedlist>
+                    <listitem>
+                      <para>
+                        &lt;MATLAB&gt;\bin\win32 (or win64 for use with 64-bit versions of GMAT)
+                      </para>
+                    </listitem>
+                  </itemizedlist>
+                </para>
+              </listitem>
+
+              <listitem>
+                <para>
+                  MATLAB must be registered as a COM server. This is done automatically by the MATLAB installer. To do it manually, open an elevated command window and run the command:
+                  matlab -regserver
+                  Make sure the proper instance of MATLAB is being run by this command.
+                </para>
+              </listitem>
+            </itemizedlist>
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            On Mac OS X:
+            
+            <itemizedlist>
+              <listitem>
+                <para>
+                  The MATLABFORGMAT environment variable must exist and contain the full path to the MATLAB application bundle (e.g. /Applications/MATLAB_R2012b/MATLAB_R2012b.app).
+                </para>
+              </listitem>
+            </itemizedlist>
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            On Linux:
+          </para>
+        </listitem>
+      </itemizedlist>
+    </refsection>
+    
+  </refsection>
+
+  <refsection>
+    <title>MATLAB Engine Connection</title>
+
+    <warning>
+      <para>
+        Caution: GMAT does not close the MATLAB Command Window it creates after a run has completed. 
+        This allows manual inspection of the MATLAB workspace, but it can lead to confusing behavior if MATLAB functions or paths are changed and rerun in the same window.
+      </para>
+
+      <para>
+        We recommend closing the MATLAB Command Window by right-clicking Matlab in the Resources tree and clicking Close between each run if you are actively editing the script.
+      </para>
+    </warning>
+
+    <para>
+      When GMAT runs a mission that contains a MATLAB function call,
+      it opens a connection to the MATLAB engine before it makes the function call. It then reuses this connection for the rest of the GMAT session.
+    </para>
+
+    <para>
+      The MATLAB Engine can be controlled manually through the <guilabel>Open</guilabel> and <guilabel>Close</guilabel> 
+      options available by right-clicking the <guilabel>Matlab</guilabel> item in the Resources tree.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <para>
+      (Same examples as MatlabFunction)
+    </para>
+  </refsection>
+</refentry>

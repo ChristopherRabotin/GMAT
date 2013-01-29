@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Optimize"
+<refentry version="5.0"
+          xml:id="Optimize"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -24,152 +25,594 @@
   <refnamediv>
     <refname>Optimize</refname>
 
-    <refpurpose>Perform an optimize command</refpurpose>
+    <refpurpose>
+      Solve for condition(s) by varying one or more parameters
+    </refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis></synopsis>
+    <title>Script Syntax</title>
+
+    <synopsis>
+      <literal>Optimize</literal> SolverName [{[<literal>SolveMode</literal> = <replaceable>value</replaceable>], [<literal>ExitMode</literal> = <replaceable>value</replaceable>]}]
+      <replaceable>Vary command</replaceable> …
+      <replaceable>script statement</replaceable> …
+      <replaceable>NonlinearConstraint command</replaceable> …
+      <replaceable>Minimize command</replaceable> …
+  <literal>EndOptimize</literal>
+    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The optimize command in GMAT allows variables to optimize by using a
-    solver fmincon object.</para>
+    <para>
+      The Optimize command in GMAT allows you to solve optimization problems by using a solver object.  Currently, you can choose from one of two available solvers,
+      the fmincon solver object available to all GMAT users with access to the Matlab optimization toolbox and the VF13AD solver object plug-in that you must install yourself.
+    </para>
 
-    <refsection>
-      <title>Possible Coupling with Other Objects</title>
 
-      <itemizedlist>
-        <listitem>
-          <para>fmincon Object</para>
+    <para>
+      You use the <guilabel>Optimize</guilabel> and <guilabel>EndOptimize</guilabel> commands to define an “Optimization Sequence” to determine, for example, 
+      the maneuver components required to raise orbit apogee to 42164 km while simultaneously minimizing the DeltaV required to do so. 
+      Optimization sequences in GMAT are general and this is just an example.  Let’s define the quantities that you don’t know precisely but 
+      need to determine as the Control Variables. We define the conditions that must be satisfied as the Constraints and we define the quantity to 
+      be minimized (e.g., DeltaV) as the Objective function.   An optimization sequence numerically solves a boundary value problem to determine the 
+      value of the Control Variables required to satisfy the Constraints while simultaneously minimizing the Objective function.  As was the case for the 
+      <guilabel>Target</guilabel>/<guilabel>EndTarget</guilabel> command sequence, you define your control variables by using Vary commands.  You define the constraints that must be satisfied by using 
+      the <guilabel>NonlinearConstraint</guilabel> command and you define the objective function to be minimized by using the <guilabel>Minimize</guilabel> command.  The <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> sequence is an 
+      advanced command. The examples later in this section give a more detailed explanation.
+    </para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Must set in order to use Optimize Command.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Minimize</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Must be defined if you would like to minimize variable in
-              an optimize sequence.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Vary</para>
-        </listitem>
-
-        <listitem>
-          <para>NonLinearConstraint</para>
-        </listitem>
-      </itemizedlist>
-    </refsection>
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="Vary"/>, 
+      <xref linkend="NonlinearConstraint"/>,
+      <xref linkend="Minimize"/>
+    </para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>SolverName</term>
+    <informaltable colsep="0"
+                   frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1"
+                 colwidth=".5*"/>
 
-        <listitem>
-          <para>The SolverName field allows the user to choose between any
-          previously created optimizer for use in an optimization sequence.
-          For example, to begin a optimization sequence using DefaultSQP, the
-          script is Optimize DefaultSQP.</para>
+        <colspec colnum="2"
+                 colwidth="3*"/>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+        <thead>
+          <row>
+            <entry>Option</entry>
 
-              <listitem>
-                <para>DefaultSQP</para>
-              </listitem>
-            </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-            <varlistentry>
-              <term>Limits</term>
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>SolverName</guilabel>
+            </entry>
 
-              <listitem>
-                <para>Any existing optimizer</para>
-              </listitem>
-            </varlistentry>
+            <entry>
+              <para>
+                The SolverName field specifies the solver/optimizer object used in the optimization sequence
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      Optimizer
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-      <varlistentry>
-        <term>&lt;Statements&gt;</term>
+                  <listitem>
+                    <para>
+                      Any vf13ad or fmincon optmizer object.
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-        <listitem>
-          <para></para>
+                <varlistentry>
+                  <term>Default Value</term>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+                  <listitem>
+                    <para>
+                      DefaultSQP
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Required</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Any non-targeter and non-optimizer command lines used in
-                the mission sequence, as well as the optimizer dependent
-                command lines Vary, NonLinearConstraint, and Minimize.</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Interfaces</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+          <row>
+            <entry>
+              <guilabel>SolveMode</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The SolveMode parameter allows you to specify how the Optimization loop behaves during mission execution. When SolveMode is set to Solve,
+                the optimization loop executes and attempts to solve the optimization problem.  When SolveMode is set to RunInitialGuess, the Optimizer does not attempt to solve the
+                optimization problem and the commands in the Optimization sequence execute using the initial guess values defined in the Vary commands.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      PredefinedString
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Solve, RunInitialGuess
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DefaultValue
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      no
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>ExitMode</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The ExitMode parameter allows you to control the initial guess values for Optimization sequences nested in control flow. 
+                If ExitMode is set to SaveAndContinue, the solution of an Optimization sequence is saved and used as the initial guess for 
+                the next time this optimization sequence is run. The rest of the mission sequence is then executed. If ExitMode is set to DiscardAndContinue, 
+                then the solution is discarded and the initial guess values specified in the Vary commands are used for each Optimization sequence execution. 
+                The rest of the mission sequence is then executed. If ExitMode is set to Stop, the Optimization sequence is executed, 
+                the solution is discarded, and the rest of the mission sequence is not executed.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      PredefinedString
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      DiscardAndContinue,SaveAndContinue, Stop
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      DiscardAndContinue
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      no
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+
+          <row>
+            <entry>
+              <guilabel>ApplyCorrections</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                The ApplyCorrections button replaces the initial guess values specified in the Vary commands with those computed by the optimizer during a run.
+                If the Optimize sequence converged, the converged values are applied.  If the Optimize sequence did not converge, the last calculated values are applied. 
+                There is one situation where the action specified above, where the initial guess values specified in the Vary commands are replaced, does not occur.  
+                This happens when the initial guess value specified in the Vary command is given by a variable.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      N/A
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      no
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>EndOptimize</guilabel>
+            </entry>
+
+            <entry>
+              <para>
+                An EndOptimize command is required to close the Optimize command.
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                     
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                    
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                    
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>
+                      yes
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>
+                      GUI, script
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>
+      The Optimize command allows you to use an optimization process to solve problems. To solve a given problem, you need to create a so-called <guilabel>Optimize</guilabel> command sequence which we now define. 
+      When you add an <guilabel>Optimize</guilabel> command to the mission sequence, an <guilabel>EndOptimize</guilabel> command is automatically added as shown below.
+    </para>
+    
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_Optimize_GUI_1.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>
+      In the example above, the Optimize command sequence is defined as all of the commands between the Optimize1 and EndOptimize1 commands, inclusive. Although not shown above, 
+      an Optimize command sequence must contain a Vary command which is used to define the control variables that can be varied in order to help solve our problem.  
+      An Optimize command must also contain a Minimize command and/or one or more NonlinearConstraint commands.  You use a Minimize command to define a cost function that 
+      you wish to minimize and you use the NonlinearConstrain command to define either an equality or 
+      inequality constraint that you want to be satisfied at the end of the optimization process.
+    </para>
+
+    <para>
+      Double click on the Optimize1 command above to open the Optimize command dialog box, shown below, which allows you to specify your choice of Solver (i.e., your choice of optimizer), 
+      Solver Mode, and Exit Mode. As described in the
+      Remarks section, the Optimize command dialog box also allows you to apply corrections to your Optimize command sequence.
+    </para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Command_Optimize_GUI_2.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Content of an Optimize/EndOptimize sequence</title>
+    
+      <para>
+        An Optimize/EndOptimize sequence must contain at least one Vary command and at least one of the following commands: NonlinearConstraint and Minimize.
+        See the Vary, NonlinearConstraint, and Minimize command sections for details on the syntax for those commands. The First Vary command must occur before the first
+        NonlinearConstraint or Minimize command.  Each Optimize command field in the curly braces is optional.
+        You can omit the entire list and the curly braces and the default values will be used for Optimize configuration fields such as SolveMode and ExitMode.
+      </para>
+    </refsection>
+
+    <refsection>
+      <title>Relation to Target/EndTarget Command Sequence</title>
+
+      <para>
+        There are some functional similarities between the Target/EndTarget and Optimize/EndOptimize command sequences.  In both cases, we define Control Variables and Constraints. 
+        For both Target and Optimization sequences, we use the Vary command to define the Control Variables.  For the Target sequence, we use the Achieve command to define the constraints whereas,
+        for an Optimization sequence, we use the NonlinearConstraint command.  The big difference between the Target and 
+        Optimization sequences is that the Optimization sequence allows for the minimization of an Objective function through the use of the Minimize command.
+      </para>
+    </refsection>
+
+    <refsection>
+      <title>Command Interactions</title>
+
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth=".5*"/>
+
+          <colspec colnum="2"
+                   colwidth="3*"/>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>Vary command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  Every Optimization sequence must contain at least one Vary command.  Vary commands are used to define the control variables associated with an Optimization sequence.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>NonlinearConstraint command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  NonlinearConstraint commands are used to define the constraints associated with an Optimization sequence.  
+                  Note that multiple NonlinearConstraint commands are allowed within an Optimization sequence.
+                </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>Minimize command</guilabel>
+              </entry>
+
+              <entry>
+                <para>
+                  A Minimize command is used within an Optimization sequence to define the Objective function that will be minimized.  
+                  Note that an optimization sequence is allowed to contain, at most, one Minimize command.  (An Optimization sequence is not required to contain  a Minimize command)
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <refsection>
-      <title>Script Syntax</title>
+    <informalexample>
+      <para>
+        Use an Optimize sequence with the fmincon solver object to find the point, (x, y), on the unit circle with the smallest y value.  
+        Note that the use of the fmincon solver assumes you have access to the Matlab optimization toolbox.
+      </para>
 
-      <programlisting><code>Optimize SolverName;
-   &lt;Statements&gt;;
-EndOptimize;</code></programlisting>
-    </refsection>
+      <programlisting>
+        <code>
+  Create FminconOptimizer SQP1;
+  SQP1.MaximumIterations = 50;
+  Create Variable x y Circle
+  BeginMissionSequence;
+  Optimize SQP1;
+    Vary SQP1(x = 1);
+    Vary SQP1(y = 1);
+    Circle = x*x + y*y
+    NonlinearConstraint SQP1(Circle = 1);
+    Minimize SQP1(y);
+  EndOptimize;
+        </code>
+      </programlisting>
+    </informalexample>
 
-    <refsection>
-      <title>Script Examples</title>
+    <informalexample>
+      <para>
+        Similar to the example given in the Target command Help, use an Optimize sequence to raise orbit apogee. In the Target command example, we had one control variable,
+        the velocity component of an ImpulsiveBurn object, and the single constraint that the position vector magnitude at orbit apogee equals 42164.  For this example, we keep this
+        control variable and constraint but we now add a second control variable, the true anomaly of where the burn occurs.   In addition, we ask the optimizer to minimize the Delta-V cost of the burn. 
+        As expected, the best (DV minimizing) orbit location to perform an apogee raising burn is near perigee (i.e., nearTA = 0).    In this example, since the force model in use in not perfectly two body
+        Keplerian, the optimal TA value obtained is close to but not exactly 0. 
+        Note that the use of the VF13AD solver object in this example assumes that you have installed this optional plug-in.
+      </para>
 
-      <programlisting><code>% Beginning and ending syntax for the Optimize command
-Optimize DefaultDC;
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
 
-EndOptimize;</code></programlisting>
-    </refsection>
+  Create Propagator aPropagator;
+  Create ImpulsiveBurn aBurn;
+  Create VF13ad VF13ad1;
+  VF13ad1.Tolerance = 1e-008;
+  Create OrbitView EarthView
+  EarthView.Add = {Earth, aSat}
+  EarthView.ViewScaleFactor = 5
+  Create Variable ApogeeRadius DVCost;
+  BeginMissionSequence;
+  Optimize VF13ad1
+    Vary VF13ad1(aSat.TA = 100, {MaxStep = 10});
+    Vary VF13ad1(aBurn.Element1 = 1, {MaxStep = 1});
+    Maneuver aBurn(aSat);
+    Propagate aPropagator(aSat) {aSat.Apoapsis};
+    GMAT ApogeeRadius = aSat.RMAG;
+    NonlinearConstraint VF13ad1(ApogeeRadius=42164);
+    GMAT DVCost = aBurn.Element1;
+    Minimize VF13ad1(DVCost);
+  EndOptimize;
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>

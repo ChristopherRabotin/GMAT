@@ -91,12 +91,15 @@
             <xi:include href="Resource_ImpulsiveBurn.xml" />
             <xi:include href="Resource_LibrationPoint.xml" />
             <xi:include href="Resource_MatlabFunction.xml" />
+            <xi:include href="Resource_MATLABInterface.xml"/>
 			      <xi:include href="Resource_NumericalIntegrators.xml" />
             <xi:include href="Resource_OrbitView.xml" />
+            <xi:include href="Resource_Output.xml"/>
             <xi:include href="Resource_Propagator.xml" />
             <xi:include href="Resource_ReportFile.xml" />
             <xi:include href="Resource_SolarSystem.xml" />
             <xi:include href="Resource_Spacecraft.xml" />
+            <xi:include href="Resource_SpacecraftHardware.xml" />
             <xi:include href="Resource_SpacecraftProperties.xml" />
 			      <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
             <xi:include href="Resource_SQP(fmincon).xml" />
@@ -105,12 +108,17 @@
             <xi:include href="Resource_Variable.xml" />
             <xi:include href="Resource_VF13adOptimizer.xml" />
             <xi:include href="Resource_XYPlot.xml" />
-            <!-- 
-        <xi:include href="Resource_SpacecraftOverview.xml"/>
-        <xi:include href="Resource_SpacecraftOrbit.xml"/>
+
+          <xi:include href="ToolbarFeatureSpec.xml" />
+
+        <!--<xi:include href="Resource_SpacecraftOverview.xml"/>-->
+        <xi:include href="Resource_SpacecraftOrbitState.xml"/>
+        <xi:include href="Resource_SpacecraftOrbitEpoch.xml" />
         <xi:include href="Resource_SpacecraftAttitude.xml"/>
+          <!-- 
         <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
-        -->
+                -->
+
       </reference>
 
       <reference xml:id="Commands">
