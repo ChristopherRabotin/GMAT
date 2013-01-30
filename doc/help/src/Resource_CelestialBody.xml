@@ -34,7 +34,8 @@
     <title>Description</title>
 
     <para>
-      Model for orbital motion, physical properties, and orientation.
+      The CelestialBody resource is a model of a celestial body containing settings for the physical properties, as well as the models for the orbital motion and orientation.  GMAT contains built-in models for the Sun, the 8 planets, Earth's moon, and Pluto.  
+      You can create a custom CelestialBody resource to model a planet, asteroid, comet, or moon.
     </para>
 
     <para>
@@ -1285,6 +1286,32 @@
   <refsection>
     <title>GUI</title>
 
+    <para>
+      The <guilabel>CelestialBody</guilabel> GUI has three tabs that allow you to set the physical properties, orbital properties, and the orientation model. 
+      <guilabel>CelestialBody</guilabel> resources can be used in <guilabel>ForceModels</guilabel>, <guilabel>CoordinateSystems</guilabel>,
+      <guilabel>LibrationPoints</guilabel>, and <guilabel>Barycenters</guilabel>, among others. 
+      For a built-in <guilabel>CelestialBody</guilabel>, the Orbit and Orientation tabs are largely inactive and the behavior is discussed below.  
+      To create a custom Asteroid - as an example of how to create a custom <guilabel>CelestialBody</guilabel> - perform the following steps.
+    </para>
+
+    <orderedlist>
+      <listitem>
+        <para>
+          In the Resource Tree, expand the SolarSystem folder.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Right-click Sun and select Add -> Asteroid.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          In the New Asteroid dialog box, type the desired name.
+        </para>
+      </listitem>
+    </orderedlist>
+
     <screenshot>
       <mediaobject>
         <imageobject>
@@ -1298,7 +1325,8 @@
     </screenshot>
 
     <para>
-      Figure 1 CelestialBody Properties Tab
+      The <guilabel>CelestialBody</guilabel> Properties tab is shown below.  GMAT models all bodies as spherical ellipsoids and you can set the <guilabel>Equatorial Radius</guilabel>, 
+      <guilabel>Flattening</guilabel>, and <guilabel>Mu</guilabel> (gravitational parameter) on this dialog box, as well as the texture map used in <guilabel>OrbitView</guilabel> graphics displays.
     </para>
 
     <screenshot>
@@ -1314,7 +1342,10 @@
     </screenshot>
 
     <para>
-      Figure 2 Unique Earth Fields
+      The <guilabel>CelestialBody</guilabel> Orbit tab is shown below for creating a custom <guilabel>CelestialBody</guilabel>.  Settings on this panel are inactive for built-in celestial bodies 
+      and the ephemeris for built-in bodies is configured on the <guilabel>Solar System</guilabel> dialog.  The CentralBody field is populated automatically when the object is created and is always inactive. 
+      To configure SPICE ephemerides
+      for a custom body, provide a list of SPK files and the NAIF ID.  See the Remarks section below for more information on configuring SPICE files.
     </para>
 
     <screenshot>
@@ -1330,7 +1361,9 @@
     </screenshot>
 
     <para>
-      Figure 3 CelestialBody Orbit tab
+      The <guilabel>CelestialBody</guilabel> Orientation tab is shown below.  Most settings on this panel are inactive for built-in celestial bodies and exceptions for the Earth and Earth's
+      moon are described further below.  To define the orientation for a celestial body you provide a reference epoch,
+      the initial orientation at the reference epoch, and angular rates.  See the Remarks section for a more detailed description of the orientation model.
     </para>
 
     <screenshot>
@@ -1346,7 +1379,8 @@
     </screenshot>
 
     <para>
-      Figure 4 CelestialBody Orientation Tab
+      he Earth and Earth's moon have unique fields to configure their orientation models.  
+      The Earth has an extra field called Nutation Update Interval that can be used when lower fidelity, higher performance simulations are required.
     </para>
 
     <screenshot>
@@ -1360,113 +1394,131 @@
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para>
-      Figure 5 Luna Orientation Tab
-    </para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>Overview of Celestial Body Orientation Model</title>
+      <title>Celestial Body Orientation Model</title>
+
+      <para>
+        The orientation of built-in celestial bodies is modeled using high fidelity theories on a per-body basis.  The orientation of Earth is modeled using IAU-1976/FK5.  Th orientation of the Moon is modeled using lunar librations from the DE405 file.
+        The remaining built-in celestial body orientations are modeled using data published by the IAU/IAG and documented by Seidelmann1.
+      </para>
+
+      <para>
+        The orientation of a custom <guilabel>CelestialBody</guilabel> is modeled by providing three angles and their rates based on IAU/IAG conventions.  The figure below illustrates the angles. 
+        The angles αo, δo, and W, are respectively the <guilabel>SpinAxisRAConstant</guilabel>, <guilabel>SpinAxisDECConstant</guilabel>, and <guilabel>RotationConstant</guilabel>. 
+        The angular rates are respectively SpinAxisRARate, SpinAxisDECRate, and RotationRate. 
+        All angles are referenced to the X-Y plane of the ICRF axis system. 
+        The constant values <guilabel>SpinAxisRAConstant</guilabel>, <guilabel>SpinAxisDECConstant</guilabel>, and <guilabel>RotationConstant</guilabel> are defined to be the values at the epoch defined in <guilabel>OrientationEpoch</guilabel>.
+      </para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_CelestialBody_GUI_6.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        Below is an example illustrating how to configure a <guilabel>CelestialBody</guilabel> according to the IAU 2006 recommended values for Vesta. Note the orientation epoch typically 
+        used by the IAU is 01 Jan 2000 12:00:00.00.000 TDB and this must be converted to A1ModJulian which can easily be performed using the Spacecraft Orbit dialog box.
+      </para>
 
       <programlisting>
         <code>
-  GMAT asdf.OrientationEpoch = 21545;
-  GMAT asdf.SpinAxisRAConstant = 0;
-  GMAT asdf.SpinAxisRARate = -0.641;
-  GMAT asdf.SpinAxisDECConstant = 90;
-  GMAT asdf.SpinAxisDECRate = -0.5570000000000001;
-  GMAT asdf.RotationConstant = 190.147;
-  GMAT asdf.RotationRate = 360.9856235;
+  Create Asteroid Vesta
+  Vesta.CentralBody         = Sun;
+  Vesta.OrientationEpoch    = 21544.99962789878;  %  Note that currently the only available format for OrientationEpoch is A1ModJulian
+  Vesta.SpinAxisRAConstant  = 301.9;
+  Vesta.SpinAxisRARate      = 0.9;
+  Vesta.SpinAxisDECConstant = 90.9;
+  Vesta.SpinAxisDECRate     = 0.0;
+  Vesta.RotationConstant    = 292.9;
+  Vesta.RotationRate        = 1617.332776;
         </code>
       </programlisting>
+
+      <para>
+        Note: The orientation models available for Earth and Luna have additional fields for configuration.   Earth has an additional field called  Nutation Update Interval that controls the update frequency for the Nutation matrix.  For high fidelity applications, NutationUpdateInterval should be set to zero.  The RotationDataSource field for Earth and Luna defines the theory used for the rotation of those bodies.  Currently, only FK5IAU1980 and DE405 are available for Earth and Luna respectively and the field is displayed for information purposes only.  Future versions of GMAT will support DE421 for Luna and IAU-2000A theory for Earth.
+      </para>
     </refsection>
-
-    <refsection>
-      <title>Physical Properties</title>
-
-      <programlisting>
-        <code>
-  GMAT asdf.Flattening = 0.0033527;
-  GMAT asdf.EquatorialRadius = 6378.1363;
-  GMAT asdf.Mu = 398600.4415;
-        </code>
-      </programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Orbit Ephemeridies</title>
-
-      <programlisting>
-        <code>
-  GMAT asdf.NAIFId = -123456789;
-  GMAT Earth.SourceFilename = '../data/planetary_ephem/de/leDE1941.405';
-        </code>
-      </programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Unique fields Earth and Moon</title>
-
-      <programlisting>
-        <code>
-  GMAT Earth.RotationDataSource = 'FK5IAU1980';
-  GMAT Earth.NutationUpdateInterval = 60;
-  Luna.RotationDataSource
-        </code>
-      </programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Use Custom Texture Map</title>
-
-      <programlisting>
-        <code>
-  GMAT Earth.TextureMapFileName = '../data/graphics/texture/ModifiedBlueMarble.jpg';
-        </code>
-      </programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Obsolete</title>
-
-      <programlisting>
-        <code>
-  GMAT asdf.PosVelSource = 'SPICE';
-  GMAT asdf.CentralBody = 'Earth';
-  GMAT asdf.RotationDataSource = 'IAUSimplified';
-        </code>
-      </programlisting>
-    </refsection>
-    
   </refsection>
 
+  <refsection>
+    <title>
+      Configuring Orbit Ephemerides
+    </title>
+
+    <para>
+      The ephemerides for built-in celestial bodies is specified by the SolarSystem.EphemerisSource field and the same source is used for all built-in bodies.
+      Ephemerides for a custom CelestialBody are provided by SPICE files.   Archives of available SPICE files are the JPL NAIF site here (ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/)
+      and the Solar System Dynamics site here (ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/).
+      JPL provides utilities to create custom SPICE files in the event existing kernels don't satisfy requirements for your application.
+      To create custom SPICE kernels, see the documentation provided by JPL (http://naif.jpl.nasa.gov/naif/documentation.html).  The list of NAIF Ids for celestial bodies is located here (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html).
+    </para>
+
+    <para>
+      To specify the SPICE kernels for a custom <guilabel>CelestialBody</guilabel>, use the <guilabel>NAIFId</guilabel>, <guilabel>CentralBody</guilabel>, and <guilabel>SourceFileName</guilabel> fields. 
+      GMAT is distributed with an SPK file for CERES which has a NAIF ID 2000001.  Here is how to configure a <guilabel>CelestialBody</guilabel> to use the CERES SPICE ephemeris data.
+    </para>
+
+    <programlisting>
+      <code>
+  Create CelestialBody Ceres
+  Ceres.CentralBody = Sun;
+  Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'
+      </code>
+    </programlisting>
+
+    <para>
+      Note: GMAT currently only supports a single ephemeris model for custom bodies (SPICE)  and this is set using PosVelSource field.  The default for PosVelSource is SPICE and it is not necessary to configure this field in the current version of GMAT.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Configuring Physical Properties</title>
+
+    <para>
+      GMAT models all celestial bodies as spherical ellipsoids. 
+      To define the physical properties use the <guilabel>Flattening</guilabel>, <guilabel>EquatorialRadius</guilabel>, and <guilabel>Mu</guilabel> fields.
+    </para>
+  </refsection>
   <refsection>
     <title>Examples</title>
 
     <informalexample>
       <para>
-        Configure a <guilabel>CelestialBody</guilabel> to model the asteroid RQ236.
+        Configure a CelestialBody to model Saturn's moon Titan.
+        Note you must obtain the SPICE kernel named "sat351.bsp" from here (ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/) 
+        and place it it the directory identified in the script snippet below
       </para>
 
       <programlisting>
         <code>
-          
-        </code>
-      </programlisting>
-    </informalexample>
-
-    <informalexample>
-      <para>
-        Configure a <guilabel>CelestialBody</guilabel> to model the Mars’ moon Phobos.
-      </para>
-
-      <programlisting>
-        <code>
-          
+  Create Moon Titan;
+  GMAT Titan.NAIFId               = 606;
+  GMAT Titan.OrbitSpiceKernelName = {'../data/planetary_ephem/spk/DE421AllPlanets.bsp', '../data/planetary_ephem/spk/sat351.bsp'};
+  GMAT Titan.EquatorialRadius     = 2575;
+  GMAT Titan.Flattening           = 0;
+  GMAT Titan.Mu                   = 8978.5215;
+  GMAT Titan.PosVelSource         = 'SPICE';
+  GMAT Titan.CentralBody          = 'Saturn';
+  GMAT Titan.RotationDataSource   = 'IAUSimplified';
+  GMAT Titan.OrientationEpoch     = 21545;
+  GMAT Titan.SpinAxisRAConstant   = 36.41;
+  GMAT Titan.SpinAxisRARate       = -0.036;
+  GMAT Titan.SpinAxisDECConstant  = 83.94;
+  GMAT Titan.SpinAxisDECRate      = -0.004;
+  GMAT Titan.RotationConstant     = 189.64;
+  GMAT Titan.RotationRate         = 22.5769768;
         </code>
       </programlisting>
     </informalexample>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="EphemerisPropagator"
+<refentry version="5.0"
+          xml:id="EphemerisPropagator"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,90 +8,348 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>EphemerisPropagator</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>EphemerisPropagator</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>EphemerisPropagator</refname>
+    <refname>ResourceName</refname>
 
-    <refpurpose>Under Construction.</refpurpose>
+    <refpurpose>
+      A propagator that uses SPK ephemeris files
+    </refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis> Under Construction.
-   </synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>Under Construction.</para>
+    <para>
+      An SPK propagator propagates a spacecraft by interpolating user-provided SPK SPICE kernels.  
+      You configure a Propagator to use an SPK kernel by setting the Type field to SPK.  SPK kernels and 
+      the NAIFId are defined on the spacecraft Resource.  You control propagation, including stopping conditions, 
+      using the Propagate command.
+    </para>
+
+    <para>
+      <phrase role="ref_seealso">See Also</phrase>: 
+      <xref linkend="Spacecraft"/>, 
+      <xref linkend="Propagate"/>
+    </para>
   </refsection>
 
   <refsection>
-    <title>Fields</title>
+    <title>GUI</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Field Name</term>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_EphemerisPropagator_GUI.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
+    <para>
+      To use an SPK propagator, on the Propagator dialog box, select SPK in the Type drop-down menu.   
+      There are four fields you can configure for an SPK propagator including <guilabel>StepSize</guilabel>, <guilabel>CentralBody</guilabel>, <guilabel>EpochFormat</guilabel>, 
+      and <guilabel>StartEpoch</guilabel>.  Note that changing the EpochFormat setting converts the input epoch to the selected Format.  
+      You can also type “FromSpacecraft” into the <guilabel>StartEpoch</guilabel> field and the propagator will use the epoch of the 
+      <guilabel>Spacecraft</guilabel> as the initial propagation epoch.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para>
+      To use an SPK propagator, you must specify the SPK kernels and NAIFId on the <guilabel>Spacecraft</guilabel> Resource,  
+      configure a propagator to use SPK files as opposed to numerical methods, and configure the <guilabel>Propagate</guilabel> 
+      command to use the configured SPK propagator.  The subsections and examples below discuss each of these items in detail.
+    </para>
+
+    <refsection>
+      <title>Configuring Spacecraft SPK Kernels</title>
+
+      <para>
+        To use an SPK propagator, you must add the SPK kernels to the spacecraft and define the spacecraft  NAIFId.   
+        SPK Kernels for selected spacecraft are available here: http://naif.jpl.nasa.gov/naif/data_archived.html   
+        Two sample vehicle spk kernels, (GEOSat.bsp and MoonTransfer.bsp) are distributed with GMAT for example purposes. 
+        An example of how to add spacecraft kernels via the script interface is shown below.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  GMAT aSpacecraft.NAIFId = -123456789;
+  GMAT aSpacecraft.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\GEOSat.bsp'};
+        </code>
+      </programlisting>
+
+      <para>
+        To add spacecraft SPK kernals via the GUI:
+      </para>
+
+      <itemizedlist>
         <listitem>
-          <para>Description....</para>
-
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Type</term>
-
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                  <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
+          <para>
+            On the spacecraft dialog box, click the SPICE tab.
+          </para>
         </listitem>
-      </varlistentry>
-    </variablelist>
+        <listitem>
+          <para>
+            Under the SPK Files list, click Add.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Browse to locate and select the desired SPK file
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Repeat to add all necessary SPK kernels
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            In the NAIF ID field, enter the spacecraft integer NAIF id number.
+          </para>
+        </listitem>
+      </itemizedlist>
+
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_EphemerisPropagator_GUI_2.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        You can add more than one kernel to a spacecraft as shown via scripting below,
+        where the files GEOSat1.bsp and GEOSat2.bsp are dummy file names used for example purposes
+        only and are not distributed with GMAT. In the script, you can use relative path or absolute path
+        to define the location of an SKP file.  Relative paths are defined with respect to the GMAT bin directory
+        of your local installation.
+      </para>
+
+      <programlisting>
+        <code>
+          Create Spacecraft aSpacecraft;
+          GMAT aSpacecraft.OrbitSpiceKernelName =
+          {'..\data\vehicle\ephem\spk\GEOSat1.bsp',
+          'C:\MyDataFiles\GEOSat2.bsp'};
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>
+        Configuring an SPK Propagator
+      </title>
+
+      <para>
+        You can define the StartEpoch of propagation of an SPK Propagator on either the <guilabel>Propagator</guilabel> Resource or 
+        inherit the StartEpoch from the spacecraft.  Below is a script snippet that shows how to inherit the StartEpoch from the spacecraft.
+        To inherit the StartEpoch from the spacecraft using the GUI
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>
+            Open the SPK propagator dialog box,
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            In the Start Epoch field., type “FromSpacecraft”
+          </para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        To explicitly define the start epoch on the SPK propagator Resource use the following syntax.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Propagator spkProp;
+  spkProp.EpochFormat = 'UTCGregorian';
+  spkProp.StartEpoch = '22 Jul 2014 11:29:10.811';
+
+  Create Propagator spkProp2;
+  spkProp2.EpochFormat = 'UTCModJulian';
+  spkProp2.StartEpoch = '23466.5';
+        </code>
+      </programlisting>
+
+      <para>
+        To configure the step size and central body, use the StepSize and Central Body fields.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Propagator spkProp;
+  spkProp.Type = SPK;
+  spkProp.StepSize = 300;
+  spkProp.CentralBody = Earth;
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>
+        Interaction with the Propagate Command
+      </title>
+
+      <para>
+        An SPK Propagator works with the <guilabel>Propagate</guilabel> command in the same way 
+        numerical propagators work with the <guilabel>Propagate</guilabel> command with the following exceptions:
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>
+            If a <guilabel>Propagate</guilabel> command uses an SPK propagator, then you can only propagate spacecraft using that propagator.  
+            You can however, mix SPK propagators and numeric propagators in a single propagate command.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            SPK Propagator will not propagate the STM or compute the orbit Jacobian (A matrix).
+          </para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        In the example below, we assume a <guilabel>Spacecraft</guilabel> named aSpacecraft and a <guilabel>Propagator</guilabel> named spkProp 
+        have been configured a-priori.  An example command to propagate aSpacecraft to Earth Periapsis using spkProp is shown below.
+      </para>
+
+      <programlisting>
+        <code>
+          Propagate spkProp(aSpacecraft) {aSpacecraft.Earth.Periapsis};
+        </code>
+      </programlisting>
+
+      <para>
+        Below is a script snippet that demonstrates how to propagate backwards using an SPK propagator.
+      </para>
+
+      <programlisting>
+        <code>
+          Propagate BackProp spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = -1.5};
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior Near Ephemeris Boundaries</title>
+
+      <para>
+        In general, ephemeris interpolation is less accurate near the boundaries of 
+        ephemeris files and we recommend providing ephemeris for significant periods 
+        beyond the initial and final epochs of your application for this and other reasons.  
+        When propagating near the beginning or end of ephemeris files, the use of the double 
+        precision arithmetic may affect results.  For example, if an ephemeris file has has an initial 
+        epoch TDBModJulian = 21545.00037249916, and you specify the StartEpoch in UTC Gregorian, round off 
+        error in time conversions and/or truncation of time using the Gregorian format (only accurate to millisecond) 
+        may cause the requested epoch to fall slightly outside of the range provided on the ephemeris file.  The best 
+        solution is to provide extra ephemeris data to avoid time issues at the boundaries and the more subtle issue of 
+        poor interpolation.
+      </para>
+
+      <warning>
+        <para>
+          Caution:  To locate requested stopping conditions, GMAT needs to bracket the root of 
+          the stopping condition function.  Then, GMAT uses standard root finding techniques to 
+          locate the stopping condition to the requested accuracy.  If the requested stopping condition 
+          lies at or near the beginning or end of the ephemeris data, then bracketing the stopping condition 
+          may not be possible without stepping off the ephemeris file which throw an error and execution will stop.  
+          In this case, you must provide more ephemeris data to locate the desired stopping condition.
+        </para>
+      </warning>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <example>
-      <title>Example Script</title>
+    <informalexample>
+      <para>
+        Propagate GEO spacecraft using SPK Propagator.  
+        Define the start epoch from the spacecraft. Note: the SPK kernel GEOSat.bsp is distributed with GMAT.
+      </para>
 
-      <programlisting>% 
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+  aSpacecraft.NAIFId = -123456789;
+  aSpacecraft.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\GEOSat.bsp'};
 
-</programlisting>
-    </example>
+  Create Propagator spkProp;
+  spkProp.Type = SPK;
+  spkProp.StepSize = 300;
+  spkProp.CentralBody = Earth;
+  spkProp.StartEpoch = FromSpacecraft;
+
+  Create OrbitView EarthView;
+  EarthView.Add = {aSpacecraft, Earth, Luna};
+  EarthView.ViewPointVector = [ 30000 -20000 10000 ];
+  EarthView.ViewScaleFactor = 2.5;
+
+  BeginMissionSequence;
+  Propagate spkProp(aSpacecraft) {aSpacecraft.TA = 90};
+  Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 2.4};
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>
+        Simulate lunar transfer using an SPK Propagator.  Define start epoch on the propagator. Note: the SPK kernel MoonTransfer.bsp is distributed with GMAT.
+      </para>
+      <programlisting>
+        <code>
+  Create Spacecraft aSpacecraft;
+  aSpacecraft.NAIFId = -123456789;
+  aSpacecraft.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\MoonTransfer.bsp'};
+
+  Create Propagator spkProp;
+  spkProp.Type = SPK;
+  spkProp.StepSize = 300;
+  spkProp.CentralBody = Earth;
+  spkProp.EpochFormat = 'UTCGregorian';
+  spkProp.StartEpoch = '22 Jul 2014 11:29:10.811';
+
+  Create OrbitView EarthView;
+  EarthView.Add = {aSpacecraft, Earth, Luna};
+  EarthView.ViewPointVector = [ 30000 -20000 10000 ];
+  EarthView.ViewScaleFactor = 30;
+
+  BeginMissionSequence;
+  Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12};
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>
