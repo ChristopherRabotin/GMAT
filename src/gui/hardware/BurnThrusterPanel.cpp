@@ -565,9 +565,9 @@ void BurnThrusterPanel::SaveData()
       
       if (coordSysName == "Local")
       {
-         //// Origin
-         //paramID = theObject->GetParameterID("Origin");
-         //theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
+         // Origin
+         paramID = theObject->GetParameterID("Origin");
+         theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
          
          // Axes
          paramID = theObject->GetParameterID("Axes");
