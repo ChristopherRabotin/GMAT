@@ -609,6 +609,10 @@ bool Achieve::InterpretAction()
                                        currentChunks[jj].c_str());
    #endif
 
+   if (currentChunks.size() == 0)
+      throw CommandException("The goal description is missing in the "
+            "Achieve command\n");
+
    // First chunk is the goal and achieve (target) value
    std::string lhs, rhs;
    if (!SeparateEquals(currentChunks[0], lhs, rhs, true))

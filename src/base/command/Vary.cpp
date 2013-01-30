@@ -859,6 +859,10 @@ bool Vary::InterpretAction()
                                        currentChunks[jj].c_str());
    #endif
 
+   if (currentChunks.size() == 0)
+      throw CommandException("The variable description is missing in the "
+            "Vary command\n");
+   
    // First chunk is the variable and initial value
    std::string lhs, rhs;
    if (!SeparateEquals(currentChunks[0], lhs, rhs, true))
