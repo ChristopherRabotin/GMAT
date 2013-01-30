@@ -593,16 +593,21 @@ bool NonlinearConstraint::InterpretAction()
       throw CommandException(
             "Solver name for NonlinearConstraint command may not contain brackets, braces, or parentheses."); 
    SetStringParameter(OPTIMIZER_NAME, currentChunks[0]);
+
    if (currentChunks.size() < 2)
       throw CommandException("Missing field or value for NonlinearConstraint command.");
-   if (currentChunks.size() > 2) tooMuch = true;
+   if (currentChunks.size() > 2) 
+      tooMuch = true;
+
    std::string cc = GmatStringUtil::Strip(currentChunks[1]);
    Integer ccEnd = cc.size() - 1;
    if ((tooMuch) || (cc.at(0) != '(') || (cc.at(ccEnd) != ')'))
       throw CommandException(
            "Missing parentheses, or unexpected characters found, around logical expression argument to NonlinearConstraint command.");
+
    if (!GmatStringUtil::IsBracketBalanced(cc, "()"))
       throw CommandException("Parentheses unbalanced in NonlinearConstraint command.");
+
    // @todo - if tolerance allowed later, will need to not check for braces here ...
    if ((cc.find('[') != cc.npos) || (cc.find(']') != cc.npos) ||
        (cc.find('{') != cc.npos) || (cc.find('}') != cc.npos) )
@@ -621,9 +626,15 @@ bool NonlinearConstraint::InterpretAction()
          MessageInterface::ShowMessage("   %s\n",
                                        currentChunks[jj].c_str());
    #endif
+
    bool testForMore = false;
    if ((Integer) currentChunks.size() > 1) testForMore = true;
    Integer end;
+   
+   if (currentChunks.size() == 0)
+      throw CommandException("The actual constraint is missing in the "
+            "NonlinearConstraint command\n");
+   
    std::string constraintStr = currentChunks[0];
    Integer opSize = 1;
    if ((end = constraintStr.find(">=", 0)) != (Integer) constraintStr.npos)
