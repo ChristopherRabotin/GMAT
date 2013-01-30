@@ -59,7 +59,7 @@
 
       <informaltable colsep="0"
                      frame="topbot">
-        <tgroup cols="2">
+        <tgroup cols="5">
           <colspec colnum="1"
                    colwidth="2*"/>
 
