@@ -26,8 +26,7 @@
     <refname>SpacecraftAttitude</refname>
 
     <refpurpose>
-      A one-line fragment describing the resource, without a
-      period
+
     </refpurpose>
   </refnamediv>
 
@@ -35,185 +34,519 @@
     <title>Description</title>
 
     <para>
-      The text description of the command. Use special formatting for
-      <guilabel>command names</guilabel> and <guilabel>
-        field
-        names
-      </guilabel>.
+      GMAT models the orientation and rate of rotation of a spacecraft using several different mathematical models. Currently, GMAT assumes that a spacecraft is a rigid body.
+      The currently supported attitude models are <guilabel>Spinner</guilabel>, <guilabel>CoordinateSystemFixed</guilabel>, and <guilabel>SpiceAttitude</guilabel>.  The Spinner model is a simple, inertially fixed spin axis model.
+      The CoordinateSystemFixed model allows you to use any CoordinateSystem supported by GMAT as the attitude of a spacecraft.
+      The SpiceAttitude model allows you to define the spacecraft attitude based on SPICE attitude kernels.
     </para>
   </refsection>
 
   <refsection>
-    <title>Fields</title>
+    <title>Remarks</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
-      <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+    <refsection>
+      <title>Overview of Availble Attitude Models</title>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+      <para>
+        GMAT models the orientation and rate of rotation of a spacecraft using several different mathematical models. Different Attitude models
+        require different information to fully configure the model.  For example, when you select the CoordinateSystemFixed model, the attitude and
+        body rates are entirely determined by the CoordinateSystem model and defining Euler angles or angular velocity components are not required and have no effect. 
+        The table below describes which interface elements such as the AttitudeCoordinateSystem, attitude representation, attitude rate fields among others are required/supported for a given model.  
+        Attitude representations fields include the DCM, EulerAngles, Quaternion, and MRPs (Modified Rodriguez Parameters). Attitude rate fields include the body angular velocity and the
+        Euler angle rates.  If a field is marked as inactive for a particular model,
+        fields of that type have no effect for that model.  Similarly, fields marked as active do affect the attitude for a particular model.
+      </para>
 
-        <thead>
-          <row>
-            <entry>Field</entry>
+      <informaltable colsep="0"
+                     frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1"
+                   colwidth="2*"/>
 
-            <entry>Description</entry>
-          </row>
-        </thead>
+          <colspec colnum="2"
+                   colwidth="2*"/>
 
-        <tbody>
-          <row>
-            <entry>
-              <guilabel>FieldName</guilabel>
-            </entry>
+          <colspec colnum="3"
+                   colwidth="3*"/>
 
-            <entry>
-              <para>
-                Description of the field. Use special formatting for
-                <guilabel>command names</guilabel> and <guilabel>
-                  field
-                  names
-                </guilabel>. See the next cell for an
-                example.
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
+          <colspec colnum="4"
+                   colwidth="2*"/>
 
-                  <listitem>
-                    <para>
-                      a list of data types from the Data Type column of
-                      the Field Spec
-                    </para>
-                  </listitem>
-                </varlistentry>
+          <colspec colnum="5"
+                   colwidth="2*"/>
 
-                <varlistentry>
-                  <term>Allowed Values</term>
+          <thead>
+            <row>
+              <entry>Attitude Model</entry>
 
-                  <listitem>
-                    <para>
-                      a range spec of list of allowed values from the
-                      Range column of the Field Spec
-                    </para>
-                  </listitem>
-                </varlistentry>
+              <entry>Coord. Sys.</entry>
 
-                <varlistentry>
-                  <term>Access</term>
+              <entry>Attitude Repressentation</entry>
 
-                  <listitem>
-                    <para>
-                      set, get, or only one (from the Access column of the
-                      Field Spec)
-                    </para>
-                  </listitem>
-                </varlistentry>
+              <entry>Attitude Rate</entry>
 
-                <varlistentry>
-                  <term>Default Value</term>
+              <entry>Euler Sequence</entry>
+            </row>
+          </thead>
 
-                  <listitem>
-                    <para>
-                      value from the Default Value column of the Field
-                      Spec
-                    </para>
-                  </listitem>
-                </varlistentry>
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>Spinner</guilabel>
+              </entry>
 
-                <varlistentry>
-                  <term>Units</term>
+              <entry>
+                <para>
+                  Inactive
+                </para>
+              </entry>
 
-                  <listitem>
-                    <para>the unit or N/A</para>
-                  </listitem>
-                </varlistentry>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
 
-                <varlistentry>
-                  <term>Interfaces</term>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
 
-                  <listitem>
-                    <para>GUI, script, or only one</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
+            </row>
 
-          <row>
-            <entry>
-              <guilabel>Start</guilabel>
-            </entry>
+            <row>
+              <entry>
+                <guilabel>CoordinateSystemFixed</guilabel>
+              </entry>
 
-            <entry>
-              <para>
-                The <guilabel>Start</guilabel> parameter is the
-                initial value for the <guilabel>Index</guilabel>
-                parameter.
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
 
-                  <listitem>
-                    <para>
-                      Real Number, Variable, Array Element, or Scalar Real
-                      Object Parameter
-                    </para>
-                  </listitem>
-                </varlistentry>
+              <entry>
+                <para>
+                  Inactive
+                </para>
+              </entry>
 
-                <varlistentry>
-                  <term>Allowed Values</term>
+              <entry>
+                <para>
+                  Inactive
+                </para>
+              </entry>
 
-                  <listitem>
-                    <para>
-                      -∞ &lt; <guilabel>Start</guilabel> &lt; ∞
-                    </para>
-                  </listitem>
-                </varlistentry>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
+            </row>
 
-                <varlistentry>
-                  <term>Access</term>
+            <row>
+              <entry>
+                <guilabel>SpiceAttitude</guilabel>
+              </entry>
 
-                  <listitem>
-                    <para>
-                      set, get, or only one (from the Access column of the
-                      Field Spec)
-                    </para>
-                  </listitem>
-                </varlistentry>
+              <entry>
+                <para>
+                  Inactive
+                </para>
+              </entry>
 
-                <varlistentry>
-                  <term>Default Value</term>
+              <entry>
+                <para>
+                  Inactive
+                  </para>
+              </entry>
 
-                  <listitem>
-                    <para>1</para>
-                  </listitem>
-                </varlistentry>
+              <entry>
+                <para>
+                  Inactive
+                </para>
+              </entry>
 
-                <varlistentry>
-                  <term>Units</term>
+              <entry>
+                <para>
+                  Active
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
 
-                  <listitem>
-                    <para>the unit or N/A</para>
-                  </listitem>
-                </varlistentry>
+    <refsection>
+      <title>Overview of State Representations</title>
 
-                <varlistentry>
-                  <term>Interfaces</term>
+      <refsection>
+        <title>Quaternion</title>
 
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+        <para>
+          The quaternion is a four element, non-singular attitude representation.  GMAT’s quaternion representation includes the three “vector” components as the first three elements in the quaternion 
+          and the “rotation” component as the last element in the quaternion.   In assignment mode, you can set the quaternions element by element like this
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.Q1 = 0.5;
+  aSpacecraft.Q2 = 0.5;
+  aSpacecraft.Q3 = 0.5;
+  aSpacecraft.Q4 = 0.5;
+          </code>
+        </programlisting>
+
+        <para>
+          or simultaneously set the entire quaternion like this
+        </para>
+
+        <programlisting>
+          <code>
+            aSpacecraft.Quaternion = [0.5 0.5 0.5 0.5];
+          </code>
+        </programlisting>
+
+        <para>
+          GMAT normalizes the quaternion before use.  In command mode, you must enter the entire quaternion as a single vector to avoid scaling components of the quaternion before the entire quaternion is set.
+        </para>
+      </refsection>
+
+      <refsection>
+        <title>
+          DirectionCosineMatrix (DCM)
+        </title>
+
+        <para>
+          The Direction Cosine Matrix is a 3x3 array that contains cosines of the angles between the x, y, and z body axes and the x, y, and z inertial axes.   The direction cosine matrix must be ortho-normal and you define the DCM element by element. 
+          Here is an example the shows how to define the attitude using the DCM.
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.DCM11 = 1;
+  aSpacecraft.DCM12 = 0;
+  aSpacecraft.DCM13 = 0;
+  aSpacecraft.DCM21 = 0;
+  aSpacecraft.DCM22 = 1;
+  aSpacecraft.DCM23 = 0;
+  aSpacecraft.DCM31 = 0;
+  aSpacecraft.DCM32 = 0;
+  aSpacecraft.DCM33 = 1;
+          </code>
+        </programlisting>
+      </refsection>
+
+      <refsection>
+        <title>Euler Angles</title>
+
+        <para>
+          Euler angles are a sequence of three rotations about coordinate axes to transform from one system to another system.
+          GMAT supports all 12 Euler angle sequences.  Here is an example setting attitude using a “321” sequence.
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.EulerAngleSequence = '321';
+  aSpacecraft.EulerAngle1 = 45;
+  aSpacecraft.EulerAngle2 = 45;
+  aSpacecraft.EulerAngle3 = 90;
+          </code>
+        </programlisting>
+
+        <warning>
+          <para>
+            Caution:  The Euler angles have singularities that can cause issues during modeling.   We recommend using other representations for this reason.
+          </para>
+        </warning>
+      </refsection>
+
+      <refsection>
+        <title>Modified Rogriques parameters</title>
+
+        <para>
+          Need text description
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.MRP1 = 0.2928932188134525;
+  aSpacecraft.MRP2 = 0.2928932188134524;
+  aSpacecraft.MRP3 = 1.149673585146546e-017;
+          </code>
+        </programlisting>
+      </refsection>
+
+      <refsection>
+        <title>Euler Angles Rates</title>
+
+        <para>
+          The Euler angle rates are the first time derivative of the Euler angles and can be used to define the body rates.  
+          Euler angle rates use the same sequence as the EulerAngles.  The example below shows how to define the EulerAngle rates for a spacecraft.
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.EulerAngleSequence = '321';
+  aSpacecraft.EulerAngleRate1 = -5;
+  aSpacecraft.EulerAngleRate2 = 20;
+  aSpacecraft.EulerAngleRate3 = 30;
+          </code>
+        </programlisting>
+      </refsection>
+
+      <refsection>
+        <title>Angular Velocity</title>
+
+        <para>
+          The angular velocity is the angular velocity of the spacecraft body with respect to the
+          inertial frame, expressed in the inertial frame.  The example below shows how to define the AngularVelocity for a spacecraft.
+        </para>
+
+        <programlisting>
+          <code>
+  aSpacecraft.AngularVelocityX = 5;
+  aSpacecraft.AngularVelocityY = 10;
+  aSpacecraft.AngularVelocityZ = 5;
+          </code>
+        </programlisting>
+      </refsection>
+    </refsection>
+
+    <refsection>
+      <title>Coordinate System Fixed Attitude Model</title>
+
+      <para>
+        The CoordinateSystemFixed model allows you to use any existing CoordinateSystem to define the attitude of a spacecraft.  The attitude uses the Axes defined on the CoordinateSystem to compute the body fixed to inertial matrix and attitude rate parameters such as the angular velocity.  To configure this attitude mode, select CoordinateSystemFixed, for Attitude.
+        You can define the EulerAngleSequence used when outputting EulerAngles and EulerAngle rates.
+      </para>
+
+      <warning>
+        <para>
+          Caution:  For the CoordinateSystemFixed attitude model, the attitude is completely described by the selected coordinate system. 
+          If you are working in the script, setting attitude parameters (Euler Angles, Quaternion etc.) or setting attitude rate parameters such as (Euler Angle Rates etc.) has no effect.
+        </para>
+      </warning>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftAttitude_GUI_1.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        The script example below shows how to configure a spacecraft to use a spacecraft VNB attitude system.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  GMAT aSat.Attitude                 = CoordinateSystemFixed;
+  GMAT aSat.ModelRotationZ           = -90;
+  GMAT aSat.AttitudeCoordinateSystem = 'attCoordSys';
+
+  Create ForceModel Propagator1_ForceModel;
+  Create Propagator Propagator1;
+  GMAT Propagator1.FM    	   = Propagator1_ForceModel;
+  GMAT Propagator1.MaxStep   = 10;
+
+  Create CoordinateSystem attCoordSys;
+  GMAT attCoordSys.Origin	= Earth;
+  GMAT attCoordSys.Axes  	= ObjectReferenced;
+  GMAT attCoordSys.XAxis 	= V;
+  GMAT attCoordSys.YAxis 	= N;
+  GMAT attCoordSys.Primary   = Earth;
+  GMAT attCoordSys.Secondary = aSat;
+
+  Create OrbitView OrbitView1;
+  GMAT OrbitView1.Add                = {aSat, Earth};
+  GMAT OrbitView1.ViewPointReference = Earth;
+  GMAT OrbitView1.ViewPointVector    = [ 30000 0 0 ];
+
+  BeginMissionSequence;
+
+  Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0};
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Spinner Attitude Model</title>
+
+      <para>
+        The Spinner attitude model propagates the attitude assuming the spin axis direction is fixed in inertial space. You define the attitude by providing initial body orientation and rates.  GMAT propagates the attitude by computing the angular velocity and then rotates the spacecraft about that angular velocity vector at a constant rate defined by the magnitude of the angular velocity.  You can define the initial attitude using Quaternions, EulerAngles, the Direction Cosine Matrix, or the Modified Rodriques Parameters.  You can define the attitude rates using 
+        Euler angles rates or AngularVelocity.  When working with EulerAngles, the rotation sequence is determined by the EulerAngleSequence field.
+      </para>
+
+      <warning>
+        <para>
+          Caution:  If you are working in the script, setting the CoordinateSystem for the Spinner attitude model has no effect.
+        </para>
+      </warning>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftAttitude_GUI_2.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        The example below configures a spacecraft to spin about the inertial z axis.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft aSat;
+  GMAT aSat.Attitude             	= Spinner
+  GMAT aSat.ModelRotationZ       	= -90;
+  GMAT aSat.AngularVelocityZ = 5;
+
+  Create ForceModel Propagator1_ForceModel;
+  Create Propagator Propagator1;
+  GMAT Propagator1.FM    	= Propagator1_ForceModel;
+  GMAT Propagator1.MaxStep   = 10;
+
+  Create CoordinateSystem attCoordSys;
+  GMAT attCoordSys.Origin	= Earth;
+  GMAT attCoordSys.Axes  	= ObjectReferenced;
+  GMAT attCoordSys.XAxis 	= V;
+  GMAT attCoordSys.YAxis 	= N;
+  GMAT attCoordSys.Primary   = Earth;
+  GMAT attCoordSys.Secondary = aSat;
+
+  Create OrbitView OrbitView1;
+  GMAT OrbitView1.Add            	= {aSat, Earth};
+  GMAT OrbitView1.ViewPointReference = Earth;
+  GMAT OrbitView1.ViewPointVector	= [ 30000 0 0 ];
+
+  BeginMissionSequence;
+
+  Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0};
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>SPK Attitude Model</title>
+
+      <para>
+        The SpiceAttitude model propagates the attitude using attitude SPICE kernels. 
+        To configure a spacecraft to use SPICE kernels select SpiceAttitude for the Attitude field as shown below.
+      </para>
+
+      <warning>
+        <para>
+          Caution:  For the SpiceAttitude model, the attitude is completely described by the spice kernels.  When working in the script, setting the 
+          CoordinateSystem, attitude parameters (Euler Angles, Quaternion etc.) or attitude rate parameters such as (Euler Angle Rates etc.) has no effect.
+        </para>
+      </warning>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftAttitude_GUI_3.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        You must provide three SPICE kernel types for the SpiceAttitude model: the attitude kernel (.bc file), the frame kernel 
+        (.tf file) and the spacecraft clock kernel (.tsc file).   These files are defined on the spacecraft SPICE tab as shown below. 
+        In addition to the kernels you must also provide the spacecraft NAIFId and the NAIFIdReferenceFrame.   Below is an illustration of the SPICE
+        tab configured for MarsExpress script found later in this section.
+      </para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftAttitude_GUI_4.png"
+                       scalefit="1"
+                       width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>
+        The example below configures a spacecraft to use SPK kernels to propagator the attitude for MarsExpress.  The SPK kernels are distributed with GMAT.
+      </para>
+
+      <programlisting>
+        <code>
+  Create Spacecraft MarsExpress;
+  GMAT MarsExpress.NAIFId = -41;
+  GMAT MarsExpress.NAIFIdReferenceFrame = -41001;
+  GMAT MarsExpress.Attitude = 'SpiceAttitude';
+  GMAT MarsExpress.OrbitSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_Short.BSP'};
+  GMAT MarsExpress.AttitudeSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_ATNM_PTR00012_100531_002.BC'};
+  GMAT MarsExpress.SCClockSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_100921_STEP.TSC'};
+  GMAT MarsExpress.FrameSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_V10.TF'};
+
+  Create Propagator spkProp;
+  GMAT spkProp.Type = SPK;
+  GMAT spkProp.StepSize = 60;
+  GMAT spkProp.CentralBody = Mars;
+  GMAT spkProp.EpochFormat = 'UTCGregorian';
+  GMAT spkProp.StartEpoch = '01 Jun 2010 16:59:09.815';
+
+  Create CoordinateSystem MarsMJ2000Eq;
+  GMAT MarsMJ2000Eq.Origin = Mars;
+  GMAT MarsMJ2000Eq.Axes = MJ2000Eq;
+
+  Create OrbitView Enhanced3DView1;
+  GMAT Enhanced3DView1.Add = {MarsExpress, Mars};
+  GMAT Enhanced3DView1.CoordinateSystem = MarsMJ2000Eq;
+  GMAT Enhanced3DView1.ViewPointReference = Mars;
+  GMAT Enhanced3DView1.ViewPointVector = [ 10000 10000 10000 ];
+  GMAT Enhanced3DView1.ViewDirection = Mars;
+
+  BeginMissionSequence;
+
+  Propagate spkProp(MarsExpress) {MarsExpress.ElapsedDays = 0.2};
+        </code>
+      </programlisting>
+    </refsection>
   </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     contentdepth="100%"
+                     fileref="files/images/Resource_SpacecraftAttitude_GUI_5.png"
+                     scalefit="1"
+                     width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+
 </refentry>
