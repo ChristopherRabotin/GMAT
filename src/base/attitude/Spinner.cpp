@@ -225,6 +225,11 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    
    dcm                      = RBB0t * RB0I;
    // currentwIBB already computed in Initialize 
+
+   // save epoch and matrix
+   epoch = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+   RB0I  = dcm;
+
    #ifdef DEBUG_SPINNER
    MessageInterface::ShowMessage(
    "EXITING Spinner::Compute ... angVel = %.12f %.12f %.12f\n",
