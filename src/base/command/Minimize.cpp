@@ -579,6 +579,7 @@ bool Minimize::InterpretAction()
    if ((cc.find('[') != cc.npos) || (cc.find(']') != cc.npos) ||
        (cc.find('{') != cc.npos) || (cc.find('}') != cc.npos) )
       throw CommandException("Minimize command may not contain brackets or braces.");
+
    std::string noSpaces     = GmatStringUtil::RemoveAll(cc,' ');
    currentChunks = parser.Decompose(noSpaces, "()", true, true);
    
@@ -589,6 +590,10 @@ bool Minimize::InterpretAction()
          MessageInterface::ShowMessage("   %s\n",
                                        currentChunks[jj].c_str());
    #endif
+
+   if (currentChunks.size() == 0)
+      throw CommandException("The objective function name is missing in the "
+               "Minimize command\n");
 
    // First chunk is the objectiveName
    objectiveName = currentChunks[0];
