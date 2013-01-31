@@ -32,6 +32,8 @@ public:
    const BooleanWrapper& operator=(const BooleanWrapper &right);
    virtual ~BooleanWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual Real         EvaluateReal() const;

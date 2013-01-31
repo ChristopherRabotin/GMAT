@@ -97,6 +97,21 @@ BooleanWrapper::~BooleanWrapper()
 
 
 //------------------------------------------------------------------------------
+//  ElementWrapper* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a new object that l.ooks like this one.
+ *
+ * @return The new object.
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* BooleanWrapper::Clone() const
+{
+   return new BooleanWrapper(*this);
+}
+
+
+//------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------
 /**

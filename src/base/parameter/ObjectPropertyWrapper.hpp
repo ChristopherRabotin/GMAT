@@ -41,6 +41,8 @@ public:
    // destructor
    virtual ~ObjectPropertyWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual const StringArray&  GetRefObjectNames();

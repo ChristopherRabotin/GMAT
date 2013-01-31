@@ -116,6 +116,22 @@ ObjectPropertyWrapper::~ObjectPropertyWrapper()
 {
 }
 
+
+//------------------------------------------------------------------------------
+// ElementWrapper* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a copy of this wrapper
+ *
+ * @return The new instance
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* ObjectPropertyWrapper::Clone() const
+{
+   return new ObjectPropertyWrapper(*this);
+}
+
+
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------

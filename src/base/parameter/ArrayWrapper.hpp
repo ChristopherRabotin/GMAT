@@ -42,6 +42,8 @@ public:
    // destructor
    virtual ~ArrayWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    

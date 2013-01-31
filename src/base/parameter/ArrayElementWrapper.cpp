@@ -150,6 +150,22 @@ ArrayElementWrapper::~ArrayElementWrapper()
    }
 }
 
+
+//------------------------------------------------------------------------------
+//  ElementWrapper* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a new object that l.ooks like this one.
+ *
+ * @return The new object.
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* ArrayElementWrapper::Clone() const
+{
+   return new ArrayElementWrapper(*this);
+}
+
+
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------

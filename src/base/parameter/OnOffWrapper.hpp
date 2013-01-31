@@ -32,6 +32,8 @@ public:
    const OnOffWrapper& operator=(const OnOffWrapper &right);
    virtual ~OnOffWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual Real         EvaluateReal() const;

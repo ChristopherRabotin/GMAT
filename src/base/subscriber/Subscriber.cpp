@@ -41,7 +41,7 @@
 #include "MessageInterface.hpp"
 
 // Cloning wrapper is not ready
-//#define __ENABLE_CLONING_WRAPPERS__
+#define __ENABLE_CLONING_WRAPPERS__
 
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_SUBSCRIBER_PARAM

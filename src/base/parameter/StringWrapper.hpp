@@ -32,6 +32,8 @@ public:
    const StringWrapper& operator=(const StringWrapper &right);
    virtual ~StringWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual Real         EvaluateReal() const;

@@ -118,6 +118,22 @@ StringObjectWrapper::~StringObjectWrapper()
 //       delete stringVar;
 }
 
+
+//------------------------------------------------------------------------------
+// ElementWrapper* StringObjectWrapper::Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a copy of this wrapper
+ *
+ * @return The wrapper copy
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* StringObjectWrapper::Clone() const
+{
+   return new StringObjectWrapper(*this);
+}
+
+
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------

@@ -49,7 +49,12 @@ public:
    virtual ~ElementWrapper();
    
    virtual std::string        ToString();
-   virtual ElementWrapper*    Clone() const;
+
+   // Abstract to !!force!! implementation in derived classes
+   /// todo: Remove implementation in .cpp file, since all it does is throw;
+   ///       this is the better approach because it FORCES the developers to
+   ///       implement the method.
+   virtual ElementWrapper*    Clone() const = 0;
    virtual void               SetDescription(const std::string &str);
    virtual std::string        GetDescription() const;
    Gmat::WrapperDataType      GetWrapperType() const;

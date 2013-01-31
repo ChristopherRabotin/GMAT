@@ -32,6 +32,8 @@ public:
    const ObjectWrapper& operator=(const ObjectWrapper &right);
    virtual ~ObjectWrapper();
    
+   virtual ElementWrapper*     Clone() const;
+
    virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    
