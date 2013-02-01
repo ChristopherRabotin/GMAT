@@ -11,6 +11,11 @@ BASE_LIBRARY = GmatBase
 SAMPLE_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
 SAMPLE_LINK_FLAGS = -fPIC -arch i386 -fno-rtti
 
+# Select the base library
+BASE_LIBRARY = GmatBase
+# BASE_LIB_LOCATION is only used on Mac - must point to libGmatBase outside of bundle for Console GMAT
+BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
+
 # Compiler options
 CPP = g++
 C = gcc
