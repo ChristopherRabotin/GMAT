@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <refentry version="5.0"
           xml:id="CallMatlabFunction"
           xmlns="http://docbook.org/ns/docbook"
@@ -113,7 +113,12 @@
       <itemizedlist>
         <listitem>
           <para>
-            resource parameter of real number type (e.g. <guilabel>Spacecraft.X</guilabel>)
+            resource parameter of real number type (e.g. <guilabel><replaceable>Spacecraft</replaceable>.X</guilabel>)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            resource parameter of string type (e.g. <guilabel><replaceable>Spacecraft</replaceable>.UTCGregorian</guilabel>)
           </para>
         </listitem>
         <listitem>
@@ -129,6 +134,32 @@
       </itemizedlist>
     </para>
 
+    <para>
+      The output arguments (<replaceable>output_argument</replaceable> values in the syntax description) can be any of the following types:
+      <itemizedlist>
+        <listitem>
+          <para>
+            resource parameter of real number type (e.g. <guilabel><replaceable>Spacecraft</replaceable>.X</guilabel>)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            resource parameter of string type (e.g. <guilabel><replaceable>Spacecraft</replaceable>.UTCGregorian</guilabel>)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Array</guilabel>, <guilabel>String</guilabel>, or <guilabel>Variable</guilabel> resource
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Array</guilabel> resource element
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    
     <para>
       Data type conversion is performed for the following data types when values are passed 
       between MATLAB and GMAT. When data is passed from GMAT to MATLAB as input arguments, the following conversions occur.
@@ -168,7 +199,7 @@
           <row>
             <entry>
               <para>
-                <guilabel>String</guilabel> resource
+                string (e.g. <guilabel><replaceable>Spacecraft</replaceable>.UTCGregorian</guilabel>, <guilabel>String</guilabel> resource)
               </para>
             </entry>
 
