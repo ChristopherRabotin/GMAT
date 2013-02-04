@@ -31,6 +31,8 @@
 #include "Rvector6.hpp"
 #include "Rvector3.hpp"
 #include "StringUtil.hpp"
+#include "FileManager.hpp"
+#include "FileUtil.hpp"
 #include "CoordinateConverter.hpp"      // for Convert()
 #include "MessageInterface.hpp"
 #ifdef __USE_SPICE__
@@ -43,6 +45,7 @@
 //#define DEBUG_SPICE_KERNEL
 //#define DEBUG_SPACE_POINT_ORBIT_KERNELS
 //#define DEBUG_ATTITUDE
+//#define DEBUG_KERNEL_VALIDATE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -125,6 +128,10 @@ hasAttitude    (false)
 {
    objectTypes.push_back(Gmat::SPACE_POINT);
    objectTypeNames.push_back("SpacePoint");
+
+   /// derived classes must override this, as necessary, to point to
+   /// the correct path
+   theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
    SaveAllAsDefault();
 }
 
@@ -155,6 +162,7 @@ orbitSpiceKernelNames    (sp.orbitSpiceKernelNames),
 attitudeSpiceKernelNames (sp.attitudeSpiceKernelNames),
 scClockSpiceKernelNames  (sp.scClockSpiceKernelNames),
 frameSpiceKernelNames    (sp.frameSpiceKernelNames),
+theSpkPath               (sp.theSpkPath),
 hasAttitude              (false)
 {
 }
@@ -182,14 +190,19 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    naifId                   = sp.naifId;
    naifIdRefFrame           = sp.naifIdRefFrame;
    spiceSetupDone           = sp.spiceSetupDone;
+   orbitSpiceKernelNames.clear();
+   attitudeSpiceKernelNames.clear();
+   scClockSpiceKernelNames.clear();
+   frameSpiceKernelNames.clear();
    orbitSpiceKernelNames    = sp.orbitSpiceKernelNames;
    attitudeSpiceKernelNames = sp.attitudeSpiceKernelNames;
    scClockSpiceKernelNames  = sp.scClockSpiceKernelNames;
    frameSpiceKernelNames    = sp.frameSpiceKernelNames;
    default_j2000BodyName    = sp.default_j2000BodyName;
    default_naifId           = sp.default_naifId;
+   theSpkPath               = sp.theSpkPath;
    hasAttitude              = false;
-   
+
    return *this;
 }
 //---------------------------------------------------------------------------
@@ -824,15 +837,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
          for (unsigned int ii = 0; ii < kernels.size(); ii++)
          {
             parsed = ParseKernelName(kernels.at(ii));
-            #ifdef __USE_SPICE__
-               if (!SpiceInterface::IsValidKernel(parsed, "spk"))
-               {
-                  GmatBaseException gbe;
-                  gbe.SetDetails(errorMessageFormat.c_str(),
-                                 parsed.c_str(), "OrbitSpiceKernelName", "Valid SPK kernel");
-                  throw gbe;
-               }
-            #endif
+            ValidateKernel(parsed, "OrbitSpiceKernelName", "spk");
             orbitSpiceKernelNames.push_back(parsed);
          }
       }
@@ -844,15 +849,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
              MessageInterface::ShowMessage(
                    "In SP::SetString value IS NOT enclosed with braces and trimmed value is %s\n", trimmed.c_str());
          #endif
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(trimmed, "spk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "OrbitSpiceKernelName", "Valid SPK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(trimmed, "OrbitSpiceKernelName", "spk");
          #ifdef DEBUG_SPACE_POINT_ORBIT_KERNELS
              MessageInterface::ShowMessage("In SP::SetString, value = %s, trimmed = %s\n",
                    value.c_str(), trimmed.c_str());
@@ -876,30 +873,14 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
          for (unsigned int ii = 0; ii < kernels.size(); ii++)
          {
             parsed = ParseKernelName(kernels.at(ii));
-            #ifdef __USE_SPICE__
-               if (!SpiceInterface::IsValidKernel(parsed, "ck"))
-               {
-                  GmatBaseException gbe;
-                  gbe.SetDetails(errorMessageFormat.c_str(),
-                                 value.c_str(), "AttitudeSpiceKernelName", "Valid CK kernel");
-                  throw gbe;
-               }
-            #endif
+            ValidateKernel(parsed, "AttitudeSpiceKernelName", "ck");
             attitudeSpiceKernelNames.push_back(parsed);
          }
       }
       else
       {
          std::string trimmed = ParseKernelName(value);
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(trimmed, "ck"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "AttitudeSpiceKernelName", "Valid CK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(trimmed,"AttitudeSpiceKernelName", "ck");
          if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),trimmed) == attitudeSpiceKernelNames.end())
             attitudeSpiceKernelNames.push_back(trimmed);
      }
@@ -919,30 +900,14 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
          for (unsigned int ii = 0; ii < kernels.size(); ii++)
          {
             parsed = ParseKernelName(kernels.at(ii));
-            #ifdef __USE_SPICE__
-               if (!SpiceInterface::IsValidKernel(parsed, "sclk"))
-               {
-                  GmatBaseException gbe;
-                  gbe.SetDetails(errorMessageFormat.c_str(),
-                                 value.c_str(), "SCClockSpiceKernelName", "Valid SCLK kernel");
-                  throw gbe;
-               }
-            #endif
+            ValidateKernel(parsed, "SCClockSpiceKernelName", "sclk");
             scClockSpiceKernelNames.push_back(parsed);
          }
       }
       else
       {
          std::string trimmed = ParseKernelName(value);
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(trimmed, "sclk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "SCClockSpiceKernelName", "Valid SCLK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(trimmed, "SCClockSpiceKernelName", "sclk");
          if (find(scClockSpiceKernelNames.begin(), scClockSpiceKernelNames.end(),trimmed) == scClockSpiceKernelNames.end())
             scClockSpiceKernelNames.push_back(trimmed);
       }
@@ -962,30 +927,14 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
          for (unsigned int ii = 0; ii < kernels.size(); ii++)
          {
             parsed = ParseKernelName(kernels.at(ii));
-            #ifdef __USE_SPICE__
-               if (!SpiceInterface::IsValidKernel(parsed, "fk"))
-               {
-                  GmatBaseException gbe;
-                  gbe.SetDetails(errorMessageFormat.c_str(),
-                                 value.c_str(), "FrameSpiceKernelName", "Valid FK kernel");
-                  throw gbe;
-               }
-            #endif
+            ValidateKernel(parsed, "FrameSpiceKernelName", "fk");
             frameSpiceKernelNames.push_back(parsed);
          }
       }
       else
       {
          std::string trimmed = ParseKernelName(value);
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(trimmed, "fk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "FrameSpiceKernelName", "Valid FK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(trimmed, "FrameSpiceKernelName", "fk");
          if (find(frameSpiceKernelNames.begin(), frameSpiceKernelNames.end(),trimmed) == frameSpiceKernelNames.end())
             frameSpiceKernelNames.push_back(trimmed);
       }
@@ -1222,15 +1171,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
    {
       case ORBIT_SPICE_KERNEL_NAME:
       {
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(value, "spk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "OrbitSpiceKernelName", "Valid SPK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(value, "OrbitSpiceKernelName", "spk");
          if (index < (Integer)orbitSpiceKernelNames.size())
             orbitSpiceKernelNames[index] = value;
          // Only add the orbit spice kernel name if it is not in the list already
@@ -1242,15 +1183,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
       }
    case ATTITUDE_SPICE_KERNEL_NAME:
       {
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(value, "ck"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "AttitudeSpiceKernelName", "Valid CK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(value, "AttitudeSpiceKernelName", "ck");
          if (index < (Integer)attitudeSpiceKernelNames.size())
             attitudeSpiceKernelNames[index] = value;
          // Only add the orbit spice kernel name if it is not in the list already
@@ -1262,15 +1195,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
      }
    case SC_CLOCK_SPICE_KERNEL_NAME:
       {
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(value, "sclk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "SCClockSpiceKernelName", "Valid SCLK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(value, "SCClockSpiceKernelName", "sclk");
          if (index < (Integer)scClockSpiceKernelNames.size())
             scClockSpiceKernelNames[index] = value;
          // Only add the orbit spice kernel name if it is not in the list already
@@ -1282,15 +1207,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
       }
    case FRAME_SPICE_KERNEL_NAME:
       {
-         #ifdef __USE_SPICE__
-            if (!SpiceInterface::IsValidKernel(value, "fk"))
-            {
-               GmatBaseException gbe;
-               gbe.SetDetails(errorMessageFormat.c_str(),
-                              value.c_str(), "FrameSpiceKernelName", "Valid FK kernel");
-               throw gbe;
-            }
-         #endif
+         ValidateKernel(value, "FrameSpiceKernelName", "fk");
          if (index < (Integer)frameSpiceKernelNames.size())
             frameSpiceKernelNames[index] = value;
          // Only add the orbit spice kernel name if it is not in the list already
@@ -1421,3 +1338,68 @@ std::string SpacePoint::ParseKernelName(const std::string &kernel)
    return GmatStringUtil::Trim(GmatStringUtil::RemoveEnclosingString(GmatStringUtil::Trim(kernel), "\'"));
 }
 
+//------------------------------------------------------------------------------
+// void ValidateKernel(const std::string &kName,
+//                     const std::string label = "OrbitSpiceKernelName",
+//                     const std::string ofType)
+//------------------------------------------------------------------------------
+/**
+ * This method checks the input kernel for existence and proper type.
+ *
+ * @param kName  input kernel name
+ * @param label  label for the field
+ * @param ofType kernel type
+ *
+ */
+//------------------------------------------------------------------------------
+void SpacePoint::ValidateKernel(const std::string &kName, const std::string label,
+                                const std::string ofType)
+{
+#ifdef DEBUG_KERNEL_VALIDATE
+   MessageInterface::ShowMessage("ValidateKernel with kName = \"%s\", and ofType = \"%s\"\n",
+         kName.c_str(), ofType.c_str());
+   MessageInterface::ShowMessage("   and label = %s\n", label.c_str());
+#endif
+
+   std::string fullSpkName = kName;
+   #ifdef DEBUG_KERNEL_VALIDATE
+      MessageInterface::ShowMessage(" ................. kName = \"%s\"\n",
+            fullSpkName.c_str());
+   #endif
+   if (!(GmatFileUtil::DoesFileExist(kName)))
+   {
+      // try again with path name from startup file
+      if (GmatFileUtil::ParsePathName(kName) == "")
+         fullSpkName = theSpkPath + fullSpkName;
+      #ifdef DEBUG_KERNEL_VALIDATE
+         MessageInterface::ShowMessage(" ................. AND NOW fullSpkName = \"%s\"\n",
+               fullSpkName.c_str());
+      #endif
+
+      if (!(GmatFileUtil::DoesFileExist(fullSpkName)))
+      {
+         // Need to check with standard (slash) path separator here, as DoesFileExist
+         // does not currently check, and back-slashes do not work on Mac
+         std::string fName = GmatStringUtil::Replace(fullSpkName, "\\", "/");
+         fullSpkName = fName;
+         if (!(GmatFileUtil::DoesFileExist(fullSpkName)))
+         {
+            GmatBaseException gbe;
+            gbe.SetDetails(errorMessageFormat.c_str(),
+                  fullSpkName.c_str(), label.c_str(), "File must exist");
+            throw gbe;
+         }
+      }
+   }
+   #ifdef __USE_SPICE__
+      if (!SpiceInterface::IsValidKernel(fullSpkName, ofType))
+      {
+         GmatBaseException gbe;
+         std::string valid = "Valid ";
+         valid += GmatStringUtil::ToUpper(ofType) + " kernel";
+         gbe.SetDetails(errorMessageFormat.c_str(),
+               fullSpkName.c_str(), label.c_str(), valid.c_str());
+         throw gbe;
+      }
+   #endif
+}

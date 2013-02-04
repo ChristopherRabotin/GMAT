@@ -37,6 +37,10 @@
 //#define DEBUG_SPK_PLANETS
 //#define DEBUG_VALID_KERNEL
 
+#ifdef DEBUG_VALID_KERNEL
+#include <unistd.h>
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -116,9 +120,18 @@ std::string    SpiceInterface::lsKernel = "";
 bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::string &ofType)
 {
    #ifdef DEBUG_VALID_KERNEL
-      MessageInterface::ShowMessage("Entering SpiceInterface::IsValidKernel with fileName = %s and ofType = %s\n",
+      MessageInterface::ShowMessage("Entering SpiceInterface::IsValidKernel with fileName = \"%s\" and ofType = \"%s\"\n",
             fileName.c_str(), ofType.c_str());
+      char *curPath = NULL;
+      size_t itsSize = 0;
+      curPath = getcwd(curPath, itsSize);
+      MessageInterface::ShowMessage("   and the current directory is \"%s\"\n", curPath);
    #endif
+
+   // Initialize here, since this may be called before a KernelReader or
+   // KernelWriter is created
+   InitializeInterface();
+
    char             kStr[5] = "    ";
    char             aStr[4] = "   ";
    SpiceInt         arclen      = 4;
@@ -136,7 +149,12 @@ bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::strin
    getfat_c(kernelName, arclen, typlen, arch, kernelType);
    if (failed_c())
    {
-      return false;
+      #ifdef DEBUG_VALID_KERNEL
+         MessageInterface::ShowMessage("In SpiceInterface::IsValidKernel, cannot find file \"%s\" ...\n",
+               kName.c_str());
+      #endif
+      reset_c();
+     return false;
    }
    #ifdef DEBUG_VALID_KERNEL
       MessageInterface::ShowMessage("In SpiceInterface::IsValidKernel, found file, now checking type ...\n");
@@ -269,13 +287,11 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
         jj != loadedKernels.end(); ++jj)
       if ((*jj) == fName)
       {
-//         MessageInterface::ShowMessage("Spice kernel %s has already been loaded.\n",
-//               (*jj).c_str());
          return false;
       }
    kernelNameSPICE = fName.c_str();
    furnsh_c(kernelNameSPICE);
-   if (failed_c() == SPICETRUE)
+   if (failed_c()) //  == SPICETRUE)
    {
 //      ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
 //      SpiceInt       numChar  = MAX_SHORT_MESSAGE;
@@ -665,6 +681,7 @@ void SpiceInterface::InitializeInterface()
    if (numInstances == 0)
    {
       loadedKernels.clear();
+      kclear_c();  // clear all kernels from the pool
       // Get path for output
       FileManager *fm = FileManager::Instance();
       std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH) + "GMATSpiceKernelError.txt";

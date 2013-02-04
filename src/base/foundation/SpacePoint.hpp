@@ -237,11 +237,19 @@ protected:
    /// Frame SPICE kernel name(s)
    StringArray     frameSpiceKernelNames;
    
+   /// full path to SPK kernels for this SpacePoint; derived classes must
+   /// set  this, if the associated SPK kernels are not located in the default
+   /// folder (SPK_PATH, as defined in the FileManager).
+   std:: string    theSpkPath;
+
    /// Current rotation matrix (from inertial to body)
    bool      hasAttitude;
    Rmatrix33 cosineMat;
 
    std::string ParseKernelName(const std::string &kernel);
+   void        ValidateKernel(const std::string &kName,
+                              const std::string label  = "OrbitSpiceKernelName",
+                              const std::string ofType = "spk");
 
 };
 #endif // SpacePoint_hpp
