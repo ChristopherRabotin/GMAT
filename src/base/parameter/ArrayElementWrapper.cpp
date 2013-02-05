@@ -84,12 +84,21 @@ ArrayElementWrapper::ArrayElementWrapper() :
 ArrayElementWrapper::ArrayElementWrapper(const ArrayElementWrapper &aew) :
    ElementWrapper(aew),
    array         (NULL),
-   row           (NULL),
-   column        (NULL),
    arrayName     (aew.arrayName),
    rowName       (aew.rowName),
    columnName    (aew.columnName)
 {
+   if (aew.row != NULL)
+      row = aew.row->Clone();
+   else
+      row          = NULL;
+
+   if (aew.column != NULL)
+      column = aew.column->Clone();
+   else
+      column       = NULL;
+
+   SetupWrapper();
 }
 
 //---------------------------------------------------------------------------
@@ -111,11 +120,22 @@ const ArrayElementWrapper& ArrayElementWrapper::operator=(
 
    ElementWrapper::operator=(aew);
    array        = NULL;  //
-   row          = NULL;  // or do I want copies or clones here?
-   column       = NULL;  //
+
+   if (aew.row != NULL)
+      row = aew.row->Clone();
+   else
+      row          = NULL;
+
+   if (aew.column != NULL)
+      column = aew.column->Clone();
+   else
+      column       = NULL;
+
    arrayName    = aew.arrayName;
    rowName      = aew.rowName;
    columnName   = aew.columnName;
+
+   SetupWrapper();
 
    return *this;
 }
@@ -322,8 +342,15 @@ Real ArrayElementWrapper::EvaluateReal() const
       throw ParameterException(
       "Cannot return value of ArrayElement - object pointer is NULL\n");
    if ((row == NULL) || (column == NULL))
-      throw ParameterException(
-      "Cannot return value of ArrayElement - row or column element is NULL\n");
+   {
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage("row = <%p>, column = <%p>\n", row,
+               column);
+      #endif
+
+      throw ParameterException("Cannot return value of ArrayElement - row or "
+            "column element is NULL\n");
+   }
    Real itsValue;
    Integer rowInt    = -99;
    Integer columnInt = -99;
@@ -517,7 +544,6 @@ bool ArrayElementWrapper::SetColumn(ElementWrapper* toWrapper)
 //---------------------------------------------------------------------------
 /**
  * Method to set up the Array Element Wrapper.
- *
  */
 //---------------------------------------------------------------------------
 void ArrayElementWrapper::SetupWrapper()
