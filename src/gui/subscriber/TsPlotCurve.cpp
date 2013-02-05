@@ -22,6 +22,8 @@
 
 //#define DEBUG_PENUP_PENDOWN
 //#define DEBUG_MESSSAGE_FLOW
+//#define DEBUG_REPEATED_POINTS
+
 
 // #define TEST_POINT_22  // Tests curve change features starting at point 22
 
@@ -122,7 +124,7 @@ void TsPlotCurve::AddData(double x, double y, double high, double low)
       }
 
       // Only add points that do not match the previous point
-      if ((x != lx) && (y != ly))
+      if (!((x == lx) && (y == ly)))
       {
          abscissa.push_back(x);
          ordinate.push_back(y);
@@ -154,7 +156,13 @@ void TsPlotCurve::AddData(double x, double y, double high, double low)
             rangeChanged = true;
          }
       }
-
+      #ifdef DEBUG_REPEATED_POINTS
+         else
+         {
+            MessageInterface::ShowMessage("Omitting [%le %le] because it matches "
+                  "[%le %le]\n", x, y, lx, ly);
+         }
+      #endif
       #if DEBUG_XY_PLOT_CURVE_ADD
          MessageInterface::ShowMessage
             ("TsPlotCurve::AddData() size = %d, x = %lf, y = %lf\n",

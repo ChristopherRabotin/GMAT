@@ -441,10 +441,11 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
                   }
                   else if (find(highlights->begin(), highlights->end(), j) !=
                         highlights->end())
-                     if (j > 0) 
-                        DrawMarker(dc, highlightMarker, markerSize, x1, y1,
-                              plotPens[n]);
-                     else
+// Omitted so that marker is ALWAYS placed on last point received (GMT-3478)
+//                     if (j > 0)
+//                        DrawMarker(dc, highlightMarker, markerSize, x1, y1,
+//                              plotPens[n]);
+//                     else
                         DrawMarker(dc, highlightMarker, markerSize, x0, y0,
                               plotPens[n]);
                }
