@@ -796,6 +796,7 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::OPTIMIZER:
       theGuiManager->UpdateSolver();
       break;
+   case GmatTree::PREDEFINED_BARYCENTER:
    case GmatTree::BARYCENTER:
    case GmatTree::LIBRATION_POINT:
       theGuiManager->UpdateCelestialPoint();
@@ -1941,11 +1942,21 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
    StringArray itemNames =
       GmatAppData::Instance()->GetGuiInterpreter()->GetListOfObjects(Gmat::CALCULATED_POINT);
    int size = itemNames.size();
+   wxString objName;
    
    for (int i = 0; i<size; i++)
    {
-      GmatBase *obj = GetObject(itemNames[i]);
-      AddObjectToTree(obj);
+      objName = wxString(itemNames[i].c_str());
+      if ((objName == "SSB") || (objName == "SolarSystemBarycenter"))
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_BARYCENTER, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::PREDEFINED_BARYCENTER));
+      }
+      else
+      {
+         GmatBase *obj = GetObject(itemNames[i]);
+         AddObjectToTree(obj);
+      }
    };
    
    if (size > 0)
@@ -4833,6 +4844,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       case GmatTree::CELESTIAL_BODY_MOON:
       case GmatTree::CELESTIAL_BODY_COMET:
       case GmatTree::CELESTIAL_BODY_ASTEROID:
+      case GmatTree::PREDEFINED_BARYCENTER:
       case GmatTree::PREDEFINED_COORDINATE_SYSTEM:
          menu.Append(POPUP_OPEN, wxT("Open"));
          menu.Append(POPUP_CLOSE, wxT("Close"));
@@ -5125,6 +5137,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::SENSOR:
       objType = Gmat::HARDWARE;
       break;
+   case GmatTree::PREDEFINED_BARYCENTER:
    case GmatTree::BARYCENTER:
    case GmatTree::LIBRATION_POINT:
       objType = Gmat::CALCULATED_POINT;
@@ -5210,6 +5223,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::HARDWARE:
       return mHardwareItem;
       
+   case GmatTree::PREDEFINED_BARYCENTER:
    case GmatTree::BARYCENTER:
    case GmatTree::LIBRATION_POINT:
       return mSpecialPointsItem;

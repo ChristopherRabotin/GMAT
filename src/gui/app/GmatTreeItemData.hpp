@@ -241,6 +241,7 @@ namespace GmatTree
       CELESTIAL_BODY_MOON,    //
       CELESTIAL_BODY_COMET,   // wcs 2009.01.09
       CELESTIAL_BODY_ASTEROID,//
+      PREDEFINED_BARYCENTER,
       BARYCENTER,
       LIBRATION_POINT,
       

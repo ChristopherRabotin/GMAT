@@ -3941,6 +3941,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::USER_COORDINATE_SYSTEM:
       sizer->Add(new CoordSystemConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::PREDEFINED_BARYCENTER:
    case GmatTree::BARYCENTER:
       sizer->Add(new BarycenterPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
