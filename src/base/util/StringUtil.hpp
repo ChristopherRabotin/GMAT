@@ -92,7 +92,7 @@ namespace GmatStringUtil
    GMAT_API StringArray SeparateBy(const std::string &str, const std::string &delim,
                            bool putBracketsTogether = false, bool insertDelim = false,
                            bool insertComma = true);
-   GMAT_API StringArray SeparateByComma(const std::string &str);
+   GMAT_API StringArray SeparateByComma(const std::string &str, bool checkSingleQuote = true);
    GMAT_API StringArray SeparateDots(const std::string &str);
    GMAT_API StringArray DecomposeBy(const std::string &str, const std::string &delim);
    
@@ -128,6 +128,7 @@ namespace GmatStringUtil
    GMAT_API std::string GetArrayName(const std::string &str,
                            const std::string &bracketPair = "()");
    GMAT_API bool IsOneElementArray(const std::string &str);
+   GMAT_API bool IsSimpleArrayElement(const std::string &str);
    
    GMAT_API void FindFirstAndLast(const std::string &str, char ch, Integer &first,
                            Integer &last);
@@ -159,6 +160,7 @@ namespace GmatStringUtil
    GMAT_API bool IsParenPartOfArray(const std::string &str);
    GMAT_API bool IsThereEqualSign(const std::string &str);
    GMAT_API bool IsThereMathSymbol(const std::string &str);
+   GMAT_API bool IsThereScientificNotation(const std::string &str);
    GMAT_API bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
    GMAT_API bool IsSingleItem(const std::string &str);
    GMAT_API bool StartsWith(const std::string &str, const std::string &value);

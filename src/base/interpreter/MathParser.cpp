@@ -184,7 +184,6 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       return false;
    }
    // Check if it is just a number
-   //else if (GmatStringUtil::ToReal(str, &rval))
    else if (GmatStringUtil::IsValidReal(str, rval, errCode))
    {
       #if DEBUG_PARSE_EQUATION
@@ -290,13 +289,27 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       #endif
       // Remove blanks before checking for function name
       str1 = GmatStringUtil::RemoveAllBlanks(str1);
-      // Remove extra layer of parenthesis before checking
-      str1 = GmatStringUtil::RemoveExtraParen(str1);
-      
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
-         ("   After blank removal str1=<%s>\n", str1.c_str());
+         ("   After blank removal, str1=<%s>\n", str1.c_str());
       #endif
+      
+      // Remove extra layer of parenthesis before checking
+      str1 = GmatStringUtil::RemoveExtraParen(str1);
+      #if DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage
+         ("   After extra paren removal, str1=<%s>\n", str1.c_str());
+      #endif
+      
+      // Check for no operands
+      if (str1.size() == 1 && GmatStringUtil::IsMathOperator(str1[0]))
+      {
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage
+            ("MathParser::IsEquation() 4 Throwng exception - Invalid number or math equation\n");
+         #endif
+         throw MathException("Incomplete math equation");
+      }
       
       // build GmatFunction list first
       BuildGmatFunctionList(str1);
@@ -322,7 +335,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       }
       else
       {
-         // Check ' for matrix transpose and ^(-1) for inverse
+         // Check for matrix transpose and inverse operator
          if (str1.find(transposeOpStr) != str1.npos || str1.find(inverseOpStr) != str1.npos)
             isEq = true;
       }
@@ -347,8 +360,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
  *
  * Precedence of operators is (highest to lowest)
  *    Parentheses ()
- *    matrix Transpose('), matrix inverse (^(-1)) - more to right has lower precedence
- *    power (^)
+ *    power(^), matrix Transpose('), matrix inverse (^(-1)) - more to right has lower precedence
  *    Unary plus (+), unary minus (-)
  *    Multiplication (*), right division (/), matrix multiplication (*), matrix right division (/)
  *    Addition (+), subtraction (-)
@@ -408,11 +420,11 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    
    #if DEBUG_FIND_LOWEST_OPERATOR
    MessageInterface::ShowMessage
-      ("FindLowestOperator() Find lowest operator before the last close "
-       "parenthesis from <%s>\n", str.c_str());
+      ("FindLowestOperator() Find lowest operator before the last matching "
+       "close parenthesis from <%s>\n", str.c_str());
    #endif
    //-----------------------------------------------------------------
-   // find a lowest operator before last close paren
+   // find a lowest operator before last matching close paren
    //-----------------------------------------------------------------
    while (!done)
    {
@@ -590,17 +602,16 @@ MathNode* MathParser::Parse(const std::string &str)
    #endif
    
    // first remove all blank spaces, extra layer of parenthesis, and semicoln
-   //std::string newEq = GmatStringUtil::RemoveAllBlanks(theEquation);
    std::string newEq = RemoveSpaceInMathEquation(theEquation);
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("   After removing spaces, newEq=<%s>\n", newEq.c_str());
+      ("   After removing spaces, newEq=%s\n", newEq.c_str());
    #endif
    
    newEq = GmatStringUtil::RemoveExtraParen(newEq);
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("   After removing extra parenthesis, newEq=<%s>\n", newEq.c_str());
+      ("   After removing extra parenthesis, newEq=%s\n", newEq.c_str());
    #endif
    
    std::string::size_type index = newEq.find_first_of(';');
@@ -1418,12 +1429,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
          }
          else
          {
-            // Replace ' (transpose) with $, since SeparateByComma() checks for single quote
-            std::string str1 = GmatStringUtil::Replace(str, "'", "$");
-            #ifdef DEBUG_ATAN2
-            MessageInterface::ShowMessage("   After replacing ' with $, str1=<%s>\n", str1.c_str());
-            #endif
-            
+            std::string str1 = str;
             std::string atan2Str = str1.substr(openParen);
             bool parsingFailed = false;
             #ifdef DEBUG_ATAN2
@@ -1435,7 +1441,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
             MessageInterface::ShowMessage("   After removing extra parenthesis, atan2Str=<%s>\n", atan2Str.c_str());
             #endif
             
-            StringArray parts = GmatStringUtil::SeparateByComma(atan2Str);
+            StringArray parts = GmatStringUtil::SeparateByComma(atan2Str, false);
             
             #ifdef DEBUG_ATAN2
             for (UnsignedInt i = 0; i < parts.size(); i++)
@@ -1448,7 +1454,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
             {
                parsingFailed = true;
                std::string str2 = str1.substr(openParen+1, index2-openParen-1);               
-               parts = GmatStringUtil::SeparateByComma(str2);
+               parts = GmatStringUtil::SeparateByComma(str2, false);
                
                #ifdef DEBUG_ATAN2
                for (UnsignedInt i = 0; i < parts.size(); i++)
@@ -1499,19 +1505,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       return items;
    }
    
-   // Why is FindLowestOperator() called again here?
-   // Exclude it (LOJ: 2012.11.15)
-   #if 0
-   Integer index2;
-   //-----------------------------------------------------------------
-   // find the lowest operator
-   //-----------------------------------------------------------------
-   #if DEBUG_PARENTHESIS
-   MessageInterface::ShowMessage("   Calling FindLowestOperator() str=<%s>\n", str.c_str());
-   #endif
-   std::string opStr2 = FindLowestOperator(str, index2);
-   #endif
-   
+   // Get operator name
    if (opStr1 != "")
    {
       bool opFound;      
@@ -1575,10 +1569,9 @@ std::string::size_type MathParser::FindOperatorIndex(std::string::size_type inde
    Integer i3 = (Integer)index3;
    
    #if DEBUG_FIND_OPERATOR > 1
-   MessageInterface::ShowMessage
-      ("   ===> i1=%3d, i2=%3d, i3=%3d\n", i1, i2, i3);
+   MessageInterface::ShowMessage("   ===> i1=%3d, i2=%3d, i3=%3d\n", i1, i2, i3);
    #endif
-      
+   
    std::string::size_type index = std::string::npos;
    
    if (i1 > i2 && i1 > i3)
@@ -1589,8 +1582,7 @@ std::string::size_type MathParser::FindOperatorIndex(std::string::size_type inde
       index = index3;
    
    #if DEBUG_FIND_OPERATOR > 1
-   MessageInterface::ShowMessage
-      ("FindOperatorIndex() returning %u\n", index);
+   MessageInterface::ShowMessage("FindOperatorIndex() returning %u\n", index);
    #endif
    
    return index;
@@ -1615,15 +1607,11 @@ std::string MathParser::FindOperatorFrom(const std::string &str, std::string::si
    std::string op;
    std::string str1 = str.substr(start);
    std::string::size_type index = str1.npos;
-   
-   // Replace scientific notation e- E- e+ E+
-   str1 = GmatStringUtil::ReplaceNumber(str1, "e-", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "e+", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "E-", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "E+", "e#");
+   str1 = GmatStringUtil::RemoveScientificNotation(str1);
    
    #if DEBUG_FIND_OPERATOR
-   MessageInterface::ShowMessage("   str1=<%s>\n", str1.c_str());
+   MessageInterface::ShowMessage
+      ("   After removing sci notation, str1=<%s>\n", str1.c_str());
    #if DEBUG_FIND_OPERATOR > 1
    MessageInterface::ShowMessage("   Find + -\n");
    #endif
@@ -1631,7 +1619,11 @@ std::string MathParser::FindOperatorFrom(const std::string &str, std::string::si
    
    std::string::size_type index1 = str1.find_last_of("+");
    std::string::size_type index2 = str1.find_last_of("-");
+   std::string::size_type index3 = str1.npos;
    index = FindOperatorIndex(index1, index2);
+   #if DEBUG_FIND_OPERATOR
+   MessageInterface::ShowMessage("   +, - index from FindOperatorIndex() = %u\n", index);
+   #endif
    
    if (index == str1.npos)
    {
@@ -1641,24 +1633,23 @@ std::string MathParser::FindOperatorFrom(const std::string &str, std::string::si
       index1 = str1.find_last_of("*");
       index2 = str1.find_last_of("/");
       index = FindOperatorIndex(index1, index2);
+      #if DEBUG_FIND_OPERATOR
+      MessageInterface::ShowMessage("   *, / index from FindOperatorIndex() = %u\n", index);
+      #endif
       
       if (index == str1.npos)
       {
          #if DEBUG_FIND_OPERATOR > 1
-         MessageInterface::ShowMessage("   Find ^\n");
+         MessageInterface::ShowMessage("   Find transposeOp, inverseOp, or ^\n");
          #endif
          
-         index = str1.find_last_of("^");
-         
-         if (index == str1.npos)
-         {
-            #if DEBUG_FIND_OPERATOR > 1
-            MessageInterface::ShowMessage("   Find ' %s\n", inverseOpStr.c_str());
-            #endif
-            index1 = str1.find_last_of(transposeOpStr);
-            index2 = str1.find_last_of(inverseOpStr);
-            index = FindOperatorIndex(index1, index2);
-         }
+         index1 = str1.find_last_of(transposeOpStr);
+         index2 = str1.find_last_of(inverseOpStr);
+         index3 = str1.find_last_of("^");
+         index = FindOperatorIndex(index1, index2, index3);
+         #if DEBUG_FIND_OPERATOR > 1
+         MessageInterface::ShowMessage("   '$^ index from FindOperatorIndex() = %u\n", index);
+         #endif
       }
    }
    
@@ -1714,8 +1705,6 @@ std::string MathParser::GetOperatorName(const std::string &op, bool &opFound)
       opName = "Transpose";
    else if (op == inverseOpStr)
       opName = "Inv";
-   //else if (op == "^(-1)") //GMT-3046 LOJ:2012.09.06
-   //   opName = "Inv";
    else
       opFound = false;
    
@@ -1764,40 +1753,38 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
    #endif
    
    std::string str1 = str;
-   
-   // Replace scientific notation e- E- e+ E+
-   str1 = GmatStringUtil::ReplaceNumber(str1, "e-", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "e+", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "E-", "e#");
-   str1 = GmatStringUtil::ReplaceNumber(str1, "E+", "e#");
+   str1 = GmatStringUtil::RemoveScientificNotation(str1);
    
    StringArray items;
    std::string op;
    std::string::size_type index;
    std::string::size_type index1 = str1.find_last_of("+");
    std::string::size_type index2 = str1.find_last_of("-");
-   std::string::size_type index3 = str1.find_first_of("-");
+   std::string::size_type firstUnaryMinusIndex = str1.find_first_of("-");
+   std::string::size_type index3 = firstUnaryMinusIndex;
    bool unaryMinusFound = false;
    bool checkNext = true;
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindOperator() for +,- index1=%u, index2=%u, index3=%u\n", index1, index2, index3);
+      ("FindOperator() for +,- index1=%u, index2=%u, firstUnaryMinusIndex=%u\n",
+       index1, index2, firstUnaryMinusIndex);
    #endif
    
    if (index1 != str1.npos || index2 != str1.npos)
       checkNext = false;
    
    // Check for unary - operator
-   if (index3 != str1.npos)
+   if (firstUnaryMinusIndex != str1.npos)
    {
       // LOJ:2012.01.19 (for bug 2493 fix)
       // if unary - is at the first position and length is greator than 1,
       // check for another + or - after 0
-      if (index3 == 0)
+      if (firstUnaryMinusIndex == 0)
       {
          #if DEBUG_FIND_OPERATOR
-         MessageInterface::ShowMessage("   Found unary minus operator at %u\n", index3);
+         MessageInterface::ShowMessage
+            ("   Found unary minus operator at %u\n", firstUnaryMinusIndex);
          #endif
          unaryMinusFound = true;
          
@@ -1808,13 +1795,18 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             std::string str2 = (isAfterCloseParen ? str1 : str1.substr(1, str1.npos));
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
-               ("   Check if there are operators in <%s>\n", str2.c_str());
+               ("   Check if there are more operators in <%s>\n", str2.c_str());
             #endif
             std::string opStr = FindOperator(str2, opIndex);
             if (opStr != "")
             {
                index1 = str2.find_last_of("+");
                index2 = str2.find_last_of("-");
+               
+               #if DEBUG_FIND_OPERATOR
+               MessageInterface::ShowMessage
+                  ("   last plus = %u, last minus = %u\n", index1, index2);
+               #endif
                
                if (index1 != str1.npos || index2 != str1.npos)
                {
@@ -1831,7 +1823,8 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             }
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
-               ("FindOperator() 2 for +,- index1=%u, index2=%u\n", index1, index2);
+               ("FindOperator() 2 for +,- index1=%u, index2=%u, checkNext=%d\n",
+                index1, index2, checkNext);
             #endif
          }
       }
@@ -1862,12 +1855,13 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             if ((index2 != str1.npos) && IsValidOperator(doubleOp))
             {
                #if DEBUG_FIND_OPERATOR
-               MessageInterface::ShowMessage("   Found unary minus operator at %u\n", index3);
+               MessageInterface::ShowMessage
+                  ("   Found unary minus operator at %u\n", firstUnaryMinusIndex);
                #endif
                unaryMinusFound = true;
                // Make - operator not found by setting npos
                index2 = str1.npos;
-               index3 = str1.npos;
+               firstUnaryMinusIndex = str1.npos;
                checkNext = true;
             }
          }
@@ -1928,14 +1922,18 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
       
       if (index1 == str1.npos && index2 == str1.npos)
       {
-         if (unaryMinusFound)
+         // Check for the unary minus at the beginning
+         //LOJ: 2013.01.30 for GMT-3497 fix
+         //if (unaryMinusFound)
+         if (unaryMinusFound && firstUnaryMinusIndex != 0)
          {
             op = "-";
             opIndex = 0;
             
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
-               ("FindOperator() returning op=%s, opIndex=%u\n", op.c_str(), opIndex);
+               ("FindOperator() returning op=%s, opIndex=%u, unary minus found\n",
+                op.c_str(), opIndex);
             #endif
             
             return op;
@@ -2265,76 +2263,19 @@ std::string::size_type MathParser::FindSubtract(const std::string &str,
    #endif
    
    std::string::size_type index2 = str.find('-', start);
-   std::string::size_type index3 = str.find("^(-1)", start);
-   
    #if DEBUG_INVERSE_OP
-   MessageInterface::ShowMessage
-      ("MathParser::FindSubtract() index2=%u, index3=%u\n", index2, index3);
+   MessageInterface::ShowMessage("MathParser::FindSubtract() index2=%u\n", index2);
    #endif
    
-   // found no ^(-1)
-   if (index2 != str.npos && index3 == str.npos)
+   // If minus found, return it
+   if (index2 != str.npos)
    {
       #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
-         ("MathParser::FindSubtract() found no ^(-1) returning index2=%u\n",
+         ("MathParser::FindSubtract() found minus (-) returning index2=%u\n",
           index2);
       #endif
       return index2;
-   }
-   
-   // found - inside of ^(-1)
-   if (index2 > index3 && index3 + 5 == str.size())
-   {
-      #if DEBUG_INVERSE_OP
-      MessageInterface::ShowMessage
-         ("MathParser::FindSubtract() found - inside of ^(-1) "
-          "returning str.size()=%u\n", str.size());
-      #endif
-      return str.size();
-   }
-
-   // found - and ^(-1)
-   if (index2 < index3)
-   {
-      #if DEBUG_INVERSE_OP
-      MessageInterface::ShowMessage
-         ("MathParser::FindSubtract() found - and ^(-1) "
-          "returning index2=%u\n", index2);
-      #endif
-      return index2;
-   }
-
-   
-   if (index3 != str.npos)
-   {
-      // If it has only "^(-1)", handle it later in DecomposeMatrixOps()
-      if (index3+5 == str.size())
-      {
-         #if DEBUG_INVERSE_OP
-         MessageInterface::ShowMessage
-            ("MathParser::FindSubtract() found ^(-1) str=%s\n",
-             str.c_str());
-         MessageInterface::ShowMessage
-            ("MathParser::FindSubtract() returning str.size()=%u\n", str.size());
-         #endif
-         
-         return str.size();
-      }
-      else
-      {
-         std::string::size_type index = FindSubtract(str, index3+5);
-         
-         #if DEBUG_INVERSE_OP
-         MessageInterface::ShowMessage
-            ("MathParser::FindSubtract() index=%u, after FindSubtract()\n",
-             index);
-         #endif
-         
-         // if found first - not in ^(-1)
-         if (index != str.npos && index != str.size())
-            return index;
-      }
    }
    
    #if DEBUG_INVERSE_OP
@@ -2422,7 +2363,7 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    //-------------------------------------------------------
    if (index2 == 0 && index1 == str.npos)
    {
-      #if DEBUG_INVERSE_OP
+      #if DEBUG_ADD_SUBTRACT
       MessageInterface::ShowMessage
          ("MathParser::ParseAddSubtract() found unary str=%s\n", str.c_str());
       #endif
@@ -2599,12 +2540,13 @@ StringArray MathParser::ParsePower(const std::string &str)
       return items;
    }
    
-   // If it is ^(-1), handle it later in DecomposeMatrixOps()
-   if (str.find("^(-1)") != str.npos)
+   // If it is inverseOpStr, handle it later in DecomposeMatrixOps()
+   if (str.find(inverseOpStr) != str.npos)
    {
       #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
-         ("MathParser::ParsePower() found ^(-1) str=%s\n", str.c_str());
+         ("MathParser::ParsePower() found inverseOp(%s) for ^(-1) str=%s\n",
+          inverseOpStr.c_str(), str.c_str());
       #endif
       
       FillItems(items, "", "", "");
@@ -2627,7 +2569,7 @@ StringArray MathParser::ParsePower(const std::string &str)
          return items;
       }
    }
-
+   
    
    std::string::size_type index = str.npos;
    if (index1 != str.npos)
@@ -2668,19 +2610,7 @@ StringArray MathParser::ParseUnary(const std::string &str)
    StringArray items;
    std::string op = "";
    
-   // If it is ^(-1), handle it later in DecomposeMatrixOps()
-   if (str.find("^(-1)") != str.npos)
-   {
-      #if DEBUG_INVERSE_OP
-      MessageInterface::ShowMessage
-         ("MathParser::ParseUnary() found ^(-1) str=%s\n", str.c_str());
-      #endif
-      
-      FillItems(items, "", "", "");
-      return items;
-   }
-   
-   // find  - or -
+   // find  - or +
    std::string::size_type index1 = str.find('-');
    std::string::size_type index2 = str.find('+');
    
@@ -2696,34 +2626,7 @@ StringArray MathParser::ParseUnary(const std::string &str)
       op = "";
    
    std::string left;
-   
-   // If power ^ found
-   if (str.find("^") != str.npos)
-   {
-      #if DEBUG_POWER
-      MessageInterface::ShowMessage
-         ("MathParser::ParseUnary() found ^ str=%s\n", str.c_str());
-      #endif
-      
-      left = str.substr(index1+1);
-   }
-   else
-   {
-      left = str.substr(index1+1, str.npos);
-   }
-   
-   // For bug 2493 fix
-   // If there is no matching ), then remove it (LOJ: 2011.01.20)
-   #if DEBUG_UNARY
-   MessageInterface::ShowMessage("   before: left = <%s>\n", left.c_str());
-   #endif
-   
-   if (left.find_first_of("(") == left.npos && (left.find_last_of(")") != left.npos))
-      left = GmatStringUtil::RemoveLastString(left, ")");
-   
-   #if DEBUG_UNARY
-   MessageInterface::ShowMessage("   after:  left = <%s>\n", left.c_str());
-   #endif
+   left = str.substr(index1+1, str.npos);
    
    FillItems(items, op, left, "");
    

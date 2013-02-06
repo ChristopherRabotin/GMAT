@@ -98,8 +98,14 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
    #endif
    
    if (!leftNode || !rightNode)
-      throw MathException("Subtract() - Missing input arguments in \"" + 
-                          GetName() + "\"");
+   {
+      #ifdef DEBUG_INPUT_OUTPUT
+      MessageInterface::ShowMessage
+         ("Subtract::GetOutputInfo() throwing exception in '%s', leftNode=<%p>, "
+          "rightNode=<%p>\n", GetName().c_str(), leftNode, rightNode);
+      #endif
+      throw MathException("Subtract() - Missing input arguments");
+   }
    
    Integer type1 = -1, row1 = -1, col1 = -1; // Left node
    Integer type2 = -1, row2 = -1, col2 = -1; // Right node
@@ -169,8 +175,14 @@ bool Subtract::ValidateInputs()
    bool retval = false;
    
    if (!leftNode || !rightNode)
-      throw MathException("Subtract() - Missing input arguments in \"" + 
-                          GetName() + "\"");
+   {
+      #ifdef DEBUG_INPUT_OUTPUT
+      MessageInterface::ShowMessage
+         ("Subtract::ValidateInputs() throwing exception in '%s', leftNode=<%p>, "
+          "rightNode=<%p>\n", GetName().c_str(), leftNode, rightNode);
+      #endif
+      throw MathException("Subtract() - Missing input arguments");
+   }
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);

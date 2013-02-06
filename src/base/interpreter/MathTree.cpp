@@ -739,7 +739,7 @@ bool MathTree::InitializeParameter(MathNode *node)
       if (undefNames == "")
          return true;
       else
-         throw InterpreterException("Undefined variable(s) \"" + undefNames + "\" used");
+         throw InterpreterException("Undefined variable(s) \"" + undefNames + "\" used in MathTree");
    }
    else
    {
