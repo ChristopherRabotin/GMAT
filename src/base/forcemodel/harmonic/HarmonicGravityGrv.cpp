@@ -20,6 +20,7 @@
 #include "ODEModelException.hpp"
 #include "UtilityException.hpp"
 #include "StringUtil.hpp"       
+#include "MessageInterface.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>           // For atoi
@@ -42,7 +43,20 @@ HarmonicGravityGrv::HarmonicGravityGrv(const std::string& filename,
 {
    bodyRadius = radius;
    factor     = -mukm;
-   Load();
+   try
+   {
+      Load();
+   }
+   catch (BaseException &e)
+   {
+      throw;
+	}
+   catch (const std::exception& ex) 
+   {
+      MessageInterface::ShowMessage("Caught ex in HarmonicGravityGrv::"
+         "HarmonicGravityGrv() during Load()\n");
+      throw;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -64,6 +78,9 @@ void HarmonicGravityGrv::Load()
    std::string isNormalized = "";
    std::string line;
    std::string firstStr;
+   bool allocated = false;
+   bool degreeSet = false;
+   bool orderSet  = false;
 
    // Read header line
    getline(inStream, line);
@@ -74,7 +91,10 @@ void HarmonicGravityGrv::Load()
 
       if (line == "")
          continue;
-
+      #ifdef DEBUG_GRAVITY_GRV_FILE
+         else
+            MessageInterface::ShowMessage("%s\n", line);
+      #endif
       std::istringstream lineStream;
       lineStream.str(line);
 
@@ -95,10 +115,12 @@ void HarmonicGravityGrv::Load()
          else if (upperString == "DEGREE")
          {
             lineStream >> NN;
+            degreeSet = true;
          }
          else if (upperString == "ORDER")
          {
             lineStream >> MM;
+            orderSet = true;
          }
          else if (upperString == "GM")
          {
@@ -120,8 +142,11 @@ void HarmonicGravityGrv::Load()
          }
          else
          {
-            Allocate ();
-
+            if (!allocated && degreeSet && orderSet)
+            {
+               Allocate (); 
+               allocated = true;
+            }
             Integer n = -1;
             Integer m = -1;
             Real cnm = 0.0;
