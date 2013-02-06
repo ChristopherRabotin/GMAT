@@ -708,6 +708,10 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    
    // Update owned object count
    ownedObjectCount = numForces;
+
+   #ifdef DEBUG_ODEMODEL_INIT
+      MessageInterface::ShowMessage("Leaving ODEModel::AddForce()\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -2383,8 +2387,6 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             "synchronized propagators; e.g. \"Propagate Synchronized "
             "prop(sat1) prop(sat2)\"\nexiting");
 
-
-
    if (order > 2)
    {
       return false;
@@ -2612,6 +2614,18 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
          debugFile << "   " << deriv[i];
       debugFile << "\n";
    #endif
+
+   // Sanity check the derivative
+   for (Integer index = 0; index < stateSize; ++index)
+   {
+      if (GmatMathUtil::IsNaN(deriv[index]))
+         throw ODEModelException("The ForceModel " + instanceName +
+               " generated a derivative that is not a number");
+
+      if (GmatMathUtil::IsInf(deriv[index]))
+         throw ODEModelException("The ForceModel " + instanceName +
+               " generated a derivative that is infinite");
+   }
 
    return true;
 }

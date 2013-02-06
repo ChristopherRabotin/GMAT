@@ -6434,6 +6434,8 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    
    debugMsg = "In SetForceModelProperty()";
    bool retval = false;
+   bool pmTypeHandled = false;
+
    StringArray parts = theTextParser.SeparateDots(prop);
 
    #ifdef DEBUG_SET_FORCE_MODEL
@@ -6465,6 +6467,11 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       id = obj->GetParameterID("CentralBody");
       type = obj->GetParameterType(id);
       retval = SetPropertyValue(obj, id, type, value);
+      #ifdef DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage("Interpreter::SetForceModelProperty() "
+               "set central body and returning %s\n",
+               retval ? "true" : "false");
+      #endif
       return retval;
    }
    
@@ -6553,7 +6560,8 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       
       #ifdef DEBUG_SET_FORCE_MODEL
       MessageInterface::ShowMessage
-         ("Interpreter::SetForceModelProperty() returning %d\n", retval);
+         ("Interpreter::SetForceModelProperty() returning %s\n",
+               retval ? "true" : "false");
       #endif
       return retval;
    }
@@ -6625,7 +6633,8 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       forceModel->AddForce(pm);
       
       #ifdef DEBUG_SET_FORCE_MODEL
-      MessageInterface::ShowMessage("Interpreter::SetForceModelProperty() returning true\n");
+      MessageInterface::ShowMessage("Interpreter::SetForceModelProperty() "
+            "returning true\n");
       #endif
       return true;
    }
@@ -6653,8 +6662,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             throw InterpreterException
                ("User defined force \"" + udForces[i] +  "\" cannot be created\n");
       }
+
+      pmTypeHandled = true;
+      // Should we return here?
    }
-   
    
    //------------------------------------------------------------
    // Set ForceModel owned object properties
@@ -6727,6 +6738,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       retval = SetPropertyValue(owner, id, type, value);
       if (fromObj != NULL)
          owner->SetRefObject(fromObj, fromObj->GetType(), value);
+      pmTypeHandled = true;
    }
    else
    {
@@ -6738,15 +6750,27 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          {
             id = owner->GetParameterID(propName);
             type = owner->GetParameterType(id);
-            retval = SetPropertyValue(owner, id, type, value);
+            bool rv = SetPropertyValue(owner, id, type, value);
+
+            if (rv)
+            {
+               retval = true;
+               pmTypeHandled = true;
+            }
+
             break;
          }
       }
    }
    
+   if (pmTypeHandled == false)
+      throw InterpreterException("The scripted force type \"" + pmType +
+            "\" is not a known force or force model setting\n");
+
    #ifdef DEBUG_SET_FORCE_MODEL
-   MessageInterface::ShowMessage
-      ("Interpreter::SetForceModelProperty() returning %d\n", retval);
+      MessageInterface::ShowMessage
+         ("Interpreter::SetForceModelProperty() exiting and returning %s\n",
+               retval ? "true" : "false");
    #endif
    return retval;
 }
@@ -8502,7 +8526,8 @@ bool Interpreter::FinalPass()
 
 
    #if DBGLVL_FINAL_PASS
-   MessageInterface::ShowMessage("Interpreter::FinalPass() returning %d\n", retval);
+   MessageInterface::ShowMessage("Interpreter::FinalPass() returning %s\n",
+         retval ? "true" : "false");
    #endif
    
    return retval;

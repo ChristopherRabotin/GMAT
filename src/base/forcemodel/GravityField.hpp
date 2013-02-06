@@ -157,6 +157,8 @@ protected:
    Real               defaultMu;
    /// default equatorial radius
    Real               defaultA;
+//   /// The minimum distance required from body origin for computation
+//   Real               minimumDistance;
    ///
    bool               gfInitialized;
    /// Flag used to keep from scrolling the "truncating to order" message

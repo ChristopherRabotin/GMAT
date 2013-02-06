@@ -279,6 +279,11 @@ bool GravityField::Initialize()
       if (!body) throw ODEModelException("Body \"" + bodyName + "\" undefined for Gravity Field.");
    }
    
+//   // The required distance from the origin to avoid numerical instability, this
+//   // value is compared to the L1 distance norm in GetDerivatives to make sure
+//   // that the offset is acceptable.  This piece is currently disabled
+//   minimumDistance = body->GetEquatorialRadius() * 0.5;
+
    if (body->GetName() != fixedCS->GetOriginName()) // ********** is this the right CS to use???
       throw ODEModelException("Full field gravity is only supported for "
                               "the force model origin in current GMAT builds.");
@@ -394,6 +399,11 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
             state[4], state[5], dt, dvorder);
       }
    #endif
+
+   // We may want to do this down the road:
+//   if (fabs(state[0]) + fabs(state[1]) + fabs(state[2]) < minimumDistance)
+//      throw ODEModelException("A harmonic gravity field is being computed "
+//            "inside of the " + bodyName + ", which is not allowed");
 
    if ((dvorder > 2) || (dvorder < 1))
       return false;
