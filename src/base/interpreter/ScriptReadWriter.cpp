@@ -344,7 +344,7 @@ std::string ScriptReadWriter::CrossPlatformGetLine()
             throw InterpreterException("Non-standard characters were "
                   "encountered in the script file; please check the file to "
                   "be sure it is saved as an ASCII file, and not formatted "
-                  "for Unicode or UTDF.");
+                  "for Unicode or UTF.");
          }
       }
       result += ch;
