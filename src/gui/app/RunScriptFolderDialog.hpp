@@ -30,17 +30,18 @@ public:
                          const wxString &compareDir);
    ~RunScriptFolderDialog();
    
+   wxString GetFilterString(bool &exclude);
+   
    bool RunScripts() { return mRunScripts; }
    bool RunFromSavedScripts() { return mRunFromSavedScripts; }
    bool CompareResults() { return mCompareResults; }
    bool SaveCompareResults() { return mSaveCompareResults; }
    bool HasOutDirChanged() { return mOutDirChanged; }
    bool CreateRunFolder() { return mCreateRunFolder; }
-   Integer GetStartingScriptNumber() { return mNumStartingScript; }
-   Integer GetNumScriptsToRun() { return mNumScriptsToRun; }
-   Integer GetNumTimesToRun() { return mNumTimesToRun; }
    Real GetAbsTolerance() { return mAbsTol; }
-   wxString GetFilterString() { return mFilterString; }
+   Integer  GetStartingScriptNumber() { return mNumStartingScript; }
+   Integer  GetNumScriptsToRun() { return mNumScriptsToRun; }
+   Integer  GetNumTimesToRun() { return mNumTimesToRun; }
    wxString GetReplaceString() { return mReplaceString; }
    wxString GetCompareDirectory() { return mCompareDir; }
    wxString GetSaveFilename() { return mSaveFilename; }
@@ -67,6 +68,7 @@ protected:
    wxTextCtrl *mSaveScriptsDirTextCtrl;
    
    wxCheckBox *mRunFromSavedCheckBox;
+   wxCheckBox *mExcludeScriptsCheckBox;
    wxCheckBox *mCreateRunFolderCheckBox;
    wxCheckBox *mCompareCheckBox;
    wxCheckBox *mSaveResultCheckBox;
@@ -98,6 +100,7 @@ private:
    bool mCompareResults;
    bool mSaveCompareResults;
    bool mOutDirChanged;
+   bool mExcludeScripts;
    bool mCreateRunFolder;
    Integer mNumStartingScript;
    Integer mNumScriptsToRun;

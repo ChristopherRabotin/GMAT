@@ -72,6 +72,16 @@ RunScriptFolderDialog::~RunScriptFolderDialog()
 
 
 //------------------------------------------------------------------------------
+// wxString GetFilterString(bool &exclude)
+//------------------------------------------------------------------------------
+wxString RunScriptFolderDialog::GetFilterString(bool &exclude)
+{
+   exclude = mExcludeScripts;
+   return mFilterString;
+}
+
+
+//------------------------------------------------------------------------------
 // virtual void Create()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::Create()
@@ -130,12 +140,16 @@ void RunScriptFolderDialog::Create()
                      wxDefaultPosition, wxSize(80,20), 0);
    
    wxStaticText *filterScriptsLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Run scripts contain:"),
+      new wxStaticText(this, ID_TEXT, wxT("Filter scripts contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mFilterStringTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxSize(100,20), 0);
+   
+   mExcludeScriptsCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT(" Exclude"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *numTimesLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of times to run each script:"),
@@ -171,14 +185,17 @@ void RunScriptFolderDialog::Create()
    runSizer->Add(mStartingScriptTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   
    runSizer->Add(numScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   
    runSizer->Add(filterScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mFilterStringTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
-   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(mExcludeScriptsCheckBox, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
@@ -419,7 +436,8 @@ void RunScriptFolderDialog::SaveData()
       canClose = false;
       return;
    }
-   
+
+   mExcludeScripts = mExcludeScriptsCheckBox->GetValue();
    mCreateRunFolder = mCreateRunFolderCheckBox->GetValue();
    
    mNumStartingScript = numStartingScript;

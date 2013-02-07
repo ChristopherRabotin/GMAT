@@ -4182,9 +4182,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    bool runFromSavedScripts = dlg.RunFromSavedScripts();
    bool compare = dlg.CompareResults();
    bool saveCompareResults = dlg.SaveCompareResults();
-   wxString filterString = dlg.GetFilterString();
+   bool excludeScripts = false;
+   wxString filterString = dlg.GetFilterString(excludeScripts);
    bool builtOk = false;
-
+   
    // for current output path
    FileManager *fm = FileManager::Instance();
    std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
@@ -4301,16 +4302,20 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetName();
       
       // Filter scripts
-      if (filterString != "" && !filename.Contains(filterString))
+      if (filterString != "")
       {
-         scriptId = GetNextChild(itemId, cookie);
-         continue;
+         if ((excludeScripts && filename.Contains(filterString)) ||
+             (!excludeScripts && !filename.Contains(filterString)))
+         {
+            scriptId = GetNextChild(itemId, cookie);
+            continue;
+         }
       }
       
       wxString titleText;
       titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());
       theMainFrame->SetTitle(titleText);
-
+      
       // Set running script text
       wxString text;
       text.Printf("Running script %d of %d;   %s\n", count, runCount,
