@@ -216,9 +216,12 @@ void EphemerisFilePanel::Create()
             wxDefaultPosition, wxDefaultSize, 0 );
    stepSizeComboBox = (wxComboBox*) BuildControl(this, id);
    stepSizeComboBox->SetToolTip(pConfig->Read(_T("StepSizeHint")));
+   wxStaticText * stepSizeUnitsStaticText =
+      new  wxStaticText(this, ID_TEXT, wxT("Secs"),
+            wxDefaultPosition, wxDefaultSize, 0 );
    grid2->Add(stepSizeStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(stepSizeComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-   grid2->Add(0, 0, wxALIGN_CENTER|wxALL, bsize );
+   grid2->Add(stepSizeUnitsStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    
    fileSettingsStaticBoxSizer->Add( grid2, 0, wxALIGN_LEFT|wxALL, bsize );
    
