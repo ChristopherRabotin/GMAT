@@ -1079,7 +1079,7 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
                else
                {
                   ex.SetDetails("The object named \"" + substr + "\" of type \"" +
-                                obj->GetTypeName() + "\" is not a valid in command");
+                                obj->GetTypeName() + "\" is not a valid command");
                }
                HandleError(ex);
                return false;
