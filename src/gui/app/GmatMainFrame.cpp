@@ -2197,7 +2197,9 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);
+   gmatAppData->GetMissionTree()->ClearFilters();
    gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
+   SetStatusText("", 2);
 
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n");
@@ -4430,7 +4432,8 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, name, GmatTree::SCRIPT_FILE);
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
-   
+
+
    #ifdef __USE_STC_EDITOR__
       EditorPanel *editorPanel = new EditorPanel(scrolledWin, name);
       sizer->Add(editorPanel, 0, wxGROW|wxALL, 0);
