@@ -1383,14 +1383,14 @@ bool Vary::TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
 void Vary::SetInitialValue(Solver *theSolver)
 {
-   MessageInterface::ShowMessage("Setting initial value\n");
    if (solver == theSolver)
    {
       Real var = solver->GetSolverVariable(variableID);
       initialValue->SetReal(var);
-      MessageInterface::ShowMessage(
-            "   Solvers matched; solution value %.12lf reset IV from %s to %.12lf\n",
-            var, initialValueName.c_str(), initialValue->EvaluateReal());
+
+      MessageInterface::ShowMessage("Apply Corrections has changed the initial "
+            "guess for %s from %s to %.12lf\n", variableName.c_str(),
+            initialValueName.c_str(), var);
       
       if (initialValue->GetWrapperType() == Gmat::NUMBER_WT)
       {
@@ -1402,9 +1402,9 @@ void Vary::SetInitialValue(Solver *theSolver)
    }
    else
    {
-      MessageInterface::ShowMessage(
-            "   Variable is new or changed; solution value remains unchanged "
-            "for %s\n", variableName.c_str());
+      MessageInterface::ShowMessage("*** Warning*** Apply Corrections did not "
+            "change the value for %s because the variable is new or modified\n",
+            variableName.c_str());
    }
 }
 
