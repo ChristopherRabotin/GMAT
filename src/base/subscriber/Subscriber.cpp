@@ -1072,6 +1072,27 @@ bool Subscriber::IsParameterVisible(const std::string &label) const
    return IsParameterVisible(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Subscriber::IsParameterCommandModeSettable(const Integer id) const
+{
+   if ((id == UPPER_LEFT)        || (id == SIZE)       ||
+       (id ==  RELATIVE_Z_ORDER) || (id ==  MINIMIZED) ||
+       (id == MAXIMIZED))
+      return false;
+
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const

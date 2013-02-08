@@ -60,6 +60,7 @@ public:
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual bool IsParameterReadOnly(const Integer id) const;
+   virtual bool IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Integer GetIntegerParameter(const Integer id) const;
    virtual Integer GetIntegerParameter(const std::string &label) const;

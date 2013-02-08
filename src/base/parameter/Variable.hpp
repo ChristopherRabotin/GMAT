@@ -44,6 +44,8 @@ public:
    virtual GmatBase* Clone() const;
    virtual void Copy(const GmatBase*);
    
+   virtual bool IsParameterCommandModeSettable(const Integer id) const;
+
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);

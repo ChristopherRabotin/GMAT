@@ -462,7 +462,8 @@ public:
    virtual void UpdateClonedObject(GmatBase *obj);
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
          Integer updatedParameterId);
-   bool BlockCommandModeAssignment();
+   bool IsCommandModeAssignable() const;
+   virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
 
 protected:

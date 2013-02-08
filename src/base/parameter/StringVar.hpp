@@ -56,6 +56,7 @@ public:
    virtual void Copy(const GmatBase*);
    
    virtual Integer GetParameterID(const std::string &str) const;
+   virtual bool IsParameterCommandModeSettable(const Integer id) const;
    
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;

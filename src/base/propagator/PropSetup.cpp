@@ -133,6 +133,10 @@ PropSetup::PropSetup(const std::string &name)
    objectTypeNames.push_back("PropSetup");
    
    parameterCount = PropSetupParamCount;
+
+   // Allow PropSetup1 = PropSetup 2 assignment in command mode
+   blockCommandModeAssignment = false;
+
    // Propagator is named or unnamed owned object which means that Propagator is not
    // created by Create command but by handling owned object in the Interpreter.
    ownedObjectCount += 1;

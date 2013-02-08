@@ -53,6 +53,7 @@
 //#define DEBUG_ASSIGN_CALLING_FUNCTION
 //#define DEBUG_CLONE_UPDATES
 //#define DEBUG_VALIDATION
+//#define DEBUG_SETTABILITY
 
 
 //#ifndef DEBUG_MEMORY
@@ -739,7 +740,7 @@ bool Assignment::Validate()
                            }
                            else
                            {
-                              lastErrorMessage = "Right of the euqal sign is not valid.";
+                              lastErrorMessage = "Right of the equal sign is not valid.";
                               retval = false;
                            }
                         }
@@ -874,7 +875,7 @@ bool Assignment::Validate()
          if (mathTree == NULL)
          {
             // rhs Wrappers should have been set by now, so validation failed
-            lastErrorMessage = "Right of the euqal sign is not valid.";
+            lastErrorMessage = "Right of the equal sign is not valid.";
             retval = false;
          }
          else
@@ -1413,6 +1414,48 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    
    if (withName == lhs)
    {
+      // Confirm settability for the LHS
+      GmatBase *obj = toWrapper->GetRefObject();
+      #ifdef DEBUG_SETTABILITY
+         MessageInterface::ShowMessage("   *** Checking to see if %s "
+               "is command mode settable...Wrapper has type %d",
+               withName.c_str(), toWrapper->GetWrapperType());
+      #endif
+      if (toWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
+      {
+         Integer id  =
+               ((ObjectPropertyWrapper*)toWrapper)->GetPropertyId();
+
+         #ifdef DEBUG_SETTABILITY
+            MessageInterface::ShowMessage("...%s\n",
+                  obj->IsParameterCommandModeSettable(id) ? "it is!" :
+                        "it is not.");
+         #endif
+
+         if (!obj->IsParameterCommandModeSettable(id))
+            throw CommandException("The field " +
+                  toWrapper->GetDescription() + " cannot be set after "
+                  "the Mission Sequence has started");
+      }
+      else if (toWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+      {
+         #ifdef DEBUG_SETTABILITY
+            MessageInterface::ShowMessage("...%s\n",
+                  obj->IsCommandModeAssignable() ? "it is!" :
+                        "it is not.");
+         #endif
+         if (!obj->IsCommandModeAssignable())
+            throw CommandException("Object Assignment is not allowed in "
+                  "the Mission Sequence for " + obj->GetTypeName() +
+                  " objects");
+      }
+      else
+      {
+         #ifdef DEBUG_SETTABILITY
+            MessageInterface::ShowMessage("...Who knows?!?\n");
+         #endif
+      }
+
       #ifdef DEBUG_WRAPPER_CODE
       MessageInterface::ShowMessage("   Checking LHS...\n");
       #endif

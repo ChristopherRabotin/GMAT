@@ -53,6 +53,7 @@
 //#define DEBUG_STATE_INTERFACE
 //#define DEBUG_SC_ATTITUDE
 //#define DEBUG_OBJ_CLONE
+//#define DEBUG_CLONES
 //#define DEBUG_GET_REAL
 //#define DEBUG_GET_STATE
 //#define DEBUG_SC_PARAMETER_TEXT
@@ -290,6 +291,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
+   blockCommandModeAssignment = false;
 
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
@@ -1888,6 +1890,24 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
 bool Spacecraft::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Spacecraft::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

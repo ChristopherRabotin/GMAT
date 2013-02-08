@@ -153,6 +153,7 @@ Thruster::Thruster(std::string nomme) :
    objectTypes.push_back(Gmat::THRUSTER);
    objectTypeNames.push_back("Thruster");
    parameterCount = ThrusterParamCount;
+   blockCommandModeAssignment = false;
    
    inertialDirection[0] = 1.0;
    inertialDirection[1] = 0.0;
@@ -580,6 +581,24 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
          return true;
    
    return Hardware::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Thruster::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

@@ -104,7 +104,8 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 {
    objectTypes.push_back(Gmat::REPORT_FILE);
    objectTypeNames.push_back("ReportFile");
-   
+   blockCommandModeAssignment = false;
+
    mNumParams = 0;
    
    if (firstParam != NULL)
@@ -815,6 +816,24 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
    else
       return Subscriber::GetParameterTypeString(id);
 
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ReportFile::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

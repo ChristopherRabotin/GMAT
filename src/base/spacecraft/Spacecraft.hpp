@@ -105,6 +105,8 @@ public:
 
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
+
    virtual bool         ParameterAffectsDynamics(const Integer id) const;
    virtual bool         ParameterDvInitializesNonzero(const Integer id,
                               const Integer r = 0, const Integer c = 0) const;

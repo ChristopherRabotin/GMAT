@@ -890,14 +890,27 @@ bool Sandbox::Execute()
                         cloneIndex, obj->GetParameterText(cloneIndex).c_str());
             #endif
 
-            if (obj != NULL)
-            {
-               if (obj->BlockCommandModeAssignment())
-                  throw SandboxException("Assignment is not allowed after the "
-                        "BeginMissionSequence command for " +
-                        obj->GetTypeName() + " objects on the line\n" +
-                        current->GetGeneratingString(Gmat::NO_COMMENTS));
-            }
+//            /**
+//             * @todo: Figure out if this code is needed or not.  The issue
+//             *        is that an owned clone might be on the list of objects
+//             *        that cannot be touched in command mode.  So do we allow
+//             *        those objects to be touched here?
+//             *
+//             *        This might always get caught at build time.  If that is
+//             *        the case, this code can safely be deleted.
+//             */
+//            if (obj != NULL)
+//            {
+//               if (!obj->IsCommandModeAssignable())
+//               {
+//                  MessageInterface::ShowMessage("Should we be setting %s?\n",
+//                        obj->GetTypeName().c_str());
+////                  throw SandboxException("Assignment is not allowed in the "
+////                        "Mission Sequence for " + obj->GetTypeName() +
+////                        " objects on the line\n" +
+////                        current->GetGeneratingString(Gmat::NO_COMMENTS));
+//               }
+//            }
          }
          else
             cloneIndex = -1;

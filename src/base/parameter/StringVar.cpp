@@ -79,6 +79,7 @@ StringVar::StringVar(const std::string &name, const std::string &typeStr,
 {  
    objectTypes.push_back(Gmat::STRING);
    objectTypeNames.push_back("String");
+   blockCommandModeAssignment = false;
    mStringValue = ""; //       STRING_PARAMETER_UNDEFINED;
    mReturnType = Gmat::STRING_TYPE;
    // Don't set name to expression, but leave it blank if not set (LOJ: 2010.11.29)
@@ -283,6 +284,24 @@ Integer StringVar::GetParameterID(const std::string &str) const
    }
    
    return Parameter::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool StringVar::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

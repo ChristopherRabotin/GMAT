@@ -92,7 +92,8 @@ FuelTank::FuelTank(std::string nomme) :
    objectTypeNames.push_back("FuelTank");
    
    parameterCount = FuelTankParamCount;
-   
+   blockCommandModeAssignment = false;
+
    // Available pressure model list
    // Since it is static data, clear it first
    pressureModelList.clear();
@@ -333,6 +334,24 @@ bool FuelTank::IsParameterReadOnly(const Integer id) const
       return true;
    
    return Hardware::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool FuelTank::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

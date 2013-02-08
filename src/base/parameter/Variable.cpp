@@ -65,6 +65,7 @@ Variable::Variable(const std::string &name, const std::string &valStr,
 {
    objectTypes.push_back(Gmat::VARIABLE);
    objectTypeNames.push_back("Variable");
+   blockCommandModeAssignment = false;
    
    #ifdef __ALLOW_SIMPLE_VAR_EXP__
    CreateSimpleExpression();
@@ -254,6 +255,24 @@ GmatBase* Variable::Clone() const
 void Variable::Copy(const GmatBase* orig)
 {
    operator=(*((Variable *)(orig)));
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Variable::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

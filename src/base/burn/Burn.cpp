@@ -118,6 +118,7 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
    parameterCount = BurnParamCount;
+   blockCommandModeAssignment = false;
    
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
    deltaVInertial[0] = deltaVInertial[1] = deltaVInertial[2] = 0.0;
@@ -448,6 +449,24 @@ bool Burn::IsParameterReadOnly(const Integer id) const
          return true;
    
    return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Burn::IsParameterCommandModeSettable(const Integer id) const
+{
+   // For now, turn them all on
+   return true;
 }
 
 

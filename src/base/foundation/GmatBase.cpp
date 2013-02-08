@@ -170,19 +170,19 @@ Integer GmatBase::instanceCount = 0;
 //------------------------------------------------------------------------------
 GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
                    const std::string &nomme) :
-   parameterCount    (GmatBaseParamCount),
-   typeName          (typeStr),
-   instanceName      (nomme),
-   type              (typeId),
-   ownedObjectCount  (0),
-   isInitialized     (false),
-   callbackExecuting (false),
-   commentLine       (""),
-   inlineComment     (""),
-   showPrefaceComment(true),
-   showInlineComment (true),
-   cloaking          (false),
-   blockCommandModeAssignment (false)
+   parameterCount             (GmatBaseParamCount),
+   typeName                   (typeStr),
+   instanceName               (nomme),
+   type                       (typeId),
+   ownedObjectCount           (0),
+   isInitialized              (false),
+   callbackExecuting          (false),
+   commentLine                (""),
+   inlineComment              (""),
+   showPrefaceComment         (true),
+   showInlineComment          (true),
+   cloaking                   (false),
+   blockCommandModeAssignment (true)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -306,7 +306,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    parameterCount            = a.parameterCount;
    typeName                  = a.typeName;
    // We don't want to copy instanceName (loj: 2008.02.15)
-   //instanceName     = a.instanceName;
+   //instanceName              = a.instanceName;
    type                      = a.type;
    ownedObjectCount          = a.ownedObjectCount;
    generatingString          = a.generatingString;
@@ -4451,7 +4451,7 @@ void GmatBase::UpdateClonedObjectParameter(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-// bool BlockCommandModeAssignment()
+// bool IsCommandModeAssignable() const
 //------------------------------------------------------------------------------
 /**
  * Tests to see if the object accepts command mode assignment
@@ -4459,7 +4459,24 @@ void GmatBase::UpdateClonedObjectParameter(GmatBase *obj,
  * @retval true if command mode assignment is allowed, false if not
  */
 //------------------------------------------------------------------------------
-bool GmatBase::BlockCommandModeAssignment()
+bool GmatBase::IsCommandModeAssignable() const
 {
-   return blockCommandModeAssignment;
+   return !blockCommandModeAssignment;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
+{
+   return false;
 }
