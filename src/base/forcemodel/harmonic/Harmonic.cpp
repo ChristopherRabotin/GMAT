@@ -249,21 +249,39 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          if (fillgradient)
          {
             // Pines Equation 27 (Part of)
-            Real G = m<=1 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
-            Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+            Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+            Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
             // Correct for normalization
-            Real Vnm = V[n][m];
-            Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
+            
+		    Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+            Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+			Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+		    if (m==0) 
+		    {
+			    VR02 /= sqrt(Real(2));
+			    VR12 /= sqrt(Real(2));
+				VR22 /= sqrt(Real(2));
+		    }
+			Real Avv02 = VR02 * A[n][m+2];
+			Real Avv12 = VR12 * A[n+1][m+2];
+            Real Avv22 = VR22 * A[n+2][m+2];
+			//Real Vnm = V[n][m];
+            //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
+			//Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
+            //Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
             if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))    Avv02 = 0.0;  // ************** wcs added ****
-            Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
-            Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
+
             #ifdef DEBUG_GRADIENT
                MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
                MessageInterface::ShowMessage("************** n = %d   m = %d\n", n, m);
-               MessageInterface::ShowMessage("Vnm       = %12.10f\n", Vnm);
-               MessageInterface::ShowMessage("Avv02     = %12.10f\n", Avv02);
-               MessageInterface::ShowMessage("V[n][m+2] = %12.10f\n", V[n][m+2]);
-               MessageInterface::ShowMessage("A[n][m+2] = %12.10f\n", A[n][m+2]);
+              // MessageInterface::ShowMessage("Vnm       = %12.10f\n", Vnm);
+               MessageInterface::ShowMessage("G     = %12.10f\n", G);
+			   MessageInterface::ShowMessage("H     = %12.10f\n", H);
+			   MessageInterface::ShowMessage("Avv02     = %12.10f\n", Avv02);
+			   MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv12);
+			   MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv22);
+              // MessageInterface::ShowMessage("V[n][m+2] = %12.10f\n", V[n][m+2]);
+              // MessageInterface::ShowMessage("A[n][m+2] = %12.10f\n", A[n][m+2]);
             #endif
             // Pines Equation 36 (Part of)
             sum11 += m*(m-1) * Avv00 * G;
@@ -374,8 +392,15 @@ void Harmonic::Allocate()
    for (Integer n=0;  n<=NN;  ++n)
       for (Integer m=0;  m<=n && m<=MM;  ++m)
       {
-         VR01[n][m] = V[n][m] / V[n][m+1];
-         VR11[n][m] = V[n][m] / V[n+1][m+1];
+         //VR01[n][m] = V[n][m] / V[n][m+1];
+         //VR11[n][m] = V[n][m] / V[n+1][m+1];
+		 VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
+         VR11[n][m] = sqrt(Real((2*n+1)*(n+m+2)*(n+m+1))/Real((2*n+3)));
+		 if (m==0) 
+		 {
+			 VR01[n][m] /= sqrt(Real(2));
+			 VR11[n][m] /= sqrt(Real(2));
+		 }
       }
 
 
