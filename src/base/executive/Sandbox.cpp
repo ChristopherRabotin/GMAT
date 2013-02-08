@@ -881,7 +881,7 @@ bool Sandbox::Execute()
          if (current->AffectsClones())
          {
             // Manage owned clones
-            GmatBase *obj = current->GetUpdatedObject();
+//            GmatBase *obj = current->GetUpdatedObject();
             cloneIndex = current->GetUpdatedObjectParameterIndex();
 
             #ifdef DEBUG_CLONE_UPDATES
