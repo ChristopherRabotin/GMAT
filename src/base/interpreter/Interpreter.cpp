@@ -5477,7 +5477,6 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          return SetPropertyStringValue(obj, id, type, valueToUse, index);
       }
    case Gmat::INTEGER_TYPE:
-   case Gmat::UNSIGNED_INT_TYPE:
       {
          Integer ival;
          if (GmatStringUtil::ToInteger(valueToUse, ival))
@@ -5501,10 +5500,34 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          break;
       }
+   case Gmat::UNSIGNED_INT_TYPE:
+      {
+         UnsignedInt ival;
+         if (GmatStringUtil::ToUnsignedInt(valueToUse, ival))
+         {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Calling '%s'->SetUnsignedIntParameter(%d, %d)\n",
+                obj->GetName().c_str(), id, ival);
+            #endif
+            
+            obj->SetUnsignedIntParameter(id, ival);
+            retval = true;
+         }
+         else
+         {
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+            errorMsg2 = " Only unsigned integer number is allowed";
+         }
+         break;
+      }
    case Gmat::UNSIGNED_INTARRAY_TYPE:
       {
-         Integer ival;
-         if (GmatStringUtil::ToInteger(valueToUse, ival))
+         UnsignedInt ival;
+         if (GmatStringUtil::ToUnsignedInt(valueToUse, ival))
          {
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage
@@ -5521,7 +5544,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
             else
                errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
-            errorMsg2 = " Only integer number is allowed";
+            errorMsg2 = " Only unsigned integer number is allowed";
          }
          break;
       }
