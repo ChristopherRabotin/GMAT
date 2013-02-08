@@ -43,6 +43,7 @@ public:
    //wxToolBar*   GetMissionToolBar();
    void         SetMissionTree(MissionTree *missionTree);
    //void         SetGmatNotebook(GmatNotebook *notebook);
+   void			ClearFilters();
    void         ResetMissionTreeTools();
    void         SetMissionTreeExpandLevel(int level);
    

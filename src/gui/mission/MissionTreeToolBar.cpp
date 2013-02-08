@@ -96,6 +96,18 @@ void MissionTreeToolBar::SetMissionTree(MissionTree *missionTree)
 
 
 //------------------------------------------------------------------------------
+// void ClearFilters()
+//------------------------------------------------------------------------------
+void MissionTreeToolBar::ClearFilters()
+{
+   ResetMissionTreeTools();
+   wxArrayString cmdsToInclude;
+   cmdsToInclude.Add("All");
+   mMissionTree->SetViewCommands(cmdsToInclude);
+}
+
+
+//------------------------------------------------------------------------------
 // void ResetMissionTreeTools()
 //------------------------------------------------------------------------------
 void MissionTreeToolBar::ResetMissionTreeTools()
@@ -377,7 +389,12 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
 void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
 {
    wxArrayString cmdsToInclude;
-   
+
+   ToggleTool(TOOL_LEVEL_ALL, false);
+   ToggleTool(TOOL_LEVEL_1, false);
+   ToggleTool(TOOL_LEVEL_2, false);
+   ToggleTool(TOOL_LEVEL_3, false);
+
    // Expand Level, Include category and Exclude category are mutually exclusive.
    // So for example, if an include button is clicked and then an exclude
    // button is clicked it will toggle off the includ button.
@@ -401,9 +418,8 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
          return;
       }
       
-      ResetMissionTreeTools();
-      cmdsToInclude.Add("All");
-      mMissionTree->SetViewCommands(cmdsToInclude);
+	  ClearFilters();
+      mMissionTree->SetViewLevel(10);
 
       break;
    case TOOL_INC_PHYSICS:
