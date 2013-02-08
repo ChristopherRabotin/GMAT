@@ -1400,6 +1400,12 @@ void Vary::SetInitialValue(Solver *theSolver)
          initialValueName = numString.str();
       }
    }
+   else
+   {
+      MessageInterface::ShowMessage(
+            "   Variable is new or changed; solution value remains unchanged "
+            "for %s\n", variableName.c_str());
+   }
 }
 
 

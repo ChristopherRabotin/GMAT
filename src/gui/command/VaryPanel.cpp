@@ -287,7 +287,7 @@ void VaryPanel::LoadData()
       GmatBase *solver = theGuiInterpreter->GetConfiguredObject(solverName);
       if (solver != NULL)
       {
-         mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
+//         mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
          solver->SetStringParameter
             (solver->GetParameterID("Variables"), variableName);
          SetControlEnabling(solver);
@@ -394,6 +394,8 @@ void VaryPanel::SaveData()
    
    try
    {
+      bool changed = false;
+
       if (solverChanged)
       {
          #ifdef DEBUG_VARYPANEL_SAVE
@@ -403,6 +405,7 @@ void VaryPanel::SaveData()
          mVaryCommand->SetStringParameter("SolverName", solverName);
          mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
          solverChanged = false;
+         changed = true;
       }
       
       if (variableChanged)
@@ -415,6 +418,7 @@ void VaryPanel::SaveData()
          mVaryCommand->SetStringParameter("Variable", variableName);
          solver->SetStringParameter("Variables", variableName);
          variableChanged = false;
+         changed = true;
       }
       
       if (mInitialTextCtrl->IsModified())
@@ -422,6 +426,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("InitialValue", strInitVal.c_str());
          mInitialTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mPertTextCtrl->IsModified())
@@ -429,6 +434,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("Perturbation", strPert.c_str());
          mPertTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mLowerValueTextCtrl->IsModified())
@@ -436,6 +442,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("Lower", strLower.c_str());
          mLowerValueTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mUpperValueTextCtrl->IsModified())
@@ -443,6 +450,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("Upper", strUpper.c_str());
          mUpperValueTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mMaxStepTextCtrl->IsModified())
@@ -450,6 +458,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("MaxStep", strMaxStep.c_str());
          mMaxStepTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mAdditiveTextCtrl->IsModified())
@@ -457,6 +466,7 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("AdditiveScaleFactor", strAddSf.c_str());
          mAdditiveTextCtrl->DiscardEdits();
+         changed = true;
       }
       
       if (mMultiplicativeTextCtrl->IsModified())
@@ -464,8 +474,13 @@ void VaryPanel::SaveData()
          validateCommand = true;
          mVaryCommand->SetStringParameter("MultiplicativeScaleFactor", strMultSf.c_str());
          mMultiplicativeTextCtrl->DiscardEdits();
+         changed = true;
       }
       
+      if (changed)
+         mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
+
+
       // avoid unnecessary validation since it clears all wrappers and recreates them
       if (validateCommand)
       {
