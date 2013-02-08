@@ -35,6 +35,7 @@ public:
                  const wxSize& size = wxDefaultSize, long style = 0 );
    virtual ~GmatNotebook();
    
+   MissionTreeToolBar* GetMissionTreeToolBar();
    void SetMissionTreeExpandLevel(int level);
    void CreateUndockedMissionPanel();
    void RestoreMissionPage();

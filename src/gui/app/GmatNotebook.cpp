@@ -104,6 +104,15 @@ GmatNotebook::~GmatNotebook()
 
 
 //------------------------------------------------------------------------------
+// MissionTreeToolBar* GetMissionTreeToolBar()
+//------------------------------------------------------------------------------
+MissionTreeToolBar* GmatNotebook::GetMissionTreeToolBar()
+{
+   return mMissionTreeToolBar;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetMissionTreeExpandLevel(int level)
 //------------------------------------------------------------------------------
 void GmatNotebook::SetMissionTreeExpandLevel(int level)
