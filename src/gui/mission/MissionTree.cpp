@@ -301,6 +301,19 @@ void MissionTree::SetNotebook(GmatNotebook *notebook)
 
 
 //------------------------------------------------------------------------------
+// void ClearFilters()
+//------------------------------------------------------------------------------
+/**
+ * Clears filters on Mission Sequence
+ */
+//------------------------------------------------------------------------------
+void MissionTree::ClearFilters()
+{
+	if ((theNotebook != NULL) && (theNotebook->GetMissionTreeToolBar() != NULL))
+		theNotebook->GetMissionTreeToolBar()->ClearFilters();
+}
+
+//------------------------------------------------------------------------------
 // void ClearMission()
 //------------------------------------------------------------------------------
 /**
@@ -326,7 +339,7 @@ void MissionTree::ClearMission()
    }
    
    DeleteChildren(mMissionSeqSubId);
-   
+
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mActionsOutStream.is_open())
       mActionsOutStream.close();
@@ -2685,7 +2698,9 @@ void MissionTree::AddDefaultMission()
    
    UpdateCommand();
    if (theNotebook)
-      theNotebook->SetMissionTreeExpandLevel(10); // level > 3 expands all
+   {
+       theNotebook->SetMissionTreeExpandLevel(10); // level > 3 expands all
+   }
    theGuiInterpreter->ResetConfigurationChanged(false, true);
    
 }

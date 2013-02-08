@@ -47,6 +47,7 @@ public:
    
    void SetMainFrame(GmatMainFrame *gmf);
    void SetNotebook(GmatNotebook *notebook);
+   void ClearFilters();
    void ClearMission();
    void AddDefaultMission();
    void UpdateMission(bool resetCounter, bool viewAll = true, bool collapse = false);
