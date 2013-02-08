@@ -1478,8 +1478,9 @@ bool GmatStringUtil::IsNumber(const std::string &str)
 {
    Real rval;
    Integer ival;
+   UnsignedInt uival;
    
-   if (ToReal(str, rval) || ToInteger(str, ival))
+   if (ToReal(str, rval) || ToUnsignedInt(str, uival) || ToInteger(str, ival))
       return true;
    else
       return false;
@@ -1866,6 +1867,83 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trim
 
 
 //------------------------------------------------------------------------------
+// bool ToUnsignedInt(const std::string &str, UnsignedInt *value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToUnsignedInt(const std::string &str, UnsignedInt &value)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToUnsignedInt(const std::string &str, UnsignedInt *value, bool trimParens, 
+	bool allowOverflow)
+{
+   return ToUnsignedInt(str, *value, trimParens, allowOverflow);
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToUnsignedInt(const std::string &str, UnsignedInt &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * This method converts string to Integer (signed integer) using atoi() after
+ * validation.
+ *
+ * @param  str			input string to be converted to Integer
+ * @param  value		output UnsignedInt value
+ * @param  trimParens	trim parentheses
+ * @param  allowOverflow warn (true) or error (false) on overflow
+ *
+ * @return true if input string represents valid Integer number, false otherwise
+ *
+ * @note  atoi() returns 0 for X or 100 for 100ABC, but we want it be an error.
+ *        This method returns unsigned integer value.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToUnsignedInt(const std::string &str, UnsignedInt &value, bool trimParens,
+	bool allowOverflow)
+{
+   std::string str2 = Trim(str, BOTH);
+   if (trimParens)
+   {
+      str2 = RemoveExtraParen(str2);
+      str2 = Trim(str2, BOTH);
+   }
+
+   if (str2.length() == 0)
+      return false;
+
+   // if string is just + or - with no number, return false
+   if ((str2.length() == 1) &&
+	   ((str2[0] == '-') || (str2[0] == '+')))
+	   return false;
+
+   if (str2[0] != '-' && !isdigit(str2[0]))
+      return false;
+
+   for (unsigned int i=0; i<str2.length(); i++)
+   {
+      if (!isdigit(str2[i]))
+         return false;
+   }
+   
+   errno = 0;
+   //long int strtoul ( const char * str, char ** endptr, int base );
+   // Changed the value of base To 10 (Fix for GMT-3273, LOJ: 2012.11.13)
+   // With base of 0, it assumes octal if string starts with 0
+   //value = strtol(str2.c_str(), NULL, 0);
+   value = strtoul(str2.c_str(), NULL, 10);
+   if (errno == ERANGE)
+   {
+		if (allowOverflow)
+			MessageInterface::ShowMessage
+				("GmatStringUtil::ToUnsignedInt('%s') out of range error, value=%d\n", str.c_str(), value);
+		else
+			return false;
+   }
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool ToBoolean(const std::string &str, bool *value, bool trimParens = false)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToBoolean(const std::string &str, bool *value, bool trimParens)
@@ -2039,15 +2117,15 @@ UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str, bool
       return intArray;
 
    StringArray vals = SeparateBy(str1, " ,");
-   Integer ival;
+   UnsignedInt ival;
 
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
-      if (ToInteger(vals[i], ival, false, allowOverflow))
+      if (ToUnsignedInt(vals[i], ival, false, allowOverflow))
           intArray.push_back((UnsignedInt)ival);
       else
          throw UtilityException
-            ("Invalid Integer value \"" + vals[i] + "\" found in \"" + str + "\"");
+            ("Invalid Unsigned Integer value \"" + vals[i] + "\" found in \"" + str + "\"");
    }
 
    return intArray;
