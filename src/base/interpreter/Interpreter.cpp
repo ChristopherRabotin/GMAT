@@ -8660,6 +8660,12 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
                   MessageInterface::ShowMessage("missing\n");
                #endif
             }
+            else
+            {
+               GmatBase* obj = theModerator->GetConfiguredObject(refs[i]);
+               if (current->AcceptsObjectType(obj->GetType()) == false)
+                  MessageInterface::ShowMessage("Configured object type not allowed\n");
+            }
             #ifdef DEBUG_COMMAND_VALIDATION
                else
                   MessageInterface::ShowMessage("Found!\n");

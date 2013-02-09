@@ -1873,6 +1873,46 @@ bool Propagate::InterpretAction()
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool AcceptsObjectType(Gmat::ObjectType theType)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a specific type is supported by the command instance
+ *
+ * @param theType The object type being checked
+ *
+ * @return true if the type is accepted, false if not
+ */
+//------------------------------------------------------------------------------
+bool Propagate::AcceptsObjectType(Gmat::ObjectType theType)
+{
+   bool retval = true;
+
+   if (theType == Gmat::FORMATION)
+   {
+      if (propAllSTMs || calcAllAmatrices)
+      {
+         std::string errmsg = "**** Error in Propagate configuration: "
+                  "Formations cannot be propagated when ";
+         std::string conjunction;
+
+         if (propAllSTMs)
+         {
+            errmsg += "propagating the State Transition Matrix ";
+            conjunction = "and ";
+         }
+         if (calcAllAmatrices)
+         {
+            errmsg += conjunction;
+            errmsg += "calculating the A-Matrix";
+         }
+         errmsg += " ****";
+         throw CommandException(errmsg);
+      }
+   }
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
@@ -3221,7 +3261,8 @@ bool Propagate::Initialize()
 
    #if DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage
-         ("Propagate::Initialize() <%p> returning initialized=%d\n", this, initialized);
+         ("Propagate::Initialize() <%p> returning initialized=%d\n", this,
+          isInitialized);
    #endif
 
    return isInitialized;

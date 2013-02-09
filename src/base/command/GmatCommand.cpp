@@ -1015,6 +1015,28 @@ const StringArray& GmatCommand::GetObjectList()
 }
 
 //------------------------------------------------------------------------------
+// bool AcceptsObjectType(Gmat::OBJECT_TYPE theType)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a specific type is supported by the command instance
+ *
+ * This method is used to validate at build time that a command instance can
+ * use object types that may be allowed or disallowed based in the command
+ * configuration.  An example of a disallowed type detected by this call are is
+ * a Propagate command containing a Formation object that also propagates the
+ * STM, a configuration that is not currently allowed in GMAT.
+ *
+ * @param theType The object type being checked
+ *
+ * @return true if the type is accepted, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::AcceptsObjectType(Gmat::ObjectType theType)
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
 /**

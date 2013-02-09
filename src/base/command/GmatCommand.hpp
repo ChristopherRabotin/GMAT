@@ -124,6 +124,7 @@ public:
    
    // Methods used in validation
    virtual const StringArray& GetObjectList();
+   virtual bool         AcceptsObjectType(Gmat::ObjectType theType);
    virtual bool         Validate();
 
    // Access methods inherited from GmatBase
