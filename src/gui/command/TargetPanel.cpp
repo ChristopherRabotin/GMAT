@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
 #include "TargetPanel.hpp"
+#include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
@@ -206,5 +208,11 @@ void TargetPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void TargetPanel::OnApplyButtonPress(wxCommandEvent& event)
 {
+   // ensure all vary panels are closed
+   if (GmatAppData::Instance()->GetMainFrame()->IsChildOpen(GmatTree::VARY))
+   {
+		MessageInterface::PopupMessage(Gmat::ERROR_, "You must close all Vary command panels before Apply Corrections");
+		return;
+   }
    theCommand->TakeAction("ApplyCorrections");
 }
