@@ -276,7 +276,20 @@ void SpacecraftPanel::SaveData()
       theAttitudePanel->SaveData();
       canClose = canClose && theAttitudePanel->CanClosePanel();
    }
+#ifdef __USE_SPICE__
+   if (theSpicePanel->IsDataChanged())
+   {
+      theSpicePanel->SaveData();
+      canClose = canClose && theSpicePanel->CanClosePanel();
+   }
+#endif
    
+   if (theVisualModelPanel->IsDataChanged())
+   {
+      theVisualModelPanel->SaveData();
+      canClose = canClose && theVisualModelPanel->CanClosePanel();
+   }
+
    if (!canClose)
    {
       EnableUpdate(true);
@@ -285,16 +298,9 @@ void SpacecraftPanel::SaveData()
    
    if (theTankPanel->IsDataChanged())
       theTankPanel->SaveData();
-   #ifdef __USE_SPICE__
-      if (theSpicePanel->IsDataChanged())
-         theSpicePanel->SaveData();
-   #endif
 
    if (theThrusterPanel->IsDataChanged())
       theThrusterPanel->SaveData();
-   
-   if (theVisualModelPanel->IsDataChanged())
-      theVisualModelPanel->SaveData();
    
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);

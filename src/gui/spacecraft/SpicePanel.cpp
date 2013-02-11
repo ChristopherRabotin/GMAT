@@ -49,9 +49,6 @@ BEGIN_EVENT_TABLE(SpicePanel, wxPanel)
    EVT_BUTTON(ID_BROWSE_BUTTON_FK_FILE, SpicePanel::OnFkFileBrowseButton)
    EVT_BUTTON(ID_REMOVE_BUTTON_FK_FILE, SpicePanel::OnFkFileRemoveButton)
    EVT_LISTBOX(ID_LIST_BOX_FK_FILE, SpicePanel::OnFkFileListBoxChange)
-//   EVT_BUTTON(ID_BROWSE_BUTTON_PCK_FILE, SpicePanel::OnPckFileBrowseButton)
-//   EVT_BUTTON(ID_REMOVE_BUTTON_PCK_FILE, SpicePanel::OnPckFileRemoveButton)
-//   EVT_LISTBOX(ID_LIST_BOX_PCK_FILE, SpicePanel::OnPckFileListBoxChange)
    EVT_TEXT(ID_TEXT_CTRL_NAIF_ID, SpicePanel::OnNaifIdTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_NAIF_ID_REF_FRAME, SpicePanel::OnNaifIdRefTextCtrlChange)
 END_EVENT_TABLE()
@@ -60,6 +57,16 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// SpicePanel(GmatPanel *scPanel,wxWindow *parent, Spacecraft *theSC)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param  the spacecraft panel on which this panel should appear
+ * @param  the Spacecraft whose data to display/alter on this panel
+ */
+//------------------------------------------------------------------------------
 SpicePanel::SpicePanel(GmatPanel *scPanel,
                        wxWindow *parent, Spacecraft *theSC) :
    wxPanel          (parent),
@@ -71,14 +78,12 @@ SpicePanel::SpicePanel(GmatPanel *scPanel,
    ckNameChanged    (false),
    sclkNameChanged  (false),
    fkNameChanged    (false),
-//   pckNameChanged   (false),
    naifIdChanged    (false),
    naifIdRefFrameChanged (false),
    spkFilesDeleted  (false),
    ckFilesDeleted   (false),
    sclkFilesDeleted (false),
    fkFilesDeleted   (false),
-//   pckFilesDeleted  (false),
    theScPanel       (scPanel)
 {
    #ifdef DEBUG_SPICE_PANEL
@@ -96,17 +101,43 @@ SpicePanel::SpicePanel(GmatPanel *scPanel,
 
 }
 
+//------------------------------------------------------------------------------
+// ~SpicePanel()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 SpicePanel::~SpicePanel()
 {
 
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves modified data to the Spacecraft object
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::SaveData()
 {
    std::string strval;
 //   Real        tmpval;
    Integer     tmpint;
    bool        retval;
+   #ifdef DEBUG_SPICE_PANEL
+   MessageInterface::ShowMessage(
+         "SPICE panel:: spkNameChanged is %s, ckNameChanged is %s, sclkNameChanged is %s, fkNameChanged is %s, naifIdChanged is %s, naifIdRefFrameChanged is %s\n",
+         (spkNameChanged? "true" : "false"), (ckNameChanged? "true" : "false"),
+         (sclkNameChanged? "true" : "false"), (fkNameChanged? "true" : "false"),
+         (naifIdChanged? "true" : "false"), (naifIdRefFrameChanged? "true" : "false"));
+   MessageInterface::ShowMessage(
+         "SPICE panel:: spkFilesDeleted is %s, ckFilesDeleted is %s, sclkFilesDeleted is %s,fkFilesDeleted is %s\n",
+         (spkFilesDeleted? "true" : "false"), (ckFilesDeleted? "true" : "false"),
+         (sclkFilesDeleted? "true" : "false"), (fkFilesDeleted? "true" : "false"));
+   #endif
 
    // don't do anything if no data has been changed.
    // note that dataChanged will be true if the user modified any combo box or
@@ -234,20 +265,35 @@ void SpicePanel::SaveData()
       {
          strval = naifIdTextCtrl->GetValue();
          retval = theScPanel->CheckInteger(tmpint, strval, "NAIF ID", "Integer Number");
-         canClose = retval;
+         #ifdef DEBUG_SPICE_PANEL
+            MessageInterface::ShowMessage("CheckInteger returns : %s\n", (retval? "true" : "false"));
+            MessageInterface::ShowMessage("canClose is set to %s\n", (canClose? "true" : "false"));
+         #endif
          if (retval)
          {
+            #ifdef DEBUG_SPICE_PANEL
+               MessageInterface::ShowMessage("now attempting to set naifid to %d\n",tmpint);
+            #endif
             theSpacecraft->SetIntegerParameter(theSpacecraft->GetParameterID("NAIFId"), tmpint);
+         }
+         else
+         {
+            canClose = false;
+            return;
          }
       }
       if (naifIdRefFrameChanged)
       {
          strval = naifIdRefFrameTextCtrl->GetValue();
          retval = theScPanel->CheckInteger(tmpint, strval, " Reference Frame NAIF ID", "Integer Number");
-         canClose = retval;
          if (retval)
          {
             theSpacecraft->SetIntegerParameter(theSpacecraft->GetParameterID("NAIFIdReferenceFrame"), tmpint);
+         }
+         else
+         {
+            canClose = false;
+            return;
          }
       }
       if (spkFilesDeleted)
@@ -281,12 +327,12 @@ void SpicePanel::SaveData()
    }
    catch (BaseException &ex)
    {
-      canClose = false;
+      canClose    = false;
       dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
 
-   #ifdef DEBUG_SPICE_ORBIT_PANEL
+   #ifdef DEBUG_SPICE_PANEL
       MessageInterface::ShowMessage("at end of SaveData, canClose = %s\n",
             (canClose? "true" : "false"));
    #endif
@@ -297,6 +343,14 @@ void SpicePanel::SaveData()
    }
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads modified data from the Spacecraft object
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::LoadData()
 {
    try
@@ -365,6 +419,15 @@ void SpicePanel::LoadData()
 
 //------------------------------------------------------------------------------
 // private methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the widgets for the panel
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::Create()
 {
@@ -558,6 +621,18 @@ void SpicePanel::Create()
 
 }
 
+//------------------------------------------------------------------------------
+// void ResetChangeFlags(bool discardMods)
+//------------------------------------------------------------------------------
+/**
+ * Resets the flags indicating whether or not data has been modified
+ * by the user.
+ *
+ * @param discardMods   indicates whether or not to discard the mods made
+ *                      by the user
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::ResetChangeFlags(bool discardMods)
 {
    spkNameChanged        = false;
@@ -569,7 +644,7 @@ void SpicePanel::ResetChangeFlags(bool discardMods)
    spkFilesDeleted       = false;
    ckFilesDeleted        = false;
    sclkFilesDeleted      = false;
-   fkFilesDeleted       = false;
+   fkFilesDeleted        = false;
 
    if (discardMods)
    {
@@ -585,6 +660,13 @@ void SpicePanel::ResetChangeFlags(bool discardMods)
 //Event Handling
 //------------------------------------------------------------------------------
 // void OnSpkFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the SPK Add Button
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnSpkFileBrowseButton(wxCommandEvent &event)
 {
@@ -622,6 +704,13 @@ void SpicePanel::OnSpkFileBrowseButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnSpkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the SPK Remove Button
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnSpkFileRemoveButton(wxCommandEvent &event)
 {
    wxArrayInt selections;
@@ -647,14 +736,29 @@ void SpicePanel::OnSpkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnSpkFileListBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the SPK list box selection
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnSpkFileListBoxChange(wxCommandEvent &event)
 {
    spkNameChanged = true;
    dataChanged    = true;
    theScPanel->EnableUpdate(true);
 }
+
 //------------------------------------------------------------------------------
 // void OnCkFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the CK Add Button
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnCkFileBrowseButton(wxCommandEvent &event)
 {
@@ -692,6 +796,13 @@ void SpicePanel::OnCkFileBrowseButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnCkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the CK Remove Button
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnCkFileRemoveButton(wxCommandEvent &event)
 {
    wxArrayInt selections;
@@ -717,6 +828,13 @@ void SpicePanel::OnCkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnCkFileListBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the CK list box selection.
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnCkFileListBoxChange(wxCommandEvent &event)
 {
    ckNameChanged  = true;
@@ -726,6 +844,13 @@ void SpicePanel::OnCkFileListBoxChange(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnSclkFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the SCLK Add Button
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnSclkFileBrowseButton(wxCommandEvent &event)
 {
@@ -763,6 +888,13 @@ void SpicePanel::OnSclkFileBrowseButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnSclkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the SCLK Remove Button
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnSclkFileRemoveButton(wxCommandEvent &event)
 {
    wxArrayInt selections;
@@ -788,6 +920,14 @@ void SpicePanel::OnSclkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnSclkFileListBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the SCLK list box
+ * selection.
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnSclkFileListBoxChange(wxCommandEvent &event)
 {
    sclkNameChanged = true;
@@ -797,6 +937,13 @@ void SpicePanel::OnSclkFileListBoxChange(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnFkFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the FK Add Button
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnFkFileBrowseButton(wxCommandEvent &event)
 {
@@ -834,6 +981,13 @@ void SpicePanel::OnFkFileBrowseButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnFkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user selects the FK Remove Button
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnFkFileRemoveButton(wxCommandEvent &event)
 {
    wxArrayInt selections;
@@ -859,6 +1013,13 @@ void SpicePanel::OnFkFileRemoveButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnFkFileListBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the FK list box selection.
+ *
+ * @param event   the event to handle
+ *
+ */
+//------------------------------------------------------------------------------
 void SpicePanel::OnFkFileListBoxChange(wxCommandEvent &event)
 {
    fkNameChanged  = true;
@@ -868,6 +1029,13 @@ void SpicePanel::OnFkFileListBoxChange(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnNaifIdTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the NAIF ID text.
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnNaifIdTextCtrlChange(wxCommandEvent &event)
 {
@@ -881,6 +1049,13 @@ void SpicePanel::OnNaifIdTextCtrlChange(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnNaifIdRefTextCtrlChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user modifies the NAIF ID reference text.
+ *
+ * @param event   the event to handle
+ *
+ */
 //------------------------------------------------------------------------------
 void SpicePanel::OnNaifIdRefTextCtrlChange(wxCommandEvent &event)
 {

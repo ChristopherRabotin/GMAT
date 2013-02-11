@@ -49,7 +49,7 @@ private:
    StringArray spkKernelNames;
    /// CK kernel names - attitude/pointing
    StringArray ckKernelNames;
-   /// SCLK kernel names - spacecrat clock
+   /// SCLK kernel names - spacecraft clock
    StringArray sclkKernelNames;
    /// FK kernel names - frames
    StringArray fkKernelNames;
@@ -102,9 +102,6 @@ private:
    void OnFkFileBrowseButton(wxCommandEvent &event);
    void OnFkFileRemoveButton(wxCommandEvent &event);
    void OnFkFileListBoxChange(wxCommandEvent &event);
-//   void OnPckFileBrowseButton(wxCommandEvent &event);
-//   void OnPckFileRemoveButton(wxCommandEvent &event);
-//   void OnPckFileListBoxChange(wxCommandEvent &event);
    void OnNaifIdTextCtrlChange(wxCommandEvent &event);
    void OnNaifIdRefTextCtrlChange(wxCommandEvent &event);
 
@@ -174,9 +171,6 @@ private:
       ID_LIST_BOX_FK_FILE,
       ID_BROWSE_BUTTON_FK_FILE,
       ID_REMOVE_BUTTON_FK_FILE,
-//      ID_LIST_BOX_PCK_FILE,
-//      ID_BROWSE_BUTTON_PCK_FILE,
-//      ID_REMOVE_BUTTON_PCK_FILE,
       ID_TEXT_CTRL_NAIF_ID,
       ID_TEXT_CTRL_NAIF_ID_REF_FRAME,
    };
