@@ -1231,6 +1231,52 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
 
 
 //------------------------------------------------------------------------------
+// bool IsChildOpen(GmatTree::ItemType itemType)
+//------------------------------------------------------------------------------
+/**
+ * Determines if ANY panel of specified type is open
+ *
+ * @param <itemType> The item type to use for checking
+ *
+ * @return true if child open, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsChildOpen(GmatTree::ItemType itemType)
+{
+   #ifdef DEBUG_CHILD_OPEN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::IsChildOpen() this=<%p> entered, "
+       "itemType=%d\n", this, itemType);
+   #endif
+   
+   wxNode *node = theMdiChildren->GetFirst();
+   while (node)
+   {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      
+      #ifdef DEBUG_CHILD_OPEN
+      MessageInterface::ShowMessage
+         ("   child title='%s'\n   child name='%s'\n",
+          theChild->GetTitle().c_str(), item->GetName().c_str());
+      #endif
+      
+      // If item is script file, compare the name which is script path and name
+      if (theChild->GetItemType() == itemType)
+      {
+         return true;
+      }
+      
+      node = node->GetNext();
+   }
+   
+   #ifdef DEBUG_CHILD_OPEN
+   MessageInterface::ShowMessage("GmatMainFrame::IsChildOpen() returning false\n");
+   #endif
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsChildOpen(const wxString &itemName, GmatTree::ItemType itemType, ...)
 //------------------------------------------------------------------------------
 /**

@@ -85,6 +85,7 @@ public:
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
    bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width, Integer &height);
    void IconizeUndockedMissionTree();
+   bool IsChildOpen(GmatTree::ItemType itemType);
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool IsChildOpen(const wxString &name, GmatTree::ItemType itemType,
                     bool restore = true);
