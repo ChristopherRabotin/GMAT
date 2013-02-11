@@ -907,7 +907,7 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
    if (fileDialog->ShowModal() == wxID_OK)
    {
       // change file name when a new file is chosen
-      wxString filename = fileDialog->GetFilename();
+      wxString filename = fileDialog->GetPath().c_str();
       fileNameTextCtrl->SetValue(filename);
    }
    else
