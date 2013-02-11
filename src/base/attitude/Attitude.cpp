@@ -44,6 +44,7 @@
 //#define DEBUG_ATTITUDE_GEN_STRING
 //#define DEBUG_ATTITUDE_GET_REAL
 //#define DEBUG_ATTITUDE_GET
+//#define DEBUG_ATTITUDE_GET_COSMAT
 //#define DEBUG_ATTITUDE_SET_REAL
 //#define DEBUG_ATTITUDE_SET
 //#define DEBUG_ATTITUDE_READ_ONLY
@@ -1589,11 +1590,11 @@ const StringArray& Attitude::GetEulerSequenceList() const
 const Rvector&   Attitude::GetQuaternion(Real atTime)
 {
    if (isInitialized && needsReinit) Initialize();
-   if (GmatMathUtil::Abs(atTime - attitudeTime) > ATTITUDE_TIME_TOLERANCE)
-   {
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) > ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
+//   }
    quaternion       = Attitude::ToQuaternion(dcm);
    return quaternion;
 }
@@ -1627,12 +1628,12 @@ const Rvector3&  Attitude::GetEulerAngles(Real atTime)
    }
    #endif
 
-   if (GmatMathUtil::Abs(atTime - attitudeTime) >
-       ATTITUDE_TIME_TOLERANCE)
-   {
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) >
+//       ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
+//   }
 
    eulerAngles = Attitude::ToEulerAngles(dcm,
                            (Integer) eulerSequenceArray.at(0),
@@ -1665,12 +1666,12 @@ const Rvector3&  Attitude::GetEulerAngles(Real atTime,  Integer seq1,
                                           Integer seq2, Integer seq3)
 {
    if (isInitialized && needsReinit) Initialize();
-   if (GmatMathUtil::Abs(atTime - attitudeTime) >
-       ATTITUDE_TIME_TOLERANCE)
-   {
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) >
+//       ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
+//   }
    eulerAngles = Attitude::ToEulerAngles(dcm, seq1, seq2, seq3);
    return eulerAngles;
 }
@@ -1689,19 +1690,27 @@ const Rvector3&  Attitude::GetEulerAngles(Real atTime,  Integer seq1,
 //---------------------------------------------------------------------------
 const Rmatrix33& Attitude::GetCosineMatrix(Real atTime)
 {
-   #ifdef DEBUG_ATTITUDE_GET
+   #ifdef DEBUG_ATTITUDE_GET_COSMAT
       MessageInterface::ShowMessage("Entering Attitude::GetCosineMatrix ...\n");
       MessageInterface::ShowMessage(" ... atTime = %12.10f     attitudeTime = %12.10f\n",
             atTime, attitudeTime);
+      MessageInterface::ShowMessage(" ... ATTITUDE_TIME_TOLERANCE = %12.10f     Abs(atTime - attitudeTime)  = %12.10f\n",
+            ATTITUDE_TIME_TOLERANCE, GmatMathUtil::Abs(atTime - attitudeTime));
    #endif
-   if (isInitialized && needsReinit) Initialize();
-   if (GmatMathUtil::Abs(atTime - attitudeTime) >
-       ATTITUDE_TIME_TOLERANCE)
+   if (isInitialized && needsReinit)
    {
+      #ifdef DEBUG_ATTITUDE_GET_COSMAT
+         MessageInterface::ShowMessage("In Attitude::GetCosineMatrix, Initializing ...\n");
+      #endif
+      Initialize();
+   }
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) >
+//       ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
-   #ifdef DEBUG_ATTITUDE_GET
+//   }
+   #ifdef DEBUG_ATTITUDE_GET_COSMAT
       MessageInterface::ShowMessage(" ... returning cosine matrix: %s\n",
             (dcm.ToString()).c_str());
    #endif
@@ -1710,7 +1719,7 @@ const Rmatrix33& Attitude::GetCosineMatrix(Real atTime)
 }
  
 //---------------------------------------------------------------------------
-//  const Rvector3&   GetAngularVelocity(Real atTime)
+//  const Rvector3&   SetAngularVelocity(Real atTime)
 //---------------------------------------------------------------------------
  /**
  * Returns the attitude rates at time atTime as an angular velocity.
@@ -1724,12 +1733,12 @@ const Rmatrix33& Attitude::GetCosineMatrix(Real atTime)
 const Rvector3& Attitude::GetAngularVelocity(Real atTime)
 {
    if (isInitialized && needsReinit) Initialize();
-   if (GmatMathUtil::Abs(atTime - attitudeTime) >
-       ATTITUDE_TIME_TOLERANCE)
-   {
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) >
+//       ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
+//   }
    return angVel;
 }
 
@@ -1755,12 +1764,12 @@ const Rvector3& Attitude::GetEulerAngleRates(Real atTime)
    atTime, attitudeTime);
    #endif
    if (isInitialized && needsReinit) Initialize();
-   if (GmatMathUtil::Abs(atTime - attitudeTime) >
-       ATTITUDE_TIME_TOLERANCE)
-   {
+//   if (GmatMathUtil::Abs(atTime - attitudeTime) >
+//       ATTITUDE_TIME_TOLERANCE)
+//   {
       ComputeCosineMatrixAndAngularVelocity(atTime);
       attitudeTime = atTime;
-   }
+//   }
    eulerAngles       = GetEulerAngles(atTime);
    eulerAngleRates = Attitude::ToEulerAngleRates(angVel,
                                eulerAngles,
