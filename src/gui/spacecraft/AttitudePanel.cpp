@@ -642,6 +642,7 @@ void AttitudePanel::SaveData()
    
    // if the user selected a different attitude model, we will need to create it
    bool isNewAttitude = false;
+   bool isModelModified = modelModified;
    Attitude *useAttitude = NULL;
    if (modelModified)  
    {
@@ -788,10 +789,14 @@ void AttitudePanel::SaveData()
    {
       canClose = false;
       dataChanged = true;
+	  modelModified = isModelModified;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
-   ResetStateFlags("Both", canClose);
-   if (canClose) dataChanged = false;
+   if (canClose) 
+   {
+		ResetStateFlags("Both", canClose);
+	    dataChanged = false;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1454,14 +1459,14 @@ void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
    else // DCM
    {
       if (st1TextCtrl->IsModified())  dcmatModified[0] = true;
-      if (st2TextCtrl->IsModified())  dcmatModified[1] = true;
-      if (st3TextCtrl->IsModified())  dcmatModified[2] = true;
+      if (st2TextCtrl->IsModified())  dcmatModified[3] = true;
+      if (st3TextCtrl->IsModified())  dcmatModified[6] = true;
       // not st4TextCtrl - Used for Q4 only
-      if (st5TextCtrl->IsModified())  dcmatModified[3] = true;
+      if (st5TextCtrl->IsModified())  dcmatModified[1] = true;
       if (st6TextCtrl->IsModified())  dcmatModified[4] = true;
-      if (st7TextCtrl->IsModified())  dcmatModified[5] = true;
-      if (st8TextCtrl->IsModified())  dcmatModified[6] = true;
-      if (st9TextCtrl->IsModified())  dcmatModified[7] = true;
+      if (st7TextCtrl->IsModified())  dcmatModified[7] = true;
+      if (st8TextCtrl->IsModified())  dcmatModified[2] = true;
+      if (st9TextCtrl->IsModified())  dcmatModified[5] = true;
       if (st10TextCtrl->IsModified()) dcmatModified[8] = true;
    }
     
