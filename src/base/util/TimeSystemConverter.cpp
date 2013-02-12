@@ -27,6 +27,8 @@
 #include "GmatGlobal.hpp"          // for TIME_PRECISION
 #include "MessageInterface.hpp"
 
+#include <algorithm>               // For the STL Find() function
+
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TIMECONVERTER_DETAILS
 //#define DEBUG_GREGORIAN
@@ -484,10 +486,20 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
       loc = type.find("Gregorian", 0);
    
    if (loc == type.npos)
+   {
+      std::string timeRepList;
+      StringArray validReps = TimeConverterUtil::GetValidTimeRepresentations();
+      for (UnsignedInt i = 0; i < validReps.size(); ++i)
+      {
+         if (i != 0)
+            timeRepList += ", ";
+         timeRepList += validReps[i];
+      }
+
       throw TimeFormatException
          ("\"" + type + "\" is not a valid time format.\n"
-          "The allowed values are: [A1ModJulian, TAIModJulian, UTCModJulian, "
-          "TTModJulian, A1Gregorian, TAIGregorian, UTCGregorian, TTGregorian]");
+          "The allowed values are: [" + timeRepList + "]");
+   }
    
    system = type.substr(0, loc);
    format = type.substr(loc);
@@ -881,4 +893,28 @@ StringArray TimeConverterUtil::GetValidTimeRepresentations()
          systems.push_back(TIME_SYSTEM_TEXT[i] + "Gregorian");
    }
    return systems;
+}
+
+//------------------------------------------------------------------------------
+// bool IsValidTimeSystem(const std::string& system)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a time system is valid
+ *
+ * @param system The descriptor for the time system
+ *
+ * @return true for valid systems, false for invalid systems
+ */
+//------------------------------------------------------------------------------
+bool TimeConverterUtil::IsValidTimeSystem(const std::string& system)
+{
+   // This code should move to class level, once this code is made into a
+   // (possibly static) class.  We should also make it so that plugins can add
+   // new time systems that gain support by registering with TimeConverterUtil,
+   // and so that the list can be built once and used.
+   StringArray validFormats = GetValidTimeRepresentations();
+
+   // Once the above is done, this is all that is needed:
+   return !(find(validFormats.begin(), validFormats.end(), system) ==
+         validFormats.end());
 }

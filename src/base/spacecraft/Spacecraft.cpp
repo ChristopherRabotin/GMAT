@@ -3749,9 +3749,31 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
          dateType.c_str(), scEpochStr.c_str());
    #endif
 
-   epochType = dateType;
-   scEpochStr = GetEpochString();
+   if (TimeConverterUtil::IsValidTimeSystem(dateType))
+   {
+      epochType = dateType;
+      scEpochStr = GetEpochString();
+   }
+   else
+   {
+      char msg[512];
+      std::string timeRepList;
+      StringArray validReps = TimeConverterUtil::GetValidTimeRepresentations();
+      for (UnsignedInt i = 0; i < validReps.size(); ++i)
+      {
+         if (i != 0)
+            timeRepList += ", ";
+         timeRepList += validReps[i];
+      }
 
+      // The valid format list here should be retrieved from TimeconverterUtil,
+      // once that code is refactored
+      std::sprintf(msg, errorMessageFormat.c_str(), dateType.c_str(),
+            PARAMETER_LABEL[DATE_FORMAT_ID - SpaceObjectParamCount].c_str(),
+            timeRepList.c_str());
+
+      throw SpaceObjectException(msg);
+   }
 }
 
 
