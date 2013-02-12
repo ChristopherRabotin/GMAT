@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="Thruster"
+<refentry version="5.0" xml:id="Thruster"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -33,61 +32,52 @@
   <refsection>
     <title>Description</title>
 
-    <para>
-      The Thruster uses the fuel tank and directs the thrust of the rocket
-      engine while in space. It is used for finite burns.
-    </para>
+    <para>The Thruster uses the fuel tank and directs the thrust of the rocket
+    engine while in space. It is used for finite burns.</para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <para>
-      The constants Ci below are used in the following equation to calculate thrust (in Newtons), FT, as a function of pressure P (kPa) and temperature T (Celsius).
-    </para>
-    
+    <para>The constants Ci below are used in the following equation to
+    calculate thrust (in Newtons), FT, as a function of pressure P (kPa) and
+    temperature T (Celsius).</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_Thruster_GUI_1.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      The constants Ki below are used in the following equation to calculate ISP (in seconds), Isp, as a function of pressure P (kPa) and temperature T (Celsius).
-    </para>
+    <para>The constants Ki below are used in the following equation to
+    calculate ISP (in seconds), Isp, as a function of pressure P (kPa) and
+    temperature T (Celsius).</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_Thruster_GUI_2.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
 
     <variablelist>
       <varlistentry>
         <term>CoordinateSystem</term>
 
         <listitem>
-          <para>
-            The CoordinateSystem field for a thrusterdetermines what
-            coordinate system the orientation parametersX_Direction,
-            Y_Direction, and Z_Direction arereferenced to. This is a temporary
-            fix in GMAT. Eventually, theuser will specify the attitude of
-            aspacecraft, and then X_Direction, Y_Direction, and Z_Direction will
-            be referenced to the spacecraft body frame.
-          </para>
+          <para>The CoordinateSystem field for a thrusterdetermines what
+          coordinate system the orientation parametersX_Direction,
+          Y_Direction, and Z_Direction arereferenced to. This is a temporary
+          fix in GMAT. Eventually, theuser will specify the attitude of
+          aspacecraft, and then X_Direction, Y_Direction, and Z_Direction will
+          be referenced to the spacecraft body frame.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -102,10 +92,8 @@
               <term>Limits</term>
 
               <listitem>
-                <para>
-                  EarthMJ2000Eq, EarthMJ2000Ec, EarthMJ2000Eq, or anyuser
-                  defined system
-                </para>
+                <para>EarthMJ2000Eq, EarthMJ2000Ec, EarthMJ2000Eq, or anyuser
+                defined system</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -116,12 +104,10 @@
         <term>Axis</term>
 
         <listitem>
-          <para>
-            The Axis field allows the user to define a localcoordinate
-            system for a thruster. Note that there is a couplingbetween the Axis
-            parameter and the CoordinateSystemparameter for a thruster. Only one
-            of the two canbe specified.
-          </para>
+          <para>The Axis field allows the user to define a localcoordinate
+          system for a thruster. Note that there is a couplingbetween the Axis
+          parameter and the CoordinateSystemparameter for a thruster. Only one
+          of the two canbe specified.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -155,12 +141,10 @@
         <term>Origin</term>
 
         <listitem>
-          <para>
-            The Origin fieldallows the user to define a local origin for a
-            thruster. Note thatthere is a coupling between the Origin parameter
-            and theCoordinateSystem parameter for a thruster. Only one of the
-            twocan be specified.
-          </para>
+          <para>The Origin fieldallows the user to define a local origin for a
+          thruster. Note thatthere is a coupling between the Origin parameter
+          and theCoordinateSystem parameter for a thruster. Only one of the
+          twocan be specified.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -175,10 +159,8 @@
               <term>Limits</term>
 
               <listitem>
-                <para>
-                  Sun, Mercury, Venus, Earth, Luna, Mars,Jupiter, Saturn,
-                  Uranus, Neptune, Pluto
-                </para>
+                <para>Sun, Mercury, Venus, Earth, Luna, Mars,Jupiter, Saturn,
+                Uranus, Neptune, Pluto</para>
               </listitem>
             </varlistentry>
 
@@ -197,11 +179,9 @@
         <term>X_Direction</term>
 
         <listitem>
-          <para>
-            X_Direction, divided by the RSS of the three
-            directioncomponents, forms the x direction of the spacecraft thrust
-            vector direction.
-          </para>
+          <para>X_Direction, divided by the RSS of the three
+          directioncomponents, forms the x direction of the spacecraft thrust
+          vector direction.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -227,11 +207,9 @@
         <term>Y_Direction</term>
 
         <listitem>
-          <para>
-            Y_Direction, divided by the RSS of the three
-            directioncomponents, forms the y direction of the spacecraft thrust
-            vector direction.
-          </para>
+          <para>Y_Direction, divided by the RSS of the three
+          directioncomponents, forms the y direction of the spacecraft thrust
+          vector direction.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -257,11 +235,9 @@
         <term>Z_Direction</term>
 
         <listitem>
-          <para>
-            Z_Direction, divided by the RSS of the three
-            directioncomponents, forms the z direction of the spacecraft thrust
-            vector direction.
-          </para>
+          <para>Z_Direction, divided by the RSS of the three
+          directioncomponents, forms the z direction of the spacecraft thrust
+          vector direction.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -287,11 +263,9 @@
         <term>ThrustScaleFactor</term>
 
         <listitem>
-          <para>
-            ThrustScaleFactor is a scale factor that is multiplied by the
-            thrust vector for a given thruster, before the thrust vector is
-            added into the total accleration.
-          </para>
+          <para>ThrustScaleFactor is a scale factor that is multiplied by the
+          thrust vector for a given thruster, before the thrust vector is
+          added into the total accleration.</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -325,16 +299,12 @@
         <term>Tank</term>
 
         <listitem>
-          <para>
-            The Tank field specifies which tank the thruster draws
-            propellant from.
-          </para>
+          <para>The Tank field specifies which tank the thruster draws
+          propellant from.</para>
 
-          <para>
-            The constants C<subscript>i</subscript> below are used in the
-            following equation to calculate thrust F<subscript>T</subscript> as
-            a function of pressure P and temperature T
-          </para>
+          <para>The constants C<subscript>i</subscript> below are used in the
+          following equation to calculate thrust F<subscript>T</subscript> as
+          a function of pressure P and temperature T</para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -357,21 +327,18 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  F<subscript>T</subscript>(P,T) =
-                  {C<subscript>1</subscript>+C<subscript>2</subscript>P+C<subscript>3</subscript>P<superscript>2</superscript>+C<subscript>4</subscript>P<superscript>
-                    C<subscript>5</subscript>
-                  </superscript>+C<subscript>6</subscript>P<superscript>
-                    C<subscript>7</subscript>
-                  </superscript>+C<subscript>8</subscript>P<superscript>
-                    C<subscript>9</subscript>
-                  </superscript>
-                  +C<subscript>10</subscript>C<subscript>11</subscript><superscript>
-                    C<subscript>12</subscript>P
-                  </superscript>}(T/T<subscript>ref</subscript>)<superscript>
-                    1+C<subscript>13</subscript>+C<subscript>14</subscript>P
-                  </superscript>
-                </para>
+                <para>F<subscript>T</subscript>(P,T) =
+                {C<subscript>1</subscript>+C<subscript>2</subscript>P+C<subscript>3</subscript>P<superscript>2</superscript>+C<subscript>4</subscript>P<superscript>
+                C<subscript>5</subscript>
+                </superscript>+C<subscript>6</subscript>P<superscript>
+                C<subscript>7</subscript>
+                </superscript>+C<subscript>8</subscript>P<superscript>
+                C<subscript>9</subscript> </superscript>
+                +C<subscript>10</subscript>C<subscript>11</subscript><superscript>
+                C<subscript>12</subscript>P
+                </superscript>}(T/T<subscript>ref</subscript>)<superscript>
+                1+C<subscript>13</subscript>+C<subscript>14</subscript>P
+                </superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -507,9 +474,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  N/kPa<superscript>C5</superscript>
-                </para>
+                <para>N/kPa<superscript>C5</superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -577,9 +542,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  N/kPa<superscript>C7</superscript>
-                </para>
+                <para>N/kPa<superscript>C7</superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -647,9 +610,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  N/kPa<superscript>C9</superscript>
-                </para>
+                <para>N/kPa<superscript>C9</superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -858,29 +819,23 @@
             </varlistentry>
 
             <varlistentry>
-              <term>
-                The constants K<subscript>i</subscript> below are used in
-                the following equation tocalculate Isp as a function of pressure
-                P and temperatureT
-              </term>
+              <term>The constants K<subscript>i</subscript> below are used in
+              the following equation tocalculate Isp as a function of pressure
+              P and temperatureT</term>
 
               <listitem>
-                <para>
-                  I<subscript>sp</subscript>(P,T) &amp;nbsp = &amp;nbsp
-                  {K<subscript>1</subscript>+K<subscript>2</subscript>P+K<subscript>3</subscript>P<superscript>2</superscript>+K<subscript>4</subscript>P<superscript>
-                    K<subscript>5</subscript>
-                  </superscript>+K<subscript>6</subscript>P<superscript>
-                    K<subscript>7</subscript>
-                  </superscript>+K<subscript>8</subscript>P<superscript>
-                    K<subscript>9</subscript>
-                  </superscript>+
-                  K<subscript>10</subscript>K<subscript>11</subscript><superscript>
-                    K<subscript>12</subscript>P
-                  </superscript>}
-                  (T/T<subscript>ref</subscript>)<superscript>
-                    1+K<subscript>13</subscript>+K<subscript>14</subscript>P
-                  </superscript>
-                </para>
+                <para>I<subscript>sp</subscript>(P,T) &amp;nbsp = &amp;nbsp
+                {K<subscript>1</subscript>+K<subscript>2</subscript>P+K<subscript>3</subscript>P<superscript>2</superscript>+K<subscript>4</subscript>P<superscript>
+                K<subscript>5</subscript>
+                </superscript>+K<subscript>6</subscript>P<superscript>
+                K<subscript>7</subscript>
+                </superscript>+K<subscript>8</subscript>P<superscript>
+                K<subscript>9</subscript> </superscript>+
+                K<subscript>10</subscript>K<subscript>11</subscript><superscript>
+                K<subscript>12</subscript>P </superscript>}
+                (T/T<subscript>ref</subscript>)<superscript>
+                1+K<subscript>13</subscript>+K<subscript>14</subscript>P
+                </superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -982,9 +937,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  m/(sec?kPa<superscript>2</superscript>)
-                </para>
+                <para>m/(sec?kPa<superscript>2</superscript>)</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -1018,9 +971,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  m/(sec?kPa<superscript>K5</superscript>)
-                </para>
+                <para>m/(sec?kPa<superscript>K5</superscript>)</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -1088,9 +1039,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  m/(sec?kPa<superscript>K7</superscript>)
-                </para>
+                <para>m/(sec?kPa<superscript>K7</superscript>)</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -1158,9 +1107,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>
-                  m/(sec?kPa<superscript>K9</superscript>
-                </para>
+                <para>m/(sec?kPa<superscript>K9</superscript></para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -1381,10 +1328,8 @@
         <term>BeginFiniteBurn/EndFiniteBurn</term>
 
         <listitem>
-          <para>
-            These commands use the tank and the thruster to start a finite
-            burn, where the delta V is not instantaneous.
-          </para>
+          <para>These commands use the tank and the thruster to start a finite
+          burn, where the delta V is not instantaneous.</para>
         </listitem>
       </varlistentry>
 
@@ -1392,10 +1337,8 @@
         <term>Fuel Tank</term>
 
         <listitem>
-          <para>
-            This object contains the fuel used to power the thruster and
-            subsequently the finite burn.
-          </para>
+          <para>This object contains the fuel used to power the thruster and
+          subsequently the finite burn.</para>
         </listitem>
       </varlistentry>
 
@@ -1403,11 +1346,9 @@
         <term>FiniteBurn</term>
 
         <listitem>
-          <para>
-            This takes the parameters of the tank and the thruster and
-            apply it to a coordinate system, with a scaling method available if
-            wanted.
-          </para>
+          <para>This takes the parameters of the tank and the thruster and
+          apply it to a coordinate system, with a scaling method available if
+          wanted.</para>
         </listitem>
       </varlistentry>
 
@@ -1427,73 +1368,67 @@
     <refsection>
       <title>Introduction</title>
 
-      <para>
-        The Thruster dialog box allows you to specify properties of a thruster including the coordinate system of the
-        Thrust acceleration direction vector, the thrust magnitude and Isp. The layout of the Thruster dialog box is shown below.
+      <para>The Thruster dialog box allows you to specify properties of a
+      thruster including the coordinate system of the Thrust acceleration
+      direction vector, the thrust magnitude and Isp coefficients, and choice
+      of FuelTank. The layout of the Thruster dialog box is shown below.
       </para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_3.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
+      <para>When configuring the CoordinateSystem field, you can choose
+      between existing coordinate systems or use locally defined coordinate
+      systems. The “Axes” field is only active if “Coordinate System” is set
+      to Local. The “Origin” field is only active if “Coordinate System” is
+      set to Local and “Axes” is set to either VNB or LVLH. </para>
 
-    <para>
-      When configuring the CoordinateSystem field, you can choose between existing coordinate systems or use Local.  The “Origin” and “Axes”
-      fields are only active if “Coordinate System” is set to Local.   Those fields allow you to to define the reference origin and axes type for the local system.
-    </para>
-
-    <para>
-      As shown below, if “Decrement Mass” is checked, then  you can select the desired FuelTank.
-    </para>
+      <para>As shown below, if “Decrement Mass” is checked, then you can input
+      the gravitational acceleration value used to calculate fuel use. The
+      value of the gravitational acceleration input here only affects fuel use
+      and does not affect the force model. </para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_4.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        Selecting the “Edit Thruster Coef.” button brings up the following dialog box where you input the coefficients for the Thruster polynomial.
-      </para>
+      <para>Selecting the “Edit Thruster Coef.” button brings up the following
+      dialog box where you input the coefficients for the Thruster
+      polynomial.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_5.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        Similarly, clicking the “Edit Impulse Coef.” button brings up the following dialog box where you input the coefficients for the specific impulse (ISP) polynomial.
-      </para>
+      <para>Similarly, clicking the “Edit Impulse Coef.” button brings up the
+      following dialog box where you input the coefficients for the specific
+      impulse (ISP) polynomial.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_6.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
@@ -1504,56 +1439,59 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>
-        Use of Thruster object in conjunction with Maneuvers
-      </title>
+      <title>Use of Thruster object in conjunction with Maneuvers</title>
 
-      <para>
-        A <guilabel>Thruster</guilabel> object is used only in association with finite maneuvers.  To implement a finite maneuver, you must first create both a 
-        <guilabel>FuelTank</guilabel> and a <guilabel>FiniteBurn</guilabel> object. You must also associate a <guilabel>FuelTank</guilabel> with 
-        the <guilabel>Thruster</guilabel> object and you must associate a <guilabel>Thruster</guilabel> with the <guilabel>FiniteBurn</guilabel> object. 
-        The actual finite maneuver is implemented using the <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel> commands.
-        See the <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel> command documentation for worked examples on how the <guilabel>Thruster</guilabel> resource is used in conjunction with finite maneuvers.
-      </para>
+      <para>A <guilabel>Thruster</guilabel> object is used only in association
+      with finite maneuvers. To implement a finite maneuver, you must first
+      create both a <guilabel>FuelTank</guilabel> and a
+      <guilabel>FiniteBurn</guilabel> object. You must also associate a
+      <guilabel>FuelTank</guilabel> with the <guilabel>Thruster</guilabel>
+      object and you must associate a <guilabel>Thruster</guilabel> with the
+      <guilabel>FiniteBurn</guilabel> object. The actual finite maneuver is
+      implemented using the
+      <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
+      commands. See the
+      <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
+      command documentation for worked examples on how the
+      <guilabel>Thruster</guilabel> resource is used in conjunction with
+      finite maneuvers.</para>
     </refsection>
 
     <refsection>
       <title>Thrust and ISP Calculation</title>
 
-      <para>
-        Unscaled thrust, FT,  and Isp, as a function of Pressure, in kPa, and Temperature, in degrees Celsius, are calculated using the following polynomials.
-      </para>
+      <para>Unscaled thrust, FT, and Isp, as a function of Pressure, in kPa,
+      and Temperature, in degrees Celsius, are calculated using the following
+      polynomials.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_7.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        The thrust, T,  output in Newtons, is scaled by the Duty Cycle and Thrust Scale Factor.  The thrust acceleration direction vector 
-        (the direction of the actual acceleration not the thruster nozzle) is given by ThrustDirection1-3 and is applied in the input Coordinate System.  The Isp is output in seconds.
-      </para>
+      <para>The thrust, T, output in Newtons, is scaled by the Duty Cycle and
+      Thrust Scale Factor. The thrust acceleration direction vector (the
+      direction of the actual acceleration not the thruster nozzle) is given
+      by ThrustDirection1-3 and is applied in the input Coordinate System. The
+      Isp is output in seconds.</para>
 
-      <para>
-        The mass flow rate and the thrust equations are shown below where F_T and I_sp are defined above, f_d is the duty cycle, f_s is 
-        the thrust scale factor, R_iT is the rotation matrix from the thrust coordinate system to the inertial system, and T_d hat is the unitized thrust direction.
-      </para>
+      <para>The mass flow rate and the thrust equations are shown below where
+      F_T and I_sp are defined above, f_d is the duty cycle, f_s is the thrust
+      scale factor, R_iT is the rotation matrix from the thrust coordinate
+      system to the inertial system, and T_d hat is the unitized thrust
+      direction.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_Thruster_GUI_8.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
@@ -1562,67 +1500,83 @@
     <refsection>
       <title>Local Coordinate Systems</title>
 
-      <para>
-        Here, a Local coordinate system is defined as one that we configure 
-        "locally" using the thruster object interface as opposed to defining a coordinate system using the <guilabel>Coordinate Systems</guilabel> folder in the <guilabel>Resources</guilabel> Tree.
-      </para>
+      <para>Here, a Local coordinate system is defined as one that we
+      configure "locally" using the thruster object interface as opposed to
+      defining a coordinate system using the <guilabel>Coordinate
+      Systems</guilabel> folder in the <guilabel>Resources</guilabel>
+      Tree.</para>
 
-      <para>
-        To configure a local coordinate system, you must specify the coordinate system of the input thrust acceleration direction vector, ThrustDirection1-3.  
-        If you choose a local coordinate system, the four choices available, as given by the Axes sub-field, are VNB, LVLH, MJ2000Eq, and SpacecraftBody.  
-        VNB or Velocity-Normal-Binormal is a non-inertial coordinate system based upon the motion of the spacecraft with respect to the Origin sub-field. 
-        For example, if the Origin is chosen as Earth, then the X-axis of this coordinate system is the along the velocity of the spacecraft with respect to the Earth,
-        the Y-axis is along the instantaneous orbit normal (with respect to the Earth) of the spacecraft, and the Z-axis completes the right-handed set.
-      </para>
+      <para>To configure a local coordinate system, you must specify the
+      coordinate system of the input thrust acceleration direction vector,
+      ThrustDirection1-3. If you choose a local coordinate system, the four
+      choices available, as given by the Axes sub-field, are VNB, LVLH,
+      MJ2000Eq, and SpacecraftBody. VNB or Velocity-Normal-Binormal is a
+      non-inertial coordinate system based upon the motion of the spacecraft
+      with respect to the Origin sub-field. For example, if the Origin is
+      chosen as Earth, then the X-axis of this coordinate system is the along
+      the velocity of the spacecraft with respect to the Earth, the Y-axis is
+      along the instantaneous orbit normal (with respect to the Earth) of the
+      spacecraft, and the Z-axis completes the right-handed set.</para>
 
-      <para>
-        Similarly, Local Vertical Local Horizontal or LVLH is also a non-inertial coordinate system based upon the motion of the spacecraft with respect to the Origin sub-field.  Again, if we choose Earth as the origin, then the X-axis of this coordinate system is the position of the spacecraft with
-        respect to the Earth, the Z-axis is the instantaneous orbit normal (with respect to the Earth) of the spacecraft, and the Y-axis completes the right-handed set.
-      </para>
+      <para>Similarly, Local Vertical Local Horizontal or LVLH is also a
+      non-inertial coordinate system based upon the motion of the spacecraft
+      with respect to the Origin sub-field. Again, if we choose Earth as the
+      origin, then the X-axis of this coordinate system is the position of the
+      spacecraft with respect to the Earth, the Z-axis is the instantaneous
+      orbit normal (with respect to the Earth) of the spacecraft, and the
+      Y-axis completes the right-handed set.</para>
 
-      <para>
-        MJ2000Eq is the J2000-based Earth-centered Earth mean equator inertial coordinate system.  Note that the Origin sub-field is not needed to define this coordinate system.
-      </para>
+      <para>MJ2000Eq is the J2000-based Earth-centered Earth mean equator
+      inertial coordinate system. Note that the Origin sub-field is not needed
+      to define this coordinate system.</para>
 
-      <para>
-        SpacecraftBody is the attitude system of the spacecraft.  Since the thrust is applied in this system, GMAT uses the attitude of the spacecraft, 
-        a spacecraft attribute, to determine the inertial thrust direction.  Note that the Origin sub-field is not needed to define this coordinate system.
-      </para>
+      <para>SpacecraftBody is the attitude system of the spacecraft. Since the
+      thrust is applied in this system, GMAT uses the attitude of the
+      spacecraft, a spacecraft attribute, to determine the inertial thrust
+      direction. Note that the Origin sub-field is not needed to define this
+      coordinate system.</para>
     </refsection>
 
     <refsection>
-      <title>
-        Caution when setting the FuelTank Temperature and Reference Temperature
-      </title>
+      <title>Caution when setting the FuelTank Temperature and Reference
+      Temperature</title>
 
-      <para>
-        Note that both the thrust and ISP polynomials have terms that involve the ratio, (Temperature / Reference Temperature).  For GMAT, this temperature ratio is calculated in Celsius units, and thus, there is a discontinuity 
-        when the Reference Temperature is equal to zero.  For this reason, GMAT requires that the absolute value of the input Reference Temperature is greater than 0.01.
-      </para>
+      <para>Note that both the thrust and ISP polynomials have terms that
+      involve the ratio, (Temperature / Reference Temperature). For GMAT, this
+      temperature ratio is calculated in Celsius units, and thus, there is a
+      discontinuity when the Reference Temperature is equal to zero. For this
+      reason, GMAT requires that the absolute value of the input Reference
+      Temperature is greater than 0.01.</para>
 
-      <para>
-        Note also that the form of the Thrust and ISP polynomial has some behavior, when the Reference Temperature is near 
-        0 degrees Centigrade, that you need to be aware of.  Because of the previously mentioned discontinuity, the polynomials 
-        do not vary smoothly when the Reference Temperature is near zero.  For example, consider the two Reference Temperatures,
-        -0.011 and + 0.011 degrees Centigrade.   These two temperatures are close to each other in value and one might expect that they
-        have roughly similar thrust and ISP values.  This may not be the case, depending upon your choice of thrust/ISP coefficients,
-        since the temperature ratios associated with the two Reference Temperatures have the same magnitude but different signs. 
-        You may choose to set the input Reference Temperature equal to the input Temperature, thus eliminating any dependence of thrust 
-        and ISP with temperature when using the currently implemented FuelTank model based upon Boyle’s Law where the fuel Temperature does not change as fuel is depleted.
-      </para>
+      <para>Note also that the form of the Thrust and ISP polynomial has some
+      behavior, when the Reference Temperature is near 0 degrees Centigrade,
+      that you need to be aware of. Because of the previously mentioned
+      discontinuity, the polynomials do not vary smoothly when the Reference
+      Temperature is near zero. For example, consider the two Reference
+      Temperatures, -0.011 and + 0.011 degrees Centigrade. These two
+      temperatures are close to each other in value and one might expect that
+      they have roughly similar thrust and ISP values. This may not be the
+      case, depending upon your choice of thrust/ISP coefficients, since the
+      temperature ratios associated with the two Reference Temperatures have
+      the same magnitude but different signs. You may choose to set the input
+      Reference Temperature equal to the input Temperature, thus eliminating
+      any dependence of thrust and ISP with temperature when using the
+      currently implemented FuelTank model based upon Boyle’s Law where the
+      fuel Temperature does not change as fuel is depleted.</para>
     </refsection>
   </refsection>
-  
+
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Create a default <guilabel>FuelTank</guilabel> and a <guilabel>Thruster</guilabel> that allows for fuel depletion, 
-        assign the <guilabel>Thruster</guilabel> the default <guilabel>FuelTank</guilabel>, and attach both the <guilabel>Thruster</guilabel> and <guilabel>FuelTank</guilabel> to a Spacecraft.
-      </para>
+      <para>Create a default <guilabel>FuelTank</guilabel> and a
+      <guilabel>Thruster</guilabel> that allows for fuel depletion, assign the
+      <guilabel>Thruster</guilabel> the default <guilabel>FuelTank</guilabel>,
+      and attach both the <guilabel>Thruster</guilabel> and
+      <guilabel>FuelTank</guilabel> to a Spacecraft.</para>
 
-    <programlisting>
+      <programlisting>
       <code>
   %  Create the FuelTank Object
   Create FuelTank FuelTank1;
@@ -1689,7 +1643,6 @@
   BeginMissionSequence
       </code>
     </programlisting>
-
     </informalexample>
   </refsection>
 </refentry>
