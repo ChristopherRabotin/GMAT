@@ -1408,6 +1408,16 @@ bool Interpreter::GetContinueOnError()
    return continueOnError;
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsInCommandMode()
+//------------------------------------------------------------------------------
+bool Interpreter::IsInCommandMode()
+{
+   return inCommandMode;
+}
+
+
 //------------------------------------------------------------------------------
 // bool CheckUndefinedReference(GmatBase *obj, bool writeLine)
 //------------------------------------------------------------------------------
@@ -3710,6 +3720,8 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
    MessageInterface::ShowMessage
       ("Interpreter::CreateAssignmentCommand() lhs=<%s>, rhs=<%s>\n", lhs.c_str(),
        rhs.c_str());
+   MessageInterface::ShowMessage
+      ("   inCommandMode=%d, inRealCommandMode=%d\n", inCommandMode, inRealCommandMode);
    #endif
    
    debugMsg = "In CreateAssignmentCommand()";
@@ -3959,10 +3971,12 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    MessageInterface::ShowMessage
       ("Interpreter::MakeAssignment() lhs=<%s>, rhs=<%s>\n", lhs.c_str(), rhs.c_str());
    MessageInterface::ShowMessage
+      ("   inCommandMode=%d, inRealCommandMode=%d\n", inCommandMode, inRealCommandMode);
+   MessageInterface::ShowMessage
       ("   inFunctionMode=%d, hasFunctionDefinition=%d\n", inFunctionMode,
        hasFunctionDefinition);
    #endif
-
+   
    debugMsg = "In MakeAssignment()";
    bool retval = false;
    
@@ -4293,6 +4307,15 @@ bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj,
    #endif
    
    debugMsg = "In SetObjectToObject()";
+   
+   // If in object initialization mode, do not allow object to object assignment
+   if (!inCommandMode)
+   {
+      InterpreterException ex
+         ("Setting \"" + toObj->GetName() + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
+      HandleError(ex);
+      return false;
+   }
    
    // Copy object
    if (toObj->GetTypeName() == fromObj->GetTypeName())
