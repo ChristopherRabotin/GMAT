@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="SpacecraftHardware"
+<refentry version="5.0" xml:id="SpacecraftHardware"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,112 +24,234 @@
   <refnamediv>
     <refname>SpacecraftHardware</refname>
 
-    <refpurpose>
-      Add hardware to a spacecraft
-    </refpurpose>
+    <refpurpose>Add hardware to a spacecraft</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The hardware fields allow you to attach pre-configured hardware models to a spacecraft.  
-      Current models include tank and thruster.  Before you attach a hardware model to a spacecraft, you must first create the model.
-    </para>
+    <para>The hardware fields allow you to attach pre-configured hardware
+    models to a spacecraft. Current models include tank and thruster. Before
+    you attach a hardware model to a spacecraft, you must first create the
+    model.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: <xref
-        linkend="FuelTank"/>, <xref linkend="Thruster"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="FuelTank"/>, <xref linkend="Thruster"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>Tanks</guilabel></entry>
+
+            <entry><para>This field is used to attach
+            <guilabel>FuelTank(s)</guilabel> to a spacecraft.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any user-defined
+                    <guilabel>FuelTank</guilabel>.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script.</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Thrusters</guilabel></entry>
+
+            <entry><para>This field is used to attach
+            <guilabel>Thruster(s)</guilabel> to a spacecraft.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any user-defined <guilabel>Thruster</guilabel>.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
     <title>GUI</title>
 
-    <para>
-      There are two spacecraft hardware items, the fuel tank and the thruster, that can be attached to a spacecraft. 
-      Here, we describe the method used to create and then attach these items to a spacecraft.  
-      For details on how to configure the fuel tank and thrusters, see the help for the individual hardware item.
-    </para>
+    <para>There are two spacecraft hardware items, the fuel tank and the
+    thruster, that can be attached to a spacecraft. Here, we describe the
+    method used to create and then attach these items to a spacecraft. For
+    details on how to configure the fuel tank and thrusters, see the help for
+    the individual hardware item.</para>
 
-    <para>
-      As shown below, to add a FuelTank to your script, highlight the Hardware resource and then right click to add a Fuel Tank.
-    </para>
+    <para>As shown below, to add a FuelTank to your script, highlight the
+    Hardware resource and then right click to add a Fuel Tank.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SpacecraftHardware_GUI_1.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      To add a Thruster to your script, highlight the Hardware resource and then right click to add a Thruster.
-    </para>
+    <para>To add a Thruster to your script, highlight the Hardware resource
+    and then right click to add a Thruster.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SpacecraftHardware_GUI_2.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      Thus far, we have created both a Fuel Tank and a Thruster.  Next, we  attach both the Fuel Tank and the Thruster to a particular spacecraft. To do this, 
-      double click on the desired spacecraft under the Spacecraft resource to bring up the associated GUI panel. Then click on the Tanks tab to bring up the following GUI display.
-    </para>
+    <para>Thus far, we have created both a Fuel Tank and a Thruster. Next, we
+    attach both the Fuel Tank and the Thruster to a particular spacecraft. To
+    do this, double click on the desired spacecraft under the Spacecraft
+    resource to bring up the associated GUI panel. Then click on the Tanks tab
+    to bring up the following GUI display.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SpacecraftHardware_GUI_3.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      Next, select the desired Fuel Tank and use the right arrow button to attach the Fuel Tank to the spacecraft as shown below. Then click the Apply button.
-    </para>
+    <para>Next, select the desired Fuel Tank and use the right arrow button to
+    attach the Fuel Tank to the spacecraft as shown below. Then click the
+    Apply button.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SpacecraftHardware_GUI_4.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      Similarly, to attach a Thruster to a spacecraft, double click on the desired spacecraft under the Spacecraft resource and then select the Actuators tab. 
-      Then select the desired thruster and use the right arrow to attach the thruster to the spacecraft as shown below. Finally, click the Apply button.
-    </para>
+    <para>Similarly, to attach a Thruster to a spacecraft, double click on the
+    desired spacecraft under the Spacecraft resource and then select the
+    Actuators tab. Then select the desired thruster and use the right arrow to
+    attach the thruster to the spacecraft as shown below. Finally, click the
+    Apply button.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SpacecraftHardware_GUI_5.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -139,19 +260,19 @@
   <refsection>
     <title>Remarks</title>
 
-    <para>
-      To actually use the thruster to apply a finite burn to a spacecraft, additional steps are required.  For example, when you create the thruster
-      object, you have to associate a fuel tank with the thruster.  For details on this and related matters, see the help for the FuelTank, Thruster, and FiniteBurn resources.
-    </para>
+    <para>To actually use the thruster to apply a finite burn to a spacecraft,
+    additional steps are required. For example, when you create the thruster
+    object, you have to associate a fuel tank with the thruster. For details
+    on this and related matters, see the help for the FuelTank, Thruster, and
+    FiniteBurn resources.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Create a default Spacecraft.  Create FuelTank and Thruster objects and attach them to the spacecraft.
-      </para>
+      <para>Create a default Spacecraft. Create FuelTank and Thruster objects
+      and attach them to the spacecraft.</para>
 
       <programlisting>
         <code>
