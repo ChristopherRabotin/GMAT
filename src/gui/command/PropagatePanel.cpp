@@ -571,6 +571,9 @@ void PropagatePanel::GetNewStopCondLeftValue(Integer row, Integer col)
    ParameterSelectDialog paramDlg(this, mObjectTypeList, GuiItemManager::SHOW_PLOTTABLE,
                                   0, false, false, true, true, true, true, "Spacecraft",
                                   true, false, false, true);
+   wxArrayString paramNames;
+   paramNames.Add(stopCondGrid->GetCellValue(row,STOPCOND_LEFT_COL));
+   paramDlg.SetParamNameArray(paramNames);
    paramDlg.ShowModal();
    
    if (paramDlg.HasSelectionChanged())
