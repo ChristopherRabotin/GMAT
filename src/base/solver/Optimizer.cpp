@@ -724,6 +724,12 @@ const StringArray& Optimizer::GetStringArrayParameter(
 bool Optimizer::TakeAction(const std::string &action,
                                        const std::string &actionData)
 {
+   if (action == "ResetInstanceCount")
+   {
+      instanceNumber = 0;
+      return true;
+   }
+
    if (action == "IncrementInstanceCount")
    {
       ++instanceNumber;
