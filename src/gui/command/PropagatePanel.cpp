@@ -592,7 +592,8 @@ void PropagatePanel::GetNewStopCondLeftValue(Integer row, Integer col)
       else
       {
          stopCondGrid->SetCellValue(row, STOPCOND_RELOPER_COL, "   = ");
-         stopCondGrid->SetCellValue(row, STOPCOND_RIGHT_COL, "0.0");
+         if (stopCondGrid->GetCellValue(row, STOPCOND_RIGHT_COL) == "")
+            stopCondGrid->SetCellValue(row, STOPCOND_RIGHT_COL, "0.0");
          stopCondGrid->SetReadOnly(row, STOPCOND_RIGHT_COL, false);
       }
       
