@@ -888,6 +888,7 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                   #endif
                   ResetLoopData();
                   branchExecuting = true;
+                  ChangeRunState(Gmat::SOLVEDPASS);
                   //publisher->SetRunState(Gmat::SOLVEDPASS);
                }
                theSolver->Finalize();
