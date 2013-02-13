@@ -1578,7 +1578,7 @@ void PropagationConfigPanel::SaveData()
                return;
          }
          
-         thePropSetup->SetPropagator(thePropagator);
+         thePropSetup->SetPropagator(thePropagator, true);
          thePropSetup->SetODEModel(NULL);  // No force model for these puppies
 
          // Since the propagator is cloned in the base code, get new pointer
