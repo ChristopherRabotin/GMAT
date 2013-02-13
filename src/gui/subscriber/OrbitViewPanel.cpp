@@ -744,7 +744,7 @@ void OrbitViewPanel::LoadData()
       mXYPlaneCheckBox->
          SetValue(mOrbitView->GetOnOffParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
-         SetValue(mOrbitView->GetOnOffParameter("CelestialPlane") == "On");
+         SetValue(mOrbitView->GetOnOffParameter("EclipticPlane") == "On");
       mWireFrameCheckBox->
          SetValue(mOrbitView->GetOnOffParameter("WireFrame") == "On");
       mAxesCheckBox->
@@ -1248,9 +1248,9 @@ void OrbitViewPanel::SaveData()
             mOrbitView->SetOnOffParameter("XYPlane", "Off");
          
          if (mEclipticPlaneCheckBox->IsChecked())
-            mOrbitView->SetOnOffParameter("CelestialPlane", "On");
+            mOrbitView->SetOnOffParameter("EclipticPlane", "On");
          else
-            mOrbitView->SetOnOffParameter("CelestialPlane", "Off");
+            mOrbitView->SetOnOffParameter("EclipticPlane", "Off");
          
          if (mWireFrameCheckBox->IsChecked())
             mOrbitView->SetOnOffParameter("WireFrame", "On");

@@ -49,7 +49,6 @@
 const std::string
 OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-//    "CoordinateSystem",
    "ViewPointRef",
    "ViewPointReference",
    "ViewPointRefType",
@@ -64,6 +63,7 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
    "ViewUpCoordinateSystem",
    "ViewUpAxis",
    "CelestialPlane",
+   "EclipticPlane",
    "XYPlane",
    "WireFrame",
    "Axes",
@@ -84,27 +84,27 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 const Gmat::ParameterType
 OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-//    Gmat::OBJECT_TYPE,            //"CoordinateSystem"
-   Gmat::OBJECT_TYPE,            //"ViewPointRef",
+   Gmat::OBJECT_TYPE,            //"ViewPointRef", - deprecated
    Gmat::OBJECT_TYPE,            //"ViewPointReference",
    Gmat::STRING_TYPE,            //"ViewPointRefType"
    Gmat::RVECTOR_TYPE,           //"ViewPointRefVector",
    Gmat::OBJECT_TYPE,            //"ViewPointVector",
    Gmat::STRING_TYPE,            //"ViewPointVectorType",
-   Gmat::RVECTOR_TYPE,           //"ViewPointVectorVector",
+   Gmat::RVECTOR_TYPE,           //"ViewPointVectorVector", - deprecated
    Gmat::OBJECT_TYPE,            //"ViewDirection",
    Gmat::STRING_TYPE,            //"ViewDirectionType",
-   Gmat::RVECTOR_TYPE,           //"ViewDirectionVector",
+   Gmat::RVECTOR_TYPE,           //"ViewDirectionVector", - deprecated
    Gmat::REAL_TYPE,              //"ViewScaleFactor",
    Gmat::OBJECT_TYPE,            //"ViewUpCoordinaetSystem"
    Gmat::ENUMERATION_TYPE,       //"ViewUpAxis"
    
-   Gmat::ON_OFF_TYPE,            //"CelestialPlane"
+   Gmat::ON_OFF_TYPE,            //"CelestialPlane" - deprecated
+   Gmat::ON_OFF_TYPE,            //"EclipticPlane"
    Gmat::ON_OFF_TYPE,            //"XYPlane"
    Gmat::ON_OFF_TYPE,            //"WireFrame"
    Gmat::ON_OFF_TYPE,            //"Axes"
    Gmat::ON_OFF_TYPE,            //"Grid"
-   Gmat::ON_OFF_TYPE,            //"EarthSunLines"   
+   Gmat::ON_OFF_TYPE,            //"EarthSunLines" - deprecated
    Gmat::ON_OFF_TYPE,            //"SunLine"   
    Gmat::ON_OFF_TYPE,            //"Overlap"
    Gmat::ON_OFF_TYPE,            //"LockView"
@@ -215,8 +215,7 @@ OrbitView::OrbitView(const OrbitView &ov)
    mViewUpCoordSysName = ov.mViewUpCoordSysName;
    mViewUpAxisName = ov.mViewUpAxisName;
    
-//    mViewCoordSystem = ov.mViewCoordSystem;
-   mViewUpCoordSystem = ov.mViewCoordSystem;
+   mViewUpCoordSystem = ov.mViewUpCoordSystem;
    mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
    mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
    mViewPointRefObj = ov.mViewPointRefObj;
@@ -268,8 +267,7 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mViewUpAxisName = ov.mViewUpAxisName;
    
    // object pointers
-//    mViewCoordSystem = ov.mViewCoordSystem;
-   mViewUpCoordSystem = ov.mViewCoordSystem;
+   mViewUpCoordSystem = ov.mViewUpCoordSystem;
    mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
    mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
    mViewPointRefObj = ov.mViewPointRefObj;
@@ -771,7 +769,7 @@ std::string OrbitView::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool OrbitView::IsParameterReadOnly(const Integer id) const
 {
-   if (id == OVERLAP_PLOT ||
+   if (id == OVERLAP_PLOT || id == CELESTIAL_PLANE ||
        id == EARTH_SUN_LINES || id == VIEWPOINT_REF || id == VIEWPOINT_REF_VECTOR ||
        id == VIEWPOINT_VECTOR_VECTOR || id == VIEW_DIRECTION_VECTOR ||
        id == VIEWPOINT_REF_TYPE || id == VIEWPOINT_VECTOR_TYPE ||
@@ -982,11 +980,9 @@ const Rvector& OrbitView::GetRvectorParameter(const Integer id) const
    switch (id)
    {
    case VIEWPOINT_REF_VECTOR:
-      //WriteDeprecatedMessage(id);
       return mViewPointRefVector;
    case VIEWPOINT_VECTOR_VECTOR:
       {
-         //WriteDeprecatedMessage(id);
          #if DBGLVL_PARAM
          Rvector vec = mViewPointVecVector;
          MessageInterface::ShowMessage
@@ -996,7 +992,6 @@ const Rvector& OrbitView::GetRvectorParameter(const Integer id) const
          return mViewPointVecVector;
       }
    case VIEW_DIRECTION_VECTOR:
-      //WriteDeprecatedMessage(id);
       return mViewDirectionVector;
    default:
       return OrbitPlot::GetRvectorParameter(id);
@@ -1306,6 +1301,7 @@ std::string OrbitView::GetOnOffParameter(const Integer id) const
    switch (id)
    {
    case CELESTIAL_PLANE:
+   case ECLIPTIC_PLANE:
       return mEclipticPlane;
    case XY_PLANE:
       return mXYPlane;
@@ -1350,6 +1346,10 @@ bool OrbitView::SetOnOffParameter(const Integer id, const std::string &value)
    switch (id)
    {
    case CELESTIAL_PLANE:
+      WriteDeprecatedMessage(id);
+      mEclipticPlane = value;
+      return true;
+   case ECLIPTIC_PLANE:
       mEclipticPlane = value;
       return true;
    case XY_PLANE:
@@ -1747,6 +1747,7 @@ void OrbitView::PutRvector3Value(Rvector3 &rvec3, Integer id,
 void OrbitView::WriteDeprecatedMessage(Integer id) const
 {
    // Write only one message per session
+   static bool writeCelestialPlane = true;
    static bool writeEarthSunLines = true;
    static bool writeViewpointRef = true;
    static bool writeViewpointRefVector = true;
@@ -1755,6 +1756,16 @@ void OrbitView::WriteDeprecatedMessage(Integer id) const
    
    switch (id)
    {
+   case CELESTIAL_PLANE:
+      if (writeCelestialPlane)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"CelestialPlane\" is deprecated and will be "
+             "removed from a future build; please use \"EclipticPlane\" "
+             "instead.\n");
+         writeCelestialPlane = false;
+      }
+      break;
    case EARTH_SUN_LINES:
       if (writeEarthSunLines)
       {

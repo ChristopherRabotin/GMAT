@@ -178,6 +178,7 @@ protected:
       VIEW_UP_COORD_SYSTEM,
       VIEW_UP_AXIS,
       CELESTIAL_PLANE,
+      ECLIPTIC_PLANE,
       XY_PLANE,
       WIRE_FRAME,
       AXES,
