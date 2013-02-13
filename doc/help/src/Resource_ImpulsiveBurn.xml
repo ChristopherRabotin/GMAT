@@ -817,8 +817,42 @@
       <para>
         SpacecraftBody is the coordinate system used by the spacecraft.  Since the thrust is applied in this system, GMAT uses the attitude of the spacecraft, a spacecraft attribute, to determine the inertial thrust direction.  Note that the Origin sub-field is not needed to define this coordinate system.
       </para>
-    </refsection>
+    	
+	</refsection>
 
+	    <refsection>
+      <title>
+        Deprecated Field Names for an ImpulsiveBurn
+      </title>
+	   <para>
+	  Note that the standard method, as shown below, for specifying the components of an ImpulsiveBurn is to use the Element1, Element2, and Element3 field names. 
+  </para>
+	    <programlisting>
+        <code>
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.Element1 = -3;
+GMAT DefaultIB.Element2 = 7;
+GMAT DefaultIB.Element3 = -2;
+        </code>
+      </programlisting>
+<para>
+For this current version of GMAT, you may also use the field names V, N, and B in place of Element1, Element2, and Element3, respectively. The commands below are equivalent to the commands above. 
+ </para>
+  <programlisting>
+        <code>
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.V = -3;
+GMAT DefaultIB.N = 7;
+GMAT DefaultIB.B = -2;
+        </code>
+      </programlisting>
+ <para>
+It is important to note that the V, N, B field names do not necessarily correspond to some Velocity, Normal, Binormal coordinate system. The Coordinate system of any impulsive burn is always specified by the CoordinateSystem, Origin, and Axes fields. Because of the confusion that the V, N, B field names can cause, their use will not be allowed in future versions of GMAT. If you use the V, N, B field names in this version of GMAT, you will receive a warning to this affect.
+ </para>
+	 
+	  	  
+	</refsection>
+	
     <refsection>
       <title>
         Interactions
