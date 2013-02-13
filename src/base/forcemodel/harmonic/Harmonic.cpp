@@ -246,30 +246,33 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          sum2 += m * Avv00 * F;
          sum3 +=     Avv01 * D;
          sum4 +=     Avv11 * D;
-         if (fillgradient)
+
+         // Truncate the gradient at 20x20, if calculated
+         if ((fillgradient) && (m < 21) && (n < 21))
          {
             // Pines Equation 27 (Part of)
             Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
             Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
             // Correct for normalization
             
-		    Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+            Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
             Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
-			Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
-		    if (m==0) 
-		    {
-			    VR02 /= sqrt(Real(2));
-			    VR12 /= sqrt(Real(2));
-				VR22 /= sqrt(Real(2));
-		    }
-			Real Avv02 = VR02 * A[n][m+2];
-			Real Avv12 = VR12 * A[n+1][m+2];
+            Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+            if (m==0)
+            {
+               VR02 /= sqrt(Real(2));
+               VR12 /= sqrt(Real(2));
+               VR22 /= sqrt(Real(2));
+            }
+            Real Avv02 = VR02 * A[n][m+2];
+            Real Avv12 = VR12 * A[n+1][m+2];
             Real Avv22 = VR22 * A[n+2][m+2];
-			//Real Vnm = V[n][m];
+            //Real Vnm = V[n][m];
             //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
-			//Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
+            //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
             //Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
-            if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))    Avv02 = 0.0;  // ************** wcs added ****
+            if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))
+               Avv02 = 0.0;  // ************** wcs added ****
 
             #ifdef DEBUG_GRADIENT
                MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
