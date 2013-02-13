@@ -470,7 +470,7 @@ bool GmatApp::ProcessCommandLineOptions()
             {
                scriptToRun = argv[i+1];
                // Replace single quotes
-               GmatStringUtil::Replace(scriptToRun, "'", "");
+               scriptToRun = GmatStringUtil::Replace(scriptToRun, "'", "");
                runScript = true;
                ++i;
                #ifdef DEBUG_CMD_LINE
