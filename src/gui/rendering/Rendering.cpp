@@ -65,21 +65,19 @@ void DrawSphere(GLdouble radius, GLint slices, GLint stacks,
 }
 
 //------------------------------------------------------------------------------
-// void DrawLine(GlColorType *color, Rvector3 start, Rvector3 end)
+// void DrawLine(GlColorType *color, const Rvector3 &start, const Rvector3 &end)
 //------------------------------------------------------------------------------
 /**
  * Draw a line of the given color from start to end
  */
 //------------------------------------------------------------------------------
-void DrawLine(GlColorType *color, Rvector3 start, Rvector3 end)
+void DrawLine(GlColorType *color, const Rvector3 &start, const Rvector3 &end)
 {
    glPushMatrix();
    glBegin(GL_LINES);
    
    glColor3ub(color->red, color->green, color->blue);
-   
    glVertex3f(start[0], start[1], start[2]);
-   
    glVertex3f(end[0], end[1], end[2]);
    
    glEnd();
@@ -87,23 +85,21 @@ void DrawLine(GlColorType *color, Rvector3 start, Rvector3 end)
 }
 
 //------------------------------------------------------------------------------
-// void DrawLine(float red, float green, float blue, Rvector3 start, Rvector3 end)
+// void DrawLine(float red, float green, float blue, const Rvector3 &start, const Rvector3 &end)
 //------------------------------------------------------------------------------
 /**
  * Draw a line of the given color from start to end
  */
 //------------------------------------------------------------------------------
-void DrawLine(float red, float green, float blue, Rvector3 start, Rvector3 end)
+void DrawLine(float red, float green, float blue, const Rvector3 &start, const Rvector3 &end)
 {
    glPushMatrix();
    glBegin(GL_LINES);
-
+   
    glColor3f(red, green, blue);
-               
    glVertex3f(start[0], start[1], start[2]);
-               
    glVertex3f(end[0], end[1], end[2]);
-
+   
    glEnd();
    glPopMatrix();
 }
@@ -254,6 +250,17 @@ void DrawSquare(double x, double y, double radius, bool fill)
    glVertex2d(x - radius, y + radius);
    glEnd();
 }
+
+
+//------------------------------------------------------------------------------
+// void DrawStringAt(const wxString &str, const Rvector3 &point)
+//------------------------------------------------------------------------------
+void DrawStringAt(const wxString &str, const Rvector3 &point)
+{
+   glRasterPos3d(point[0], point[1], point[2]);
+   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
+}
+
 
 //------------------------------------------------------------------------------
 // void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z, GLfloat k)

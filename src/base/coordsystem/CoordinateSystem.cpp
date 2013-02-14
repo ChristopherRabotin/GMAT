@@ -30,6 +30,7 @@
 #include "CoordinateBase.hpp"
 #include "ObjectReferencedAxes.hpp"
 #include "MJ2000EqAxes.hpp"
+#include "MJ2000EcAxes.hpp"
 #include "TopocentricAxes.hpp"
 #include "BodyFixedAxes.hpp"
 #include "Rmatrix33.hpp"
@@ -2051,12 +2052,14 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
       return localCS;
    }
    // these are needed at least by the Measurement code
-   else if ((axesType == "MJ2000Eq") || (axesType == "Topocentric") ||
-            (axesType == "BodyFixed" ))
+   else if ((axesType == "MJ2000Eq") || (axesType == "MJ2000Ec") ||
+            (axesType == "Topocentric") || (axesType == "BodyFixed" ))
    {
       localCS = new CoordinateSystem("CoordinateSystem",csName);
       if (axesType == "MJ2000Eq")
          theAxes = new MJ2000EqAxes(csName);
+      else if (axesType == "MJ2000Ec")
+         theAxes = new MJ2000EcAxes(csName);
       else if (axesType == "Topocentric")
          theAxes = new TopocentricAxes(csName);
       else

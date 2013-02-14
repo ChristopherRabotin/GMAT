@@ -90,6 +90,9 @@ using namespace FloatAttUtil;
 // canvas and thus show your current output.
 
 // Skip data over the max position difference
+// Define this for GMT-3209 Fix (LOJ: 2013.01.25)
+// Actually this is not a robust fix. We need to think about better fix for
+// incorrectly connecting lines
 //#define SKIP_DATA_OVER_LIMIT
 
 // debug
@@ -160,7 +163,8 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
 {
    // extra data need
    mNeedAttitude = true;
-	
+	mNeedEcliptic = true;
+   
    // Linux specific
    #ifdef __WXGTK__
       hasBeenPainted = false;
@@ -218,10 +222,9 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    // drawing options
    mDrawXyPlane = false;
-   mDrawEcPlane = false;
+   mDrawEclipticPlane = false;
    mDrawAxes = false;
    mPolygonMode = GL_FILL;
-   mNeedAttitude = true;
    
    mXyPlaneColor = GmatColor::NAVY32;
    mEcPlaneColor = 0x00002266; //dark red
@@ -256,16 +259,17 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    // Spacecraft
    mScCount = 0;
    
+   // All in ViewCanvas
+   #if 0
    // Coordinate System
    pInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
    mInternalCoordSysName = wxString(pInternalCoordSystem->GetName().c_str());
-   
    mViewCoordSysName = "";
    pViewCoordSystem = NULL;
-   
-   // CoordinateSystem conversion
+   // For CoordinateSystem conversion
    mViewCsIsInternalCs = true;
-   
+   #endif
+      
    #if DEBUG_INIT
    MessageInterface::ShowMessage
       ("   pInternalCoordSystem=<%p>'%s', pViewCoordSystem=<%p>'%s'\n",
@@ -429,7 +433,7 @@ void OrbitViewCanvas::DrawXyPlane(bool flag)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawEcPlane(bool flag)
 {
-   mDrawEcPlane = flag;
+   mDrawEclipticPlane = flag;
    Refresh(false);
 }
 
@@ -678,7 +682,7 @@ void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
        usevpInfo, drawStars, drawConstellations, starCount);
    #endif
    
-   mDrawEcPlane = drawEcPlane;
+   mDrawEclipticPlane = drawEcPlane;
    mDrawXyPlane = drawXyPlane;
    mDrawWireFrame = drawWireFrame;
    mDrawAxes = drawAxes;
@@ -688,7 +692,7 @@ void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
    mDrawStars = drawStars;
    mDrawConstellations = drawConstellations;
    mStarCount = starCount;
-   
+      
    if (mDrawWireFrame)
       mPolygonMode = GL_LINE;
    else
@@ -1842,16 +1846,25 @@ void OrbitViewCanvas::DrawPlot()
    
    // draw axes
    if (mDrawAxes)
-      if (!mCanRotateAxes)
-         DrawAxes();
+      DrawAxes();
    
    // draw equatorial plane
    if (mDrawXyPlane)
-      DrawEquatorialPlane(mXyPlaneColor);
+      DrawXYPlane(mXyPlaneColor);
    
    // draw ecliptic plane
-   if (mDrawEcPlane)
-      DrawEclipticPlane(mEcPlaneColor);
+   if (mDrawEclipticPlane)
+   {
+      if (pMJ2000EcCoordSystem == NULL)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Cannot compute MJ2000Ec coordiante system, so drawing "
+             "ecliptic plane is turned off\n");
+         mDrawEclipticPlane = false;
+      }
+      else
+         DrawEclipticPlane(mEcPlaneColor);
+   }
    
    // draw object orbit
    DrawObjectOrbit();
@@ -2066,35 +2079,7 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
        mDrawAxes, objId, mOriginId, mCanRotateAxes);
    #endif
    
-   //-------------------------------------------------------
-   // draw axes if it rotates with the body
-   //-------------------------------------------------------
-   // Note from Dunn.  This is for earth fixed axes that rotate with the earth.
-   // If this is true, you do get axes that rotate with the earth, but you also
-   // get +X and +Y ECI axis labels.  The DrawAxes function needs to be told
-   // which labels to use, so it can show Earth Fixed labels.
-   if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
-   {
-      #if DEBUG_DRAW > 1
-      MessageInterface::ShowMessage("   Now Drawing axes\n");
-      #endif
-      
-      // Before debugging the Earth Rotation Angle, and getting the texture map
-      // to be correctly oriented in ECI space, Dunn has noticed that the ECF
-      // axes seem to be rotated 90 degrees to the east.  To fix this we will
-      // call an OpenGL rotate command here before and after drawing the axes in
-      // order to get them correctly oriented wrt the prime meridian.
-      glRotatef(-90.0, 0.0, 0.0, 1.0);
-      
-      // Draw axes
-      DrawAxes();
-      
-      // After rotating -90 to get the axes lined up wrt the texture map, it is
-      // time to rotate back +90.  This is from Dunn.
-      glRotatef(90.0, 0.0, 0.0, 1.0);
-   }
-   
-   // Why do we need 90 degree offset? (LOJ: 2010.11.19)
+   // Rotate to line up wrt the texture map
    glRotatef(90.0, 0.0, 0.0, 1.0);
    
    //-------------------------------------------------------
@@ -2215,7 +2200,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
       #ifdef SKIP_DATA_OVER_LIMIT
-      static Real sMaxDiffDist = 100000.0;
+      static Real sMaxDiffDist = 100000000.0;
       // if difference is more than sMaxDiffDist skip
       if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
           (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
@@ -2223,7 +2208,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       {
          #if DEBUG_SHOW_SKIP
          MessageInterface::ShowMessage
-            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s   r2=%s\n",
              GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
              r2.ToString().c_str());
          #endif
@@ -2278,13 +2263,59 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
 
 
 //------------------------------------------------------------------------------
-//  void DrawEquatorialPlane(UnsignedInt color)
+//  void DrawXYPlane(UnsignedInt color)
 //------------------------------------------------------------------------------
 /**
- * Draws equatorial plane circles.
+ * Draws XY plane circles.
  */
 //------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
+void OrbitViewCanvas::DrawXYPlane(UnsignedInt color)
+{
+   glPushMatrix();
+   
+   DrawCircles(color);
+   
+   glPopMatrix();
+   
+} // end DrawXYPlane()
+
+
+//------------------------------------------------------------------------------
+//  void DrawEclipticPlane(UnsignedInt color)
+//------------------------------------------------------------------------------
+/**
+ * Draws ecliptic plane circles.
+ */
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawEclipticPlane(UnsignedInt color)
+{
+   glPushMatrix();
+   
+   // Get view to ecliptic frame rotation matrix
+   int coordIndex = mLastIndex*16;
+   mCoordMatrix = Rmatrix(4,4);
+   for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 4; j++)
+         mCoordMatrix.SetElement(i, j, mRotMatViewToEcliptic[coordIndex + i*4 + j]);
+   
+   // Multiply rotation matrix to current matrix
+   glMultMatrixd(mCoordMatrix.GetDataVector());
+   
+   // Then draw circles
+   DrawCircles(color);
+   
+   glPopMatrix();
+} // end DrawEclipticPlane()
+
+
+//------------------------------------------------------------------------------
+// void DrawCircles(UnsignedInt color)
+//------------------------------------------------------------------------------
+/**
+ * Draws circles.
+ */
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawCircles(UnsignedInt color)
 {
    int i;
    float endPos[3];
@@ -2301,7 +2332,7 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
    *sIntColor = color;
    Rvector3 start, end;
    start.Set(0, 0, 0);
-
+   
    //-----------------------------------
    // draw lines
    //-----------------------------------
@@ -2317,7 +2348,7 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
       // PS - See Rendering.cpp
       DrawLine(sGlColor, start, end); 
    }
-
+   
    //-----------------------------------
    // draw circles
    //-----------------------------------
@@ -2346,14 +2377,8 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
    //------------------------------------------
    // Draw MINOR circles
    //------------------------------------------
-   //imax = minimum (imax, 100);
    imax = GmatMathUtil::Min(imax, 100);
-   //ZColor color = GlOptions.EquatorialPlaneColor;
    Real factor = (size*100)/(ort);
-   //color.Red *=factor;
-   //color.Green *=factor;
-   //color.Blue *=factor;
-   //SetCelestialColor (color)
    
    GLubyte ubfactor = (GLubyte)(factor * 255);
    //MessageInterface::ShowMessage("===> ubfactor=%d, factor=%f\n", ubfactor, factor);
@@ -2362,8 +2387,6 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
    glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, ubfactor);
    
    for (int i=1; i<=(int)imax; ++i)
-      //if (i%10!=0 && (GlOptions.DrawDarkLines || factor > 0.5))
-      //if (i%10!=0 && (factor > 0.5)) // why i%10!=0? not every 10th?
       if (i%10 == 0 || (factor > 0.5))
          DrawCircle(qobj, i*size);
    
@@ -2373,31 +2396,7 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
    glPopMatrix();
    glLineWidth(1.0f);
    glEnable(GL_LINE_SMOOTH);
-   
-} // end DrawEquatorialPlane()
-
-
-//------------------------------------------------------------------------------
-//  void DrawEclipticPlane(UnsignedInt color)
-//------------------------------------------------------------------------------
-/**
- * Draws ecliptic plane circles.
- */
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawEclipticPlane(UnsignedInt color)
-{
-   // First rotate the grand coordinate system to obliquity of the ecliptic
-   // (23.5) and draw equatorial plane
-   glPushMatrix();
-
-   // Dunn changed 23.5 to -23.5.  When he changed -1 to 1 or +1 he got an 
-   // RVector3 error.  This negative obliquity of the ecliptic around the
-   // negative ECI X-Axis aligns the plane of the ecliptic with the sunline
-   // after all minus signs for position have been removed.
-   glRotatef(-23.5, -1, 0, 0);
-   DrawEquatorialPlane(color);
-   glPopMatrix();
-} // end DrawEclipticPlane()
+}
 
 
 //------------------------------------------------------------------------------
@@ -2469,32 +2468,34 @@ void OrbitViewCanvas::DrawSunLine()
 //---------------------------------------------------------------------------
 void OrbitViewCanvas::DrawAxes()
 {
+   glPushMatrix();
+   
+   // Rotate axis before drawing
+   if (mCanRotateAxes)
+      RotateUsingOriginAttitude();
+   
+   GLfloat viewDist = mAxisLength;
+   Rvector3 xAxis(viewDist, 0.0, 0.0);
+   Rvector3 yAxis(0.0, viewDist, 0.0);
+   Rvector3 zAxis(0.0, 0.0, viewDist);
+   
    glDisable(GL_LIGHTING);
    glDisable(GL_LIGHT0);
    wxString axisLabel;
-   GLfloat viewDist;
-
+   
    glLineWidth(2.0);
    
    //-----------------------------------
    // draw axes
    //-----------------------------------
    
-   //viewDist = mCurrViewDist/2; //zooms in and out
-   viewDist = mAxisLength;///1.8; // stays the same
-   Rvector3 axis;
    Rvector3 origin;
    origin.Set(0, 0, 0);
-
+   
    // PS - See Rendering.cpp
-   axis.Set(viewDist, 0, 0);
-   DrawLine(1, 0, 0, origin, axis);
-
-   axis.Set(0, viewDist, 0);
-   DrawLine(0, 1, 0, origin, axis);
-
-   axis.Set(0, 0, viewDist);
-   DrawLine(0, 0, 1, origin, axis);
+   DrawLine(1, 0, 0, origin, xAxis);
+   DrawLine(0, 1, 0, origin, yAxis);
+   DrawLine(0, 0, 1, origin, zAxis);
    
    //-----------------------------------
    // throw some text out...
@@ -2503,20 +2504,22 @@ void OrbitViewCanvas::DrawAxes()
    // each axis and thus make attitude correct.
    glColor3f(1, 0, 0);     // red
    axisLabel = "+X ";
-   DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
+   DrawStringAt(axisLabel, xAxis);
    
    glColor3f(0, 1, 0);     // green
    axisLabel = "+Y ";
-   DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
+   DrawStringAt(axisLabel, yAxis);
    
    glColor3f(0, 0, 1);     // blue
    axisLabel = "+Z ";
-   DrawStringAt(axisLabel, 0.0, 0.0, +viewDist, 1.0);
+   DrawStringAt(axisLabel, zAxis);
    
    glLineWidth(1.0);
    
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+   
+   glPopMatrix();
 }
 
 
@@ -2648,7 +2651,7 @@ void OrbitViewCanvas::DrawStars()
    GLfloat aspect = (GLfloat)mCanvasSize.x / (GLfloat)mCanvasSize.y;
    glMatrixMode(GL_MODELVIEW);
    gluPerspective(mCamera.fovDeg, aspect, 0.1f, 50000000.0f);
-   // they stars also need to be drawn in their own world view to be drawn at infinity
+   // The stars also need to be drawn in their own world view to be drawn at infinity
    Rvector3 starPosition = mCamera.position;
    Rvector3 starCenter = mCamera.view_center - starPosition;
    Rvector3 starUp = mCamera.up;
@@ -2676,13 +2679,12 @@ void OrbitViewCanvas::DrawStars()
    // 4x4 column-major matrix
    //-----------------------------------------------------------------
    
-   // Get view coordiante frame to internal frame rotation matrix
+   // Get view to internal coordiante frame rotation matrix
    int coordIndex = mLastIndex*16;
    mCoordMatrix = Rmatrix(4,4);
    for (int i = 0; i < 4; i++)
       for (int j = 0; j < 4; j++)
-         mCoordMatrix.SetElement(i, j, mCoordData[coordIndex + i*4 + j]);
-   mCoordMatrix = mCoordMatrix.Transpose();
+         mCoordMatrix.SetElement(i, j, mRotMatViewToInternal[coordIndex + i*4 + j]);
    
    // Multiply rotation matrix to current matrix
    glMultMatrixd(mCoordMatrix.GetDataVector());
@@ -2699,7 +2701,7 @@ void OrbitViewCanvas::DrawStars()
    #if DEBUG_DRAW_STARS
    MessageInterface::ShowMessage("OrbitViewCanvas::DrawStars() leaving\n");
    #endif
- }
+}
 
 
 //---------------------------------------------------------------------------
@@ -2736,6 +2738,39 @@ void OrbitViewCanvas::RotateBodyUsingAttitude(const wxString &objName, int objId
 
 
 //---------------------------------------------------------------------------
+// void RotateUsingOriginAttitude()
+//---------------------------------------------------------------------------
+void OrbitViewCanvas::RotateUsingOriginAttitude()
+{
+   #if DEBUG_ROTATE_WORLD > 1
+   MessageInterface::ShowMessage
+      ("RotateUsingOriginAttitude() '%s' entered, mLastIndex=%d, time=%f\n",
+       mOriginName.c_str(), mLastIndex, mTime[mLastIndex]);
+   #endif
+   
+   if (mTime[mLastIndex] == 0.0)
+      return;
+   
+   Real angInDeg = 0.0;
+   Rvector3 eAxis;
+   
+   // Use saved rotation angle and axis
+   GetBodyRotationData(mOriginId, angInDeg, eAxis);
+   
+   // Now rotate
+   if (angInDeg != 0.0)
+      glRotated(angInDeg, eAxis[0], eAxis[1], eAxis[2]);
+   
+   #if DEBUG_ROTATE_WORLD > 0
+   MessageInterface::ShowMessage
+      ("RotateUsingOriginAttitude() '%s' leaving, mOriginId=%d, mLastIndex=%d, time=%f, "
+       "angInDeg=%f, eAxis=%s\n", mOriginName.c_str(), mOriginId, mLastIndex, mTime[mLastIndex],
+       angInDeg, eAxis.ToString(12).c_str());
+   #endif
+}
+
+
+//---------------------------------------------------------------------------
 // void UpdateRotateFlags()
 //---------------------------------------------------------------------------
 /**
@@ -2744,6 +2779,12 @@ void OrbitViewCanvas::RotateBodyUsingAttitude(const wxString &objName, int objId
 //---------------------------------------------------------------------------
 void OrbitViewCanvas::UpdateRotateFlags()
 {
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::UpdateRotateFlags() entered, pViewCoordSystem=<%p>'%s'\n",
+       pViewCoordSystem, pViewCoordSystem->GetName().c_str());
+   #endif
+   
    AxisSystem *axis =
       (AxisSystem*)pViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "");
    
@@ -2759,8 +2800,7 @@ void OrbitViewCanvas::UpdateRotateFlags()
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::UpdateRotateFlags() mCanRotateAxes=%d\n",
-       mCanRotateAxes);
+      ("OrbitViewCanvas::UpdateRotateFlags() mCanRotateAxes=%d\n", mCanRotateAxes);
    #endif
 }
 

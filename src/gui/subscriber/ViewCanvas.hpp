@@ -214,6 +214,7 @@ protected:
    bool mWriteWarning;
    bool mNeedVelocity;
    bool mNeedAttitude;
+   bool mNeedEcliptic;
    
    // Drawing option
    bool mDrawWireFrame;
@@ -259,6 +260,10 @@ protected:
    CoordinateSystem *pInternalCoordSystem;
    CoordinateSystem *pViewCoordSystem;
    CoordinateSystem *pViewUpCoordSystem;
+   
+   // For drawing ecliptic plane
+   CoordinateSystem *pMJ2000EcCoordSystem;
+   
    int mOriginId;
    int mViewObjId;
    float mOriginRadius;
@@ -311,8 +316,10 @@ protected:
    Real *mBodyRotAngle;            // [mObjectCount][MAX_DATA]
    Real *mBodyRotAxis;             // [mObjectCount][MAX_DATA[[3]
    
-   // Coordinate Transformation Matrices
-   Real *mCoordData;               // [MAX_DATA][16]
+   // Rotation matrices from view to internal(MJ2000Eq) axes
+   Real *mRotMatViewToInternal;    // [MAX_DATA][16]
+   // Rotation matrices from view to ecliptic (MJ2000Ec) axes
+   Real *mRotMatViewToEcliptic;    // [MAX_DATA][16]
    
    // Solver data
    bool mDrawSolverData;
@@ -394,7 +401,14 @@ protected:
    void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId);
    void UpdateBodyRotationData(const wxString &objName, int objId);
    void GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis);
+   void ComputeRotMatForView(Real time, Rvector6 &state);
+   void ComputeRotMatForEclipticPlane(Real time, Rvector6 &state);
    void SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis);
+   void SaveRotMatViewToInternal(Rmatrix &rotMat);
+   void SaveRotMatViewToEcliptic(Rmatrix &rotMat);
+   
+   // For drawing ecliptic plane
+   void CreateMJ2000EcCoordSystem();
    
    // For coordinate system
    virtual bool ConvertObjectData() = 0;

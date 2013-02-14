@@ -43,7 +43,7 @@ public:
    virtual ~OrbitViewCanvas();
    
    bool GetDrawXyPlane() { return mDrawXyPlane; }
-   bool GetDrawEcPlane() { return mDrawEcPlane; }
+   bool GetDrawEcPlane() { return mDrawEclipticPlane; }
    bool GetDrawSunLine() { return mDrawSunLine; }
    bool GetDrawAxes() { return mDrawAxes; }
    unsigned int GetXyPlaneColor() { return mXyPlaneColor; }
@@ -53,7 +53,7 @@ public:
    void SetDrawConstellations(bool flag) { mDrawConstellations = flag; }
    void SetStarCount(int count) { mStarCount = count; }
    void SetDrawXyPlane(bool flag) { mDrawXyPlane = flag; }
-   void SetDrawEcPlane(bool flag) { mDrawEcPlane = flag; }
+   void SetDrawEcPlane(bool flag) { mDrawEclipticPlane = flag; }
    void SetDrawSunLine(bool flag) { mDrawSunLine = flag; }
    void SetDrawAxes(bool flag) { mDrawAxes = flag; }
    void SetXyPlaneColor(unsigned int color) { mXyPlaneColor = color; }
@@ -150,10 +150,10 @@ private:
    // drawing options
    float mAxisLength;
    bool mDrawXyPlane;
-   bool mDrawEcPlane;
+   bool mDrawEclipticPlane;
    bool mDrawSunLine;
    bool mDrawAxes;
-
+   
    // polygon drawing mode
    GLenum mPolygonMode;
    
@@ -199,7 +199,7 @@ private:
    int mVpVecObjId;
    int mVdirObjId;
    Real mViewObjRadius;
-      
+   
    // object rotation
    Real mInitialLongitude;
    Real mInitialMha;
@@ -243,8 +243,9 @@ private:
    void DrawObjectTexture(const wxString &objName, int obj, int objId);
    void DrawObject(const wxString &objName, int obj);
    void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
-   void DrawEquatorialPlane(UnsignedInt color);
+   void DrawXYPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
+   void DrawCircles(UnsignedInt color);
    void DrawSunLine();
    void DrawAxes();
    void DrawGridLines(int objId);
@@ -258,11 +259,14 @@ private:
    // for rotation of body
    void RotateBodyUsingAttitude(const wxString &objName, int objId);
    
+   // for rotation of axis
+   void RotateUsingOriginAttitude();
+   
    // for coordinate system
    void UpdateRotateFlags();
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
-   
+      
    // Linux specific fix
    #ifdef __WXGTK__
       bool hasBeenPainted;

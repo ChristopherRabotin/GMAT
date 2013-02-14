@@ -54,6 +54,8 @@
 //#define DEBUG_UPDATE 1
 //#define DEBUG_DRAW 1
 //#define DEBUG_SOLVER_DATA 1
+//#define DEBUG_ECLIPTIC_PLANE
+//#define DEBUG_ROT_MAT
 
 //---------------------------------
 // static data
@@ -154,6 +156,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mWriteWarning = true;
    mNeedVelocity = false;
    mNeedAttitude = false;
+   mNeedEcliptic = false;
    
    // drawing options
    mDrawWireFrame = false;
@@ -212,6 +215,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mViewCoordSysName = "";
    pViewCoordSystem = NULL;
    mViewCsIsInternalCs = true;
+   pMJ2000EcCoordSystem = NULL;
    
    // Initialize dynamic arrays to NULL
    ClearObjectArrays(false);
@@ -334,8 +338,9 @@ bool ViewCanvas::InitializePlot()
 {
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("\nViewCanvas::InitializePlot() '%s' entered, theContext=<%p>\n",
-       mPlotName.c_str(), theContext);
+      ("\nViewCanvas::InitializePlot() '%s' entered, theContext=<%p>, mIsNewFrame=%d, "
+       "mUseInitialViewPoint=%d\n", mPlotName.c_str(), theContext, mIsNewFrame,
+       mUseInitialViewPoint);
    #endif
    
    // Add things to do here
@@ -373,7 +378,7 @@ bool ViewCanvas::InitializePlot()
    MessageInterface::ShowMessage
       ("ViewCanvas::InitializePlot() '%s' leaving\n\n", mPlotName.c_str());
    #endif
-      
+   
    return true;
 }
 
@@ -570,7 +575,7 @@ void ViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
    
    mViewObjName = mOriginName;
    mViewObjId = mOriginId;
-   
+      
    #if DEBUG_CS
    MessageInterface::ShowMessage
       ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
@@ -1202,8 +1207,11 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
       if (mBodyRotAxis)
          delete [] mBodyRotAxis;
       
-      if (mCoordData)
-         delete [] mCoordData;
+      if (mRotMatViewToInternal)
+         delete [] mRotMatViewToInternal;
+      
+      if (mRotMatViewToEcliptic)
+         delete [] mRotMatViewToEcliptic;
    }
    
    mTime = NULL;
@@ -1219,8 +1227,9 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
    mObjectQuat = NULL;
    mBodyRotAngle = NULL;
    mBodyRotAxis = NULL;
-   mCoordData = NULL;
-   
+   mRotMatViewToInternal = NULL;
+   mRotMatViewToEcliptic = NULL;
+      
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage("ViewCanvas::ClearObjectArrays() exiting\n");
    #endif
@@ -1291,8 +1300,14 @@ bool ViewCanvas::CreateObjectArrays()
          return false;
    }
    
-   if ((mCoordData = new Real[MAX_DATA*16]) == NULL)
+   if ((mRotMatViewToInternal = new Real[MAX_DATA*16]) == NULL)
       return false;
+   
+   if (mNeedEcliptic)
+   {
+      if ((mRotMatViewToEcliptic = new Real[MAX_DATA*16]) == NULL)
+         return false;
+   }
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage("ViewCanvas::CreateObjectArrays() exiting\n");
@@ -2204,6 +2219,9 @@ void ViewCanvas::UpdateOtherData(const Real &time)
       ("ViewCanvas::UpdateOtherData() entered, time = %f\n", time);
    #endif
    
+   bool viewRotMatComputed = false;
+   bool eclipticRotMatComputed = false;
+   
    for (int obj = 0; obj < mObjectCount; obj++)
    {
       SpacePoint *otherObj = mObjectArray[obj];
@@ -2228,10 +2246,10 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             else
                mDrawOrbitFlag[colorIndex] = true;
             
-            Rvector6 objState;
+            Rvector6 objMjEqState;
             try
             {
-               objState = otherObj->GetMJ2000State(time);
+               objMjEqState = otherObj->GetMJ2000State(time);
             }
             catch (BaseException &)
             {
@@ -2240,17 +2258,17 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             }
             
             int posIndex = objId * MAX_DATA * 3 + (mLastIndex*3);
-            mObjectGciPos[posIndex+0] = objState[0];
-            mObjectGciPos[posIndex+1] = objState[1];
-            mObjectGciPos[posIndex+2] = objState[2];
+            mObjectGciPos[posIndex+0] = objMjEqState[0];
+            mObjectGciPos[posIndex+1] = objMjEqState[1];
+            mObjectGciPos[posIndex+2] = objMjEqState[2];
             
             #if DEBUG_UPDATE_OBJECT > 1
             MessageInterface::ShowMessage
-               ("ViewCanvas::UpdateOtherData() %s, posIndex=%d, objState=%s\n",
-                mObjectNames[obj].c_str(), posIndex, objState.ToString().c_str());
+               ("ViewCanvas::UpdateOtherData() %s, posIndex=%d, objMjEqState=%s\n",
+                mObjectNames[obj].c_str(), posIndex, objMjEqState.ToString().c_str());
             #endif
             
-            // convert objects to view CoordinateSystem
+            // Convert objects to view CoordinateSystem if needed
             if (mViewCsIsInternalCs)
             {
                CopyVector3(&mObjectViewPos[posIndex], &mObjectGciPos[posIndex]);
@@ -2259,13 +2277,43 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             {
                Rvector6 outState;
                
-               mCoordConverter.Convert(time, objState, pInternalCoordSystem,
+               // Convert to view coordinate system since planets are in MJ2000Eq
+               mCoordConverter.Convert(time, objMjEqState, pInternalCoordSystem,
                                        outState, pViewCoordSystem);
                
                mObjectViewPos[posIndex+0] = outState[0];
                mObjectViewPos[posIndex+1] = outState[1];
-               mObjectViewPos[posIndex+2] = outState[2];                  
+               mObjectViewPos[posIndex+2] = outState[2];
             }
+            
+            // Compute internal to view rotation matrix and save
+            // We need to compute only once here, not for all objects
+            if (!viewRotMatComputed)
+            {
+               ComputeRotMatForView(time, objMjEqState);               
+               viewRotMatComputed = true;
+            }
+            
+            // If drawing ecliptic plane, convert and save rotation matrix
+            if (mNeedEcliptic)
+            {
+               // We need to compute only once here, not for all objects
+               if (!eclipticRotMatComputed)
+               {
+                  if (pMJ2000EcCoordSystem == NULL)
+                     CreateMJ2000EcCoordSystem();
+                  
+                  // If MJ2000Ec coordinate system is available, then compute
+                  if (pMJ2000EcCoordSystem)
+                     ComputeRotMatForEclipticPlane(time, objMjEqState);
+                  
+                  eclipticRotMatComputed = true;      
+               }
+            }
+            
+            // Update object's attitude and rotation data
+            if (mNeedAttitude)
+               UpdateOtherObjectAttitude(time, otherObj, objId);
             
             #if DEBUG_UPDATE_OBJECT > 1
             MessageInterface::ShowMessage
@@ -2273,10 +2321,6 @@ void ViewCanvas::UpdateOtherData(const Real &time)
                 posIndex, mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
                 mObjectViewPos[posIndex+2]);
             #endif
-            
-            // Update object's attitude and rotation data
-            if (mNeedAttitude)
-               UpdateOtherObjectAttitude(time, otherObj, objId);
          }
          else
          {
@@ -2299,22 +2343,6 @@ void ViewCanvas::UpdateOtherData(const Real &time)
          #endif
       }
    }
-   
-   // Save view coordiante frame to internal frame rotation matrix
-   // for drawing stars during animation
-   int cIndex = mLastIndex * 16;
-   Rmatrix converterMatrix = mCoordConverter.GetLastRotationMatrix();
-   for (int i = 0; i < 4; i++)
-   {
-      for (int j = 0; j < 4; j++)
-      {
-         if (j < 3 && i < 3)
-            mCoordData[cIndex+(i*4)+j] = converterMatrix.GetElement(i,j);
-         else
-            mCoordData[cIndex+(i*4)+j] = 0;
-      }
-   }
-   mCoordData[cIndex+15] = 1;
    
    #if DEBUG_UPDATE_OBJECT
    MessageInterface::ShowMessage
@@ -2485,7 +2513,7 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
 // void GetBodyRotationData(Real angInDeg, const Rvector3 &eAxis)
 //---------------------------------------------------------------------------
 /**
- * Saves body rotation angle and axis for use in animation
+ * Retrieves body rotation angle and axis
  *
  * @parameter  angInDeg  Rotation angle in degrees
  * @parameter  eAxis  Rotation axis vector
@@ -2499,6 +2527,85 @@ void ViewCanvas::GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis)
    eAxis(0) = mBodyRotAxis[axisIndex];
    eAxis(1) = mBodyRotAxis[axisIndex + 1];
    eAxis(2) = mBodyRotAxis[axisIndex + 2];
+}
+
+
+//------------------------------------------------------------------------------
+// void ComputeRotMatForView(Real time, Rvector6 &state)
+//------------------------------------------------------------------------------
+void ViewCanvas::ComputeRotMatForView(Real time, Rvector6 &state)
+{
+   // state is in MJ2000Eq internal coordinate system
+   Rvector6 outState;
+   mCoordConverter.Convert(time, state, pInternalCoordSystem,
+                           outState, pViewCoordSystem);
+   Rmatrix rotMatEqToView = mCoordConverter.GetLastRotationMatrix();
+   
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::ComputeRotMatForView() rotMatEqToView=\n%s",
+       rotMatEqToView.ToString(12, 20).c_str());
+   #endif
+   
+   rotMatEqToView = rotMatEqToView.Transpose();
+   
+   // Save rotation matrix for animation
+   SaveRotMatViewToInternal(rotMatEqToView);
+}
+
+
+//---------------------------------------------------------------------------
+// void ComputeRotMatForEclipticPlane(Real time, Rvector6 &state)
+//---------------------------------------------------------------------------
+/**
+ * Here is math for how to rotate the ecliptic plane for OrbitView.
+ * Here are some definitions first:
+ * 
+ * - Q means MJ2000Eq axes
+ * - C means MJ2000Ec axes
+ * - P means plot axes
+ * - R_QC = Rotation matrix from MJ2000Ec to MJ2000Eq.  
+ * - R_PQ = Rotation from MJ2000Eq to Plot coordinate axes.
+ * 
+ * By definition, the ecliptic plane lies in the XY plane of MJ2000Ec.
+ * So, we need to determine how to rotate from MJ2000Ec to the plot system.
+ * That is done like this:
+ * 
+ * R_PC = R_PQ * R_QC;
+ *
+ */
+ //---------------------------------------------------------
+void ViewCanvas::ComputeRotMatForEclipticPlane(Real time, Rvector6 &state)
+{
+   // state is in MJ2000Eq internal coordinate system, so
+   // convert it from MJ2000Eq to MJ2000Ec then transpose it
+   Rvector6 outState1, outState2;
+   mCoordConverter.Convert(time, state, pInternalCoordSystem,
+                           outState1, pMJ2000EcCoordSystem);
+   Rmatrix rotMatEcToEq = mCoordConverter.GetLastRotationMatrix();
+   rotMatEcToEq = rotMatEcToEq.Transpose();
+   
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::ComputeRotMatForEclipticPlane() rotMatEcToEq=\n%s",
+       rotMatEcToEq.ToString(12, 20).c_str());
+   #endif
+   
+   mCoordConverter.Convert(time, outState1, pInternalCoordSystem,
+                           outState2, pViewCoordSystem);
+   Rmatrix rotMatEqToView = mCoordConverter.GetLastRotationMatrix();
+   
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::ComputeRotMatForEclipticPlane() rotMatEqToView=\n%s",
+       rotMatEqToView.ToString(12, 20).c_str());
+   #endif
+   
+   Rmatrix rotMatEcToView = rotMatEqToView * rotMatEcToEq;
+   rotMatEcToView = rotMatEcToView.Transpose();
+   
+   // Save rotation matrix for animation
+   SaveRotMatViewToEcliptic(rotMatEcToView);
 }
 
 
@@ -2521,6 +2628,112 @@ void ViewCanvas::SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &
    mBodyRotAxis[axisIndex] = eAxis(0);
    mBodyRotAxis[axisIndex + 1] = eAxis(1);
    mBodyRotAxis[axisIndex + 2] = eAxis(2);
+}
+
+
+//---------------------------------------------------------------------------
+// void SaveRotMatViewToInternal(Rmatrix &rotMat)
+//---------------------------------------------------------------------------
+void ViewCanvas::SaveRotMatViewToInternal(Rmatrix &rotMat)
+{
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SaveRotMatViewToInternal() entered\n%s",
+       rotMat.ToString(12, 20).c_str());
+   #endif
+   
+   // Save internal frame to view coordiante rotation matrix
+   // for drawing stars during animation
+   int cIndex = mLastIndex * 16;
+   for (int i = 0; i < 4; i++)
+   {
+      for (int j = 0; j < 4; j++)
+      {
+         if (j < 3 && i < 3)
+            mRotMatViewToInternal[cIndex+(i*4)+j] = rotMat.GetElement(i,j);
+         else
+            mRotMatViewToInternal[cIndex+(i*4)+j] = 0;
+      }
+   }
+   mRotMatViewToInternal[cIndex+15] = 1;
+   
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SaveRotMatViewToInternal() leaving, cIndex = %d\n", cIndex);
+   #endif
+}
+
+
+//---------------------------------------------------------------------------
+// void SaveRotMatViewToEcliptic(Rmatrix &rotMat)
+//---------------------------------------------------------------------------
+void ViewCanvas::SaveRotMatViewToEcliptic(Rmatrix &rotMat)
+{
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SaveRotMatViewToEcliptic() entered\n%s",
+       rotMat.ToString(12, 20).c_str());
+   #endif
+   
+   // Save rotation matrix to draw ecliptic plane
+   // during animation
+   int cIndex = mLastIndex * 16;
+   for (int i = 0; i < 4; i++)
+   {
+      for (int j = 0; j < 4; j++)
+      {
+         if (j < 3 && i < 3)
+            mRotMatViewToEcliptic[cIndex+(i*4)+j] = rotMat.GetElement(i,j);
+         else
+            mRotMatViewToEcliptic[cIndex+(i*4)+j] = 0;
+      }
+   }
+   mRotMatViewToEcliptic[cIndex+15] = 1;
+   
+   #ifdef DEBUG_ROT_MAT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SaveRotMatViewToEcliptic() leaving, cIndex = %d\n", cIndex);
+   #endif
+
+}
+
+
+//---------------------------------------------------------------------------
+// void CreateMJ2000EcCoordSystem()
+//---------------------------------------------------------------------------
+void ViewCanvas::CreateMJ2000EcCoordSystem()
+{
+   #ifdef DEBUG_ECLIPTIC_PLANE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::CreateMJ2000EcCoordSystem() entered, mOriginName='%s', "
+       "pMJ2000EcCoordSystem=<%p>'%s'\n", mOriginName.c_str(), pMJ2000EcCoordSystem,
+       pMJ2000EcCoordSystem ? pMJ2000EcCoordSystem->GetName().c_str() : "NULL");
+   #endif
+   
+   if (pMJ2000EcCoordSystem != NULL)
+   {
+      #ifdef DEBUG_ECLIPTIC_PLANE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateMJ2000EcCoordSystem() leaving, no need to create pMJ2000EcCoordSystem\n");
+      #endif
+      return;
+   }
+   
+   std::string originName = SolarSystem::EARTH_NAME;
+   std::string axesType = "MJ2000Ec";
+   std::string csName = originName + axesType;
+   SpacePoint *origin = (SpacePoint*)pSolarSystem->GetBody(originName.c_str());
+   SpacePoint *j2000Body = (SpacePoint*)pSolarSystem->GetBody(SolarSystem::EARTH_NAME);
+   
+   // Create coordinate system with Earth origin and MJ2000Ec axis
+   pMJ2000EcCoordSystem = CoordinateSystem::CreateLocalCoordinateSystem
+      (csName, axesType, origin, NULL, NULL, j2000Body, pSolarSystem);
+   
+   #ifdef DEBUG_ECLIPTIC_PLANE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::CreateMJ2000EcCoordSystem() leaving, pMJ2000EcCoordSystem=<%p>'%s'\n",
+       pMJ2000EcCoordSystem, pMJ2000EcCoordSystem ? pMJ2000EcCoordSystem->GetName().c_str() : "NULL");
+   #endif
 }
 
 

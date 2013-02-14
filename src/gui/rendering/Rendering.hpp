@@ -35,8 +35,8 @@ void SetColor(GlColorType color, Byte red, Byte green, Byte blue);
 void DrawSphere(GLdouble radius, GLint slices, GLint stacks, GLenum style,
                 GLenum orientation = GLU_OUTSIDE, GLenum normals = GL_SMOOTH,
                 GLenum textureCoords = GL_TRUE);
-void DrawLine(GlColorType *color, Rvector3 start, Rvector3 end);
-void DrawLine(float red, float green, float blue, Rvector3 start, Rvector3 end);
+void DrawLine(GlColorType *color, const Rvector3 &start, const Rvector3 &end);
+void DrawLine(float red, float green, float blue, const Rvector3 &start, const Rvector3 &end);
 void DrawLine(double x1, double y1, double x2, double y2);
 void DrawCube(float x, float y, float z);
 void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2);
@@ -44,6 +44,7 @@ void DrawEquatorialPlanes();
 void DrawCircle(GLUquadricObj *qobj, Real radius);
 void DrawCircle(double x1, double y1, double radius, bool fill = true);
 void DrawSquare(double x1, double y1, double radius, bool fill = true);
+void DrawStringAt(const wxString &str, const Rvector3 &point);
 void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z,
                   GLfloat k);
 
