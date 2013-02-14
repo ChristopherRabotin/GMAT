@@ -787,9 +787,10 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
       (mItemType == GmatTree::OUTPUT_ORBIT_VIEW ||
        mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
    {
-      // If mission is not running, enable animation tools
+      // If mission is not running, enable screen shot and animation tools
       if (isAnimatable)
       {
+         toolBar->EnableTool(GmatMenu::TOOL_SCREENSHOT, true);
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, true);
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, true);
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, true);
@@ -808,6 +809,7 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    }
    else
    {
+      toolBar->EnableTool(GmatMenu::TOOL_SCREENSHOT, false);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, false);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, false);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, false);

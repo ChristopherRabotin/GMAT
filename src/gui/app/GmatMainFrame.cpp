@@ -158,6 +158,7 @@
 //#define DEBUG_OPEN_SCRIPT
 //#define DEBUG_REFRESH_SCRIPT
 //#define DEBUG_INTERPRET
+//#define DEBUG_BUILD_RUN
 //#define DEBUG_RUN_MISSION
 //#define DEBUG_ANIMATION
 //#define DEBUG_SIZE
@@ -2433,7 +2434,7 @@ bool GmatMainFrame::BuildScript(const wxString &filename, bool addToResourceTree
    
    #ifdef DEBUG_BUILD_RUN
    MessageInterface::ShowMessage
-      ("GmatMainFrame::BuildScript() returning build status %d\n", buildStatus);
+      ("GmatMainFrame::BuildScript() returning build status %d\n", builtOk);
    #endif
    
    return builtOk;
@@ -3591,7 +3592,7 @@ void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
    wxSafeYield();
    
    wxToolBar* toolBar = GetToolBar();
-   // enable screen capture when the simulation is run
+   // Disable screen capture when no children is showing
    toolBar->EnableTool(TOOL_SCREENSHOT, false);
 }
 
@@ -3613,7 +3614,7 @@ void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
    if (theMdiChildren->GetCount() <= 0)
    {
       wxToolBar* toolBar = GetToolBar();
-      // deactivate screen capture when not running
+      // Deactivate screen capture when no children is showing
       toolBar->EnableTool(TOOL_SCREENSHOT, false);
    }
 }
@@ -5134,7 +5135,7 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
       ("GmatMainFrame::EnableMenuAndToolBar() enable=%d, missionRunning=%d, "
        "forAnimation=%d\n", enable, missionRunning, forAnimation);
    #endif
-
+   
    wxToolBar *toolBar = GetToolBar();
    
    toolBar->EnableTool(TOOL_RUN, enable);
@@ -5145,7 +5146,10 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    {
       toolBar->EnableTool(TOOL_PAUSE, !enable);
       toolBar->EnableTool(TOOL_STOP, !enable);
-      toolBar->EnableTool(TOOL_SCREENSHOT, true);
+      // This makes screen shot icon to disappear and reappear after mission run.
+      // This has to do with changes made in GmatMdiChildFrame to disable screenshot
+      // if child is not OrbitView or GroundTrackPlot, so commented out (LOJ: 2013.02.14)
+      //toolBar->EnableTool(TOOL_SCREENSHOT, true);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, false);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, false);
       toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, false);
@@ -5153,15 +5157,15 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    }
    else
    {
-	  toolBar->EnableTool(TOOL_PAUSE, false);
-	  toolBar->EnableTool(TOOL_STOP, false);
-	  bool isAnimatable = IsAnimatable();
-	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, isAnimatable);
-	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, isAnimatable);
-	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, isAnimatable);
-	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_SLOW, isAnimatable);
+      toolBar->EnableTool(TOOL_PAUSE, false);
+      toolBar->EnableTool(TOOL_STOP, false);
+      bool isAnimatable = IsAnimatable();
+      toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, isAnimatable);
+      toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, isAnimatable);
+      toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, isAnimatable);
+      toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_SLOW, isAnimatable);
    }
-
+   
    if (forAnimation)
       toolBar->ToggleTool(TOOL_ANIMATION_PLAY, !enable);
 
@@ -5256,15 +5260,23 @@ void GmatMainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
    // Retrieve an instance of the file manager
    FileManager *fm = FileManager::Instance();
    std::string outputPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-   std::string screenShotFile = fm->GetPathname("SCREENSHOT_FILE");
-   
-   // If no screenshot file name found, give it default name to SCREEN_SHOT (LOJ: 2012.12.03)
-   if (GmatFileUtil::ParseFileName(screenShotFile) == "")
-      screenShotFile = "SCREEN_SHOT";
+   std::string screenShotPath = fm->GetPathname("SCREENSHOT_FILE");
+   std::string screenShotFullPath = fm->GetFullPathname("SCREENSHOT_FILE");
+   std::string screenShotFile = GmatFileUtil::ParseFileName(screenShotFullPath);
    
    #ifdef DEBUG_SCREEN_SHOT
    MessageInterface::ShowMessage
-      ("   outputPath='%s', screenShotFile='%s'\n", outputPath.c_str(), screenShotFile.c_str());
+      ("   outputPath='%s', screenShotPath='%s', screenShowFullPath='%s', "
+       "screenShotFile='%s'\n", outputPath.c_str(), screenShotPath.c_str(),
+       screenShotFullPath.c_str(), screenShotFile.c_str());
+   #endif
+   
+   // If no screenshot file name found, give it default name to SCREEN_SHOT (LOJ: 2012.12.03)
+   if (screenShotFile == "")
+      screenShotFile = "SCREEN_SHOT";
+   
+   #ifdef DEBUG_SCREEN_SHOT
+   MessageInterface::ShowMessage("   final screenShotFile='%s'\n", screenShotFile.c_str());
    #endif
    
    // Keep looking until we do not find an existing file

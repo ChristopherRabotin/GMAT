@@ -114,6 +114,12 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    parameterCount = ReportFileParamCount;
    initial = true;
    initialFromReport = true;
+   
+   #ifdef DEBUG_REPORTFILE
+   MessageInterface::ShowMessage
+      ("ReportFile:: constructor entered, mNumParams=%d, filename='%s'\n",
+       mNumParams, filename.c_str());
+   #endif
 }
 
 
@@ -163,11 +169,11 @@ ReportFile::ReportFile(const ReportFile &rf) :
    parameterCount = ReportFileParamCount;
    initial = true;
    initialFromReport = true;
-
+   
    #ifdef DEBUG_REPORTFILE
    MessageInterface::ShowMessage
-      ("ReportFile:: copy constructor entered, r.mNumParams=%d, mNumParams=%d\n",
-       rf.mNumParams, mNumParams);
+      ("ReportFile:: copy constructor entered, r.mNumParams=%d, mNumParams=%d, filename='%s'\n",
+       rf.mNumParams, mNumParams, filename.c_str());
    #endif
 }
 
@@ -247,13 +253,17 @@ std::string ReportFile::GetPathAndFileName()
    
    #ifdef DEBUG_REPORTFILE_OPEN
    MessageInterface::ShowMessage
-      ("ReportFile::GetPathAndFileName() fname=%s\n", fname.c_str());
+      ("ReportFile::GetPathAndFileName() fname='%s'\n", fname.c_str());
    #endif
    
    try
    {
       FileManager *fm = FileManager::Instance();
-      outputPath = fm->GetPathname(FileManager::REPORT_FILE);
+      outputPath = fm->GetPathname(FileManager::OUTPUT_PATH);
+      
+      #ifdef DEBUG_REPORTFILE_OPEN
+      MessageInterface::ShowMessage("   outputPath='%s'\n", outputPath.c_str());
+      #endif
       
       if (filename == "")
       {
@@ -1033,9 +1043,12 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       // If file extension is blank, append .txt
       if (GmatFileUtil::ParseFileExtension(filename) == "")
       {
-         filename = filename + ".txt";
-         MessageInterface::ShowMessage
-            ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
+         if (filename != "")
+         {
+            filename = filename + ".txt";
+            MessageInterface::ShowMessage
+               ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
+         }
       }
       
       std::string fullName = GetPathAndFileName();
