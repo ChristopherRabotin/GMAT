@@ -1122,7 +1122,7 @@ std::string FminconOptimizer::GetProgressString()
                progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                         << "!!! WARNING: Optimizer did NOT converge in "
-                        << maxIterations << " passes!"
+                        << maxIterations << " iterations!"
                         << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
             
