@@ -179,34 +179,7 @@ void MathFunction::GetScalarOutputInfo(Integer &type, Integer &rowCount,
    type = Gmat::REAL_TYPE;
    rowCount = 1;
    colCount = 1;
-   
-   //===========================================================================
-   // Input validation is done in ValidateInputs() so this code is commented out
-   // LOJ: 2012.01.19
-   /*
-   if (leftNode == NULL)
-      throw MathException(GetTypeName() + "() - Missing input arguments");
-   
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   if ((type1 == Gmat::REAL_TYPE) ||
-       (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1))
-   {
-      type = type1;
-      rowCount = row1;
-      colCount = col1;
-   }
-   else
-   {
-      throw MathException("Input is not a scalar or 1x1 matrix, so cannot do " +
-                          GetTypeName() + "()");  
-   }
-   #endif
-   */
-   
+      
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("MathFunction::GetScalarOutputInfo() <%p><%s> leaving, type=%d, "

@@ -58,8 +58,10 @@ private:
    
    std::string  originalEquation;
    std::string  theEquation;
+   std::string  powerOpStr;
    std::string  inverseOpStr;
    std::string  transposeOpStr;
+   char         powerOp;
    char         inverseOp;
    char         transposeOp;
    Integer      theGmatFuncCount;

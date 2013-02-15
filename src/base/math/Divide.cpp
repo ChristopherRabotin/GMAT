@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INPUT_OUTPUT 1
+//#define DEBUG_EVALUATE
 
 //---------------------------------
 // public methods
@@ -221,7 +222,19 @@ bool Divide::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Divide::Evaluate()
 {
-   return leftNode->Evaluate() / rightNode->Evaluate();
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("\nDivide::Evaluate() '%s' entered\n", GetName().c_str());
+   #endif
+   
+   Real div;
+   div = leftNode->Evaluate() / rightNode->Evaluate();
+   
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("Divide::Evaluate() '%s' returning %f\n", GetName().c_str(), div);
+   #endif
+   return div;
 }
 
 
@@ -235,7 +248,7 @@ Real Divide::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Divide::MatrixEvaluate()
 {
-   #ifdef DEBUG_INPUT_OUTPUT
+   #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
       ("\nDivide::MatrixEvaluate() '%s' entered\n", GetName().c_str());
    #endif
@@ -262,7 +275,7 @@ Rmatrix Divide::MatrixEvaluate()
    else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
       div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
    
-   #ifdef DEBUG_INPUT_OUTPUT
+   #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
       ("Divide::MatrixEvaluate() '%s' returning %s\n", GetName().c_str(), div.ToString().c_str());
    #endif

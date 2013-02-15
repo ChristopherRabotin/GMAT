@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INPUT_OUTPUT 1
+//#define DEBUG_EVALUATE
 
 //---------------------------------
 // public methods
@@ -229,27 +230,62 @@ bool Multiply::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Multiply::Evaluate()
 {
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("\nMultiply::Evaluate() '%s' entered\n", GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1;
    Integer type2, row2, col2;
+   Real prod;
+   bool error = false;
    leftNode->GetOutputInfo(type1, row1, col1);
    rightNode->GetOutputInfo(type2, row2, col2);
    
    if (type1 == Gmat::REAL_TYPE && type2 == Gmat::REAL_TYPE)
    {
-      return (leftNode->Evaluate() * rightNode->Evaluate());
+      prod = leftNode->Evaluate() * rightNode->Evaluate();
+   }
+   else if (type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
+   {
+      if (row2 == 1 && col2 == 1)
+      {
+         Rmatrix mat = rightNode->MatrixEvaluate();
+         prod = leftNode->Evaluate() * mat(0,0);
+         error = false;
+      }
+   }
+   else if (type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
+   {
+      if (row1 == 1 && col1 == 1)
+      {
+         Rmatrix mat = leftNode->MatrixEvaluate();
+         prod = mat(0,0) * rightNode->Evaluate();
+         error = false;
+      }
+   }
+   else if (type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
+   {
+      if (row1 == col2)
+      {
+         Rmatrix mat = leftNode->MatrixEvaluate() * rightNode->MatrixEvaluate();
+         prod = mat.GetElement(0,0);
+         error = false;
+      }
    }
    
-   // Handle column vector * row vector resulting scalar
-   if (row1 == col2)
-   {
-      Rmatrix mat = leftNode->MatrixEvaluate() * rightNode->MatrixEvaluate();
-      return mat.GetElement(0,0);
-   }
-   else
+   if (error)
    {
       throw MathException
          ("Multiply::Evaluate() row:%d * col:%d does not produce scalar\n");
    }
+   
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("Multiply::Evaluate() '%s' returning %f\n", GetName().c_str(), prod);
+   #endif
+   
+   return prod;
 }
 
 
@@ -263,6 +299,10 @@ Real Multiply::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Multiply::MatrixEvaluate()
 {
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("\nMultiply::MatrixEvaluate() '%s' entered\n", GetName().c_str());
+   #endif
    Integer type1, row1, col1; // Left node matrix
    Integer type2, row2, col2; // Right node matrix
    Rmatrix prod;
@@ -284,6 +324,12 @@ Rmatrix Multiply::MatrixEvaluate()
    // Multiply matrix by scalar
    else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
       prod = leftNode->MatrixEvaluate() * rightNode->Evaluate();
+   
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("Multiply::MatrixEvaluate() '%s' returning %s\n", GetName().c_str(),
+       prod.ToString().c_str());
+   #endif
    
    return prod;
 }

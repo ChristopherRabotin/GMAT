@@ -42,7 +42,7 @@
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
 //#define DEBUG_FIND_LOWEST_OPERATOR 1
-//#define DEBUG_FIND_OPERATOR 1
+//#define DEBUG_FIND_OPERATOR 2
 //#define DEBUG_ADD_SUBTRACT 1
 //#define DEBUG_MULT_DIVIDE 1
 //#define DEBUG_MATRIX_OPS 1
@@ -81,8 +81,10 @@
 MathParser::MathParser()
 {
    theGmatFuncCount = 0;
+   powerOpStr = "^";
    inverseOpStr = "$";
    transposeOpStr = "'";
+   powerOp = powerOpStr[0];
    inverseOp = inverseOpStr[0];
    transposeOp = transposeOpStr[0];
    
@@ -558,7 +560,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
             // Find transpose or inverse of matrix or power
             pos1 = opIndexMap.find(inverseOpStr);
             pos2 = opIndexMap.find(transposeOpStr);
-            pos3 = opIndexMap.find("^");
+            pos3 = opIndexMap.find(powerOpStr);
             opStr = GetOperator(pos1, pos2, pos3, opIndexMap, index);
          }
       }
@@ -1316,7 +1318,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    //-----------------------------------------------------------------
    // if lowest operator is ^, just return with operator
    //-----------------------------------------------------------------
-   if (opStr1 == "^")
+   if (opStr1 == powerOpStr)
    {      
       bool opFound1;      
       op = GetOperatorName(opStr1, opFound1);
@@ -1569,7 +1571,7 @@ std::string::size_type MathParser::FindOperatorIndex(std::string::size_type inde
    Integer i3 = (Integer)index3;
    
    #if DEBUG_FIND_OPERATOR > 1
-   MessageInterface::ShowMessage("   ===> i1=%3d, i2=%3d, i3=%3d\n", i1, i2, i3);
+   MessageInterface::ShowMessage("   i1=%3d, i2=%3d, i3=%3d\n", i1, i2, i3);
    #endif
    
    std::string::size_type index = std::string::npos;
@@ -1645,7 +1647,7 @@ std::string MathParser::FindOperatorFrom(const std::string &str, std::string::si
          
          index1 = str1.find_last_of(transposeOpStr);
          index2 = str1.find_last_of(inverseOpStr);
-         index3 = str1.find_last_of("^");
+         index3 = str1.find_last_of(powerOpStr);
          index = FindOperatorIndex(index1, index2, index3);
          #if DEBUG_FIND_OPERATOR > 1
          MessageInterface::ShowMessage("   '$^ index from FindOperatorIndex() = %u\n", index);
@@ -1699,7 +1701,7 @@ std::string MathParser::GetOperatorName(const std::string &op, bool &opFound)
       opName = "Multiply";
    else if (op == "/")
       opName = "Divide";
-   else if (op == "^")
+   else if (op == powerOpStr)
       opName = "Power";
    else if (op == transposeOpStr)
       opName = "Transpose";
@@ -1839,7 +1841,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
          MessageInterface::ShowMessage("   doubleOp=<%s>\n", doubleOp.c_str());
          #endif
          
-         if (doubleOp == "^")
+         if (doubleOp == powerOpStr)
          {
             // Make - operator not found by setting npos
             index2 = str1.npos;
@@ -1942,7 +1944,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
          // try for transpose or inverse or ^
          index1 = str1.find_last_of(transposeOpStr);
          index2 = str1.find_last_of(inverseOpStr);
-         index3 = str1.find_last_of("^");
+         index3 = str1.find_last_of(powerOpStr);
          #if DEBUG_FIND_OPERATOR
          MessageInterface::ShowMessage
             ("FindOperator() for %s index1=%u, for %s index2=%u, for ^ index3=%u, "
@@ -1953,7 +1955,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
          if (index1 == str1.npos && index2 == str1.npos)
          {
             // try for ^
-            index1 = str1.find_last_of("^");
+            index1 = str1.find_last_of(powerOpStr);
             index2 = str1.npos;
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
@@ -2052,7 +2054,7 @@ std::string MathParser::GetOperator(const IntegerMap::iterator &pos1,
    std::string op2 = pos2 != opIndexMap.end() ? pos2->first : "";
    std::string op3 = pos3 != opIndexMap.end() ? pos3->first : "";
    std::string ops = op1 + op2 + op3;
-   std::string opsToFind = inverseOpStr + transposeOpStr + "^";
+   std::string opsToFind = inverseOpStr + transposeOpStr + powerOpStr;
 
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage("   ops=<%s>, opsToFind=<%s>\n", ops.c_str(), opsToFind.c_str());
@@ -2540,13 +2542,14 @@ StringArray MathParser::ParsePower(const std::string &str)
       return items;
    }
    
-   // If it is inverseOpStr, handle it later in DecomposeMatrixOps()
-   if (str.find(inverseOpStr) != str.npos)
+   // If there are inverseOpStr or transposeOpStr, handle it later in DecomposeMatrixOps()
+   // since power, transpose, and inverse have the same operator precedence
+   if (str.find(inverseOpStr) != str.npos || str.find(transposeOpStr) != str.npos)
    {
       #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
-         ("MathParser::ParsePower() found inverseOp(%s) for ^(-1) str=%s\n",
-          inverseOpStr.c_str(), str.c_str());
+         ("MathParser::ParsePower() found inverseOp(%s) for ^(-1) or transposeOp(%s), str=%s\n",
+          inverseOpStr.c_str(), transposeOpStr.c_str(), str.c_str());
       #endif
       
       FillItems(items, "", "", "");
@@ -2696,27 +2699,31 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
    
    StringArray items;
    std::string left;
+   std::string right;
    
    // find matrix function
    std::string fnName = GetFunctionName(MATRIX_FUNCTION, str, left);
    
-   // Check for matrix operator symbol, such as ' for transpose and ^(-1) for inverse
+   // Check ^ for power ^,  ' for transpose and ^(-1) for inverse
    if (fnName == "")
    {
-      std::string::size_type index1 = str.find_last_of(transposeOpStr);
+      std::string::size_type index1 = str.find_last_of(powerOpStr);
       std::string::size_type index2 = str.find_last_of(inverseOpStr);
-      std::string::size_type index = FindOperatorIndex(index1, index2);
+      std::string::size_type index3 = str.find_last_of(transposeOpStr);
+      std::string::size_type index = FindOperatorIndex(index1, index2, index3);
       if (index != str.npos)
       {
          #if DEBUG_MATRIX_OPS
          MessageInterface::ShowMessage
-            ("   Found ' or %s found at %u\n", inverseOpStr.c_str(), index);
+            ("   Found %s, %s, or %s found at %u\n", powerOpStr.c_str(),
+             inverseOpStr.c_str(), transposeOpStr.c_str(), index);
          #endif
          
          bool opFound = false;
          std::string opName = str.substr(index, 1);
          opName = GetOperatorName(opName, opFound);
          left = str.substr(0, index);
+         right = str.substr(index+1);
          fnName = opName;
          
          #if DEBUG_MATRIX_OPS
@@ -2725,8 +2732,8 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
          #endif
       }
       
-      FillItems(items, fnName, left, "");
-
+      //FillItems(items, fnName, left, "");
+      FillItems(items, fnName, left, right);
    }
    else // matrix function name found
    {
