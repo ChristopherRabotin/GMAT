@@ -22,6 +22,7 @@
 //#include <io.h>
 #include "ModelObject.hpp"
 #include "Load3ds.hpp"
+#include "MessageInterface.hpp"
 
 #define CHUNK_MAIN      0x4d4d
 #define CHUNK_OBJMESH   0x3d3d
@@ -43,16 +44,23 @@
 #define CHUNK_TEXMAP    0xA200
 #define CHUNK_MATTEXT   0xA300
 
-// This function loads a mesh from a 3ds file. 
-// It takes in only the vertices, polygons, and mapping lists. 
-// Other information, such as lightings, materials, etc. must be added in
-//
-// p_object: pointer to a ModelObject
-// p_filename: Filenames of the 3ds file to load from
-//
-// Return value: 1 if the object loaded correctly, 0 otherwise (char)
 
-char Load3DS(ModelObject *p_object, const wxString &p_filename){
+//------------------------------------------------------------------------------
+// char Load3DS(ModelObject *p_object, const wxString &p_filename)
+//------------------------------------------------------------------------------
+/**
+ * This function loads a mesh from a 3ds file.
+ *
+ * It takes in only the vertices, polygons, and mapping lists.  Other
+ * information, such as lightings, materials, etc. must be added in
+ *
+ * @param p_object pointer to a ModelObject
+ *
+ * @return 1 if the object loaded correctly, 0 otherwise (char)
+ */
+//------------------------------------------------------------------------------
+char Load3DS(ModelObject *p_object, const wxString &p_filename)
+{
    int i, chunk = 0; // Index
    int vert_index[MAX_LISTS]; // The starting index of a particular list of vertices
    int poly_index[MAX_LISTS]; // The starting index of a particular list of polygons
@@ -70,11 +78,14 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
    // Make we have a file name
    if (p_filename[0] == '\0') 
       return 0;
-   fprintf(stdout, "Loading 3ds object: %s\n", p_filename.mb_str());
+   if (LOAD3DS_DEBUG)
+      MessageInterface::ShowMessage("Loading 3ds object: %s\n",
+            p_filename.mb_str());
 
    // Load the file, print an error message if we couldn't find the file or it failed for any reason
-	if ((l_file = fopen(p_filename.mb_str(), "rb")) == NULL){ 
-      fprintf(stdout, "File %s not found!", p_filename.mb_str());
+	if ((l_file = fopen(p_filename.mb_str(), "rb")) == NULL)
+	{
+	   MessageInterface::ShowMessage("File %s not found!", p_filename.mb_str());
       return 0;
    }
 
@@ -91,11 +102,11 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
       // Read in chunk header
       fread(&l_chunk_id, 2, 1, l_file); 
       if (LOAD3DS_DEBUG)
-         fprintf(stdout, "ChunkID: %x\n", l_chunk_id);
+         MessageInterface::ShowMessage("ChunkID: %x\n", l_chunk_id);
       // Read in the length of the chunk
       fread(&l_chunk_length, 4, 1, l_file);
       if (LOAD3DS_DEBUG)
-         fprintf(stdout, "Chunk Length: %x\n", l_chunk_length);
+         MessageInterface::ShowMessage("Chunk Length: %x\n", l_chunk_length);
 
       // How we proceed depends on the chunk we are examining
       switch (l_chunk_id)
@@ -112,7 +123,8 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
          // We extract the names
          case CHUNK_OBJBLOCK:
             i = 0;
-            do{
+            do
+            {
                fread(&l_char, 1, 1, l_file);
                p_object->name.Append(l_char);
                i++;
@@ -131,24 +143,27 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             vert_index[vert_list] = p_object->num_vertices;
             p_object->num_vertices += l_qty;
             if (LOAD3DS_DEBUG)
-               fprintf(stdout, "Number of vertices: %d\n", l_qty);
+               MessageInterface::ShowMessage("Number of vertices: %d\n", l_qty);
             // If the number of vertices is beyond our max, we bug out
-            if (p_object->num_vertices > MAX_VERTICES){
-               fprintf(stdout, "Number of vertices too high!\n");
+            if (p_object->num_vertices > MAX_VERTICES)
+            {
+               MessageInterface::ShowMessage("Number of vertices too high!\n");
                return 0;
             }
             // Then we loop through all vertices and store them
-            for (i = p_object->num_vertices - l_qty; i < p_object->num_vertices; i++){
+            for (i = p_object->num_vertices - l_qty; i < p_object->num_vertices; i++)
+            {
                fread(&v, sizeof(float), 1, l_file);
                p_object->vertex[i].x = v;
                fread(&v, sizeof(float), 1, l_file);
                p_object->vertex[i].y = v;
                fread(&v, sizeof(float), 1, l_file);
                p_object->vertex[i].z = v;
-               if (LOAD3DS_DEBUG){
-                  fprintf(stdout, "Vertices List x: %f\n", p_object->vertex[i].x);
-                  fprintf(stdout, "Vertices List y: %f\n", p_object->vertex[i].y);
-                  fprintf(stdout, "Vertices List z: %f\n", p_object->vertex[i].z);
+               if (LOAD3DS_DEBUG)
+               {
+                  MessageInterface::ShowMessage("Vertices List x: %f\n", p_object->vertex[i].x);
+                  MessageInterface::ShowMessage("Vertices List y: %f\n", p_object->vertex[i].y);
+                  MessageInterface::ShowMessage("Vertices List z: %f\n", p_object->vertex[i].z);
                }
             }
             vert_list++;
@@ -161,10 +176,11 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             poly_index[poly_list] = p_object->num_polygons;
             p_object->num_polygons += l_qty;
             if (LOAD3DS_DEBUG)
-               fprintf(stdout, "Number of polygons: %d\n", l_qty);
+               MessageInterface::ShowMessage("Number of polygons: %d\n", l_qty);
             // Ensure we don't have more polygons than we can handle
-            if (p_object->num_polygons > MAX_POLYGONS){
-               fprintf(stdout, "Number of polygons is too high!\n");
+            if (p_object->num_polygons > MAX_POLYGONS)
+            {
+               MessageInterface::ShowMessage("Number of polygons is too high!\n");
                return 0;
             }
             // Loop through file and extract all of the face information
@@ -176,11 +192,12 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
                fread(&p_object->polygon[i].c, sizeof(unsigned short), 1, l_file);
                p_object->polygon[i].c += vert_index[poly_list];
                fread(&l_face_flags, sizeof(unsigned short), 1, l_file);
-               if (LOAD3DS_DEBUG){
-                  fprintf(stdout, "Polygon point a: %d\n", p_object->polygon[i].a);
-                  fprintf(stdout, "Polygon point b: %d\n", p_object->polygon[i].b);
-                  fprintf(stdout, "Polygon point c: %d\n", p_object->polygon[i].c);
-                  fprintf(stdout, "Face Flags: %x\n", l_face_flags);
+               if (LOAD3DS_DEBUG)
+               {
+                  MessageInterface::ShowMessage("Polygon point a: %d\n", p_object->polygon[i].a);
+                  MessageInterface::ShowMessage("Polygon point b: %d\n", p_object->polygon[i].b);
+                  MessageInterface::ShowMessage("Polygon point c: %d\n", p_object->polygon[i].c);
+                  MessageInterface::ShowMessage("Face Flags: %x\n", l_face_flags);
                }
             }
             poly_list++;
@@ -192,17 +209,21 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             unsigned short value;
             char str[255];
             i = 0;
-            do{
+            do
+            {
                fread(&l_char, 1, 1, l_file);
                str[i] = l_char;
                i++;
             } while (l_char != '\0' && i < 255);
-            for (i = 0; i < p_object->num_materials; i++){
-               if (strcmp(p_object->material[i].name, str) == 0){
+            for (i = 0; i < p_object->num_materials; i++)
+            {
+               if (strcmp(p_object->material[i].name, str) == 0)
+               {
                   index = i;
                   break;
                }
-               else if (i == p_object->num_materials-1){
+               else if (i == p_object->num_materials-1)
+               {
                   fprintf(stdout, "Material %s not found!\n", str);
                   index = -1;
                   return 0;
@@ -211,7 +232,8 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             fread(&l_qty, sizeof(unsigned short), 1, l_file);
             if (index != -1)
                p_object->material[index].num_faces += l_qty;
-            for (i = p_object->material[index].num_faces - l_qty; i < p_object->material[index].num_faces; i++){
+            for (i = p_object->material[index].num_faces - l_qty; i < p_object->material[index].num_faces; i++)
+            {
                fread(&value, sizeof(unsigned short), 1, l_file);
                if (index != -1)
                   p_object->material[index].faces[i] = value + poly_index[map_list];
@@ -224,13 +246,15 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             // Retrieve the number of mappings
             fread(&l_qty, sizeof(unsigned short), 1, l_file);
             // Go through all of the mappings and store them
-            for (i = p_object->num_vertices-l_qty; i < p_object->num_vertices; i++){
+            for (i = p_object->num_vertices-l_qty; i < p_object->num_vertices; i++)
+            {
                fread(&p_object->mapcoord[i], sizeof(float), 2, l_file);
-					p_object->mapcoord[i].u = p_object->mapcoord[i].u;
+//					p_object->mapcoord[i].u = p_object->mapcoord[i].u;
 					p_object->mapcoord[i].v = -p_object->mapcoord[i].v;
                if (LOAD3DS_DEBUG)
                {
-                  fprintf(stdout, "Mapping list u,v: %f,%f\n", p_object->mapcoord[i].u, p_object->mapcoord[i].v);
+                  MessageInterface::ShowMessage("Mapping list u,v: %f,%f\n",
+                        p_object->mapcoord[i].u, p_object->mapcoord[i].v);
                }
             }
             break;
@@ -241,7 +265,8 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
          // The name of the material. We extract and store
          case CHUNK_MATNAME:
             i = 0;
-            do{
+            do
+            {
                fread(&l_char, 1, 1, l_file);
                p_object->material[p_object->num_materials-1].name[i] = l_char;
                i++;
@@ -256,19 +281,22 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
             fread(&r, sizeof(unsigned char), 1, l_file);
             fread(&g, sizeof(unsigned char), 1, l_file);
             fread(&b, sizeof(unsigned char), 1, l_file);
-            if (chunk == CHUNK_MATACOL){
+            if (chunk == CHUNK_MATACOL)
+            {
                p_object->material[p_object->num_materials-1].mat_ambient.r = (float)r/255;
                p_object->material[p_object->num_materials-1].mat_ambient.g = (float)g/255;
                p_object->material[p_object->num_materials-1].mat_ambient.b = (float)b/255;
                p_object->material[p_object->num_materials-1].mat_ambient.a = (float)(r+g+b)/3/255;
             }
-            else if (chunk == CHUNK_MATDIFF){
+            else if (chunk == CHUNK_MATDIFF)
+            {
                p_object->material[p_object->num_materials-1].mat_diffuse.r = (float)r/255;
                p_object->material[p_object->num_materials-1].mat_diffuse.g = (float)g/255;
                p_object->material[p_object->num_materials-1].mat_diffuse.b = (float)b/255;
                p_object->material[p_object->num_materials-1].mat_diffuse.a = (float)(r+g+b)/3/255;
             }
-            else if (chunk == CHUNK_MATSPEC){
+            else if (chunk == CHUNK_MATSPEC)
+            {
                p_object->material[p_object->num_materials-1].mat_specular.r = (float)r/255;
                p_object->material[p_object->num_materials-1].mat_specular.g = (float)g/255;
                p_object->material[p_object->num_materials-1].mat_specular.b = (float)b/255;
@@ -298,13 +326,14 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
          // and bind the textures in the object. 
          case CHUNK_MATTEXT:
             i = 0;
-            do{
+            do
+            {
                fread(&l_char, 1, 1, l_file);
                p_object->material[p_object->num_materials-1].texture_name[i] = l_char;
                i++;
             } while (l_char != '\0' && i < 255);
             break;
-         // We skip all unkown chunks.
+         // We skip all unknown chunks.
          // Since they all begin with the chunk length, we use that information to skip. 
          // If you want to add other information to the model (materials info, for example),
          // then add their cases here
@@ -313,5 +342,10 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename){
       }
    }
    fclose(l_file); // Close the file
+
+   if (LOAD3DS_DEBUG)
+      MessageInterface::ShowMessage("Vertex count: %d  Face count: %d\n",
+            p_object->num_vertices, p_object->num_polygons);
+
    return 1; // Return successfully
 }
