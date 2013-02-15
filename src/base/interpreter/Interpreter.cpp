@@ -4309,12 +4309,17 @@ bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj,
    debugMsg = "In SetObjectToObject()";
    
    // If in object initialization mode, do not allow object to object assignment
+   // except spacecraft (GMT-3534)
    if (!inCommandMode)
    {
-      InterpreterException ex
-         ("Setting \"" + toObj->GetName() + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
-      HandleError(ex);
-      return false;
+      if (!(toObj->IsOfType(Gmat::SPACECRAFT)) && !(fromObj->IsOfType(Gmat::SPACECRAFT)))
+      {
+         InterpreterException ex
+            ("Setting \"" + toObj->GetName() + "\" to \"" + rhs +
+             "\" is not allowed before BeginMissionSequence");
+         HandleError(ex);
+         return false;
+      }
    }
    
    // Copy object
