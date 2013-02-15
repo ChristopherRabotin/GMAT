@@ -33,23 +33,27 @@
 #define M_INFINITY 30000000
 
 // The vertex type
-typedef struct{
+typedef struct
+{
    float x,y,z;
 } vector_type, *vector_type_ptr;
 
-typedef struct{
+typedef struct
+{
    float element[16];
 } matrix_type, *matrix_type_ptr;
 
 // The polygon (triangle), the 3 numbers point at 3 vertices
-typedef struct{
+typedef struct
+{
    unsigned int a,b,c;
    int neighbors[3];
    bool visible;
 } polygon_type;
 
 // Texture map coordinate, 2 texture coordinates per vertex
-typedef struct{
+typedef struct
+{
    float u,v;
 } texmap_coord_type;
 
@@ -62,7 +66,8 @@ typedef struct{
 } rgba_type;
 
 // The material type
-typedef struct{
+typedef struct
+{
    char name[255];                     // The name of the material
    char texture_name[255];             // The file name of the texture associated with the material
    int num_faces;                      // The number of faces that use this material
