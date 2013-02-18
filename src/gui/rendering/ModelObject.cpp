@@ -124,6 +124,10 @@ char ModelObject::Load(const wxString &full_path,
                        float posX, float posY, float posZ,
                        int rotX, int rotY, int rotZ)
 {
+   // WHY are we using wxStrings in this code?  Do this, and the texture issue
+   // goes away:
+   MessageInterface::ShowMessage("Loading the spacecraft model \"%s\"\n",
+         full_path.c_str());
    #ifdef DEBUG_LOAD
    MessageInterface::ShowMessage
       ("ModelObject::Load() entered, full_path='%s'\n", full_path.c_str());
