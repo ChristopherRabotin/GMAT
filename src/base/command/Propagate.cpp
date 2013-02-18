@@ -3780,8 +3780,8 @@ void Propagate::PrepareStoppingConditions()
                std::string msg = "Warning: The stopping condition " +
                      stopWhen[i]->GetName() + " cannot be met; propagation "
                      "runs in the wrong direction in line\n   \"" +
-                     GetGeneratingString(Gmat::SCRIPTING) + "\"";
-               MessageInterface::ShowMessage("%s\n", msg.c_str());
+                     GetGeneratingString(Gmat::NO_COMMENTS) + "\"";
+               MessageInterface::ShowMessage("%s\n\n", msg.c_str());
             }
          }
       }
