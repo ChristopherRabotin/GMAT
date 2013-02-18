@@ -25,6 +25,6 @@
 #define LOAD3DS_DEBUG 0
 
 // Functions
-extern char Load3DS(ModelObject *p_object, const wxString &p_filename);
+extern char Load3DS(ModelObject *p_object, const std::string &p_filename);
 
 #endif

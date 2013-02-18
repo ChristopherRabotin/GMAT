@@ -133,9 +133,9 @@ ModelObject* ModelManager::GetModel(int id)
 
 
 //------------------------------------------------------------------------------
-// int LoadModel(wxString &modelPath)
+// int LoadModel(std::string &modelPath)
 //------------------------------------------------------------------------------
-int ModelManager::LoadModel(wxString &modelPath)
+int ModelManager::LoadModel(std::string &modelPath)
 {
 	#ifdef DEBUG_LOAD_MODEL
 	MessageInterface::ShowMessage

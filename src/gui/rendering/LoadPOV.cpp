@@ -79,9 +79,9 @@ void GetMaterialColor (ifstream &InFile, ModelObject *obj)
 
 
 //------------------------------------------------------------------------------
-// void LoadPOV(ModelObject *obj, const wxString &modelPath)
+// void LoadPOV(ModelObject *obj, const std::string &modelPath)
 //------------------------------------------------------------------------------
-void LoadPOV(ModelObject *obj, const wxString &modelPath)
+void LoadPOV(ModelObject *obj, const std::string &modelPath)
 {
    const int ASize = 32;
    
@@ -112,7 +112,7 @@ void LoadPOV(ModelObject *obj, const wxString &modelPath)
    char ChVert3z[ASize];
    char Pathname[256];
    
-   //wxString line, word;
+   //std::string line, word;
    
    POVTYPE CommandCase = PovSearch;
    bool IsMoreData = true;
@@ -129,8 +129,8 @@ void LoadPOV(ModelObject *obj, const wxString &modelPath)
    
    if (InFile.fail())
    {
-      wxString msg = "Could not open model file: ";
-      msg.Append(modelPath);
+      std::string msg = "Could not open model file: ";
+      msg += modelPath;
       MessageInterface::LogMessage(msg + "\n");
       return;
    }

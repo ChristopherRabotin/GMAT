@@ -46,7 +46,7 @@
 //#define DEBUG_DRAW_MORE
 
 //int control_object;
-wxString filePath;
+std::string filePath;
 
 //------------------------------------------------------------------------------
 // ModelObject()
@@ -60,7 +60,7 @@ ModelObject::ModelObject()
 }
 
 //------------------------------------------------------------------------------
-// char Load(const wxString &objectName, const wxString &path, ...)
+// char Load(const std::string &objectName, const std::string &path, ...)
 //------------------------------------------------------------------------------
 // Loads a model from a 3ds file and sets some parameters
 //
@@ -76,7 +76,7 @@ ModelObject::ModelObject()
 //
 // Return value: 1 if the object loaded correctly, 0 otherwise (char)
 //------------------------------------------------------------------------------
-char ModelObject::Load(const wxString &objectName, const wxString &path, 
+char ModelObject::Load(const std::string &objectName, const std::string &path, 
                        float posX, float posY, float posZ,
                        int rotX, int rotY, int rotZ)
 {
@@ -88,13 +88,18 @@ char ModelObject::Load(const wxString &objectName, const wxString &path,
    
    filename = objectName;
    //   WIREFRAME_MODE = 0;
-   wxString thepath, string;
+   std::string thepath, string;
    FileManager *fm = FileManager::Instance();
    
-   thepath = wxString(fm->GetPathname("MODEL_PATH").c_str());
-   thepath.Append(path);
+   thepath = std::string(fm->GetPathname("MODEL_PATH").c_str());
+   thepath += path;
    string = thepath;
-   string.Append(objectName);
+   string += objectName;
+
+   #ifdef DEBUG_LOAD
+   MessageInterface::ShowMessage("   Loading '%s'\n", string.c_str());
+   #endif
+
    char retval = Load(string, posX, posY, posZ, rotX, rotY, rotZ);
    
    #ifdef DEBUG_LOAD
@@ -106,7 +111,7 @@ char ModelObject::Load(const wxString &objectName, const wxString &path,
 }
 
 //------------------------------------------------------------------------------
-// char Load(const wxString &full_path, ...)
+// char Load(const std::string &full_path, ...)
 //------------------------------------------------------------------------------
 // Loads a model from a 3ds file and sets some parameters
 //
@@ -120,32 +125,43 @@ char ModelObject::Load(const wxString &objectName, const wxString &path,
 //
 // Return value: 1 if the object loaded correctly, 0 otherwise (char)
 //------------------------------------------------------------------------------
-char ModelObject::Load(const wxString &full_path,
+char ModelObject::Load(const std::string &full_path,
                        float posX, float posY, float posZ,
                        int rotX, int rotY, int rotZ)
 {
-   // WHY are we using wxStrings in this code?  Do this, and the texture issue
-   // goes away:
-   MessageInterface::ShowMessage("Loading the spacecraft model \"%s\"\n",
-         full_path.c_str());
    #ifdef DEBUG_LOAD
    MessageInterface::ShowMessage
       ("ModelObject::Load() entered, full_path='%s'\n", full_path.c_str());
    #endif
    
-   wxString path, string, extension;
-   path = full_path.BeforeLast('/');
-   if (path.Length() <= 0)
+   std::string path, string, extension;
+   UnsignedInt loc = full_path.find_last_of('/');
+   if (loc != std::string::npos)
+      path = full_path.substr(0,loc);
+
+   // Might have Windows path delimiters
+   if (path.length() <= 0)
    {
-      path = full_path.BeforeLast('\\');
-      path.Append('\\');
+      loc = full_path.find_last_of('\\');
+      if (loc != std::string::npos)
+         path = full_path.substr(0,loc);
+      path += '\\';
    }
    else
-      path.append('/');
+      path += '/';
    
-   extension = full_path.AfterLast('.');
+   loc = full_path.find_last_of('.');
+   extension = full_path.substr(loc+1);
+   #ifdef DEBUG_LOAD
+      MessageInterface::ShowMessage("   Extension '%s'\n", extension.c_str());
+   #endif
+
    if (extension == wxT("3ds") || extension == wxT("3DS"))
    {
+      #ifdef DEBUG_LOAD
+      MessageInterface::ShowMessage("   Loading 3ds '%s'\n", full_path.c_str());
+      #endif
+
       if (Load3DS(this, full_path) == 0)
          return 0;
       
@@ -156,6 +172,10 @@ char ModelObject::Load(const wxString &full_path,
    }
    else if (extension == wxT("pov") || extension == wxT("POV"))
    {
+      #ifdef DEBUG_LOAD
+      MessageInterface::ShowMessage("   Loading pov '%s'\n", full_path.c_str());
+      #endif
+
       LoadPOV(this, full_path);
       //CalcNormals();
       //for (int i = 0; i < num_vertices; i++){
@@ -165,6 +185,7 @@ char ModelObject::Load(const wxString &full_path,
       //return 0;
    }
    filePath = path;
+
    // Then we go through each texture from the materials and load those. Any that failed
    // we bind to the default texture passed in
    LoadTextures();
@@ -201,24 +222,24 @@ void ModelObject::LoadTextures()
    
    int i;
    GLuint result;
-   wxString string;
+   std::string string;
    for (i = 0; i < num_materials; i++)
    {
       string = filePath;
-      string.Append(material[i].texture_name);
+      string += material[i].texture_name;
       result = LoadTexture(string);
       material[i].id_texture = result;
    }
 }
 
 //-------------------------------------------------------------------------------
-// int LoadTexture(const wxString &filename)
+// int LoadTexture(const std::string &filename)
 //-------------------------------------------------------------------------------
 /**
  * Loads a texture, binds it, and returns the generated texture id
  */
 //-------------------------------------------------------------------------------
-int ModelObject::LoadTexture(const wxString &filename)
+int ModelObject::LoadTexture(const std::string &filename)
 {
    #ifdef DEBUG_LOAD_TEXTURE
    MessageInterface::ShowMessage
@@ -229,7 +250,7 @@ int ModelObject::LoadTexture(const wxString &filename)
    GLenum error;
    wxImage image; 
    bool result = false;
-   wxString ext;
+   std::string ext;
    
    if (!wxFileExists(filename))
    {
@@ -241,14 +262,16 @@ int ModelObject::LoadTexture(const wxString &filename)
    }
    
    // Load the file
-   ext = filename.AfterLast('.');
-   if (strcmp(ext, "bmp") == 0 || strcmp(ext, "BMP") == 0)
+   UnsignedInt loc = filename.find_last_of('.');
+   if (loc != std::string::npos)
+      ext = filename.substr(loc+1);
+   if (strcmp(ext.c_str(), "bmp") == 0 || strcmp(ext.c_str(), "BMP") == 0)
       result = image.LoadFile(filename, wxBITMAP_TYPE_BMP, -1);
-   else if (strcmp(ext, "jpg") == 0 || strcmp(ext, "JPG") == 0)
+   else if (strcmp(ext.c_str(), "jpg") == 0 || strcmp(ext.c_str(), "JPG") == 0)
       result = image.LoadFile(filename, wxBITMAP_TYPE_JPEG, -1);
-   else if (strcmp(ext, "png") == 0 || strcmp(ext, "PNG") == 0)
+   else if (strcmp(ext.c_str(), "png") == 0 || strcmp(ext.c_str(), "PNG") == 0)
       result = image.LoadFile(filename, wxBITMAP_TYPE_PNG, -1);
-   else if (strcmp(ext, "tif") == 0 || strcmp(ext, "TIF") == 0)
+   else if (strcmp(ext.c_str(), "tif") == 0 || strcmp(ext.c_str(), "TIF") == 0)
       result = image.LoadFile(filename, wxBITMAP_TYPE_TIF, -1);
    else
       return -1;

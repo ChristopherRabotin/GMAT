@@ -23,4 +23,4 @@
 #include "gmatwxdefs.hpp"
 #include "ModelObject.hpp"
 
-void LoadPOV(ModelObject *obj, const wxString &modelPath);
+void LoadPOV(ModelObject *obj, const std::string &modelPath);

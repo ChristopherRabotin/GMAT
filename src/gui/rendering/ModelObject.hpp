@@ -83,8 +83,8 @@ typedef struct
 class ModelObject
 {
 public:
-   wxString name;      // The name of the object
-   wxString filename;  // The name of the file this object came from
+   std::string name;      // The name of the object
+   std::string filename;  // The name of the file this object came from
 
    // int WIREFRAME_MODE;
 
@@ -120,10 +120,10 @@ public:
    ///////////////////////////////////////////////////////////////////////////////////////////
 
    // Load the model information from a .3ds file
-   char Load(const wxString &object_name, const wxString &path, 
+   char Load(const std::string &object_name, const std::string &path, 
       float pos_x = 0.0f, float pos_y = 0.0f, float pos_z = 0.0f, 
       int rot_x = 0, int rot_y = 0, int rot_z = 0);
-   char Load(const wxString &full_path, 
+   char Load(const std::string &full_path, 
       float pos_x = 0.0f, float pos_y = 0.0f, float pos_z = 0.0f, 
       int rot_x = 0, int rot_y = 0, int rot_z = 0);
    void LoadTextures();
@@ -194,7 +194,7 @@ private:
    void CreateBSphere(); // Creates the bounding sphere for the object
    void CalcNormals(); // Calculates the vertex normals of the object
    void FindNeighbors(); // Finds all neighboring faces for all polygons
-   int  LoadTexture(const wxString &file_name);
+   int  LoadTexture(const std::string &file_name);
    
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// Helper functions for the vector structure used within the class

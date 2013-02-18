@@ -1947,7 +1947,8 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
                         #endif
-								sat->modelID = mm->LoadModel(modelPath);
+                        std::string mP = modelPath.c_str();
+                        sat->modelID = mm->LoadModel(mP);
                         numModelLoaded++;
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage

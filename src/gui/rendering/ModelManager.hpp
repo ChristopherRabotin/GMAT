@@ -29,7 +29,7 @@
 #include "ModelObject.hpp"
 
 typedef std::map<int, ModelObject*> ModelMap;
-typedef std::map<wxString, int> ModelIdMap;
+typedef std::map<std::string, int> ModelIdMap;
 
 class ModelManager
 {
@@ -43,7 +43,7 @@ public:
    
 	void ClearModel();
    ModelObject* GetModel(int id);
-   int LoadModel(wxString &modelPath);
+   int LoadModel(std::string &modelPath);
    
 private:
    /// Shared GL context between GL canvases

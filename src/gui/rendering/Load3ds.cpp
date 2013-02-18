@@ -46,7 +46,7 @@
 
 
 //------------------------------------------------------------------------------
-// char Load3DS(ModelObject *p_object, const wxString &p_filename)
+// char Load3DS(ModelObject *p_object, const std::string &p_filename)
 //------------------------------------------------------------------------------
 /**
  * This function loads a mesh from a 3ds file.
@@ -59,7 +59,7 @@
  * @return 1 if the object loaded correctly, 0 otherwise (char)
  */
 //------------------------------------------------------------------------------
-char Load3DS(ModelObject *p_object, const wxString &p_filename)
+char Load3DS(ModelObject *p_object, const std::string &p_filename)
 {
    int i, chunk = 0; // Index
    int vert_index[MAX_LISTS]; // The starting index of a particular list of vertices
@@ -80,12 +80,12 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename)
       return 0;
    if (LOAD3DS_DEBUG)
       MessageInterface::ShowMessage("Loading 3ds object: %s\n",
-            p_filename.mb_str());
+            p_filename.c_str());
 
    // Load the file, print an error message if we couldn't find the file or it failed for any reason
-	if ((l_file = fopen(p_filename.mb_str(), "rb")) == NULL)
+	if ((l_file = fopen(p_filename.c_str(), "rb")) == NULL)
 	{
-	   MessageInterface::ShowMessage("File %s not found!", p_filename.mb_str());
+	   MessageInterface::ShowMessage("File %s not found!", p_filename.c_str());
       return 0;
    }
 
@@ -126,7 +126,7 @@ char Load3DS(ModelObject *p_object, const wxString &p_filename)
             do
             {
                fread(&l_char, 1, 1, l_file);
-               p_object->name.Append(l_char);
+               p_object->name += l_char;
                i++;
             } while (l_char != '\0' && i < 20);
             break;

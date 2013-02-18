@@ -529,7 +529,8 @@ void VisualModelCanvas::LoadModel()
       ("VisualModelCanvas::LoadModel() entered, modelPath='%s'\n", modelPath.c_str());
    #endif
    ModelManager *mm = ModelManager::Instance();
-   currentSpacecraft->modelID = mm->LoadModel(modelPath);
+   std::string mP = modelPath.c_str();
+   currentSpacecraft->modelID = mm->LoadModel(mP);
    loadedModel = mm->GetModel(currentSpacecraft->modelID);
    needToLoadModel = false;
    #ifdef DEBUG_LOAD_MODEL
