@@ -1822,8 +1822,13 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
    {
       AppendItem(itemId, wxT("Matlab"), GmatTree::RESOURCE_ICON_MATLAB, -1,
                  new GmatTreeItemData(wxT("Matlab"), GmatTree::MATLAB_INTERFACE));
+      #ifdef __ADD_MATLAB_SERVER__
+      // Hide showing Matlab Server from the resource tree (GMT-3320)
+      // @todo It should be called Gmat Server instead of Matlab Server since
+      // GMAT is providing a service to MATLAB. (LOJ: 2013.02.19)
       AppendItem(itemId, wxT("Matlab Server"), GmatTree::RESOURCE_ICON_MATLAB_SERVER, -1,
                  new GmatTreeItemData(wxT("Matlab Server"), GmatTree::MATLAB_SERVER));
+      #endif
    }
    
    Expand(itemId);
@@ -2657,7 +2662,6 @@ void ResourceTree::AddIcons()
    
    theGuiManager->LoadIcon("rt_Matlab", bitmapType, &bitmaps[++index], rt_Matlab_xpm);
    theGuiManager->LoadIcon("rt_MatlabServer", bitmapType, &bitmaps[++index], rt_MatlabServer_xpm);
-   
    theGuiManager->LoadIcon("rt_Script", bitmapType, &bitmaps[++index], rt_Script_xpm);
    
    theGuiManager->LoadIcon("rt_Variable", bitmapType, &bitmaps[++index], rt_Variable_xpm);
@@ -4548,16 +4552,24 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    if (msg1 != "" || msg2 != "" || msg3 != "" || msg4 != "" || msg5 != "" || msg6 != "")
    {
+      wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
+      
       // Show errors to message window
-      MessageInterface::ShowMessage(msg1 + msg2 + msg3 + msg4 + msg5 + msg6);
+      MessageInterface::ShowMessage(msg);
       
       // Show errors to view text dialog
       ViewTextDialog *dlg =
          new ViewTextDialog(this, _T("Information"), false, wxDefaultPosition, wxSize(550, 300));
       wxTextCtrl *text = dlg->GetTextCtrl();
-      wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
       text->AppendText(msg);
       dlg->ShowModal();
+      
+      // Log run folder summary report to a separate file
+      std::string summaryFile = currOutPath + "GmatFolderRunSummary.txt";
+      MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
+      MessageInterface::SetLogFile(summaryFile);
+      MessageInterface::LogMessage(msg);
+      MessageInterface::SetLogFile(oldLogFile);
    }
    
    #ifdef DEBUG_RUN_SCRIPT_FOLDER
@@ -4818,6 +4830,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          menu.Append(GmatMenu::MENU_MATLAB_CLOSE, wxT("Close"));
          break;
       case GmatTree::MATLAB_SERVER:
+         #ifdef __ADD_MATLAB_SERVER__
          menu.Append(GmatMenu::MENU_MATLAB_SERVER_START, wxT("Start"));
          menu.Append(GmatMenu::MENU_MATLAB_SERVER_STOP, wxT("Stop"));
          if (mMatlabServerStarted)
@@ -4830,6 +4843,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
             menu.Enable(GmatMenu::MENU_MATLAB_SERVER_START, true);
             menu.Enable(GmatMenu::MENU_MATLAB_SERVER_STOP, false);
          }
+         #endif
          break;
       default:
          break;
