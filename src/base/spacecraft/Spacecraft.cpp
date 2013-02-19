@@ -1906,7 +1906,9 @@ bool Spacecraft::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Spacecraft::IsParameterCommandModeSettable(const Integer id) const
 {
-   // For now, turn them all on
+   if (id == MODEL_FILE)
+      return false;
+
    return true;
 }
 
