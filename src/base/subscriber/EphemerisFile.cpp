@@ -1557,6 +1557,8 @@ bool EphemerisFile::OpenEphemerisFile()
    std::string debugFileName;
    bool openDebugFile = false;
    
+   // For CCSDS file, DEBUG_EPHEMERIS_TEXT has no effect if not using DATAFILE
+   // since it writes to a text file as debug is turned on
    if (fileType == CCSDS_OEM || fileType == CCSDS_AEM)
    {
       #if defined(__USE_DATAFILE__) && defined(DEBUG_EPHEMFILE_TEXT)
@@ -3693,14 +3695,14 @@ void EphemerisFile::DebugWriteOrbit(const std::string &msg, Real epoch,
    if (logOnly)
    {
       MessageInterface::ShowMessage
-         ("%s\n%s\n%24.14f  %24.14f  %24.14f\n%19.16f  %19.16f  %19.16f\n",
+         ("%s\n%s\n% 1.15e  % 1.15e  % 1.15e\n% 1.15e  % 1.15e  % 1.15e\n",
           msg.c_str(), epochStr.c_str(), outState[0], outState[1], outState[2],
           outState[3], outState[4], outState[5]);
    }
    else
    {
       char strBuff[200];
-      sprintf(strBuff, "%s  %24.14f  %24.14f  %24.14f  %19.16f  %19.16f  %19.16f\n",
+      sprintf(strBuff, "%s  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
               epochStr.c_str(), outState[0], outState[1], outState[2], outState[3],
               outState[4], outState[5]);
       dstream << strBuff;
