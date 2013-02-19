@@ -842,8 +842,7 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ReportFile::IsParameterCommandModeSettable(const Integer id) const
 {
-   // For now, turn them all on
-   return true;
+   return Subscriber::IsParameterCommandModeSettable(id);
 }
 
 
