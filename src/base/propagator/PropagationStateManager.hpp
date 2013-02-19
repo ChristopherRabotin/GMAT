@@ -47,6 +47,7 @@ public:
    virtual bool MapObjectsToVector();
    virtual bool MapVectorToObjects();
    virtual bool RequiresCompletion();
+   virtual bool ObjectEpochsMatch();
    virtual Integer GetCompletionCount();
    virtual Integer GetCompletionIndex(const Integer which);
    virtual Integer GetCompletionSize(const Integer which);

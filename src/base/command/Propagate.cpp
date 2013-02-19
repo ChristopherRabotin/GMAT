@@ -3002,23 +3002,26 @@ bool Propagate::Initialize()
             if (so->IsManeuvering())
                finiteBurnActive = true;
             sats.push_back(so);
-            if (sats.size() > 1)
-               if (so->GetRealParameter(epochID) !=
-                     sats[0]->GetRealParameter(epochID))
-               {
-                  std::stringstream errorString;
-                  errorString.precision(16);
-                  errorString << "Coupled propagation epoch mismatch between "
-                              << sats[0]->GetName()
-                              << " (epoch = "
-                              << sats[0]->GetRealParameter(epochID)
-                              << ") and "
-                              << so->GetName()
-                              << " (epoch = "
-                              << so->GetRealParameter(epochID)
-                              << ")";
-                  throw CommandException(errorString.str());
-               }
+
+            // This validation is moved to PrepareToPropagate because there may
+            // be changes made that enable it after the command initialization 
+            //if (sats.size() > 1)
+            //   if (so->GetRealParameter(epochID) !=
+            //         sats[0]->GetRealParameter(epochID))
+            //   {
+            //      std::stringstream errorString;
+            //      errorString.precision(16);
+            //      errorString << "Coupled propagation epoch mismatch between "
+            //                  << sats[0]->GetName()
+            //                  << " (epoch = "
+            //                  << sats[0]->GetRealParameter(epochID)
+            //                  << ") and "
+            //                  << so->GetName()
+            //                  << " (epoch = "
+            //                  << so->GetRealParameter(epochID)
+            //                  << ")";
+            //      throw CommandException(errorString.str());
+            //   }
 
             AddToBuffer(so);
 
@@ -3611,6 +3614,12 @@ void Propagate::PrepareToPropagate()
 
       }
    }
+
+   // Sanity check the Spacecraft epochs to be sure that they match for each propagator
+   for (UnsignedInt i = 0; i < psm.size(); ++i)
+      if (psm[i]->ObjectEpochsMatch() == false)
+         throw CommandException("Spacecraft epochs do not match in a "
+               "Propagator used in the Propagate command");
 
    if (pubdata)
    {

@@ -527,17 +527,11 @@ bool PropagationStateManager::MapObjectsToVector()
    }
    
    // Manage epoch
-   GmatEpoch theEpoch = 0.0;
-   for (UnsignedInt i = 0; i < objects.size(); ++i)
-   {
-      if (i == 0)
-         theEpoch = objects[i]->GetRealParameter(epochIDs[i]);
-      else
-         if (theEpoch != objects[i]->GetRealParameter(epochIDs[i]))
-            // should throw here
-            MessageInterface::ShowMessage("Epoch mismatch\n");
-   }
-   state.SetEpoch(theEpoch);
+   if (ObjectEpochsMatch() == false)
+      MessageInterface::ShowMessage("Epochs do not match\n");
+
+   if (objects.size() > 0)
+      state.SetEpoch(objects[0]->GetRealParameter(epochIDs[0]));
    
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage(
@@ -672,16 +666,48 @@ bool PropagationStateManager::RequiresCompletion()
    return hasPostSuperpositionMember;
 }
 
+//------------------------------------------------------------------------------
+// bool ObjectEpochsMatch()
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if the object epochs match
+ *
+ * @return true is the eopchs match, false if not
+ */
+//------------------------------------------------------------------------------
+bool PropagationStateManager::ObjectEpochsMatch()
+{
+   bool retval = true;
+
+   if (objects.size() > 0)
+   {
+      GmatEpoch theEpoch = objects[0]->GetRealParameter(epochIDs[0]);
+      for (UnsignedInt i = 1; i < objects.size(); ++i)
+      {
+         #ifdef DEBUG_OBJECT_UPDATES
+            MessageInterface::ShowMessage("   Epochs are %.12lf for %s and "
+               "%.12lf for %s\n", theEpoch, objects[0]->GetName().c_str(),
+               objects[i]->GetRealParameter(epochIDs[i]), 
+               objects[i]->GetName().c_str());
+         #endif
+
+         if (theEpoch != objects[i]->GetRealParameter(epochIDs[i]))
+         {
+            retval = false;
+         }
+      }
+   }
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // Integer GetCompletionCount()
 //------------------------------------------------------------------------------
 /**
- * Describe the method here
+ * Obtains the number of objects that need to complete updates
  *
- * @param
- *
- * @return
+ * @return The number of completion indices registered
  */
 //------------------------------------------------------------------------------
 Integer PropagationStateManager::GetCompletionCount()
