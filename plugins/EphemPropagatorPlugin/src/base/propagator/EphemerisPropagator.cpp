@@ -655,7 +655,30 @@ bool EphemerisPropagator::SetStringParameter(const Integer id,
          return true;
 
       case EPHEM_EPOCH_FORMAT:
-         epochFormat = value;
+         if (TimeConverterUtil::IsValidTimeSystem(value))
+         {
+            epochFormat = value;   
+         }
+         else
+         {
+            char msg[512];
+            std::string timeRepList;
+            StringArray validReps = TimeConverterUtil::GetValidTimeRepresentations();
+            for (UnsignedInt i = 0; i < validReps.size(); ++i)
+            {
+               if (i != 0)
+                  timeRepList += ", ";
+               timeRepList += validReps[i];
+            }
+
+            // The valid format list here should be retrieved from TimeconverterUtil,
+            // once that code is refactored
+            std::sprintf(msg, errorMessageFormat.c_str(), value.c_str(),
+                  PARAMETER_TEXT[EPHEM_EPOCH_FORMAT - PropagatorParamCount].c_str(),
+                  timeRepList.c_str());
+
+            throw PropagatorException(msg);
+         }
          return true;
 
       case EPHEM_START_EPOCH:
@@ -897,7 +920,7 @@ void EphemerisPropagator::SetSolarSystem(SolarSystem *ss)
       propOrigin = solarSystem->GetBody(centralBody);
 
       if (propOrigin == NULL)
-         throw ODEModelException(
+         throw PropagatorException(
             "Ephemeris propagator origin (" + centralBody +
             ") was not found in the solar system");
 
