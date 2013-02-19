@@ -1152,10 +1152,24 @@ void PropagatePanel::SaveData()
                validationMessage = "The SpaceObject " + sats[i] + " cannot be found\n";
                validationErrors.push_back(validationMessage);
             }
-            else if (theThing->IsOfType("SpaceObject") == false)
+            else 
             {
-               validationMessage = "The object " + sats[i] + " is not a Spacecraft or Formation\n";
-               validationErrors.push_back(validationMessage);
+               if (theThing->IsOfType("SpaceObject") == false)
+               {
+                  validationMessage = "The object " + sats[i] + " is not a Spacecraft or Formation\n";
+                  validationErrors.push_back(validationMessage);
+               }
+               else
+               {
+                  bool stmOrAmatrix = stmPropCheckBox->IsChecked() || aMatrixCalcCheckBox->IsChecked();
+                  if (theThing->IsOfType("Formation") && stmOrAmatrix)
+                  {
+                     validationMessage = "The object " + sats[i] + " is a Formation; Formations cannot "
+                        "be propagated when propagating the State Transition Matrix or calculating the "
+                        "A-matrix\n";
+                     validationErrors.push_back(validationMessage);
+                  }
+               }
             }
          }
       }
@@ -1180,7 +1194,7 @@ void PropagatePanel::SaveData()
       canClose = false;
    }
    
-   // check to see if there is any missing propagators for space objects
+   // check to see if there are any missing propagators for space objects
    if (emptyProps.GetCount() > 0)
    {
       for (UnsignedInt i=0; i<emptyProps.GetCount(); i++)
@@ -1191,7 +1205,7 @@ void PropagatePanel::SaveData()
       canClose = false;
    }
    
-   // check to see if there is any missing space objects to propagate
+   // check to see if there are any missing space objects to propagate
    if (emptySos.GetCount() > 0)
    {
       for (UnsignedInt i=0; i<emptySos.GetCount(); i++)
