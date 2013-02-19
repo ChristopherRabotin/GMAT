@@ -857,6 +857,13 @@ true | false             % error
         </code>
       </programlisting>
 
+      <para>For backwards compatibility, there is one exception to the
+      literal-value rule: <guilabel>Spacecraft</guilabel> resources can copied
+      with an initialization statement like:</para>
+
+      <programlisting>Create Spacecraft aSat1 aSat2
+aSat2 = aSat1                   % Valid only for Spacecraft resources</programlisting>
+
       <para>Fields that have no assigned value in the Initialization section
       of the script remain at their default values, as specified in the
       documentation for each resource type.</para>
