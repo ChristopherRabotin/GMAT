@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include <sstream>
+#include <cstdio>                   // for sprintf
 #include "EphemerisPropagator.hpp"
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
