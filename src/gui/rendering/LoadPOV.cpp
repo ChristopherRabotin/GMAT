@@ -125,7 +125,7 @@ void LoadPOV(ModelObject *obj, const std::string &modelPath)
    int NumConSets;
    int TotObjects;
    
-   ifstream InFile(modelPath, ios::in);
+   ifstream InFile(modelPath.c_str(), ios::in);
    
    if (InFile.fail())
    {

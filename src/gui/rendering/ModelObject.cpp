@@ -252,7 +252,7 @@ int ModelObject::LoadTexture(const std::string &filename)
    bool result = false;
    std::string ext;
    
-   if (!wxFileExists(filename))
+   if (!wxFileExists(filename.c_str()))
    {
       #ifdef DEBUG_LOAD_TEXTURE
       MessageInterface::ShowMessage
@@ -266,13 +266,13 @@ int ModelObject::LoadTexture(const std::string &filename)
    if (loc != std::string::npos)
       ext = filename.substr(loc+1);
    if (strcmp(ext.c_str(), "bmp") == 0 || strcmp(ext.c_str(), "BMP") == 0)
-      result = image.LoadFile(filename, wxBITMAP_TYPE_BMP, -1);
+      result = image.LoadFile(filename.c_str(), wxBITMAP_TYPE_BMP, -1);
    else if (strcmp(ext.c_str(), "jpg") == 0 || strcmp(ext.c_str(), "JPG") == 0)
-      result = image.LoadFile(filename, wxBITMAP_TYPE_JPEG, -1);
+      result = image.LoadFile(filename.c_str(), wxBITMAP_TYPE_JPEG, -1);
    else if (strcmp(ext.c_str(), "png") == 0 || strcmp(ext.c_str(), "PNG") == 0)
-      result = image.LoadFile(filename, wxBITMAP_TYPE_PNG, -1);
+      result = image.LoadFile(filename.c_str(), wxBITMAP_TYPE_PNG, -1);
    else if (strcmp(ext.c_str(), "tif") == 0 || strcmp(ext.c_str(), "TIF") == 0)
-      result = image.LoadFile(filename, wxBITMAP_TYPE_TIF, -1);
+      result = image.LoadFile(filename.c_str(), wxBITMAP_TYPE_TIF, -1);
    else
       return -1;
    

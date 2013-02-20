@@ -4565,7 +4565,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       dlg->ShowModal();
       
       // Log run folder summary report to a separate file
-      std::string summaryFile = currOutPath + "GmatFolderRunSummary.txt";
+      std::string summaryFile = currOutPath.c_str();
+      summaryFile += "GmatFolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
       MessageInterface::LogMessage(msg);
