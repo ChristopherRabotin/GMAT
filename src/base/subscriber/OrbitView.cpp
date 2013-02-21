@@ -1212,8 +1212,24 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
       mViewUpCoordSysName = value;
       return true;
    case VIEW_UP_AXIS:
-      mViewUpAxisName = value;
-      return true;
+   {
+      std::string viewUpList    = "X, -X, Y, -Y, Z, -Z";
+      if ((value == "X") || (value == "-X") ||
+    	  (value == "Y") || (value == "-Y") ||
+    	  (value == "Z") || (value == "-Z"))
+      {
+          mViewUpAxisName = value;
+          return true;
+      }
+      else
+      {
+         std::string errmsg =
+            "The value of \"" + value + "\" for field \"ViewUpAxis\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ " + viewUpList + " ]. ";
+         throw SubscriberException(errmsg);
+      }
+   }
    default:
       return OrbitPlot::SetStringParameter(id, value);
    }
