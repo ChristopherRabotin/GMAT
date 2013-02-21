@@ -1836,12 +1836,27 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trim
 	   ((str2[0] == '-') || (str2[0] == '+')))
 	   return false;
 
-   if (str2[0] != '-' && !isdigit(str2[0]))
+   if ((str2[0] != '+') && (str2[0] != '-') && !isdigit(str2[0]))
       return false;
+
+   // Remove blanks after + or - sign
+   if (str2[0] == '+' || str2[0] == '-')
+   {
+      std::string::size_type firstBlank = str2.find_first_of(" ", 1);
+      std::string::size_type firstNonBlank = str2.find_first_not_of(" ", 1);
+      if (firstBlank != str2.npos)
+      {
+         if (firstNonBlank != str2.npos && firstBlank < firstNonBlank)
+         {
+            std::string str3 = str2.substr(firstNonBlank);
+            str2 = str2[0] + str3;
+         }
+      }
+   }
 
    for (unsigned int i=0; i<str2.length(); i++)
    {
-      if (i == 0 && str2[0] == '-')
+      if ((i == 0) && ((str2[0] == '+') || (str2[0] == '-')))
          continue;
 
       if (!isdigit(str2[i]))
@@ -1916,11 +1931,29 @@ bool GmatStringUtil::ToUnsignedInt(const std::string &str, UnsignedInt &value, b
 	   ((str2[0] == '-') || (str2[0] == '+')))
 	   return false;
 
-   if (str2[0] != '-' && !isdigit(str2[0]))
+   if ((str2[0] != '+') && !isdigit(str2[0]))
       return false;
+
+   // Remove blanks after + sign
+   if (str2[0] == '+')
+   {
+      std::string::size_type firstBlank = str2.find_first_of(" ", 1);
+      std::string::size_type firstNonBlank = str2.find_first_not_of(" ", 1);
+      if (firstBlank != str2.npos)
+      {
+         if (firstNonBlank != str2.npos && firstBlank < firstNonBlank)
+         {
+            std::string str3 = str2.substr(firstNonBlank);
+            str2 = str2[0] + str3;
+         }
+      }
+   }
 
    for (unsigned int i=0; i<str2.length(); i++)
    {
+      if ((i == 0) && (str2[0] == '+'))
+         continue;
+
       if (!isdigit(str2[i]))
          return false;
    }
