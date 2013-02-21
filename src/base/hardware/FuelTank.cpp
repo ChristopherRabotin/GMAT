@@ -350,8 +350,12 @@ bool FuelTank::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 bool FuelTank::IsParameterCommandModeSettable(const Integer id) const
 {
-   // For now, turn them all on
-   return true;
+   if ((id == ALLOW_NEGATIVE_FUEL_MASS) ||
+       (id == PRESSURE_MODEL) ||
+       (id == PRESSURE_REGULATED))
+      return false;
+
+   return Hardware::IsParameterCommandModeSettable(id);
 }
 
 

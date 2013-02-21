@@ -50,6 +50,8 @@ public:
    
    // for parameters
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
+
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType

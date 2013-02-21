@@ -455,6 +455,27 @@ bool FiniteBurn::IsParameterReadOnly(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::IsParameterCommandModeSettable(const Integer id) const
+{
+   // I think this should also be turned off; waiting for verification
+//   if ((id == THRUSTER) || (id == FUEL_TANK))
+//      return false;
+
+   return Burn::IsParameterCommandModeSettable(id);
+}
+
+
+//------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**

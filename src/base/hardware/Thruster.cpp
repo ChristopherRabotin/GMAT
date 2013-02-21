@@ -597,8 +597,12 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 bool Thruster::IsParameterCommandModeSettable(const Integer id) const
 {
-   // For now, turn them all on
-   return true;
+   if ((id == COORDINATE_SYSTEM) || (id == AXES) ||
+       (id == ORIGIN)            || (id == DECREMENT_MASS) ||
+       (id == TANK))
+      return false;
+
+   return Hardware::IsParameterCommandModeSettable(id);
 }
 
 

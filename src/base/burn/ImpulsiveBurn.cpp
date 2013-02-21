@@ -419,6 +419,28 @@ bool ImpulsiveBurn::IsParameterReadOnly(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ *
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool ImpulsiveBurn::IsParameterCommandModeSettable(const Integer id) const
+{
+   if ((id == DECREMENT_MASS)   || (id == FUEL_TANK) ||
+       (id == COORDINATESYSTEM) || (id == BURNORIGIN) ||
+       (id == BURNAXES))
+      return false;
+
+   return Burn::IsParameterCommandModeSettable(id);
+}
+
+
+//------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
