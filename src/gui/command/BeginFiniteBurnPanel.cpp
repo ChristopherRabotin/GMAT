@@ -331,6 +331,7 @@ void BeginFiniteBurnPanel::SaveData()
    }
    catch (BaseException &e)
    {
+	  canClose = false;
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
@@ -345,10 +346,10 @@ void BeginFiniteBurnPanel::SaveData()
 //------------------------------------------------------------------------------
 void BeginFiniteBurnPanel::OnButtonClicked(wxCommandEvent& event)
 {
-   // Allow multiple selection on spacecraft
+   // Allow ONE selection on spacecraft
    ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                   GuiItemManager::SHOW_WHOLE_OBJECT_ONLY, 1,
-                                  true, false, false, false, false, "Spacecraft");
+                                  false, false, false, false, false, "Spacecraft");
    
    paramDlg.SetParamNameArray(mSpacecraftList);
    paramDlg.ShowModal();
