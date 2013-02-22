@@ -43,6 +43,7 @@
 //#define DEBUG_ATTITUDE_PANEL 1
 //#define DEBUG_ATTITUDE_SAVE
 //#define DEBUG_ATTITUDE_RATE
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -306,8 +307,13 @@ void AttitudePanel::Create()
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
                       wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
 
+//   // units for the Euler Angles
+//   attUnits1 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+//   attUnits2 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+//   attUnits3 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+
    // Rate State Type
-   stateTypeRate4StaticText =
+   stateRateTypeStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Rate State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
 
@@ -379,14 +385,17 @@ void AttitudePanel::Create()
    Integer bsize = 2; // border size
    // wx*Sizers   
    wxBoxSizer *boxSizer1 = new wxBoxSizer(wxHORIZONTAL);
+
    //GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
    GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-   GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+//   GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
    attitudeSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Initial Conditions" );
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
+//   flexGridSizer2 = new wxFlexGridSizer( 5, 0, 0 );   // need 5 to add attUnits
 //   wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
    wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 3, 0, 0 );
    // Let's make TextCtrl growable, so we can see more numbers when expand
@@ -409,26 +418,27 @@ void AttitudePanel::Create()
    
    flexGridSizer2->Add(st1StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   //flexGridSizer2->Add(attUnits1, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    flexGridSizer2->Add(st5TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st8TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );          
+//   flexGridSizer2->Add(attUnits1, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st2StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   //flexGridSizer2->Add(attUnits2, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    flexGridSizer2->Add(st6TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st9TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );        
+//   flexGridSizer2->Add(attUnits2, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st3StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   //flexGridSizer2->Add(attUnits3, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    flexGridSizer2->Add(st7TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st10TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );       
+//   flexGridSizer2->Add(attUnits3, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st4StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st4TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);        
+//   flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  // for units
    
    flexGridSizer3->Add(str1StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
@@ -444,7 +454,7 @@ void AttitudePanel::Create()
    attitudeSizer->Add(stateTypeComboBox , 0, wxALIGN_LEFT|wxALL, bsize);  
    attitudeSizer->Add(flexGridSizer2, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);            
    
-   attRateSizer->Add(stateTypeRate4StaticText , 0, wxALIGN_LEFT|wxALL, bsize);
+   attRateSizer->Add(stateRateTypeStaticText , 0, wxALIGN_LEFT|wxALL, bsize);
    attRateSizer->Add(stateRateTypeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    attRateSizer->Add(flexGridSizer3, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);         
    
@@ -532,7 +542,7 @@ void AttitudePanel::LoadData()
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
 
-      DisplayDataForModel(attitudeModel);
+//      DisplayDataForModel(attitudeModel);
       
       if (attStateType == "EulerAngles")
       {
@@ -596,7 +606,9 @@ void AttitudePanel::LoadData()
          }
          DisplayAngularVelocity();
       }
-      
+
+      DisplayDataForModel(attitudeModel);
+
       dataChanged = false;
    }
    catch (BaseException &e)
@@ -1141,109 +1153,128 @@ bool AttitudePanel::ValidateState(const std::string which)
 }
 
 //------------------------------------------------------------------------------
-// void DisableInitialAttitudeAndRate()
+// void HideInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 /**
  * Disables the initial attitude rate widgets.
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::DisableInitialAttitudeAndRate()
+void AttitudePanel::HideInitialAttitudeAndRate()
 {
-   stateTypeStaticText->Disable();
-   stateTypeComboBox->Disable();
-   stateTypeRate4StaticText->Disable();
-   st1StaticText->Disable();
-   st2StaticText->Disable();
-   st3StaticText->Disable();
-   st1TextCtrl->Disable();
-   st2TextCtrl->Disable();
-   st3TextCtrl->Disable();
-
-   if (attStateType == STATE_TEXT[QUATERNION])
-   {
-      st4StaticText->Disable();
-      st4TextCtrl->Disable();
-   }
-   if (attStateType == STATE_TEXT[DCM])
-   {
-      st5TextCtrl->Disable();
-      st6TextCtrl->Disable();
-      st7TextCtrl->Disable();
-      st8TextCtrl->Disable();
-      st9TextCtrl->Disable();
-      st10TextCtrl->Disable();
-   }
-   st1TextCtrl->Disable();
-
-   stateTypeRate4StaticText->Disable();
-
-   stateRateTypeComboBox->Disable();
-
-   str1StaticText->Disable();
-   str2StaticText->Disable();
-   str3StaticText->Disable();
-
-   str1TextCtrl->Disable();
-   str2TextCtrl->Disable();
-   str3TextCtrl->Disable();
-
-   rateUnits1->Disable();
-   rateUnits2->Disable();
-   rateUnits3->Disable();
+   // can hide entire sizers here
+   boxSizer3->Hide(attitudeSizer); // , true);
+   boxSizer3->Hide(attRateSizer); // , true);
+   boxSizer3->Layout();
+   Refresh();
 }
 
 //------------------------------------------------------------------------------
-// void EnableInitialAttitudeAndRate()
+// void ShowInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 /**
  * Enables the initial attitude rate widgets.
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::EnableInitialAttitudeAndRate()
+void AttitudePanel::ShowInitialAttitudeAndRate()
 {
-   stateTypeStaticText->Enable();
-   stateTypeComboBox->Enable();
-   stateTypeRate4StaticText->Enable();
-   st1StaticText->Enable();
-   st2StaticText->Enable();
-   st3StaticText->Enable();
-   st1TextCtrl->Enable();
-   st2TextCtrl->Enable();
-   st3TextCtrl->Enable();
+   boxSizer3->Show(attitudeSizer, true);
+   boxSizer3->Show(attRateSizer, true);
 
-   if (attStateType == STATE_TEXT[QUATERNION])
+   // all representations show these three widgets
+   st1TextCtrl->Show(true);
+   st2TextCtrl->Show(true);
+   st3TextCtrl->Show(true);
+
+   if (attStateType == stateTypeArray[EULER_ANGLES])
    {
-      st4StaticText->Enable();
-      st4TextCtrl->Enable();
+      st1StaticText->Show(true);
+      st2StaticText->Show(true);
+      st3StaticText->Show(true);
+      st4StaticText->Show(false);
+
+      ResizeTextCtrl1234(); // true);
+
+      st4TextCtrl->Show(false);
+
+      st5TextCtrl->Show(false);
+      st6TextCtrl->Show(false);
+      st7TextCtrl->Show(false);
+
+      st8TextCtrl->Show(false);
+      st9TextCtrl->Show(false);
+      st10TextCtrl->Show(false);
+
+//      attUnits1->Show(true);
+//      attUnits2->Show(true);
+//      attUnits3->Show(true);
    }
-   if (attStateType == STATE_TEXT[DCM])
+   else if (attStateType == stateTypeArray[QUATERNION])
    {
-      st5TextCtrl->Enable();
-      st6TextCtrl->Enable();
-      st7TextCtrl->Enable();
-      st8TextCtrl->Enable();
-      st9TextCtrl->Enable();
-      st10TextCtrl->Enable();
+      st1StaticText->Show(true);
+      st2StaticText->Show(true);
+      st3StaticText->Show(true);
+      st4StaticText->Show(true);
+
+      ResizeTextCtrl1234(true);
+
+      st4TextCtrl->Show(true);
+
+      st5TextCtrl->Show(false);
+      st6TextCtrl->Show(false);
+      st7TextCtrl->Show(false);
+
+      st8TextCtrl->Show(false);
+      st9TextCtrl->Show(false);
+      st10TextCtrl->Show(false);
    }
-   st1TextCtrl->Enable();
+   else if (attStateType == stateTypeArray[DCM])
+   {
+      st1StaticText->Show(false);
+      st2StaticText->Show(false);
+      st3StaticText->Show(false);
+      st4StaticText->Show(false);
 
-   stateTypeRate4StaticText->Enable();
+      ResizeTextCtrl1234();
 
-   stateRateTypeComboBox->Enable();
+      st4TextCtrl->Show(false);
 
-   str1StaticText->Enable();
-   str2StaticText->Enable();
-   str3StaticText->Enable();
+      st5TextCtrl->Show(true);
+      st6TextCtrl->Show(true);
+      st7TextCtrl->Show(true);
 
-   str1TextCtrl->Enable();
-   str2TextCtrl->Enable();
-   str3TextCtrl->Enable();
+      st8TextCtrl->Show(true);
+      st9TextCtrl->Show(true);
+      st10TextCtrl->Show(true);
+   }
+   else if (attStateType == stateTypeArray[MRPS])   // Added by Dunn
+   {
+      st1StaticText->Show(true);
+      st2StaticText->Show(true);
+      st3StaticText->Show(true);
+      st4StaticText->Show(false);
 
-   rateUnits1->Enable();
-   rateUnits2->Enable();
-   rateUnits3->Enable();
+      ResizeTextCtrl1234();  //   true);
+
+      st4TextCtrl->Show(false);
+
+      st5TextCtrl->Show(false);
+      st6TextCtrl->Show(false);
+      st7TextCtrl->Show(false);
+
+      st8TextCtrl->Show(false);
+      st9TextCtrl->Show(false);
+      st10TextCtrl->Show(false);
+   }
+
+   // both rate representations show these three widgets
+   str1TextCtrl->Show(true);
+   str2TextCtrl->Show(true);
+   str3TextCtrl->Show(true);
+
+   boxSizer3->Layout();
+   Refresh();
 }
 
 //------------------------------------------------------------------------------
@@ -1252,20 +1283,24 @@ void AttitudePanel::EnableInitialAttitudeAndRate()
 /**
  * Disables the widgets.
  *
+ *@note Currently not used
  */
 //------------------------------------------------------------------------------
 void AttitudePanel::DisableAll()
 {
-   DisableInitialAttitudeAndRate();
+   HideInitialAttitudeAndRate();
 //   config1StaticText->Disable();
    config2StaticText->Disable();
 //   config3StaticText->Disable();
    config4StaticText->Disable();
+
+   // just want this one disabled, not hidden
    coordSysComboBox->Disable();
+
    config4ComboBox->Disable();
    stateTypeStaticText->Disable();
    stateTypeComboBox->Disable();
-   stateTypeRate4StaticText->Disable();
+   stateRateTypeStaticText->Disable();
    st1StaticText->Disable();
    st2StaticText->Disable();
    st3StaticText->Disable();
@@ -1300,16 +1335,18 @@ void AttitudePanel::DisableAll()
 //------------------------------------------------------------------------------
 void AttitudePanel::EnableAll()
 {
-   EnableInitialAttitudeAndRate();
 //   config1StaticText->Enable();
    config2StaticText->Enable();
 //   config3StaticText->Enable();
    config4StaticText->Enable();
+
+   // just want this one enabled - we don't show/hide this one
    coordSysComboBox->Enable();
+
    config4ComboBox->Enable();
    stateTypeStaticText->Enable();
    stateTypeComboBox->Enable();
-   stateTypeRate4StaticText->Enable();
+   stateRateTypeStaticText->Enable();
    st1StaticText->Enable();
    st2StaticText->Enable();
    st3StaticText->Enable();
@@ -1350,6 +1387,8 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
                            CreateObject(modelType, "", 0);
 
+   // Show everything that should be shown, then enable it all
+   ShowInitialAttitudeAndRate();
    EnableAll();
    if (!tmpAttitude->CSModifyAllowed())
    {
@@ -1357,7 +1396,7 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    }
    if (!tmpAttitude->SetInitialAttitudeAllowed())
    {
-      DisableInitialAttitudeAndRate();
+      HideInitialAttitudeAndRate();
    }
    if (modelType == "SpiceAttitude")
    {
@@ -1751,14 +1790,18 @@ bool AttitudePanel::DisplayEulerAngles()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234();
+      ResizeTextCtrl1234(); // true);
 
+      st1TextCtrl->Enable();
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngle1Hint")));
+      st2TextCtrl->Enable();
       st2TextCtrl->Show(true);
       st2TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngle2Hint")));
+      st3TextCtrl->Enable();
       st3TextCtrl->Show(true);
       st3TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngle3Hint")));
+      st4TextCtrl->Disable();
       st4TextCtrl->Show(false);
 
       st5TextCtrl->Show(false);
@@ -1768,6 +1811,10 @@ bool AttitudePanel::DisplayEulerAngles()
       st8TextCtrl->Show(false);
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
+
+//      attUnits1->Show(true);
+//      attUnits2->Show(true);
+//      attUnits3->Show(true);
 
       st1StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"1"));
       st2StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"2"));
@@ -1782,6 +1829,9 @@ bool AttitudePanel::DisplayEulerAngles()
       //attUnits1->Enable();
       //attUnits2->Enable();
       //attUnits3->Enable();
+//      attUnits1->SetLabel(wxT("degrees"));
+//      attUnits2->SetLabel(wxT("degrees"));
+//      attUnits3->SetLabel(wxT("degrees"));
    
       attitudeSizer->Layout();
       Refresh();
@@ -1855,6 +1905,9 @@ bool AttitudePanel::DisplayQuaternion()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
+//      attUnits1->Show(false);
+//      attUnits2->Show(false);
+//      attUnits3->Show(false);
    
       attitudeSizer->Layout();
       Refresh();
@@ -1940,6 +1993,9 @@ bool AttitudePanel::DisplayDCM()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
+//      attUnits1->Show(false);
+//      attUnits2->Show(false);
+//      attUnits3->Show(false);
    
       attitudeSizer->Layout();
       Refresh();
@@ -1981,7 +2037,7 @@ bool AttitudePanel::DisplayMRPs()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234();
+      ResizeTextCtrl1234();  //   true);
 
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("MRP1Hint")));
@@ -2012,6 +2068,9 @@ bool AttitudePanel::DisplayMRPs()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
+//      attUnits1->Show(false);
+//      attUnits2->Show(false);
+//      attUnits3->Show(false);
 
       attitudeSizer->Layout();
       Refresh();
@@ -2267,7 +2326,7 @@ bool AttitudePanel::UpdateEulerAngles()
 bool AttitudePanel::UpdateMRPs()
 {
 #ifdef DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::UpdateEulerAngles() entered\n");
+   MessageInterface::ShowMessage("AttitudePanel::UpdateMRPs() entered\n");
 #endif
    bool retval = true;
    if (attStateType == stateTypeArray[MRPS]) return true;
@@ -2321,14 +2380,21 @@ bool AttitudePanel::UpdateAngularVelocity()
    {
       try
       {
-         UpdateEulerAngles();
-         av = Attitude::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
-                        ea * GmatMathConstants::RAD_PER_DEG,
-                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
-                        * GmatMathConstants::DEG_PER_RAD;
-         // update string versions of av values
-         for (unsigned int x = 0; x < 3; ++x)
-            *angVel[x] = theGuiManager->ToWxString(av[x]);
+         retval = UpdateEulerAngles();
+         #ifdef DEBUG_ATTITUDE_PANEL
+            MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() retval = %s\n",
+                  (retval? "true" : "false"));
+         #endif
+         if (retval)
+         {
+            av = Attitude::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
+                           ea * GmatMathConstants::RAD_PER_DEG,
+                           (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
+                           * GmatMathConstants::DEG_PER_RAD;
+            // update string versions of av values
+            for (unsigned int x = 0; x < 3; ++x)
+               *angVel[x] = theGuiManager->ToWxString(av[x]);
+         }
       }
       catch (BaseException &ex)
       {
@@ -2360,14 +2426,21 @@ bool AttitudePanel::UpdateEulerAngleRates()
    {
       try
       {
-         UpdateEulerAngles();
-         ear = Attitude::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
-                         ea * GmatMathConstants::RAD_PER_DEG,
-                         (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
-                         * GmatMathConstants::DEG_PER_RAD;
-         // update string versions of av values
-            for (unsigned int x = 0; x < 3; ++x)
-               *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
+         retval = UpdateEulerAngles();
+         #ifdef DEBUG_ATTITUDE_PANEL
+            MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() retval = %s\n",
+                  (retval? "true" : "false"));
+         #endif
+         if (retval)
+         {
+            ear = Attitude::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
+                            ea * GmatMathConstants::RAD_PER_DEG,
+                            (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
+                            * GmatMathConstants::DEG_PER_RAD;
+            // update string versions of av values
+               for (unsigned int x = 0; x < 3; ++x)
+                  *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
+         }
       }
       catch (BaseException &ex)
       {

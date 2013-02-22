@@ -48,6 +48,8 @@ public:
    
 private:    
 
+   GmatStaticBoxSizer *boxSizer3;
+
    wxFlexGridSizer    *flexGridSizer2;
 
    GmatStaticBoxSizer *attitudeSizer;
@@ -59,7 +61,7 @@ private:
    wxStaticText *config4StaticText;
    
    wxStaticText *stateTypeStaticText;
-   wxStaticText *stateTypeRate4StaticText;
+   wxStaticText *stateRateTypeStaticText;
    
    wxStaticText *st1StaticText;
    wxStaticText *st2StaticText;
@@ -194,8 +196,8 @@ private:
                         bool discardEdits = false);
    bool ValidateState(const std::string which = "Both");
    
-   void DisableInitialAttitudeAndRate();
-   void EnableInitialAttitudeAndRate();
+   void HideInitialAttitudeAndRate();
+   void ShowInitialAttitudeAndRate();
    void DisableAll();
    void EnableAll();
    void DisplayDataForModel(const std::string &modelType);
