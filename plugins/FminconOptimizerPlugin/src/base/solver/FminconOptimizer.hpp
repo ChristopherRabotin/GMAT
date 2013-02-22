@@ -126,6 +126,7 @@ protected:
    
    void                 RunCdCommand(const std::string &pathName);
    void                 WriteSearchPath(const std::string &msg);
+   void                 EvalMatlabString(const std::string &evalString);
    
 public:
    // Parameter IDs

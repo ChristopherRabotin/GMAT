@@ -1523,6 +1523,58 @@ bool BranchCommand::IsExecuting()
 }
 
 //------------------------------------------------------------------------------
+// bool NeedsServerStartup()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatCommand
+ * Indicates in the engine needs to start an external process to run the command
+ * 
+ * @return true if a server needs to start, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::NeedsServerStartup()
+{
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage
+      ("BranchCommand::NeedsServerStartup() entered, this=<%p>'%s'\n", this,
+       generatingString.c_str());
+   #endif
+   
+   GmatCommand *currentPtr;
+   bool needServer = false;
+   
+   std::vector<GmatCommand*>::iterator node;
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         if (currentPtr->NeedsServerStartup())
+         {
+            needServer = true;
+            break;
+         }
+         
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+      
+      if (needServer)
+         break;
+   }
+   
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage
+      ("BranchCommand::NeedsServerStartup() returning %d\n", needServer);
+   #endif
+   
+   return needServer;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer GetCloneCount()
 //------------------------------------------------------------------------------
 /**
@@ -1645,3 +1697,5 @@ GmatBase* BranchCommand::GetUpdatedObject()
       return lastFired->GetUpdatedObject();
    return NULL;
 }
+
+

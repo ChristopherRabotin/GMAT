@@ -81,6 +81,7 @@ public:
    virtual bool            HasAFunction();
    virtual void            SetCallingFunction(FunctionManager *fm);
    virtual bool            IsExecuting();
+   virtual bool            NeedsServerStartup();
 
    virtual Integer         GetCloneCount();
    virtual GmatBase*       GetClone(Integer cloneIndex);
