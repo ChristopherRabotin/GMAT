@@ -592,6 +592,10 @@ void SolverBranchCommand::CheckForOptions(std::string &opts)
       }
       else if (option[0] == "ExitMode")
       {
+         #ifdef DEBUG_EXITMODE
+            MessageInterface::ShowMessage("Setting solvemode to %s\n",
+                  option[1].c_str());
+         #endif
          if (option[1] == "DiscardAndContinue")
             exitMode = DISCARD_AND_CONTINUE;
          else if (option[1] == "SaveAndContinue")

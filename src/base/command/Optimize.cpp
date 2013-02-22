@@ -400,6 +400,9 @@ bool Optimize::Initialize()
    if (theSolver->GetStringParameter("ReportStyle") == "Debug")
       optimizerInDebugMode = true;      
     
+   theSolver->SetStringParameter("ExitMode",
+         GetStringParameter(SOLVER_EXIT_MODE));
+
    // Set the local copy of the optimizer on each node
    std::vector<GmatCommand*>::iterator node;
    GmatCommand *currentCmd;

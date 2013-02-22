@@ -443,6 +443,11 @@ bool Solver::RefreshSolverVariables(Real *data, const std::string &name)
    if (hasFired && (exitMode == RETAIN))
       return true;
 
+   #ifdef DEBUG_SAVEANDCONTINUE
+      MessageInterface::ShowMessage("Resetting variables for %s\n",
+            instanceName.c_str());
+   #endif
+
    // Find index of the variable
    for (UnsignedInt n = 0; n < variableNames.size(); ++n)
    {
@@ -1073,6 +1078,10 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == ExitModeID) 
    {
+      #ifdef DEBUG_SOLVEANDCONTINUE
+         MessageInterface::ShowMessage("%s setting ExitMode to %s (old id %d",
+               instanceName.c_str(), value.c_str(), exitMode);
+      #endif
       if (value == "DiscardAndContinue")
          exitMode = DISCARD;
       else if (value == "SaveAndContinue")
@@ -1084,6 +1093,9 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
                   "not recognized; allowed values are {\"DiscardAndContinue\", "
                   "\"SaveAndContinue\", \"Stop\"}");
       exitModeText = value;
+      #ifdef DEBUG_SOLVEANDCONTINUE
+         MessageInterface::ShowMessage(", new id %d)\n", exitMode);
+      #endif
       return true;
    }
 
@@ -1237,6 +1249,11 @@ void Solver::CompleteInitialization()
    // Reset initial values if in DiscardAndContinue mode
    if (exitMode == DISCARD)
    {
+      #ifdef DEBUG_SAVEANDCONTINUE
+         MessageInterface::ShowMessage("%s is resetting variables\n",
+               instanceName.c_str());
+      #endif
+
       ResetVariables();
    }
 }

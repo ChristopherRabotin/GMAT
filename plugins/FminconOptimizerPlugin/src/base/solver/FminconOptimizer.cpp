@@ -947,6 +947,7 @@ void FminconOptimizer::RunComplete()
 {
    ExternalOptimizer::RunComplete();
    status = RUN;  // Enables "Apply corrections"
+   hasFired = true;
 
    WriteToTextFile();
 }
