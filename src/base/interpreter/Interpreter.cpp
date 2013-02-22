@@ -8535,6 +8535,65 @@ bool Interpreter::FinalPass()
    }
 
    //-------------------------------------------------------------------
+   // Validate membership uniqueness for Formations.
+   //-------------------------------------------------------------------
+   objList = theModerator->GetListOfObjects(Gmat::FORMATION);
+   if (objList.size() > 0)
+   {
+      StringArray f1List, f2List;
+      GmatBase *f1, *f2;
+      std::string overlaps;
+
+      // Make sure formation members are all SpaceObjects (note: Formations can
+      // contain formations)
+      for (UnsignedInt i = 0; i < objList.size(); ++i)
+      {
+         f1 = theModerator->GetConfiguredObject(objList[i]);
+         f1List = f1->GetStringArrayParameter("Add");
+
+         for (UnsignedInt j = 0; j < f1List.size(); ++j)
+         {
+            if (theModerator->GetConfiguredObject(f1List[j])->
+                  IsOfType("SpaceObject") == false)
+            {
+               overlaps += "   ";
+               overlaps += f1List[j] + " cannot propagate in the formation " +
+                           f1->GetName() + ".\n";
+            }
+         }
+      }
+
+      // Make sure the are no shared objects between Formations
+      for (UnsignedInt i = 0; i < objList.size()-1; ++i)
+      {
+         f1 = theModerator->GetConfiguredObject(objList[i]);
+         f1List = f1->GetStringArrayParameter("Add");
+         for (UnsignedInt j = i+1; j < objList.size(); ++j)
+         {
+            f2 = theModerator->GetConfiguredObject(objList[j]);
+            f2List = f2->GetStringArrayParameter("Add");
+
+            // Check member by member for overlap
+            for (UnsignedInt m = 0; m < f1List.size(); ++m)
+            {
+               if (find(f2List.begin(), f2List.end(), f1List[m])!=f2List.end())
+               {
+                  overlaps += "   ";
+                  overlaps += f1List[m] + " is in formations " + f1->GetName() +
+                              " and " + f2->GetName() + "\n";
+               }
+            }
+         }
+      }
+      if (overlaps.length() > 0)
+      {
+         InterpreterException ex("Formation errors:\n" + overlaps);
+         HandleError(ex, false);
+         retval = false;
+      }
+   }
+
+   //-------------------------------------------------------------------
    // Special case for SolverBranchCommand such as Optimize, Target,
    // we need to set Solver object to SolverBranchCommand and then
    // to all Vary commands inside. Since Vary command's parameters are
