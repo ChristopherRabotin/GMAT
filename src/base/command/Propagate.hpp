@@ -178,6 +178,8 @@ protected:
    
    /// The spacecraft and formations that are propagated
    ObjectArray                  sats;
+//   /// Flag indicating a formation was detected
+//   bool                         hasFormation;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to interpolate across

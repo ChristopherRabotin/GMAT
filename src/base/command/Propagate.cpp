@@ -139,6 +139,7 @@ Propagate::Propagate() :
    interruptCheckFrequency     (30),
    inProgress                  (false),
    epochID                     (-1),
+//   hasFormation                (false),
    stopInterval                (0.0),
    stopTrigger                 (-1),
    propAllSTMs                 (false),
@@ -255,6 +256,7 @@ Propagate::Propagate(const Propagate &prp) :
    interruptCheckFrequency     (prp.interruptCheckFrequency),
    inProgress                  (false),
    epochID                     (prp.epochID),
+//   hasFormation                (prp.hasFormation),
    stopInterval                (0.0),
    stopTrigger                 (-1),
    stopSatNames                (prp.stopSatNames),
@@ -322,6 +324,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    inProgress              = false;
    hasFired                = false;
    epochID                 = prp.epochID;
+//   hasFormation            = prp.hasFormation;
    objectArray             = prp.objectArray;
    elapsedTime             = prp.elapsedTime;
    currEpoch               = prp.currEpoch;
@@ -2889,6 +2892,51 @@ bool Propagate::Initialize()
       propagators.clear();
       p.clear();
       fm.clear();
+   }
+
+   // Check uniqueness of objects we propagate
+   StringArray fullSatList;
+
+   // Only do this if the command has a formation -- can't do this here, but
+   // kept in code so that it can be addressed at refactoring
+   // if (hasFormation)
+   {
+      for (UnsignedInt i = 0; i < satName.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < satName[i]->size(); ++j)
+         {
+            std::string scName = satName[i]->at(j);
+            if ((mapObj = FindObject(scName)) != NULL)
+            {
+               if (mapObj->IsOfType(Gmat::SPACECRAFT))
+                  fullSatList.push_back(scName);
+               else  // It's a formation
+               {
+                  // Note: we do not recurse nested formations at this time
+                  StringArray formSats = mapObj->GetStringArrayParameter("Add");
+                  for (UnsignedInt k = 0; k < formSats.size(); ++k)
+                     fullSatList.push_back(formSats[k]);
+               }
+            }
+         }
+      }
+      // Now check uniqueness
+      std::string repeats;
+      for (StringArray::iterator i = fullSatList.begin(); i < fullSatList.end(); ++i)
+      {
+         StringArray::iterator j = i+1;
+         if (find(j, fullSatList.end(), *i) != fullSatList.end())
+         {
+            if (repeats.length() > 0)
+               repeats += ", ";
+            repeats += (*i);
+         }
+      }
+      if (repeats.length() > 0)
+         throw CommandException("Duplicate Spacecraft [" + repeats +
+               "] found in the Propagate command:\n   \"" +
+               GetGeneratingString(Gmat::NO_COMMENTS) +
+               "\"\nCheck spacecraft in Formations for repeated members");
    }
 
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
