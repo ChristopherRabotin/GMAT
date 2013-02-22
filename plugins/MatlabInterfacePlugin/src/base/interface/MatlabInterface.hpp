@@ -104,7 +104,6 @@ private:
    Engine *enginePtr;   
    std::map<std::string, Engine*> matlabEngineMap;
    std::string lastEngineName;
-   std::string message;
    std::string callingObjectName;
    Integer accessCount;
    Integer matlabMode;

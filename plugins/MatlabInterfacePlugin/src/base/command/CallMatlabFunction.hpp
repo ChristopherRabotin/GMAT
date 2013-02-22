@@ -55,7 +55,9 @@ protected:
    void ClearInputParameters();
    void ClearOutputParameters();
    void UpdateObject(GmatBase *obj, char *buffer);
-   
+   void HandleError(double **outArray, std::string &errMsg, Integer numRows,
+                    Integer numCols, Integer numRowsReceived,
+                    Integer numColsReceived);
 };
 
 #endif // CallMatlabFunction_hpp

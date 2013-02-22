@@ -116,7 +116,11 @@ int MatlabInterface::Open(const std::string &name)
       return OpenSharedEngine();
    else
    {
-      message = "matlab mode is invalid, expecting 20 or 21";
+      #ifdef DEBUG_OPEN_CLOSE
+      MessageInterface::ShowMessage
+         ("MatlabInterface::Open() name='%s', returning 0, matlab mode is invalid, "
+          "expecting 20 or 21\n");
+      #endif
       return 0;
    }
    
@@ -154,7 +158,11 @@ int MatlabInterface::Close(const std::string &name)
       return CloseSharedEngine();
    else
    {
-      message = "matlab mode is invalid, expecting 20 or 21";
+      #ifdef DEBUG_OPEN_CLOSE
+      MessageInterface::ShowMessage
+         ("MatlabInterface::Close() name='%s', returning 0, matlab mode is invalid, "
+          "expecting 20 or 21\n");
+      #endif
       return 0;
    }
    
@@ -534,28 +542,47 @@ char* MatlabInterface::GetOutputBuffer()
 //------------------------------------------------------------------------------
 bool MatlabInterface::IsOpen(const std::string &name)
 {
+   #ifdef DEBUG_MATLAB_OPEN_CLOSE
+   MessageInterface::ShowMessage
+      ("MatlabInterface::IsOpen() entered, name='%s', matlabMode=%d, enginePtr=<%p>\n",
+       name.c_str(), matlabMode, enginePtr);
+   #endif
+   
+   bool isOpen = false;
    if (matlabMode == SINGLE_USE)
    {
       if (name != "")
       {
          std::map<std::string, Engine*>::iterator pos = matlabEngineMap.find(name);
          if (pos == matlabEngineMap.end())
-            return false;
+            //return false;
+            isOpen = false;
          else
-            return true;
+            //return true;
+            isOpen = true;
       }
       else
       {
          if (matlabEngineMap.empty())
-            return false;
+            //return false;
+            isOpen = false;
          else
-            return true;
+            //return true;
+            isOpen = true;
       }
    }
    else
    {
-      return (MatlabInterface::enginePtr != NULL);
+      //return (MatlabInterface::enginePtr != NULL);
+      isOpen = (MatlabInterface::enginePtr != NULL);
    }
+   
+   #ifdef DEBUG_MATLAB_OPEN_CLOSE
+   MessageInterface::ShowMessage
+      ("MatlabInterface::IsOpen() returning %d\n", isOpen);
+   #endif
+   
+   return isOpen;
 }
 
 
@@ -781,7 +808,6 @@ int MatlabInterface::OpenEngineOnMac()
    
    if (enginePtr == NULL)
       MessageInterface::ShowMessage("Please wait while MATLAB engine opens...\n");
-      message = "Please wait while MATLAB engine opens...\n";
    
    /// Check if MATLAB engine is still running then doesn't need to re-launch
    if (enginePtr != NULL)
@@ -819,7 +845,6 @@ int MatlabInterface::OpenEngineOnMac()
       MessageInterface::ShowMessage(
                "Successfully opened MATLAB engine using startcmd \"%s\"\n",
                runString.c_str());
-      message = "Successfully opened MATLAB engine using startcmd " + runString + "\n";
       
       accessCount++;
       if (debugMatlabEngine)
@@ -836,7 +861,6 @@ int MatlabInterface::OpenEngineOnMac()
       MessageInterface::ShowMessage(
                "Failed to open MATLAB engine using startcmd \"%s\"\n",
                runString.c_str());
-      message = "Failed to open MATLAB engine using startcmd " + runString + "\n";
       return 0;
    }
 #else
@@ -893,13 +917,11 @@ int MatlabInterface::CloseEngineOnMac()
       {
          retval = 1;
          MessageInterface::ShowMessage("MATLAB engine successfully closed\n");
-         message = "MATLAB engine successfully closed\n";
       }
       else
       {
          retval = 0;;
          MessageInterface::ShowMessage("\nError closing MATLAB\n");
-         message = "\nError closing MATLAB\n";
       }
       
       enginePtr = NULL;      // set to NULL, so it can be reopened
@@ -937,8 +959,6 @@ int MatlabInterface::OpenSharedEngine()
    if (enginePtr == NULL)
    {
       MessageInterface::ShowMessage("Please wait while MATLAB engine opens...\n");
-      // This message is useless since it will be overwritten by the next message.
-      //message = "Please wait while MATLAB engine opens...\n";
    }
    else
    {
@@ -967,7 +987,6 @@ int MatlabInterface::OpenSharedEngine()
       // set precision to long
       EvalString("format long");
       MessageInterface::ShowMessage("MATLAB engine successfully opened\n");
-      message = "MATLAB engine successfully opened\n";
       if (debugMatlabEngine)
          MessageInterface::ShowMessage
             ("MatlabInterface::OpenSharedEngine() returning 1\n");;
@@ -976,7 +995,6 @@ int MatlabInterface::OpenSharedEngine()
    else
    {
       MessageInterface::ShowMessage("Failed to open MATLAB engine ...\n");
-      message = "Failed to open MATLAB engine ...\n";
       if (debugMatlabEngine)
          MessageInterface::ShowMessage
             ("MatlabInterface::OpenSharedEngine() returning 0\n");;
@@ -996,6 +1014,11 @@ int MatlabInterface::OpenSharedEngine()
 //------------------------------------------------------------------------------
 int MatlabInterface::CloseSharedEngine()
 {
+   #ifdef DEBUG_MATLAB_OPEN_CLOSE
+   MessageInterface::ShowMessage
+      ("MatlabInterface::CloseSharedEngine() entered, enginePtr=<%p>\n", enginePtr);
+   #endif
+   
    int retval = 0; // set to failed
    
    // Check if MATLAB engine is still running then close it.
@@ -1026,13 +1049,11 @@ int MatlabInterface::CloseSharedEngine()
       {
          retval = 1;
          MessageInterface::ShowMessage("MATLAB engine successfuly closed\n");
-         message = "MATLAB engine successfuly closed\n";
       }
       else
       {
          retval = 0;
-         MessageInterface::ShowMessage("\nError closing MATLAB\n");
-         message = "\nError closing MATLAB\n";
+         MessageInterface::ShowMessage("Error closing MATLAB\n");
       }
       
       enginePtr = NULL; // set to NULL, so it can be reopened
@@ -1047,6 +1068,10 @@ int MatlabInterface::CloseSharedEngine()
       }
    }
    
+   #ifdef DEBUG_MATLAB_OPEN_CLOSE
+   MessageInterface::ShowMessage
+      ("MatlabInterface::CloseSharedEngine() returning retval=%d\n", retval);
+   #endif
    return retval;
 }
 
@@ -1124,7 +1149,6 @@ int MatlabInterface::OpenSingleEngine(const std::string &name)
    {
       MessageInterface::ShowMessage
          ("Failed to open MATLAB engine for single use...\n");
-      message = "Failed to open MATLAB engine for single use...\n";
       if (debugMatlabEngine)
          MessageInterface::ShowMessage
             ("MatlabInterface::OpenSingleEngine() returning 0\n");
@@ -1144,7 +1168,6 @@ int MatlabInterface::OpenSingleEngine(const std::string &name)
    EvalString("format long");
    MessageInterface::ShowMessage
       ("MATLAB engine '%s' successfully opened\n", lastEngineName.c_str());
-   message = "MATLAB engine " + lastEngineName + " successfully opened\n";
    
    if (debugMatlabEngine)
       MessageInterface::ShowMessage
@@ -1185,22 +1208,19 @@ int MatlabInterface::CloseSingleEngine(const std::string &name)
          {
             MessageInterface::ShowMessage
                ("MATLAB engine '%s' successfully closed\n", name.c_str());
-            message = "MATLAB engine " + name + " successfully closed\n";
             matlabEngineMap.erase(pos);
          }
          else
          {
             failedToClose = true;
             MessageInterface::ShowMessage
-               ("\nError closing MATLAB engine '%s'\n", name.c_str());
-            message = "\nError closing MATLAB engine " + name + "\n";
+               ("Error closing MATLAB engine '%s'\n", name.c_str());
          }
       }
       else
       {
          MessageInterface::ShowMessage
-            ("\nError closing MATLAB engine '%s'\n", name.c_str());
-         message = "\nError closing MATLAB engine " + name + "\n";
+            ("Error closing MATLAB engine '%s'\n", name.c_str());
       }
    }
    else
@@ -1221,14 +1241,12 @@ int MatlabInterface::CloseSingleEngine(const std::string &name)
          {
             MessageInterface::ShowMessage
                ("MATLAB engine '%s' successfully closed\n", (pos->first).c_str());
-            message = "MATLAB engine " + pos->first + " successfully closed\n";
          }
          else
          {
             failedToClose = true;
             MessageInterface::ShowMessage
-               ("\nError closing MATLAB engine '%s'\n", (pos->first).c_str());
-            message = "\nError closing MATLAB engine " + pos->first + "\n";
+               ("Error closing MATLAB engine '%s'\n", (pos->first).c_str());
          }
       }
       
