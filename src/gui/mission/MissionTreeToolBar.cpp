@@ -337,13 +337,6 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
 {
    int eventId = event.GetId();
    
-   if (eventId == mLastLevelClicked)
-   {
-      // stay toggled on
-      ToggleTool(eventId, true);
-      return;
-   }
-   
    mLastLevelClicked = eventId;
    int viewLevel = 0;
    
@@ -375,6 +368,7 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
    ResetMissionTreeIncludeCategory();
    ResetMissionTreeExcludeCategory();
    mMissionTree->SetViewLevel(viewLevel);
+
 }
 
 
