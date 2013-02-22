@@ -960,6 +960,11 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
       }
    case ORBIT_COLOR:
    case TARGET_COLOR:
+      #if DBGLVL_PARAM_STRING
+      MessageInterface::ShowMessage
+         ("   Setting ORBIT_COLOR or TARGET_COLOR, value='%s'\n", value.c_str());
+      #endif
+      
       if (value[0] == '[')
          PutUnsignedIntValue(id, value);
       return true;
@@ -1057,8 +1062,8 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
 {
    #if DBGLVL_PARAM
    MessageInterface::ShowMessage
-      ("OrbitPlot::SetUnsignedIntParameter() this=%s\n   id=%d, value=%u<%08x>, index=%d, "
-       "mAllSpCount=%d, mOrbitColorArray.size()=%d, mTargetColorArray.size()=%d\n",
+      ("OrbitPlot::SetUnsignedIntParameter() entered, this=<%p>'%s'\n   id=%d, value=%u<%08x>, index=%d, "
+       "mAllSpCount=%d, mOrbitColorArray.size()=%d, mTargetColorArray.size()=%d\n", this,
        instanceName.c_str(), id, value, value, index, mAllSpCount, mOrbitColorArray.size(),
        mTargetColorArray.size());
    #endif
@@ -1068,6 +1073,9 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
    case ORBIT_COLOR:
       {
          Integer size = mAllSpNameArray.size();
+         #if DBGLVL_PARAM
+         MessageInterface::ShowMessage("   mAllSpNameArray.size()=%d\n", size);
+         #endif
          if (index >= size)
             throw SubscriberException
                ("index out of bounds for " + GetParameterText(id));
@@ -1077,16 +1085,23 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
             if (index == i)
                mOrbitColorMap[mAllSpNameArray[i]] = value;
             
-            if (index < size)
+            if (index >= 0 && index < size)
                mOrbitColorArray[index] = value;
             else
                mOrbitColorArray.push_back(value);
          }
+         #if DBGLVL_PARAM
+         MessageInterface::ShowMessage
+            ("OrbitPlot::SetUnsignedIntParameter() returning %u\n", value);
+         #endif
          return value;
       }
    case TARGET_COLOR:
       {
          Integer size = mAllSpNameArray.size();
+         #if DBGLVL_PARAM
+         MessageInterface::ShowMessage("   mAllSpNameArray.size()=%d\n", size);
+         #endif
          if (index >= size)
             throw SubscriberException
                ("index out of bounds for " + GetParameterText(id));
@@ -1096,14 +1111,24 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
             if (index == i)
                mTargetColorMap[mAllSpNameArray[i]] = value;
             
-            if (index < size)
+            if (index >= size && index < size)
                mTargetColorArray[index] = value;
             else
                mTargetColorArray.push_back(value);
          }
+         #if DBGLVL_PARAM
+         MessageInterface::ShowMessage
+            ("OrbitPlot::SetUnsignedIntParameter() returning %u\n", value);
+         #endif
+         
          return value;
       }
    default:
+      #if DBGLVL_PARAM
+      MessageInterface::ShowMessage
+         ("OrbitPlot::SetUnsignedIntParameter() returning output from "
+          "Subscriber::SetUnsignedIntParameter()\n");
+      #endif
       return Subscriber::SetUnsignedIntParameter(id, value, index);
    }
 }
