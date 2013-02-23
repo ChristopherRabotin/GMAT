@@ -194,7 +194,7 @@ private:
    bool IsStateModified(const std::string which = "Both");
    void ResetStateFlags(const std::string which = "Both",
                         bool discardEdits = false);
-   bool ValidateState(const std::string which = "Both");
+   bool ValidateState(const std::string which = "Both", bool checkForSingularity = false);
    
    void HideInitialAttitudeAndRate();
    void ShowInitialAttitudeAndRate();
@@ -266,6 +266,10 @@ private:
    
    static const Integer ATTITUDE_TEXT_CTRL_WIDTH;
    static const Integer QUATERNION_TEXT_CTRL_WIDTH;
+
+   /// @todo these should come from the Attitude class or GmatConstants
+   static const Real    EULER_ANGLE_TOLERANCE;
+   static const Real    DCM_ORTHONORMALITY_TOLERANCE;
 
 };
 #endif

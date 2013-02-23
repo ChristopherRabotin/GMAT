@@ -1007,11 +1007,21 @@ Rvector3 Attitude::ToEulerAngleRates(const Rvector3 &angularVel,
                "...... singularity found!!!\n");
       #endif
       std::stringstream errmsg;
-      errmsg << "Error: the attitude defined by the euler angles (";
+//      errmsg << "Error: the attitude defined by the euler angles (";
+//      errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
+//             << (eulerAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
+//             << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
+//      errmsg << ") is near a singularity." << std::endl;
+//      throw AttitudeException(errmsg.str());
+      errmsg << "The attitude defined by the input euler angles (";
       errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
              << (eulerAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
              << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
-      errmsg << ") is near a singularity." << std::endl;
+      errmsg << ") is near a singularity.  The allowed values are:\n";
+      errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+      errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+      errmsg << "The tolerance on EulerAngle2 singularity is ";
+      errmsg << EULER_ANGLE_TOLERANCE << ".\n";
       throw AttitudeException(errmsg.str());
    }
    #ifdef DEBUG_EULER_ANGLE_RATES
@@ -1306,6 +1316,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    refCSName               ("EarthMJ2000Eq"),
    refCS                   (NULL),
    eulerSequence           ("321"),  // Dunn Changed from 312 to 321
+   dcm                     (Rmatrix33(true)),
    attitudeTime            (0.0),
    quaternion              (Rvector(4,0.0,0.0,0.0,1.0)),
    attitudeModelName       (""),
@@ -2544,10 +2555,19 @@ Real Attitude::SetRealParameter(const Integer id,
           (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
       {
          std::ostringstream errmsg;
-         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
+//                << value << ", " << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
+//         errmsg << ") is near a singularity." << std::endl;
+//         throw AttitudeException(errmsg.str());
+         errmsg << "The attitude defined by the input euler angles (";
          errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
                 << value << ", " << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
-         errmsg << ") is near a singularity." << std::endl;
+         errmsg << ") is near a singularity.  The allowed values are:\n";
+         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+         errmsg << "The tolerance on EulerAngle2 singularity is ";
+         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
          throw AttitudeException(errmsg.str());
       }
       // check for a nearly singular attitude, for non-symmetric sequences
@@ -2555,10 +2575,19 @@ Real Attitude::SetRealParameter(const Integer id,
                (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
       {
          std::ostringstream errmsg;
-         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
+//                << value << ", " << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
+//         errmsg << ") is near a singularity." << std::endl;
+//         throw AttitudeException(errmsg.str());
+         errmsg << "The attitude defined by the input euler angles (";
          errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
                 << value << ", " << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
-         errmsg << ") is near a singularity." << std::endl;
+         errmsg << ") is near a singularity.  The allowed values are:\n";
+         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+         errmsg << "The tolerance on EulerAngle2 singularity is ";
+         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
          throw AttitudeException(errmsg.str());
       }
       (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
@@ -2890,9 +2919,18 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
              (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
          {
             std::ostringstream errmsg;
-            errmsg << "Error: the attitude defined by the input euler angles (";
-            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
-            errmsg << ") is near a singularity." << std::endl;
+//            errmsg << "Error: the attitude defined by the input euler angles (";
+//            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
+//            errmsg << ") is near a singularity." << std::endl;
+//            throw AttitudeException(errmsg.str());
+            errmsg << "The attitude defined by the input euler angles (";
+            errmsg << (eulerAngles(0)) << ", "
+                   << value << ", " << (eulerAngles(2));
+            errmsg << ") is near a singularity.  The allowed values are:\n";
+            errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+            errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+            errmsg << "The tolerance on EulerAngle2 singularity is ";
+            errmsg << EULER_ANGLE_TOLERANCE << ".\n";
             throw AttitudeException(errmsg.str());
          }
          // check for a nearly singular attitude, for non-symmetric sequences
@@ -2900,9 +2938,18 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
                   (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
          {
             std::ostringstream errmsg;
-            errmsg << "Error: the attitude defined by the input euler angles (";
-            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
-            errmsg << ") is near a singularity." << std::endl;
+//            errmsg << "Error: the attitude defined by the input euler angles (";
+//            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
+//            errmsg << ") is near a singularity." << std::endl;
+//            throw AttitudeException(errmsg.str());
+            errmsg << "The attitude defined by the input euler angles (";
+            errmsg << (eulerAngles(0)) << ", "
+                   << value << ", " << (eulerAngles(2));
+            errmsg << ") is near a singularity.  The allowed values are:\n";
+            errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+            errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+            errmsg << "The tolerance on EulerAngle2 singularity is ";
+            errmsg << EULER_ANGLE_TOLERANCE << ".\n";
             throw AttitudeException(errmsg.str());
          }
       }
@@ -3144,9 +3191,18 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
           (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
       {
          std::ostringstream errmsg;
-         errmsg << "Error: the attitude defined by the input euler angles (";
-         errmsg << value(0) << ", " << value(1) << ", " << value(2);
-         errmsg << ") is near a singularity." << std::endl;
+//         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << value(0) << ", " << value(1) << ", " << value(2);
+//         errmsg << ") is near a singularity." << std::endl;
+//         throw AttitudeException(errmsg.str());
+         errmsg << "The attitude defined by the input euler angles (";
+         errmsg << value(0) << ", "
+                << value(1) << ", " << value(2);
+         errmsg << ") is near a singularity.  The allowed values are:\n";
+         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+         errmsg << "The tolerance on EulerAngle2 singularity is ";
+         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
          throw AttitudeException(errmsg.str());
       }
       // check for a nearly singular attitude, for non-symmetric sequences
@@ -3154,9 +3210,18 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
                (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
       {
          std::ostringstream errmsg;
-         errmsg << "Error: the attitude defined by the input euler angles (";
-         errmsg << value(0) << ", " << value(1) << ", " << value(2);
-         errmsg << ") is near a singularity." << std::endl;
+//         errmsg << "Error: the attitude defined by the input euler angles (";
+//         errmsg << value(0) << ", " << value(1) << ", " << value(2);
+//         errmsg << ") is near a singularity." << std::endl;
+//         throw AttitudeException(errmsg.str());
+         errmsg << "The attitude defined by the input euler angles (";
+         errmsg << value(0) << ", "
+                << value(1) << ", " << value(2);
+         errmsg << ") is near a singularity.  The allowed values are:\n";
+         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+         errmsg << "The tolerance on EulerAngle2 singularity is ";
+         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
          throw AttitudeException(errmsg.str());
       }
       for (i=0;i<3;i++) 

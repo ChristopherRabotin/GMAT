@@ -43,6 +43,7 @@
 //#define DEBUG_ATTITUDE_PANEL 1
 //#define DEBUG_ATTITUDE_SAVE
 //#define DEBUG_ATTITUDE_RATE
+//#define DEBUG_ATTITUDE_PANEL_DCM
 
 //------------------------------------------------------------------------------
 // static data
@@ -68,6 +69,9 @@ const Integer AttitudePanel::STARTUP_RATE_STATE_TYPE_SELECTION = EULER_ANGLE_RAT
 
 const Integer AttitudePanel::ATTITUDE_TEXT_CTRL_WIDTH          = 80;
 const Integer AttitudePanel::QUATERNION_TEXT_CTRL_WIDTH        = 148;
+
+const Real    AttitudePanel::EULER_ANGLE_TOLERANCE             = 1.0E-10;
+const Real    AttitudePanel::DCM_ORTHONORMALITY_TOLERANCE      = 1.0e-14;
 
 //------------------------------
 // event tables for wxWindows
@@ -930,7 +934,8 @@ void AttitudePanel::ResetStateFlags(const std::string which,
 }
 
 //------------------------------------------------------------------------------
-// bool ValidateState(const std::string which = "Both")
+// bool ValidateState(const std::string which = "Both",
+//                    bool checkForSingularity = false)
 //------------------------------------------------------------------------------
 /**
  * Validates the state specified.
@@ -940,10 +945,14 @@ void AttitudePanel::ResetStateFlags(const std::string which,
  * @return is the state specified valid?
  */
 //------------------------------------------------------------------------------
-bool AttitudePanel::ValidateState(const std::string which)
+bool AttitudePanel::ValidateState(const std::string which,
+                                  bool checkForSingularity)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::ValidateState() entered\n");
+      MessageInterface::ShowMessage("which = %s,   checkForSingularity = %s\n",
+            which.c_str(), (checkForSingularity? "true" : "false"));
+      MessageInterface::ShowMessage("attStateType = %s\n", attStateType.c_str());
    #endif
    bool retval = true;
    std::string strVal;
@@ -952,30 +961,63 @@ bool AttitudePanel::ValidateState(const std::string which)
    {
       if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         if (eaModified[0])
+         if (eaModified[0] || checkForSingularity)
          {
             strVal = st1TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "Euler Angle 1", "Real Number"))
                retval = false;
             else  ea[0] = tmpVal;
          }
-         if (eaModified[1]) 
+         if (eaModified[1] || checkForSingularity)
          {
             strVal = st2TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "Euler Angle 2", "Real Number"))
                retval = false;
             else  ea[1] = tmpVal;
          }
-         if (eaModified[2])
+         if (eaModified[2] || checkForSingularity)
          {
             strVal = st3TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "Euler Angle 3", "Real Number"))
                retval = false;
             else  ea[2] = tmpVal;
          }
+         if (retval && checkForSingularity)
+         {
+            Real ea2 = ea[1];
+            while (ea2 <= -360.0) ea2 += 360.0;
+            while (ea2 >=  360.0) ea2 -= 360.0;
+            Real ea2Radians = ea2 * GmatMathConstants::RAD_PER_DEG;
+            std::string eseq = config4ComboBox->GetValue().c_str();
+            UnsignedIntArray eseqInt = Attitude::ExtractEulerSequence(eseq);
+            if (((eseqInt[0] == eseqInt[2]) && GmatMathUtil::Abs(GmatMathUtil::Sin(ea2Radians)) < EULER_ANGLE_TOLERANCE) ||
+                ((eseqInt[0] != eseqInt[2]) && GmatMathUtil::Abs(GmatMathUtil::Cos(ea2Radians)) < EULER_ANGLE_TOLERANCE))
+            {
+               std::stringstream errmsg;
+               errmsg << "The attitude defined by the euler angles (";
+               errmsg << ea(0) << ", " << ea(1) << ", " << ea(2);
+               errmsg << ") is near a singularity.  The allowed values are:\n";
+               errmsg << "For a symmetric sequence, EulerAngle2 != 0\n";
+               errmsg << "For a non-symmetric sequence, EulerAngle2 != 90\n";
+               errmsg << "The tolerance on EulerAngle2 singularity is ";
+               errmsg << EULER_ANGLE_TOLERANCE << ".\n";
+               MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.str());
+               retval = false;
+            }
+         }
       }
       else if (attStateType == stateTypeArray[QUATERNION])
       {
+         #ifdef DEBUG_ATTITUDE_PANEL
+            MessageInterface::ShowMessage("   qModified[0] = %s\n",
+                  (qModified[0]? "true" : "false"));
+            MessageInterface::ShowMessage("   qModified[1] = %s\n",
+                  (qModified[1]? "true" : "false"));
+            MessageInterface::ShowMessage("   qModified[2] = %s\n",
+                  (qModified[2]? "true" : "false"));
+            MessageInterface::ShowMessage("   qModified[3] = %s\n",
+                  (qModified[3]? "true" : "false"));
+         #endif
          if (qModified[0])
          {
             strVal = st1TextCtrl->GetValue();
@@ -1004,6 +1046,10 @@ bool AttitudePanel::ValidateState(const std::string which)
                retval = false;
             else  q[3] = tmpVal;
          }
+         #ifdef DEBUG_ATTITUDE_PANEL
+            MessageInterface::ShowMessage("at end of quaternion check, retval = %s\n",
+                  (retval? "true" : "false"));
+         #endif
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
@@ -1031,71 +1077,108 @@ bool AttitudePanel::ValidateState(const std::string which)
       }
       else if (attStateType == stateTypeArray[DCM])
       {
-         if (dcmatModified[0])
+         if (dcmatModified[0] || checkForSingularity)
          {
             strVal = st1TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 1,1", "Real Number"))
                retval = false;
             else  dcmat(0,0) = tmpVal;
          }
-         if (dcmatModified[1])
+         if (dcmatModified[1] || checkForSingularity)
          {
             strVal = st5TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 1,2", "Real Number"))
                retval = false;
             else  dcmat(0,1) = tmpVal;
          }
-         if (dcmatModified[2])
+         if (dcmatModified[2] || checkForSingularity)
          {
             strVal = st8TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 1,3", "Real Number"))
                retval = false;
             else  dcmat(0,2) = tmpVal;
          }
-         if (dcmatModified[3])
+         if (dcmatModified[3] || checkForSingularity)
          {
             strVal = st2TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 2,1", "Real Number"))
                retval = false;
             else  dcmat(1,0) = tmpVal;
          }
-         if (dcmatModified[4])
+         if (dcmatModified[4] || checkForSingularity)
          {
             strVal = st6TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 2,2", "Real Number"))
                retval = false;
             else  dcmat(1,1) = tmpVal;
          }
-         if (dcmatModified[5])
+         if (dcmatModified[5] || checkForSingularity)
          {
             strVal = st9TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 2,3", "Real Number"))
                retval = false;
             else  dcmat(1,2) = tmpVal;
          }
-         if (dcmatModified[6])
+         if (dcmatModified[6] || checkForSingularity)
          {
             strVal = st3TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 3,1", "Real Number"))
                retval = false;
             else  dcmat(2,0) = tmpVal;
          }
-         if (dcmatModified[7])
+         if (dcmatModified[7] || checkForSingularity)
          {
             strVal = st7TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 3,2", "Real Number"))
                retval = false;
             else  dcmat(2,1) = tmpVal;
          }
-         if (dcmatModified[8])
+         if (dcmatModified[8] || checkForSingularity)
          {
             strVal = st10TextCtrl->GetValue();
             if (!theScPanel->CheckReal(tmpVal, strVal, "DCM 3,3", "Real Number"))
                retval = false;
             else  dcmat(2,2) = tmpVal;
          }
+         #ifdef DEBUG_ATTITUDE_PANEL_DCM
+            MessageInterface::ShowMessage("in AttitudePanel::ValidateState()\n");
+            MessageInterface::ShowMessage("dcmat = %s\n",dcmat.ToString().c_str());
+         #endif
+         if (retval && checkForSingularity)
+         {
+            if (!dcmat.IsOrthogonal(DCM_ORTHONORMALITY_TOLERANCE))
+            {
+               std::ostringstream errmsg;
+               errmsg << "The value [";
+               errmsg << dcmat(0,0) << " " << dcmat(0,1) << " " << dcmat(0,2) << " ";
+               errmsg << dcmat(1,0) << " " << dcmat(1,1) << " " << dcmat(1,2) << " ";
+               errmsg << dcmat(2,0) << " " << dcmat(2,1) << " " << dcmat(2,2);
+               errmsg << "] for a cosine matrix is not an allowed value." << std::endl;
+               errmsg << "The allowed values are: [orthogonal matrix].\n";
+               errmsg << "The tolerance on orthonormality is ";
+               errmsg << DCM_ORTHONORMALITY_TOLERANCE << ".\n";
+               MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.str());
+               retval = false;
+            }
+            for (unsigned int ii = 0; ii < 3; ii++)
+            {
+               for (unsigned int jj = 0; jj < 3; jj++)
+               {
+                  if ((dcmat(ii,jj) < -1.0 - GmatRealConstants::REAL_EPSILON) ||
+                      (dcmat(ii,jj) >  1.0 + GmatRealConstants::REAL_EPSILON))
+                  {
+                     std::ostringstream errmsg;
+                     errmsg << "The value \"";
+                     errmsg << dcmat(ii,jj);
+                     errmsg << "\" for cosine matrix element \"DCM" << ii + 1 << jj + 1 << "\" is not an allowed value.\n";
+                     errmsg << "The allowed values are: [-1.0 <= Real Number <= 1.0].\n";
+                     MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.str());
+                     retval = false;
+                  }
+               }
+            }
+         }
       }
-
    }
    if ((which == "Rate") || (which == "Both"))
    {
@@ -1674,11 +1757,11 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
    #endif
    std::string newStateType = stateTypeComboBox->GetStringSelection().c_str();
    if (newStateType == attStateType) return;
-   if (!ValidateState("State"))
+   if (!ValidateState("State", true))
    {
       stateTypeComboBox->SetValue(wxT(attStateType.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
-         "Please enter valid value before changing the Attitude State Type\n");
+         "Please enter valid value(s) before changing the Attitude State Type\n");
      return;
    }
    
@@ -1729,11 +1812,11 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
       stateRateTypeComboBox->GetStringSelection().c_str();
       if (newStateRateType == attRateStateType) return;
       
-   if (!ValidateState("Both"))
+   if (!ValidateState("Both", true))
    {
       stateRateTypeComboBox->SetValue(wxT(attRateStateType.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
-         "Please enter valid value before changing the Attitude Rate State Type\n");
+         "Please enter valid value(s) before changing the Attitude Rate State Type\n");
      return;
    }
   
@@ -1874,12 +1957,16 @@ bool AttitudePanel::DisplayQuaternion()
       ResizeTextCtrl1234(true);
 
       st1TextCtrl->Show(true);
+      st1TextCtrl->Enable(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("Quaternion1Hint")));
       st2TextCtrl->Show(true);
+      st2TextCtrl->Enable(true);
       st2TextCtrl->SetToolTip(pConfig->Read(_T("Quaternion2Hint")));
       st3TextCtrl->Show(true);
+      st3TextCtrl->Enable(true);
       st3TextCtrl->SetToolTip(pConfig->Read(_T("Quaternion3Hint")));
       st4TextCtrl->Show(true);
+      st4TextCtrl->Enable(true);
       st4TextCtrl->SetToolTip(pConfig->Read(_T("Quaternion4Hint")));
 
       st5TextCtrl->Show(false);
@@ -1952,25 +2039,34 @@ bool AttitudePanel::DisplayDCM()
       ResizeTextCtrl1234();
 
       st1TextCtrl->Show(true);
+      st1TextCtrl->Enable(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("DCM1Hint")));
       st2TextCtrl->Show(true);
+      st2TextCtrl->Enable(true);
       st2TextCtrl->SetToolTip(pConfig->Read(_T("DCM2Hint")));
       st3TextCtrl->Show(true);
+      st3TextCtrl->Enable(true);
       st3TextCtrl->SetToolTip(pConfig->Read(_T("DCM3Hint")));
       st4TextCtrl->Show(false);
 
       st5TextCtrl->Show(true);
+      st5TextCtrl->Enable(true);
       st5TextCtrl->SetToolTip(pConfig->Read(_T("DCM5Hint")));
       st6TextCtrl->Show(true);
+      st6TextCtrl->Enable(true);
       st6TextCtrl->SetToolTip(pConfig->Read(_T("DCM6Hint")));
       st7TextCtrl->Show(true);
+      st7TextCtrl->Enable(true);
       st7TextCtrl->SetToolTip(pConfig->Read(_T("DCM7Hint")));
 
       st8TextCtrl->Show(true);
+      st8TextCtrl->Enable(true);
       st8TextCtrl->SetToolTip(pConfig->Read(_T("DCM8Hint")));
       st9TextCtrl->Show(true);
+      st9TextCtrl->Enable(true);
       st9TextCtrl->SetToolTip(pConfig->Read(_T("DCM9Hint")));
       st10TextCtrl->Show(true);
+      st10TextCtrl->Enable(true);
       st10TextCtrl->SetToolTip(pConfig->Read(_T("DCM10Hint")));
 
       st1StaticText->SetLabel(wxT(""));
@@ -2040,10 +2136,13 @@ bool AttitudePanel::DisplayMRPs()
       ResizeTextCtrl1234();  //   true);
 
       st1TextCtrl->Show(true);
+      st1TextCtrl->Enable(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("MRP1Hint")));
       st2TextCtrl->Show(true);
+      st2TextCtrl->Enable(true);
       st2TextCtrl->SetToolTip(pConfig->Read(_T("MRP2Hint")));
       st3TextCtrl->Show(true);
+      st3TextCtrl->Enable(true);
       st3TextCtrl->SetToolTip(pConfig->Read(_T("MRP3Hint")));
       st4TextCtrl->Show(false);
 
