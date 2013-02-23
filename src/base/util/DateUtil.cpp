@@ -241,20 +241,22 @@ Real JulianDate(YearNumber year, MonthOfYear month, DayOfMonth day,
 
 //------------------------------------------------------------------------------
 // Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day,
-//                         Integer hour, Integer minute, Real second)
+//                         Integer hour, Integer minute, Real second
+//                         Real refEpochJD = GmatTimeConstants::JULIAN_DATE_OF_010541)
 //
 //------------------------------------------------------------------------------
 /**
  * Friend function.   Converted from calendar date to Modified Julian Date.
  *
- * @param <year>    - year of calendar
- * @param <month>   - month in calendar format
- * @param <day>     - day of month in calendar format
- * @param <hour>    - hour of day
- * @param <minute>  - minute of hour
- * @param <second>  - seconds including millisecond
+ * @param <year>       - year of calendar
+ * @param <month>      - month in calendar format
+ * @param <day>        - day of month in calendar format
+ * @param <hour>       - hour of day
+ * @param <minute>     - minute of hour
+ * @param <second>     - seconds including millisecond
+ * @param <refEpochJD> - reference epoch Julian Date
  *
- * @return           Modified Julian date
+ * @return    Modified Julian date
  *
  */
 //------------------------------------------------------------------------------
@@ -277,48 +279,6 @@ Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day,
 
    return modJulianDate;
 }
-
-//------------------------------------------------------------------------------
-// Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day,
-//                         Integer hour, Integer minute, Real second)
-//
-//------------------------------------------------------------------------------
-/**
- * Friend function.   Converted from calendar date to Modified Julian Date.
- *
- * @param <year>    - year of calendar
- * @param <month>   - month in calendar format
- * @param <day>     - day of month in calendar format
- * @param <hour>    - hour of day
- * @param <minute>  - minute of hour
- * @param <second>  - seconds including millisecond
- *
- * @return           Modified Julian date
- *
- */
-//------------------------------------------------------------------------------
-Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day,
-                        Integer hour, Integer minute, Real second)
-{
-    // 5/23/06 - commented out
-    // Need to subtract out Julian date offset before adding the fraction
-    // of a day term to gain significant digits after the decimal place.
-    // The computation is copied from the Julian Date method.
-//   Real jd =  JulianDate(year, month, day, hour, minute, second);
-//   return (jd - GmatTimeConstants::JULIAN_DATE_OF_010541);
-
-   //Integer computeYearMon = ( 7*(year + (Integer)(month + 9)/12 ) )/4;
-   Integer computeYearMon = ( 7*(year + (Integer)((month + 9)/12)) )/4;
-   Integer computeMonth = (275 * month)/9;
-   Real fractionalDay = ((second/60.0 + minute)/60.0 + hour)/24.0;
-
-   Real ModJulianDay = 367*year - computeYearMon + computeMonth + day +
-               1721013.5 -  GmatTimeConstants::JULIAN_DATE_OF_010541;
-   Real modJulianDate = ModJulianDay  + fractionalDay;
-
-   return modJulianDate;
-}
-
 
 //------------------------------------------------------------------------------
 //  void UnpackDate (Real packedDate, Integer& year, Integer& month, Integer& day)
