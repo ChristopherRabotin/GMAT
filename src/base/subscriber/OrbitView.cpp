@@ -697,6 +697,16 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
       if (mViewUpCoordSysName == oldName)
          mViewUpCoordSysName = newName;
    }
+   if (type == Gmat::SPACECRAFT || type == Gmat::GROUND_STATION ||
+       type == Gmat::CALCULATED_POINT)
+   {
+      if (mViewPointRefName == oldName)
+         mViewPointRefName = newName;
+      if (mViewPointVecName == oldName)
+         mViewPointRefName = newName;
+      if (mViewDirectionName == oldName)
+         mViewDirectionName = newName;
+   }
    
    return OrbitPlot::RenameRefObject(type, oldName, newName);
 }
