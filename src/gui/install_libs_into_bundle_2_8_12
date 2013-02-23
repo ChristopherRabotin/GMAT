@@ -1,4 +1,4 @@
-# copy the Gmatbase library and all of the necessary dynamic wx libraries into the Frameworks directory.  Copy the pcre libraries (used by some plugins) as well.
+# copy the Gmatbase library and all of the necessary dynamic wx libraries into the Frameworks directory.
 LOC=$1
 BASE_LOC=$2
 BASE_LIB_NAME=$3
@@ -9,7 +9,6 @@ WX_LIB_LOC=$6
 cp $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 #cp $SPICE_DIR/libcspice.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 cp $BASE_LOC/$BASE_LIB_NAME.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
-cp $PCRE_LOC/libpcrecpp.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 
 # tell the libraries they are now inside the bundle
 install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon-2.8.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_base_carbon-2.8.dylib
