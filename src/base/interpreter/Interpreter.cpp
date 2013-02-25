@@ -7946,6 +7946,20 @@ bool Interpreter::FinalPass()
       // or Burn for now
       if (obj == NULL)
          throw InterpreterException("The object " + (*i) + " does not exist");
+
+      // Validate IBs so we trap mass depletion issues
+      if (obj->GetType() == Gmat::IMPULSIVE_BURN)
+      {
+         try
+         {
+            obj->Validate();
+         }
+         catch (BaseException& ex)
+         {
+            HandleError(ex, false);
+            retval = false;
+         }
+      }
       
       if (obj->GetType() == Gmat::PARAMETER)
       {

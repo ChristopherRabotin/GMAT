@@ -42,6 +42,7 @@ public:
    virtual bool         Fire(Real *burnData = NULL, Real epoch = GmatTimeConstants::MJD_OF_J2000);
    
    // inherited from GmatBase
+   virtual bool         Validate();
    virtual bool         Initialize();
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);

@@ -150,14 +150,17 @@ void ImpulsiveBurnSetupPanel::SaveData()
          paramID = theObject->GetParameterID("Isp");
          theObject->SetRealParameter(paramID, isp);
       }
+
+      BurnThrusterPanel::SaveData();
+      
+      // Validation checks mass depletion settings
+      theObject->Validate();
    }
    catch(BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
       canClose = false;
    }
-   
-   BurnThrusterPanel::SaveData();
    
    #ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel::SaveData() exiting\n");

@@ -272,6 +272,31 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * Checks to be sure that mass decrementing has needed settings
+ *
+ * @return true if the settings are correct, throws if not.
+ */
+//------------------------------------------------------------------------------
+bool ImpulsiveBurn::Validate()
+{
+   if (decrementMass)
+   {
+      if (tankNames.empty())
+      {
+         throw BurnException("The ImpulsiveBurn \"" + instanceName +
+               "\" is set to deplete mass, but no tank is identified as the "
+               "mass source for mass depletion.  Please specify a fuel tank "
+               "on the panel or by using the scripting\n   " + instanceName +
+               ".Tank = {<tankName>};");
+      }
+   }
+
+   return Burn::Validate();
+}
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -300,8 +325,19 @@ bool ImpulsiveBurn::Initialize()
    
    bool retval = false;
    
-   if (decrementMass && !tankNames.empty())
-      retval = SetTankFromSpacecraft();
+   if (decrementMass)
+   {
+      if (!tankNames.empty())
+         retval = SetTankFromSpacecraft();
+      else
+      {
+         BurnException aException("");
+         aException.SetDetails(errorMessageFormat.c_str(), "",
+                     PARAMETER_TEXT[FUEL_TANK-BurnParamCount].c_str(),
+                     "Named Fuel Tank");
+         throw aException;
+      }
+   }
    
    if (localCoordSystem == NULL)
       retval = retval | false;
@@ -595,14 +631,15 @@ Real ImpulsiveBurn::SetRealParameter(const Integer id, const Real value)
    {
       // Isp Coefficients
       case ISP:
-         if (value >= 0)
+         if (value > 0)
             isp = value;
          else
          { 
             BurnException aException("");
             aException.SetDetails(errorMessageFormat.c_str(),
                         GmatStringUtil::ToString(value, 16).c_str(),
-                        PARAMETER_TEXT[id-BurnParamCount].c_str(), "Real Number >= 0");
+                        PARAMETER_TEXT[id-BurnParamCount].c_str(),
+                        "Real Number > 0");
             throw aException;
          }
          return isp;
