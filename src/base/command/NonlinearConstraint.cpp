@@ -479,6 +479,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       optimizerName = value;
       // Set the base class string
       solverName    = value;
+      optimizerDataFinalized = false;
       return true;
    }
 
@@ -504,9 +505,14 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
    
    if (id == OPERATOR)
    {
-      if (value == "<=")      op = LESS_THAN_OR_EQUAL;
-      else if (value == ">=") op = GREATER_THAN_OR_EQUAL;
-      else if (value == "=")  op = EQUAL;
+      Operator oldOp = op;
+
+      if (value == "<=")
+         op = LESS_THAN_OR_EQUAL;
+      else if (value == ">=")
+         op = GREATER_THAN_OR_EQUAL;
+      else if (value == "=")
+         op = EQUAL;
       else
       {
          std::string errmsg = "The conditional operator \"" + value;
@@ -514,6 +520,22 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
          errmsg            += "The allowed values are [=, <=, >=]\n";
          throw CommandException(errmsg);
       }
+
+      if (op != oldOp)
+      {
+         optimizerDataFinalized = false;
+         if (op == EQUAL)
+         {
+            isInequality = false;
+            isIneqString = "EqConstraint";
+         }
+         else
+         {
+            isInequality = true;
+            isIneqString = "IneqConstraint";
+         }
+      }
+
       //interpreted   = false;
       return true;
    }
