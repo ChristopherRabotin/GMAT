@@ -102,8 +102,7 @@ void MissionTreeToolBar::ClearFilters()
 {
    ResetMissionTreeTools();
    wxArrayString cmdsToInclude;
-   cmdsToInclude.Add("All");
-   mMissionTree->SetViewCommands(cmdsToInclude);
+   mMissionTree->SetViewLevel(0);
 }
 
 
