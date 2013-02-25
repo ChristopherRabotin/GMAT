@@ -50,6 +50,7 @@ public:
    void ClearFilters();
    void ClearMission();
    void AddDefaultMission();
+   void PanelObjectChanged( GmatBase *obj );
    void UpdateMission(bool resetCounter, bool viewAll = true, bool collapse = false);
    void UpdateMissionForRename();
    void ChangeNodeLabel(const wxString &oldLabel);
@@ -213,7 +214,8 @@ private:
    int  GetMenuId(const wxString &cmd, ActionType action);
    
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
-   wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
+	wxTreeItemId FindChild(wxTreeItemId parentId, GmatCommand *cmd);
+	wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
                           bool useSummaryName = false, bool onlyCheckCmdType = false);
    wxTreeItemId FindElse(wxTreeItemId parentId);
    int  FindItemPosition(wxTreeItemId parentId, wxTreeItemId itemId);

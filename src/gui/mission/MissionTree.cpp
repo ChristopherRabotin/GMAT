@@ -4435,6 +4435,29 @@ int MissionTree::GetMenuId(const wxString &cmd, ActionType action)
    return id;
 }
 
+//------------------------------------------------------------------------------
+// void PanelObjectChanged( GmatBase *obj )
+// Called when user clicks Ok/Apply and successful
+//------------------------------------------------------------------------------
+void MissionTree::PanelObjectChanged( GmatBase *obj )
+{
+   wxTreeItemId itemId = FindChild(mMissionSeqSubId, (GmatCommand *) obj );
+   if (itemId.IsOk())
+   {
+      MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
+	  wxString oldLabel = GetItemText(itemId);
+      GmatCommand *cmd = (GmatCommand *) obj;
+      wxString newLabel = GetCommandString(cmd, oldLabel);
+      
+      if (newLabel != oldLabel)
+      {
+         item->SetName(newLabel);
+         item->SetTitle(newLabel);
+         SetItemText(itemId, newLabel);
+      }
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void ResetCommandCounter(const wxString &cmd, bool resetAll = false)
@@ -4616,7 +4639,72 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
             break;
          
          if (GetChildrenCount(childId) > 0)
-            FindChild(childId, cmd);
+		 {
+            childId = FindChild(childId, cmd, useSummaryName, onlyCheckCmdType);
+			if (childId.IsOk()) break;
+		 }
+         
+         childId = GetNextChild(parentId, cookie);
+      }
+   }
+   
+   #if DEBUG_MISSION_TREE_FIND
+   MessageInterface::ShowMessage("MissionTree::FindChild() returning ");
+   WriteNode(1, "", false, "childId", childId);
+   #endif
+   
+   return childId;
+}
+
+
+//------------------------------------------------------------------------------
+// wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
+//                        bool useSummaryName, bool onlyCheckCmdType)
+//------------------------------------------------------------------------------
+/*
+ * Finds a first item from the parent node of the tree. It compares item command name
+ * and cmdName for finding the item.
+ *
+ * @param  parentId  Parent item id
+ * @param  cmdName   Comand name or type name to find. If using command type name,
+ *                         set onlyCheckCmdType flag to true
+ * @param  useSummaryName  If this flag is set, it will use summary name to find
+ *                         the item [false]
+ * @param  onlyCheckCmdType If this flag is set, it will only check for the command
+ *                         type name [false]
+ *
+ */
+//------------------------------------------------------------------------------
+wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, GmatCommand *cmd)
+{
+   #if DEBUG_MISSION_TREE_FIND
+   MessageInterface::ShowMessage
+      ("\nMissionTree::FindChild() entered, parentId=<%s>, cmd=<%s>\n",
+       GetItemText(parentId).c_str(), cmd.c_str());
+   #endif
+   
+   int numChildren = GetChildrenCount(parentId);
+   wxTreeItemId childId;
+   wxString childText;
+   
+   if (numChildren > 0)
+   {
+      wxTreeItemIdValue cookie;
+      childId = GetFirstChild(parentId, cookie);
+      
+      while (childId.IsOk())
+      {
+         //MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(childId);
+         //GmatCommand *currCmd = currItem->GetCommand();
+         GmatCommand *currCmd = GetCommand(childId);
+         if (currCmd == cmd)
+            break;
+         
+         if (GetChildrenCount(childId) > 0)
+		 {
+            childId = FindChild(childId, cmd);
+			if (childId.IsOk()) break;
+		 }
          
          childId = GetNextChild(parentId, cookie);
       }
