@@ -325,6 +325,8 @@ void GmatPanel::OnApply(wxCommandEvent &event)
          #endif
          theGuiInterpreter->ConfigurationChanged(mObject, true);
          EnableUpdate(false);
+		 GmatAppData::Instance()->GetMainFrame()->PanelObjectChanged(mObject);
+
       }
    }
    #ifdef DEBUG_GMATPANEL_SAVE
@@ -361,6 +363,8 @@ void GmatPanel::OnOK(wxCommandEvent &event)
              mObject->GetTypeName().c_str());
          #endif
          theGuiInterpreter->ConfigurationChanged(mObject, true);
+		 GmatAppData::Instance()->GetMainFrame()->PanelObjectChanged(mObject);
+
       }
    }
    
