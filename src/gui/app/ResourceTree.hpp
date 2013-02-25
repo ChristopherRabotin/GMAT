@@ -45,6 +45,7 @@ public:
    void SetActiveScript(const wxString &script);
    void AddScript(wxString path);
    bool AddScriptItem(wxString path);
+   void PanelObjectChanged( GmatBase *obj );
    void UpdateFormation();
    void UpdateVariable();
    void UpdateRecentFiles(wxString filename);

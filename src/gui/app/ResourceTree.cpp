@@ -3947,6 +3947,15 @@ bool ResourceTree::IsScriptFolderRunning()
 
 
 //------------------------------------------------------------------------------
+// void PanelObjectChanged( GmatBase *obj )
+// Called when user clicks Ok/Apply and successful
+//------------------------------------------------------------------------------
+void ResourceTree::PanelObjectChanged( GmatBase *obj )
+{
+}
+
+
+//------------------------------------------------------------------------------
 // void QuitRunningScriptFolder()
 //------------------------------------------------------------------------------
 /**
