@@ -468,7 +468,10 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = gen + ";";
    
    if (mode == Gmat::NO_COMMENTS)
+   {
+	  InsertCommandName(generatingString);
       return generatingString;
+   }
    
    // Then call the base class method
    return GmatCommand::GetGeneratingString(mode, prefix, useName);

@@ -231,7 +231,10 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
    generatingString += ";";
 
    if (mode == Gmat::NO_COMMENTS)
+   {
+	  InsertCommandName(generatingString);
       return generatingString;
+   }
 
    return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }

@@ -228,6 +228,7 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       generatingString = "EndTarget;";
+	  InsertCommandName(generatingString);
       return generatingString;
    }
    

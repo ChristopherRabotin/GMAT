@@ -144,7 +144,10 @@ const std::string& EndOptimize::GetGeneratingString(Gmat::WriteMode mode,
 {
    generatingString = prefix + "EndOptimize;";
    if (mode == Gmat::NO_COMMENTS)
+   {
+	  InsertCommandName(generatingString);
       return generatingString;
+   }
    
    if ((next) && (next->GetTypeName() == "Optimize"))
    {

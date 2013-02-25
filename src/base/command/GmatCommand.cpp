@@ -451,7 +451,10 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    if (mode == Gmat::NO_COMMENTS)
-      return generatingString;
+   {
+      InsertCommandName(generatingString);      
+	  return generatingString;
+   }
    
    
    std::string commentLine = GetCommentLine();

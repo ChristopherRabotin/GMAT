@@ -437,6 +437,7 @@ const std::string& While::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       generatingString = "While " + GetConditionalString();
+	  InsertCommandName(generatingString);
       return generatingString;
    }
    

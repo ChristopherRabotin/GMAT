@@ -452,6 +452,7 @@ const std::string& If::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       generatingString = "If " + GetConditionalString();
+	  InsertCommandName(generatingString);
       return generatingString;
    }
    

@@ -467,6 +467,7 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       generatingString = "For " + gen.str() + ";";
+	  InsertCommandName(generatingString);
       return generatingString;
    }
    
