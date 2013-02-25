@@ -135,6 +135,7 @@ public:
    void ManageMissionTree();
    
    // event handling
+   void PanelObjectChanged( GmatBase *obj );
    void OnClose(wxCloseEvent& event);
    void OnProjectNew(wxCommandEvent &event);
    void OnClearCurrentMission(wxCommandEvent &event);

@@ -43,6 +43,7 @@
 #include "GmatMdiChildFrame.hpp"
 #include "MdiChildViewFrame.hpp"
 // panels
+#include "GmatPanel.hpp"
 #include "GmatBaseSetupPanel.hpp"
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
@@ -2810,6 +2811,17 @@ void GmatMainFrame::StopMatlabServer()
    }
 }
 
+//------------------------------------------------------------------------------
+// void PanelObjectChanged( GmatBase *obj )
+// Called when user clicks Ok/Apply and successful
+//------------------------------------------------------------------------------
+void GmatMainFrame::PanelObjectChanged( GmatBase *obj )
+{
+	if (obj->IsOfType(Gmat::COMMAND))
+		GmatAppData::Instance()->GetMissionTree()->PanelObjectChanged( obj );
+	else
+		GmatAppData::Instance()->GetResourceTree()->PanelObjectChanged( obj );
+}
 
 //------------------------------------------------------------------------------
 // void OnClose(wxCloseEvent& event)
