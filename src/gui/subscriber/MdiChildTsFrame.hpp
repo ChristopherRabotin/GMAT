@@ -128,7 +128,10 @@ protected:
    double GetYMin();
    double GetYMax();
    
-   static const int MAX_NUM_CURVE = 6;
+   // TS plot does not have curve size limit.  Setting one here is artificial,
+   // and only needed because of the mHasFirstXSet[] array below.  That array
+   // should be replaced by a std::vector<bool> and this artifice removed.
+   static const int MAX_NUM_CURVE = 20;      // Changed from 6 for GMT-2411
     
    wxString mPlotTitle;
    wxString mXAxisTitle;

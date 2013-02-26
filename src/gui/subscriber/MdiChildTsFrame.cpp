@@ -171,7 +171,7 @@ MdiChildTsFrame::~MdiChildTsFrame()
    MessageInterface::ShowMessage
       ("~MdiChildTsFrame() mPlotName=%s\n", mPlotName.c_str());
    #endif
-   
+
    MdiTsPlot::mdiChildren.DeleteObject(this);
    MdiTsPlot::numChildren--;
    
@@ -245,7 +245,7 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
 // bool DeletePlot()
 //------------------------------------------------------------------------------
 /**
- * Prepares teh plot frame for deletion
+ * Prepares the plot frame for deletion
  *
  * @return true on success
  */
@@ -320,6 +320,14 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, const wxString &curveTitl
          ("MdiChildTsFrame::AddPlotCurve() curveIndex='%s', curveTitle='%s', penColor=%u\n",
           curveIndex, curveTitle.c_str(), penColor);
    #endif
+
+   if (curveIndex > MAX_NUM_CURVE)
+   {
+      std::stringstream num;
+      num << MAX_NUM_CURVE;
+      throw SubscriberException("XY Plots are limited to " + num.str() +
+            " curves in GMAT");
+   }
    
    if (mXyPlot != NULL)
    {
