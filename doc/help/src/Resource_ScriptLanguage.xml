@@ -227,8 +227,9 @@
         <title>Integers</title>
 
         <para>Integers are written as a sequence of literal digits, with no
-        decimal. Preceding zeros are allowed, but scientific notation is
-        not</para>
+        decimal. Preceding zeros and prepended signs (<code>+</code> or
+        <code>-</code>) are allowed. Scientific notation is not
+        permitted.</para>
       </refsection>
 
       <refsection>
