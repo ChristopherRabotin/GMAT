@@ -177,7 +177,7 @@ void BeginFiniteBurnPanel::Create()
    
    wxStaticText *satLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT(GUI_ACCEL_KEY"Spacecraft"), wxDefaultPosition, wxSize(50,-1));
+                       wxT(GUI_ACCEL_KEY"Spacecraft"), wxDefaultPosition, wxSize(60,-1));
    mSatTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1));
    mSatTextCtrl->SetToolTip(pConfig->Read(_T("SpacecraftHint")));
@@ -262,7 +262,7 @@ void BeginFiniteBurnPanel::SaveData()
    if (satNames == "")
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Please enter Spacecrafts to begin maneuver\n");
+         (Gmat::ERROR_, "The Spacecraft field cannot be empty\n");
       canClose = false;
       return;
    }
