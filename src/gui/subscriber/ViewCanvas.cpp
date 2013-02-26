@@ -52,6 +52,7 @@
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
 //#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE_VIEW 1
 //#define DEBUG_DRAW 1
 //#define DEBUG_SOLVER_DATA 1
 //#define DEBUG_ECLIPTIC_PLANE
@@ -912,7 +913,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    // update non-spacecraft objects position
    UpdateOtherData(time);
    
-   #if DEBUG_UPDATE
+   #if DEBUG_UPDATE_VIEW
    MessageInterface::ShowMessage
       ("   mViewPointInitialized=%d, mGlInitialized=%d, mUseInitialViewPoint=%d\n",
        mViewPointInitialized, mGlInitialized, mUseInitialViewPoint);
@@ -924,21 +925,21 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    //if (!mViewPointInitialized || mUseInitialViewPoint)
    if (!mViewPointInitialized)
    {
-      #if DEBUG_UPDATE
+      #if DEBUG_UPDATE_VIEW
       MessageInterface::ShowMessage
          ("ViewCanvas::UpdatePlot() Calling InitializeViewPoint()\n");
       #endif
       if (!mViewPointInitialized ||
           (mGlInitialized && mUseInitialViewPoint))
       {
-         #if DEBUG_UPDATE
+         #if DEBUG_UPDATE_VIEW
          MessageInterface::ShowMessage("===> Initializing view\n");
          #endif
          InitializeViewPoint();
       }
       else
       {
-         #if DEBUG_UPDATE
+         #if DEBUG_UPDATE_VIEW
          MessageInterface::ShowMessage("===> Using current view\n");
          #endif
       }

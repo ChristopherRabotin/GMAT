@@ -902,6 +902,11 @@ Real OrbitView::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real OrbitView::SetRealParameter(const Integer id, const Real value)
 {
+   #if DBGLVL_PARAM
+   MessageInterface::ShowMessage
+      ("OrbitView::SetRealParameter() entered, id=%d, value=%f\n", id, value);
+   #endif
+   
    switch (id)
    {
    case VIEW_SCALE_FACTOR:

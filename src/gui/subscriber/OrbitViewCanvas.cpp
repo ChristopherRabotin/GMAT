@@ -769,10 +769,8 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
    // Set viewpoint ref. object id
    if (!mUseViewPointRefVector && pViewPointRefObj)
    {
-      mViewObjName = pViewDirectionObj->GetName().c_str();
       mViewPointRefObjName = pViewPointRefObj->GetName();
-      
-      mVpRefObjId = GetObjectId(pViewPointRefObj->GetName().c_str());
+      mVpRefObjId = GetObjectId(mViewPointRefObjName.c_str());
       
       if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
       {
@@ -822,7 +820,8 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
    // Set view direction object id
    if (!mUseViewDirectionVector && pViewDirectionObj)
    {
-      mVdirObjId = GetObjectId(pViewDirectionObj->GetName().c_str());
+      mViewObjName = pViewDirectionObj->GetName().c_str();
+      mVdirObjId = GetObjectId(mViewObjName.c_str());
       
       if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
       {
@@ -986,10 +985,6 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
    int flippedY;
    int width, height;
    int mouseX, mouseY;
-
-   // Why is animation running flag set to false here?
-   // Commented out (LOJ: 2012.07.20)
-   //mIsAnimationRunning = false;
    
    GetClientSize(&width, &height);
    
@@ -1063,14 +1058,16 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
       //------------------------------
       // FOV Zoom
       //------------------------------
-      else if (event.ShiftDown() && event.RightIsDown()){
-         Real x2 = Pow(mLastMouseX - mouseX, 2);
-         Real y2 = Pow(mouseY - mLastMouseY, 2);
-         Real length = sqrt(x2 + y2);
-         
+      else if (event.ShiftDown() && event.RightIsDown())
+      {
+         // Find the zoom amount
+         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
+         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
+         Real length = sqrt(x2 + y2);        
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
-         mZoomAmount = length * distance / 1000000;
+         mZoomAmount = length * distance / 500;
+         
          if (mouseY > mLastMouseY)
             mCamera.ZoomOut(mZoomAmount);
          else
@@ -1087,14 +1084,10 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
          if (mIsEndOfRun)
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
-         //VC++ error C2668: 'pow' : ambiguous call to overloaded function
-         //'long double pow(long double,int)' 'float pow(float,int)' 'double pow(double,int);
-         // Changed pow to GmatMathUtil::Pow();
-         
-         // find the length
-         Real x2 = Pow(mLastMouseX - mouseX, 2);
-         Real y2 = Pow(mouseY - mLastMouseY, 2);
-         Real length = sqrt(x2 + y2);
+         // Find the zoom amount
+         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
+         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
+         Real length = sqrt(x2 + y2);         
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
          mZoomAmount = length * distance / 500;
