@@ -1872,17 +1872,25 @@ void FminconOptimizer::EvalMatlabString(const std::string &evalString)
    }
    catch (InterfaceException &ie)
    {
+      bool rethrowException = true;
       std::string errMsg = ie.GetFullMessage();
+      #ifdef DEBUG_MATLAB_EVAL
       MessageInterface::ShowMessage(errMsg + "\n");
+      #endif
       
-      // If error from evaluating string but not from opening matlab engine,
-      // close and re-initialize and re-execute as user may have manually closed it.
-      if (errMsg.find("Failed to open MATLAB engine") == errMsg.npos)
+      // If error from evaluating string but not from opening matlab engine or
+      // not from undefined function, or error from MATLAB, close and re-initialize
+      // and re-execute as user may have manually closed it.
+      if (errMsg.find("engEvalString") != errMsg.npos)
       {
+         rethrowException = false;
          MessageInterface::ShowMessage("Trying to close and reopen MATLAB engine...\n");
          matlabIf->Close();
          Initialize();
       }
+      
+      if (rethrowException)
+         throw;
    }
 }
 

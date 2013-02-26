@@ -658,7 +658,7 @@ void MatlabInterface::RunMatlabString(const std::string &evalString)
    else
    {
       errorReturned = true;
-      errorStr = "Error returned from " + evalString;
+      errorStr = "Error encountered during engEvalString of \"" + evalString + "\"";
    }
    
    if (errorReturned)
