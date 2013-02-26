@@ -107,7 +107,10 @@ protected:
    /// Flag used to tell if the summary can be built yet
    bool                    firedOnce;
 
-   // Saved data for Command Summary
+   /// Saved data for Command Summary
+   /// flag indicating whether or not the Burn is using a Local
+   /// coordinate system
+   bool                    localCS;
    /// Spacecraft that maneuvers, as retrieved from the Burn object
    std::string             scNameM;
    /// Maneuver coordinate system

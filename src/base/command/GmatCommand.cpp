@@ -94,8 +94,8 @@ const Gmat::ParameterType
 const Integer GmatCommand::MAX_NUM_TANKS = 20;
 
 const std::string GmatCommand::MISSION_CHANGE_MESSAGE =
-         "*** Changes made to the mission will not be reflected in the data "
-         "displayed until the mission is rerun ***\n\n";
+         "******  Changes made to the mission will not be reflected ******\n"
+         "******  in the data displayed until the mission is rerun  ******\n\n";
 
 Integer GmatCommand::satEpochID = -1;
 Integer GmatCommand::satCdID;
@@ -2281,7 +2281,10 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    if (summaryForEntireMission)
       data << "======  ";
    else
+   {
       data << MISSION_CHANGE_MESSAGE;
+      data << "        ";
+   }
 
    // Handle special case of EndScript -> we want ScriptEvent for individual command summary
    if ((!summaryForEntireMission) && (typeName == "EndScript"))
@@ -2295,7 +2298,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    if (((objectMap == NULL) && (globalObjectMap == NULL)) ||
        (satVector.size() == 0))
    {
-         data << "No command summary data available\n";
+         data << "        Command summary is not supported for Propagate (in Single Step Mode)\n";
+         data << "        or when the command did not execute due to control logic statements.\n";
+         data << "        Please see the next valid command.\n\n";
    }
    else
    {

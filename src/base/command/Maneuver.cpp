@@ -64,6 +64,7 @@ Maneuver::Maneuver() :
    satName     (""),
    sat         (NULL),
    firedOnce   (false),
+   localCS     (false),
    scNameM     (""),
    csNameM     (""),
    originNameM (""),
@@ -112,6 +113,7 @@ Maneuver::Maneuver(const Maneuver& m) :
    satName              (m.satName),
    sat                  (NULL),
    firedOnce            (false),
+   localCS              (m.localCS),
    scNameM              (m.scNameM),
    csNameM              (m.csNameM),
    originNameM          (m.originNameM),
@@ -147,6 +149,7 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    sat       = NULL;
    firedOnce = false;
 
+   localCS            = m.localCS;
    scNameM            = m.scNameM;
    csNameM            = m.csNameM;
    originNameM        = m.originNameM;
@@ -698,6 +701,7 @@ void Maneuver::BuildCommandSummary(bool commandCompleted)
    #endif
 
    // Save the Maneuver-specific data
+   localCS     = burn->IsUsingLocalCoordSystem();
    scNameM     = burn->GetStringParameter(burn->GetParameterID(
                      "SpacecraftName"));
    csNameM     = burn->GetStringParameter(burn->GetParameterID(
@@ -709,6 +713,8 @@ void Maneuver::BuildCommandSummary(bool commandCompleted)
                      "DecrementMass"));
 
    #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
+      MessageInterface::ShowMessage("... localCS     = %s\n",
+            (localCS? "true" : "false"));
       MessageInterface::ShowMessage("... scNameM     = %s\n", scNameM.c_str());
       MessageInterface::ShowMessage("... csNameM     = %s\n", csNameM.c_str());
       MessageInterface::ShowMessage("... originNameM = %s\n",
@@ -783,12 +789,20 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
            << "\n        Maneuver Summary"
            << "\n        -----------------"
            << "\n        Impulsive Burn:     " << burnName
-           << "\n        Spacecraft:         " << scNameM
-           << "\n        Coordinate System:  " << csNameM
-           << "\n        Origin:             " << originNameM
-           << "\n        Axes:               " << axesNameM
+           << "\n        Spacecraft:         " << scNameM;
+      if (localCS)
+      {
+         data  << "\n        Origin:             " << originNameM
+               << "\n        Axes:               " << axesNameM;
 
-           << "\n        Delta V Vector:"
+      }
+      else
+      {
+         data << "\n        Coordinate System:  " << csNameM;
+      }
+
+
+      data << "\n        Delta V Vector:"
            << "\n           Element 1:  "
            << BuildNumber(elementIspMassData[0]) << " km/s"
            << "\n           Element 2:  "
@@ -833,7 +847,7 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
       }
       else
          data << "\n        No mass depletion\n";
-	     data << "\n";
+	      data << "\n";
 	     
 
       commandSummary = commandSummary + data.str();
