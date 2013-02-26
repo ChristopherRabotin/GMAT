@@ -311,10 +311,10 @@ void AttitudePanel::Create()
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
                       wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
 
-//   // units for the Euler Angles
-//   attUnits1 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
-//   attUnits2 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
-//   attUnits3 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+   // units for the Euler Angles
+   attUnits1 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+   attUnits2 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
+   attUnits3 = new wxStaticText( this, ID_TEXT, wxT("degrees"));
 
    // Rate State Type
    stateRateTypeStaticText =
@@ -364,7 +364,7 @@ void AttitudePanel::Create()
    // Dunn added initialization of attUnits.  They were already declared in the
    // code but not yet showing up when attitude state type is Euler Angles.
    //
-   // This is not working yet.  Dunn needs to learn more wxWidgets commands first.
+   // This is not working yet.  Dunn needs to learn more wxWidgets commands first.  Wendy fixed it.
    //attUnits1 = new wxStaticText( this, ID_TEXT, wxT(""));
    //attUnits2 = new wxStaticText( this, ID_TEXT, wxT(""));
    //attUnits3 = new wxStaticText( this, ID_TEXT, wxT(""));
@@ -398,9 +398,7 @@ void AttitudePanel::Create()
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
-   flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
-//   flexGridSizer2 = new wxFlexGridSizer( 5, 0, 0 );   // need 5 to add attUnits
-//   wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
+   flexGridSizer2 = new wxFlexGridSizer( 5, 0, 0 );   // need 5 to add attUnits
    wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 3, 0, 0 );
    // Let's make TextCtrl growable, so we can see more numbers when expand
    // Commented out since it doesn't look good on Linux(LOJ: 2010.02.19)
@@ -424,25 +422,25 @@ void AttitudePanel::Create()
    flexGridSizer2->Add(st1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st5TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st8TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );          
-//   flexGridSizer2->Add(attUnits1, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
+   flexGridSizer2->Add(attUnits1, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st2StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st6TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st9TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );        
-//   flexGridSizer2->Add(attUnits2, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
+   flexGridSizer2->Add(attUnits2, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st3StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st7TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st10TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );       
-//   flexGridSizer2->Add(attUnits3, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
+   flexGridSizer2->Add(attUnits3, 0, wxALIGN_CENTER|wxALL, bsize );  // Dunn Added
    
    flexGridSizer2->Add(st4StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st4TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);        
-//   flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  // for units
+   flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  // for units
    
    flexGridSizer3->Add(str1StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
@@ -1277,7 +1275,7 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234(); // true);
+      ResizeTextCtrl1234();  // true);  // add true for wider text box
 
       st4TextCtrl->Show(false);
 
@@ -1289,9 +1287,9 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-//      attUnits1->Show(true);
-//      attUnits2->Show(true);
-//      attUnits3->Show(true);
+      attUnits1->Show(true);
+      attUnits2->Show(true);
+      attUnits3->Show(true);
    }
    else if (attStateType == stateTypeArray[QUATERNION])
    {
@@ -1311,6 +1309,10 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st8TextCtrl->Show(false);
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
+
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
    }
    else if (attStateType == stateTypeArray[DCM])
    {
@@ -1330,6 +1332,10 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st8TextCtrl->Show(true);
       st9TextCtrl->Show(true);
       st10TextCtrl->Show(true);
+
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
    }
    else if (attStateType == stateTypeArray[MRPS])   // Added by Dunn
    {
@@ -1338,7 +1344,7 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234();  //   true);
+      ResizeTextCtrl1234();  // true); // add true for wider text box
 
       st4TextCtrl->Show(false);
 
@@ -1349,6 +1355,10 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
       st8TextCtrl->Show(false);
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
+
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
    }
 
    // both rate representations show these three widgets
@@ -1499,7 +1509,7 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
  * Resizes the four text controls.
  *
  * @param forQuaternion flag indicating whether or not these text controls
- *                      are for the quaternion
+ *                      are for the quaternion OR we want a wider text box
  *
  */
 //------------------------------------------------------------------------------
@@ -1873,7 +1883,7 @@ bool AttitudePanel::DisplayEulerAngles()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234(); // true);
+      ResizeTextCtrl1234();  // true); // add true for wider text box
 
       st1TextCtrl->Enable();
       st1TextCtrl->Show(true);
@@ -1895,9 +1905,9 @@ bool AttitudePanel::DisplayEulerAngles()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-//      attUnits1->Show(true);
-//      attUnits2->Show(true);
-//      attUnits3->Show(true);
+      attUnits1->Show(true);
+      attUnits2->Show(true);
+      attUnits3->Show(true);
 
       st1StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"1"));
       st2StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"2"));
@@ -1912,9 +1922,9 @@ bool AttitudePanel::DisplayEulerAngles()
       //attUnits1->Enable();
       //attUnits2->Enable();
       //attUnits3->Enable();
-//      attUnits1->SetLabel(wxT("degrees"));
-//      attUnits2->SetLabel(wxT("degrees"));
-//      attUnits3->SetLabel(wxT("degrees"));
+      attUnits1->SetLabel(wxT("degrees"));
+      attUnits2->SetLabel(wxT("degrees"));
+      attUnits3->SetLabel(wxT("degrees"));
    
       attitudeSizer->Layout();
       Refresh();
@@ -1992,9 +2002,9 @@ bool AttitudePanel::DisplayQuaternion()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
-//      attUnits1->Show(false);
-//      attUnits2->Show(false);
-//      attUnits3->Show(false);
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
    
       attitudeSizer->Layout();
       Refresh();
@@ -2089,9 +2099,9 @@ bool AttitudePanel::DisplayDCM()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
-//      attUnits1->Show(false);
-//      attUnits2->Show(false);
-//      attUnits3->Show(false);
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
    
       attitudeSizer->Layout();
       Refresh();
@@ -2133,7 +2143,7 @@ bool AttitudePanel::DisplayMRPs()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
-      ResizeTextCtrl1234();  //   true);
+      ResizeTextCtrl1234();   // true); // add true for wider text box
 
       st1TextCtrl->Show(true);
       st1TextCtrl->Enable(true);
@@ -2167,9 +2177,9 @@ bool AttitudePanel::DisplayMRPs()
       //attUnits1->Disable();
       //attUnits2->Disable();
       //attUnits3->Disable();
-//      attUnits1->Show(false);
-//      attUnits2->Show(false);
-//      attUnits3->Show(false);
+      attUnits1->Show(false);
+      attUnits2->Show(false);
+      attUnits3->Show(false);
 
       attitudeSizer->Layout();
       Refresh();
