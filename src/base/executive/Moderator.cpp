@@ -111,6 +111,7 @@
 //#define DEBUG_CCSDS_EPHEMERIS
 //#define DEBUG_CREATE_PHYSICAL_MODEL
 //#define DEBUG_LIST_CALCULATED_POINT
+//#define DEBUG_SHOW_SYSTEM_EXCEPTIONS
 
 // Currently we can't use DataFile for 2011a release so commented out
 // Actually we want to put this flag in BuildEnv.mk but it is very close to
@@ -6495,6 +6496,16 @@ Integer Moderator::RunMission(Integer sandboxNum)
 			MessageInterface::PopupMessage(Gmat::ERROR_, msg + "\n");
 			isRunReady = false;
 		}
+		#ifdef DEBUG_SHOW_SYSTEM_EXCEPTIONS
+        catch (const std::exception& ex) 
+        {
+           status = -3;
+           MessageInterface::ShowMessage("**** ERROR **** Moderator caught a "
+              "system level exception:\n    %s\nduring Sandbox initialization\n",
+              ex.what());
+           isRunReady = false;
+        }
+        #endif
 		catch (...)
 		{
 			status = -3;
