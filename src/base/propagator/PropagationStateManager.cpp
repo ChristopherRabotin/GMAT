@@ -685,6 +685,7 @@ bool PropagationStateManager::ObjectEpochsMatch()
    if (objects.size() > 0)
    {
       GmatEpoch theEpoch = objects[0]->GetRealParameter(epochIDs[0]);
+      Real diff = 0.0, dt;
       for (UnsignedInt i = 1; i < objects.size(); ++i)
       {
          #ifdef DEBUG_OBJECT_UPDATES
@@ -694,12 +695,19 @@ bool PropagationStateManager::ObjectEpochsMatch()
                objects[i]->GetName().c_str());
          #endif
 
-         if (fabs(theEpoch - objects[i]->GetRealParameter(epochIDs[i]) >
-                  IDENTICAL_TIME_TOLERANCE))
+         dt = fabs(theEpoch - objects[i]->GetRealParameter(epochIDs[i]));
+         if (dt > IDENTICAL_TIME_TOLERANCE)
          {
             retval = false;
          }
+         diff = (diff > dt ? diff : dt);
       }
+      // Here's how we'll warn if needed:
+//      if (retval && (diff != 0.0))
+//         MessageInterface::ShowMessage("Spacecraft epochs do not match in a "
+//               "Propagator used in the Propagate command, but are within "
+//               "tolerance (%le sec) acceptable for propagation\n",
+//               IDENTICAL_TIME_TOLERANCE * 86400.0);
    }
    return retval;
 }
