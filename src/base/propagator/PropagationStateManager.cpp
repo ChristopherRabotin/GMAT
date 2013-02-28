@@ -35,6 +35,9 @@
 //#define DUMP_STATE
 //#define DEBUG_OBJECT_UPDATES
 
+// When Spacecraft epochs are this close, the PSM will call them identical:
+#define IDENTICAL_TIME_TOLERANCE  5.0e-11
+
 
 //------------------------------------------------------------------------------
 // PropagationStateManager(Integer size)
@@ -691,7 +694,8 @@ bool PropagationStateManager::ObjectEpochsMatch()
                objects[i]->GetName().c_str());
          #endif
 
-         if (theEpoch != objects[i]->GetRealParameter(epochIDs[i]))
+         if (fabs(theEpoch - objects[i]->GetRealParameter(epochIDs[i]) >
+                  IDENTICAL_TIME_TOLERANCE))
          {
             retval = false;
          }
