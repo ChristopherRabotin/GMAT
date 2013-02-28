@@ -1259,9 +1259,9 @@ void PropagationConfigPanel::SaveData()
 //               theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
-               theGravForce->SetStringParameter("PotentialFile",
-//                     primaryBodyList[i]->potFilename.c_str());
-                     primaryBodyData->potFilename.c_str());
+//               theGravForce->SetStringParameter("PotentialFile",
+////                     primaryBodyList[i]->potFilename.c_str());
+//                     primaryBodyData->potFilename.c_str());
 
                if (deg != -999)
                {
@@ -2926,16 +2926,26 @@ bool PropagationConfigPanel::SavePotFile()
 //                  return false;
 //               }
 
+               bool update = true;
+               if (!filename)
+               {
+                  update = false;
+                  throw PropagatorException("The potential file \"" +
+                        inputString + "\" cannot be found; please enter a "
+                        "valid file name and path");
+               }
                filename.close();
-               theGravForce->SetStringParameter("PotentialFile",
-//                     primaryBodyList[i]->potFilename.c_str());
-                     primaryBodyData->potFilename.c_str());
+               if (update)
+               {
+                  theGravForce->SetStringParameter("PotentialFile",
+//                        primaryBodyList[i]->potFilename.c_str());
+                        primaryBodyData->potFilename.c_str());
+                  retval = true;
+                  isPotFileChanged = false;
+               }
             }
          }
       }
-
-      isPotFileChanged = false;
-      retval = true;
    }
    catch (BaseException &e)
    {
