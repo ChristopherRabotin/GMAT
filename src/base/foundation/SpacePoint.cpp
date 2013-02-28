@@ -1160,13 +1160,13 @@ bool SpacePoint::SetStringParameter(const Integer id,
          "Entering SpacePoint::SetStringParameter with id = %d, value = %s, and index = %d\n",
          id, value.c_str(), index);
 #endif
-   if (index < 0)
-   {
-      GmatBaseException ex;
-      ex.SetDetails("The index %d is out-of-range for field \"%s\"", index,
-                    GetParameterText(id).c_str());
-      throw ex;
-   }
+//   if (index < 0)
+//   {
+//      GmatBaseException ex;
+//      ex.SetDetails("The index %d is out-of-range for field \"%s\"", index,
+//                    GetParameterText(id).c_str());
+//      throw ex;
+//   }
     switch (id)
    {
       case ORBIT_SPICE_KERNEL_NAME:
