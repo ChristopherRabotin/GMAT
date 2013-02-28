@@ -433,9 +433,6 @@ void ScriptEventPanel::SaveData()
    {      
       line = mFileContentsTextCtrl->GetLineText(i);
       scriptText1 << line << "\n";
-      // Since GmatMdiChildFrame uses this TextCtrl for checking
-      // modified flag, set the flag to false
-      mFileContentsTextCtrl->SetModified(false);
    }
    
    //=======================================================
@@ -529,20 +526,10 @@ void ScriptEventPanel::SaveData()
       //--------------------------------------------------------------
       // If error occurred during interpretation, handle and return
       //--------------------------------------------------------------
-      bool ignoreErrors = true;
+      bool ignoreErrors = canClose;
       if (!canClose)
       {         
-         wxMessageDialog *msgDlg = new wxMessageDialog
-            (this, "Errors were found in the ScriptEvent; Do you want to save it anyway?", "",
-             wxYES_NO | wxICON_QUESTION, wxDefaultPosition);
-         int result = msgDlg->ShowModal();
-         
-         ignoreErrors = false;
-         if (result == wxID_YES)
-         {
-            ignoreErrors = true;
-            canClose = true;
-         }
+		  MessageInterface::PopupMessage(Gmat::ERROR_,"Errors were found in the ScriptEvent.  The script cannot be saved until all errors are fixed");
       }
       
       if (!ignoreErrors)
@@ -635,6 +622,10 @@ void ScriptEventPanel::SaveData()
       // new BeginScript command was created.
       // Fix for GMT-2611 (LOJ: 2012.10.05)
       SaveComments();
+      // Since GmatMdiChildFrame uses this TextCtrl for checking
+      // modified flag, set the flag to false
+      mFileContentsTextCtrl->SetModified(false);
+      mCommentTextCtrl->SetModified(false);
       EnableUpdate(false);
    }
    catch (BaseException &ex)
