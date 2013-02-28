@@ -6759,6 +6759,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
                                 const std::string &newPath)
 {
    bool isGoodScript = false;
+   bool foundBeginMissionSeq = false;
    isRunReady = false;
    endOfInterpreter = false;
    runState = Gmat::IDLE;
@@ -6771,6 +6772,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    {
       PrepareNextScriptReading();
       isGoodScript = theScriptInterpreter->Interpret(filename);
+      foundBeginMissionSeq = theScriptInterpreter->FoundBeginMissionSequence();
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->SetScript(filename);
@@ -6866,18 +6868,32 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
          }
          else
          {
-            //if (second != NULL)            
-            firstCmdStr = "The first command detected is \n'";
+            //firstCmdStr = "The first command detected is '";
+            firstCmdStr = "Command mode entered at '";
             firstCmdStr = firstCmdStr +
                second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
          }
          
-         std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
-         //firstCmdStr = firstCmdStr + second->GetGeneratingString() + "'";
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "*** WARNING *** Mission Sequence start command "
-             "is missing.  One will be required in future builds.  Recognized "
-             "start commands are\n" + knownStartCommands + firstCmdStr);
+         //std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
+         //MessageInterface::PopupMessage
+         //   (Gmat::WARNING_, "*** WARNING *** Mission Sequence start command "
+         //    "is missing.  One will be required in future builds.  Recognized "
+         //    "start commands are\n" + knownStartCommands + firstCmdStr);
+         // Improved warning message (GMT-3546)
+         std::string knownStartCommands = GetStarterStringList();
+         if (foundBeginMissionSeq)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "*** WARNING ***  Command mode entered before " +
+                knownStartCommands + "; in future release, " + knownStartCommands +
+                " is required before any command begins. " + firstCmdStr);
+         }
+         else
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "*** WARNING ***  " + knownStartCommands + " command is missing. "
+                "One will be required in future release. " + firstCmdStr);
+         }
          
          #if DEBUG_INTERPRET
          MessageInterface::ShowMessage

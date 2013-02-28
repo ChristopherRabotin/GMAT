@@ -1000,37 +1000,45 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       
       leftEw = CreateElementWrapper(lhs, paramFirst, manage);
       
-      if (leftEw == NULL)
-         return false;
+      // We need to create RHS wrapper even through LHS failed for better message
+      // in the Assignment command. Assignment command uses wrapper pointers to
+      // figure which side of equal sign is invalid. (LOJ: 2013.02.27)
+      //if (leftEw == NULL)
+      //   return false;
       
-      #if DBGLVL_WRAPPERS > 1
-      MessageInterface::ShowMessage
-         ("   (1)Setting ElementWrapper type %d for '%s' to '%s'\n",
-          leftEw->GetWrapperType(), leftEw->GetDescription().c_str(), typeName.c_str());
-      #endif
-      
-      if (cmd->SetElementWrapper(leftEw, lhs) == false)
+      if (leftEw != NULL)
       {
-         theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
-            "\" in Assignment";
-         return HandleError();
-      }
-      
-      // Since BOOLEAN_TYPE and ON_OFF_TYPE can accept case insensitive True/False/On/Off,
-      // save LHS property type if it is an object property wrapper (LOJ: 2012.06.15)
-      if (leftEw->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
-      {
-         GmatBase *lhsObj = FindObject(owner);
-         if (lhsObj)
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("   (1)Setting ElementWrapper type %d for '%s' to '%s'\n",
+             leftEw->GetWrapperType(), leftEw->GetDescription().c_str(), typeName.c_str());
+         #endif
+         
+         if (cmd->SetElementWrapper(leftEw, lhs) == false)
          {
-            GmatBase *toObj = NULL;
-            Integer lhsPropId = -1;
-            if (theInterpreter->FindPropertyID(lhsObj, type, &toObj, lhsPropId, lhsParamType))
+            theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
+               "\" in Assignment";
+            // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
+            //return HandleError();
+            HandleError();
+         }
+         
+         // Since BOOLEAN_TYPE and ON_OFF_TYPE can accept case insensitive True/False/On/Off,
+         // save LHS property type if it is an object property wrapper (LOJ: 2012.06.15)
+         if (leftEw->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
+         {
+            GmatBase *lhsObj = FindObject(owner);
+            if (lhsObj)
             {
-              #if DBGLVL_WRAPPERS
-              MessageInterface::ShowMessage
-                 ("   ==> LHS is object property and lhsParamType=%d\n", lhsParamType);
-              #endif
+               GmatBase *toObj = NULL;
+               Integer lhsPropId = -1;
+               if (theInterpreter->FindPropertyID(lhsObj, type, &toObj, lhsPropId, lhsParamType))
+               {
+                  #if DBGLVL_WRAPPERS
+                  MessageInterface::ShowMessage
+                     ("   ==> LHS is object property and lhsParamType=%d\n", lhsParamType);
+                  #endif
+               }
             }
          }
       }
@@ -1038,7 +1046,9 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    catch (BaseException &ex)
    {
       theErrorMsg = ex.GetFullMessage();
-      return HandleError(false);
+      // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
+      //return HandleError(false);
+      HandleError(false);
    }
    
    //-------------------------------------------------------------------
@@ -1058,12 +1068,13 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    MessageInterface::ShowMessage("   createDefaultStringWrapper initially set to true\n");
    #endif
    
+   ElementWrapper *rightEw = NULL;
    createDefaultStringWrapper = true;
    // Actually we want to check for return data type not the wrapper type here.
    // (This will fix bug 2196)
    //if (leftEw->GetWrapperType() == Gmat::VARIABLE_WT ||
    //    leftEw->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
-   if (leftEw->GetDataType() == Gmat::REAL_TYPE)
+   if (leftEw && leftEw->GetDataType() == Gmat::REAL_TYPE)
       createDefaultStringWrapper = false;
    
    #if DBGLVL_WRAPPERS > 1
@@ -1074,13 +1085,14 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    
    // check if there is missing single quote in RHS if LHS is string type(loj: 2008.07.22)
    // it will catch missing end quote
-   if (leftEw->GetDataType() == Gmat::STRING_TYPE ||
-       leftEw->GetDataType() == Gmat::STRINGARRAY_TYPE)
+   if (leftEw &&
+       (leftEw->GetDataType() == Gmat::STRING_TYPE ||
+        leftEw->GetDataType() == Gmat::STRINGARRAY_TYPE))
    {
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage("==========> LHS type is STRING or STRINGARRAY\n");
       #endif
-     // first remove ending ; from the RHS
+      // first remove ending ; from the RHS
       rhs = GmatStringUtil::RemoveLastString(rhs, ";");
       if (GmatStringUtil::HasMissingQuote(rhs, "'"))
       {
@@ -1114,7 +1126,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       // Bug 2063 fix
       if (createDefaultStringWrapper)
       {
-         if (leftEw->GetDataType() == Gmat::FILENAME_TYPE &&
+         if (leftEw && leftEw->GetDataType() == Gmat::FILENAME_TYPE &&
              !GmatStringUtil::IsEnclosedWith(name, "'"))
          {
             // Check if name is not an object name (Bug 2148 fix)
@@ -1138,32 +1150,32 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          
          try
          {                  
-            ElementWrapper *ew = NULL;
+            //ElementWrapper *ew = NULL;
             if (IsParameterType(name))
-               ew = CreateElementWrapper(name, true, manage);
+               rightEw = CreateElementWrapper(name, true, manage);
             else
-               ew = CreateElementWrapper(name, false, manage);
+               rightEw = CreateElementWrapper(name, false, manage);
             
             #if DBGLVL_WRAPPERS > 1
-            if (ew == NULL)
+            if (rightEw == NULL)
                MessageInterface::ShowMessage("   (2) ElementWrapper is NULL\n");
             else
                MessageInterface::ShowMessage
                   ("   (2)Setting ElementWrapper type %d for '%s' to '%s'\n",
-                   ew->GetWrapperType(), ew->GetDescription().c_str(), typeName.c_str());
+                   rightEw->GetWrapperType(), rightEw->GetDescription().c_str(), typeName.c_str());
             #endif
             
             std::string strToUse = name;
             if (addedQuotes)
                strToUse = origVal;
             
-            if (ew)
+            if (rightEw)
             {
                #if DBGLVL_WRAPPERS > 1
                MessageInterface::ShowMessage
-                  ("   Calling cmd->SetElementWrapper(<%p>, '%s')\n", ew, strToUse.c_str());
+                  ("   Calling cmd->SetElementWrapper(<%p>, '%s')\n", rightEw, strToUse.c_str());
                #endif
-               if (cmd->SetElementWrapper(ew, strToUse) == false)
+               if (cmd->SetElementWrapper(rightEw, strToUse) == false)
                {
                   if (skipErrorMessage)
                      return false;
@@ -1175,6 +1187,14 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
                   }
                }
             }
+            else
+            {
+               #if DBGLVL_WRAPPERS > 1
+               MessageInterface::ShowMessage
+                  ("Validator::CreateAssignmentWrappers() returning false, rightEw is NULL\n");
+               #endif
+               return false;
+            }
          }
          catch (BaseException &ex)
          {
@@ -1183,6 +1203,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          }
       }
    }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage("   Calling acmd->SetMathWrappers()\n");
+   #endif
    
    // Set math wrappers to math tree
    acmd->SetMathWrappers();
@@ -1304,6 +1328,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    }
    
    #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage("   leftEw=<%p>, rightEw=<%p>\n", leftEw, rightEw);
    MessageInterface::ShowMessage
       ("Validator::CreateAssignmentWrappers() returning true\n");
    #endif
@@ -2368,10 +2393,20 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          bool isParameterValid = true;
          bool depExist = true;
          
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage("   Now checking Parameter dependency\n");
+         #endif
          // Check for dependency before creating Spacecraft Parameter
          // (Fix for GMT3272, 3271, 3215; LOJ:2012.11.19)
          ParameterInfo *paramInfo = ParameterInfo::Instance();
          GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
+         Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("   depType=%d, ownedObjType=%d(%s)\n", depType, ownedObjType,
+             GmatBase::GetObjectTypeString(ownedObjType).c_str());
+         #endif
+         
          if (depType == GmatParam::NO_DEP)
          {
             #if DBGLVL_WRAPPERS > 1
@@ -2409,6 +2444,29 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
                   isParameterValid = false;
             }
          }
+         else if (depType == GmatParam::OWNED_OBJ)
+         {
+            // Owned object dependent Parameter does not allow explicit dependency since
+            // owned object is created locally in the Spacecraft, such as Attitude.
+            if (depobj != "")
+               isParameterValid = false;
+         }
+         else if (depType == GmatParam::ATTACHED_OBJ)
+         {
+            GmatBase *depObjPtr = FindObject(depobj);
+            if (depObjPtr == NULL)
+            {
+               depExist = false;
+               isParameterValid = false;
+            }
+            else
+            {
+               // If it is not of attached object type, then invalid
+               if (!(depObjPtr->IsOfType(ownedObjType)))
+                  isParameterValid = false;
+            }
+         }
+
          
          if (!isParameterValid)
          {

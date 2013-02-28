@@ -95,6 +95,7 @@ ScriptInterpreter::ScriptInterpreter() : Interpreter()
    
    inCommandMode = false;
    inRealCommandMode = false;
+   firstTimeCommandMode = true;
    
    // Initialize the section delimiter comment
    sectionDelimiterString.clear();
@@ -138,9 +139,10 @@ bool ScriptInterpreter::Interpret()
    Initialize();
    
    StringArray defaultCSNames;
-
+   
    inCommandMode = false;
    inRealCommandMode = false;
+   firstTimeCommandMode = true;
    beginMissionSeqFound = false;
    userParameterLines.clear();
    
@@ -892,7 +894,7 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
 {
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::Parse() inCmd=<%p>, logicalBlock = \n<<<%s>>>\n",
+      ("ScriptInterpreter::Parse() inCmd=<%p>, currentBlock = \n<<<%s>>>\n",
        inCmd, currentBlock.c_str());
    #endif
    
@@ -1129,6 +1131,20 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
    default:
       break;
+   }
+   
+   if (inCommandMode)
+   {
+      if (!beginMissionSeqFound && firstTimeCommandMode)
+      {
+         firstCommandStr = actualScript;
+         firstTimeCommandMode = false;
+         
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage
+            ("===> Command mode entered at '%s'\n", firstCommandStr.c_str());
+         #endif
+      }
    }
    
    #ifdef DEBUG_PARSE
@@ -1554,11 +1570,20 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
    }
    else
    {
+      if (inCommandMode)
+      {
+         InterpreterException ex
+            (" Command mode entered at \'" + firstCommandStr + "'.  " +
+             "Create command is not allowed after command mode started");
+         HandleError(ex);
+         return false;
+      }
+      
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
          obj = CreateObject(type, names[i]);
-            
+         
          if (obj == NULL)
          {
             InterpreterException ex
@@ -2010,6 +2035,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       #ifdef DEBUG_PARSE_ASSIGNMENT
       MessageInterface::ShowMessage("   Calling CreateAssignmentCommand()\n");
       #endif
+      inCommandMode = true;
       obj = (GmatBase*)CreateAssignmentCommand(lhs, rhs, retval, inCmd);
    }
    else

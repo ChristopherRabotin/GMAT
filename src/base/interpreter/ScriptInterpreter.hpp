@@ -74,6 +74,10 @@ private:
    bool functionDefined;
    /// Flag indicating function file has more than one function definition, so ignoring the rest
    bool ignoreRest;
+   /// Flag indicating first time command mode entered
+   bool firstTimeCommandMode;
+   /// First command string
+   std::string firstCommandStr;
    /// Function definition line
    std::string functionDef;
    /// Function file name

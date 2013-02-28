@@ -143,6 +143,10 @@ Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 // Gmat::ObjectType GetOwnedObjectType(const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Returns owned or attached object type.
+ */
+//------------------------------------------------------------------------------
 Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
 {
    if (mOwnedObjTypeMap.find(name) != mOwnedObjTypeMap.end())

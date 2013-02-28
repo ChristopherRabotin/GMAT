@@ -121,6 +121,7 @@ public:
    void SetContinueOnError(bool flag);
    bool GetContinueOnError();
    bool IsInCommandMode();
+   bool FoundBeginMissionSequence();
    
    const StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}

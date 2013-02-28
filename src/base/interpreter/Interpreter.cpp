@@ -917,8 +917,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
       ("Interpreter::CreateObject() type=<%s>, name=<%s>, manage=%d, createDefault=%d, "
-       "includeLineOnError=%d, continueOnError=%d\n", type.c_str(), name.c_str(), manage,
-       createDefault, includeLineOnError, continueOnError);
+       "includeLineOnError=%d\n   continueOnError=%d, inCommandMode=%d, currentFunction=<%p>\n",
+       type.c_str(), name.c_str(), manage, createDefault, includeLineOnError, continueOnError,
+       inCommandMode, currentFunction);
    #endif
    
    debugMsg = "In CreateObject()";
@@ -1415,6 +1416,15 @@ bool Interpreter::GetContinueOnError()
 bool Interpreter::IsInCommandMode()
 {
    return inCommandMode;
+}
+
+
+//------------------------------------------------------------------------------
+// bool FoundBeginMissionSequence()
+//------------------------------------------------------------------------------
+bool Interpreter::FoundBeginMissionSequence()
+{
+   return beginMissionSeqFound;
 }
 
 

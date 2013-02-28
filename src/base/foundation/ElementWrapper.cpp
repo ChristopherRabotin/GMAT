@@ -602,8 +602,17 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
                if (GmatStringUtil::ToInteger(desc, itempval))
                   lhsWrapper->SetInteger(itempval);
                else
-                  throw GmatBaseException
-                     ("ElementWrapper::SetValue() Cannot set \"" + lhs + "\" to " + rhs + "\"");
+               {
+                  // Truncate real value before assign it to integer (GMT-3469 fix)
+                  itempval = (Integer)rval;
+                  #ifdef DEBUG_EW_SET_VALUE
+                  MessageInterface::ShowMessage
+                     ("   Real value truncated to Integer, rval=%f, itempval=%d\n", rval, itempval);
+                  #endif
+                  lhsWrapper->SetInteger(itempval);
+                  //throw GmatBaseException
+                  //   ("ElementWrapper::SetValue() Cannot set \"" + lhs + "\" to " + rhs + "\"");
+               }
             }
             break;
          }
