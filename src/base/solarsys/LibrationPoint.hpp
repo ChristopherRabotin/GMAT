@@ -85,6 +85,9 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, 
                                      const Gmat::ObjectType type,
                                      const std::string &name = "");
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);

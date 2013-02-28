@@ -35,6 +35,7 @@
 
 //#define DEBUG_CHECK_BODIES
 //#define DEBUG_LP_OBJECT
+//#define DEBUG_LP_RENAME
 
 //---------------------------------
 // static data
@@ -101,8 +102,8 @@ CalculatedPoint          (lp),
 primaryBodyName          (lp.primaryBodyName),
 secondaryBodyName        (lp.secondaryBodyName),
 whichPoint               (lp.whichPoint),
-primaryBody              (lp.primaryBody),
-secondaryBody            (lp.secondaryBody)
+primaryBody              (NULL),   // (lp.primaryBody)
+secondaryBody            (NULL)    // (lp.secondaryBody)
 {
 }
 
@@ -508,12 +509,10 @@ std::string LibrationPoint::GetStringParameter(const Integer id) const
 {
    if (id == PRIMARY_BODY_NAME)             
    {
-      if (primaryBody)  return primaryBody->GetName();
       return primaryBodyName;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
-      if (secondaryBody)  return secondaryBody->GetName();
       return secondaryBodyName;
    }
    if (id == WHICH_POINT)             
@@ -759,7 +758,7 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
        secondaryBodyName.c_str(), secondaryBody);
    #endif
    
-   if (obj->IsOfType(Gmat::SPACE_POINT))
+   if ((obj->IsOfType(Gmat::SPACE_POINT)) || (obj->IsOfType(Gmat::CALCULATED_POINT)))
    {
       if (name == primaryBodyName)
          primaryBody = (SpacePoint*)obj;
@@ -788,6 +787,41 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
    // Call parent class to add objects to bodyList
    return CalculatedPoint::SetRefObject(obj, type, name);
 }
+
+
+//------------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ *
+ * @param <type>    reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ *
+ * @return true if object name changed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool LibrationPoint::RenameRefObject(const Gmat::ObjectType type,
+                                      const std::string &oldName,
+                                      const std::string &newName)
+{
+   #ifdef DEBUG_LP_RENAME
+      MessageInterface::ShowMessage("Entering LP::Rename with type = %d, oldName = %s, newName = %s\n",
+            (Integer) type, oldName.c_str(), newName.c_str());
+   #endif
+   if ((type == Gmat::SPACE_POINT) || (type == Gmat::CALCULATED_POINT))
+   {
+      if (primaryBodyName == oldName)
+         primaryBodyName = newName;
+      if (secondaryBodyName == oldName)
+         secondaryBodyName = newName;
+   }
+
+   return CalculatedPoint::RenameRefObject(type, oldName, newName);
+}
+
 
 
 //------------------------------------------------------------------------------

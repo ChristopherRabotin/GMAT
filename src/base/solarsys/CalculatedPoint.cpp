@@ -32,6 +32,7 @@
 //#define DEBUG_CP_BODIES
 //#define DEBUG_CP_SET_STRING
 //#define DEBUG_CP_ACTION
+//#define DEBUG_CP_RENAME
 
 //---------------------------------
 // static data
@@ -772,6 +773,10 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {
+   #ifdef DEBUG_CP_RENAME
+      MessageInterface::ShowMessage("Entering LP::Rename with type = %d, oldName = %s, newName = %s\n",
+            (Integer) type, oldName.c_str(), newName.c_str());
+   #endif
    if ((type == Gmat::SPACE_POINT) || (type == Gmat::CALCULATED_POINT))
    {
       for (unsigned int i=0; i< bodyNames.size(); i++)
@@ -785,7 +790,7 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
             defaultBodies[i] = newName;
       }
    }
-   return SpacePoint::RenameRefObject(type, oldName, newName);
+   return true;
 }
 
 
