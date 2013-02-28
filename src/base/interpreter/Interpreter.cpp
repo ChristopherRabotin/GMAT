@@ -7937,7 +7937,7 @@ bool Interpreter::FinalPass()
       
       #if DBGLVL_FINAL_PASS > 1
       MessageInterface::ShowMessage
-         ("Checking ref. object on %s:%s -> retval = ",
+         ("Checking ref. object on %s:%s -> retval = \n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
       #endif
       
@@ -7946,6 +7946,25 @@ bool Interpreter::FinalPass()
       // or Burn for now
       if (obj == NULL)
          throw InterpreterException("The object " + (*i) + " does not exist");
+
+      // Check attitude for singularity or disallowed values
+      if (obj->IsOfType("Spacecraft"))
+      {
+         try
+         {
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage
+               ("Calling Validate on object %s:%s\n",
+                     obj->GetTypeName().c_str(), obj->GetName().c_str());
+            #endif
+            obj->Validate();
+         }
+         catch (BaseException& ex)
+         {
+            HandleError(ex, false);
+            retval = false;
+         }
+      }
 
       // Validate IBs so we trap mass depletion issues
       if (obj->GetType() == Gmat::IMPULSIVE_BURN)

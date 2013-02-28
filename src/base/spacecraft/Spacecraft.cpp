@@ -3568,6 +3568,23 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * Checks to be sure that initial spacecraft settings are OK
+ *
+ * @return true if the settings are correct, throws if not.
+ */
+//------------------------------------------------------------------------------
+bool Spacecraft::Validate()
+{
+   // right now, we only have the attitude to Validate
+   if (attitude)  attitude->Validate();
+
+   return SpaceObject::Validate();
+}
+
 
 //---------------------------------------------------------------------------
 //  bool Initialize()

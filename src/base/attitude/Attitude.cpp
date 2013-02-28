@@ -1439,6 +1439,62 @@ Attitude::~Attitude()
    // nothing else to do here ... la la la la la
 }
 
+//------------------------------------------------------------------------------
+// bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * Checks to be sure that initial attitude settings do not lead to a
+ * singularity and are not disallowed
+ *
+ * @return true if the settings are correct, throws an AttitudeException if not.
+ */
+//------------------------------------------------------------------------------
+bool Attitude::Validate()
+{
+   // only need to check if setting the initial attitude is allowed for this
+   // attitude model type
+   if (setInitialAttitudeAllowed)
+   {
+      switch (inputAttitudeType)
+      {
+         case GmatAttitude::QUATERNION_TYPE:
+            ValidateQuaternion(quaternion);
+            break;
+         case GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE:
+            ValidateCosineMatrix(dcm);
+            break;
+         case GmatAttitude::MODIFIED_RODRIGUES_PARAMETERS_TYPE:
+            ValidateMRPs(mrps);
+            break;
+         case GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE:
+            ValidateEulerSequence(eulerSequence);
+            ValidateEulerAngles(eulerAngles, eulerSequenceArray);
+            break;
+         default:
+            break;
+      };
+
+      switch (inputAttitudeRateType)
+      {
+         case GmatAttitude::ANGULAR_VELOCITY_TYPE:
+            break;
+         case GmatAttitude::EULER_ANGLE_RATES_TYPE:
+            ValidateEulerSequence(eulerSequence);
+            angVel = Attitude::ToAngularVelocity(eulerAngleRates,
+                               eulerAngles,
+                               (Integer) eulerSequenceArray.at(0),
+                               (Integer) eulerSequenceArray.at(1),
+                               (Integer) eulerSequenceArray.at(2));
+         default:
+            break;
+      }
+   }
+
+   return true;
+}
+
+
+
 //---------------------------------------------------------------------------
 //  bool Initialize() 
 //---------------------------------------------------------------------------
@@ -1483,6 +1539,7 @@ bool Attitude::Initialize()
          break;
       case GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE:
          ValidateEulerSequence(eulerSequence);
+         ValidateEulerAngles(eulerAngles, eulerSequenceArray);
          dcm = Attitude::ToCosineMatrix(eulerAngles,
                          (Integer) eulerSequenceArray.at(0),
                          (Integer) eulerSequenceArray.at(1),
@@ -2919,10 +2976,6 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
              (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
          {
             std::ostringstream errmsg;
-//            errmsg << "Error: the attitude defined by the input euler angles (";
-//            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
-//            errmsg << ") is near a singularity." << std::endl;
-//            throw AttitudeException(errmsg.str());
             errmsg << "The attitude defined by the input euler angles (";
             errmsg << (eulerAngles(0)) << ", "
                    << value << ", " << (eulerAngles(2));
@@ -2938,10 +2991,6 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
                   (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
          {
             std::ostringstream errmsg;
-//            errmsg << "Error: the attitude defined by the input euler angles (";
-//            errmsg << eulerAngles(0) << ", " << value << ", " << eulerAngles(2);
-//            errmsg << ") is near a singularity." << std::endl;
-//            throw AttitudeException(errmsg.str());
             errmsg << "The attitude defined by the input euler angles (";
             errmsg << (eulerAngles(0)) << ", "
                    << value << ", " << (eulerAngles(2));
@@ -3185,45 +3234,7 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
    {
       if (sz != 3) throw AttitudeException(
                   "Incorrectly sized Rvector passed in for euler angles.");
-      Real angle2 = value(1) * GmatMathConstants::RAD_PER_DEG;
-      // check for a nearly singular attitude, for symmetric sequences
-      if ((eulerSequenceArray.at(0) == eulerSequenceArray.at(2)) &&
-          (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
-      {
-         std::ostringstream errmsg;
-//         errmsg << "Error: the attitude defined by the input euler angles (";
-//         errmsg << value(0) << ", " << value(1) << ", " << value(2);
-//         errmsg << ") is near a singularity." << std::endl;
-//         throw AttitudeException(errmsg.str());
-         errmsg << "The attitude defined by the input euler angles (";
-         errmsg << value(0) << ", "
-                << value(1) << ", " << value(2);
-         errmsg << ") is near a singularity.  The allowed values are:\n";
-         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
-         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
-         errmsg << "The tolerance on EulerAngle2 singularity is ";
-         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
-         throw AttitudeException(errmsg.str());
-      }
-      // check for a nearly singular attitude, for non-symmetric sequences
-      else if ((eulerSequenceArray.at(0) != eulerSequenceArray.at(2)) &&
-               (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
-      {
-         std::ostringstream errmsg;
-//         errmsg << "Error: the attitude defined by the input euler angles (";
-//         errmsg << value(0) << ", " << value(1) << ", " << value(2);
-//         errmsg << ") is near a singularity." << std::endl;
-//         throw AttitudeException(errmsg.str());
-         errmsg << "The attitude defined by the input euler angles (";
-         errmsg << value(0) << ", "
-                << value(1) << ", " << value(2);
-         errmsg << ") is near a singularity.  The allowed values are:\n";
-         errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
-         errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
-         errmsg << "The tolerance on EulerAngle2 singularity is ";
-         errmsg << EULER_ANGLE_TOLERANCE << ".\n";
-         throw AttitudeException(errmsg.str());
-      }
+      ValidateEulerAngles(value * GmatMathConstants::RAD_PER_DEG, eulerSequenceArray);
       for (i=0;i<3;i++) 
          eulerAngles(i) = value(i) * GmatMathConstants::RAD_PER_DEG;
       dcm = Attitude::ToCosineMatrix(eulerAngles,
@@ -3801,6 +3812,66 @@ bool Attitude::ValidateCosineMatrix(const Rmatrix33 &mat)
       attex.SetDetails(errMsg);
       throw attex;
    }
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool  ValidateEulerAngles(const Rvector &eAngles,
+//                            const UnsignedIntArray &eulSeq)
+//------------------------------------------------------------------------------
+/**
+ * This method validates the euler angles.
+ *
+ * @param <eAngles>  euler angles to validate
+ * @param <eulSeq>   euler sequence
+ *
+ * @return  flag indicating whether or not the input is a valid set of
+ *          euler angles
+ *
+ */
+//------------------------------------------------------------------------------
+bool Attitude::ValidateEulerAngles(const Rvector &eAngles,
+                                   const UnsignedIntArray &eulSeq)
+{
+   if (eAngles.GetSize() != 3)
+   {
+      throw AttitudeException(
+            "The Euler Angles must have 3 elements.\n");
+   }
+   Real angle2 = eAngles[1];
+   // check for a nearly singular attitude, for symmetric sequences
+   if ((eulSeq.at(0) == eulSeq.at(2)) &&
+       (GmatMathUtil::Abs(GmatMathUtil::Sin(angle2)) < EULER_ANGLE_TOLERANCE))
+   {
+      std::ostringstream errmsg;
+      errmsg << "The attitude defined by the input euler angles (";
+      errmsg << (eAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
+             << (eAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
+             << (eAngles(2) * GmatMathConstants::DEG_PER_RAD);
+      errmsg << ") is near a singularity.  The allowed values are:\n";
+      errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+      errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+      errmsg << "The tolerance on EulerAngle2 singularity is ";
+      errmsg << EULER_ANGLE_TOLERANCE << ".\n";
+      throw AttitudeException(errmsg.str());
+   }
+   // check for a nearly singular attitude, for non-symmetric sequences
+   else if ((eulSeq.at(0) != eulSeq.at(2)) &&
+            (GmatMathUtil::Abs(GmatMathUtil::Cos(angle2)) < EULER_ANGLE_TOLERANCE))
+   {
+      std::ostringstream errmsg;
+      errmsg << "The attitude defined by the input euler angles (";
+      errmsg << (eAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
+             << (eAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
+             << (eAngles(2) * GmatMathConstants::DEG_PER_RAD);
+      errmsg << ") is near a singularity.  The allowed values are:\n";
+      errmsg << "For a symmetric sequence EulerAngle2 != 0. ";
+      errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
+      errmsg << "The tolerance on EulerAngle2 singularity is ";
+      errmsg << EULER_ANGLE_TOLERANCE << ".\n";
+      throw AttitudeException(errmsg.str());
+   }
+
    return true;
 }
 

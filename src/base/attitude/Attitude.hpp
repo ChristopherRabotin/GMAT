@@ -114,12 +114,15 @@ public:
    // destructor
    virtual ~Attitude();
 
+   /// Method to Validate the input at the end of the script parsing process
+   virtual bool       Validate();
    /// Method to initialize the Attitude
    virtual bool       Initialize();
-   
+
    /// Methods to get/set the epoch and the reference coordinate system name
    Real               GetEpoch() const;
    void               SetEpoch(Real toEpoch); // A1Mjd time
+
    virtual bool       SetReferenceCoordinateSystemName(
                          const std::string &refName);
    /// Method to get the Euler sequence list (as strings)
@@ -355,9 +358,7 @@ protected:
    /// Has the warning about setting the initial attitude having no effect
    /// been written?
    bool                  warnNoAttitudeWritten;
- 
 
-   
    //------------------------------------------------------------------------------
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
    //------------------------------------------------------------------------------
@@ -379,6 +380,7 @@ private:
    Attitude();
 
    bool      ValidateCosineMatrix(const Rmatrix33 &mat);
+   bool      ValidateEulerAngles(const Rvector &eAngles, const UnsignedIntArray &eulSeq);
    bool      ValidateEulerSequence(const std::string &seq);
    bool      ValidateEulerSequence(const UnsignedIntArray &eulAng);
    bool      ValidateQuaternion(const Rvector &quat);

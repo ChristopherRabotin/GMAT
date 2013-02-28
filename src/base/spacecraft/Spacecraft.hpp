@@ -172,6 +172,7 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         Validate();
    virtual bool         Initialize();
 
    virtual bool         TakeAction(const std::string &action,
