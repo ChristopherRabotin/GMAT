@@ -606,6 +606,10 @@ bool Thruster::IsParameterCommandModeSettable(const Integer id) const
    if (id >= HardwareParamCount)
       return true;
 
+   // Inherited parameters that can be set:
+   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
+      return true;
+
    return Hardware::IsParameterCommandModeSettable(id);
 }
 
