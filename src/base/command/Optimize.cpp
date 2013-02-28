@@ -358,7 +358,7 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
 bool Optimize::Initialize()
 {
    #ifdef DEBUG_OPTIMIZE_INIT
-   ShowCommand("", "Initialize() this = ", this);
+      ShowCommand("", "Initialize() this = ", this);
    #endif
    
    GmatBase *mapObj = NULL;
@@ -389,9 +389,9 @@ bool Optimize::Initialize()
    // Clone the optimizer for local use
    theSolver = (Solver *)(mapObj->Clone());
    #ifdef DEBUG_MEMORY
-   MemoryTracker::Instance()->Add
-      (theSolver, theSolver->GetName(), "Optimize::Initialize()",
-       "theSolver = (Solver *)(mapObj->Clone())");
+      MemoryTracker::Instance()->Add
+         (theSolver, theSolver->GetName(), "Optimize::Initialize()",
+          "theSolver = (Solver *)(mapObj->Clone())");
    #endif
    
    theSolver->TakeAction("ResetInstanceCount");
@@ -402,6 +402,10 @@ bool Optimize::Initialize()
    
    if (theSolver->GetStringParameter("ReportStyle") == "Debug")
       optimizerInDebugMode = true;      
+   theSolver->SetStringParameter("SolverMode", 
+         GetStringParameter(SOLVER_SOLVE_MODE));
+   theSolver->SetStringParameter("ExitMode", 
+         GetStringParameter(SOLVER_EXIT_MODE));
     
    theSolver->SetStringParameter("ExitMode",
          GetStringParameter(SOLVER_EXIT_MODE));
@@ -499,6 +503,16 @@ bool Optimize::Initialize()
 //------------------------------------------------------------------------------
 // Execute
 //------------------------------------------------------------------------------
+/**
+ * Optimize the variables defined for this optimization loop.
+ *
+ * This method runs the optimizer state machine in order to determine the 
+ * variable values needed to optimize the user specified goals.
+ *
+ * @return true if the Command runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
 bool Optimize::Execute()
 {
    #ifdef DEBUG_OPTIMIZE_EXEC
@@ -507,8 +521,9 @@ bool Optimize::Execute()
    
    // We need to re-initialize since only one MatlabEngine is running per GMAT
    // session. This will allow to run back to back optimization.
-   if (!commandExecuting)
-      Initialize();
+   if ((theSolver == NULL) || (!theSolver->IsSolverInternal()))
+      if (!commandExecuting)
+         Initialize();
    
    // If optimizing inside a function, we need to reinitialize since the local solver is
    // cloned in Initialize(). All object data setting are done through assignment command
@@ -572,12 +587,23 @@ bool Optimize::Execute()
          MessageInterface::ShowMessage(
             "Optimize::Execute - about to advance the state\n");
       #endif
-      theSolver->AdvanceState();
 
-      if (theSolver->GetState() == Solver::FINISHED) 
+      if ((theSolver->IsSolverInternal()) || (startMode == RUN_AND_SOLVE))
+      {
+         theSolver->AdvanceState();
+      }
+
+      if ((theSolver->GetState() == Solver::FINISHED) || 
+          ((startMode == RUN_INITIAL_GUESS) && (specialState == Solver::FINISHED))) 
       {
          publisher->FlushBuffers();
          optimizerConverged = true;
+         if ((!theSolver->IsSolverInternal()) && (startMode == RUN_INITIAL_GUESS))
+         {
+            commandComplete    = true;
+            theSolver->ReportProgress(Solver::CHECKINGRUN);
+            theSolver->ReportProgress(Solver::FINISHED);
+         }
       }
    }
    
@@ -1105,63 +1131,140 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
       
       GmatCommand *currentCmd;
       publisher->SetRunState(Gmat::SOLVING);
-      
-      switch (state) 
+
+      switch (startMode)
       {
-      case Solver::INITIALIZING:
-         // Finalize initialization of the optimizer data
-         #ifdef DEBUG_OPTIMIZE_EXEC
-         MessageInterface::ShowMessage
-            ("Optimize::Execute - external solver in INITIALIZING state\n");
-         #endif
-         currentCmd = branch[0];
-         optimizerConverged = false;
-         while (currentCmd != this)  
+      case RUN_INITIAL_GUESS:
+         switch (specialState) 
          {
-            std::string type = currentCmd->GetTypeName();
-            if ((type == "Optimize") || (type == "Vary") ||
-                (type == "Minimize") || (type == "NonlinearConstraint"))
-               currentCmd->Execute();
-            currentCmd = currentCmd->GetNext();
-         }
-         StoreLoopData();
-         break;
-         
-      case Solver::RUNEXTERNAL:
-         #ifdef DEBUG_OPTIMIZE_EXEC
-         MessageInterface::ShowMessage
-            ("Optimize::Execute - external solver in RUNEXTERNAL state\n");
-         #endif
-         break;
-         
-      case Solver::FINISHED:
-         // Final clean-up
-         // Commented out to run once more below (LOJ: 2010.01.08)
-         //commandComplete = true;
-         #ifdef DEBUG_OPTIMIZE_EXEC
-         MessageInterface::ShowMessage
-            ("Optimize::Execute - external solver in FINISHED state\n");
-         #endif
-         optimizerConverged = true;
-         
-         // Run once more to publish the data from the converged state
-         if (!commandComplete)
-         {
+         case Solver::INITIALIZING:
+            // Finalize initialization of the optimizer data
             #ifdef DEBUG_OPTIMIZE_EXEC
             MessageInterface::ShowMessage
-               ("Optimize::Execute - external solver setting publisher with SOLVEDPASS\n");
+               ("Optimize::Execute - external solver in INITIALIZING state\n");
             #endif
-            ResetLoopData();
+            currentCmd = branch[0];
+            optimizerConverged = false;
+            while (currentCmd != this)  
+            {
+               std::string type = currentCmd->GetTypeName();
+               if ((type == "Optimize") || (type == "Vary") ||
+                   (type == "Minimize") || (type == "NonlinearConstraint"))
+                  currentCmd->Execute();
+               currentCmd = currentCmd->GetNext();
+            }
+            StoreLoopData();
+
+            theSolver->ReportProgress(Solver::INITIALIZING);
+
+            specialState = Solver::NOMINAL;
+            break;
+         
+         
+         case Solver::NOMINAL:
             branchExecuting = true;
-            publisher->SetRunState(Gmat::SOLVEDPASS);
+            specialState = Solver::FINISHED;
+            break;
+
+         case Solver::FINISHED:
+            // Final clean-up
+            // Commented out to run once more below (LOJ: 2010.01.08)
+            //commandComplete = true;
+            #ifdef DEBUG_OPTIMIZE_EXEC
+            MessageInterface::ShowMessage
+               ("Optimize::Execute - external solver in FINISHED state\n");
+            #endif
+            optimizerConverged = true;
+         
+            // Run once more to publish the data from the converged state
+            if (!commandComplete)
+            {
+               #ifdef DEBUG_OPTIMIZE_EXEC
+               MessageInterface::ShowMessage
+                  ("Optimize::Execute - external solver setting publisher with SOLVEDPASS\n");
+               #endif
+               ResetLoopData();
+               branchExecuting = true;
+               publisher->SetRunState(Gmat::SOLVEDPASS);
+            }
+            break;
+         
+         default:
+            MessageInterface::ShowMessage("Optimize::invalid state %d\n",state);
+         }
+
+         break;
+
+      case RUN_SOLUTION:
+         #ifdef DEBUG_OPTIMIZE_EXEC
+            MessageInterface::ShowMessage
+                  ("Running as RUN_SOLUTION, state = %d\n", state);
+         #endif
+         throw SolverException
+            ("Run Solution is not yet implemented for the Optimize command\n");
+
+         break;
+
+      case RUN_AND_SOLVE:
+      default:
+         switch (state) 
+         {
+         case Solver::INITIALIZING:
+            // Finalize initialization of the optimizer data
+            #ifdef DEBUG_OPTIMIZE_EXEC
+            MessageInterface::ShowMessage
+               ("Optimize::Execute - external solver in INITIALIZING state\n");
+            #endif
+            currentCmd = branch[0];
+            optimizerConverged = false;
+            while (currentCmd != this)  
+            {
+               std::string type = currentCmd->GetTypeName();
+               if ((type == "Optimize") || (type == "Vary") ||
+                   (type == "Minimize") || (type == "NonlinearConstraint"))
+                  currentCmd->Execute();
+               currentCmd = currentCmd->GetNext();
+            }
+            StoreLoopData();
+            break;
+         
+         case Solver::RUNEXTERNAL:
+            #ifdef DEBUG_OPTIMIZE_EXEC
+            MessageInterface::ShowMessage
+               ("Optimize::Execute - external solver in RUNEXTERNAL state\n");
+            #endif
+            break;
+         
+         case Solver::FINISHED:
+            // Final clean-up
+            // Commented out to run once more below (LOJ: 2010.01.08)
+            //commandComplete = true;
+            #ifdef DEBUG_OPTIMIZE_EXEC
+            MessageInterface::ShowMessage
+               ("Optimize::Execute - external solver in FINISHED state\n");
+            #endif
+            optimizerConverged = true;
+         
+            // Run once more to publish the data from the converged state
+            if (!commandComplete)
+            {
+               #ifdef DEBUG_OPTIMIZE_EXEC
+               MessageInterface::ShowMessage
+                  ("Optimize::Execute - external solver setting publisher with SOLVEDPASS\n");
+               #endif
+               ResetLoopData();
+               branchExecuting = true;
+               publisher->SetRunState(Gmat::SOLVEDPASS);
+            }
+            break;
+         
+         default:
+            MessageInterface::ShowMessage("Optimize::invalid state %d\n",state);
          }
          break;
-         
-      default:
-         MessageInterface::ShowMessage("Optimize::invalid state %d\n",state);
       }
    }
-   
+
    #ifdef DEBUG_OPTIMIZE_EXEC
    MessageInterface::ShowMessage
       ("Optimize::RunExternalSolver() returning %d, branch %s executing\n", retval,

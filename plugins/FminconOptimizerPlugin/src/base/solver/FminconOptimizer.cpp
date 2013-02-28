@@ -368,6 +368,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
          "   adding %s to string array\n", oneResult.c_str());
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
+
       // Jacobian in the future ---------------------- <future> ----------------
 
       WriteToTextFile(nestedState);
@@ -1069,33 +1070,37 @@ std::string FminconOptimizer::GetProgressString()
 
          case CHECKINGRUN:
             // Iterate through the constraints, writing them to the file
-            progress << "   Equality Constraints and achieved values:\n      ";
-
-            for (current = eqConstraintNames.begin(), i = 0;
-                 current != eqConstraintNames.end(); ++current)
+            if (eqConstraintNames.size() > 0)
             {
-               if (current != eqConstraintNames.begin())
-                  progress << ",  ";
-                  // does this make sense???
-               //progress << *current << "  Desired: " << eqConstaint[i]
-               //         << "  Achieved: " << nominal[i];
-               ++i;
+               progress << "   Equality constraint variances:\n      ";
+
+               for (current = eqConstraintNames.begin(), i = 0;
+                    current != eqConstraintNames.end(); ++current)
+               {
+                  if (current != eqConstraintNames.begin())
+                     progress << ",  ";
+                  progress << *current // << "  Desired: " << eqConstraint[i]
+                           << "  Achieved: " << eqConstraintValues[i];
+                  ++i;
+               }
             }
-
-           progress << "   Inequality Constraints and achieved values:\n      ";
-
-            for (current = ineqConstraintNames.begin(), i = 0;
-                 current != ineqConstraintNames.end(); ++current)
+            if (ineqConstraintNames.size() > 0)
             {
-               if (current != ineqConstraintNames.begin())
-                  progress << ",  ";
-                  // does this make sense???
-               //progress << *current << "  Desired: " << eqConstaint[i]
-               //         << "  Achieved: " << nominal[i];
-               ++i;
-            }
+               progress << "   Inequality constraint variances:\n      ";
 
-            break;
+               for (current = ineqConstraintNames.begin(), i = 0;
+                    current != ineqConstraintNames.end(); ++current)
+               {
+                  if (current != ineqConstraintNames.begin())
+                     progress <<  ",  ";
+                  progress << *current // << "  Desired: " << eqConstraint[i]
+                           << "  Achieved: " << ineqConstraintValues[i];
+                  ++i;
+               }
+            }
+            if (objectiveDefined)
+               progress << "\n   Cost Function Value: " << cost;
+             break;
 
          case RUNEXTERNAL:
             progress << instanceName << " Control Sequence Pass " << iterationsTaken+1

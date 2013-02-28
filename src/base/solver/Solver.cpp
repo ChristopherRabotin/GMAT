@@ -1206,12 +1206,19 @@ const StringArray& Solver::GetPropertyEnumStrings(const Integer id) const
  * This default version just passes the progress string to the MessageInterface.
  */
 //------------------------------------------------------------------------------
-void Solver::ReportProgress()
+void Solver::ReportProgress(const SolverState forState)
 {
+   SolverState stateBuffer = currentState;
+
+   if (forState != UNDEFINED_STATE)
+      currentState = forState;
+
    if (showProgress)
    {
       MessageInterface::ShowMessage("%s\n", GetProgressString().c_str());
    }
+
+   currentState = stateBuffer;
 }
 
 //------------------------------------------------------------------------------

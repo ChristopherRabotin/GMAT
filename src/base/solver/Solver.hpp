@@ -160,7 +160,7 @@ public:
    virtual bool        SetBooleanParameter(const Integer id,
                                            const bool value);
                                            
-   virtual void        ReportProgress();
+   virtual void        ReportProgress(const SolverState forState = UNDEFINED_STATE);
    virtual void        SetDebugString(const std::string &str);
     
    virtual bool        Initialize();
