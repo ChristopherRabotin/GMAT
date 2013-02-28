@@ -2380,10 +2380,11 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
             if (depobj != "")
             {
                // Special case for Element1/2/3 since these are deprecated types of Spacecraft
-               // owend Thruster Parameter such as sat1.Thruster1.Element1
+               // owned Thruster Parameter such as sat1.Thruster1.Element1 or owned FuelTank
                // We don't want to throw an exception for this case
                GmatBase *ownedObj = FindObject(depobj);
-               if (ownedObj && ownedObj->IsOfType(Gmat::THRUSTER))
+               if (ownedObj && (ownedObj->IsOfType(Gmat::THRUSTER) ||
+                     ownedObj->IsOfType(Gmat::FUEL_TANK)))
                   isParameterValid = true;
                // Special case for DateFormat such as sat1.Epoch.UTCGregorian
                else if ((paramInfo->IsTimeParameter(type) && depobj == "Epoch") &&
