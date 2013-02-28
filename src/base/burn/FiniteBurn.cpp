@@ -467,9 +467,8 @@ bool FiniteBurn::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 bool FiniteBurn::IsParameterCommandModeSettable(const Integer id) const
 {
-   // I think this should also be turned off; waiting for verification
-//   if ((id == THRUSTER) || (id == FUEL_TANK))
-//      return false;
+   if ((id == THRUSTER) || (id == FUEL_TANK))
+      return false;
 
    return Burn::IsParameterCommandModeSettable(id);
 }
