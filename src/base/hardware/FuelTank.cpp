@@ -355,6 +355,10 @@ bool FuelTank::IsParameterCommandModeSettable(const Integer id) const
        (id == PRESSURE_REGULATED))
       return false;
 
+   // Activate all of the other tank specific IDs
+   if (id >= HardwareParamCount)
+      return true;
+
    return Hardware::IsParameterCommandModeSettable(id);
 }
 

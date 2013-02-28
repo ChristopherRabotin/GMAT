@@ -602,6 +602,10 @@ bool Thruster::IsParameterCommandModeSettable(const Integer id) const
        (id == TANK))
       return false;
 
+   // Activate all of the other thruster specific IDs
+   if (id >= HardwareParamCount)
+      return true;
+
    return Hardware::IsParameterCommandModeSettable(id);
 }
 
