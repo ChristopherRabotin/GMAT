@@ -2545,7 +2545,9 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
    {
       if (ToInteger(rowStr, intVal))
       {
-         if (bracketPair == "()")
+         if (intVal <= 0)
+			return;
+		 else if (bracketPair == "()")
             row = intVal - 1; // array index start at 0
          else
             row = intVal;
@@ -2556,6 +2558,8 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
    {
       if (ToInteger(colStr, intVal))
       {
+         if (intVal <= 0)
+			return;
          if (bracketPair == "()")
             col = intVal - 1; // array index start at 0
          else
