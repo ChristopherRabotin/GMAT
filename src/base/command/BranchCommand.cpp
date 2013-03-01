@@ -1699,3 +1699,25 @@ GmatBase* BranchCommand::GetUpdatedObject()
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetUpdatedObjectParameterIndex()
+//------------------------------------------------------------------------------
+/**
+ * Returns updated parameter index for an updated object that may have clones
+ *
+ * @return The parameter index, 0r -1 if no index specified
+ */
+//------------------------------------------------------------------------------
+Integer BranchCommand::GetUpdatedObjectParameterIndex()
+{
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("BranchCommand::GetUpdatedObjectParameter"
+            "Index(): Got index %d from command type %s\n",
+            lastFired->GetUpdatedObjectParameterIndex(),
+            lastFired->GetTypeName().c_str());
+   #endif
+
+   if ((lastFired != NULL) && (lastFired != this))
+      return lastFired->GetUpdatedObjectParameterIndex();
+   return -1;
+}
