@@ -583,19 +583,7 @@ void CoordinateConverter::RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch,
    // Specify Euler rotation vector for theEpoch:
    Real vec[3];
    ICRFFile* icrfFile = ICRFFile::Instance();
-
-
-   // This try-catch-throw section was chnaged by TUAN NGUYEN to fix bug GMT-3652
-   try
-   {
-      icrfFile->Initialize();
-   }
-   catch(...)
-   {
-	   MessageInterface::ShowMessage("Error: ICRFFile object is fail to initialize.\n");
-   };
-
-
+   icrfFile->Initialize();
    icrfFile->GetICRFRotationVector(theEpoch, &vec[0], 3, 9);
 
    // Calculate rotation matrix based on Euler rotation vector:

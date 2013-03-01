@@ -73,18 +73,9 @@ void ICRFFile::Initialize()
    std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
    std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
    icrfFileName = path+name;
-
-   // This try-catch-throw section was changed by TUAN NGUYEN to fix bug GMT-3652
-   FILE* fpt;
-   try 
-   {
-      fpt = fopen(icrfFileName.c_str(), "r");
-      if (fpt == NULL)
-		  MessageInterface::ShowMessage("Error: cann't open '%s' file!!!\n", icrfFileName.c_str());
-   }
-   catch(...){}
-   throw (new GmatBaseException("Error: cann't open '" + icrfFileName + "' file!!!\n"));
-
+   FILE* fpt = fopen(icrfFileName.c_str(), "r");
+   if (fpt == NULL)
+	  throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
 
    // Read ICRF Euler rotation vector from data file and store to buffer:
    Real t;
