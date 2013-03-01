@@ -226,6 +226,9 @@ public:
    wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);
+   wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+                                             const wxSize &size,
+                                             bool isForPen);
    wxCheckListBox* GetXyPlotCheckListBox(wxWindow *parent, wxWindowID id,
                                          const wxSize &size,
                                          wxArrayString *excList = NULL);   

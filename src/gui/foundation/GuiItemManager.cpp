@@ -2456,6 +2456,50 @@ wxComboBox* GuiItemManager::GetOptimizerComboBox(wxWindow *parent, wxWindowID id
 //------------------------------------------------------------------------------
 wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
                                                           const wxSize &size,
+                                                          bool isForPen)
+{
+   wxArrayString emptyList;
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT);
+   
+   if (isForPen)
+   {
+      for (int i=0; i<theNumSubscriber; i++)
+      {
+		 GmatBase *otype = theGuiInterpreter->FindObject(theSubscriberList[i].c_str());
+		 if ((!otype->IsOfType(Gmat::EPHEMERIS_FILE)) && (!otype->IsOfType(Gmat::REPORT_FILE)))
+            checkListBox->Append(theSubscriberList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumSubscriber; i++)
+         checkListBox->Append(theSubscriberList[i]);
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mSubscriberCLBList.push_back(checkListBox);
+   mSubscriberExcList.push_back(NULL);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
+// CheckListBox
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+//                 const wxSize &size, wxArrayString &excList = NULL)
+//------------------------------------------------------------------------------
+/**
+ * @return Available Subscriber ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+                                                          const wxSize &size,
                                                           wxArrayString *excList)
 {
    wxArrayString emptyList;
