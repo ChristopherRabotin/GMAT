@@ -143,8 +143,15 @@ void TogglePanel::Create()
       mSubsCheckListBox =
          theGuiManager->GetXyPlotCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
    else
-      mSubsCheckListBox =
-         theGuiManager->GetSubscriberCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
+   {
+	   if ((theCommand->GetTypeName() == "PenUp") ||
+		   (theCommand->GetTypeName() == "PenDown"))
+		  mSubsCheckListBox =
+			 theGuiManager->GetSubscriberCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1), true);
+	   else
+		  mSubsCheckListBox =
+			 theGuiManager->GetSubscriberCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
+   }
    
    // On or Off button
    if (mShowToggleState)
