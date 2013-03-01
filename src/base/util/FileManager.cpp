@@ -2173,7 +2173,7 @@ void FileManager::RefreshFiles()
    AddFileType("MARS_POT_PATH", "DATA_PATH/gravity/mars/");
    AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.cof");
 
-   // planetary coeff. fiels
+   // planetary coeff. files
    AddFileType("PLANETARY_COEFF_PATH", "DATA_PATH/planetary_coeff/");
    AddFileType("EOP_FILE", "PLANETARY_COEFF_PATH/eopc04.62-now");
    AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
@@ -2182,7 +2182,7 @@ void FileManager::RefreshFiles()
    // time path and files
    AddFileType("TIME_PATH", "DATA_PATH/time/");
    AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
-   AddFileType("LSK_FILE", "TIME_PATH/naif0009.tls");
+   AddFileType("LSK_FILE", "TIME_PATH/naif0010.tls");
    
    // gui config file path
    AddFileType("GUI_CONFIG_PATH", "DATA_PATH/gui_config/");
