@@ -91,6 +91,7 @@ private:
    /// List of written objects, used to avoid duplicates
    StringArray objectsWritten;
    
+   bool CheckEncoding();
    bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
                              GmatBase *obj);
    bool ParseCommandBlock(const StringArray &chunks, GmatCommand *inCmd,

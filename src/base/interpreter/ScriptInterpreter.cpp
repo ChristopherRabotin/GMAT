@@ -27,6 +27,8 @@
 #include "StringUtil.hpp"      // for GmatStringUtil::
 #include "TimeTypes.hpp"       // for GmatTimeUtil::FormatCurrentTime()
 
+#include <sstream>      // For stringstream, used to check for non-ASCII chars
+
 // to allow object creation in command mode, such as inside ScriptEvent
 //#define __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
 
@@ -305,15 +307,92 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
    std::ifstream inFile(scriptFilename.c_str());
    inStream = &inFile;
    
-   theReadWriter->SetInStream(inStream);
-   retval = Interpret();
-   
+   if (CheckEncoding())
+   {
+      theReadWriter->SetInStream(inStream);
+      retval = Interpret();
+   }
+   else
+   {
+      inFile.close();
+      throw InterpreterException("The script \"" + scriptFilename +
+            "\" contains characters outside of the ASCII character set; "
+            "please fix the file before proceeding.");
+   }
    inFile.close();
    inStream = NULL;
    
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// bool CheckEncoding()
+//------------------------------------------------------------------------------
+/**
+ * Checks a script file to be sure all characters are ASCII characters.
+ *
+ * @return true if the file does not have out of range characters, false if it
+ *         does.
+ */
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::CheckEncoding()
+{
+   bool retval = true;
+
+   // Check each character
+   char theChar;
+   std::stringstream badCharMsg, currentLine;
+   Integer i = 0, firstFound = -1;
+   theChar = inStream->get();
+   bool badCharInLine = false;
+
+   do
+   {
+      if ((theChar == '\n') || (theChar == '\r'))
+      {
+         if (badCharInLine)
+            badCharMsg << "in the line \"" << currentLine.str() <<"\"\n";
+         currentLine.str("");
+         badCharInLine = false;
+         i = 0;
+      }
+      else
+         currentLine << theChar;
+
+      ++i;
+      #ifdef DEBUG_ENCODING
+         MessageInterface::ShowMessage("%c", theChar);
+      #endif
+      if ((theChar < 0x00) || (theChar > 0x7e))
+      {
+         badCharInLine = true;
+         badCharMsg << "Bad character found at location " << i << ": "
+                    << theChar << " with non-ASCII value "
+                    << (int)((unsigned char)theChar) << "\n";
+         if (firstFound == -1)
+            firstFound = i;
+      }
+      theChar = inStream->get();
+   } while (inStream->good());
+
+   #ifdef DEBUG_ENCODING
+      MessageInterface::ShowMessage("%s\nTotal read %d\n", bad.str().c_str(), i);
+   #endif
+
+   // Report error if there was a non-ASCII character before the eof marker
+   if (firstFound != -1)
+   {
+      MessageInterface::ShowMessage("%s\n", badCharMsg.str().c_str());
+      retval = false;
+   }
+
+   // reset the file pointer to the start if the check passed
+   if (retval)
+      inStream->seekg (0, std::ios::beg);
+
+   return retval;;
+}
 
 //------------------------------------------------------------------------------
 // GmatCommand* InterpretGmatFunction(const std::string fileName)
