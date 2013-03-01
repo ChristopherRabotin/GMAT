@@ -1111,7 +1111,7 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
             if (index == i)
                mTargetColorMap[mAllSpNameArray[i]] = value;
             
-            if (index >= size && index < size)
+            if (index >= 0 && index < size)
                mTargetColorArray[index] = value;
             else
                mTargetColorArray.push_back(value);
@@ -1120,7 +1120,6 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
          MessageInterface::ShowMessage
             ("OrbitPlot::SetUnsignedIntParameter() returning %u\n", value);
          #endif
-         
          return value;
       }
    default:
