@@ -352,7 +352,7 @@ bool ScriptInterpreter::CheckEncoding()
       if ((theChar == '\n') || (theChar == '\r'))
       {
          if (badCharInLine)
-            badCharMsg << "in the line \"" << currentLine.str() <<"\"\n";
+            badCharMsg << "in the line\n\"" << currentLine.str() <<"\"\n";
          currentLine.str("");
          badCharInLine = false;
          i = 0;
@@ -370,7 +370,7 @@ bool ScriptInterpreter::CheckEncoding()
          badCharMsg << "***ERROR*** Non-ASCII character \"" << theChar 
                     << "\" found at column " << i
                     << " (non-ASCII value "
-                    << (int)((unsigned char)theChar) << ")\n";
+                    << (int)((unsigned char)theChar) << ") ";
          if (firstFound == -1)
             firstFound = i; 
       }
