@@ -367,11 +367,12 @@ bool ScriptInterpreter::CheckEncoding()
       if ((theChar < 0x00) || (theChar > 0x7e))
       {
          badCharInLine = true;
-         badCharMsg << "Bad character found at location " << i << ": "
-                    << theChar << " with non-ASCII value "
-                    << (int)((unsigned char)theChar) << "\n";
+         badCharMsg << "***ERROR*** Non-ASCII character \"" << theChar 
+                    << "\" found at column " << i
+                    << " (non-ASCII value "
+                    << (int)((unsigned char)theChar) << ")\n";
          if (firstFound == -1)
-            firstFound = i;
+            firstFound = i; 
       }
       theChar = inStream->get();
    } while (inStream->good());
