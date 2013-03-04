@@ -25,6 +25,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "gmatdefs.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 class BurnThrusterPanel: public GmatPanel
 {
@@ -82,6 +83,10 @@ protected:
    wxStaticText *XLabel;
    wxStaticText *YLabel;
    wxStaticText *ZLabel;
+   wxStaticText *XUnitLabel;
+   wxStaticText *YUnitLabel;
+   wxStaticText *ZUnitLabel;
+   GmatStaticBoxSizer *vectorBoxSizer;
    wxTextCtrl *elem1TextCtrl;
    wxTextCtrl *elem2TextCtrl;
    wxTextCtrl *elem3TextCtrl;

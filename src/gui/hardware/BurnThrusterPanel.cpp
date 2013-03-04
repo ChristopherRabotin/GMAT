@@ -174,7 +174,7 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    
    // ThrustDirection1
-   wxStaticText *elem1Unit = new wxStaticText(this, ID_TEXT, wxT(""));
+   XUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
    XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
    elem1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -182,7 +182,7 @@ void BurnThrusterPanel::Create()
    elem1TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection1Hint")));
    
    // ThrustDirection2
-   wxStaticText *elem2Unit =
+   YUnitLabel =
       new wxStaticText(this, ID_TEXT, wxT(""));
    YLabel =
       new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"2"),
@@ -193,7 +193,7 @@ void BurnThrusterPanel::Create()
    elem2TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection2Hint")));
    
    // ThrustDirection3
-   wxStaticText *elem3Unit = new wxStaticText(this, ID_TEXT, wxT(""));
+   ZUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
    ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
    elem3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -226,15 +226,15 @@ void BurnThrusterPanel::Create()
    wxFlexGridSizer *vectorSizer = new wxFlexGridSizer(3, 0, 0);
    vectorSizer->Add(XLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    vectorSizer->Add(elem1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   vectorSizer->Add(elem1Unit, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   vectorSizer->Add(XUnitLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    vectorSizer->Add(YLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    vectorSizer->Add(elem2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   vectorSizer->Add(elem2Unit, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   vectorSizer->Add(YUnitLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    vectorSizer->Add(ZLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    vectorSizer->Add(elem3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   vectorSizer->Add(elem3Unit, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   vectorSizer->Add(ZUnitLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
@@ -247,7 +247,7 @@ void BurnThrusterPanel::Create()
       vectorSizer->Add(20,20);
    }
    
-   GmatStaticBoxSizer *vectorBoxSizer =
+   vectorBoxSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Vector");
    vectorBoxSizer->Add(vectorSizer, 0, wxALIGN_CENTER|wxALL, 0);
    
