@@ -2176,6 +2176,9 @@ void FileManager::RefreshFiles()
    // planetary coeff. files
    AddFileType("PLANETARY_COEFF_PATH", "DATA_PATH/planetary_coeff/");
    AddFileType("EOP_FILE", "PLANETARY_COEFF_PATH/eopc04.62-now");
+   // wcs 2013.03.04 PLANETARY_COEFF_FILE is CURRENTLY not used, since our
+   // default is PLANETARY_1980 and PLANETARY_1996 is not allowed; however,
+   // we will leave this here as a placeholder anyway
    AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
    AddFileType("NUTATION_COEFF_FILE", "PLANETARY_COEFF_PATH/NUTATION.DAT");
 

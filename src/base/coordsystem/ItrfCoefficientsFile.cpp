@@ -75,7 +75,7 @@ const Real    ItrfCoefficientsFile::MULT_2000_PLANET      = 1.0e-04;        // ?
  * (default constructor).
  *
  * @param fileNme      Nutation file name.
- * @param planFileName Planetary terms file name
+ * @param planFileName Planetary terms file name    // CURRENTLY not used wcs 2013.03.04
  * @param nutTerms     Number of nutation terms  (default GmatItrf::NUTATION_1980)
  * @param planTerms    Number of Planetary terms (default GmatItrf::PLANETARY_1980)
  */
@@ -87,7 +87,7 @@ ItrfCoefficientsFile::ItrfCoefficientsFile(const std::string &nutFileName,
 nutation              (nutTerms),
 planetary             (planTerms),
 nutationFileName      (nutFileName),
-planetaryFileName     (planFileName),
+planetaryFileName     (planFileName),     // CURRENTLY not used wcs 2013.03.04
 filesAreInitialized   (false),
 A                     (NULL),
 B                     (NULL),
@@ -295,7 +295,7 @@ void ItrfCoefficientsFile::Initialize()
  
    if (itrfNutFile.is_open())  itrfNutFile.close();
    
-   if (planetary == GmatItrf::PLANETARY_1996)
+   if (planetary == GmatItrf::PLANETARY_1996)      // CURRENTLY not used or disallowed wcs 2013.03.04
    {
       // read the planetary file and put the coefficient data into the arrays
       std::ifstream itrfPlanFile(planetaryFileName.c_str());

@@ -41,7 +41,7 @@ namespace GmatItrf
    enum PlanetaryTerms
    {
       PLANETARY_1980,
-      PLANETARY_1996
+      PLANETARY_1996     // CURRENTLY not used wcs 2013.03.04
       // not available for 2000?
    };
 };
@@ -52,7 +52,7 @@ public:
 
    // default constructor
    ItrfCoefficientsFile(const std::string &nutFileName = "NUTATION.DAT", 
-               const std::string planFileName = "NUT85.DAT",
+               const std::string planFileName = "NUT85.DAT",      // CURRENTLY not used wcs 2013.03.04
                GmatItrf::NutationTerms  nutTerms  = GmatItrf::NUTATION_1980,
                GmatItrf::PlanetaryTerms planTerms = GmatItrf::PLANETARY_1980);
    // copy constructor

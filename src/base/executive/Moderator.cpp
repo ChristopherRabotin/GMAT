@@ -7140,6 +7140,9 @@ void Moderator::CreatePlanetaryCoeffFile()
       theFileManager->GetFullPathname("NUTATION_COEFF_FILE");
    MessageInterface::ShowMessage("Setting nutation file to %s\n",
                                  nutFileName.c_str());
+   // wcs 2013.03.04 planFileName is CURRENTLY not used, since our default is
+   // PLANETARY_1980 and PLANETARY_1996 is not allowed; however, we pass it in
+   // here anyway since we are not removing the code to handle PLANETARY_1996
    std::string planFileName =
       theFileManager->GetFullPathname("PLANETARY_COEFF_FILE");
    MessageInterface::ShowMessage("Setting planetary coeff. file to %s\n",
