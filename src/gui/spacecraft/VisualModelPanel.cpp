@@ -292,7 +292,7 @@ void VisualModelPanel::Create()
    wxStaticText *scaleMinLabel =
       new wxStaticText(this, ID_TEXT, wxT("0.001"), wxDefaultPosition, wxDefaultSize, 0);
    scaleSlider =
-      new wxSlider(this, ID_SCALE_SLIDER, 0, -1000, 1000, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_SCALE_SLIDER, 0, -999, 1000, wxDefaultPosition, wxSize(120, 25),
       wxSL_HORIZONTAL);
    wxStaticText *scaleMaxLabel =
       new wxStaticText(this, ID_TEXT, wxT("1000.0"), wxDefaultPosition, wxDefaultSize, 0);
@@ -475,8 +475,13 @@ void VisualModelPanel::InitializeCanvas()
       zRotSlider->SetValue(z);
       
       x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
-      scaleSlider->SetValue(x);
       scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
+      if (x < 1)
+      {
+         int m = scaleSlider->GetMax();
+         x = (float)(m*x)-m;
+      }
+      scaleSlider->SetValue(x);
       
       modelTextCtrl->SetValue(wxT(currentSpacecraft->modelFile.c_str()));
       modelCanvas->Refresh(false);
