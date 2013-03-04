@@ -276,9 +276,13 @@ std::string AttitudeData::GetString(Integer item)
    {
    case QUATERNION:
    {
-      std::string str = "[ " + GmatStringUtil::ToString(quat[0], 15) + " " +
+      // We don't want square brackets around values (GMT-3663)
+      //std::string str = "[ " + GmatStringUtil::ToString(quat[0], 15) + " " +
+      //   GmatStringUtil::ToString(quat[1], 15) + " " + GmatStringUtil::ToString(quat[2], 15) + 
+      //   " " + GmatStringUtil::ToString(quat[3], 15) + "]";
+      std::string str = GmatStringUtil::ToString(quat[0], 15) + " " +
          GmatStringUtil::ToString(quat[1], 15) + " " + GmatStringUtil::ToString(quat[2], 15) + 
-         " " + GmatStringUtil::ToString(quat[3], 15) + "]";
+         " " + GmatStringUtil::ToString(quat[3], 15);
       return str;
    }
    default:
