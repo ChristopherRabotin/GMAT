@@ -38,7 +38,7 @@
 // OrbitStm(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStm::OrbitStm(const std::string &name, GmatBase *obj)
-   : OrbitRmat66(name, "OrbitSTM", obj, "Orbit STM", "", GmatParam::COORD_SYS, true)
+   : OrbitRmat66(name, "OrbitSTM", obj, "Orbit STM", "", GmatParam::NO_DEP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -108,7 +108,7 @@ GmatBase* OrbitStm::Clone(void) const
 // OrbitStmA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStmA::OrbitStmA(const std::string &name, GmatBase *obj)
-   : OrbitRmat33(name, "OrbitSTMA", obj, "Orbit STM_A", "", GmatParam::COORD_SYS, true)
+   : OrbitRmat33(name, "OrbitSTMA", obj, "Orbit STM_A", "", GmatParam::NO_DEP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -178,7 +178,7 @@ GmatBase* OrbitStmA::Clone(void) const
 // OrbitStmB(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStmB::OrbitStmB(const std::string &name, GmatBase *obj)
-   : OrbitRmat33(name, "OrbitSTMB", obj, "Orbit STM_B", "", GmatParam::COORD_SYS, true)
+   : OrbitRmat33(name, "OrbitSTMB", obj, "Orbit STM_B", "", GmatParam::NO_DEP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -248,7 +248,7 @@ GmatBase* OrbitStmB::Clone(void) const
 // OrbitStmC(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStmC::OrbitStmC(const std::string &name, GmatBase *obj)
-   : OrbitRmat33(name, "OrbitSTMC", obj, "Orbit STM_C", "", GmatParam::COORD_SYS, true)
+   : OrbitRmat33(name, "OrbitSTMC", obj, "Orbit STM_C", "", GmatParam::NO_DEP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -318,7 +318,7 @@ GmatBase* OrbitStmC::Clone(void) const
 // OrbitStmD(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStmD::OrbitStmD(const std::string &name, GmatBase *obj)
-   : OrbitRmat33(name, "OrbitSTMD", obj, "Orbit STM_D", "", GmatParam::COORD_SYS, true)
+   : OrbitRmat33(name, "OrbitSTMD", obj, "Orbit STM_D", "", GmatParam::NO_DEP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
