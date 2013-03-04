@@ -154,7 +154,11 @@ void AssignmentPanel::SaveData()
    #endif
    
    canClose = true;
-   mLhsTextCtrl->SetValue(mLhsTextCtrl->GetValue().Trim(true).Trim(false));
+   if (mIsTextModified)
+   {
+		mLhsTextCtrl->SetValue(mLhsTextCtrl->GetValue().Trim(true).Trim(false));
+		mRhsTextCtrl->SetValue(mRhsTextCtrl->GetValue().Trim(true).Trim(false));
+   }
    std::string newLhs = mLhsTextCtrl->GetValue().c_str();
    std::string newRhs = mRhsTextCtrl->GetValue().c_str();
    
