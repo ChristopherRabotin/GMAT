@@ -335,6 +335,9 @@ bool GmatApp::OnInit()
       // success: wxApp::OnRun() will be called which will enter the main message
       // loop and the application will run. If we returned FALSE here, the
       // application would exit immediately.
+
+      if (startupMessageBuffer.length() > 0)
+         MessageInterface::ShowMessage("%s\n", startupMessageBuffer.c_str());
       
       return status;
    }
@@ -425,16 +428,16 @@ bool GmatApp::ProcessCommandLineOptions()
    
    wxString commandLineOptions =
       "Valid command line options are:\n"
-      "   --help, -h              Shows available options\n"
-      "   --version, -v           Shows GMAT build date\n"
+      "   --help, -h\t\tShows available options\n"
+      "   --version, -v\t\tShows GMAT build date\n"
       #ifdef __ADD_GMAT_SERVER__
       // GmatServer is disabled (GMT-3320)
       "   --start-server          Starts GMAT server on start-up\n"
       #endif
-      "   --run, -r <scriptname>  Builds and runs the script\n"
-      "   --minimize, -m          Minimizes GMAT window\n"
-      "   --nits, -n              Run as a NITS client\n"
-      "   --exit, -x              Exits GMAT after a script is run\n\n";
+      "   --run, -r <scriptname>\tBuilds and runs the script\n"
+      "   --minimize, -m\t\tMinimizes GMAT window\n"
+      "   --nits, -n\t\tRun as a NITS client\n"
+      "   --exit, -x\t\tExits GMAT after a script is run\n\n";
 
    #ifdef DEBUG_CMD_LINE
    MessageInterface::ShowMessage("argc = %d\n", argc);
@@ -452,8 +455,9 @@ bool GmatApp::ProcessCommandLineOptions()
          if ((arg == "--version") || (arg == "-v"))
          {
             wxString buildDate;
-            buildDate.Printf("Build Date: %s %s\n", __DATE__, __TIME__);
-            MessageInterface::ShowMessage(buildDate.c_str());
+            buildDate.Printf("Build Date: %s %s\n\n", __DATE__, __TIME__);
+            startupMessageBuffer += buildDate;
+//            MessageInterface::ShowMessage(buildDate.c_str());
          }
          #ifdef __ADD_GMAT_SERVER__
          else if (arg == "--start-server")
@@ -482,7 +486,8 @@ bool GmatApp::ProcessCommandLineOptions()
          }
          else if ((arg == "--help") || (arg == "-h"))
          {
-            MessageInterface::ShowMessage(commandLineOptions.c_str());
+            startupMessageBuffer += commandLineOptions;
+//            MessageInterface::ShowMessage(commandLineOptions.c_str());
          }
          else if ((arg == "--exit") || (arg == "-x"))
          {

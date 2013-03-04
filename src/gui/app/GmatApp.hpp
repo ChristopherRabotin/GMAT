@@ -59,6 +59,10 @@ private:
    bool runScript;
    bool runBatch;
    bool startMatlabServer;
+
+   /// Buffer for messages based on command line parameters, so they can
+   /// display after the Moderator initializes
+   std::string startupMessageBuffer;
    
    bool ProcessCommandLineOptions();
    void BuildAndRunScript();
