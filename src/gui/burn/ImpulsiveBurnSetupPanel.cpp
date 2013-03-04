@@ -21,6 +21,8 @@
 
 #include "ImpulsiveBurnSetupPanel.hpp"
 #include "MessageInterface.hpp"
+#include <wx/config.h>
+
 
 //#define DEBUG_BURNPANEL_LOAD
 
@@ -77,12 +79,24 @@ void ImpulsiveBurnSetupPanel::Create()
    #endif
    
    BurnThrusterPanel::Create();
+
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Impulsive Burn"));
    //-----------------------------------------------------------------
    // thrust vector items
    //-----------------------------------------------------------------
    XLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"1"));
    YLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"2"));
    ZLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"3"));
+   XUnitLabel->SetLabel(wxT("km/s"));
+   YUnitLabel->SetLabel(wxT("km/s"));
+   ZUnitLabel->SetLabel(wxT("km/s"));
+   vectorBoxSizer->GetStaticBox()->SetLabel(wxT("Delta-V Vector"));
+   elem1TextCtrl->SetToolTip(pConfig->Read(_T("Element1Hint")));
+   elem2TextCtrl->SetToolTip(pConfig->Read(_T("Element2Hint")));
+   elem3TextCtrl->SetToolTip(pConfig->Read(_T("Element3Hint")));
    
    #ifdef DEBUG_BURNPANEL_CREATE
    MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel::Create() exiting\n");
