@@ -8596,12 +8596,15 @@ bool Interpreter::FinalPass()
 
          for (UnsignedInt j = 0; j < f1List.size(); ++j)
          {
-            if (theModerator->GetConfiguredObject(f1List[j])->
-                  IsOfType("SpaceObject") == false)
+            obj = theModerator->GetConfiguredObject(f1List[j]);
+            if (obj != NULL)
             {
-               overlaps += "   ";
-               overlaps += f1List[j] + " cannot propagate in the formation " +
-                           f1->GetName() + ".\n";
+               if (obj->IsOfType("SpaceObject") == false)
+               {
+                  overlaps += "   ";
+                  overlaps += f1List[j] + " cannot propagate in the formation " +
+                              f1->GetName() + ".\n";
+               }
             }
          }
       }
