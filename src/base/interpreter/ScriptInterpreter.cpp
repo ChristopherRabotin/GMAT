@@ -345,41 +345,46 @@ bool ScriptInterpreter::CheckEncoding()
    std::stringstream badCharMsg, currentLine;
    Integer i = 0, firstFound = -1;
    theChar = inStream->get();
-   bool badCharInLine = false;
 
-   do
+   // Only do this if the file is not empty
+   if (inStream->good())
    {
-      if ((theChar == '\n') || (theChar == '\r'))
-      {
-         if (badCharInLine)
-            badCharMsg << "in the line\n\"" << currentLine.str() <<"\"\n";
-         currentLine.str("");
-         badCharInLine = false;
-         i = 0;
-      }
-      else
-         currentLine << theChar;
+      bool badCharInLine = false;
 
-      ++i;
+      do
+      {
+         if ((theChar == '\n') || (theChar == '\r'))
+         {
+            if (badCharInLine)
+               badCharMsg << "in the line\n\"" << currentLine.str() <<"\"\n";
+            currentLine.str("");
+            badCharInLine = false;
+            i = 0;
+         }
+         else
+            currentLine << theChar;
+
+         ++i;
+         #ifdef DEBUG_ENCODING
+            MessageInterface::ShowMessage("%c", theChar);
+         #endif
+         if ((theChar < 0x00) || (theChar > 0x7f))
+         {
+            badCharInLine = true;
+            badCharMsg << "***ERROR*** Non-ASCII character \"" << theChar
+                       << "\" found at column " << i
+                       << " (non-ASCII value "
+                       << (int)((unsigned char)theChar) << ") ";
+            if (firstFound == -1)
+               firstFound = i;
+         }
+         theChar = inStream->get();
+      } while (inStream->good());
+
       #ifdef DEBUG_ENCODING
-         MessageInterface::ShowMessage("%c", theChar);
+         MessageInterface::ShowMessage("%s\nTotal read %d\n", bad.str().c_str(), i);
       #endif
-      if ((theChar < 0x00) || (theChar > 0x7e))
-      {
-         badCharInLine = true;
-         badCharMsg << "***ERROR*** Non-ASCII character \"" << theChar 
-                    << "\" found at column " << i
-                    << " (non-ASCII value "
-                    << (int)((unsigned char)theChar) << ") ";
-         if (firstFound == -1)
-            firstFound = i; 
-      }
-      theChar = inStream->get();
-   } while (inStream->good());
-
-   #ifdef DEBUG_ENCODING
-      MessageInterface::ShowMessage("%s\nTotal read %d\n", bad.str().c_str(), i);
-   #endif
+   }
 
    // Report error if there was a non-ASCII character before the eof marker
    if (firstFound != -1)
@@ -392,7 +397,7 @@ bool ScriptInterpreter::CheckEncoding()
    if (retval)
       inStream->seekg (0, std::ios::beg);
 
-   return retval;;
+   return retval;
 }
 
 //------------------------------------------------------------------------------
