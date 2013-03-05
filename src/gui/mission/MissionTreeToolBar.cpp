@@ -167,7 +167,7 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
    
    index = 0;
    AddCheckTool(TOOL_CLEAR_FILTERS, wxT("ClearFilters"), *bitmaps[index],
-                                 *bitmaps[index], wxT("Clear Filters"));
+                                 *bitmaps[index], wxT("Show All"));
    AddSeparator();
    ++index;
    AddCheckTool(TOOL_LEVEL_ALL, wxT("LevelA"), *bitmaps[index],
