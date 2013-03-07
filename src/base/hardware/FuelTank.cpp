@@ -439,7 +439,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
             {
                fuelMass = value;
                UpdateTank();
-               // initialized = false;
+               isInitialized = false;
                return fuelMass;
             }
             else
