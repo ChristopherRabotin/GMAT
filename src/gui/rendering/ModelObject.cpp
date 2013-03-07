@@ -30,11 +30,13 @@
 #include "GmatConstants.hpp"
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
 #include "ModelObject.hpp"
-#include "Load3ds.hpp"
-#include "LoadPOV.hpp"
+//#include "Load3ds.hpp"
+//#include "LoadPOV.hpp"
+#include "ThreeDSLoader.hpp"
 #include <wx/image.h>
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
+#include "SubscriberException.hpp"
 
 
 //#define DRAW_NORMALS
@@ -44,6 +46,8 @@
 //#define DEBUG_LOAD_TEXTURE
 //#define DEBUG_DRAW
 //#define DEBUG_DRAW_MORE
+//#define DEBUG_INDICES
+//#define DEBUG_MODEL_DATA
 
 //int control_object;
 std::string filePath;
@@ -51,13 +55,67 @@ std::string filePath;
 //------------------------------------------------------------------------------
 // ModelObject()
 //------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
 ModelObject::ModelObject()
 {
    num_vertices = 0;
    num_polygons = 0;
    num_materials = 0;
    isLoaded = false;
+
+   mass  = 0.0;              // Object's mass
+   bsphere_radius = 10.0;    // the radius of the object's bounding sphere
+   id_texture = 0;           // The id of the object's texture
 }
+
+
+//------------------------------------------------------------------------------
+// ~ModelObject()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
+ModelObject::~ModelObject()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// ModelObject(const ModelObject& mo)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * This method is not used, but is provided for completeness and to match GMAT
+ * style.
+ */
+//------------------------------------------------------------------------------
+ModelObject::ModelObject(const ModelObject& mo)
+{
+   MessageInterface::ShowMessage("ModelObject::ModelObject(const ModelObject& )"
+         "called but not implemented\n");
+}
+
+//------------------------------------------------------------------------------
+// ModelObject& operator=(const ModelObject& mo)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * This method is not used, but is provided for completeness and to match GMAT
+ * style.
+ */
+//------------------------------------------------------------------------------
+ModelObject& ModelObject::operator=(const ModelObject& mo)
+{
+   MessageInterface::ShowMessage("ModelObject::operator=(const ModelObject& )"
+         "called but not implemented\n");
+}
+
 
 //------------------------------------------------------------------------------
 // char Load(const std::string &objectName, const std::string &path, ...)
@@ -88,19 +146,19 @@ char ModelObject::Load(const std::string &objectName, const std::string &path,
    
    filename = objectName;
    //   WIREFRAME_MODE = 0;
-   std::string thepath, string;
+   std::string thepath, thestring;
    FileManager *fm = FileManager::Instance();
    
    thepath = std::string(fm->GetPathname("MODEL_PATH").c_str());
    thepath += path;
-   string = thepath;
-   string += objectName;
+   thestring = thepath;
+   thestring += objectName;
 
    #ifdef DEBUG_LOAD
-   MessageInterface::ShowMessage("   Loading '%s'\n", string.c_str());
+   MessageInterface::ShowMessage("   Loading '%s'\n", thestring.c_str());
    #endif
 
-   char retval = Load(string, posX, posY, posZ, rotX, rotY, rotZ);
+   char retval = Load(thestring, posX, posY, posZ, rotX, rotY, rotZ);
    
    #ifdef DEBUG_LOAD
    MessageInterface::ShowMessage
@@ -159,12 +217,15 @@ char ModelObject::Load(const std::string &full_path,
    if (extension == wxT("3ds") || extension == wxT("3DS"))
    {
       #ifdef DEBUG_LOAD
-      MessageInterface::ShowMessage("   Loading 3ds '%s'\n", full_path.c_str());
+         MessageInterface::ShowMessage("   Loading 3ds '%s'\n", full_path.c_str());
       #endif
 
-      if (Load3DS(this, full_path) == 0)
+      ThreeDSLoader loader;
+      if (!loader.LoadFileIntoModel(this, full_path))
          return 0;
       
+      isLoaded = true;
+
       // Calculate the normals for the object
       // We only do this for 3ds files, since pov files
       // come with their norms
@@ -173,10 +234,15 @@ char ModelObject::Load(const std::string &full_path,
    else if (extension == wxT("pov") || extension == wxT("POV"))
    {
       #ifdef DEBUG_LOAD
-      MessageInterface::ShowMessage("   Loading pov '%s'\n", full_path.c_str());
+         MessageInterface::ShowMessage("   Loading pov '%s'\n",
+               full_path.c_str());
       #endif
 
-      LoadPOV(this, full_path);
+      MessageInterface::ShowMessage("POV model files are not currently "
+            "supported in GMAT\n");
+      return 0;
+
+//      LoadPOV(this, full_path);
       //CalcNormals();
       //for (int i = 0; i < num_vertices; i++){
       //VectorNormalize(&normal[i]);
@@ -344,6 +410,203 @@ int ModelObject::LoadTexture(const std::string &filename)
    return id;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GetNumVertices()
+//------------------------------------------------------------------------------
+/**
+ * Gets the current vertex count
+ *
+ * @return The number of defined vertices
+ */
+//------------------------------------------------------------------------------
+Integer ModelObject::GetNumVertices()
+{
+   return num_vertices;
+}
+
+//------------------------------------------------------------------------------
+// void SetNumVertices(Integer vCount)
+//------------------------------------------------------------------------------
+/**
+ * Sets the vertex count
+ *
+ * @param vCount The total number of vertices
+ */
+//------------------------------------------------------------------------------
+void ModelObject::SetNumVertices(Integer vCount)
+{
+   if ((num_vertices > 0) && (num_vertices != vCount))
+      MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
+            "multiple vertex blocks and may not display correctly.\n",
+            filename.c_str());
+   num_vertices = vCount;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetNumPolygons()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the polygon count
+ *
+ * @return The number of polygons
+ */
+//------------------------------------------------------------------------------
+Integer ModelObject::GetNumPolygons()
+{
+   return num_polygons;
+}
+
+//------------------------------------------------------------------------------
+// void SetNumPolygons(Integer pCount)
+//------------------------------------------------------------------------------
+/**
+ * Sets the polygon count
+ *
+ * @param pCount The new polygon count
+ */
+//------------------------------------------------------------------------------
+void ModelObject::SetNumPolygons(Integer pCount)
+{
+   if ((num_polygons > 0) && (num_polygons != pCount))
+      MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
+            "multiple polygon blocks and may not display correctly.\n",
+            filename.c_str());
+   num_polygons = pCount;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetNumMaterials()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the number of materials in the model
+ *
+ * @return The number of materials
+ */
+//------------------------------------------------------------------------------
+Integer ModelObject::GetNumMaterials()
+{
+   return num_materials;
+}
+
+//------------------------------------------------------------------------------
+// void SetNumMaterials(Integer mCount)
+//------------------------------------------------------------------------------
+/**
+ * Sets teh number of materials in the model
+ *
+ * @param mCount The new material count
+ */
+//------------------------------------------------------------------------------
+void ModelObject::SetNumMaterials(Integer mCount)
+{
+   num_materials = mCount;
+}
+
+//------------------------------------------------------------------------------
+// bool IsLoaded()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the flag indicating if the model has been loaded
+ *
+ * @return The isLoaded flag
+ */
+//------------------------------------------------------------------------------
+bool ModelObject::IsLoaded()
+{
+   return isLoaded;
+}
+
+//------------------------------------------------------------------------------
+// vector_type *GetVertexArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the vertex array
+ *
+ * @return The vertex array
+ */
+//------------------------------------------------------------------------------
+vector_type *ModelObject::GetVertexArray()
+{
+   // If we move to dynamic memory allocation, here's a start that assumes a
+   // single vertex block in the model file
+   //if (vertex == NULL)
+   //   if (num_vertices > 0)
+   //      vertex = new vector_type[num_vertices];
+   return vertex;
+}
+
+//------------------------------------------------------------------------------
+// polygon_type *GetPolygonArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the polygon array
+ *
+ * @return The polygon array
+ */
+//------------------------------------------------------------------------------
+polygon_type *ModelObject::GetPolygonArray()
+{
+   return polygon;
+}
+
+//------------------------------------------------------------------------------
+// texmap_coord_type *GetTextureMap()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the texture map array
+ *
+ * @return The mapcoord array
+ */
+//------------------------------------------------------------------------------
+texmap_coord_type *ModelObject::GetTextureMap()
+{
+   return mapcoord;
+}
+
+//------------------------------------------------------------------------------
+// material_type *GetMaterials()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the material array
+ *
+ * @return The material array
+ */
+//------------------------------------------------------------------------------
+material_type *ModelObject::GetMaterials()
+{
+   return material;
+}
+
+//------------------------------------------------------------------------------
+// vector_type& GetBSphereCenter()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the center of the bounding sphere
+ *
+ * @return The location of the center
+ */
+//------------------------------------------------------------------------------
+vector_type& ModelObject::GetBSphereCenter()
+{
+   return bsphere_center;
+}
+
+//------------------------------------------------------------------------------
+// float GetBSphereRadius()
+//------------------------------------------------------------------------------
+/**
+ * Retireves the radius of the bounding sphere
+ *
+ * @return The radius
+ */
+//------------------------------------------------------------------------------
+float ModelObject::GetBSphereRadius()
+{
+   return bsphere_radius;
+}
+
+
 //------------------------------------------------------------------------------
 // void CreateBSphere()
 //------------------------------------------------------------------------------
@@ -382,14 +645,30 @@ void ModelObject::CreateAABB()
    
    int i;
 
+   #ifdef DEBUG_MODEL_DATA
+      MessageInterface::ShowMessage("Vertices:\n");
+      for (i = 1; i < num_vertices; i++)
+         MessageInterface::ShowMessage("   [%4d] -> [%lf %lf %lf]\n", i,
+               vertex[i].x, vertex[i].y, vertex[i].z);
+      MessageInterface::ShowMessage("Polygons:\n");
+      for (i = 1; i < num_polygons; i++)
+         MessageInterface::ShowMessage("   [%4d] -> [%d %d %d]\n", i,
+               polygon[i].a, polygon[i].b, polygon[i].c);
+      MessageInterface::ShowMessage("Mappings [u,v]:\n");
+      for (i = 1; i < num_polygons; i++)
+         MessageInterface::ShowMessage("   [%4d] -> [%lf %lf]\n", i,
+               mapcoord[i].u, mapcoord[i].v);
+   #endif
    // We first store the first vertex into the first AABB vertex
-   for (i = 0; i < 8; i++){
+   for (i = 0; i < 8; i++)
+   {
       aabb[i].x = vertex[0].x;
       aabb[i].y = vertex[0].y;
       aabb[i].z = vertex[0].z;
    }
    // Get the 8 AABB vertex by making some comparisons to get the 8 extreme vertices
-   for (i = 1; i < num_vertices; i++){
+   for (i = 1; i < num_vertices; i++)
+   {
       if (vertex[i].x < aabb[0].x)
          aabb[0].x = vertex[i].x;
       if (vertex[i].y < aabb[0].y)
@@ -1118,7 +1397,8 @@ void ModelObject::Draw(bool isLit)
    glPushMatrix();
    glBegin(GL_LINES);
 
-   for (i = 0; i < num_polygons; i++){
+   for (i = 0; i < num_polygons; i++)
+   {
       glColor3f(0.1f, 0.1f, 1.0f);
       glVertex3fv(&vertex[polygon[i].a].x);
       glVertex3fv(&vertex[polygon[i].b].x);
@@ -1299,6 +1579,7 @@ void ModelObject::VectorNormalize(vector_type_ptr vector)
    float len = VectorLength(vector);
    if (len == 0)
       len = 1;
+
    vector->x /= len;
    vector->y /= len;
    vector->z /= len; 

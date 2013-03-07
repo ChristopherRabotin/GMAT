@@ -376,7 +376,7 @@ void VisualModelCanvas::Rotate(bool useDegrees, float xAngle, float yAngle, floa
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
+   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseRotation(useDegrees, xAngle, yAngle, zAngle);
    Refresh(false);
 }
@@ -396,7 +396,7 @@ void VisualModelCanvas::Translate(float x, float y, float z)
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
+   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseOffset(x,y,z);
    Refresh(false);
 }
@@ -417,7 +417,7 @@ void VisualModelCanvas::Scale(float xScale, float yScale, float zScale)
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
+   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseScale(xScale, yScale, zScale);
    Refresh(false);
 }
@@ -444,11 +444,12 @@ void VisualModelCanvas::RecenterModel(float *offset)
       ("   modelID=%d, isLoaded=%d\n", currentSpacecraft->modelID, loadedModel->isLoaded);
    #endif
    
-   if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
+   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
    {
-      float x = -loadedModel->bsphere_center.x;
-      float y = -loadedModel->bsphere_center.y;
-      float z = -loadedModel->bsphere_center.z;
+      vector_type bsphere_center = loadedModel->GetBSphereCenter();
+      float x = -bsphere_center.x;
+      float y = -bsphere_center.y;
+      float z = -bsphere_center.z;
       offset[0] = x;
       offset[1] = y;
       offset[2] = z;
@@ -474,7 +475,7 @@ void VisualModelCanvas::RecenterModel(float *offset)
 float VisualModelCanvas::AutoscaleModel()
 {
    float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
-   float modelRadius = loadedModel->bsphere_radius;
+   float modelRadius = loadedModel->GetBSphereRadius();
 
    #ifdef DEBUG_AUTO_SCALE
    MessageInterface::ShowMessage

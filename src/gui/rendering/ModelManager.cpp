@@ -16,7 +16,7 @@
 // Author: Phillip Silvia
 // Created: 2009/09/11
 /**
- * Contains all of the models loaded and maps thems to an ID to be referenced
+ * Contains all of the models loaded and maps them to an ID to be referenced
  * by the spacecraft and used by the canvases. 
  */
 //------------------------------------------------------------------------------

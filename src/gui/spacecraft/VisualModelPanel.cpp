@@ -723,8 +723,11 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
 {
    wxString filename, path;
    // Open up a file dialog
+// Temporarily disable POV support
+//   wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
+//      wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
    wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
-      wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
+      wxT("3DS files (*.3ds)|*.3ds"), wxOPEN);
    
    // If it succeeded...
    if (fileDialog.ShowModal() == wxID_OK)

@@ -21,12 +21,17 @@
 #define MODEL_OBJECT_H
 
 #include <wx/string.h>
+#include "gmatwxdefs.hpp"
 #include "Rmatrix.hpp"
 #include "Rvector3.hpp"
 
+// Since we are indexing into arrays with a short, is this realistic?
 #define MAX_VERTICES 200000  // Maximum vertices per object
 //#define MAX_VERTICES 80000  // Maximum vertices per object
+
+// Same question here
 #define MAX_POLYGONS 80000  // Maximum polygons (triangles) per object
+
 #define MAX_LISTS 300       // Maximum number of vertex/polygon lists per object
 #define MAX_MATERIALS 500   // Maximum materials per object
 #define MAX_POINTS 20000      // Maximum data points per object
@@ -80,9 +85,13 @@ typedef struct
 } material_type, *material_type_ptr;
 
 
+/**
+ * Class used to build the OpenGL model of a Spacecraft
+ */
 class ModelObject
 {
-public:
+   // Data that was exposed but should not be
+private:
    std::string name;      // The name of the object
    std::string filename;  // The name of the file this object came from
 
@@ -111,9 +120,12 @@ public:
    
    matrix_type matrix;      // Object matrix
    
-   // Functions
-   
+   // Visible Methods
+public:
    ModelObject();
+   ~ModelObject();
+   ModelObject(const ModelObject& mo);
+   ModelObject& operator=(const ModelObject& mo);
    
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These are for loading and saving the model from and to a file
@@ -128,6 +140,23 @@ public:
       int rot_x = 0, int rot_y = 0, int rot_z = 0);
    void LoadTextures();
    
+   // Accessors for the private data
+   Integer GetNumVertices();
+   void SetNumVertices(Integer vCount);
+   Integer GetNumPolygons();
+   void SetNumPolygons(Integer pCount);
+   Integer GetNumMaterials();
+   void SetNumMaterials(Integer mCount);
+
+   bool IsLoaded();
+
+   vector_type *GetVertexArray();
+   polygon_type *GetPolygonArray();
+   texmap_coord_type *GetTextureMap();
+   material_type *GetMaterials();
+   vector_type& GetBSphereCenter();
+   float GetBSphereRadius();
+
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These modify the model's object matrix
    ///////////////////////////////////////////////////////////////////////////////////////////

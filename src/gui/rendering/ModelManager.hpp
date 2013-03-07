@@ -35,8 +35,6 @@ class ModelManager
 {
 public:
    static ModelManager* Instance();
-   ModelManager();
-   ~ModelManager();
 	
    wxGLContext* GetSharedGLContext();
 	void SetSharedGLContext(wxGLContext *glContext);
@@ -46,6 +44,10 @@ public:
    int LoadModel(std::string &modelPath);
    
 private:
+   // Hide these so no one can call them
+   ModelManager();
+   ~ModelManager();
+
    /// Shared GL context between GL canvases
    wxGLContext *theGLContext;
    int numElements;

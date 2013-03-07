@@ -248,8 +248,6 @@ OBJECTS = \
     rendering/GLStars.o \
     rendering/GmatOpenGLSupport.o \
     rendering/Light.o \
-    rendering/Load3ds.o \
-    rendering/LoadPOV.o \
     rendering/ThreeDSLoader.o \
     rendering/ModelManager.o \
     rendering/ModelObject.o \
@@ -304,6 +302,9 @@ OBJECTS = \
     $(SPICE_OBJECTS)
 #    app/GmatSocketServer.o \
 #    solarsys/SolarSystemWindow.o \
+
+#    rendering/Load3ds.o \
+#    rendering/LoadPOV.o \
 
 ifeq ($(SHARED_BASE), 1)
 
