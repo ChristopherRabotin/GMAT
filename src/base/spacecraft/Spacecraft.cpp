@@ -1909,6 +1909,12 @@ bool Spacecraft::IsParameterCommandModeSettable(const Integer id) const
    if (id == MODEL_FILE)
       return false;
 
+   if ((id == ORBIT_SPICE_KERNEL_NAME)    ||
+       (id == ATTITUDE_SPICE_KERNEL_NAME) ||
+       (id == SC_CLOCK_SPICE_KERNEL_NAME) ||
+       (id == FRAME_SPICE_KERNEL_NAME))
+      return false;
+
    return true;
 }
 
