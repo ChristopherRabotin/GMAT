@@ -459,12 +459,6 @@
     <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\rendering\Load3ds.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\rendering\LoadPOV.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
@@ -524,6 +518,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp">
       <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
+      <Filter>Source Files\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -926,12 +923,6 @@
     <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp">
       <Filter>Source Files\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\rendering\Load3ds.hpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\rendering\LoadPOV.hpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp">
       <Filter>Source Files\rendering</Filter>
     </ClInclude>
@@ -988,6 +979,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp">
       <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
+      <Filter>Source Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -470,11 +470,10 @@
     <ClCompile Include="..\..\..\src\gui\rendering\GLStars.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\Load3ds.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\LoadPOV.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp" />
@@ -725,11 +724,10 @@
     <ClInclude Include="..\..\..\src\gui\rendering\GLStars.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\Load3ds.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\LoadPOV.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp" />
