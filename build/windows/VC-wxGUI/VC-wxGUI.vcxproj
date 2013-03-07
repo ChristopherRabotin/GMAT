@@ -670,6 +670,7 @@
     <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
@@ -724,8 +725,6 @@
     <ClCompile Include="..\..\..\src\gui\rendering\GLStars.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\Load3ds.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\LoadPOV.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
@@ -1324,6 +1323,7 @@
     <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />
@@ -1379,8 +1379,6 @@
     <ClInclude Include="..\..\..\src\gui\rendering\GLStars.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\Load3ds.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\LoadPOV.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp" />
