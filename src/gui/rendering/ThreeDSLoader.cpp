@@ -170,7 +170,6 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                break;
 
             case CHUNK_VERTLIST:
-               // Here we go: These are the vertices!
                #ifdef DEBUG_LOADING
                   MessageInterface::ShowMessage("The Vertex data:  ");
                #endif
@@ -205,7 +204,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                   // Clear the pointer so it's not inadvertently stomped
                   theModel = NULL;
                   throw SubscriberException("An error was encountered loading "
-                        "the polygon map " + filename);
+                        "the face material map " + filename);
                }
                break;
 
@@ -221,12 +220,12 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                }
                break;
 
-            case CHUNK_SMOOLIST:
-               // Not handled -- should it be?
-               #ifdef DEBUG_LOADING
-                  MessageInterface::ShowMessage("The face smoothing list\n");
-               #endif
-               break;
+            // Phil had this ID, but didn't support it
+            //case CHUNK_SMOOLIST:
+            //   #ifdef DEBUG_LOADING
+            //      MessageInterface::ShowMessage("The face smoothing list\n");
+            //   #endif
+            //   break;
 
             case CHUNK_MATERIAL:
                #ifdef DEBUG_LOADING
@@ -382,50 +381,44 @@ bool ThreeDSLoader::LoadVertexData()
 {
    bool retval = false;
    float v;
-   unsigned short vertexCount;
+   unsigned short vertexCount, previousVertexCount, totalVertexCount;
 
-   // Sanity check -- if the file has multiple vertex lists, the code needs
-   // updating to handle it
-   if (theModel->GetNumVertices() > 0)
-      MessageInterface::ShowMessage("Multiple vertex data entries were "
-            "detected in the file\n");
-   else
+   // Retrieve the number of new vertices
+   fread(&vertexCount, sizeof(unsigned short), 1, theFile);
+   previousVertexCount = theModel->GetNumVertices();
+   totalVertexCount = previousVertexCount + vertexCount;
+   theModel->SetNumVertices(totalVertexCount);
+
+   #ifdef DEBUG_LOADING
+      MessageInterface::ShowMessage("Number of vertices: %d\n",
+            vertexCount);
+   #endif
+
+   if (totalVertexCount <= MAX_VERTICES)
    {
-      // Retrieve the number of vertices
-      fread(&vertexCount, sizeof(unsigned short), 1, theFile);
-      theModel->SetNumVertices(vertexCount);
+      vector_type *vertex = theModel->GetVertexArray();
 
-      #ifdef DEBUG_LOADING
-         MessageInterface::ShowMessage("Number of vertices: %d\n",
-               vertexCount);
-      #endif
-
-      if (vertexCount <= MAX_VERTICES)
+      // Then we loop through all vertices and store them
+      for (unsigned short i = previousVertexCount; i < totalVertexCount; ++i)
       {
-         vector_type *vertex = theModel->GetVertexArray();
+         fread(&v, sizeof(float), 1, theFile);
+         vertex[i].x = v;
+         fread(&v, sizeof(float), 1, theFile);
+         vertex[i].y = v;
+         fread(&v, sizeof(float), 1, theFile);
+         vertex[i].z = v;
 
-         // Then we loop through all vertices and store them
-         for (unsigned short i = 0; i < vertexCount; ++i)
-         {
-            fread(&v, sizeof(float), 1, theFile);
-            vertex[i].x = v;
-            fread(&v, sizeof(float), 1, theFile);
-            vertex[i].y = v;
-            fread(&v, sizeof(float), 1, theFile);
-            vertex[i].z = v;
-
-            #ifdef DUMP_DATA
-               MessageInterface::ShowMessage("Vertex %d: [%f %f %f]\n", i,
-                     vertex[i].x, vertex[i].y, vertex[i].z);
-            #endif
-         }
-
-         retval = true;
+         #ifdef DUMP_DATA
+            MessageInterface::ShowMessage("Vertex %d: [%f %f %f]\n", i,
+                  vertex[i].x, vertex[i].y, vertex[i].z);
+         #endif
       }
-      else
-         MessageInterface::ShowMessage("The number of vertices found is too "
-               "high!\n");
+
+      retval = true;
    }
+   else
+      MessageInterface::ShowMessage("The number of vertices found is too "
+            "high!\n");
 
    return retval;
 }
@@ -621,52 +614,49 @@ bool ThreeDSLoader::ReadTextureMapping()
 bool ThreeDSLoader::LoadFaceList()
 {
    bool retval = false;
-   unsigned short faceCount, faceFlag;
+   unsigned short faceCount, previousFaceCount, totalFaceCount, faceFlag;
 
    // Retrieve the number of faces
    fread(&faceCount, sizeof(unsigned short), 1, theFile);
 
-   if (theModel->GetNumPolygons() == 0)
+   previousFaceCount = theModel->GetNumPolygons();
+   totalFaceCount = faceCount + previousFaceCount;
+
+   theModel->SetNumPolygons(totalFaceCount);
+
+   #ifdef DEBUG_LOADING
+      MessageInterface::ShowMessage("Number of polygons: %d\n", faceCount);
+   #endif
+
+   // Ensure we don't have more polygons than we can handle
+   if (faceCount <= MAX_POLYGONS)
    {
-      theModel->SetNumPolygons(faceCount);
+      polygon_type *polygon = theModel->GetPolygonArray();
 
-      #ifdef DEBUG_LOADING
-         MessageInterface::ShowMessage("Number of polygons: %d\n", faceCount);
-      #endif
-
-      // Ensure we don't have more polygons than we can handle
-      if (faceCount <= MAX_POLYGONS)
+      // Loop through file and extract all of the face information
+      for (unsigned short i = previousFaceCount; i < totalFaceCount; i++)
       {
-         polygon_type *polygon = theModel->GetPolygonArray();
+         fread(&polygon[i].a, sizeof(unsigned short), 1, theFile);
+         polygon[i].a += previousFaceCount;
+         fread(&polygon[i].b, sizeof(unsigned short), 1, theFile);
+         polygon[i].b += previousFaceCount;
+         fread(&polygon[i].c, sizeof(unsigned short), 1, theFile);
+         polygon[i].c += previousFaceCount;
+         fread(&faceFlag, sizeof(unsigned short), 1, theFile);
 
-         // Loop through file and extract all of the face information
-         for (unsigned short i = 0; i < faceCount; i++)
-         {
-            fread(&polygon[i].a, sizeof(unsigned short), 1, theFile);
-//            polygon[i].a += vert_index[poly_list];
-            fread(&polygon[i].b, sizeof(unsigned short), 1, theFile);
-//            polygon[i].b += vert_index[poly_list];
-            fread(&polygon[i].c, sizeof(unsigned short), 1, theFile);
-//            polygon[i].c += vert_index[poly_list];
-            fread(&faceFlag, sizeof(unsigned short), 1, theFile);
-
-            #ifdef DUMP_DATA
-               MessageInterface::ShowMessage("Polygon point %4d: "
-                     "[%4d %4d %4d]  ", i, polygon[i].a,
-                     polygon[i].b, polygon[i].c);
-               MessageInterface::ShowMessage("Face Flags: %x\n",
-                     l_face_flags);
-            #endif
-         }
-
-         retval = true;
+         #ifdef DUMP_DATA
+            MessageInterface::ShowMessage("Polygon point %4d: "
+                  "[%4d %4d %4d]  ", i, polygon[i].a,
+                  polygon[i].b, polygon[i].c);
+            MessageInterface::ShowMessage("Face Flags: %x\n",
+                  l_face_flags);
+         #endif
       }
-      else
-         MessageInterface::ShowMessage("Number of polygons is too high!\n");
+
+      retval = true;
    }
    else
-      MessageInterface::ShowMessage("Polygons were already loaded; refactoring "
-            "is needed\n");
+      MessageInterface::ShowMessage("Number of polygons is too high!\n");
 
    return retval;
 }
@@ -687,6 +677,8 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
    unsigned short value;
    char str[255], theChar;
    Integer i = 0, index;
+   Integer previousFaceCount;
+
    do
    {
       fread(&theChar, 1, 1, theFile);
@@ -695,6 +687,7 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
    } while (theChar != '\0' && i < 255);
 
    material_type *material = theModel->GetMaterials();
+
    for (i = 0; i < theModel->GetNumMaterials(); i++)
    {
       if (strcmp(material[i].name, str) == 0)
@@ -716,11 +709,12 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
 
    if (materialFound)
    {
+      previousFaceCount = material[index].num_faces;
       fread(&value, sizeof(unsigned short), 1, theFile);
       if (index != -1)
-         material[index].num_faces = value;
+         material[index].num_faces += value;
 
-      for (i = 0; i < material[index].num_faces; i++)
+      for (i = previousFaceCount; i < material[index].num_faces; i++)
       {
          fread(&value, sizeof(unsigned short), 1, theFile);
          if (index != -1)
