@@ -114,6 +114,8 @@ ModelObject& ModelObject::operator=(const ModelObject& mo)
 {
    MessageInterface::ShowMessage("ModelObject::operator=(const ModelObject& )"
          "called but not implemented\n");
+
+   return *this;
 }
 
 
