@@ -389,7 +389,19 @@ bool ScriptInterpreter::CheckEncoding()
    // Report error if there was a non-ASCII character before the eof marker
    if (firstFound != -1)
    {
-      MessageInterface::ShowMessage("%s\n", badCharMsg.str().c_str());
+      try
+      {
+         if (badCharMsg.str().length() < 32160)
+            MessageInterface::ShowMessage("%s\n", badCharMsg.str().c_str());
+         else
+            MessageInterface::ShowMessage("The script error is not "
+                  "displayable\n");
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("The script file contains non-ASCII "
+               "data and cannot be parsed\n");
+      }
       retval = false;
    }
 
