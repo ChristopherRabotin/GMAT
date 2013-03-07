@@ -250,6 +250,7 @@ OBJECTS = \
     rendering/Light.o \
     rendering/Load3ds.o \
     rendering/LoadPOV.o \
+    rendering/ThreeDSLoader.o \
     rendering/ModelManager.o \
     rendering/ModelObject.o \
     rendering/Rendering.o \
