@@ -107,7 +107,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
          model->SetNumMaterials(0);
 
          // Flag used to detect if the case statement failed
-         bool noError = true;
+         bool noError = true, dataEnd = false;
 
          // Data structures used during the read
          unsigned short chunkId;
@@ -235,6 +235,25 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                {
                   Integer matCount = theModel->GetNumMaterials();
                   currentMaterial = &(theModel->GetMaterials()[matCount]);
+
+                  // Set some defaults
+                  currentMaterial->mat_ambient.r =
+                  currentMaterial->mat_ambient.g =
+                  currentMaterial->mat_ambient.b =
+                  currentMaterial->mat_ambient.a = 0.5;
+
+                  currentMaterial->mat_diffuse.r =
+                  currentMaterial->mat_diffuse.g =
+                  currentMaterial->mat_diffuse.b =
+                  currentMaterial->mat_diffuse.a = 0.5;
+
+                  currentMaterial->mat_specular.r =
+                  currentMaterial->mat_specular.g =
+                  currentMaterial->mat_specular.b =
+                  currentMaterial->mat_specular.a = 0.5;
+
+                  currentMaterial->mat_shininess = 0.5;
+
                   theModel->SetNumMaterials(matCount + 1);
                }
                break;
@@ -334,6 +353,14 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                         currentMaterial->texture_name);
                #endif
                break;
+            case 0:
+               #ifdef DEBUG_LOADING
+                  MessageInterface::ShowMessage("ID 0; ending read\n");
+               #endif
+               // For ID zero, assume end of the .3ds chunks
+               dataEnd = true;
+               break;
+
 
             default:
                #ifdef DEBUG_LOADING
@@ -343,6 +370,9 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                fseek(theFile, chunkLength-6, SEEK_CUR);
                break;
             };
+
+            if (dataEnd)
+               break;
          }
          fclose(theFile);
          theFile = NULL;      // Prevent mistaken reaccesses
