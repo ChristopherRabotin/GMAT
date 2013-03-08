@@ -1076,9 +1076,14 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
          #if DBGLVL_PARAM
          MessageInterface::ShowMessage("   mAllSpNameArray.size()=%d\n", size);
          #endif
+         
          if (index >= size)
-            throw SubscriberException
-               ("index out of bounds for " + GetParameterText(id));
+         {
+            SubscriberException se;
+            se.SetDetails("Index out of bounds for %s, %d object(s) added to plot",
+                          GetParameterText(id).c_str(), size);
+            throw se;
+         }
          
          for (int i=0; i<size; i++)
          {
@@ -1102,9 +1107,14 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
          #if DBGLVL_PARAM
          MessageInterface::ShowMessage("   mAllSpNameArray.size()=%d\n", size);
          #endif
+         
          if (index >= size)
-            throw SubscriberException
-               ("index out of bounds for " + GetParameterText(id));
+         {
+            SubscriberException se;
+            se.SetDetails("Index out of bounds for %s, %d object(s) added to plot",
+                          GetParameterText(id).c_str(), size);
+            throw se;
+         }
          
          for (int i=0; i<size; i++)
          {
