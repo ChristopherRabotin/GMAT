@@ -3318,7 +3318,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       }
    }
    
-   // Ceate new Parameter
+   // Ceate new Parameter but do not add to ConfigManager yet
    param = theFactoryManager->CreateParameter(newType, name);
    
    #ifdef DEBUG_MEMORY
@@ -3346,7 +3346,13 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    // We don't know the owner type the parameter before create,
    // so validate owner type after create.
    if (ownerName != "" && manage != 0)
-      CheckParameterType(param, newType, ownerName);
+      CheckParameterType(&param, newType, ownerName);
+   
+   // CheckParameterType() deletes param pointer if invalid Parameter
+   // so check again
+   if (param == NULL)
+      return NULL;
+   
    
    // set Parameter reference object
    SetParameterRefObject(param, newType, name, ownerName, depName, manage);
@@ -8132,42 +8138,81 @@ void Moderator::CreateDefaultMission()
 
 // Parameter reference object setting
 //------------------------------------------------------------------------------
-// void CheckParameterType(Parameter *param, const std::string &type,
+// void CheckParameterType(Parameter **param, const std::string &type,
 //                         const std::string &ownerName)
 //------------------------------------------------------------------------------
-void Moderator::CheckParameterType(Parameter *param, const std::string &type,
+void Moderator::CheckParameterType(Parameter **param, const std::string &type,
                                    const std::string &ownerName)
 {
+   #ifdef DEBUG_PARAMETER_TYPE
+   MessageInterface::ShowMessage
+      ("Moderator::CheckParameterType() entered, param=<%p><%s>'%s', type='%s', "
+       "ownerName='%s'\n", *param, *param ? (*param)->GetTypeName().c_str() : "NULL",
+       *param ? (*param)->GetName().c_str() : "NULL", type.c_str(), ownerName.c_str());
+   #endif
+   
    GmatBase *obj = FindObject(ownerName);
    if (obj)
    {
       #if DEBUG_CREATE_PARAMETER
       MessageInterface::ShowMessage
-         ("   Found owner object, name='%s', addr=<%p>\n", obj->GetName().c_str(), obj);
+         ("   Found owner object, obj=<%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
+      MessageInterface::ShowMessage
+         ("   parameter owner type = %d, object type = %d\n", (*param)->GetOwnerType(),
+          obj->GetType());
       #endif
       
-      if (param->GetOwnerType() != obj->GetType())
+      if ((*param)->GetOwnerType() != obj->GetType())
       {
          std::string paramOwnerType =
-            GmatBase::GetObjectTypeString(param->GetOwnerType());
+            GmatBase::GetObjectTypeString((*param)->GetOwnerType());
+         
+         #ifdef DEBUG_PARAMETER_TYPE
+         MessageInterface::ShowMessage
+            ("   parameter owner type and object type do not match, paramOwnerType='%s'\n",
+             paramOwnerType.c_str());
+         #endif
          
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Remove
-            (param, param->GetName(), "Moderator::CheckParameterType()");
+            (*param, (*param)->GetName(), "Moderator::CheckParameterType()");
          #endif
-         delete param;
-         param = NULL;
+         delete *param;
+         *param = NULL;
          
          if (paramOwnerType == "")
+         {
+            #ifdef DEBUG_PARAMETER_TYPE
+            MessageInterface::ShowMessage
+               ("Moderator::CheckParameterType() throwing exception - "
+                "Cannot find the object type which has '%s' as a Parameter type\n",
+                type.c_str());
+            #endif
+            
             throw GmatBaseException
                ("Cannot find the object type which has \"" + type +
                 "\" as a Parameter type");
+         }
          else
+         {
+            #ifdef DEBUG_PARAMETER_TYPE
+            MessageInterface::ShowMessage
+               ("Moderator::CheckParameterType() throwing exception - "
+                "Parameter type: '%s' should be property of '%s'\n", type.c_str(),
+                paramOwnerType.c_str());
+            #endif
+            
             throw GmatBaseException
                ("Parameter type: " + type + " should be property of " +
                 paramOwnerType);
+         }
       }
    }
+   
+   #ifdef DEBUG_PARAMETER_TYPE
+   MessageInterface::ShowMessage("Moderator::CheckParameterType() leaving\n");
+   #endif
 }
 
 

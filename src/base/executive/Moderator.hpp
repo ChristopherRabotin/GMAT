@@ -431,7 +431,7 @@ private:
    void CreateDefaultMission();
    
    // Parameter reference object setting
-   void CheckParameterType(Parameter *param, const std::string &type,
+   void CheckParameterType(Parameter **param, const std::string &type,
                            const std::string &ownerName);
    
    // Object map
