@@ -381,7 +381,21 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    Real itsValue;
    try
    {
-      itsValue = object->GetRealParameter(propID);
+      Gmat::ParameterType propType = GetDataType();
+      if (propType == Gmat::INTEGER_TYPE)
+      {
+         itsValue = (Real)(object->GetIntegerParameter(propID));
+      }
+      else if (propType == Gmat::REAL_TYPE)
+      {
+         itsValue = object->GetRealParameter(propID);
+      }
+      else
+      {
+         throw GmatBaseException
+            ("EvaluateReal() method not valid for wrapper of non-Integer or non-Real type.\n");
+      }
+      
       #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
          "In ObjPropWrapper::EvaluateReal, value = %.12f\n", itsValue);
@@ -390,12 +404,9 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    catch (BaseException &be)
    {
       std::stringstream errmsg;
-//      errmsg << "Cannot return Real value for id \"" << propID;
-//      errmsg << "\" for object \"" << object->GetName();
-//      errmsg << "\" - exception thrown: "<< be.GetFullMessage() << std::endl;
       errmsg << be.GetFullMessage() << std::endl;
       throw ParameterException(errmsg.str());
-  }
+   }
    
    return itsValue;
 }

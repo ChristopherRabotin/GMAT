@@ -474,11 +474,15 @@ Real SpacecraftData::GetOwnedObjectProperty(Gmat::ObjectType objType,
    
    if (ownedObj == NULL)
    {
-      ParameterException pe;
-      pe.SetDetails("SpacecraftData::GetOwnedObjectProperty() %s \"%s\" is not "
-                    "attached to Spacecraft \"%s\"",
-                    GmatBase::GetObjectTypeString(objType).c_str(), dep.c_str(),
-                    mSpacecraft->GetName().c_str());
+      Integer runMode = GmatGlobal::Instance()->GetRunMode();
+      std::string msg = "Cannot evaluate Parameter \"" + mActualParamName + "\"; " +
+         GmatBase::GetObjectTypeString(objType) + " named \"" + dep + "\" is not "
+         "attached to Spacecraft \"" + mSpacecraft->GetName() + "\"";
+      
+      if (runMode == GmatGlobal::TESTING || runMode == GmatGlobal::TESTING_NO_PLOTS)
+         MessageInterface::ShowMessage("In SpacecraftData::GetOwnedObjectProperty() " + msg + "\n");
+      
+      ParameterException pe(msg);
       throw pe;
    }
    else

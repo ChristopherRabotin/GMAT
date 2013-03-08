@@ -26,15 +26,17 @@
 class GMAT_API ParameterException : public BaseException
 {
    public:
-      ParameterException(const std::string& message = "") 
-         : BaseException(message) {};
+   ParameterException(const std::string &details = "",
+                      const std::string& message = "Parameter exception: ") 
+      : BaseException(message, details) {};
 };
 
 class InvalidDependencyException : public BaseException
 {
    public:
-      InvalidDependencyException(const std::string& message = "") 
-         : BaseException(message) {};
+   InvalidDependencyException(const std::string &details = "",
+                              const std::string& message = "Parameter exception: ") 
+      : BaseException(message, details) {};
 };
 
 #endif
