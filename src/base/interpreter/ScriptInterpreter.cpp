@@ -192,6 +192,10 @@ bool ScriptInterpreter::Interpret()
    Integer truncLength = truncMsg.size();
    Integer numErrors = errorList.size();
    Integer errorLength;
+   #if DBGLVL_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::Interpret() There are %d errors\n", numErrors);
+   #endif
    for (Integer i = 0; i < numErrors; i++)
    {
       errorMsg = errorList[i];
@@ -1683,10 +1687,28 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          
          if (obj == NULL)
          {
-            InterpreterException ex
-               ("Cannot create an object \"" + names[i] + "\". The \"" +
-                type + "\" is an unknown object type");
-            HandleError(ex);
+            // Check error message from the Validator which has more
+            // detailed error message
+            StringArray errList = theValidator->GetErrorList();
+            #ifdef DEBUG_PARSE
+            MessageInterface::ShowMessage
+               ("   Validator errList.size() = %d\n", errList.size());
+            #endif
+            if (errList.size() > 0)
+            {
+               for (UnsignedInt i=0; i<errList.size(); i++)
+                  HandleError(InterpreterException(errList[i]), true);
+               
+               // Empty Validator errors now
+               theValidator->ClearErrorList();
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Cannot create an object \"" + names[i] + "\". The \"" + type +
+                   "\" is an unknown object type or invalid object name or dimension");
+               HandleError(ex);
+            }
             return false;
          }
          
@@ -2173,7 +2195,12 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
          owner->SetAttributeCommentLine(paramID, attrStr);
       
       if (attrInLineStr != "")
+      {
+         MessageInterface::ShowMessage
+            ("==> Calling SetInlineAttributeComment() paramID=%d, attrInLineStr=<%s>\n",
+             paramID, attrInLineStr.c_str());
          owner->SetInlineAttributeComment(paramID, attrInLineStr);
+      }
       
       //Reset
       attrStr = ""; 

@@ -2538,35 +2538,38 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
    row = -1;
    col = -1;
    Integer intVal;
-
+   
    GetArrayIndexVar(str, rowStr, colStr, name, bracketPair);
-
+   
+   // Check row string
+   // @note Do not just return if row number failed, we also want to check column number
    if (rowStr != "-1")
    {
       if (ToInteger(rowStr, intVal))
       {
          if (intVal <= 0)
-			return;
-		 else if (bracketPair == "()")
+            row = -1;
+         else if (bracketPair == "()")
             row = intVal - 1; // array index start at 0
          else
             row = intVal;
       }
    }
-
+   
+   // Check column string
    if (colStr != "-1")
    {
       if (ToInteger(colStr, intVal))
       {
          if (intVal <= 0)
-			return;
+            col = -1;
          if (bracketPair == "()")
             col = intVal - 1; // array index start at 0
          else
             col = intVal;
       }
    }
-
+   
    #if DEBUG_ARRAY_INDEX
    MessageInterface::ShowMessage
       ("StringUtil::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());

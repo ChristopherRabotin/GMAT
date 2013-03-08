@@ -61,6 +61,7 @@ public:
                                         bool parametersFirst = false,
                                         Integer manage = 1);
    const StringArray& GetErrorList();
+   void ClearErrorList();
    
    GmatBase* FindObject(const std::string &name, 
                         const std::string &ofType = "");
@@ -144,7 +145,7 @@ private:
    bool            continueOnError;
    bool            skipErrorMessage;
    bool            isFinalError;
-   StringArray     theErrorList;
+   StringArray     validatorErrorList;
    std::string     theErrorMsg;
    
    static Validator *instance;

@@ -26,25 +26,25 @@
  */
 //------------------------------------------------------------------------------
 
-#include "Interpreter.hpp"    // class's header file
+#include "Interpreter.hpp"          // class's header file
 #include "Moderator.hpp"
 #include "StringTokenizer.hpp"
 #include "ConditionalBranch.hpp"
 #include "SolverBranchCommand.hpp"  // To check Vary command levels
-#include "StringUtil.hpp"     // for ToReal()
+#include "StringUtil.hpp"           // for ToReal()
 #include "TimeTypes.hpp"
 #include "Array.hpp"
-#include "Assignment.hpp"     // for GetLHS(), GetRHS()
+#include "Assignment.hpp"           // for GetLHS(), GetRHS()
 #include "Validator.hpp"
 #include "ElementWrapper.hpp"
 #include "MessageInterface.hpp"
-#include "FileUtil.hpp"       // for DoesFileExist()
-#include "GmatGlobal.hpp"     // for GetMatlabFuncNameExt()
+#include "FileUtil.hpp"             // for DoesFileExist()
+#include "GmatGlobal.hpp"           // for GetMatlabFuncNameExt()
 #include "Covariance.hpp"
 
-#include <stack>              // for checking matching begin/end control logic
-#include <fstream>            // for checking GmatFunction declaration
-#include <sstream>            // for checking GmatFunction declaration
+#include <stack>                    // for checking matching begin/end control logic
+#include <fstream>                  // for checking GmatFunction declaration
+#include <sstream>                  // for checking GmatFunction declaration
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
@@ -1512,6 +1512,10 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
    }
    
    bool isValid = theValidator->ValidateCommand(cmd, continueOnError, 1);
+   
+   #ifdef DEBUG_VALIDATE_COMMAND
+   MessageInterface::ShowMessage("   theValidator->ValidateCommand() returned %d\n", isValid);
+   #endif
    
    // Handle error messages here
    if (!isValid)
@@ -3838,7 +3842,13 @@ Parameter* Interpreter::CreateParameter(const std::string &type,
    if (inFunctionMode)
       manage = 0;
    
-   return theValidator->CreateParameter(type, name, ownerName, depName, manage);
+   Parameter *param = theValidator->CreateParameter(type, name, ownerName, depName, manage);
+   
+   #ifdef DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateParameter() returning <%p>\n", param);
+   #endif
+   return param;
 }
 
 
@@ -5119,7 +5129,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyToValue() objType=<%s>, objName=<%s>, toProp=<%s>, "
+      ("Interpreter::SetPropertyToValue() entered, objType=<%s>, objName=<%s>, toProp=<%s>, "
        "value=<%s>\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
        toProp.c_str(), value.c_str());
    #endif
@@ -5144,7 +5154,12 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
    else
    {
       StringArray parts = theTextParser.SeparateDots(toProp);
-      
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage
+         ("   There are %d part(s) after separating by dots\n", parts.size());
+      for (UnsignedInt i = 0; i < parts.size(); i++)
+         MessageInterface::ShowMessage("   parts[%d] = <%s>\n", i, parts[i].c_str());
+      #endif
       // if property has multiple dots, handle separately
       if (parts.size() > 1)
       {
@@ -5482,7 +5497,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
 {
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyValue() obj=<%s>, id=%d, type=%d, value=<%s>, index=%d\n",
+      ("Interpreter::SetPropertyValue() entered, obj=<%s>, id=%d, type=%d, value=<%s>, index=%d\n",
        obj->GetName().c_str(), id, type, value.c_str(), index);
    #endif
    
@@ -5493,8 +5508,9 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("   propertyType=%s\n",
-       type == -1 ? "UNKNOWN_TYPE" : GmatBase::PARAM_TYPE_STRING[type].c_str());
+      ("   propertyType=%s, valueToUse=<%s>\n",
+       type == -1 ? "UNKNOWN_TYPE" : GmatBase::PARAM_TYPE_STRING[type].c_str(),
+       valueToUse.c_str());
    #endif
    
    if (type == -1)
@@ -5738,6 +5754,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
    // Remove enclosing single quotes first (LOJ: 2009.06.08)
    std::string valueToUse = value;
    valueToUse = GmatStringUtil::RemoveEnclosingString(valueToUse, "'");
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   valueToUse=<%s> after enclosing quote removed\n", valueToUse.c_str());
+   #endif
    
    // Try creating Parameter first if it is not ObjectType
    if (!IsObjectType(valueToUse))
@@ -6198,7 +6218,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
 {
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetProperty() obj=<%p>'%s', id=%d, type=%d, value=<%s>\n",
+      ("Interpreter::SetProperty() entered, obj=<%p>'%s', id=%d, type=%d, value=<%s>\n",
        obj, obj->GetName().c_str(), id, type, value.c_str());
    #endif
    
@@ -6206,24 +6226,44 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    
    std::string valueToUse = value;
    CheckForSpecialCase(obj, id, valueToUse);
-
+   
    // require the object to take its prerequisite action before setting the value
    obj->TakeRequiredAction(id);
-
+   
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage("   propertyType=%d\n", obj->GetParameterType(id));
+   MessageInterface::ShowMessage
+      ("   propertyType=%d, valueToUse=<%s>\n", obj->GetParameterType(id), valueToUse.c_str());
    #endif
    
    StringArray rhsValues;
    Integer count = 0;
    
+   // Check if valueToUse is in array form (enclosed with [])
+   // LOJ: 2013.03.07 GMT-3564 fix
+   if ((type == Gmat::BOOLEANARRAY_TYPE) ||
+       (type == Gmat::INTARRAY_TYPE) ||
+       (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
+       (type == Gmat::RVECTOR_TYPE))
+   {
+      if (!GmatStringUtil::IsEnclosedWithBrackets(valueToUse))
+      {
+         if (errorMsg1 == "")
+            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+         else
+            errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+         errorMsg2 = " Needs [] around values for array type";
+
+         return retval;
+      }
+   }
+   
    // if value has braces or brackets, setting multiple values
    if (value.find("{") != value.npos || value.find("}") != value.npos)
    {
       // verify that we accept only OBJECTARRAYTYPE
-	  if ((type != Gmat::OBJECTARRAY_TYPE) &&
-		 (type != Gmat::STRINGARRAY_TYPE))
-		  return retval;
+      if ((type != Gmat::OBJECTARRAY_TYPE) &&
+          (type != Gmat::STRINGARRAY_TYPE))
+         return retval;
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6245,13 +6285,13 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    }
    else if (value.find("[") != value.npos || value.find("]") != value.npos)
    {
-      // verify that we accept only OBJECTARRAYTYPE
-	  // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
+      // verify that we accept only numeric ARRAYTYPE
+      // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
       //      Long term, we need a GetParameterTypeArray or something
 	  if (((type != Gmat::BOOLEANARRAY_TYPE) &&
-		   (type != Gmat::INTARRAY_TYPE) &&
-		   (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-		   (type != Gmat::RVECTOR_TYPE)) &&
+          (type != Gmat::INTARRAY_TYPE) &&
+          (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+          (type != Gmat::RVECTOR_TYPE)) &&
 		   (!((type == Gmat::OBJECT_TYPE) && 
 		      ((obj->GetParameterText(id) == "ViewDirection") ||
 			   (obj->GetParameterText(id) == "ViewPointVector") || 

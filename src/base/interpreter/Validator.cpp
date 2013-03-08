@@ -46,6 +46,7 @@
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CREATE_PARAM
+//#define DEBUG_CREATE_ARRAY
 //#define DEBUG_AUTO_PARAM
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_FUNCTION
@@ -224,7 +225,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
        obj->GetName().c_str(), continueOnError);
    #endif
    
-   theErrorList.clear();
+   validatorErrorList.clear();
    bool retval = true;
    ObjectTypeArray refTypes = obj->GetRefObjectTypeArray();
    bool includeOwnedObjects = obj->IncludeOwnedObjectsInValidation();
@@ -395,8 +396,8 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
    
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::CheckUndefinedReference() theErrorList.size()=%d, returning %d\n",
-       theErrorList.size(), retval);
+      ("Validator::CheckUndefinedReference() validatorErrorList.size()=%d, returning %d\n",
+       validatorErrorList.size(), retval);
    #endif
    
    return retval;
@@ -476,7 +477,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    }
    
    // Now, start creating wrappers
-   theErrorList.clear();
+   validatorErrorList.clear();
    cmd->ClearWrappers();
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
    #ifdef DEBUG_VALIDATE_COMMAND
@@ -826,9 +827,16 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
 //------------------------------------------------------------------------------
 const StringArray& Validator::GetErrorList()
 {
-   return theErrorList;
+   return validatorErrorList;
 }
 
+//------------------------------------------------------------------------------
+// void ClearErrorList()
+//------------------------------------------------------------------------------
+void Validator::ClearErrorList()
+{
+   validatorErrorList.clear();
+}
 
 //----------------------------
 // private methods
@@ -1074,8 +1082,26 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    // (This will fix bug 2196)
    //if (leftEw->GetWrapperType() == Gmat::VARIABLE_WT ||
    //    leftEw->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
-   if (leftEw && leftEw->GetDataType() == Gmat::REAL_TYPE)
-      createDefaultStringWrapper = false;
+   if (leftEw)
+   {
+      if (leftEw->GetDataType() == Gmat::REAL_TYPE)
+         createDefaultStringWrapper = false;
+      else
+      {
+         // Check if left is ParameterWapper and it is a time parameter returing
+         // string, such as Gregorian time, do not create default string wrapper
+         // NOTE: This may break GmatFunction since all scripts in the function
+         // will be assignment command and some objects can be created later in
+         // the function sequence.
+         // LOJ: 2013.03.04 for GMT-2543 fix
+         if (leftEw->GetWrapperType() ==  Gmat::PARAMETER_WT)
+         {
+            Parameter *param = (Parameter*)(leftEw->GetRefObject());
+            if (param->IsTimeParameter())
+               createDefaultStringWrapper = false;
+         }
+      }
+   }
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
@@ -1326,14 +1352,26 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          return HandleError();
       }
    }
+
+   // By this time, right side wrapper was created succesfully
+   bool retval = true;
+   
+   // If left side wrapper is NULL, the error message was alredy pushed
+   // to buffer when an error was encluntered, so set skipErrorMessage to false
+   // to avoid general error message handling.
+   if (leftEw == NULL)
+   {
+      skipErrorMessage = true;
+      retval = false;
+   }
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage("   leftEw=<%p>, rightEw=<%p>\n", leftEw, rightEw);
    MessageInterface::ShowMessage
-      ("Validator::CreateAssignmentWrappers() returning true\n");
+      ("Validator::CreateAssignmentWrappers() returning %d\n", retval);
    #endif
    
-   return true;
+   return retval;
 }
 
 
@@ -2227,23 +2265,41 @@ Parameter* Validator::CreateParameter(const std::string &type,
 //------------------------------------------------------------------------------
 Parameter* Validator::CreateArray(const std::string &arrayStr, Integer manage)
 {
+   #ifdef DEBUG_CREATE_ARRAY
+   MessageInterface::ShowMessage
+      ("Validator::CreateArray() entered, arrayStr='%s', manage=%d\n",
+       arrayStr.c_str(), manage);
+   #endif
    std::string name;
    Integer row, col;
    GmatStringUtil::GetArrayIndex(arrayStr, row, col, name, "[]");
    bool isOk = true;
    
-   if (row == -1)
+   #ifdef DEBUG_CREATE_ARRAY
+   MessageInterface::ShowMessage("   row=%d, col=%d\n", row, col);
+   #endif
+   
+   if (row <= 0 && col <= 0)
    {
-      theErrorMsg = "Validator::CreateArray() invalid number of rows found in: " +
-         arrayStr + "\n";
+      theErrorMsg = "Cannot create an Array \"" + arrayStr + "\"; Row and column numbers are invalid";
+      skipErrorMessage = false;
+      isFinalError = true;
       HandleError();
       isOk = false;
    }
-   
-   if (col == -1)
+   else if (row <= 0)
    {
-      theErrorMsg = "Validator::CreateArray() invalid number of columns found in: " +
-         arrayStr + "\n";
+      theErrorMsg = "Cannot create an Array \"" + arrayStr + "\"; Row number is invalid";
+      skipErrorMessage = false;
+      isFinalError = true;
+      HandleError();
+      isOk = false;
+   }
+   else if (col <= 0)
+   {
+      theErrorMsg = "Cannot create an Array \"" + arrayStr + "\"; Column number is invalid";
+      skipErrorMessage = false;
+      isFinalError = true;
       HandleError();
       isOk = false;
    }
@@ -2262,6 +2318,9 @@ Parameter* Validator::CreateArray(const std::string &arrayStr, Integer manage)
       ((Array*)param)->SetSize(row, col);
    }
    
+   #ifdef DEBUG_CREATE_ARRAY
+   MessageInterface::ShowMessage("Validator::CreateArray() returning <%p>\n", param);
+   #endif
    return param;
 }
 
@@ -2363,10 +2422,14 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
    
    Gmat::WrapperDataType itsType = Gmat::NUMBER_WT;
    ElementWrapper *ew = NULL;
-   
+   Integer numberOfDots = GmatStringUtil::NumberOfOccurrences(theDescription, '.');
+   ParameterInfo *paramInfo = ParameterInfo::Instance();
+   GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
+   Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+      
    // if there are two dots, then treat it as a Parameter
    // e.g. Sat.Thruster1.K1
-   if (GmatStringUtil::NumberOfOccurrences(theDescription, '.') > 1)
+   if (numberOfDots > 1)
    {
       // see if reallay create a ParameterWrapper first, there are a few exceptions.
       bool paramFirst = true;
@@ -2398,9 +2461,10 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          #endif
          // Check for dependency before creating Spacecraft Parameter
          // (Fix for GMT3272, 3271, 3215; LOJ:2012.11.19)
-         ParameterInfo *paramInfo = ParameterInfo::Instance();
-         GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
-         Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+         // LOJ: 2013.03.04 Moved to top
+         //ParameterInfo *paramInfo = ParameterInfo::Instance();
+         //GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
+         //Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
          #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage
             ("   depType=%d, ownedObjType=%d(%s)\n", depType, ownedObjType,
@@ -3271,7 +3335,7 @@ bool Validator::HandleError(bool addFunction)
    
    if (continueOnError)
    {
-      theErrorList.push_back(theErrorMsg);
+      validatorErrorList.push_back(theErrorMsg);
       return false;
    }
    else

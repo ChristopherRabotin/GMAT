@@ -691,9 +691,21 @@ bool Assignment::Validate()
                {
                   // Allow setting String, Number, Variable, or ArrayElement to
                   // String.  This fixes bug 1340.
-                  if (rhsDataType == Gmat::STRING_TYPE ||
-                      rhsDataType == Gmat::REAL_TYPE)
+                  if (rhsDataType == Gmat::STRING_TYPE)
                      retval = true;
+                  else if (rhsDataType == Gmat::REAL_TYPE)
+                  {
+                     retval = true;
+                     // Check if left is ParameterWapper and it is a time parameter returing
+                     // string, such as Gregorian time, then it is not allowed
+                     // (GMT-2543 fix)
+                     if (lhsWrapper->GetWrapperType() ==  Gmat::PARAMETER_WT)
+                     {
+                        Parameter *param = (Parameter*)(lhsWrapper->GetRefObject());
+                        if (param->IsTimeParameter())
+                           retval = false;
+                     }
+                  }
                   else
                      retval = false;
                }
@@ -872,7 +884,12 @@ bool Assignment::Validate()
       }
       else
       {
-         if (mathTree == NULL)
+         if (lhsDataType == Gmat::STRING_TYPE && mathTree)
+         {
+            lastErrorMessage = "Right of the equal sign is not valid.";
+            retval = false;
+         }
+         else if (mathTree == NULL)
          {
             // rhs Wrappers should have been set by now, so validation failed
             lastErrorMessage = "Right of the equal sign is not valid.";
