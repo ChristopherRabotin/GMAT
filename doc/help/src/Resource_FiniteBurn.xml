@@ -188,14 +188,24 @@
 
         <thead>
           <row>
-            <entry>Spacecraft resource</entry>
+            <entry>Field</entry>
 
-            <entry>Must be created in order to apply any burn.</entry>
+            <entry>Description</entry>
           </row>
         </thead>
 
         <tbody>
+
+
           <row>
+            <entry><guilabel>Spacecraft resource</guilabel></entry>
+
+            <entry><para> Must be created in order to apply any burn.</para></entry>
+          </row>
+
+
+
+		<row>
             <entry><guilabel>Thruster resource</guilabel></entry>
 
             <entry><para> As discussed in the <guilabel>Remarks</guilabel>,

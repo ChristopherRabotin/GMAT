@@ -32,16 +32,16 @@
   <refsection>
     <title>Description</title>
 
-    <para>The Thruster uses the fuel tank and directs the thrust of the rocket
-    engine while in space. It is used for finite burns.</para>
+    <para>The Thrusterdirects the thrust of the rocket engine while in space.
+    It is used for finite burns.</para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
     <para>The constants Ci below are used in the following equation to
-    calculate thrust (in Newtons), FT, as a function of pressure P (kPa) and
-    temperature T (Celsius).</para>
+    calculate thrust (in Newtons), F<subscript>T</subscript>, as a function of
+    pressure P (kPa) and temperature T (Celsius).</para>
 
     <screenshot>
       <mediaobject>
@@ -72,9 +72,9 @@
         <term>CoordinateSystem</term>
 
         <listitem>
-          <para>The CoordinateSystem field for a thrusterdetermines what
-          coordinate system the orientation parametersX_Direction,
-          Y_Direction, and Z_Direction arereferenced to. This is a temporary
+          <para>The CoordinateSystem field for a thruster determines what
+          coordinate system the orientation parameters, X_Direction,
+          Y_Direction, and Z_Direction are referenced to. This is a temporary
           fix in GMAT. Eventually, theuser will specify the attitude of
           aspacecraft, and then X_Direction, Y_Direction, and Z_Direction will
           be referenced to the spacecraft body frame.</para>
@@ -1371,8 +1371,8 @@
       <para>The Thruster dialog box allows you to specify properties of a
       thruster including the coordinate system of the Thrust acceleration
       direction vector, the thrust magnitude and Isp coefficients, and choice
-      of FuelTank. The layout of the Thruster dialog box is shown below.
-      </para>
+      of FuelTank. The layout of the Thruster dialog box is shown
+      below.</para>
 
       <screenshot>
         <mediaobject>
@@ -1388,12 +1388,12 @@
       between existing coordinate systems or use locally defined coordinate
       systems. The “Axes” field is only active if “Coordinate System” is set
       to Local. The “Origin” field is only active if “Coordinate System” is
-      set to Local and “Axes” is set to either VNB or LVLH. </para>
+      set to Local and “Axes” is set to either VNB or LVLH.</para>
 
       <para>As shown below, if “Decrement Mass” is checked, then you can input
       the gravitational acceleration value used to calculate fuel use. The
       value of the gravitational acceleration input here only affects fuel use
-      and does not affect the force model. </para>
+      and does not affect the force model.</para>
 
       <screenshot>
         <mediaobject>
