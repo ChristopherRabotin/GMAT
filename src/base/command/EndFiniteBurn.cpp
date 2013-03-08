@@ -24,6 +24,7 @@
 
 //#define DEBUG_END_MANEUVER
 //#define DEBUG_END_MANEUVER_EXE
+//#define DEBUG_TRANSIENT_FORCES
 
 
 //------------------------------------------------------------------------------
@@ -460,66 +461,114 @@ bool EndFiniteBurn::Initialize()
 bool EndFiniteBurn::Execute()
 {
    ValidateThrusters();
-   
-   // Turn off all of the referenced thrusters
-   for (std::vector<Thruster*>::iterator i = thrusters.begin(); 
-        i != thrusters.end(); ++i)
-   {
-      Thruster *th = *i;
-      #ifdef DEBUG_END_MANEUVER_EXE
-         MessageInterface::ShowMessage
-            ("EndFiniteBurn::Execute() Deactivating engine <%p>'%s'\n", th,
-             th->GetName().c_str());
-      #endif
-      th->SetBooleanParameter(th->GetParameterID("IsFiring"), false);
 
-      #ifdef DEBUG_END_MANEUVER_EXE
-         MessageInterface::ShowMessage
-            ("Checking to see if engine is inactive: returned %s\n", 
-             (th->GetBooleanParameter(th->GetParameterID("IsFiring")) ? 
-              "true" : "false"));
-      #endif      
-   }
-   
-   // Tell active spacecraft that they are no longer firing
-   for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
-   {
-      /// todo: Be sure that no other maneuver has the spacecraft maneuvering;
-      /// for R2013a this is not an issue since only 1 burn per spacecraft is
-      /// allowed.  We'll need to fix this when that restriction is removed.
-      (*s)->IsManeuvering(false);
-   }
-   
-   // Remove the force from the list of transient forces
+   // Only do this if the FiniteBurn is the one this command controls...
+   bool forceActive = false;
    for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
         j != transientForces->end(); ++j)
    {
       if (((*j)->GetName()) == thrustName)
       {
-         #ifdef DEBUG_TRANSIENT_FORCES
-         MessageInterface::ShowMessage
-            ("EndFiniteBurn::Execute() Removing burnForce<%p>'%s' from "
-                  "transientForces\n", burnForce, burnForce->GetName().c_str());
-         #endif
-         transientForces->erase(j);
-         break;
+         // ... and if it is set for the right spacecraft
+         StringArray burnSatNames = (*j)->GetRefObjectNameArray(Gmat::SPACECRAFT);
+
+         bool foundSats = false;
+         UnsignedInt numberFound = 0;
+         for (UnsignedInt i = 0; i < satNames.size(); ++i)
+         {
+            if (find(burnSatNames.begin(), burnSatNames.end(), satNames[i]) != burnSatNames.end())
+            {
+               foundSats = true;
+               ++numberFound;
+            }
+         }
+         if (foundSats)
+         {
+            #ifdef DEBUG_TRANSIENT_FORCES
+               MessageInterface::ShowMessage("EndFiniteBurn::Execute(): The burn "
+                     "is active\n");
+            #endif
+
+            forceActive = true;
+
+            if (numberFound != satNames.size())
+               MessageInterface::ShowMessage("*** WARNING *** Turning off the "
+                     "finite burn %s, but the EndFiniteBurn command did not "
+                     "list all of the spacecraft that are no longer "
+                     "maneuvering.\n", burnName.c_str());
+
+            break;
+         }
       }
    }
    
-   // Reset maneuvering to Publisher so that any subscriber can do its own action
-   if (!sats.empty())
+   if (forceActive)
    {
-      Real epoch = sats[0]->GetEpoch();
-      publisher->SetManeuvering(this, false, epoch, satNames, "end of finite "
-            "maneuver");
-   }
+      // Turn off all of the referenced thrusters
+      for (std::vector<Thruster*>::iterator i = thrusters.begin();
+           i != thrusters.end(); ++i)
+      {
+         Thruster *th = *i;
+         #ifdef DEBUG_END_MANEUVER_EXE
+            MessageInterface::ShowMessage
+               ("EndFiniteBurn::Execute() Deactivating engine <%p>'%s'\n", th,
+                th->GetName().c_str());
+         #endif
+         th->SetBooleanParameter(th->GetParameterID("IsFiring"), false);
    
-   #ifdef DEBUG_END_MANEUVER_EXE
-      MessageInterface::ShowMessage("EndFiniteBurn::Execute() Current TransientForces list:\n");
+         #ifdef DEBUG_END_MANEUVER_EXE
+            MessageInterface::ShowMessage
+               ("Checking to see if engine is inactive: returned %s\n",
+                (th->GetBooleanParameter(th->GetParameterID("IsFiring")) ?
+                 "true" : "false"));
+         #endif
+      }
+
+      // Tell active spacecraft that they are no longer firing
+      for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
+      {
+         #ifdef DEBUG_END_MANEUVER_EXE
+            MessageInterface::ShowMessage
+                  ("EndFiniteBurn::Execute() Deactivating maneuvers on Spacecraft "
+                   "<%p>'%s'\n", *s, (*s)->GetName().c_str());
+         #endif
+         /// todo: Be sure that no other maneuver has the spacecraft maneuvering;
+         /// for R2013a this is not an issue since only 1 burn per spacecraft is
+         /// allowed.  We'll need to fix this when that restriction is removed.
+         (*s)->IsManeuvering(false);
+      }
+
+      // Remove the force from the list of transient forces
       for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
            j != transientForces->end(); ++j)
-         MessageInterface::ShowMessage("   %s\n", (*j)->GetName().c_str());
-   #endif
+      {
+         if (((*j)->GetName()) == thrustName)
+         {
+            #ifdef DEBUG_TRANSIENT_FORCES
+            MessageInterface::ShowMessage
+               ("EndFiniteBurn::Execute() Removing burnForce<%p>'%s' from "
+                     "transientForces\n", *j, (*j)->GetName().c_str());
+            #endif
+            transientForces->erase(j);
+            break;
+         }
+      }
+
+      // Reset maneuvering to Publisher so that any subscriber can do its own action
+      if (!sats.empty())
+      {
+         Real epoch = sats[0]->GetEpoch();
+         publisher->SetManeuvering(this, false, epoch, satNames, "end of finite "
+               "maneuver");
+      }
+
+      #ifdef DEBUG_END_MANEUVER_EXE
+         MessageInterface::ShowMessage("EndFiniteBurn::Execute() Current TransientForces list:\n");
+         for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
+              j != transientForces->end(); ++j)
+            MessageInterface::ShowMessage("   %s\n", (*j)->GetName().c_str());
+      #endif
+   }
    
    BuildCommandSummary(true);
    return true;
