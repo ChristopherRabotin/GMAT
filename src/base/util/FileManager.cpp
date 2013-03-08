@@ -1376,14 +1376,21 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath)
    std::string absPath;
    StringTokenizer st(relPath, "/\\");
    StringArray allNames = st.GetAllTokens();
+   Integer numNames = allNames.size();
    StringArray pathNames;
+   
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage("There are %d names in relPath\n", numNames);
+   for (int i = 0; i < numNames; i++)
+      MessageInterface::ShowMessage("   allNames[%d] = '%s'\n", i, allNames[i].c_str());
+   #endif
    
    for (UnsignedInt i = 0; i < allNames.size(); i++)
    {
       std::string name = allNames[i];
       
       #ifdef DEBUG_FILE_PATH
-      MessageInterface::ShowMessage("   name = '%s'\n", name.c_str());
+      MessageInterface::ShowMessage("   allNames[%d] = '%s'\n", i, name.c_str());
       #endif
       
       absPath = name;
@@ -1396,11 +1403,17 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath)
          if (mPathMap.find(name) != mPathMap.end())
             absPath = mPathMap[name];
          
-         if (absPath.find("_PATH") != absPath.npos)
+         #ifdef DEBUG_FILE_PATH
+         MessageInterface::ShowMessage("   1st absPath = '%s'\n", absPath.c_str());
+         #endif
+         
+         // If _PATH found and it is not the same as original name,
+         // Call ConvertToAbsPath() again
+         if (absPath.find("_PATH") != absPath.npos && absPath != name)
             absPath = ConvertToAbsPath(absPath);
          
          #ifdef DEBUG_FILE_PATH
-         MessageInterface::ShowMessage("   absPath = '%s'\n", absPath.c_str());
+         MessageInterface::ShowMessage("   2nd absPath = '%s'\n", absPath.c_str());
          #endif
          
          pathNames.push_back(absPath);
@@ -1424,7 +1437,7 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath)
       else
          absPath = absPath + pathNames[i] + "/";
    }
-      
+   
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
       ("FileManager::ConvertToAbsPath() returning '%s'\n", absPath.c_str());
