@@ -259,10 +259,11 @@
       <programlisting>
         <code>
   % Create a default Spacecraft and FuelTank Object
-  Create Spacecraft DefaultSC;
+  Create Spacecraft DefaultSC
   Create FuelTank FuelTank1
 
-  % Create a default Thruster.  Allow for fuel depletion from the default FuelTank.
+  % Create a default Thruster.  Allow for fuel depletion from 
+  % the default FuelTank.
   Create Thruster Thruster1
   GMAT Thruster1.DecrementMass = true
   GMAT Thruster1.Tank = {FuelTank1}
