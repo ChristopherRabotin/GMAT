@@ -353,8 +353,17 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
          }
          else
          {
-
+            #ifdef DEBUG_LOADING
+               MessageInterface::ShowMessage("*** An error was detected during "
+                     "the load!!! ***\n");
+            #endif
          }
+
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("Load completed; found %d vertices, "
+                  "%d polygons, and %d materials\n", theModel->GetNumVertices(),
+                  theModel->GetNumPolygons(), theModel->GetNumMaterials());
+         #endif
 
          theModel = NULL;
       }
