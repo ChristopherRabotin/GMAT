@@ -38,9 +38,6 @@
     fuel is depleted. To use a <guilabel>FuelTank</guilabel>, you must first
     create the tank, and then attach it to the desired spacecraft and
     associate it with a thruster as shown in the example below.</para>
-
-    <para>When working in the script, you must add tanks to spacecraft before
-    the begin mission sequence command.</para>
   </refsection>
 
   <refsection>
@@ -120,13 +117,13 @@
           <row>
             <entry><guilabel>PressureModel</guilabel></entry>
 
-            <entry><para> Description </para> <variablelist>
+            <entry><para>The pressure model describes how pressure in the tank
+            changes as fuel is depleted.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>The pressure model describes how pressure in the
-                    tank changes as fuel is depleted.</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -392,14 +389,14 @@
           <row>
             <entry><guilabel>Temperature</guilabel></entry>
 
-            <entry><para> Description </para> <variablelist>
+            <entry><para>The temperature of the fuel and ullage in the tank.
+            GMAT currently assumes ullage and fuel are always at the same
+            temperature.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>The temperature of the fuel and ullage in the tank.
-                    GMAT currently assumes ullage and fuel are always at the
-                    same temperature.</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -457,7 +454,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>datatype</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -521,7 +518,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_FuelTank_GUI_1.png"
-                     scalefit="1" width="100%"/>
+                     scalefit="1" width="75%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -538,15 +535,15 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_FuelTank_GUI_2.png"
-                     scalefit="1" width="100%"/>
+                     scalefit="1" width="75%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
     <para>When performing a finite burn, you will typically want to model fuel
-    depletion. To do this, select the Decrement Mass button and then select
-    the previously created <guilabel>FuelTank</guilabel> as shown
-    below.</para>
+    depletion. To do this, select the <guibutton>Decrement Mass</guibutton>
+    button and then select the previously created
+    <guilabel>FuelTank</guilabel> as shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -561,12 +558,12 @@
     <para>Thus far, we have created both a <guilabel>FuelTank</guilabel> and a
     <guilabel>Thruster</guilabel>, and we have associated a
     <guilabel>FuelTank</guilabel> with our <guilabel>Thruster</guilabel>. We
-    are not done yet. We must tell GMAT that we want to attach both the Fuel
-    Tank and the <guilabel>Thruster</guilabel> to a particular spacecraft. To
-    do this, double click on the desired spacecraft under the
-    <guilabel>Spacecraft</guilabel> resource to bring up the associated GUI
-    panel. Then click on the Tanks tab to bring up the following GUI
-    display.</para>
+    are not done yet. We must tell GMAT that we want to attach both the
+    <guibutton>FuelTank</guibutton> and the <guilabel>Thruster</guilabel> to a
+    particular spacecraft. To do this, double click on the desired spacecraft
+    under the <guilabel>Spacecraft</guilabel> resource to bring up the
+    associated GUI panel. Then click on the <guibutton>Tanks</guibutton> tab
+    to bring up the following GUI display.</para>
 
     <screenshot>
       <mediaobject>
@@ -580,7 +577,8 @@
 
     <para>Next, select the desired <guilabel>FuelTank</guilabel> and use the
     right arrow button to attach the <guilabel>FuelTank</guilabel> to the
-    spacecraft. Then, click the Apply button as shown below.</para>
+    spacecraft. Then, click the <guibutton>Apply</guibutton> button as shown
+    below.</para>
 
     <screenshot>
       <mediaobject>
@@ -594,10 +592,10 @@
 
     <para>Similarly, to attach a <guilabel>Thruster</guilabel> to a
     spacecraft, double click on the desired spacecraft under the
-    <guilabel>Spacecraft</guilabel> resource and then select the Actuators
-    tab. Then select the desired thruster and use the right arrow to attach
-    the thruster to the spacecraft. Finally, click the Apply button as shown
-    below.</para>
+    <guilabel>Spacecraft</guilabel> resource and then select the
+    <guilabel>Actuators</guilabel> tab. Then select the desired thruster and
+    use the right arrow to attach the thruster to the spacecraft. Finally,
+    click the <guibutton>Apply</guibutton> button as shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -650,73 +648,77 @@
       <programlisting>
         <code>
   %  Create the Fuel Tank Object
-  Create FuelTank aTank;
-  aTank.AllowNegativeFuelMass = false;
-  aTank.FuelMass = 756;
-  aTank.Pressure = 1500;
-  aTank.Temperature = 20;
-  aTank.RefTemperature = 20;
-  aTank.Volume = 0.75;
-  aTank.FuelDensity = 1260;
-  aTank.PressureModel = PressureRegulated;
+  Create FuelTank aTank
+  aTank.AllowNegativeFuelMass = false
+  aTank.FuelMass = 756
+  aTank.Pressure = 1500
+  aTank.Temperature = 20
+  aTank.RefTemperature = 20
+  aTank.Volume = 0.75
+  aTank.FuelDensity = 1260
+  aTank.PressureModel = PressureRegulated
   %  Create a Thruster and assign it a FuelTank
-  Create Thruster aThruster;
-  aThruster.Tank = {aTank};
+  Create Thruster aThruster
+  aThruster.Tank = {aTank}
 
   %  Add the FuelTank and Thruster to a Spacecraft
   Create Spacecraft aSpacecraft
-  aSpacecraft.Tanks = {aTank};
-  aSpacecraft.Thrusters = {aThruster};
+  aSpacecraft.Tanks = {aTank}
+  aSpacecraft.Thrusters = {aThruster}
         </code>
       </programlisting>
 
       <para>As exhibited below, there are some subtleties associated with
       setting and getting parent vs. cloned objects. In the example above,
-      aTank is the parent ‘<guilabel>FuelTank</guilabel>’ object and the field
-      aSpacecraft. Tanks is populated with a cloned copy of aTank.</para>
+      <literal>aTank </literal>is the parent ‘<guilabel>FuelTank</guilabel>’
+      object and the field <literal>aSpacecraft.Tanks</literal> is populated
+      with a cloned copy of <literal>aTank</literal>.</para>
 
       <para>Create a second spacecraft and attach a fuel tank using the same
       procedure used in the previous example. Set the
-      <guilabel>FuelMass</guilabel> in the parent object, aTank, to 900
-      kg.</para>
+      <guilabel>FuelMass</guilabel> in the parent object,
+      <literal>aTank</literal>, to 900 kg.</para>
 
       <programlisting>
         <code>
   %  Add the FuelTank and Thruster to a second Spacecraft
   Create Spacecraft bSpacecraft
-  bSpacecraft.Tanks = {aTank};
-  bSpacecraft.Thrusters = {aThruster};
-  aTank.FuelMass = 900;    %Can be performed in both resource and command modes
+  bSpacecraft.Tanks = {aTank}
+  bSpacecraft.Thrusters = {aThruster}
+  aTank.FuelMass = 900    %Can be performed in both resource and 
+                          %command modes
         </code>
       </programlisting>
 
       <para>Note that, in the example above, setting the value of the parent
-      object, aTank, changes the fuel mass value in both cloned fuel tank
-      objects. More specifically, the value of both aSpacecraft.aTank.FuelMass
-      and bSpacecraft.aTank.FuelMass are both now equal to the new value of
-      900 kg. We note that the assignment command for the parent object,
-      aTank.FuelMass, can be performed in both resource and command
-      modes.</para>
+      object, <literal>aTank</literal>, changes the fuel mass value in both
+      cloned fuel tank objects. More specifically, the value of both
+      <literal>aSpacecraft.aTank.FuelMass</literal> and
+      <literal>bSpacecraft.aTank.FuelMass</literal> are both now equal to the
+      new value of 900 kg. We note that the assignment command for the parent
+      object, <literal>aTank.FuelMass</literal>, can be performed in both
+      resource and command modes.</para>
 
       <para>To change the value of the fuel mass in only the first created
-      spacecraft, aSpacecraft, we do the following.</para>
+      spacecraft, <literal>aSpacecraft</literal>, we do the following.</para>
 
       <programlisting>
         <code>
   %  Create the Fuel Tank Object
-  aTank.FuelMass = 756;       %Fuel tank mass in both spacecraft set back to default
-  aSpacecraft.aTank.FuelMass = 1000;   %Can only be performed in command mode.
+  aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
+  aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.
         </code>
       </programlisting>
 
       <para>As a result of the commands in the previous example, the value of
-      aSpacecraft.aTank.FuelMass is 1000 kg and the value of
-      bSpacecraft.aTank.FuelMass is 756 kg. We note that the assignment
-      command for the cloned object, aSpacecraft.aTank.FuelMass, can only be
-      performed in command mode.</para>
+      <literal>aSpacecraft.aTank.FuelMass</literal> is 1000 kg and the value
+      of <literal>bSpacecraft.aTank.FuelMass</literal> is 756 kg. We note that
+      the assignment command for the cloned object,
+      <literal>aSpacecraft.aTank.FuelMass</literal>, can only be performed in
+      command mode.</para>
 
-      <para><literal>Caution: Value of AllowNegativeFuelMass flag can affect
-      iterative processes</literal></para>
+      <refsection>
+	  <title>Caution: Value of AllowNegativeFuelMass flag can affect iterative processes</title>
 
       <para>By default, GMAT will not allow the fuel mass to be negative.
       However, occasionally in iterative processes such as targeting, a solver
@@ -726,6 +728,7 @@
       GMAT will not allow the the total spacecraft mass to be negative. If
       DryMass + FuelMass is negative GMAT will throw an exception and
       stop.</para>
+	  </refsection>
     </refsection>
   </refsection>
 
@@ -740,24 +743,24 @@
       <programlisting>
         <code>
   %  Create the Fuel Tank Object
-  Create FuelTank aTank;
-  aTank.AllowNegativeFuelMass = false;
-  aTank.FuelMass = 756;
-  aTank.Pressure = 1500;
-  aTank.Temperature = 20;
-  aTank.RefTemperature = 20;
-  aTank.Volume = 0.75;
-  aTank.FuelDensity = 1260;
-  aTank.PressureModel = PressureRegulated;
+  Create FuelTank aTank
+  aTank.AllowNegativeFuelMass = false
+  aTank.FuelMass = 756
+  aTank.Pressure = 1500
+  aTank.Temperature = 20
+  aTank.RefTemperature = 20
+  aTank.Volume = 0.75
+  aTank.FuelDensity = 1260
+  aTank.PressureModel = PressureRegulated
 
   %  Create a Thruster and assign it a FuelTank
-  Create Thruster aThruster;
-  aThruster.Tank = {aTank};
+  Create Thruster aThruster
+  aThruster.Tank = {aTank}
 
   %  Add the FuelTank and Thruster to a Spacecraft
   Create Spacecraft aSpacecraft
-  aSpacecraft.Tanks = {aTank};
-  aSpacecraft.Thrusters = {aThruster};
+  aSpacecraft.Tanks = {aTank}
+  aSpacecraft.Thrusters = {aThruster}
 
   BeginMissionSequence
         </code>
