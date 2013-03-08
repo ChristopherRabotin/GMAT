@@ -425,9 +425,19 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
       return false;
    }
    
-   int retval = mGuiManager->
-      IsValidVariable(varName.c_str(), ownerType, allowNumber, allowNonPlottable,
-                      allowObjectProperty, allowWholeArray);
+   int retval = -1;
+   try
+   {
+      retval = mGuiManager->
+         IsValidVariable(varName.c_str(), ownerType, allowNumber, allowNonPlottable,
+                         allowObjectProperty, allowWholeArray);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      SetErrorFlag();
+      return false;
+   }
    
    if (retval == -1)
    {

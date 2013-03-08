@@ -592,10 +592,12 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    
    std::string type, ownerName, depObj;
    GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
+   Integer numberOfDots = GmatStringUtil::NumberOfOccurrences(varName, '.');
+   
    #ifdef DEBUG_GUI_ITEM_VALIDATE
    MessageInterface::ShowMessage
-      ("   type=<%s>, ownerName=<%s>, depObj=<%s>\n", varName.c_str(),
-       type.c_str(), ownerName.c_str(), depObj.c_str());
+      ("   type=<%s>, ownerName=<%s>, depObj=<%s>, numberOfDots=%d\n", varName.c_str(),
+       type.c_str(), ownerName.c_str(), depObj.c_str(), numberOfDots);
    #endif
    
    // Check for the dependency or owned object
@@ -623,10 +625,20 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       #endif
       if (type != "")
       {
+         ParameterInfo *paramInfo = ParameterInfo::Instance();
+         GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
+         Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+         bool isParameter = theGuiInterpreter->IsParameter(type);
+         if (isParameter && depType == GmatParam::ATTACHED_OBJ && numberOfDots != 2)
+            isParameter = false;
+         
          #ifdef DEBUG_GUI_ITEM_VALIDATE
-         MessageInterface::ShowMessage("   Now checking if Parameter can be created\n");
+         MessageInterface::ShowMessage
+            ("   Now checking if Parameter can be created, depType=%d, ownedObjType=%d\n",
+             depType, ownedObjType);
          #endif
-         if (theGuiInterpreter->IsParameter(type))
+         //if (theGuiInterpreter->IsParameter(type))
+         if (isParameter)
          {
             if (theGuiInterpreter->GetConfiguredObject(ownerName))
             {
