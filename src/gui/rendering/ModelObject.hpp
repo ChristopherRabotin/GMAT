@@ -141,6 +141,7 @@ public:
    void LoadTextures();
    
    // Accessors for the private data
+   void SetName(const std::string &nameFromFile);
    Integer GetNumVertices();
    void SetNumVertices(Integer vCount);
    Integer GetNumPolygons();

@@ -414,6 +414,20 @@ int ModelObject::LoadTexture(const std::string &filename)
 
 
 //------------------------------------------------------------------------------
+// void SetName(const std::string &nameFromFile)
+//------------------------------------------------------------------------------
+/**
+ * Sets the model name, usually from the data in the model file
+ *
+ * @param nameFromFile The model name read from the file
+ */
+//------------------------------------------------------------------------------
+void ModelObject::SetName(const std::string &nameFromFile)
+{
+   name = nameFromFile;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetNumVertices()
 //------------------------------------------------------------------------------
 /**
