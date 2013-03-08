@@ -93,7 +93,7 @@ void ImpulsiveBurnSetupPanel::Create()
    XUnitLabel->SetLabel(wxT("km/s"));
    YUnitLabel->SetLabel(wxT("km/s"));
    ZUnitLabel->SetLabel(wxT("km/s"));
-   vectorBoxSizer->GetStaticBox()->SetLabel(wxT("Delta-V Vector"));
+   vectorBoxSizer->SetLabel(wxT("Delta-V Vector"));
    elem1TextCtrl->SetToolTip(pConfig->Read(_T("Element1Hint")));
    elem2TextCtrl->SetToolTip(pConfig->Read(_T("Element2Hint")));
    elem3TextCtrl->SetToolTip(pConfig->Read(_T("Element3Hint")));

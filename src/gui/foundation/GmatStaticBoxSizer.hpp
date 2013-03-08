@@ -36,9 +36,12 @@ public:
    GmatStaticBoxSizer(int orient, wxWindow *parent,
                       const wxString& label = wxEmptyString, long style = 0);
    
+   void SetLabel(const wxString& label);
+
 protected:
    
-   wxWindow *theParent;
+   wxWindow     *theParent;
+   wxStaticText *labelText;
    
 };
 

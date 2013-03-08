@@ -41,16 +41,29 @@ GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
                                        const wxString& label, long style)
    : wxBoxSizer(orient)
 {
-   wxStaticText *labelText =
+//   wxStaticText *labelText =
+   labelText =
       new wxStaticText(parent, -1, label, wxDefaultPosition, wxSize(220,20), style);
    labelText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                              false, _T(""), wxFONTENCODING_SYSTEM));
    Add(labelText);
 }
+
+void GmatStaticBoxSizer::SetLabel(const wxString& label)
+{
+   labelText->SetLabel(label);
+}
+
 #else
 GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
                                        const wxString& label, long style)
    : wxStaticBoxSizer(orient, parent, label)
 {
 }
+
+void GmatStaticBoxSizer::SetLabel(const wxString& label)
+{
+   GetStaticBox()->SetLabel(label);
+}
+
 #endif
