@@ -159,6 +159,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                      MessageInterface::ShowMessage("The descriptor: \"%s\"\n",
                            theName.c_str());
                   #endif
+                  theModel->SetName(theName);
                }
                break;
 
@@ -253,6 +254,8 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                   currentMaterial->mat_specular.a = 0.5;
 
                   currentMaterial->mat_shininess = 0.5;
+
+                  currentMaterial->id_texture = 0;
 
                   theModel->SetNumMaterials(matCount + 1);
                }
@@ -429,7 +432,7 @@ bool ThreeDSLoader::LoadVertexData()
    theModel->SetNumVertices(totalVertexCount);
 
    #ifdef DEBUG_LOADING
-      MessageInterface::ShowMessage("Number of vertices: %d\n",
+      MessageInterface::ShowMessage("Number of vertices: %d filled from ",
             vertexCount);
    #endif
 
@@ -438,6 +441,10 @@ bool ThreeDSLoader::LoadVertexData()
       vector_type *vertex = theModel->GetVertexArray();
 
       // Then we loop through all vertices and store them
+      #ifdef DEBUG_LOADING
+         MessageInterface::ShowMessage("%d to %d\n", previousVertexCount,
+               totalVertexCount);
+      #endif
       for (unsigned short i = previousVertexCount; i < totalVertexCount; ++i)
       {
          fread(&v, sizeof(float), 1, theFile);
