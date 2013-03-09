@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="Maneuver"
+<refentry version="5.0" xml:id="Maneuver"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,52 +24,50 @@
   <refnamediv>
     <refname>Maneuver</refname>
 
-    <refpurpose>
-      Performs an impulsive (instantaneous) maneuver
-    </refpurpose>
+    <refpurpose>Performs an impulsive (instantaneous) maneuver</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
     <synopsis>
-      <literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>);
+      <literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>)
     </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>Maneuver</guilabel> command applies a selected <guilabel>ImpulsiveBurn</guilabel> to a selected <guilabel>Spacecraft</guilabel>.  To perform an impulsive maneuver 
-      using the <guilabel>Maneuver</guilabel> command, you must create an <guilabel>ImpulsiveBurn</guilabel>.  If you wish to model fuel depletion, you must associate a 
-      specific <guilabel>FuelTank</guilabel> hardware object with this <guilabel>ImpulsiveBurn</guilabel> and attach the <guilabel>FuelTank</guilabel> to the desired spacecraft.  See the Remarks and 
-      example shown below for more details.
-    </para>
+    <para>The <guilabel>Maneuver</guilabel> command applies a selected
+    <guilabel>ImpulsiveBurn</guilabel> to a selected
+    <guilabel>Spacecraft</guilabel>. To perform an impulsive maneuver using
+    the <guilabel>Maneuver</guilabel> command, you must create an
+    <guilabel>ImpulsiveBurn</guilabel>. If you wish to model fuel depletion,
+    you must associate a specific <guilabel>FuelTank</guilabel> hardware
+    object with this <guilabel>ImpulsiveBurn</guilabel> and attach the
+    <guilabel>FuelTank</guilabel> to the desired
+    <guilabel>Spacecraft</guilabel>. See the Remarks and example shown below
+    for more details.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="FuelTank"/>, 
-      <xref linkend="ImpulsiveBurn"/>,
-      <xref linkend="Spacecraft"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="FuelTank"/>, <xref linkend="ImpulsiveBurn"/>, <xref
+    linkend="Spacecraft"/></para>
   </refsection>
 
   <refsection>
     <title>GUI</title>
 
-    <para>
-      The Maneuver command dialog box, as shown below, allows you to select which previously created impulsive burn should be applied to which spacecraft.
-    </para>
-    
+    <para>The <guilabel>Maneuver</guilabel> command dialog box, as shown
+    below, allows you to select which previously created
+    <guilabel>ImpulsiveBurn</guilabel> should be applied to which
+    <guilabel>Spacecraft</guilabel>.</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_Maneuver_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -80,84 +77,68 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>
-        Fuel Depletion
-      </title>
+      <title>Fuel Depletion</title>
 
-      <para>
-        To model fuel depletion associated with your chosen ImpulsiveBurn, you must configure the ImpulsiveBurn object as follows:
-      </para>
+      <para>To model fuel depletion associated with your chosen
+      <guilabel>ImpulsiveBurn</guilabel>, you must configure the
+      <guilabel>ImpulsiveBurn</guilabel> object as follows:</para>
 
       <itemizedlist>
         <listitem>
-          <para>
-            Set the ImpulsiveBurn parameter, DecrementMass, equal to true.
-          </para>
+          <para>Set the <guilabel>ImpulsiveBurn</guilabel> parameter,
+          <guilabel>Decrement Mass</guilabel>, equal to true.</para>
         </listitem>
+
         <listitem>
-          <para>
-            Select a fuel tank for the ImpulsiveBurn object and attach this selected fuel tank to the spacecraft.
-          </para>
+          <para>Select a <guilabel>FuelTank</guilabel> for the
+          <guilabel>ImpulsiveBurn </guilabel>object and attach this
+          selected<guilabel> FuelTank </guilabel>to the
+          <guilabel>Spacecraft</guilabel>.</para>
         </listitem>
+
         <listitem>
-          <para>
-            Set values for the ImpulsiveBurn parameters, Isp and GravitationalAccel, which are used to calculate, via the Rocket Equation, the mass depleted.
-          </para>
+          <para>Set values for the <guilabel>ImpulsiveBurn</guilabel>
+          parameters,<guilabel> Isp</guilabel> and
+          <guilabel>GravitationalAccel</guilabel>, which are used to
+          calculate, via the Rocket Equation, the mass depleted.</para>
         </listitem>
       </itemizedlist>
     </refsection>
 
     <refsection>
-      <title>
-        Interactions
-      </title>
+      <title>Interactions</title>
 
-      <informaltable colsep="0"
-                     frame="topbot">
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1"
-                   colwidth=".5*"/>
+          <colspec colnum="1" colwidth=".5*"/>
 
-          <colspec colnum="2"
-                   colwidth="3*"/>
+          <colspec colnum="2" colwidth="3*"/>
 
           <tbody>
             <row>
-              <entry>
-                <guilabel>ImpulsiveBurn</guilabel>
-              </entry>
+              <entry><guilabel>ImpulsiveBurn</guilabel></entry>
 
-              <entry>
-                <para>
-                  The Maneuver command applies the specified ImpulsiveBurn to the specified Spacecraft.
-                </para>
-              </entry>
+              <entry><para> The <guilabel>Maneuver</guilabel> command applies
+              the specified <guilabel>ImpulsiveBurn</guilabel> to the
+              specified Spacecraft. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>FuelTank</guilabel>
-              </entry>
+              <entry><guilabel>FuelTank</guilabel></entry>
 
-              <entry>
-                <para>
-                  The fuel tank specified by the ImpulsiveBurn object is used to power the ImpulsiveBurn.
-                </para>
-              </entry>
+              <entry><para> The <guilabel>FuelTank</guilabel> specified by
+              the<guilabel> ImpulsiveBurn</guilabel> object is (optionally)
+              used to power the <guilabel>ImpulsiveBurn</guilabel>.
+              </para></entry>
             </row>
-            
+
             <row>
-              <entry>
-                <guilabel>Spacecraft</guilabel>
-              </entry>
+              <entry><guilabel>Spacecraft</guilabel></entry>
 
-              <entry>
-                <para>
-                  This is the object that the ImpulsiveBurn is applied to.
-                </para>
-              </entry>
+              <entry><para> This is the object that the
+              <guilabel>ImpulsiveBurn</guilabel> is applied to.
+              </para></entry>
             </row>
-
           </tbody>
         </tgroup>
       </informaltable>
@@ -168,43 +149,46 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Create a default Spacecraft and FuelTank and attach the fuel tank to the spacecraft.  Perform a 100 m/s impulsive maneuver in the Earth VNB-V direction.
-      </para>
+      <para>Create a default <guilabel>Spacecraft</guilabel> and
+      <guilabel>FuelTank</guilabel> and attach the
+      <guilabel>FuelTank</guilabel> to the <guilabel>Spacecraft</guilabel>.
+      Perform a 100 m/s impulsive maneuver in the Earth VNB-V
+      direction.</para>
 
       <programlisting>
         <code>
-  %  Create default spacecraft and FuelTank and attach the fuel tank to the spacecraft.
-  Create Spacecraft DefaultSC;
-  Create FuelTank FuelTank1;
-  DefaultSC.Tanks = {FuelTank1};
+  %  Create default Spacecraft and FuelTank and attach the FuelTank 
+  %  to the Spacecraft.
+  Create Spacecraft DefaultSC
+  Create FuelTank FuelTank1
+  DefaultSC.Tanks = {FuelTank1}
 
   %  Set FuelTank1 parameters to default values
-  GMAT FuelTank1.AllowNegativeFuelMass = false;
-  GMAT FuelTank1.FuelMass = 756;
-  GMAT FuelTank1.Pressure = 1500;
-  GMAT FuelTank1.Temperature = 20;
-  GMAT FuelTank1.RefTemperature = 20;
-  GMAT FuelTank1.Volume = 0.75;
-  GMAT FuelTank1.FuelDensity = 1260;
-  GMAT FuelTank1.PressureModel = PressureRegulated;
+  GMAT FuelTank1.AllowNegativeFuelMass = false
+  GMAT FuelTank1.FuelMass = 756
+  GMAT FuelTank1.Pressure = 1500
+  GMAT FuelTank1.Temperature = 20
+  GMAT FuelTank1.RefTemperature = 20
+  GMAT FuelTank1.Volume = 0.75
+  GMAT FuelTank1.FuelDensity = 1260
+  GMAT FuelTank1.PressureModel = PressureRegulated
 
-  %  Create impulsive burn associated with the created fuel tank
-  Create ImpulsiveBurn IB;
-  GMAT IB.CoordinateSystem = Local;
-  GMAT IB.Origin = Earth;
-  GMAT IB.Axes = VNB;
-  GMAT IB.Element1 = 0.1;
-  GMAT IB.Element2 = 0;
-  GMAT IB.Element3 = 0;
-  GMAT IB.DecrementMass = true;
-  GMAT IB.Tank = {FuelTank1};
-  GMAT IB.Isp = 300;
-  GMAT IB.GravitationalAccel = 9.810000000000001;
+  %  Create ImpulsiveBurn associated with the created FuelTank
+  Create ImpulsiveBurn IB
+  GMAT IB.CoordinateSystem = Local
+  GMAT IB.Origin = Earth
+  GMAT IB.Axes = VNB
+  GMAT IB.Element1 = 0.1
+  GMAT IB.Element2 = 0
+  GMAT IB.Element3 = 0
+  GMAT IB.DecrementMass = true
+  GMAT IB.Tank = {FuelTank1}
+  GMAT IB.Isp = 300
+  GMAT IB.GravitationalAccel = 9.810000000000001
 
-  BeginMissionSequence;
+  BeginMissionSequence
   %  Apply impulsive maneuver to DefaultSC
-  Maneuver IB(DefaultSC);
+  Maneuver IB(DefaultSC)
         </code>
       </programlisting>
     </informalexample>
