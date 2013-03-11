@@ -439,7 +439,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
             {
                fuelMass = value;
                UpdateTank();
-               isInitialized = false;
+               //isInitialized = false;
                return fuelMass;
             }
             else
@@ -830,6 +830,11 @@ void FuelTank::UpdateTank()
          Initialize();
 
       gasVolume = volume - fuelMass / density;
+
+//      if (gasVolume < 0.0)
+//         throw HardwareException("*** ERROR *** The fuel volume in the "
+//               "tank \"" + instanceName + "\" exceeds the volume of the tank.");
+
       pressure = pvBase / gasVolume;
 
       #ifdef DEBUG_MASS_FLOW
