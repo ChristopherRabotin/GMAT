@@ -72,6 +72,7 @@ GmatApp::GmatApp()
    theModerator = (Moderator *)NULL;
    scriptToRun = "";
    showMainFrame = true;
+   buildScript = false;
    runScript = false;
    runBatch = false;
    startMatlabServer = false;
@@ -306,9 +307,18 @@ bool GmatApp::OnInit()
             theMainFrame->ManageMissionTree();
          }
          
-         if (runScript)
+         #ifdef DEBUG_CMD_LINE
+         MessageInterface::ShowMessage
+            ("  buildScript=%d, runScript=%d\n", buildScript, runScript);
+         #endif
+         
+         if (buildScript && runScript)
          {
-            BuildAndRunScript();
+            BuildAndRunScript(true);
+         }
+         else if (buildScript)
+         {
+            BuildAndRunScript(false);
          }
          else if (runBatch)
          {
@@ -424,6 +434,10 @@ int GmatApp::FilterEvent(wxEvent& event)
 /// all user interfaces?
 bool GmatApp::ProcessCommandLineOptions()
 {
+   #ifdef DEBUG_CMD_LINE
+   MessageInterface::ShowMessage("GmatApp::ProcessCommandLineOptions() entered\n");
+   #endif
+   
    bool retval = true;
    
    wxString commandLineOptions =
@@ -457,7 +471,9 @@ bool GmatApp::ProcessCommandLineOptions()
             wxString buildDate;
             buildDate.Printf("Build Date: %s %s\n\n", __DATE__, __TIME__);
             startupMessageBuffer += buildDate;
-//            MessageInterface::ShowMessage(buildDate.c_str());
+            #ifdef DEBUG_CMD_LINE
+            MessageInterface::ShowMessage(buildDate.c_str());
+            #endif
          }
          #ifdef __ADD_GMAT_SERVER__
          else if (arg == "--start-server")
@@ -474,20 +490,14 @@ bool GmatApp::ProcessCommandLineOptions()
             }
             else
             {
-               scriptToRun = argv[i+1];
-               // Replace single quotes
-               scriptToRun = GmatStringUtil::Replace(scriptToRun, "'", "");
+               buildScript = true;
                runScript = true;
-               ++i;
-               #ifdef DEBUG_CMD_LINE
-               MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
-               #endif
             }
          }
          else if ((arg == "--help") || (arg == "-h"))
          {
             startupMessageBuffer += commandLineOptions;
-//            MessageInterface::ShowMessage(commandLineOptions.c_str());
+            //MessageInterface::ShowMessage(commandLineOptions.c_str());
          }
          else if ((arg == "--exit") || (arg == "-x"))
          {
@@ -517,18 +527,18 @@ bool GmatApp::ProcessCommandLineOptions()
             {
                scriptToRun = "NITS_Config.script";
                // Replace single quotes
-               GmatStringUtil::Replace(scriptToRun, "'", "");
+               scriptToRun = GmatStringUtil::Replace(scriptToRun, "'", "");
                runScript = true;
                GmatGlobal::Instance()->SetNitsClient(true);
                GmatGlobal::Instance()->SetRunMode(GmatGlobal::EXIT_AFTER_RUN);
-
+               
                // When this changes from throw-away prototype mode to NITS compatible
                // mode, we'll want to do a NITS handshake here to register as a NITS
                // client.  That mode is not yet ready for use, though.  Here's a start on 
                // how to do that, via a static method in the command that does not 
                // (and cannot) yet exist:
                //SendMessage::ShakeHands();
-
+               
                ++i;
                #ifdef DEBUG_CMD_LINE
                   MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
@@ -537,44 +547,67 @@ bool GmatApp::ProcessCommandLineOptions()
          }
          else
          {
+            #ifdef DEBUG_CMD_LINE
+            MessageInterface::ShowMessage("Checking if arg is script name, arg=<%s>\n", arg.c_str());
+            #endif
+            
             bool isArgValid = false;
+            // Remove single quotes before checking
+            std::string tempfile = GmatStringUtil::Replace(arg, "'", "");
+            
+            #ifdef DEBUG_CMD_LINE
+            MessageInterface::ShowMessage("tempfile=<%s>\n", tempfile.c_str());
+            #endif
             
             // Check for file type association with GMAT on Windows
             // since argv[0] contains the file name to run
-            #ifdef __WIN32__
-            if (GmatFileUtil::DoesFileExist(arg.c_str()))
+            // 2013.03.11: Changed to check for the script file so that script
+            // name can appear anywhere in the argument list, for example --run can
+            // appear after script name such as, 'BplaneTarget.script' -- run
+            // So removed #ifdef __WIN32__
+            //#ifdef __WIN32__
+            if (GmatFileUtil::DoesFileExist(tempfile))
             {
                // Set this as script to run
-               scriptToRun = arg.c_str();
-               runScript = true;
+               scriptToRun = tempfile;
+               buildScript = true;
                isArgValid = true;
                #ifdef DEBUG_CMD_LINE
-               MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
+               MessageInterface::ShowMessage("scriptToRun=<%s>\n", scriptToRun.c_str());
                #endif
             }
-            #endif
+            //#endif
             //@todo Implement this for Mac and Linux?
             
             if (!isArgValid)
             {
                MessageInterface::ShowMessage("The option \"%s\" is not valid.\n", arg.c_str());
                MessageInterface::ShowMessage(commandLineOptions.c_str());
+               break;
             }
-            
-            break;
          }
       }
    }
-
+   
+   #ifdef DEBUG_CMD_LINE
+   MessageInterface::ShowMessage
+      ("GmatApp::ProcessCommandLineOptions() returning %d, runScript=%d\n", retval, runScript);
+   #endif
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// void BuildAndRunScript()
+// void BuildAndRunScript(bool runScript)
 //------------------------------------------------------------------------------
-void GmatApp::BuildAndRunScript()
+void GmatApp::BuildAndRunScript(bool runScript)
 {
+   #ifdef DEBUG_CMD_LINE
+   MessageInterface::ShowMessage
+      ("GmatApp::BuildAndRunScript() entered, runScript=%d, scriptToRun='%s'\n",
+       runScript, scriptToRun.c_str());
+   #endif
+   
    if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
       theMainFrame->Iconize(true);
    
@@ -582,6 +615,9 @@ void GmatApp::BuildAndRunScript()
    bool builtOk = false;
    try
    {
+      #ifdef DEBUG_CMD_LINE
+      MessageInterface::ShowMessage("   Building script ...\n");
+      #endif
       wxSafeYield();
       builtOk = theMainFrame->BuildScript(scriptToRun.c_str(), true);
    }
@@ -598,10 +634,13 @@ void GmatApp::BuildAndRunScript()
    
    // Run script
    Integer runStatus = 0;
-   if (builtOk)
+   if (builtOk && runScript)
    {
       try
       {
+         #ifdef DEBUG_CMD_LINE
+         MessageInterface::ShowMessage("   Running script ...\n");
+         #endif
          wxSafeYield();
          runStatus = theMainFrame->RunCurrentScript();
          if (runStatus != 1)

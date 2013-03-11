@@ -56,6 +56,7 @@ private:
    std::string scriptToRun;
    wxString batchFile;
    bool showMainFrame;
+   bool buildScript;
    bool runScript;
    bool runBatch;
    bool startMatlabServer;
@@ -65,7 +66,7 @@ private:
    std::string startupMessageBuffer;
    
    bool ProcessCommandLineOptions();
-   void BuildAndRunScript();
+   void BuildAndRunScript(bool runScript = true);
    void RunBatch();
    void WriteMessage(const std::string &msg1, const std::string &msg2,
                      const std::string &msg3 = "");
