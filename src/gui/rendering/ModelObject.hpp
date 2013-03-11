@@ -119,6 +119,8 @@ private:
    material_type material[MAX_MATERIALS]; // The materials loaded from the file
    
    matrix_type matrix;      // Object matrix
+   std::string filePath;
+
    
    // Visible Methods
 public:

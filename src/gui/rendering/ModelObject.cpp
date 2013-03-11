@@ -50,7 +50,6 @@
 //#define DEBUG_MODEL_DATA
 
 //int control_object;
-std::string filePath;
 
 //------------------------------------------------------------------------------
 // ModelObject()
