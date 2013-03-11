@@ -3115,8 +3115,8 @@ bool GmatMainFrame::SaveScriptAs()
 {
    #ifdef DEBUG_MAINFRAME_SAVE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::SaveScriptAs() mScriptFilename=%s\n",
-       mScriptFilename.c_str());
+      ("GmatMainFrame::SaveScriptAs() entered, mScriptFilename=%s, mInterpretFailed=%d\n",
+       mScriptFilename.c_str(), mInterpretFailed);
    #endif
    
    bool scriptSaved = true;
@@ -3135,12 +3135,18 @@ bool GmatMainFrame::SaveScriptAs()
       {
          #ifdef DEBUG_MAINFRAME_SAVE
          MessageInterface::ShowMessage
-            ("The script file: \"%s\" exist\n", mScriptFilename.c_str());
+            ("The script file: \"%s\" exist, asking user to overwrite\n",
+             mScriptFilename.c_str());
          #endif
-
+         
          if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"),
                           _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
          {
+            #ifdef DEBUG_MAINFRAME_SAVE
+            MessageInterface::ShowMessage
+               ("User confirmed to overwrite, saving position and size , "
+                "calling theGuiInterpreter->SaveScript()\n");
+            #endif
             SaveChildPositionsAndSizes();
             theGuiInterpreter->SaveScript(mScriptFilename);
          }
@@ -3167,7 +3173,16 @@ bool GmatMainFrame::SaveScriptAs()
    #endif
    
    if (scriptSaved)
+   {
+      // Need to refresh active script first (GMT-3591 fix)
+      RefreshActiveScript(mScriptFilename.c_str(), false);
       UpdateGuiScriptSyncStatus(1, 1);
+   }
+   
+   #ifdef DEBUG_MAINFRAME_SAVE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::SaveScriptAs() returning scriptSaved=%d\n", scriptSaved);
+   #endif
    
    return scriptSaved;
 } // SaveScriptAs()
@@ -5435,7 +5450,7 @@ void GmatMainFrame::RefreshActiveScript(const wxString &filename, bool reloadFil
    while (node)
    {
       #ifdef DEBUG_REFRESH_SCRIPT
-      MessageInterface::ShowMessage("   node = %p\n", node);
+      MessageInterface::ShowMessage("   node = <%p>\n", node);
       #endif
       
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
