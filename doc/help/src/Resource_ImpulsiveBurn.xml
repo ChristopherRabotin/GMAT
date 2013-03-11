@@ -8,7 +8,7 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>ImpulsiveBurn</primary>
+    <primary>ImpulsiveBurnM</primary>
   </indexterm>
 
   <refmeta>
@@ -38,7 +38,10 @@
     <guilabel>Loca</guilabel><guilabel>l</guilabel> coordinate systems, the
     user can choose the <guilabel>Origin</guilabel> and type of
     <guilabel>Axes</guilabel>. Depending on the mission, it may be simpler to
-    use one <guilabel>Coordinate System</guilabel> over another.</para>
+    use one coordinate system over another.</para>
+
+    <para>See Also <xref linkend="Maneuver"/>,<xref linkend="FuelTank"/>,<xref
+    linkend="BeginFiniteBurn"/></para>
   </refsection>
 
   <refsection>
@@ -59,6 +62,229 @@
         </thead>
 
         <tbody>
+          <row>
+            <entry><guilabel>Axes </guilabel></entry>
+
+            <entry><para> The Axes field allows the user to define a
+            spacecraft centered set of axes for the impulsive burn.  </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>VNB, LVLH, MJ2000Eq, SpacecraftBody</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>VNB</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>B</guilabel></entry>
+
+            <entry><para> Deprecated. Z-component of the applied impulsive
+            burn (Delta-V) </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km/s</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>CoordinateSystem</guilabel></entry>
+
+            <entry><para> The CoordinateSystem field for an impulsive
+            burn determines what coordinate system the orientation parameters,
+            Element1, Element2, and Element3 refer to.  </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Local, EarthMJ2000Eq, EarthMJ2000Ec, EarthFixed, or
+                    any user defined system</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Local</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DecrementMass </guilabel></entry>
+
+            <entry><para> Flag which determines if the FuelMass is to be
+            decremented as it used.    </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true, false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>FALSE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
           <row>
             <entry><guilabel>Element1</guilabel></entry>
 
@@ -335,16 +561,15 @@
           </row>
 
           <row>
-            <entry><guilabel>Axes </guilabel></entry>
+            <entry><guilabel>N</guilabel></entry>
 
-            <entry><para> The Axes field allows the user to define a
-            spacecraft centered set of axes for the impulsive burn.  </para>
-            <variablelist>
+            <entry><para> Deprecated. Y-component of the applied impulsive
+            burn (Delta-V) </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -352,7 +577,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>VNB, LVLH, MJ2000Eq, SpacecraftBody</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -360,7 +585,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set</para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -368,7 +593,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>VNB</para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -376,119 +601,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DecrementMass </guilabel></entry>
-
-            <entry><para> Flag which determines if the FuelMass is to be
-            decremented as it used.    </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>true, false</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>FALSE</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>CoordinateSystem</guilabel></entry>
-
-            <entry><para> The CoordinateSystem field for an impulsive
-            burn determines what coordinate system the orientation parameters,
-            Element1, Element2, and Element3 refer to.  </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>UserDefString</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Local, EarthMJ2000Eq, EarthMJ2000Ec, EarthFixed, or
-                    any user defined system</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Local</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
+                    <para>km/s</para>
                   </listitem>
                 </varlistentry>
 
@@ -613,6 +726,61 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>V</guilabel></entry>
+
+            <entry><para> Deprecated. X-component of the applied impulsive
+            burn (Delta-V) </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km/s</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -709,9 +877,9 @@
       <programlisting>
         <code>
 Create ImpulsiveBurn DefaultIB
-GMAT DefaultIB.Element1 = -3
-GMAT DefaultIB.Element2 = 7
-GMAT DefaultIB.Element3 = -2
+DefaultIB.Element1 = -3
+DefaultIB.Element2 = 7
+DefaultIB.Element3 = -2
         </code>
       </programlisting>
 
@@ -722,9 +890,9 @@ GMAT DefaultIB.Element3 = -2
       <programlisting>
         <code>
 Create ImpulsiveBurn DefaultIB
-GMAT DefaultIB.V = -3
-GMAT DefaultIB.N = 7
-GMAT DefaultIB.B = -2
+DefaultIB.V = -3
+DefaultIB.N = 7
+DefaultIB.B = -2
         </code>
       </programlisting>
 
@@ -814,30 +982,30 @@ GMAT DefaultIB.B = -2
         <code>
   %  Create the FuelTank Object
   Create FuelTank FuelTank1
-  GMAT FuelTank1.AllowNegativeFuelMass = false
-  GMAT FuelTank1.FuelMass = 756
-  GMAT FuelTank1.Pressure = 1500
-  GMAT FuelTank1.Temperature = 20
-  GMAT FuelTank1.RefTemperature = 20
-  GMAT FuelTank1.Volume = 0.75
-  GMAT FuelTank1.FuelDensity = 1260
-  GMAT FuelTank1.PressureModel = PressureRegulated
+  FuelTank1.AllowNegativeFuelMass = false
+  FuelTank1.FuelMass = 756
+  FuelTank1.Pressure = 1500
+  FuelTank1.Temperature = 20
+  FuelTank1.RefTemperature = 20
+  FuelTank1.Volume = 0.75
+  FuelTank1.FuelDensity = 1260
+  FuelTank1.PressureModel = PressureRegulated
 
   Create ImpulsiveBurn DefaultIB
-  GMAT DefaultIB.CoordinateSystem = Local
-  GMAT DefaultIB.Origin = Earth
-  GMAT DefaultIB.Axes = VNB
-  GMAT DefaultIB.Element1 = 0.001
-  GMAT DefaultIB.Element2 = 0
-  GMAT DefaultIB.Element3 = 0
-  GMAT DefaultIB.DecrementMass = true
-  GMAT DefaultIB.Tank = {FuelTank1}
-  GMAT DefaultIB.Isp = 300
-  GMAT DefaultIB.GravitationalAccel = 9.810000000000001
+  DefaultIB.CoordinateSystem = Local
+  DefaultIB.Origin = Earth
+  DefaultIB.Axes = VNB
+  DefaultIB.Element1 = 0.001
+  DefaultIB.Element2 = 0
+  DefaultIB.Element3 = 0
+  DefaultIB.DecrementMass = true
+  DefaultIB.Tank = {FuelTank1}
+  DefaultIB.Isp = 300
+  DefaultIB.GravitationalAccel = 9.810000000000001
 
   %  Add the the FuelTank to a Spacecraft
-  GMAT Create Spacecraft DefaultSC
-  GMAT DefaultSC.Tanks = {FuelTank1}
+  Create Spacecraft DefaultSC
+  DefaultSC.Tanks = {FuelTank1}
 
 
   BeginMissionSequence
