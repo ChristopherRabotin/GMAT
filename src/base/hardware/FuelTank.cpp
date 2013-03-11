@@ -139,17 +139,7 @@ FuelTank::FuelTank(const FuelTank& ft) :
    pvBase               (ft.pvBase)
 {
    parameterCount = ft.parameterCount;
-   try
-   {
-      isInitialized  = Initialize();
-   }
-   catch (BaseException &)
-   {
-      // Ignore validation messages here, but set uninitialized
-      MessageInterface::ShowMessage("Initialization for FuelTank %s "
-            "failed\n", instanceName.c_str());
-      isInitialized = false;
-   }
+   isInitialized  = Initialize();
 }
 
 
@@ -185,17 +175,7 @@ FuelTank& FuelTank::operator=(const FuelTank& ft)
       gasVolume             = ft.gasVolume;
       pvBase                = ft.pvBase;
 
-      try
-      {
-         isInitialized  = Initialize();
-      }
-      catch (BaseException &)
-      {
-         // Ignore validation messages here, but set uninitialized
-         MessageInterface::ShowMessage("Initialization for FuelTank %s "
-               "failed\n", instanceName.c_str());
-         isInitialized = false;
-      }
+      isInitialized  = Initialize();
    }
    
    return *this;
@@ -869,7 +849,7 @@ bool FuelTank::Validate()
    if (density <= 0.0)
 	  return false;
    if ((volume - fuelMass / density) < 0.0)
-	  throw HardwareException("Fuel volume exceeds tank capacity\n");
+	   throw HardwareException("Fuel volume exceeds tank capacity\n");
    return true;
 }
 
