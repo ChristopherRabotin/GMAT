@@ -1177,7 +1177,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
    wxString itemName = item->GetName();
    GmatTree::ItemType itemType = item->GetItemType();
 
-   return IsChildOpen(itemName, itemType);
+   return IsChildOpen(itemName, itemType, restore);
    
    
    #if 0
