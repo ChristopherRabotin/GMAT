@@ -38,6 +38,10 @@ private:
    long int fileSize;
    /// The model we are loading; should be NULL outside of the load process
    ModelObject *theModel;
+   /// Starting index for the current block in the vertex array
+   Integer vertexStart;
+   /// Starting index for the current block in the polygon array
+   Integer polygonStart;
 
    enum {
       CHUNK_MAIN     = 0x4d4d,

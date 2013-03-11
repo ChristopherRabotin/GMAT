@@ -42,7 +42,9 @@
 ThreeDSLoader::ThreeDSLoader() :
    theFile           (NULL),
    fileSize          (0),
-   theModel          (NULL)
+   theModel          (NULL),
+   vertexStart       (0),
+   polygonStart      (0)
 {
 }
 
@@ -105,6 +107,9 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
          model->SetNumVertices(0);
          model->SetNumPolygons(0);
          model->SetNumMaterials(0);
+
+         vertexStart  = 0;
+         polygonStart = 0;
 
          // Flag used to detect if the case statement failed
          bool noError = true, dataEnd = false;
@@ -358,7 +363,8 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                break;
             case 0:
                #ifdef DEBUG_LOADING
-                  MessageInterface::ShowMessage("ID 0; ending read\n");
+                  MessageInterface::ShowMessage("ID 0; ending read at byte "
+                        "%d of %d\n", ftell(theFile), fileSize);
                #endif
                // For ID zero, assume end of the .3ds chunks
                dataEnd = true;
@@ -423,12 +429,13 @@ bool ThreeDSLoader::LoadVertexData()
 {
    bool retval = false;
    float v;
-   unsigned short vertexCount, previousVertexCount, totalVertexCount;
+   unsigned short vertexCount, totalVertexCount;
 
    // Retrieve the number of new vertices
    fread(&vertexCount, sizeof(unsigned short), 1, theFile);
-   previousVertexCount = theModel->GetNumVertices();
-   totalVertexCount = previousVertexCount + vertexCount;
+
+   vertexStart = theModel->GetNumVertices();
+   totalVertexCount = vertexStart + vertexCount;
    theModel->SetNumVertices(totalVertexCount);
 
    #ifdef DEBUG_LOADING
@@ -445,7 +452,7 @@ bool ThreeDSLoader::LoadVertexData()
          MessageInterface::ShowMessage("%d to %d\n", previousVertexCount,
                totalVertexCount);
       #endif
-      for (unsigned short i = previousVertexCount; i < totalVertexCount; ++i)
+      for (unsigned short i = vertexStart; i < totalVertexCount; ++i)
       {
          fread(&v, sizeof(float), 1, theFile);
          vertex[i].x = v;
@@ -660,13 +667,13 @@ bool ThreeDSLoader::ReadTextureMapping()
 bool ThreeDSLoader::LoadFaceList()
 {
    bool retval = false;
-   unsigned short faceCount, previousFaceCount, totalFaceCount, faceFlag;
+   unsigned short faceCount, totalFaceCount, faceFlag;
 
    // Retrieve the number of faces
    fread(&faceCount, sizeof(unsigned short), 1, theFile);
 
-   previousFaceCount = theModel->GetNumPolygons();
-   totalFaceCount = faceCount + previousFaceCount;
+   polygonStart = theModel->GetNumPolygons();
+   totalFaceCount = faceCount + polygonStart;
 
    theModel->SetNumPolygons(totalFaceCount);
 
@@ -680,14 +687,32 @@ bool ThreeDSLoader::LoadFaceList()
       polygon_type *polygon = theModel->GetPolygonArray();
 
       // Loop through file and extract all of the face information
-      for (unsigned short i = previousFaceCount; i < totalFaceCount; i++)
+      for (unsigned short i = polygonStart; i < totalFaceCount; i++)
       {
          fread(&polygon[i].a, sizeof(unsigned short), 1, theFile);
-         polygon[i].a += previousFaceCount;
+         #ifdef DEBUG_LOADING
+            if (i == polygonStart)
+               MessageInterface::ShowMessage("***====> vertexStart: %d, index "
+                     "for [a, b, c] : [%d ", vertexStart, polygon[i].a);
+         #endif
+         polygon[i].a += vertexStart;
          fread(&polygon[i].b, sizeof(unsigned short), 1, theFile);
-         polygon[i].b += previousFaceCount;
+         #ifdef DEBUG_LOADING
+            if (i == polygonStart)
+               MessageInterface::ShowMessage("%d ", polygon[i].b);
+         #endif
+         polygon[i].b += vertexStart;
          fread(&polygon[i].c, sizeof(unsigned short), 1, theFile);
-         polygon[i].c += previousFaceCount;
+         #ifdef DEBUG_LOADING
+            if (i == polygonStart)
+               MessageInterface::ShowMessage("%d] --> [", polygon[i].c);
+         #endif
+         polygon[i].c += vertexStart;
+         #ifdef DEBUG_LOADING
+            if (i == polygonStart)
+               MessageInterface::ShowMessage("%d %d %d]\n", polygon[i].a,
+                     polygon[i].b, polygon[i].c);
+         #endif
          fread(&faceFlag, sizeof(unsigned short), 1, theFile);
 
          #ifdef DUMP_DATA
@@ -795,7 +820,9 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
 ThreeDSLoader::ThreeDSLoader(const ThreeDSLoader& tds) :
    theFile              (NULL),
    fileSize             (0),
-   theModel             (NULL)
+   theModel             (NULL),
+   vertexStart       (0),
+   polygonStart      (0)
 {
 }
 
