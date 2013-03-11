@@ -214,6 +214,7 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       return;
    }
    
+   mSaveCanceled = false;
    // if it is temp script file, call OnSaveAs() to bring up file dialog to save
    if (mFilename == GmatAppData::Instance()->GetTempScriptName())
    {
@@ -309,10 +310,10 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
             "All files (*.*)|*.*"), wxSAVE);
    
    bool saveScript = false;
-   mSaveCanceled = false;
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString path = dialog.GetPath().c_str();
+	  mSaveCanceled = false;
       
       if(DoesFileExist(path.c_str()))
       {
@@ -322,6 +323,8 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
             mFilename = path;
             saveScript = true;
          }
+		 else
+			mSaveCanceled = true;
       }
       else
       {
