@@ -37,7 +37,8 @@
     Boyle’s law and assume that there is no temperature change in the tank as
     fuel is depleted. To use a <guilabel>FuelTank</guilabel>, you must first
     create the tank, and then attach it to the desired spacecraft and
-    associate it with a thruster as shown in the example below.</para>
+    associate it with a <guilabel>Thruster</guilabel> as shown in the example
+    below.</para>
   </refsection>
 
   <refsection>
@@ -93,61 +94,6 @@
 
                   <listitem>
                     <para>FALSE</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>PressureModel</guilabel></entry>
-
-            <entry><para>The pressure model describes how pressure in the tank
-            changes as fuel is depleted.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Enumeration</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>PressureRegulated, BlowDown</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>PressureRegulated</para>
                   </listitem>
                 </varlistentry>
 
@@ -318,6 +264,64 @@
 
                   <listitem>
                     <para>kPa</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>PressureModel</guilabel></entry>
+
+            <entry><para>The pressure model describes how pressure in the tank
+            changes as fuel is depleted.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>PressureRegulated</guilabel>,
+                    <guilabel>BlowDown</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>PressureRegulated</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -670,7 +674,7 @@
 
       <para>As exhibited below, there are some subtleties associated with
       setting and getting parent vs. cloned objects. In the example above,
-      <literal>aTank </literal>is the parent ‘<guilabel>FuelTank</guilabel>’
+      <literal>aTank </literal>is the parent <guilabel>FuelTank</guilabel>
       object and the field <literal>aSpacecraft.Tanks</literal> is populated
       with a cloned copy of <literal>aTank</literal>.</para>
 
@@ -718,17 +722,18 @@
       command mode.</para>
 
       <refsection>
-	  <title>Caution: Value of AllowNegativeFuelMass flag can affect iterative processes</title>
+        <title>Caution: Value of AllowNegativeFuelMass flag can affect
+        iterative processes</title>
 
-      <para>By default, GMAT will not allow the fuel mass to be negative.
-      However, occasionally in iterative processes such as targeting, a solver
-      will try values of a maneuver parameter that result in total fuel
-      depletion. Using the default tank settings, this will throw an exception
-      stopping the run unless you set the AllowNegativeFuelMass flag to true.
-      GMAT will not allow the the total spacecraft mass to be negative. If
-      DryMass + FuelMass is negative GMAT will throw an exception and
-      stop.</para>
-	  </refsection>
+        <para>By default, GMAT will not allow the fuel mass to be negative.
+        However, occasionally in iterative processes such as targeting, a
+        solver will try values of a maneuver parameter that result in total
+        fuel depletion. Using the default tank settings, this will throw an
+        exception stopping the run unless you set the AllowNegativeFuelMass
+        flag to true. GMAT will not allow the the total spacecraft mass to be
+        negative. If DryMass + FuelMass is negative GMAT will throw an
+        exception and stop.</para>
+      </refsection>
     </refsection>
   </refsection>
 

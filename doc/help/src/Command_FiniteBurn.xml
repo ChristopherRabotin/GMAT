@@ -102,7 +102,9 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>FiniteBurn</para>
+                    <para>
+                      <guilabel>FiniteBurn</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -155,7 +157,9 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Spacecraft</para>
+                    <para>
+                      <guilabel>Spacecraft</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -203,7 +207,9 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>FiniteBurn</para>
+                    <para>
+                      <guilabel>FiniteBurn</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -255,7 +261,9 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Spacecraft</para>
+                    <para>
+                      <guilabel>Spacecraft</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
