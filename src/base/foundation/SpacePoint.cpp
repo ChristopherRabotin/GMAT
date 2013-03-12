@@ -799,7 +799,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
                                      const std::string &value)
 {
     // this is also handled in CelestialBody and Spacecraft
-    // it is caught here if not handles there for some reason
+    // it is caught here if not handled there for some reason
    if (id == J2000_BODY_NAME) 
    {
       static bool writeIgnoredMessage = true;
