@@ -55,6 +55,127 @@
   </refsection>
 
   <refsection>
+    <title>Options</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Option</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>ImpulsiveBurnName</guilabel></entry>
+
+            <entry><para>Allows the user to select which
+            <guilabel>ImpulsiveBurn</guilabel> to apply. As an example, to
+            maneuver DefaultSC using DefaultIB, the script line would appear
+            as Maneuver DefaultIB(DefaultSC).</para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any <guilabel>ImpulsiveBurn</guilabel> existing in
+                    the resource treet</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultIB</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SpacecraftName</guilabel></entry>
+
+            <entry><para>Allows the user to select which
+            <guilabel>Spacecraft</guilabel> to maneuver. The maneuver applied
+            is specified by the <guilabel>ImpulsiveBurnName</guilabel> option
+            above. </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Spacecraft Objects</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultSC</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
     <title>GUI</title>
 
     <para>The <guilabel>Maneuver</guilabel> command dialog box, as shown
@@ -164,27 +285,27 @@
   DefaultSC.Tanks = {FuelTank1}
 
   %  Set FuelTank1 parameters to default values
-  GMAT FuelTank1.AllowNegativeFuelMass = false
-  GMAT FuelTank1.FuelMass = 756
-  GMAT FuelTank1.Pressure = 1500
-  GMAT FuelTank1.Temperature = 20
-  GMAT FuelTank1.RefTemperature = 20
-  GMAT FuelTank1.Volume = 0.75
-  GMAT FuelTank1.FuelDensity = 1260
-  GMAT FuelTank1.PressureModel = PressureRegulated
+   FuelTank1.AllowNegativeFuelMass = false
+   FuelTank1.FuelMass = 756
+   FuelTank1.Pressure = 1500
+   FuelTank1.Temperature = 20
+   FuelTank1.RefTemperature = 20
+   FuelTank1.Volume = 0.75
+   FuelTank1.FuelDensity = 1260
+   FuelTank1.PressureModel = PressureRegulated
 
   %  Create ImpulsiveBurn associated with the created FuelTank
   Create ImpulsiveBurn IB
-  GMAT IB.CoordinateSystem = Local
-  GMAT IB.Origin = Earth
-  GMAT IB.Axes = VNB
-  GMAT IB.Element1 = 0.1
-  GMAT IB.Element2 = 0
-  GMAT IB.Element3 = 0
-  GMAT IB.DecrementMass = true
-  GMAT IB.Tank = {FuelTank1}
-  GMAT IB.Isp = 300
-  GMAT IB.GravitationalAccel = 9.810000000000001
+   IB.CoordinateSystem = Local
+   IB.Origin = Earth
+   IB.Axes = VNB
+   IB.Element1 = 0.1
+   IB.Element2 = 0
+   IB.Element3 = 0
+   IB.DecrementMass = true
+   IB.Tank = {FuelTank1}
+   IB.Isp = 300
+   IB.GravitationalAccel = 9.810000000000001
 
   BeginMissionSequence
   %  Apply impulsive maneuver to DefaultSC
