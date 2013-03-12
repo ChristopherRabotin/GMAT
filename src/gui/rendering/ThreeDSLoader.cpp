@@ -367,7 +367,21 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                         "%d of %d\n", ftell(theFile), fileSize);
                #endif
                // For ID zero, assume end of the .3ds chunks
-               dataEnd = true;
+               // go to end of 0's
+               {
+                  char ch;
+
+                  // Skip the null data
+                  do
+                  {
+                     fread(&ch, sizeof(ch), 1, theFile);
+                  } while (ch == '\0');
+
+                  // back up one byte because we just read the first non-null
+                  fseek(theFile, -1, SEEK_CUR);
+               }
+               // If we decide to just stop on zero, uncomment this line:
+               //dataEnd = true;
                break;
 
 
@@ -449,8 +463,8 @@ bool ThreeDSLoader::LoadVertexData()
 
       // Then we loop through all vertices and store them
       #ifdef DEBUG_LOADING
-         MessageInterface::ShowMessage("%d to %d\n", previousVertexCount,
-               totalVertexCount);
+         MessageInterface::ShowMessage("%d to %d\n", vertexStart,
+               totalVertexCount-1);
       #endif
       for (unsigned short i = vertexStart; i < totalVertexCount; ++i)
       {
@@ -616,7 +630,8 @@ bool ThreeDSLoader::GetTextureFileName(material_type *forMaterial)
 bool ThreeDSLoader::ReadTextureMapping()
 {
    bool retval = false;
-   unsigned short mapCount, vertexCount;
+   unsigned short mapCount;
+   Integer vertexCount;
 
    fread(&mapCount, sizeof(unsigned short), 1, theFile);
 

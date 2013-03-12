@@ -41,6 +41,7 @@
 
 //#define DRAW_NORMALS
 //#define WIREFRAME_MODE
+#define WARN_ON_COUNTS		// Post a warning if multiple vertex or face chunks
 
 //#define DEBUG_LOAD
 //#define DEBUG_LOAD_TEXTURE
@@ -451,10 +452,12 @@ Integer ModelObject::GetNumVertices()
 //------------------------------------------------------------------------------
 void ModelObject::SetNumVertices(Integer vCount)
 {
-   if ((num_vertices > 0) && (num_vertices != vCount))
-      MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
-            "multiple vertex blocks and may not display correctly.\n",
-            filename.c_str());
+   #ifdef WARN_ON_COUNTS
+      if ((num_vertices > 0) && (num_vertices != vCount))
+         MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
+               "multiple vertex blocks and may not display correctly.\n",
+               filename.c_str());
+   #endif
    num_vertices = vCount;
 }
 
@@ -483,10 +486,12 @@ Integer ModelObject::GetNumPolygons()
 //------------------------------------------------------------------------------
 void ModelObject::SetNumPolygons(Integer pCount)
 {
-   if ((num_polygons > 0) && (num_polygons != pCount))
-      MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
-            "multiple polygon blocks and may not display correctly.\n",
-            filename.c_str());
+   #ifdef WARN_ON_COUNTS
+      if ((num_polygons > 0) && (num_polygons != pCount))
+         MessageInterface::ShowMessage("*** WARNING *** The model file %s has "
+               "multiple polygon blocks and may not display correctly.\n",
+               filename.c_str());
+   #endif
    num_polygons = pCount;
 }
 
