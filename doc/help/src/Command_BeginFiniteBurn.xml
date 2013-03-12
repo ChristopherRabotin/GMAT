@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="BeginFiniteBurn"
+<refentry version="5.0" xml:id="FiniteBurnCommand"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -16,17 +16,17 @@
   </indexterm>
 
   <refmeta>
-    <refentrytitle>BeginFiniteBurn</refentrytitle>
+    <refentrytitle>FiniteBurn</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">2011a</refmiscinfo>
+    <refmiscinfo class="version">R2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>BeginFiniteBurn</refname>
+    <refname>FiniteBurn</refname>
 
     <refpurpose>Model finite thrust maneuvers in the mission
     sequence</refpurpose>
@@ -35,34 +35,42 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><guilabel>BeginFiniteBurn aFiniteBurn(<replaceable>aSpacecraft</replaceable>, <replaceable>aSpacecraft2</replaceable>, …, <replaceable>aSpacecraftN</replaceable>)</guilabel>
+    <synopsis>
+      <literal>BeginFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)
+    </synopsis>
 
-<emphasis role="bold">EndFiniteBurn aFiniteBurn(<replaceable>aSpacecraft</replaceable>, <replaceable>aSpacecraft2</replaceable>, …, <replaceable>aSpacecraftN)</replaceable></emphasis></synopsis>
+    <synopsis>
+      <literal>EndFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)
+    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>When you apply a <guilabel>BeginFiniteBurn</guilabel> command you
-    are effectively turning on the thruster configuration in the specified
+    <para>When you apply a <guilabel>BeginFiniteBurn</guilabel> command, you
+    turn on the thruster configuration given in the specified
     <guilabel>FiniteBurn</guilabel> model. Similarly, when you apply an
-    <guilabel>EndFiniteBurn</guilabel> command you are effectively turning off
-    the thruster configuration in the specified
-    <guilabel>FiniteBurn</guilabel> model. After GMAT executes a
-    <guilabel>BeginFiniteBurn</guilabel> command, all propagation for the
-    spacecraft affected by the <guilabel>FiniteBurn</guilabel> object will
-    include the configured finite thrust in the dynamics until an
-    <guilabel>EndFiniteBurn</guilabel> line is executed for that
-    configuration. To apply the <guilabel>BeginFiniteBurn</guilabel> and
+    <guilabel>EndFiniteBurn</guilabel> command, you turn off the thruster
+    configuration in the specified <guilabel>FiniteBurn</guilabel> model.
+    After GMAT executes a <guilabel>BeginFiniteBurn</guilabel> command, all
+    propagation for the spacecraft affected by the
+    <guilabel>FiniteBurn</guilabel> object will include the configured finite
+    thrust in the dynamics until an <guilabel>EndFiniteBurn</guilabel> line is
+    executed for that configuration. In order to apply a non-zero finite burn
+    , there must be a <guilabel>Propagate</guilabel> command between the
+    <guilabel>BeginFiniteBurn</guilabel> and
+    <guilabel>EndFiniteBurn</guilabel> commands.</para>
+
+    <para>To apply the <guilabel>BeginFiniteBurn</guilabel> and
     <guilabel>EndFiniteBurn</guilabel> commands, a
     <guilabel>FiniteBurn</guilabel> object must be configured. This object
-    requires the configuration of <guilabel>Tank</guilabel> and
-    <guilabel>Thruster</guilabel> models. See the <guilabel>Remarks</guilabel>
-    section and the examples below for a more detailed explanation.</para>
+    requires the configuration of <guilabel>FuelTank</guilabel> and
+    <guilabel>Thruster</guilabel> models. See the Remarks section and the
+    examples below for a more detailed explanation.</para>
 
-    <para>See Also: <guilabel>Spacecraft</guilabel>,
-    <guilabel>Thruster</guilabel>, <guilabel>Tank</guilabel>,
-    <guilabel>FiniteBurn</guilabel>.</para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Spacecraft"/>, <xref linkend="Thruster"/>, <xref
+    linkend="FuelTank"/>, <xref linkend="FiniteBurn"/></para>
   </refsection>
 
   <refsection>
@@ -84,16 +92,19 @@
 
         <tbody>
           <row>
-            <entry><guilabel>Burn</guilabel></entry>
+            <entry><guilabel>BeginFiniteBurn - Burn</guilabel></entry>
 
-            <entry><para><guilabel>Burn</guilabel> field defines the
+            <entry><para> The Burn field defines the
             <guilabel>FiniteBurn</guilabel> object activated by the
-            <guilabel>BeginFiniteBurn</guilabel> command.</para><variablelist>
+            <guilabel>BeginFiniteBurn</guilabel> command. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>FiniteBurn</para>
+                    <para>
+                      <guilabel>FiniteBurn</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -132,19 +143,127 @@
           </row>
 
           <row>
-            <entry><guilabel>SpacecraftList</guilabel></entry>
+            <entry><guilabel>BeginFiniteBurn -
+            SpacecraftList</guilabel></entry>
 
-            <entry><para>The Spacecraft list field defines the spacecraft
-            acted upon by the <guilabel>BeginFiniteBurn</guilabel> command.
-            Spacecraft listed in <guilabel>SpacecraftList</guilabel> will have
-            thrusters activated according to the configuration of the
-            <guilabel>FiniteBurn</guilabel> object defined by the
-            <guilabel>Burn</guilabel> field.</para><variablelist>
+            <entry><para> The Spacecraft list field defines the spacecraft
+            (currently only a single spacecraft can be in this list) acted
+            upon by the <guilabel>BeginFiniteBurn</guilabel> command. The
+            Spacecraft listed in SpacecraftList will have thrusters activated
+            according to the configuration of the
+            <guilabel>FiniteBurn</guilabel> object defined by the Burn field.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Spacecraft</para>
+                    <para>
+                      <guilabel>Spacecraft</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Spacecraft Objects</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultSC</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EndFiniteBurn - Burn</guilabel></entry>
+
+            <entry><para> The Burn field defines the
+            <guilabel>FiniteBurn</guilabel> object de-activated by the
+            <guilabel>EndFiniteBurn</guilabel> command. </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>FiniteBurn</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>FiniteBurn Object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultFB</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EndFiniteBurn - SpacecraftList</guilabel></entry>
+
+            <entry><para> The Spacecraft list field defines the spacecraft
+            (currently only a single spacecraft can be in this list) acted
+            upon by the <guilabel>EndFiniteBurn</guilabel> command. Spacecraft
+            listed in SpacecraftList will have thrusters de-activated
+            according to the configuration of the
+            <guilabel>FiniteBurn</guilabel> object defined by the Burn field.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Spacecraft</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -189,181 +308,217 @@
   <refsection>
     <title>GUI</title>
 
+    <para>The <guilabel>BeginFiniteBurn</guilabel> and
+    <guilabel>EndFiniteBurn</guilabel> command dialog boxes allow you to
+    implement a finite burn by specifying which finite burn model should be
+    used and which spacecraft the finite burn should be applied to. The dialog
+    boxes for <guilabel>BeginFiniteBurn</guilabel> and
+    <guilabel>EndFiniteBurn</guilabel> are shown below.</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="???"/>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_FiniteBurn_GUI_1.png"
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>The dialog boxes for <guilabel>BeginFiniteBurn</guilabel> and
-    <guilabel>EndFiniteBurn</guilabel> are shown below.</para>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_FiniteBurn_GUI_2.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-    <para>Use the <guilabel>Burn</guilabel> menu to select the
-    <guilabel>FiniteBurn</guilabel> model for the maneuver. Use the
-    <guilabel>Spacecraft</guilabel> text box to select the spacecraft(s) for
-    the finite burn. You can either type a comma separated list of spacecraft
-    in the <guilabel>Spacecraft</guilabel> text box, or click the
-    <guilabel>Edit </guilabel>button and select spacecraft using the
+    <para>Use the Burn menu to select the <guilabel>FiniteBurn
+    </guilabel>model for the maneuver. Use the <guilabel>Spacecraft</guilabel>
+    text box to select the spacecraft for the finite burn. You can either type
+    the spacecraft name in the Spacecraft text box or click the
+    <guibutton>Edit</guibutton> button and select the spacecraft using the
     <guilabel>ParameterSelectDialog</guilabel> box.</para>
 
     <para>If you add a <guilabel>BeginFiniteBurn</guilabel> command or
     <guilabel>EndFiniteBurn</guilabel> command to the mission sequence,
     without first creating a <guilabel>FiniteBurn</guilabel> object, GMAT will
-    create a default <guilabel>FiniteBurn</guilabel> object called
-    <guilabel>DefaultFB</guilabel>. However, you will need to configure the
-    required <guilabel>Tank</guilabel> and <guilabel>Thruster</guilabel>
-    objects required for a <guilabel>FiniteBurn</guilabel> before you can run
+    create a default <guilabel>FiniteBurn</guilabel> object called DefaultFB.
+    However, you will need to configure the required
+    <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> objects
+    required for a <guilabel>FiniteBurn</guilabel> object before you can run
     the mission. See the Remarks section for detailed instructions.</para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
-    <para>To use the <guilabel>BeginFiniteBurn</guilabel> and
-    <guilabel>EndFiniteBurn</guilabel> commands in your mission sequence, you
-    must configure a <guilabel>FiniteBurn</guilabel> object along with
-    <guilabel>Tank</guilabel> and <guilabel>Thruster</guilabel> objects as
-    shown in the examples below and as described in these steps:</para>
+    <refsection>
+      <title>Configuring a Finite Burn</title>
 
-    <procedure>
-      <step>
-        <para>Create and configure a <guilabel>Tank </guilabel>model.</para>
-      </step>
+      <para>To use the <guilabel>BeginFiniteBurn</guilabel> and
+      <guilabel>EndFiniteBurn</guilabel> commands in your mission sequence,
+      you must configure a <guilabel>FiniteBurn</guilabel> object along with
+      <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> objects
+      as shown in the examples below and as described in these steps:</para>
 
-      <step>
-        <para>Create a <guilabel>Thruster</guilabel> model:</para>
+      <orderedlist>
+        <listitem>
+          <para>Create and configure a <guilabel>FuelTank</guilabel>
+          model.</para>
+        </listitem>
 
-        <procedure>
-          <step>
-            <para>Set the parameters (direction, thrust, specific impulse,
-            etc) for the thruster</para>
-          </step>
+        <listitem>
+          <para>Create a <guilabel>Thruster</guilabel> model:</para>
 
-          <step>
-            <para>Configure the thruster to use the tank created in Step
-            1.</para>
-          </step>
-        </procedure>
-      </step>
+          <orderedlist>
+            <listitem>
+              <para>Set the parameters (direction, thrust, specific impulse,
+              etc) for the thruster</para>
+            </listitem>
 
-      <step>
-        <para>Add the <guilabel>Tank</guilabel> and
-        <guilabel>Thruster</guilabel> created in the previous two steps to the
-        spacecraft.</para>
-      </step>
+            <listitem>
+              <para>Configure the <guilabel>Thruster</guilabel> to use the
+              <guilabel>FuelTank</guilabel> created in Step 1.</para>
+            </listitem>
+          </orderedlist>
+        </listitem>
 
-      <step>
-        <para>Create a <guilabel>FiniteBurn</guilabel> model and configure it
-        to use the <guilabel>Thruster</guilabel> created in Step 2.</para>
-      </step>
-    </procedure>
+        <listitem>
+          <para>Add the <guilabel>FuelTank</guilabel> and
+          <guilabel>Thruster</guilabel> created in the previous two steps to
+          the <guilabel>Spacecraft</guilabel>.</para>
+        </listitem>
 
-    <caution>
-      <para>If GMAT throws the error message “Propagator Exception:
-      <guilabel>MassFlow</guilabel> is not a known propagation parameter on
-      <guilabel>DefaultSC</guilabel>”, then you have not configured all of the
-      required models to perform a finite burn. See detailed instructions
-      above and examples to configure models required by the
-      <guilabel>EndFiniteBurn</guilabel>/<guilabel>BeginFiniteBurn</guilabel>
-      commands.</para>
-    </caution>
+        <listitem>
+          <para>Create a <guilabel>FiniteBurn</guilabel> model and configure
+          it to use the <guilabel>Thruster</guilabel> created in Step
+          2.</para>
+        </listitem>
+      </orderedlist>
+    </refsection>
 
-    <para>The <guilabel>BeginFiniteBurn</guilabel> and
-    <guilabel>EndFiniteBurn</guilabel> commands are NOT branch commands,
-    meaning, a <guilabel>BeginFiniteBurn</guilabel> command can exist without
-    an <guilabel>EndFiniteBurn</guilabel> command (however, this may result in
-    depleting all the fuel in the spacecraft model). For behavior when fuel
-    mass is fully depleted during a finite burn see the
-    <guilabel>Tank</guilabel> object.</para>
+    <refsection>
+      <title>Initial Thruster Status</title>
 
-    <para>Similarly, since the <guilabel>BeginFiniteBurn</guilabel> and
-    <guilabel>EndFiniteBurn</guilabel> commands are used to turn on or off the
-    thrusters, applying the same command multiple times in a script without
-    its inverse is the same as applying it once. In other words, if you do
-    this:</para>
+      <para>When you configure the<guilabel> Spacecraft</guilabel>,
+      <guilabel>FuelTank</guilabel>, <guilabel>Thruster</guilabel>, and
+      <guilabel>FiniteBurn</guilabel> objects, GMAT initializes these objects
+      with the thrusters turned off, so that no finite burns are active. You
+      must use the <guilabel>BeginFiniteBurn</guilabel> command to turn on the
+      thruster if you want to apply a finite burn during propagation.</para>
 
-    <programlisting>BeginFiniteBurn aFiniteBurn(aSat)
-BeginFiniteBurn aFiniteBurn(aSat)<code>
-BeginFiniteBurn aFiniteBurn(aSat)</code></programlisting>
+      <warning>
+        <para>Caution: If GMAT throws the error message “Propagator Exception:
+        MassFlow is not a known propagation parameter on DefaultSC”, then you
+        have not configured all of the required models to perform a finite
+        burn. See detailed instructions above and examples to configure models
+        required by the EndFiniteBurn/BeginFiniteBurn commands.</para>
+      </warning>
+    </refsection>
 
-    <para>the effect is the same as only applying the
-    <code>BeginFiniteBurn</code> command one time. The same holds true for the
-    <guilabel>EndFiniteBurn</guilabel> command.</para>
+    <refsection>
+      <title>BeginFiniteBurn and EndFiniteBurn commands are NOT branch
+      commands</title>
 
-    <para>Furthermore, you can initiate a group of finite maneuvers using a
-    single command and terminate those burns individually or initiate a set of
-    burns individually and terminate as a group as shown below.</para>
+      <para>The <guilabel>BeginFiniteBurn</guilabel> and
+      <guilabel>EndFiniteBurn</guilabel> commands are NOT branch commands,
+      meaning, a <guilabel>BeginFiniteBurn</guilabel> command can exist
+      without an <guilabel>EndFiniteBurn</guilabel> command (however, this may
+      result in depleting all the fuel in the spacecraft model). For behavior
+      when fuel mass is fully depleted during a finite burn see the
+      <guilabel>FuelTank</guilabel> object.</para>
 
-    <programlisting>%  Initiate as a group but terminate individually
-BeginFiniteBurn aFiniteBurn(Sat1, Sat2)
-Propagate aPropagator(Sat1, Sat2, {Sat1.TA = 60})
-EndFiniteBurn aFiniteBurn(Sat1)
-EndFiniteBurn aFiniteBurn(Sat2)
+      <para>Similarly, since the <guilabel>BeginFiniteBurn</guilabel> and
+      <guilabel>EndFiniteBurn</guilabel> commands are used to turn on or off
+      the thrusters, applying the same command multiple times in a script
+      without its inverse is the same as applying it once. In other words, if
+      you do this:</para>
 
-%  Initiate individually but terminate as a group
-BeginFiniteBurn aFiniteBurn(Sat1)
-BeginFiniteBurn aFiniteBurn(Sat2)
-Propagate aPropagator(Sat1, Sat2, {Sat1.TA = 60})
-EndFiniteBurn aFiniteBurn(Sat1, Sat2) </programlisting>
+      <programlisting>
+        <code>
+  BeginFiniteBurn aFiniteBurn(aSat)
+  BeginFiniteBurn aFiniteBurn(aSat)
+  BeginFiniteBurn aFiniteBurn(aSat)
+        </code>
+      </programlisting>
 
-    <para><bridgehead>Examples</bridgehead></para>
+      <para>The effect is the same as only applying the
+      <guilabel>BeginFiniteBurn</guilabel> command one time. The same holds
+      true for the <guilabel>EndFiniteBurn</guilabel> command.</para>
+    </refsection>
+  </refsection>
 
-    <para>Perform finite burn while the spacecraft is between true anomaly of
-    300 degrees and 60 degrees.</para>
+  <refsection>
+    <title>Examples</title>
 
-    <programlisting>%  Create objects
-Create Spacecraft aSat
-Create Thruster aThruster
-Create FuelTank aTank
-Create FiniteBurn aFiniteBurn
-Create Propagator aPropagator
+    <informalexample>
+      <para>Perform a finite burn while the spacecraft is between true anomaly
+      of 300 degrees and 60 degrees.</para>
 
-%  Configure the physical objects
-aSat.Thrusters     = {aThruster}
-aThruster.Tank     = {aTank}
-aSat.Tanks         = {aTank}
-aFiniteBurn.Thrusters = {aThruster}
+      <programlisting>
+        <code>
+  %  Create objects
+  Create Spacecraft aSat
+  Create Thruster aThruster
+  Create FuelTank aTank
+  Create FiniteBurn aFiniteBurn
+  Create Propagator aPropagator
 
-BeginMissionSequence
+  %  Configure the physical objects
+  aSat.Thrusters        = {aThruster}
+  aThruster.Tank        = {aTank}
+  aSat.Tanks            = {aTank}
+  aFiniteBurn.Thrusters = {aThruster}
 
-%  Prop to TA = 300 then maneuver until TA = 60
-Propagate aPropagator(aSat, {aSat.TA = 300})
-BeginFiniteBurn aFiniteBurn(aSat)
-Propagate aPropagator(aSat, {aSat.TA = 60})
-EndFiniteBurn aFiniteBurn(aSat)
-</programlisting>
+  BeginMissionSequence
 
-    <para>Perform a velocity direction maneuver firing the thruster for 2
-    minutes.</para>
+  %  Prop to TA = 300 then maneuver until TA = 60
+  Propagate aPropagator(aSat, {aSat.TA = 300})
+  BeginFiniteBurn aFiniteBurn(aSat)
+  Propagate aPropagator(aSat, {aSat.TA = 60})
+  EndFiniteBurn aFiniteBurn(aSat)
+        </code>
+      </programlisting>
+    </informalexample>
 
-    <programlisting>%  Create objects
-Create Spacecraft aSat
-Create Thruster aThruster
-Create FuelTank aTank
-Create FiniteBurn aFiniteBurn
-Create Propagator aPropagator
+    <informalexample>
+      <para>Perform a velocity direction maneuver firing the thruster for 2
+      minutes.</para>
 
-%  Configure the physical objects
-aThruster.CoordinateSystem = Local
-aThruster.Origin = Earth
-aThruster.Axes   = VNB
-aThruster.Element1 = 1
-aThruster.Element2 = 0
-aThruster.Element3 = 0
+      <programlisting>
+        <code>
+  %  Create objects
+  Create Spacecraft aSat
+  Create Thruster aThruster
+  Create FuelTank aTank
+  Create FiniteBurn aFiniteBurn
+  Create Propagator aPropagator
 
-%  Configure the physical objects
-aSat.Thrusters     = {aThruster}
-aThruster.Tank     = {aTank}
-aSat.Tanks         = {aTank}
-aFiniteBurn.Thrusters = {aThruster}
+  %  Configure the physical objects
+  aThruster.CoordinateSystem = Local
+  aThruster.Origin = Earth
+  aThruster.Axes   = VNB
+  aThruster.ThrustDirection1 = 1
+  aThruster.ThrustDirection2 = 0
+  aThruster.ThrustDirection3 = 0
 
-BeginMissionSequence
+  %  Configure the physical objects
+  aSat.Thrusters    	 = {aThruster}
+  aThruster.Tank    	 = {aTank}
+  aSat.Tanks        	 = {aTank}
+  aFiniteBurn.Thrusters = {aThruster}
 
-%  Fire thruster for 2 minutes
-BeginFiniteBurn aFiniteBurn(aSat)
-Propagate aPropagator(aSat, {aSat.ElapsedSecs = 120})
-EndFiniteBurn aFiniteBurn(aSat) </programlisting>
+  BeginMissionSequence
+
+  %  Fire thruster for 2 minutes
+  BeginFiniteBurn aFiniteBurn(aSat)
+  Propagate aPropagator(aSat, {aSat.ElapsedSecs = 120})
+  EndFiniteBurn aFiniteBurn(aSat)
+        </code>
+      </programlisting>
+    </informalexample>
   </refsection>
 </refentry>
