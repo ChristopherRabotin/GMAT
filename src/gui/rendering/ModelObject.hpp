@@ -30,7 +30,7 @@
 //#define MAX_VERTICES 80000  // Maximum vertices per object
 
 // Same question here
-#define MAX_POLYGONS 80000  // Maximum polygons (triangles) per object
+#define MAX_POLYGONS 100000  // Maximum polygons (triangles) per object
 
 #define MAX_LISTS 300       // Maximum number of vertex/polygon lists per object
 #define MAX_MATERIALS 500   // Maximum materials per object

@@ -25,7 +25,7 @@
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
 
-//#define DEBUG_LOADING
+#define DEBUG_LOADING
 //#define DUMP_DATA
 
 //------------------------------------------------------------------------------
@@ -45,7 +45,9 @@ ThreeDSLoader::ThreeDSLoader() :
    theModel             (NULL),
    vertexStart          (0),
    polygonStart         (0),
-   ambientColorLoaded   (false)
+   materialPolygonStart (0),
+   ambientColorLoaded   (false),
+   lastPolygonCount     (0)
 {
 }
 
@@ -121,6 +123,10 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
          material_type *currentMaterial = NULL;
          int subtype = 0;
 
+         // Flag used to indicate of a face list was just loaded
+         bool faceListLoaded = false;
+
+
          // Read the file until an error occurs or we reach the end, processing
          // the contents as we go
          while(ftell(theFile) < fileSize)
@@ -132,6 +138,11 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                MessageInterface::ShowMessage("   Current chunk ID: %6d, "
                      "hex %4x, length %10d   ", chunkId, chunkId, chunkLength);
             #endif
+
+            if (faceListLoaded && (chunkId != CHUNK_FACEMAT))
+               if (!LoadDefaultMaterial())
+                  MessageInterface::ShowMessage("Unable to set the default "
+                        "model material\n");
 
             // Process the chunk
             switch (chunkId)
@@ -200,6 +211,9 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                   throw SubscriberException("An error was encountered loading "
                         "the polygon map " + filename);
                }
+               // Need to set default material if next chunk isn't CHUNK_FACEMAT
+//               faceListLoaded = true;
+               LoadDefaultMaterial();
                break;
 
             case CHUNK_FACEMAT:
@@ -815,11 +829,13 @@ bool ThreeDSLoader::ReadTextureMapping()
 bool ThreeDSLoader::LoadFaceList()
 {
    bool retval = false;
-   unsigned short faceCount, totalFaceCount, faceFlag;
+   unsigned short faceCount;
+   Integer totalFaceCount, faceFlag;
 
    // Retrieve the number of faces
    fread(&faceCount, sizeof(unsigned short), 1, theFile);
 
+   lastPolygonCount = faceCount;
    polygonStart = theModel->GetNumPolygons();
    totalFaceCount = faceCount + polygonStart;
 
@@ -835,7 +851,7 @@ bool ThreeDSLoader::LoadFaceList()
       polygon_type *polygon = theModel->GetPolygonArray();
 
       // Loop through file and extract all of the face information
-      for (unsigned short i = polygonStart; i < totalFaceCount; i++)
+      for (Integer i = polygonStart; i < totalFaceCount; i++)
       {
          fread(&polygon[i].a, sizeof(unsigned short), 1, theFile);
          #ifdef DEBUG_LOADING
@@ -914,7 +930,7 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
          index = i;
          materialFound = true;
          #ifdef DEBUG_LOADING
-            MessageInterface::ShowMessage("for material %s\n", str);
+            MessageInterface::ShowMessage("for material %s  ", str);
          #endif
          break;
       }
@@ -931,7 +947,14 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
       previousFaceCount = material[index].num_faces;
       fread(&value, sizeof(unsigned short), 1, theFile);
       if (index != -1)
+      {
          material[index].num_faces += value;
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("Setting %d faces (%d to %d)\n",
+                  material[index].num_faces, previousFaceCount,
+                  material[index].num_faces-1);
+         #endif
+      }
 
       for (i = previousFaceCount; i < material[index].num_faces; i++)
       {
@@ -947,7 +970,42 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
 }
 
 
+//------------------------------------------------------------------------------
+// bool ThreeDSLoader::SetDefaultMaterial()
+//------------------------------------------------------------------------------
+/**
+ * Sets the material to default if no material specified for the model
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool ThreeDSLoader::LoadDefaultMaterial()
+{
+   bool retval = false;
 
+//   unsigned short value;
+//   char str[255], theChar;
+//   Integer i = 0;
+//   Integer previousFaceCount;
+//
+//   if (theModel->GetNumMaterials() == 0)
+//   {
+//      MessageInterface::ShowMessage("Default material not found!  Filling "
+//            "anyway\n");
+//   }
+//
+//   material_type *material = theModel->GetMaterials();
+//
+//   previousFaceCount = material[0].num_faces;
+//   material[0].num_faces += lastPolygonCount;
+//
+//   for (i = previousFaceCount; i < material[0].num_faces; i++)
+//      material[0].faces[i] = polygonStart + i - previousFaceCount;
+
+   retval = true;
+
+   return retval;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Hidden methods
@@ -971,7 +1029,9 @@ ThreeDSLoader::ThreeDSLoader(const ThreeDSLoader& tds) :
    theModel             (NULL),
    vertexStart          (0),
    polygonStart         (0),
-   ambientColorLoaded   (false)
+   materialPolygonStart (0),
+   ambientColorLoaded   (false),
+   lastPolygonCount     (0)
 {
 }
 

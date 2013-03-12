@@ -42,8 +42,12 @@ private:
    Integer vertexStart;
    /// Starting index for the current block in the polygon array
    Integer polygonStart;
+   /// Starting index for the current block in the current material map
+   Integer materialPolygonStart;
    /// Color loading: if spec loaded and ambient not set, set both to specular
    bool ambientColorLoaded;
+   /// Number of polygons read on last read, for default material if needed
+   unsigned short lastPolygonCount;
 
    enum {
       CHUNK_MAIN      = 0x4d4d,
@@ -76,6 +80,7 @@ private:
    bool ReadTextureMapping();
    bool LoadFaceList();
    bool LoadFaceMaterialMap();
+   bool LoadDefaultMaterial();
 
    // Hidden methods
    ThreeDSLoader(const ThreeDSLoader& tds);
