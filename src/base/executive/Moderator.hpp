@@ -325,7 +325,7 @@ public:
    MathNode* CreateMathNode(const std::string &type,
                             const std::string &name = "");
    
-   // AxisSystem
+   // Attitude
    Attitude* CreateAttitude(const std::string &type,
                             const std::string &name);
    
