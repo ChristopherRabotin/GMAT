@@ -25,7 +25,7 @@
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
 
-#define DEBUG_LOADING
+//#define DEBUG_LOADING
 //#define DUMP_DATA
 
 //------------------------------------------------------------------------------
