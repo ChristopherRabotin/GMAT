@@ -338,8 +338,11 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Rvector3 vR    = vSun / rMag;
    Rvector3 xDot  = vR - x * (x * vR);
 
-   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +
-                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);
+//   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
+//                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);						// fix bug GMT-3465;  made change by TUAN NGUYEN
+   Rvector3 spinaxisFixed =  fixedToMJ2000.Transpose()*spinaxisFK5;						// fix bug GMT-3465;  made change by TUAN NGUYEN
+   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFixed), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
+                    Cross(spinaxisFK5, xDot);											// fix bug GMT-3465;  made change by TUAN NGUYEN
    Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
 
    Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);
@@ -349,6 +352,8 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                    xDot[2],yDot[2],zDot[2]);
                    
    #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Sun state: %s %s\n", primary->GetName().c_str(), primary->GetMJ2000State(atEpoch).ToString().c_str());
+      MessageInterface::ShowMessage("Earth state: %s %s\n", secondary->GetName().c_str(), secondary->GetMJ2000State(atEpoch).ToString().c_str());
       MessageInterface::ShowMessage("Sun R vector(MJ2000) = %lf %lf %lf\n", rvSunVec[0], rvSunVec[1], rvSunVec[2]);
       MessageInterface::ShowMessage("Sun V vector(MJ2000) = %lf %lf %lf\n", rvSunVec[3], rvSunVec[4], rvSunVec[5]);
       MessageInterface::ShowMessage("x-axis unit vector: x = %18.15lf   %18.15lf   %18.15lf\n", x[0], x[1], x[2]);
