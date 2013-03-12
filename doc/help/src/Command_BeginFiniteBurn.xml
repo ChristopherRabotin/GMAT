@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="FiniteBurnCommand"
+<refentry version="5.0" xml:id="BeginFiniteBurn"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -11,12 +11,8 @@
     <primary>BeginFiniteBurn</primary>
   </indexterm>
 
-  <indexterm>
-    <primary>EndFiniteBurn</primary>
-  </indexterm>
-
   <refmeta>
-    <refentrytitle>FiniteBurn</refentrytitle>
+    <refentrytitle>BeginFiniteBurn</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -26,7 +22,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>FiniteBurn</refname>
+    <refname>BeginFiniteBurn</refname>
 
     <refpurpose>Model finite thrust maneuvers in the mission
     sequence</refpurpose>
