@@ -151,9 +151,9 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    if (isInitialized && needsReinit)  Initialize();
    #ifdef DEBUG_CSFIXED
    MessageInterface::ShowMessage(
-   "Entering CSFixed::Compute ... angVel = %.12f %.12f %.12f\n",
-   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
-   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   "Entering CSFixed::Compute ... angVel = %18.12le %18.12le %18.12le\n",
+   angVel[0] * GmatMathConstants::DEG_PER_RAD, angVel[1] * GmatMathConstants::DEG_PER_RAD, 
+   angVel[2] * GmatMathConstants::DEG_PER_RAD);
    #endif
 
    // We know RBi, since it is computed on initialization
@@ -173,10 +173,12 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    angVel(1)   = wxIBB(0,2);
    angVel(2)   = wxIBB(1,0);
    #ifdef DEBUG_CSFIXED
+   MessageInterface::ShowMessage("Matrix RiIDot = %s\n", RiIDot.ToString().c_str());
+   MessageInterface::ShowMessage("Matrix RBi = %s\n", RBi.ToString().c_str());
+   MessageInterface::ShowMessage("Matrix dcm = %s\n", dcm.ToString().c_str());
+   MessageInterface::ShowMessage("Matrix wxIBB = %s\n", wxIBB.ToString().c_str());
    MessageInterface::ShowMessage(
-   "EXITING CSFixed::Compute ... angVel = %.12f %.12f %.12f\n",
-   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
-   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   "EXITING CSFixed::Compute ... angVel = %18.12le %18.12le %18.12le\n", angVel[0], angVel[1], angVel[2]);
    #endif
 }
 
