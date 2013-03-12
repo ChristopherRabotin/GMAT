@@ -195,17 +195,14 @@
         </thead>
 
         <tbody>
-
-
           <row>
             <entry><guilabel>Spacecraft resource</guilabel></entry>
 
-            <entry><para> Must be created in order to apply any burn.</para></entry>
+            <entry><para> Must be created in order to apply any
+            burn.</para></entry>
           </row>
 
-
-
-		<row>
+          <row>
             <entry><guilabel>Thruster resource</guilabel></entry>
 
             <entry><para> As discussed in the <guilabel>Remarks</guilabel>,
@@ -275,21 +272,21 @@
   % Create a default Thruster.  Allow for fuel depletion from 
   % the default FuelTank.
   Create Thruster Thruster1
-  GMAT Thruster1.DecrementMass = true
-  GMAT Thruster1.Tank = {FuelTank1}
+  Thruster1.DecrementMass = true
+  Thruster1.Tank = {FuelTank1}
 
   %  Attach FuelTank and Thruster to the spacecraft
-  GMAT DefaultSC.Thrusters = {Thruster1}
-  GMAT DefaultSC.Tanks = {FuelTank1}
+  DefaultSC.Thrusters = {Thruster1}
+  DefaultSC.Tanks = {FuelTank1}
 
   %  Create default ForceModel and Propagator
   Create ForceModel DefaultProp_ForceModel
   Create Propagator DefaultProp
-  GMAT DefaultProp.FM = DefaultProp_ForceModel
+  DefaultProp.FM = DefaultProp_ForceModel
 
   %  Create a Finite Burn that uses the default thruster
   Create FiniteBurn FiniteBurn1
-  GMAT FiniteBurn1.Thrusters = {Thruster1}
+  FiniteBurn1.Thrusters = {Thruster1}
 
   BeginMissionSequence
 

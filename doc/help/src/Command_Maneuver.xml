@@ -285,27 +285,27 @@
   DefaultSC.Tanks = {FuelTank1}
 
   %  Set FuelTank1 parameters to default values
-   FuelTank1.AllowNegativeFuelMass = false
-   FuelTank1.FuelMass = 756
-   FuelTank1.Pressure = 1500
-   FuelTank1.Temperature = 20
-   FuelTank1.RefTemperature = 20
-   FuelTank1.Volume = 0.75
-   FuelTank1.FuelDensity = 1260
-   FuelTank1.PressureModel = PressureRegulated
+  FuelTank1.AllowNegativeFuelMass = false
+  FuelTank1.FuelMass = 756
+  FuelTank1.Pressure = 1500
+  FuelTank1.Temperature = 20
+  FuelTank1.RefTemperature = 20
+  FuelTank1.Volume = 0.75
+  FuelTank1.FuelDensity = 1260
+  FuelTank1.PressureModel = PressureRegulated
 
   %  Create ImpulsiveBurn associated with the created FuelTank
   Create ImpulsiveBurn IB
-   IB.CoordinateSystem = Local
-   IB.Origin = Earth
-   IB.Axes = VNB
-   IB.Element1 = 0.1
-   IB.Element2 = 0
-   IB.Element3 = 0
-   IB.DecrementMass = true
-   IB.Tank = {FuelTank1}
-   IB.Isp = 300
-   IB.GravitationalAccel = 9.810000000000001
+  IB.CoordinateSystem = Local
+  IB.Origin = Earth
+  IB.Axes = VNB
+  IB.Element1 = 0.1
+  IB.Element2 = 0
+  IB.Element3 = 0
+  IB.DecrementMass = true
+  IB.Tank = {FuelTank1}
+  IB.Isp = 300
+  IB.GravitationalAccel = 9.810000000000001
 
   BeginMissionSequence
   %  Apply impulsive maneuver to DefaultSC
