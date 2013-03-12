@@ -298,8 +298,8 @@
   Create Thruster Thruster1
 
   %  Attach FuelTank and Thruster to the spacecraft
-  GMAT DefaultSC.Thrusters = {Thruster1}
-  GMAT DefaultSC.Tanks = {FuelTank1}
+  DefaultSC.Thrusters = {Thruster1}
+  DefaultSC.Tanks = {FuelTank1}
 
   BeginMissionSequence
         </code>
