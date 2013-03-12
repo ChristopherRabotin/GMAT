@@ -40,11 +40,12 @@
  */
 //------------------------------------------------------------------------------
 ThreeDSLoader::ThreeDSLoader() :
-   theFile           (NULL),
-   fileSize          (0),
-   theModel          (NULL),
-   vertexStart       (0),
-   polygonStart      (0)
+   theFile              (NULL),
+   fileSize             (0),
+   theModel             (NULL),
+   vertexStart          (0),
+   polygonStart         (0),
+   ambientColorLoaded   (false)
 {
 }
 
@@ -308,6 +309,20 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                #endif
                break;
 
+            case CHUNK_SUBCOLORF:
+               #ifdef DEBUG_LOADING
+                  MessageInterface::ShowMessage("The material subcolor, as "
+                        "floats\n");
+               #endif
+               if (!ReadMaterialSubcolorsFloat(currentMaterial, subtype))
+               {
+                  MessageInterface::ShowMessage("The material subcolor was not "
+                        "loaded correctly\n");
+                  noError = false;
+               }
+               break;
+
+
             case CHUNK_SUBCOLOR:
                #ifdef DEBUG_LOADING
                   MessageInterface::ShowMessage("The material subcolors\n");
@@ -531,10 +546,95 @@ bool ThreeDSLoader::GetMaterialName(material_type *forMaterial)
 
 
 //------------------------------------------------------------------------------
+// bool ReadMaterialSubcolorsFloat(material_type *forMaterial, int subtype)
+//------------------------------------------------------------------------------
+/**
+ * Loads the substrate color for a given material and lighting, as floating
+ * point data
+ *
+ * @param forMaterial The material being loaded
+ * @param subtype The lighting type that uses this subcolor
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool ThreeDSLoader::ReadMaterialSubcolorsFloat(material_type *forMaterial,
+      int subtype)
+{
+   #ifdef DEBUG_LOADING
+      MessageInterface::ShowMessage("    Subcolor for %s:\n",
+            forMaterial->name);
+   #endif
+   bool retval = false;
+   float r, g, b;
+
+   if (forMaterial)
+   {
+      fread(&r, sizeof(float), 1, theFile);
+      fread(&g, sizeof(float), 1, theFile);
+      fread(&b, sizeof(float), 1, theFile);
+
+      if (subtype == CHUNK_MATACOL)
+      {
+         forMaterial->mat_ambient.r = r;
+         forMaterial->mat_ambient.g = g;
+         forMaterial->mat_ambient.b = b;
+         forMaterial->mat_ambient.a = (r+g+b)/3.0;
+         ambientColorLoaded = true;
+
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Ambient color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_ambient.r,
+                  forMaterial->mat_ambient.g, forMaterial->mat_ambient.b,
+                  forMaterial->mat_ambient.a);
+         #endif
+      }
+      else if (subtype == CHUNK_MATDIFF)
+      {
+         forMaterial->mat_diffuse.r = r;
+         forMaterial->mat_diffuse.g = g;
+         forMaterial->mat_diffuse.b = b;
+         forMaterial->mat_diffuse.a = (r+g+b)/3.0;
+
+         if (!ambientColorLoaded)
+         {
+            forMaterial->mat_ambient.r = r;
+            forMaterial->mat_ambient.g = g;
+            forMaterial->mat_ambient.b = b;
+            forMaterial->mat_ambient.a = (r+g+b)/3.0;
+         }
+
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Diffuse color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_diffuse.r,
+                  forMaterial->mat_diffuse.g, forMaterial->mat_diffuse.b,
+                  forMaterial->mat_diffuse.a);
+         #endif
+      }
+      else if (subtype == CHUNK_MATSPEC)
+      {
+         forMaterial->mat_specular.r = r;
+         forMaterial->mat_specular.g = g;
+         forMaterial->mat_specular.b = b;
+         forMaterial->mat_specular.a = (r+g+b)/3.0;
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Speclar color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_specular.r,
+                  forMaterial->mat_specular.g, forMaterial->mat_specular.b,
+                  forMaterial->mat_specular.a);
+         #endif
+      }
+      retval = true;
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // bool RealMaterialSubcolors(material_type *forMaterial, int subtype)
 //------------------------------------------------------------------------------
 /**
- * Loads the substrate color dor a given material and lighting
+ * Loads the substrate color for a given material and lighting
  *
  * @param forMaterial The material being loaded
  * @param subtype The lighting type that uses this subcolor
@@ -545,6 +645,10 @@ bool ThreeDSLoader::GetMaterialName(material_type *forMaterial)
 bool ThreeDSLoader::ReadMaterialSubcolors(material_type *forMaterial,
       int subtype)
 {
+   #ifdef DEBUG_LOADING
+      MessageInterface::ShowMessage("    Subcolor for %s:\n",
+            forMaterial->name);
+   #endif
    bool retval = false;
    unsigned char r, g, b;
 
@@ -560,6 +664,14 @@ bool ThreeDSLoader::ReadMaterialSubcolors(material_type *forMaterial,
          forMaterial->mat_ambient.g = (float)g/255;
          forMaterial->mat_ambient.b = (float)b/255;
          forMaterial->mat_ambient.a = (float)(r+g+b)/3/255;
+         ambientColorLoaded = true;
+
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Ambient color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_ambient.r,
+                  forMaterial->mat_ambient.g, forMaterial->mat_ambient.b,
+                  forMaterial->mat_ambient.a);
+         #endif
       }
       else if (subtype == CHUNK_MATDIFF)
       {
@@ -567,6 +679,21 @@ bool ThreeDSLoader::ReadMaterialSubcolors(material_type *forMaterial,
          forMaterial->mat_diffuse.g = (float)g/255;
          forMaterial->mat_diffuse.b = (float)b/255;
          forMaterial->mat_diffuse.a = (float)(r+g+b)/3/255;
+
+         if (!ambientColorLoaded)
+         {
+            forMaterial->mat_ambient.r = (float)r/255;
+            forMaterial->mat_ambient.g = (float)g/255;
+            forMaterial->mat_ambient.b = (float)b/255;
+            forMaterial->mat_ambient.a = (float)(r+g+b)/3/255;
+         }
+
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Diffuse color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_diffuse.r,
+                  forMaterial->mat_diffuse.g, forMaterial->mat_diffuse.b,
+                  forMaterial->mat_diffuse.a);
+         #endif
       }
       else if (subtype == CHUNK_MATSPEC)
       {
@@ -574,6 +701,12 @@ bool ThreeDSLoader::ReadMaterialSubcolors(material_type *forMaterial,
          forMaterial->mat_specular.g = (float)g/255;
          forMaterial->mat_specular.b = (float)b/255;
          forMaterial->mat_specular.a = (float)(r+g+b)/3/255;
+         #ifdef DEBUG_LOADING
+            MessageInterface::ShowMessage("    Speclar color set to [%f %f %f "
+                  "%f]\n", forMaterial->mat_specular.r,
+                  forMaterial->mat_specular.g, forMaterial->mat_specular.b,
+                  forMaterial->mat_specular.a);
+         #endif
       }
       retval = true;
    }
@@ -836,8 +969,9 @@ ThreeDSLoader::ThreeDSLoader(const ThreeDSLoader& tds) :
    theFile              (NULL),
    fileSize             (0),
    theModel             (NULL),
-   vertexStart       (0),
-   polygonStart      (0)
+   vertexStart          (0),
+   polygonStart         (0),
+   ambientColorLoaded   (false)
 {
 }
 

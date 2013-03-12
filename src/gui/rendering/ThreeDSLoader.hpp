@@ -42,31 +42,35 @@ private:
    Integer vertexStart;
    /// Starting index for the current block in the polygon array
    Integer polygonStart;
+   /// Color loading: if spec loaded and ambient not set, set both to specular
+   bool ambientColorLoaded;
 
    enum {
-      CHUNK_MAIN     = 0x4d4d,
-      CHUNK_OBJMESH  = 0x3d3d,
-      CHUNK_OBJBLOCK = 0x4000,
-      CHUNK_TRIMESH  = 0x4100,
-      CHUNK_VERTLIST = 0x4110,
-      CHUNK_FACELIST = 0x4120,
-      CHUNK_FACEMAT  = 0x4130,
-      CHUNK_MAPLIST  = 0x4140,
-      CHUNK_SMOOLIST = 0x4150,
-      CHUNK_MATERIAL = 0xAFFF,
-      CHUNK_MATNAME  = 0xA000,
-      CHUNK_MATACOL  = 0xA010,
-      CHUNK_SUBCOLOR = 0x0011,
-      CHUNK_MATDIFF  = 0xA020,
-      CHUNK_MATSPEC  = 0xA030,
-      CHUNK_MATSHINE = 0xA040,
-      CHUNK_SUBSHINE = 0x0030,
-      CHUNK_TEXMAP   = 0xA200,
-      CHUNK_MATTEXT  = 0xA300
+      CHUNK_MAIN      = 0x4d4d,
+      CHUNK_OBJMESH   = 0x3d3d,
+      CHUNK_OBJBLOCK  = 0x4000,
+      CHUNK_TRIMESH   = 0x4100,
+      CHUNK_VERTLIST  = 0x4110,
+      CHUNK_FACELIST  = 0x4120,
+      CHUNK_FACEMAT   = 0x4130,
+      CHUNK_MAPLIST   = 0x4140,
+      CHUNK_SMOOLIST  = 0x4150,
+      CHUNK_MATERIAL  = 0xAFFF,
+      CHUNK_MATNAME   = 0xA000,
+      CHUNK_MATACOL   = 0xA010,
+      CHUNK_SUBCOLORF = 0x0010,
+      CHUNK_SUBCOLOR  = 0x0011,
+      CHUNK_MATDIFF   = 0xA020,
+      CHUNK_MATSPEC   = 0xA030,
+      CHUNK_MATSHINE  = 0xA040,
+      CHUNK_SUBSHINE  = 0x0030,
+      CHUNK_TEXMAP    = 0xA200,
+      CHUNK_MATTEXT   = 0xA300
    };
 
    bool LoadVertexData();
    bool GetMaterialName(material_type *forMaterial);
+   bool ReadMaterialSubcolorsFloat(material_type *forMaterial, int subtype);
    bool ReadMaterialSubcolors(material_type *forMaterial, int subtype);
    bool GetTextureFileName(material_type *forMaterial);
    bool ReadTextureMapping();
