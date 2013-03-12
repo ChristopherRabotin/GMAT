@@ -20,28 +20,27 @@
   <refnamediv>
     <refname>Thruster</refname>
 
-    <refpurpose>A thruster.</refpurpose>
+    <refpurpose>A spacecraft thruster for finite burns.</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>
-      A chemical thruster
-    </synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
     <para>The <guilabel>Thruster</guilabel> directs the thrust of the rocket
     engine while in space. It is used for finite burns.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: , <xref
+    linkend="BeginFiniteBurn"/><xref linkend="FuelTank"/>,<xref
+    linkend="FiniteBurn"/></para>
   </refsection>
 
   <refsection>
-    <title>Options</title>
+    <title>Fields</title>
 
-    <para>The constants Ci below are used in the following equation to
-    calculate thrust (in Newtons), F<subscript>T</subscript>, as a function of
-    pressure P (kPa) and temperature T (Celsius).</para>
+    <para>The constants <guilabel>Ci</guilabel> below are used in the
+    following equation to calculate thrust (in Newtons),
+    F<subscript>T</subscript>, as a function of pressure P (kPa) and
+    temperature T (Celsius).</para>
 
     <screenshot>
       <mediaobject>
@@ -53,9 +52,9 @@
       </mediaobject>
     </screenshot>
 
-    <para>The constants Ki below are used in the following equation to
-    calculate ISP (in seconds), Isp, as a function of pressure P (kPa) and
-    temperature T (Celsius).</para>
+    <para>The constants <guilabel>Ki</guilabel> below are used in the
+    following equation to calculate ISP (in seconds), Isp, as a function of
+    pressure P (kPa) and temperature T (Celsius).</para>
 
     <screenshot>
       <mediaobject>
@@ -83,69 +82,11 @@
 
         <tbody>
           <row>
-            <entry><guilabel>CoordinateSystem</guilabel></entry>
-
-            <entry><para>The <guilabel>CoordinateSystem</guilabel> field for a
-            <guilabel>Thruster</guilabel> determines what coordinate system
-            the orientation parameters, ThrustDirection1, ThrustDirection2,
-            and ThrustDirection3 refer to. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>UserDefString</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Local, EarthMJ2000Eq, EarthMJ2000Ec, EarthFixed, or
-                    any user defined system</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Local</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>Axes</guilabel></entry>
 
-            <entry><para>The <guilabel>Axes</guilabel> field allows the user
-            to define a spacecraft centered set of axes for the
-            <guilabel>Thruster</guilabel>. </para> <variablelist>
+            <entry><para>Allows the user to define a spacecraft centered set
+            of axes for the <guilabel>Thruster</guilabel>. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -158,7 +99,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>VNB, LVLH, MJ2000Eq, SpacecraftBody</para>
+                    <para><guilabel>VNB</guilabel>, <guilabel>LVLH</guilabel>,
+                    <guilabel>MJ2000Eq</guilabel>,
+                    <guilabel>SpacecraftBody</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -197,15 +140,11 @@
           </row>
 
           <row>
-            <entry><guilabel>Origin</guilabel></entry>
+            <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>The <guilabel>Origin</guilabel> field, used in
-            conjunction with the <guilabel>Axes</guilabel> field, allows the
-            user to define a spacecraft centered set of axes for the
-            <guilabel>Thruster</guilabel>. <guilabel>Origin</guilabel> has no
-            affect when a Local coordinate system is used and the
-            <guilabel>Axes</guilabel> are set to MJ2000Eq or
-            SpacecraftBody.</para> <variablelist>
+            <entry><para>Determines what coordinate system the orientation
+            parameters, ThrustDirection1, ThrustDirection2, and
+            ThrustDirection3 refer to. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -218,8 +157,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Sun, Mercury, Venus, Earth, Luna, Mars,Jupiter,
-                    Saturn, Uranus, Neptune, Pluto</para>
+                    <para><literal>Local</literal>,
+                    <guilabel>EarthMJ2000Eq</guilabel>,
+                    <guilabel>EarthMJ2000Ec</guilabel>,
+                    <guilabel>EarthFixed</guilabel>, or any user defined
+                    system</para>
                   </listitem>
                 </varlistentry>
 
@@ -235,344 +177,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ThrustDirection1</guilabel></entry>
-
-            <entry><para><guilabel>ThrustDirection1</guilabel>, divided by the
-            RSS of the three direction components, forms the x component of
-            the spacecraft thrust vector direction. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real Number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ThrustDirection2</guilabel></entry>
-
-            <entry><para><guilabel>ThrustDirection2</guilabel>, divided by the
-            RSS of the three direction components, forms the y component of
-            the spacecraft thrust vector direction. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real Number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ThrustDirection3</guilabel></entry>
-
-            <entry><para><guilabel>ThrustDirection3</guilabel>, divided by the
-            RSS of the three direction components, forms the z component of
-            the spacecraft thrust vector direction. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real Number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ThrustScaleFactor</guilabel></entry>
-
-            <entry><para><guilabel>ThrustScaleFactor</guilabel> is a scale
-            factor that is multiplied by the thrust vector, for a given
-            thruster, before the thrust vector is added into the total
-            acceleration. Note that the value of this scale factor does not
-            affect the mass flow rate. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real Number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real &gt;= 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DecrementMass</guilabel></entry>
-
-            <entry><para>Flag which determines if the FuelMass is to be
-            decremented as it used.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>true, false</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>false</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Tank</guilabel></entry>
-
-            <entry><para><guilabel>FuelTank</guilabel> from which the
-            <guilabel>Thruster</guilabel> draws propellant from. </para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>UserDefString</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>User defined list of FuelTanks.</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>N/A</para>
+                    <para>
+                      <literal>Local</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1459,6 +1066,61 @@
           </row>
 
           <row>
+            <entry><guilabel>DecrementMass</guilabel></entry>
+
+            <entry><para>Flag which determines if the FuelMass is to be
+            decremented as it used.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true, false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>K1</guilabel></entry>
 
             <entry><para>ISP coefficient. </para> <variablelist>
@@ -2321,6 +1983,296 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>Origin</guilabel></entry>
+
+            <entry><para>This field, used in conjunction with the
+            <guilabel>Axes</guilabel> field, allows the user to define a
+            spacecraft centered set of axes for the
+            <guilabel>Thruster</guilabel>. <guilabel>Origin</guilabel> has no
+            affect when a Local coordinate system is used and the
+            <guilabel>Axes</guilabel> are set to MJ2000Eq or
+            SpacecraftBody.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>Sun</guilabel>,
+                    <guilabel>Mercury</guilabel>, <guilabel>Venus</guilabel>,
+                    <guilabel>Earth</guilabel>, <guilabel>Luna</guilabel>,
+                    <guilabel>Mars</guilabel>,<guilabel>Jupiter</guilabel>,
+                    <guilabel>Saturn</guilabel>, <guilabel>Uranus</guilabel>,
+                    <guilabel>Neptune</guilabel>,
+                    <guilabel>Pluto</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Earth</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Tank</guilabel></entry>
+
+            <entry><para><guilabel>FuelTank</guilabel> from which the
+            <guilabel>Thruster</guilabel> draws propellant from. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>User defined list of FuelTanks.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ThrustDirection1</guilabel></entry>
+
+            <entry><para>X component of the spacecraft thrust vector
+            direction. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real Number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ThrustDirection3</guilabel></entry>
+
+            <entry><para>Z component of the spacecraft thrust vector
+            direction. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real Number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ThrustScaleFactor</guilabel></entry>
+
+            <entry><para><guilabel>ThrustScaleFactor</guilabel> is a scale
+            factor that is multiplied by the thrust vector, for a given
+            thruster, before the thrust vector is added into the total
+            acceleration. Note that the value of this scale factor does not
+            affect the mass flow rate. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real Number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt;= 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -2398,8 +2350,6 @@
   <refsection>
     <title>GUI</title>
 
-    <!--       -->
-
     <para>The <guilabel>Thruster</guilabel> dialog box allows you to specify
     properties of a <guilabel>Thruster</guilabel> including the
     <guilabel>Coordinate System</guilabel> of the thrust acceleration
@@ -2421,9 +2371,9 @@
     you can choose between existing coordinate systems or use locally defined
     coordinate systems. The <guilabel>Axes</guilabel> field is only active if
     <guilabel>Coordinate System</guilabel> is set to
-    <guimenuitem>Local</guimenuitem>. The “<guilabel>Origin</guilabel> field
-    is only active if “<guilabel>Coordinate System</guilabel> is set to
-    <guimenuitem>Local</guimenuitem> and “<guilabel>Axes</guilabel>” is set to
+    <guimenuitem>Local</guimenuitem>. The <guilabel>Origin</guilabel> field is
+    only active if <guilabel>Coordinate System</guilabel> is set to
+    <guimenuitem>Local</guimenuitem> and <guilabel>Axes</guilabel> is set to
     either <guimenuitem>VNB</guimenuitem> or
     <guimenuitem>LVLH</guimenuitem>.</para>
 
@@ -2475,7 +2425,7 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Use of Thruster object in conjunction with Maneuvers</title>
+      <title>Use of Thruster Object in Conjunction With Maneuvers</title>
 
       <para>A <guilabel>Thruster</guilabel> object is used only in association
       with finite maneuvers. To implement a finite maneuver, you must first
@@ -2627,65 +2577,65 @@
       <code>
   %  Create the FuelTank Object
   Create FuelTank FuelTank1
-  GMAT FuelTank1.AllowNegativeFuelMass = false
-  GMAT FuelTank1.FuelMass = 756
-  GMAT FuelTank1.Pressure = 1500
-  GMAT FuelTank1.Temperature = 20
-  GMAT FuelTank1.RefTemperature = 20
-  GMAT FuelTank1.Volume = 0.75
-  GMAT FuelTank1.FuelDensity = 1260
-  GMAT FuelTank1.PressureModel = PressureRegulated
+  FuelTank1.AllowNegativeFuelMass = false
+  FuelTank1.FuelMass = 756
+  FuelTank1.Pressure = 1500
+  FuelTank1.Temperature = 20
+  FuelTank1.RefTemperature = 20
+  FuelTank1.Volume = 0.75
+  FuelTank1.FuelDensity = 1260
+  FuelTank1.PressureModel = PressureRegulated
 
   %  Create a Thruster, that allows fuel depletion, and assign it a FuelTank
   Create Thruster Thruster1
-  GMAT Thruster1.CoordinateSystem = Local
-  GMAT Thruster1.Origin = Earth
-  GMAT Thruster1.Axes = VNB
-  GMAT Thruster1.ThrustDirection1 = 1
-  GMAT Thruster1.ThrustDirection2 = 0
-  GMAT Thruster1.ThrustDirection3 = 0
-  GMAT Thruster1.DutyCycle = 1
-  GMAT Thruster1.ThrustScaleFactor = 1
-  GMAT Thruster1.DecrementMass = true
-  GMAT Thruster1.Tank = {FuelTank1}
-  GMAT Thruster1.GravitationalAccel = 9.810000000000001
-  GMAT Thruster1.C1 = 10
-  GMAT Thruster1.C2 = 0
-  GMAT Thruster1.C3 = 0
-  GMAT Thruster1.C4 = 0
-  GMAT Thruster1.C5 = 0
-  GMAT Thruster1.C6 = 0
-  GMAT Thruster1.C7 = 0
-  GMAT Thruster1.C8 = 0
-  GMAT Thruster1.C9 = 0
-  GMAT Thruster1.C10 = 0
-  GMAT Thruster1.C11 = 0
-  GMAT Thruster1.C12 = 0
-  GMAT Thruster1.C13 = 0
-  GMAT Thruster1.C14 = 0
-  GMAT Thruster1.C15 = 0
-  GMAT Thruster1.C16 = 0
-  GMAT Thruster1.K1 = 300
-  GMAT Thruster1.K2 = 0
-  GMAT Thruster1.K3 = 0
-  GMAT Thruster1.K4 = 0
-  GMAT Thruster1.K5 = 0
-  GMAT Thruster1.K6 = 0
-  GMAT Thruster1.K7 = 0
-  GMAT Thruster1.K8 = 0
-  GMAT Thruster1.K9 = 0
-  GMAT Thruster1.K10 = 0
-  GMAT Thruster1.K11 = 0
-  GMAT Thruster1.K12 = 0
-  GMAT Thruster1.K13 = 0
-  GMAT Thruster1.K14 = 0
-  GMAT Thruster1.K15 = 0
-  GMAT Thruster1.K16 = 0
+  Thruster1.CoordinateSystem = Local
+  Thruster1.Origin = Earth
+  Thruster1.Axes = VNB
+  Thruster1.ThrustDirection1 = 1
+  Thruster1.ThrustDirection2 = 0
+  Thruster1.ThrustDirection3 = 0
+  Thruster1.DutyCycle = 1
+  Thruster1.ThrustScaleFactor = 1
+  Thruster1.DecrementMass = true
+  Thruster1.Tank = {FuelTank1}
+  Thruster1.GravitationalAccel = 9.810000000000001
+  Thruster1.C1 = 10
+  Thruster1.C2 = 0
+  Thruster1.C3 = 0
+  Thruster1.C4 = 0
+  Thruster1.C5 = 0
+  Thruster1.C6 = 0
+  Thruster1.C7 = 0
+  Thruster1.C8 = 0
+  Thruster1.C9 = 0
+  Thruster1.C10 = 0
+  Thruster1.C11 = 0
+  Thruster1.C12 = 0
+  Thruster1.C13 = 0
+  Thruster1.C14 = 0
+  Thruster1.C15 = 0
+  Thruster1.C16 = 0
+  Thruster1.K1 = 300
+  Thruster1.K2 = 0
+  Thruster1.K3 = 0
+  Thruster1.K4 = 0
+  Thruster1.K5 = 0
+  Thruster1.K6 = 0
+  Thruster1.K7 = 0
+  Thruster1.K8 = 0
+  Thruster1.K9 = 0
+  Thruster1.K10 = 0
+  Thruster1.K11 = 0
+  Thruster1.K12 = 0
+  Thruster1.K13 = 0
+  Thruster1.K14 = 0
+  Thruster1.K15 = 0
+  Thruster1.K16 = 0
 
   %  Add the Thruster and the FuelTank to a Spacecraft
-  GMAT Create Spacecraft DefaultSC
-  GMAT DefaultSC.Tanks = {FuelTank1}
-  GMAT DefaultSC.Thrusters = {Thruster1}
+  Create Spacecraft DefaultSC
+  DefaultSC.Tanks = {FuelTank1}
+  DefaultSC.Thrusters = {Thruster1}
 
   BeginMissionSequence
       </code>
