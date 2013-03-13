@@ -706,6 +706,8 @@ bool Optimize::ExecuteCallback()
    
    // get the state of the Optimizer
    Solver::SolverState nState = theSolver->GetNestedState(); 
+
+   // Drive the state machine
    if (nState == Solver::INITIALIZING)
    {
       #ifdef DEBUG_CALLBACK
@@ -713,6 +715,13 @@ bool Optimize::ExecuteCallback()
          "Optimize::ExecuteCallback - state is INITIALIZING\n");
       #endif
       StoreLoopData();
+
+      #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+         "   Setting Subscriber Breakpoints\n");
+      #endif
+      GetActiveSubscribers();
+      SetSubscriberBreakpoint();
       // advance to NOMINAL
       callbackResults = theSolver->AdvanceNestedState(vars);
       nState          = theSolver->GetNestedState();
@@ -728,7 +737,13 @@ bool Optimize::ExecuteCallback()
    #endif
    callbackResults = theSolver->AdvanceNestedState(vars);
    ResetLoopData();
-   
+
+   #ifdef DEBUG_CALLBACK
+   MessageInterface::ShowMessage(
+      "   Applying Subscriber Breakpoints\n");
+   #endif
+   ApplySubscriberBreakpoint();
+
    try
    {
       branchExecuting = true;
@@ -1226,6 +1241,8 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
                currentCmd = currentCmd->GetNext();
             }
             StoreLoopData();
+            GetActiveSubscribers();
+            SetSubscriberBreakpoint();
             break;
          
          case Solver::RUNEXTERNAL:
@@ -1253,6 +1270,7 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
                   ("Optimize::Execute - external solver setting publisher with SOLVEDPASS\n");
                #endif
                ResetLoopData();
+               ApplySubscriberBreakpoint();
                branchExecuting = true;
                publisher->SetRunState(Gmat::SOLVEDPASS);
             }
