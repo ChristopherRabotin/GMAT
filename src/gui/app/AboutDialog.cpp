@@ -61,23 +61,41 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
                          const wxPoint& pos, const wxSize& size, long style)
    : wxDialog(parent, id, title, pos, size, style, title)
 {
+   #ifdef DEBUG_ICONFILE
+   MessageInterface::ShowMessage("AboutDialog::AboutDialog() entered\n");
+   #endif
    wxBitmap bitmap;
    wxBitmapButton *aboutButton;
    
    // if icon file available, use it
    FileManager *fm = FileManager::Instance();
-   std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.jpg");   
+   std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.png");
+   #ifdef DEBUG_ICONFILE
+   MessageInterface::ShowMessage("   About iconFile='%s'\n", iconFile.c_str());
+   #endif
    if (fm->DoesFileExist(iconFile))
    {
-      bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
+      //bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
+      bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_PNG);
       wxImage image = bitmap.ConvertToImage();
-      bitmap = wxBitmap(image.Scale(60, 60), wxIMAGE_QUALITY_HIGH);     
+      #ifdef DEBUG_ICONFILE
+      MessageInterface::ShowMessage("   Scaling and creating bitmap button\n");
+      #endif
+      bitmap = wxBitmap(image.Scale(100, 100), wxIMAGE_QUALITY_HIGH);
       aboutButton = new wxBitmapButton(this, -1, bitmap, wxDefaultPosition,
-                                       wxSize(60, 60), wxTRANSPARENT_WINDOW);
+                                       wxSize(100, 100), wxBORDER_NONE);
    }
    else
+   {
+      MessageInterface::ShowMessage
+         ("About GMAT icon file '%s' does not exist.\n", iconFile.c_str());
       aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
-                                       wxSize(60, 60));
+                                       wxSize(100, 100));
+   }
+   
+   #ifdef DEBUG_ICONFILE
+   MessageInterface::ShowMessage("   Bitmap button created\n");
+   #endif
    
    wxColourDatabase cdb;
    wxColour gmatColor = cdb.Find("NAVY");
@@ -196,6 +214,10 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    }
    
    CenterOnScreen(wxBOTH);
+   
+   #ifdef DEBUG_ICONFILE
+   MessageInterface::ShowMessage("AboutDialog::AboutDialog() leaving\n");
+   #endif
 }
 
 
