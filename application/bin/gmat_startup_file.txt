@@ -87,7 +87,6 @@ DE424_FILE             = DE_PATH/leDE18002100.424
 #-----------------------------------------------------------
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
-PLANETARY_COEFF_FILE   = PLANETARY_COEFF_PATH/NUT85.DAT
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
 TIME_PATH              = DATA_PATH/time/
