@@ -471,7 +471,7 @@ bool StopCondition::Evaluate()
    #endif
    
    // evaluate goal
-   if (mAllowGoalParam && mGoalParam != NULL || rhsWrapper != NULL)
+   if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
    {
       if (mAllowGoalParam)
       {
@@ -716,7 +716,7 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
    Real stopEpoch; //in A1Mjd
    
    // evaluate goal
-   if (mAllowGoalParam && mGoalParam != NULL || rhsWrapper != NULL)
+   if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
    {
       if (mAllowGoalParam)
          initialGoalValue = mGoalParam->EvaluateReal();
@@ -1063,7 +1063,7 @@ bool StopCondition::CheckCyclicCondition(Real &value)
 bool StopCondition::Initialize()
 {
    #ifdef DEBUG_STOPCOND_INIT
-   MessageInterface::ShowMessage("StopCondition::Initialize() entered\n");
+   MessageInterface::ShowMessage("\nStopCondition::Initialize() entered\n");
    #endif
    
    mInitialized = false;
@@ -1074,6 +1074,9 @@ bool StopCondition::Initialize()
    // clear local parameters
    if (mEccParam != NULL)
    {
+      #ifdef DEBUG_STOPCOND_INIT
+      MessageInterface::ShowMessage("   Deleting mEccParam<%p>...\n", mEccParam);
+      #endif
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
          (mEccParam, mEccParam->GetName(), "StopCondition::Initialize()",
@@ -1084,6 +1087,9 @@ bool StopCondition::Initialize()
    
    if (mRmagParam != NULL)
    {
+      #ifdef DEBUG_STOPCOND_INIT
+      MessageInterface::ShowMessage("   Deleting mRmagParam<%p>...\n", mRmagParam);
+      #endif
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
          (mRmagParam, mRmagParam->GetName(), "StopCondition::Initialize()",
@@ -1097,6 +1103,9 @@ bool StopCondition::Initialize()
    
    std::string paramTypeName = mStopParam->GetTypeName();
    
+   #ifdef DEBUG_STOPCOND_INIT
+   MessageInterface::ShowMessage("   Calling Validate()\n");
+   #endif
    if (Validate())
    {
       if (mStopParamType == "Apoapsis" ||
@@ -1114,7 +1123,13 @@ bool StopCondition::Initialize()
       {
          if (rhsWrapper != NULL)
          {
-            if (rhsWrapper->GetRefObject() != NULL)
+            GmatBase *refObj = rhsWrapper->GetRefObject();
+            #ifdef DEBUG_STOPCOND_INIT
+            MessageInterface::ShowMessage
+               ("   rhsWrapper->GetRefObject()=<%p>'%s'\n", refObj,
+                refObj ? refObj->GetName().c_str() : "NULL");
+            #endif
+            if (refObj != NULL)
                mAllowGoalParam = false;
             
             initialGoalValue = rhsWrapper->EvaluateReal();
@@ -1187,9 +1202,10 @@ bool StopCondition::Validate()
    #ifdef DEBUG_STOPCOND_INIT   
    MessageInterface::ShowMessage
       ("StopCondition::Validate() entered, mUseInternalEpoch=%d, mEpochParam=<%p>, "
-       "mStopParam=<%p>, mAllowGoalParam=%d, mGoalParam=<%p>, rhsWrapper=<%p>\n",
+       "mStopParam=<%p>\n   mAllowGoalParam=%d, mGoalParam=<%p>'%s', rhsWrapper=<%p>'%s'\n",
        mUseInternalEpoch, mEpochParam, mStopParam, mAllowGoalParam, mGoalParam,
-       rhsWrapper);
+       mGoalParam ? mGoalParam->GetName().c_str() : "NULL", rhsWrapper,
+       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
    #endif
    
    // check on epoch parameter
@@ -1924,8 +1940,11 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
 {
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("StopCondition::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+      ("StopCondition::RenameRefObject() type=%s, oldName=%s, newName=%s\n   "
+       "lhsWrapper=<%p>'%s', rhsWrapper=<%p>'%s'\n", GetObjectTypeString(type).c_str(),
+       oldName.c_str(), newName.c_str(),
+       lhsWrapper, lhsWrapper ? lhsWrapper->GetDescription().c_str() : "NULL",
+       rhsWrapper, rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
    #endif
    
    if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
@@ -1960,6 +1979,37 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
    if (pos != rhsString.npos)
       rhsString = GmatStringUtil::ReplaceName(rhsString, oldName, newName);
    
+   // Rename wrappers
+   if (lhsWrapper)
+   {
+      std::string lhsDesc = lhsWrapper->GetDescription();
+      std::string nameToUse = GmatStringUtil::GetArrayName(lhsDesc, "()");
+      if (nameToUse == oldName)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   Calling lhsWrapper->RenameObject(), wrapperType=%d\n",
+             lhsWrapper->GetWrapperType());
+         #endif
+         lhsWrapper->RenameObject(oldName, newName);
+      }
+   }
+   
+   if (rhsWrapper)
+   {
+      std::string rhsDesc = rhsWrapper->GetDescription();
+      std::string nameToUse = GmatStringUtil::GetArrayName(rhsDesc, "()");
+      if (nameToUse == oldName)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   Calling rhsWrapper->RenameObject(), wrapperType=%d\n",
+             rhsWrapper->GetWrapperType());
+         #endif
+         rhsWrapper->RenameObject(oldName, newName);
+      }
+   }
+   
    return true;
 }
 
@@ -1980,9 +2030,10 @@ StopCondition::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    #ifdef DEBUG_STOPCOND_OBJ
    MessageInterface::ShowMessage
-      ("StopCondition::GetRefObjectNameArray() entered, type=%d, mAllowGoalParam=%d, "
-       "lhsWrapper=<%p>, rhsWrapper=<%p>\n", type, mAllowGoalParam, lhsWrapper,
-       rhsWrapper);
+      ("StopCondition::GetRefObjectNameArray() entered, type=%d, mAllowGoalParam=%d\n   "
+       "lhsWrapper=<%p>'%s', rhsWrapper=<%p>'%s'\n", type, mAllowGoalParam, lhsWrapper,
+       lhsWrapper ? lhsWrapper->GetDescription().c_str() : "NULL", rhsWrapper,
+       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
    #endif
    
    mAllRefObjectNames.clear();
@@ -1990,7 +2041,7 @@ StopCondition::GetRefObjectNameArray(const Gmat::ObjectType type)
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::PARAMETER)
    {
       mAllRefObjectNames.push_back(mStopParamName);
-      if (mAllowGoalParam || !GmatStringUtil::IsNumber(rhsString) && rhsWrapper != NULL)
+      if (mAllowGoalParam || (!GmatStringUtil::IsNumber(rhsString) && rhsWrapper != NULL))
          mAllRefObjectNames.push_back(rhsString);
    }
    
@@ -2191,7 +2242,7 @@ Real StopCondition::SetRealParameter(const Integer id, const Real value)
    case BASE_EPOCH:
       mBaseEpoch = value;
 
-      if (mAllowGoalParam && mGoalParam != NULL || rhsWrapper != NULL)
+      if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
       {
          if (mAllowGoalParam)
             initialGoalValue = mGoalParam->EvaluateReal();
@@ -2344,7 +2395,7 @@ Real StopCondition::GetStopValue()
 Real StopCondition::GetStopDifference()
 {
    Real goalValue, achievedValue;
-   if (mAllowGoalParam && mGoalParam || rhsWrapper != NULL)
+   if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
    {
       if (mAllowGoalParam)
          goalValue = mGoalParam->EvaluateReal();
@@ -2388,7 +2439,7 @@ Real StopCondition::GetStopDifference()
 Real StopCondition::GetStopGoal()
 {
    Real goalValue;
-   if (mAllowGoalParam && mGoalParam || rhsWrapper != NULL)
+   if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
    {
       if (mAllowGoalParam)
          goalValue = mGoalParam->EvaluateReal();
@@ -2615,7 +2666,7 @@ void StopCondition::UpdateBuffer()
    previousAchievedValue = mStopParam->EvaluateReal();
 
    // evaluate goal in case needed for cyclics
-   if (mAllowGoalParam && mGoalParam != NULL || rhsWrapper != NULL)
+   if ((mAllowGoalParam && mGoalParam != NULL) || rhsWrapper != NULL)
    {
       if (mAllowGoalParam)
          initialGoalValue = mGoalParam->EvaluateReal();
