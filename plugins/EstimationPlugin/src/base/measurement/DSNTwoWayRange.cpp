@@ -640,12 +640,20 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
       // 1. Get the range from the down link
       Rvector3 r1, r2;
+	  Real t1, t2;
       r1 = downlinkLeg.GetPosition(participants[0]);
       r2 = downlinkLeg.GetPosition(participants[1]);
+	  t1 = downlinkLeg.GetEventData((GmatBase*) participants[0]).epoch;
+	  t2 = downlinkLeg.GetEventData((GmatBase*) participants[1]).epoch;
+	  Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
-         MessageInterface::ShowMessage("   Ground station position in FK5: r1 = (%f, %f, %f)km\n", r1.Get(0), r1.Get(1), r1.Get(2));
-         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r2 = (%f, %f, %f)km\n", r2.Get(0), r2.Get(1), r2.Get(2));
+         MessageInterface::ShowMessage("   Ground station position in FK5: r1 = (%f, %f, %f)km  at epoch = %18.12lf\n", r1.Get(0), r1.Get(1), r1.Get(2), t1);
+         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r2 = (%f, %f, %f)km  at epoch = %18.12lf\n", r2.Get(0), r2.Get(1), r2.Get(2), t2);
+		 MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to FK5 coordinate system at epoch = %18.12lf:\n", t1);
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(0,0), mt(0,1), mt(0,2));
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(1,0), mt(1,1), mt(1,2));
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(2,0), mt(2,1), mt(2,2));
       #endif
       Rvector3 downlinkVector = r2 - r1;		// rVector = r2 - r1;
       downlinkRange = downlinkVector.GetMagnitude();
@@ -678,12 +686,20 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
       // 3. Get the range from the uplink
       Rvector3 r3, r4;
+	  Real t3, t4;
       r3 = uplinkLeg.GetPosition(participants[0]);
       r4 = uplinkLeg.GetPosition(participants[1]);
+	  t3 = uplinkLeg.GetEventData((GmatBase*) participants[0]).epoch;
+	  t4 = uplinkLeg.GetEventData((GmatBase*) participants[1]).epoch;
+	  Rmatrix33 mt1 = uplinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     MessageInterface::ShowMessage("3. Get uplink leg range:\n");
-         MessageInterface::ShowMessage("   Ground station position in FK5: r3 = (%f, %f, %f)km\n", r3.Get(0), r3.Get(1), r3.Get(2));
-         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r4 = (%f, %f, %f)km\n", r4.Get(0), r4.Get(1), r4.Get(2));
+         MessageInterface::ShowMessage("   Spacecraft position in FK5    : r4 = (%f, %f, %f)km   at epoch = %18.12lf\n", r4.Get(0), r4.Get(1), r4.Get(2), t4);
+         MessageInterface::ShowMessage("   Ground station position in FK5: r3 = (%f, %f, %f)km   at epoch = %18.12lf\n", r3.Get(0), r3.Get(1), r3.Get(2), t3);
+		 MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to FK5 coordinate system at epoch = %18.12lf:\n", t3);
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(0,0), mt1(0,1), mt1(0,2));
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(1,0), mt1(1,1), mt1(1,2));
+		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(2,0), mt1(2,1), mt1(2,2));
       #endif
       Rvector3 uplinkVector = r4 - r3;
       uplinkRange = uplinkVector.GetMagnitude();
