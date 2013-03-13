@@ -122,6 +122,7 @@ public:
    /// Methods to get/set the epoch and the reference coordinate system name
    Real               GetEpoch() const;
    void               SetEpoch(Real toEpoch); // A1Mjd time
+   void               NeedsReinitialization();
 
    virtual bool       SetReferenceCoordinateSystemName(
                          const std::string &refName);
@@ -152,6 +153,10 @@ public:
    /// the initial attitude conditions is allowed for this attitude model
    bool                SetInitialAttitudeAllowed() const;
    
+   /// Has this attitude been initialized?
+   bool                IsInitialized()
+                       { return isInitialized; };
+
    /// methods to access object parameters
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,

@@ -32,7 +32,8 @@
 #include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"
 #include "TimeTypes.hpp"
-#include "CSFixed.hpp"               // for default attitude creation
+#include "CSFixed.hpp"               // for default and command mode attitude creation
+#include "Spinner.hpp"               // for command mode attitude creation
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
@@ -274,6 +275,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    coordSysSet          (false),
    epochSet             (false),
    spacecraftId         ("SatId"),
+   attitudeModel        ("CoordinateSystemFixed"),
    attitude             (NULL),
    totalMass            (850.0),
    initialDisplay       (false),
@@ -463,6 +465,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    epochSet             (a.epochSet),
    coordSysMap          (a.coordSysMap),
    spacecraftId         (a.spacecraftId),
+   attitudeModel        (a.attitudeModel),
    coordConverter       (a.coordConverter),
    totalMass            (a.totalMass),
    initialDisplay       (false),
@@ -562,6 +565,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    epochSet             = a.epochSet;
    coordSysMap          = a.coordSysMap;
    spacecraftId         = a.spacecraftId;
+   attitudeModel        = a.attitudeModel;
    solarSystem          = a.solarSystem;         // need to copy
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
@@ -1592,6 +1596,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          #endif
       }
       attitude = (Attitude*) obj;
+      attitudeModel = attitude->GetAttitudeModelName();
       ownedObjectCount++;
       // set epoch ...
       #ifdef DEBUG_SC_ATTITUDE
@@ -2254,7 +2259,14 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
-         return attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
+      {
+         // We have to set the epoch on the attitude each time we set a
+         // state element
+         bool attOK = false;
+         attOK =  attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
+         if (attOK)  attitude->SetEpoch(state.GetEpoch());
+         return attOK;
+      }
 
    if (id == CARTESIAN_X )
    {
@@ -2395,7 +2407,14 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    // first (really) see if it's a parameter for an owned object (i.e. attitude)
    if (GetParameterID(label) >= ATTITUDE_ID_OFFSET)
       if (attitude)
-         return attitude->SetRealParameter(label, value);
+      {
+         // We have to set the epoch on the attitude each time we set a
+         // state element
+         bool attOK = false;
+         attOK =  attitude->SetRealParameter(label, value);
+         if (attOK)  attitude->SetEpoch(state.GetEpoch());
+         return attOK;
+      }
 
    // We are currently not allowing users to set anomaly other than the True
    // Anomaly ****** to be modified in the future ******
@@ -2800,6 +2819,81 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          id, GetParameterText(id).c_str(), value.c_str());
    #endif
 
+   if (id == ATTITUDE)
+   {
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage("Attitude model type is currently %s\n", attitudeModel.c_str());
+         MessageInterface::ShowMessage("Now setting Spacecraft %s attitude model type to \"%s\"\n",
+               instanceName.c_str(), value.c_str());
+      #endif
+      // strip quotes off of the string here - particularly in Command Mode, when the
+      // Assignment command treats it as a string
+      std::string newAttType = GmatStringUtil::RemoveOuterString(value, "'", "'");
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage("Attitude model type after stripping quotes is: %s\n",
+               newAttType.c_str());
+      #endif
+      Attitude *newAtt;  // NOTE - we need a more generic way to do this since users may add
+                         // attitude models via plugins!!!
+      if (attitudeModel != newAttType)
+      {
+         if (newAttType == "Spinner")
+            newAtt = new Spinner();
+         else if (newAttType == "CoordinateSystemFixed")
+            newAtt = new CSFixed();
+         #ifdef __USE_SPICE__
+         else if (newAttType == "SpiceAttitude")
+            newAtt = new SpiceAttitude();
+         #endif
+         else
+         {
+            std::string errmsg = "Cannot create Attitude object of unknown attitude type \"";
+            errmsg += newAttType + "\"\n";
+            throw SpaceObjectException(errmsg);
+         }
+         #ifdef DEBUG_SC_ATTITUDE
+            MessageInterface::ShowMessage("Created an attitude of type %s\n",
+                  (newAtt->GetTypeName()).c_str());
+         #endif
+         if (!newAtt)
+         {
+            std::string errmsg = "Unable to create an Attitude of type ";
+            errmsg += value + "\n";
+            throw SpaceObjectException(errmsg);
+         }
+         if (attitude != NULL)
+         {
+            #ifdef DEBUG_SC_ATTITUDE
+               MessageInterface::ShowMessage("   new attitude is of type %s\n",
+                     newAtt->GetAttitudeModelName().c_str());
+            #endif
+            delete attitude;
+            ownedObjectCount--;
+         }
+         #ifdef __USE_SPICE__
+         // If it's a SPICE attitude, set the object data
+         // @todo we may need to add some kind of AddData method to Attitude
+         // so that plugin attitudes may implement it for setup
+         if (newAtt->IsOfType("SpiceAttitude"))
+         {
+            SpiceAttitude *spiceAtt = (SpiceAttitude*) newAtt;
+            spiceAtt->SetObjectID(instanceName, naifId, naifIdRefFrame);
+            for (Integer ii = 0; ii < (Integer) attitudeSpiceKernelNames.size(); ii++)
+               spiceAtt->SetStringParameter("AttitudeKernelName", attitudeSpiceKernelNames[ii], ii);
+            for (Integer ii = 0; ii < (Integer) scClockSpiceKernelNames.size(); ii++)
+               spiceAtt->SetStringParameter("SCClockKernelName", scClockSpiceKernelNames[ii], ii);
+            for (Integer ii = 0; ii < (Integer) frameSpiceKernelNames.size(); ii++)
+               spiceAtt->SetStringParameter("FrameKernelName", frameSpiceKernelNames[ii], ii);
+            }
+         #endif
+         newAtt->SetEpoch(state.GetEpoch()); // correct? do we want to do this?  for Spinner?
+         newAtt->NeedsReinitialization();
+         attitude = newAtt;
+         ownedObjectCount++;
+         attitudeModel = value;
+      }
+      return true;
+   }
    // this is also handled in SpacePoint - we catch it here to tailor the warning message
    if (id == J2000_BODY_NAME)
    {
@@ -3254,7 +3348,10 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
                "------ Now calling attitude to SET real parameter for id =  %d"
                ", index = %d,  and value = %12.10f\n", id, index, value);
             #endif
-            return attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index);
+            bool attOK = false;
+            attOK =  attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index);
+            if (attOK)  attitude->SetEpoch(state.GetEpoch());
+            return attOK;
          }
       }
    }
@@ -4535,6 +4632,7 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
              "deleting attitude of " + GetName(), this);
          #endif
          delete attitude;
+         attitude = NULL;
          ownedObjectCount--;
          #ifdef DEBUG_SC_OWNED_OBJECT
          MessageInterface::ShowMessage
@@ -4615,7 +4713,13 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
        " thruster count = %d\n", this, GetName().c_str(), att, tnks.size(), thrs.size());
    #endif
 
-   attitude = NULL;
+   // We can't assume that the attitude has been deleted previous to this call
+//   if (attitude)
+//   {
+//      delete attitude;   //since Attitudes are NOT configured items at this time
+      attitude = NULL;
+//      ownedObjectCount--;
+//   }
 
    // clone the attitude
    if (att)

@@ -396,6 +396,8 @@ protected:
    /// Spacecraft ID Used in estimation, measurement data files, etc
    std::string       spacecraftId;
 
+   /// The model type of the attitude
+   std::string       attitudeModel;
    /// Pointer to the object that manages the attitude of the spacecraft
    Attitude          *attitude;
 

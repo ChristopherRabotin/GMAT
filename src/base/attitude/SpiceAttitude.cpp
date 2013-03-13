@@ -690,6 +690,8 @@ const StringArray& SpiceAttitude::GetStringArrayParameter(const Integer id) cons
 //------------------------------------------------------------------------------
 void SpiceAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
+   if (!isInitialized || needsReinit)  Initialize();
+
    #ifdef __USE_SPICE__
       reader->GetTargetOrientation(scName, naifId, refFrameNaifId, atTime, dcm, angVel);
    #else

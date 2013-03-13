@@ -50,6 +50,10 @@
 Spinner::Spinner(const std::string &itsName) : 
    Kinematic("Spinner", itsName)
 {
+   #ifdef DEBUG_SPINNER_INIT
+   MessageInterface::ShowMessage("------- Entering Spinner (constructor)\n");
+   #endif
+
    parameterCount    = SpinnerParamCount;
    objectTypeNames.push_back("Spinner");
    attitudeModelName     = "Spinner";
@@ -69,6 +73,9 @@ Spinner::Spinner(const std::string &itsName) :
 Spinner::Spinner(const Spinner& att) :
    Kinematic(att)
 {
+   #ifdef DEBUG_SPINNER_INIT
+   MessageInterface::ShowMessage("------- Entering Spinner (copy constructor)\n");
+   #endif
 }
  
 //------------------------------------------------------------------------------
@@ -115,54 +122,29 @@ Spinner::~Spinner()
 bool Spinner::Initialize()
 {
    #ifdef DEBUG_SPINNER_INIT
-   MessageInterface::ShowMessage(
-   "------- Entering Spinner::Initialize, and calling Kinematic::Initialize\n");
+      MessageInterface::ShowMessage(
+      "------- Entering Spinner::Initialize, and calling Kinematic::Initialize\n");
    #endif
    Kinematic::Initialize();
    #ifdef DEBUG_SPINNER_INIT
-   MessageInterface::ShowMessage(
-   "------- after calling Kinematic::Initialize, angVel = %.12f %.12f %.12f\n",
-   angVel[0] * GmatMathUtil::DEG_PER_RAD,angVel[1] * GmatMathUtil::DEG_PER_RAD, 
-   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+      MessageInterface::ShowMessage(
+      "------- after calling Kinematic::Initialize, angVel = %.12f %.12f %.12f\n",
+      angVel[0] * GmatMathConstants::DEG_PER_RAD,angVel[1] * GmatMathConstants::DEG_PER_RAD,
+      angVel[2] * GmatMathConstants::DEG_PER_RAD);
    #endif
    Rmatrix33 RiI;
-   try
-   {
-      // Compute the rotation matrix from inertial to Fi at the epoch time, t0
-      Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
-      Rvector bogus2 = refCS->FromBaseSystem(epoch, bogus, true);  // @todo - do we need FromMJ2000Eq here?
-      RiI  = (refCS->GetLastRotationMatrix()).Transpose();
-   }
-   catch (BaseException &)
-   {
-      #ifdef DEBUG_SPINNER_INIT
-      MessageInterface::ShowMessage(
-      "------- error initializing rotation matrix for Spinner\n");
-      #endif
-   }
-   #ifdef DEBUG_SPINNER_INIT
-   std::stringstream RBiStream;
-   RBiStream << RBi << std::endl;
-   MessageInterface::ShowMessage(
-   "------- RBi = %s\n", (RBiStream.str()).c_str());
-   std::stringstream RiIStream;
-   RiIStream << RiI << std::endl;
-   MessageInterface::ShowMessage(
-   "------- RiI = %s\n", (RiIStream.str()).c_str());
-   #endif
-   
-   RB0I           = RBi * RiI;
+   RB0I           = RBi;
    //angVel         = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
    
    #ifdef DEBUG_SPINNER_INIT
-   std::stringstream RB0IStream;
-   RB0IStream << RB0I << std::endl;
-   MessageInterface::ShowMessage(
-   "------- RB0I = %s\n", (RB0IStream.str()).c_str());
-   std::stringstream IBBStream;
-   IBBStream << angVel * GmatMathUtil::DEG_PER_RAD << std::endl;
-   MessageInterface::ShowMessage(
-   "------- angVel = %s\n", (IBBStream.str()).c_str());
+      std::stringstream RB0IStream;
+      RB0IStream << RB0I << std::endl;
+      MessageInterface::ShowMessage(
+      "------- RB0I = %s\n", (RB0IStream.str()).c_str());
+      std::stringstream IBBStream;
+      IBBStream << angVel * GmatMathConstants::DEG_PER_RAD << std::endl;
+      MessageInterface::ShowMessage(
+      "------- angVel = %s\n", (IBBStream.str()).c_str());
    #endif
    
    initialwMag    = angVel.GetMagnitude();
@@ -209,15 +191,21 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #ifdef DEBUG_SPINNER
    MessageInterface::ShowMessage(
    "Entering Spinner::Compute ... angVel = %.12f %.12f %.12f\n",
-   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
-   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   angVel[0] * GmatMathConstants::DEG_PER_RAD, angVel[1] * GmatMathConstants::DEG_PER_RAD,
+   angVel[2] * GmatMathConstants::DEG_PER_RAD);
+   MessageInterface::ShowMessage("      isInitialized = %s\n", (isInitialized? "true" : "false"));
+   MessageInterface::ShowMessage("      needsReinit   = %s\n", (needsReinit? "true" : "false"));
    #endif
-   if (isInitialized && needsReinit) Initialize();
+   if (!isInitialized || needsReinit) Initialize();
    // now, RB0I and currentwIBB have been computed by Initialize
    
    // Calculate RBIt, where t = atTime
    Real      dt             = (atTime - epoch) * 
                               GmatTimeConstants::SECS_PER_DAY;
+   #ifdef DEBUG_SPINNER
+   MessageInterface::ShowMessage(
+   "In Spinner::Compute ... atTime = %.12f and dt = %.12f\n", atTime, dt);
+   #endif
    // Compute the Euler angle
    Real      theEAngle      = initialwMag * dt;
    Rmatrix33 RBB0t          = Attitude::EulerAxisAndAngleToDCM(
@@ -233,8 +221,8 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #ifdef DEBUG_SPINNER
    MessageInterface::ShowMessage(
    "EXITING Spinner::Compute ... angVel = %.12f %.12f %.12f\n",
-   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
-   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   angVel[0] * GmatMathConstants::DEG_PER_RAD, angVel[1] * GmatMathConstants::DEG_PER_RAD,
+   angVel[2] * GmatMathConstants::DEG_PER_RAD);
    #endif
 }
 
