@@ -76,9 +76,8 @@
           <row>
             <entry><guilabel>DerivativeMethod</guilabel></entry>
 
-            <entry><para> Allows the user to choose between one-sided and
-            central differencing for numerically determining the derivative.
-            </para> <variablelist>
+            <entry><para> Chooses between one-sided and central differencing
+            for numerically determining the derivative. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -136,13 +135,13 @@
           <row>
             <entry><guilabel>MaximumIterations</guilabel></entry>
 
-            <entry><para>Allows the user to set the maximum number of nominal
-            passes the <guilabel>DifferentialCorrector</guilabel> is allowed
-            to take during the attempt to find a solution. If the maximum
-            iterations is reached, GMAT exits the target loop and continues to
-            the next command in the mission sequence. In this case, the
-            objects retain their states as of the last nominal pass through
-            the targeting loop. </para> <variablelist>
+            <entry><para>Sets the maximum number of nominal passes the
+            <guilabel>DifferentialCorrector</guilabel> is allowed to take
+            during the attempt to find a solution. If the maximum iterations
+            is reached, GMAT exits the target loop and continues to the next
+            command in the mission sequence. In this case, the objects retain
+            their states as of the last nominal pass through the targeting
+            loop. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -196,10 +195,10 @@
           <row>
             <entry><guilabel>ReportFile</guilabel></entry>
 
-            <entry><para> Allows the user to specify the path and file name
-            for the <guilabel>DifferentialCorrector</guilabel> report.  The
-            report is only generated if <guilabel>ShowProgress</guilabel> is
-            set to true.  </para> <variablelist>
+            <entry><para> Specifies the path and file name for the
+            <guilabel>DifferentialCorrector</guilabel> report.  The report is
+            only generated if <guilabel>ShowProgress</guilabel> is set to
+            true.  </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -255,18 +254,18 @@
           <row>
             <entry><guilabel>ReportStyle</guilabel></entry>
 
-            <entry><para>Allows the user to control the amount and type of
-            information written to the file defined in the
-            <guilabel>ReportFile</guilabel> field. Currently, the
-            <guilabel>Normal</guilabel> and <guilabel>Concise</guilabel>
-            options contain the same information: the Jacobian, the inverse of
-            the Jacobian, the current values of the control variables, and
-            achieved and desired values of the constraints.
-            <guilabel>Verbose</guilabel> contains values of the perturbation
-            variables in addition to the data for <guilabel>Normal</guilabel>
-            and <guilabel>Concise</guilabel>. <guilabel>Debug</guilabel>
-            contains detailed script snippets at each iteration for objects
-            that have control variables. </para> <variablelist>
+            <entry><para>Controls the amount and type of information written
+            to the file defined in the <guilabel>ReportFile</guilabel> field.
+            Currently, the <guilabel>Normal</guilabel> and
+            <guilabel>Concise</guilabel> options contain the same information:
+            the Jacobian, the inverse of the Jacobian, the current values of
+            the control variables, and achieved and desired values of the
+            constraints. <guilabel>Verbose</guilabel> contains values of the
+            perturbation variables in addition to the data for
+            <guilabel>Normal</guilabel> and <guilabel>Concise</guilabel>.
+            <guilabel>Debug</guilabel> contains detailed script snippets at
+            each iteration for objects that have control variables. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
