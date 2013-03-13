@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="VF13adOptimizer"
+<refentry version="5.0" xml:id="VF13adOptimizer"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,35 +24,35 @@
   <refnamediv>
     <refname>VF13adOptimizer</refname>
 
-    <refpurpose>
-      The Sequential Quadratic Processor (SQP) optimizer, VF13ad, used to optimize mission parameters
-    </refpurpose>
+    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer, VF13ad,
+    used to optimize mission parameters</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>VF13ad</guilabel> optimizer is a SQP-based Nonlinear Programming solver available in the Harwell Subroutine Library. 
-      <guilabel>VF13ad</guilabel> performs nonlinear constrained optimization and supports both linear and nonlinear constraints.  To use this solver, 
-      you must configure the solver options including convergence criteria, maximum iterations, and gradient computation method.  
-      In the mission sequence, you implement an optimizer such as  VF13ad by using an  <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> sequence.  Within this 
-      sequence, you define optimization variables by using the <guilabel>Vary</guilabel> command, and define cost and constraints by using the <guilabel>Minimize</guilabel> and 
-      <guilabel>NonlinearConstraint</guilabel> commands respectively.
-    </para>
+    <para>The <guilabel>VF13ad</guilabel> optimizer is a SQP-based Nonlinear
+    Programming solver available in the Harwell Subroutine Library.
+    <guilabel>VF13ad</guilabel> performs nonlinear constrained optimization
+    and supports both linear and nonlinear constraints. To use this solver,
+    you must configure the solver options including convergence criteria,
+    maximum iterations, and gradient computation method. In the mission
+    sequence, you implement an optimizer such as VF13ad by using an
+    <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel> sequence.
+    Within this sequence, you define optimization variables by using the
+    <guilabel>Vary</guilabel> command, and define cost and constraints by
+    using the <guilabel>Minimize</guilabel> and
+    <guilabel>NonlinearConstraint</guilabel> commands respectively.</para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -65,22 +64,15 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>ReportFile</guilabel>
-            </entry>
+            <entry><guilabel>FeasibilityTolerance</guilabel></entry>
 
-            <entry>
-              <para>
-                The ReportFile field contains the path and file name of the report file.
-              </para>
-              <variablelist>
+            <entry><para> Specifies the accuracy to which you want constraints
+            to be satisfied. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -88,10 +80,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-
-
-                    </para>
+                    <para>Real &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -99,9 +88,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -109,9 +96,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Any user-defined file name
-                    </para>
+                    <para>1e-3</para>
                   </listitem>
                 </varlistentry>
 
@@ -119,9 +104,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -132,28 +115,19 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>MaximumIterations</guilabel>
-            </entry>
+            <entry><guilabel>MaximumIterations</guilabel></entry>
 
-            <entry>
-              <para>
-                The MaximumIterations field allows the user to set the
-                maximum allowable number of nominal passes through the Solver Control Sequence.
-              </para>
-              <variablelist>
+            <entry><para>Specifies the maximum allowable number of nominal
+            passes through the Solver Control Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -161,9 +135,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer &gt; 0
-                    </para>
+                    <para>Integer &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -171,9 +143,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -181,9 +151,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      200
-                    </para>
+                    <para>200</para>
                   </listitem>
                 </varlistentry>
 
@@ -191,9 +159,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -204,27 +170,19 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>FeasibilityTolerance</guilabel>
-            </entry>
+            <entry><guilabel>ReportFile</guilabel></entry>
 
-            <entry>
-              <para>
-                The FeasibilityTolerance field specifies the accuracy with which the user desires a constraint to be satisfied.
-              </para>
-              <variablelist>
+            <entry><para> Contains the path and file name of the report file.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Real
-                    </para>
+                    <para>FileName</para>
                   </listitem>
                 </varlistentry>
 
@@ -232,9 +190,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real &gt; 0
-                    </para>
+                    <para>Any user-defined file name</para>
                   </listitem>
                 </varlistentry>
 
@@ -242,9 +198,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -252,9 +206,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      1e-3
-                    </para>
+                    <para>VF13adVF13ad1.data</para>
                   </listitem>
                 </varlistentry>
 
@@ -262,9 +214,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -275,27 +225,27 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Tolerance</guilabel>
-            </entry>
+            <entry><guilabel>ReportStyle</guilabel></entry>
 
-            <entry>
-              <para>
-                The Tolerance field specifies the measure the optimizer will use to determine when an optimal solution has been found based on the value of the goal set in a Minimize command. 
-              </para>
-              <variablelist>
+            <entry><para>Determines the amount and type of data written to the
+            message window and to the report specified by field
+            <guilabel>ReportFile</guilabel> for each iteration of the solver
+            (When <guilabel>ShowProgress</guilabel> is true).  Currently, the
+            <literal>Normal</literal>, <literal>debug</literal>, and
+            <literal>Concise</literal> options contain the same information:
+            the values for the control variables, the constraints, and the
+            objective function.  In addition to this information, the
+            <literal>Verbose</literal> option also contains values of the
+            optimizer-scaled control variables.  </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Real
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -304,7 +254,7 @@
 
                   <listitem>
                     <para>
-                      Real &gt; 0
+                      <literal>Normal, Concise, Verbose, Debug</literal>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -313,9 +263,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -323,9 +271,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      1e-5
-                    </para>
+                    <para>DefaultValue</para>
                   </listitem>
                 </varlistentry>
 
@@ -333,9 +279,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>Normal</para>
                   </listitem>
                 </varlistentry>
 
@@ -346,30 +290,24 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ReportStyle</guilabel>
-            </entry>
+            <entry><guilabel>ShowProgress</guilabel></entry>
 
-            <entry>
-              <para>
-                The ReportStyle field determines the amount and type of data written to the message window and to the report specified by field 
-                ReportFile for each iteration of the solver (When ShowProgress is true).  Currently, the Normal, debug, and Concise options contain the same 
-                information: the values for the control variables, the constraints, and the objective function.  
-                In addition to this information, the Verbose option also contains values of the optimizer-scaled control variables. 
-              </para>
-              <variablelist>
+            <entry><para>Determines whether data pertaining to iterations of
+            the solver is both displayed in the message window and written to
+            the report specified by the <guilabel>ReportFile</guilabel> field.
+            When <guilabel>ShowProgress</guilabel> is true, the amount of
+            information contained in the message window and written in the
+            report is controlled by the <guilabel>ReportStyle</guilabel>
+            field. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -377,9 +315,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Normal, Concise, Verbose, Debug
-                    </para>
+                    <para>true, false</para>
                   </listitem>
                 </varlistentry>
 
@@ -387,9 +323,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -397,9 +331,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultValue
-                    </para>
+                    <para>TRUE</para>
                   </listitem>
                 </varlistentry>
 
@@ -407,9 +339,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      Normal
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -420,29 +350,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ShowProgress</guilabel>
-            </entry>
+            <entry><guilabel>Tolerance</guilabel></entry>
 
-            <entry>
-              <para>
-                The ShowProgress field determines whether data pertaining to iterations of the solver is both displayed in the message window and 
-                written to the report specified by the ReportFile field. When ShowProgress is true, the amount of information contained in the message
-                window and written in the report is controlled by the ReportStyle field.
-              </para>
-              <variablelist>
+            <entry><para> Specifies the measure the optimizer will use to
+            determine when an optimal solution has been found based on the
+            value of the goal set in a Minimize command.  </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -450,9 +372,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true, false
-                    </para>
+                    <para>Real &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -460,9 +380,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -470,9 +388,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      TRUE
-                    </para>
+                    <para>1e-5</para>
                   </listitem>
                 </varlistentry>
 
@@ -480,9 +396,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -493,28 +407,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UseCentralDifferences</guilabel>
-            </entry>
+            <entry><guilabel>UseCentralDifferences</guilabel></entry>
 
-            <entry>
-              <para>
-                The UseCentralDifferences field allows the user to choose whether or not to use central differencing for numerically 
-                determining the derivative. For the default, 'false' value of this field, forward differencing is used to calculate the derivative. 
-              </para>
-              <variablelist>
+            <entry><para>Allows you to choose whether or not to use central
+            differencing for numerically determining the derivative. For the
+            default, 'false' value of this field, forward differencing is used
+            to calculate the derivative.  </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      DataType
-                    </para>
+                    <para>DataType</para>
                   </listitem>
                 </varlistentry>
 
@@ -522,9 +429,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true, false
-                    </para>
+                    <para>true, false</para>
                   </listitem>
                 </varlistentry>
 
@@ -532,9 +437,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -542,9 +445,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      false
-                    </para>
+                    <para>false</para>
                   </listitem>
                 </varlistentry>
 
@@ -552,9 +453,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -565,8 +464,7 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -576,58 +474,51 @@
   <refsection>
     <title>GUI</title>
 
-    <para>
-      The <guilabel>VF13ad</guilabel> dialog box allows you to specify properties of a <guilabel>VF13ad</guilabel> such as as maximum iterations, 
-      cost function tolerance, feasibility tolerance, choice of reporting options, and choice of whether 
-      or not to use the central difference derivative method.
-    </para>
+    <para>The <guilabel>VF13ad</guilabel> dialog box allows you to specify
+    properties of a <guilabel>VF13ad</guilabel> such as as maximum iterations,
+    cost function tolerance, feasibility tolerance, choice of reporting
+    options, and choice of whether or not to use the central difference
+    derivative method.</para>
 
-    <para>
-      To create a <guilabel>VF13ad</guilabel> resource, navigate to the <guilabel>Resources</guilabel> tree, expand the <guilabel>Solvers</guilabel> folder, highlight and then 
-      right-click on the <guilabel>Optimizers</guilabel> sub-folder, point to Add and then select <guilabel>VF13AD</guilabel>. This will create a new <guilabel>VF13ad</guilabel> resource, 
-      VF13ad1. Double-click on VF13ad1 to bring up the <guilabel>VF13ad</guilabel> dialog box shown below.
-    </para>
+    <para>To create a <guilabel>VF13ad</guilabel> resource, navigate to the
+    <guilabel>Resources</guilabel> tree, expand the
+    <guilabel>Solvers</guilabel> folder, highlight and then right-click on the
+    <guilabel>Optimizers</guilabel> sub-folder, point to <guilabel>Add
+    </guilabel>and then select <guilabel>VF13AD</guilabel>. This will create a
+    new <guilabel>VF13ad</guilabel> resource, VF13ad1. Double-click on VF13ad1
+    to bring up the <guilabel>VF13ad</guilabel> dialog box shown below.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_VF13adOptimizer_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para>
-      A screenshot of the GUI (above) along with a text
-      description.
-    </para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>
-        VF13ad Optimizer Availability
-      </title>
+      <title>VF13ad Optimizer Availability</title>
 
-      <para>
-        This optimizer is not included as part of the nominal GMAT installation and  
-        is only available if you have created and installed the VF13ad plug-in.
-      </para>
+      <para>This optimizer is not included as part of the nominal GMAT
+      installation and is only available if you have created and installed the
+      VF13ad plug-in.</para>
     </refsection>
 
     <refsection>
       <title>Object and Command Interactions</title>
 
-      <para>
-        The <guilabel>VF13ad</guilabel> object can only be used in the context of optimization-type commands. Please see the 
-        documentation for <guilabel>Optimize</guilabel>, <guilabel>Vary</guilabel>, <guilabel>NonlinearConstraint</guilabel>, 
-        and <guilabel>Minimize</guilabel> for more information and worked examples.
-      </para>
+      <para>The <guilabel>VF13ad</guilabel> object can only be used in the
+      context of optimization-type commands. Please see the documentation for
+      <guilabel>Optimize</guilabel>, <guilabel>Vary</guilabel>,
+      <guilabel>NonlinearConstraint</guilabel>, and
+      <guilabel>Minimize</guilabel> for more information and worked
+      examples.</para>
     </refsection>
   </refsection>
 
@@ -635,26 +526,24 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Create a VF13AD resource named VF13ad1.
-      </para>
+      <para>Create a VF13AD resource named VF13ad1.</para>
 
       <programlisting>
         <code>
-  Create VF13ad VF13ad1;
-  GMAT VF13ad1.ShowProgress = true;
-  GMAT VF13ad1.ReportStyle = Normal;
-  GMAT VF13ad1.ReportFile = 'VF13adVF13ad1.data';
-  GMAT VF13ad1.MaximumIterations = 200;
-  GMAT VF13ad1.Tolerance = 1e-005;
-  GMAT VF13ad1.UseCentralDifferences = false;
-  GMAT VF13ad1.FeasibilityTolerance = 1e-003;
+  Create VF13ad VF13ad1
+  VF13ad1.ShowProgress = true
+  VF13ad1.ReportStyle = Normal
+  VF13ad1.ReportFile = 'VF13adVF13ad1.data'
+  VF13ad1.MaximumIterations = 200
+  VF13ad1.Tolerance = 1e-005
+  VF13ad1.UseCentralDifferences = false
+  VF13ad1.FeasibilityTolerance = 1e-003
         </code>
       </programlisting>
     </informalexample>
 
-    <para>
-      For an example of how a <guilabel>VF13AD</guilabel> resource can be used within an Optimization sequence, see the <guilabel>Optimize</guilabel> command examples.
-    </para>
+    <para>For an example of how a <guilabel>VF13ADOptimizer</guilabel>
+    resource can be used within an Optimization sequence, see the
+    <guilabel>Optimize</guilabel> command examples.</para>
   </refsection>
 </refentry>
