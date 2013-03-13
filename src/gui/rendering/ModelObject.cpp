@@ -1356,39 +1356,41 @@ void ModelObject::Draw(bool isLit)
       #endif
       
       // Fill in with default texture
-      if (i == 0)
-      {
-         // Go through all of the faces stored in the material
-         for (j = 0; j < num_polygons; j++)
+      #ifdef FILL_WITH_DEFAULT
+         if (i == 0)
          {
-            glEnable(GL_NORMALIZE); // added (LOJ: 2012.07.11)
+            // Go through all of the faces stored in the material
+            for (j = 0; j < num_polygons; j++)
+            {
+               glEnable(GL_NORMALIZE); // added (LOJ: 2012.07.11)
 
-//            // Store the face number, for easy reference
-//            k = material[i].faces[j];
-//
-            // Apply the normals for the first vertex
-            glNormal3fv(&normal[polygon[j].a].x);
-            // Apply the texture coordinates for the first vertex
-            glTexCoord2fv(&mapcoord[polygon[j].a].u);
-            // Draw the first vertex
-            glVertex3fv(&vertex[polygon[j].a].x);
+   //            // Store the face number, for easy reference
+   //            k = material[i].faces[j];
+   //
+               // Apply the normals for the first vertex
+               glNormal3fv(&normal[polygon[j].a].x);
+               // Apply the texture coordinates for the first vertex
+               glTexCoord2fv(&mapcoord[polygon[j].a].u);
+               // Draw the first vertex
+               glVertex3fv(&vertex[polygon[j].a].x);
 
-            // Apply the normals for the second vertex
-            glNormal3fv(&normal[polygon[j].b].x);
-            // Apply the texture coordinates for the second vertex
-            glTexCoord2fv(&mapcoord[polygon[j].b].u);
-            // Draw the second vertex
-            glVertex3fv(&vertex[polygon[j].b].x);
+               // Apply the normals for the second vertex
+               glNormal3fv(&normal[polygon[j].b].x);
+               // Apply the texture coordinates for the second vertex
+               glTexCoord2fv(&mapcoord[polygon[j].b].u);
+               // Draw the second vertex
+               glVertex3fv(&vertex[polygon[j].b].x);
 
-            // Apply the normals for the third vertex
-            glNormal3fv(&normal[polygon[j].c].x);
-            // Apply the texture coordinates for the third vertex
-            glTexCoord2fv(&mapcoord[polygon[j].c].u);
-            // Draw the third vertex
-            glVertex3fv(&vertex[polygon[j].c].x);
+               // Apply the normals for the third vertex
+               glNormal3fv(&normal[polygon[j].c].x);
+               // Apply the texture coordinates for the third vertex
+               glTexCoord2fv(&mapcoord[polygon[j].c].u);
+               // Draw the third vertex
+               glVertex3fv(&vertex[polygon[j].c].x);
+            }
          }
-      }
-      else
+         else
+      #endif
       {
          // Go through all of the faces stored in the material
          for (j = 0; j < material[i].num_faces; j++)

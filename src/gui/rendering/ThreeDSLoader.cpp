@@ -139,10 +139,10 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                      "hex %4x, length %10d   ", chunkId, chunkId, chunkLength);
             #endif
 
-            if (faceListLoaded && (chunkId != CHUNK_FACEMAT))
-               if (!LoadDefaultMaterial())
-                  MessageInterface::ShowMessage("Unable to set the default "
-                        "model material\n");
+            //if (faceListLoaded && (chunkId != CHUNK_FACEMAT))
+            //   if (!LoadDefaultMaterial())
+            //      MessageInterface::ShowMessage("Unable to set the default "
+            //            "model material\n");
 
             // Process the chunk
             switch (chunkId)
@@ -446,7 +446,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                   "%d polygons, and %d materials\n", theModel->GetNumVertices(),
                   theModel->GetNumPolygons(), theModel->GetNumMaterials());
          #endif
-
+//         LoadDefaultMaterial();
          theModel = NULL;
       }
    }
@@ -974,7 +974,7 @@ bool ThreeDSLoader::LoadFaceMaterialMap()
 // bool ThreeDSLoader::SetDefaultMaterial()
 //------------------------------------------------------------------------------
 /**
- * Sets the material to default if no material specified for the model
+ * Sets the material to default if no material specified for specific polygons
  *
  * @return true on success, false on failure
  */
@@ -983,26 +983,51 @@ bool ThreeDSLoader::LoadDefaultMaterial()
 {
    bool retval = false;
 
-//   unsigned short value;
-//   char str[255], theChar;
-//   Integer i = 0;
-//   Integer previousFaceCount;
-//
-//   if (theModel->GetNumMaterials() == 0)
-//   {
-//      MessageInterface::ShowMessage("Default material not found!  Filling "
-//            "anyway\n");
-//   }
-//
-//   material_type *material = theModel->GetMaterials();
-//
-//   previousFaceCount = material[0].num_faces;
-//   material[0].num_faces += lastPolygonCount;
-//
-//   for (i = previousFaceCount; i < material[0].num_faces; i++)
-//      material[0].faces[i] = polygonStart + i - previousFaceCount;
+   Integer polyCount = theModel->GetNumPolygons();
+   Integer coveredCount = 0;
 
-   retval = true;
+   if (polyCount > 0)
+   {
+#ifdef DEBUG_DEFAULT_MATERIAL
+      bool *coverage = new bool[polyCount];
+      for (Integer i = 0; i < polyCount; ++i)
+         coverage[i] = false;
+
+      material_type *material = theModel->GetMaterials();
+      for (Integer i = 0; i < theModel->GetNumMaterials(); ++i)
+      {
+         for (Integer j = 0; j < material[i].num_faces; ++j)
+         {
+            coverage[material[i].faces[j]] = true;
+            ++coveredCount;
+         }
+      }
+
+      // polyCount - coveredCount = # of faces not yet covered 
+      Integer uncoveredCount = polyCount - coveredCount;
+      Integer defaultStart = material[0].num_faces;
+      Integer currentLoc = 0;
+      material[0].num_faces += uncoveredCount;
+
+         MessageInterface::ShowMessage("There are %d uncovered points\n", 
+            uncoveredCount);
+
+      for (Integer i = 0; i < polyCount; ++i)
+      {
+         if (coverage[i] == false)
+         {
+            material[0].faces[defaultStart + currentLoc] = (unsigned short)i;
+            --uncoveredCount;
+            ++currentLoc;
+         }
+      }
+
+      if (uncoveredCount != 0)
+         MessageInterface::ShowMessage("Uncovered count %d is not correct\n",
+               uncoveredCount);
+#endif
+      retval = true;
+   }
 
    return retval;
 }
