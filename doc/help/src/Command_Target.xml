@@ -43,11 +43,11 @@
     </synopsis>
 
     <note>
-      <para xlink:href="Target_Remarks">See sections <xref
-      linkend="Target_Remarks"/> and <xref linkend="Target_Description"/> for
-      this complex command. Multiple <guilabel>Vary</guilabel> and
-      <guilabel>Achieve</guilabel> commands are permitted. Script statements
-      can appear anywhere in the <guilabel>Target</guilabel> sequence.</para>
+      <para xlink:href="Target_Remarks">See <xref linkend="Target_Remarks"/>
+      and <xref linkend="Target_Description"/> for this complex command.
+      Multiple <guilabel>Vary</guilabel> and <guilabel>Achieve</guilabel>
+      commands are permitted. Script statements can appear anywhere in the
+      <guilabel>Target</guilabel> sequence.</para>
     </note>
   </refsynopsisdiv>
 
