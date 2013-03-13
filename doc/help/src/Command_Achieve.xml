@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="Achieve"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Achieve" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -25,9 +23,8 @@
   <refnamediv>
     <refname>Achieve</refname>
 
-    <refpurpose>
-        Specify a goal for a Target Sequence
-    </refpurpose>
+    <refpurpose>Specify a goal for a <guilabel>Target</guilabel>
+    sequence</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -41,33 +38,31 @@
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>Achieve</guilabel> command is used in conjunction with the <guilabel>Target</guilabel> command as part of the Target sequence.  
-      The purpose of the <guilabel>Achieve</guilabel> command is to define a goal for the targeter (currently, the differential corrector is the only targeter
-      available within a Target sequence) to achieve.  To configure the Achieve command, you specify the goal object, its corresponding desired value, 
-      and an optional tolerance so the differential corrector can find a solution.  The <guilabel>Achieve</guilabel> command must be accompanied and preceded by a
-      <guilabel>Vary</guilabel> command in order to assist in the targeting process.
-    </para>
+    <para>The <guilabel>Achieve</guilabel> command is used in conjunction with
+    the <guilabel>Target</guilabel> command as part of the
+    <guilabel>Target</guilabel> sequence. The purpose of the
+    <guilabel>Achieve</guilabel> command is to define a goal for the targeter
+    (currently, the differential corrector is the only targeter available
+    within a <guilabel>Target</guilabel> sequence) to achieve. To configure
+    the <guilabel>Achieve</guilabel> command, you specify the goal object, its
+    corresponding desired value, and an optional tolerance so the differential
+    corrector can find a solution. The <guilabel>Achieve</guilabel> command
+    must be accompanied and preceded by a <guilabel>Vary</guilabel> command in
+    order to assist in the targeting process.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="DifferentialCorrector"/>, 
-      <xref linkend="Target"/>,
-      <xref linkend="Vary"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="DifferentialCorrector"/>, <xref linkend="Target"/>, <xref
+    linkend="Vary"/></para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -79,22 +74,17 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>SolverName</guilabel>
-            </entry>
+            <entry><guilabel>Arg1</guilabel></entry>
 
-            <entry>
-              <para>
-                The SolverName option allows the user to choose which targeter uses the goal specified in the Achieve command
-              </para>
-              <variablelist>
+            <entry><para>Specifies the desired value for the
+            <guilabel>Goal</guilabel> after the
+            <guilabel>DifferentialCorrector</guilabel> has converged. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      Targeter
-                    </para>
+                    <para>Array, ArrayElement, Variable, String</para>
                   </listitem>
                 </varlistentry>
 
@@ -102,9 +92,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any user defined targeter
-                    </para>
+                    <para>Real Number, Array element, or Variable</para>
                   </listitem>
                 </varlistentry>
 
@@ -112,9 +100,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultDC
-                    </para>
+                    <para>42165</para>
                   </listitem>
                 </varlistentry>
 
@@ -122,9 +108,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -132,32 +116,24 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Goal</guilabel>
-            </entry>
+            <entry><guilabel>Arg2</guilabel></entry>
 
-            <entry>
-              <para>
-                The option allows the user to select any single element user defined parameter, except a number, as a targeter goal.
-              </para>
-              <variablelist>
+            <entry><para> Convergence tolerance for how close
+            <guilabel>Goal</guilabel> equals <guilabel>Arg1</guilabel> </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      Object parameter, ArrayElement, Variable
-                    </para>
+                    <para>Real Number, Array element, Variable, or any
+                    user-defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -165,9 +141,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Spacecraft parameter, Array element, Variable, or any other single element user defined parameter, excluding numbers
-                    </para>
+                    <para>Real Number, Array element, Variable, or any
+                    user-defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -175,9 +150,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultSC.Earth.RMAG
-                    </para>
+                    <para>0.1</para>
                   </listitem>
                 </varlistentry>
 
@@ -185,9 +158,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -195,32 +166,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Arg1</guilabel>
-            </entry>
+            <entry><guilabel>Goal</guilabel></entry>
 
-            <entry>
-              <para>
-                The Arg1 option is the desired value for the goal after the solver has converged.
-              </para>
-              <variablelist>
+            <entry><para>Allows you to select any single element user defined
+            parameter, except a number, as a targeter goal. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      Array, ArrayElement, Variable, String
-                    </para>
+                    <para>Object parameter, ArrayElement, Variable</para>
                   </listitem>
                 </varlistentry>
 
@@ -228,9 +190,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real Number, Array element, or Variable
-                    </para>
+                    <para>Spacecraft parameter, Array element, Variable, or
+                    any other single element user defined parameter, excluding
+                    numbers</para>
                   </listitem>
                 </varlistentry>
 
@@ -238,9 +200,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      42165
-                    </para>
+                    <para>DefaultSC.Earth.RMAG</para>
                   </listitem>
                 </varlistentry>
 
@@ -248,9 +208,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -258,32 +216,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Arg2</guilabel>
-            </entry>
+            <entry><guilabel>SolverName</guilabel></entry>
 
-            <entry>
-              <para>
-                Arg2 is the convergence tolerance for how close Goal equals Arg1
-              </para>
-              <variablelist>
+            <entry><para>Specifies the
+            <guilabel>DifferentialCorrector</guilabel> being used in the
+            <guilabel>Target</guilabel> sequence</para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      Real Number, Array element, Variable, or any user-defined parameter &gt; 0
-                    </para>
+                    <para>Targeter</para>
                   </listitem>
                 </varlistentry>
 
@@ -291,9 +240,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real Number, Array element, Variable, or any user-defined parameter &gt; 0
-                    </para>
+                    <para>Any user defined targeter</para>
                   </listitem>
                 </varlistentry>
 
@@ -301,9 +248,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0.1
-                    </para>
+                    <para>DefaultDC</para>
                   </listitem>
                 </varlistentry>
 
@@ -311,9 +256,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -321,13 +264,10 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -337,71 +277,58 @@
   <refsection>
     <title>GUI</title>
 
-    <para>
-      You use an <guilabel>Achieve</guilabel> command, which is only valid within a <guilabel>Target</guilabel> sequence, to define your desired goal.  
-      More than one <guilabel>Achieve</guilabel> command may be used within a <guilabel>Target</guilabel> command sequence.  The <guilabel>Achieve</guilabel> command dialog box, 
-      which allows you to specify the targeter, goal object, goal value, and convergence tolerance, is shown below.
-    </para>
+    <para>You use an <guilabel>Achieve</guilabel> command, which is only valid
+    within a <guilabel>Target</guilabel> sequence, to define your desired
+    goal. More than one <guilabel>Achieve</guilabel> command may be used
+    within a <guilabel>Target</guilabel> command sequence. The
+    <guilabel>Achieve</guilabel> command dialog box, which allows you to
+    specify the targeter, goal object, goal value, and convergence tolerance,
+    is shown below.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_Achieve_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>
-        Command Interactions
-      </title>
+      <title>Command Interactions</title>
 
-      <para>
-        A <guilabel>Target</guilabel> sequence must contain at least one <guilabel>Vary</guilabel> and one <guilabel>Achieve</guilabel> command.
-      </para>
+      <para>A <guilabel>Target</guilabel> sequence must contain at least one
+      <guilabel>Vary</guilabel> and one <guilabel>Achieve</guilabel>
+      command.</para>
 
-      <informaltable colsep="0"
-                     frame="topbot">
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1"
-                   colwidth=".5*"/>
+          <colspec colnum="1" colwidth=".5*"/>
 
-          <colspec colnum="2"
-                   colwidth="3*"/>
+          <colspec colnum="2" colwidth="3*"/>
 
           <tbody>
             <row>
-              <entry>
-                <guilabel>Target command</guilabel>
-              </entry>
+              <entry><guilabel>Target command</guilabel></entry>
 
-              <entry>
-                <para>
-                  An Achieve command only occurs within a Target sequence
-                </para>
-              </entry>
+              <entry><para>An <guilabel>Achieve</guilabel> command only occurs
+              within a <guilabel>Target </guilabel>sequence </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>Vary command  </guilabel>
-              </entry>
+              <entry><guilabel>Vary command </guilabel></entry>
 
-              <entry>
-                <para>
-                  Associated with any Achieve command is at least one Vary command.  The Vary command identifies the control variable used by the targeter.  
-                  The goal specified by the Achieve command is obtained by varying the control variables.
-                </para>
-              </entry>
+              <entry><para>Associated with any <guilabel>Achieve</guilabel>
+              command is at least one <guilabel>Vary</guilabel> command. The
+              <guilabel>Vary</guilabel> command identifies the control
+              variable used by the targeter. The goal specified by the
+              <guilabel>Achieve</guilabel> command is obtained by varying the
+              control variables. </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -412,8 +339,9 @@
   <refsection>
     <title>Examples</title>
 
-    <para>
-      As mentioned in the <guilabel>Remarks</guilabel>, see the <guilabel>Target</guilabel> command help for examples showing the use of the <guilabel>Achieve</guilabel> command.
-    </para>
+    <para>As mentioned above, an <guilabel>Achieve</guilabel> command only
+    occurs within a <guilabel>Target</guilabel> sequence. See the
+    <guilabel>Target</guilabel> command help for examples showing the use of
+    the <guilabel>Achieve</guilabel> command.</para>
   </refsection>
 </refentry>
