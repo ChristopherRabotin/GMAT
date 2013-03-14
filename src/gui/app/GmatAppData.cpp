@@ -119,8 +119,15 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
 {
    if (thePersonalizationConfig == NULL)
    {
-//      MessageInterface::PopupMessage(Gmat::INFO_, "Setting up Personalization file: %s\n",FileManager::Instance()->GetFilename(FileManager::PERSONALIZATION_FILE).c_str());
-      thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, (FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE)).c_str(),
+	  std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
+	  // fix crash for invalid filename
+	  if (!FileManager::Instance()->DoesDirectoryExist(pfile))
+	  {
+		  MessageInterface::PopupMessage( Gmat::WARNING_, "Invalid personalization file specified: \n%s\n",
+                                 pfile.c_str() );
+		  pfile = "";
+	  }
+      thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, pfile.c_str(),
               wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
    }
    return thePersonalizationConfig;
