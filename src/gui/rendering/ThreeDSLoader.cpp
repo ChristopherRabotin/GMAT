@@ -28,6 +28,8 @@
 //#define DEBUG_LOADING
 //#define DUMP_DATA
 
+//#define DEBUG_DEFAULT_MATERIAL
+
 //------------------------------------------------------------------------------
 // ThreeDSLoader()
 //------------------------------------------------------------------------------
@@ -47,6 +49,7 @@ ThreeDSLoader::ThreeDSLoader() :
    polygonStart         (0),
    materialPolygonStart (0),
    ambientColorLoaded   (false),
+   usesColors           (true),
    lastPolygonCount     (0)
 {
 }
@@ -213,7 +216,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                }
                // Need to set default material if next chunk isn't CHUNK_FACEMAT
 //               faceListLoaded = true;
-               LoadDefaultMaterial();
+//               LoadDefaultMaterial();
                break;
 
             case CHUNK_FACEMAT:
@@ -275,7 +278,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
 
                   currentMaterial->mat_shininess = 0.5;
 
-                  currentMaterial->id_texture = 0;
+                  currentMaterial->id_texture = -1;
 
                   theModel->SetNumMaterials(matCount + 1);
                }
@@ -758,6 +761,8 @@ bool ThreeDSLoader::GetTextureFileName(material_type *forMaterial)
       if (theName.length() < 255)
       {
          strcpy(forMaterial->texture_name, theName.c_str());
+         if (theName.length() > 0)
+               usesColors = false;
          retval = true;
       }
    }
@@ -986,7 +991,7 @@ bool ThreeDSLoader::LoadDefaultMaterial()
    Integer polyCount = theModel->GetNumPolygons();
    Integer coveredCount = 0;
 
-   if (polyCount > 0)
+   if ((polyCount > 0) && usesColors)
    {
 #ifdef DEBUG_DEFAULT_MATERIAL
       bool *coverage = new bool[polyCount];
@@ -994,14 +999,24 @@ bool ThreeDSLoader::LoadDefaultMaterial()
          coverage[i] = false;
 
       material_type *material = theModel->GetMaterials();
+
+         MessageInterface::ShowMessage("The model has %d materials\n", 
+            theModel->GetNumMaterials());
+
       for (Integer i = 0; i < theModel->GetNumMaterials(); ++i)
       {
+            MessageInterface::ShowMessage("   material %d has %d faces\n", 
+               i, material[i].num_faces);
+
          for (Integer j = 0; j < material[i].num_faces; ++j)
          {
             coverage[material[i].faces[j]] = true;
             ++coveredCount;
          }
       }
+
+         MessageInterface::ShowMessage("There are %d of %d covered points\n", 
+            coveredCount, polyCount);
 
       // polyCount - coveredCount = # of faces not yet covered 
       Integer uncoveredCount = polyCount - coveredCount;
@@ -1016,7 +1031,7 @@ bool ThreeDSLoader::LoadDefaultMaterial()
       {
          if (coverage[i] == false)
          {
-            material[0].faces[defaultStart + currentLoc] = (unsigned short)i;
+            material[0].faces[defaultStart + currentLoc] = i;
             --uncoveredCount;
             ++currentLoc;
          }
@@ -1056,6 +1071,7 @@ ThreeDSLoader::ThreeDSLoader(const ThreeDSLoader& tds) :
    polygonStart         (0),
    materialPolygonStart (0),
    ambientColorLoaded   (false),
+   usesColors           (false),
    lastPolygonCount     (0)
 {
 }

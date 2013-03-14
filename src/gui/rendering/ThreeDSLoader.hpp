@@ -46,6 +46,8 @@ private:
    Integer materialPolygonStart;
    /// Color loading: if spec loaded and ambient not set, set both to specular
    bool ambientColorLoaded;
+   /// Flag indicating that the model uses colors rather than textures
+   bool usesColors;
    /// Number of polygons read on last read, for default material if needed
    unsigned short lastPolygonCount;
 
