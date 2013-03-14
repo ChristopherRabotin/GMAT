@@ -43,6 +43,8 @@
 //#define WIREFRAME_MODE
 //#define WARN_ON_COUNTS		// Post a warning if multiple vertex or face chunks
 
+//#define FILL_WITH_DEFAULT
+
 //#define DEBUG_LOAD
 //#define DEBUG_LOAD_TEXTURE
 //#define DEBUG_DRAW
@@ -68,7 +70,7 @@ ModelObject::ModelObject()
 
    mass  = 0.0;              // Object's mass
    bsphere_radius = 10.0;    // the radius of the object's bounding sphere
-   id_texture = 0;           // The id of the object's texture
+   id_texture = -1;          // The id of the object's texture
 }
 
 

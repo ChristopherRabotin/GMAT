@@ -76,7 +76,10 @@ typedef struct
    char name[255];                     // The name of the material
    char texture_name[255];             // The file name of the texture associated with the material
    int num_faces;                      // The number of faces that use this material
-   unsigned short faces[MAX_POLYGONS]; // The indices of the faces using this material
+
+   // This needs to be an int since a model can have more than 65536 faces; not making it unsigned for now
+//   unsigned short faces[MAX_POLYGONS]; // The indices of the faces using this material
+   int faces[MAX_POLYGONS];            // The indices of the faces using this material
    rgba_type mat_ambient;              // The ambient color of the material
    rgba_type mat_diffuse;              // The diffuse color of the material
    rgba_type mat_specular;             // The specular color of the material
