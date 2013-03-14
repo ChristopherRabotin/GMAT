@@ -309,5 +309,11 @@
         </code>
       </programlisting>
     </informalexample>
+
+    <para>As mentioned above, the <guilabel>Minimize</guilabel> command only
+    occurs within an <guilabel>Optimize</guilabel> sequence. See the
+    <guilabel><xref linkend="Optimize"/></guilabel> command help for complete
+    examples showing the use of the <guilabel>Minimize</guilabel>
+    command.</para>
   </refsection>
 </refentry>

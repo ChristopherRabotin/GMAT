@@ -66,59 +66,12 @@
 
         <tbody>
           <row>
-            <entry><guilabel>OptimizerName</guilabel></entry>
-
-            <entry><para> The SolverName field specifies the solver/optimizer
-            object used to apply a constraint.  </para> <variablelist>
-                <varlistentry>
-                  <term>Accepted Data Types</term>
-
-                  <listitem>
-                    <para>Optimizer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any vf13ad or fmincon optmizer object.</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>DefaultSQP</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Required</term>
-
-                  <listitem>
-                    <para>yes</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>LHS</guilabel></entry>
 
-            <entry><para> The SolverName option allows the user to select any
-            single element user defined parameter, except a number, to define
-            the constraint variable.  The constraint function is of the form
-            'LHS Operator RHS' </para> <variablelist>
+            <entry><para>Allows you to select any single element user defined
+            parameter, except a number, to define the constraint variable. 
+            The constraint function is of the form <guilabel>LHS Operator
+            RHS</guilabel> </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -141,7 +94,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC.SMA</para>
+                    <para>
+                      <literal>DefaultSC.SMA</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -167,8 +122,8 @@
             <entry><guilabel>Operator</guilabel></entry>
 
             <entry><para> logical operator used to specify the constraint
-            function.  The constraint function is of the form 'LHS Operator
-            RHS' </para> <variablelist>
+            function.  The constraint function is of the form <guilabel>LHS
+            Operator RHS</guilabel> </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -212,12 +167,61 @@
           </row>
 
           <row>
+            <entry><guilabel>OptimizerName</guilabel></entry>
+
+            <entry><para> Specifies the solver/optimizer object used to apply
+            a constraint.  </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Optimizer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any vf13ad or fmincon optmizer object.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>DefaultSQP</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>RHS</guilabel></entry>
 
-            <entry><para> The RHS option allows the user to select any single
-            element user defined parameter, including a number, to specify the
-            desired value of the constraint variable.  The constraint function
-            is of the form 'LHS Operator RHS' </para> <variablelist>
+            <entry><para> Allows you to select any single element user defined
+            parameter, including a number, to specify the desired value of the
+            constraint variable.  The constraint function is of the form
+            <guilabel>LHS Operator RHS</guilabel> </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -240,7 +244,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>7000</para>
+                    <para>
+                      <literal>7000</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -269,8 +275,8 @@
   <refsection>
     <title>GUI</title>
 
-    <para>You use a NonlinearConstraint command, within an
-    Optimize/EndOptimize sequence as shown below, to define an equality or
+    <para>You use a <guilabel>NonlinearConstraint</guilabel> command, within
+    an Optimize/EndOptimize sequence as shown below, to define an equality or
     inequality constraint that you want to be satisfied at the end of the
     optimization process.</para>
 
@@ -284,8 +290,9 @@
       </mediaobject>
     </screenshot>
 
-    <para>Double click on NonlinearConstraint1 to bring up the
-    NonlinearConstraint command dialog box, shown below.</para>
+    <para>Double click on <guilabel>NonlinearConstraint1</guilabel> to bring
+    up the <guilabel>NonlinearConstraint</guilabel> command dialog box, shown
+    below.</para>
 
     <screenshot>
       <mediaobject>
@@ -297,16 +304,18 @@
       </mediaobject>
     </screenshot>
 
-    <para>You must provide four inputs for the NonlinearConstraint command
-    dialog box above: <itemizedlist>
+    <para>You must provide four inputs for the
+    <guilabel>NonlinearConstraint</guilabel> command dialog box above:
+    <itemizedlist>
         <listitem>
           <para>Choice of optimizer.</para>
         </listitem>
 
         <listitem>
-          <para>Constraint Object. Click the Edit button to the right of this
-          field to select the type of constraint object from three possible
-          choices, Spacecraft, Variable, or Array.</para>
+          <para>Constraint Object. Click the <guilabel>Edit</guilabel> button
+          to the right of this field to select the type of constraint object
+          from three possible choices, <guilabel>Spacecraft</guilabel>,
+          <guilabel>Variable</guilabel>, or <guilabel>Array</guilabel>.</para>
         </listitem>
 
         <listitem>
@@ -320,36 +329,42 @@
       </itemizedlist></para>
 
     <para>Note that Inputs 2-4 define a logical expression. In the example
-    above, we have: "DefaultSC.SMA = 7000"</para>
+    above, we have: <literal>DefaultSC.SMA = 7000</literal></para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>Number of Vary, NonlinearConstraint, and Minimize commands within
+      <title>Number of Vary, NonlinearConstraint, and Minimize Commands Within
       an Optimization Sequence</title>
 
-      <para>An Optimization sequence must contain one or more Vary commands.
-      Vary commands must occur before any Minimize or NonlinearConstraint
-      commands.</para>
+      <para>An Optimization sequence must contain one or more
+      <guilabel>Vary</guilabel> commands. <guilabel>Vary</guilabel> commands
+      must occur before any <guilabel>Minimize</guilabel> or
+      <guilabel>NonlinearConstraint</guilabel> commands.</para>
 
-      <para>Multiple NonlinearConstraint commands are allowed. There is
-      exactly one NonlinearConstraint command for every constraint.</para>
+      <para>Multiple <guilabel>NonlinearConstraint</guilabel> commands are
+      allowed. There is exactly one <guilabel>NonlinearConstraint</guilabel>
+      command for every constraint.</para>
 
-      <para>It is possible for an Optimize/EndOptimize optimization sequence
-      to contain no NonlinearConstraint commands. In this case, since every
-      optimization sequence must contain (a) one or more NonlinearConstraint
-      commands and/or (b) a single Minimize command, the optimization sequence
-      must contain a single Minimize command.</para>
+      <para>It is possible for an <guilabel>Optimize/EndOptimize</guilabel>
+      optimization sequence to contain no
+      <guilabel>NonlinearConstraint</guilabel> commands. In this case, since
+      every optimization sequence must contain (a) one or more
+      <guilabel>NonlinearConstraint</guilabel> commands and/or (b) a single
+      <guilabel>Minimize</guilabel> command, the optimization sequence must
+      contain a single <guilabel>Minimize</guilabel> command.</para>
     </refsection>
 
     <refsection>
       <title>Command Interactions</title>
 
-      <para>The Minimize command is only used within an Optimize/EndOptimize
-      Optimization sequence. See the Optimize command documentation for a
-      complete worked example using the NonlinearConstraint command.</para>
+      <para>The <guilabel>Minimize</guilabel> command is only used within an
+      <guilabel>Optimize/EndOptimize</guilabel> Optimization sequence. See the
+      <guilabel>Optimize</guilabel> command documentation for a complete
+      worked example using the <guilabel>NonlinearConstraint</guilabel>
+      command.</para>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
@@ -361,28 +376,30 @@
             <row>
               <entry><guilabel>Optimize command</guilabel></entry>
 
-              <entry><para> NonlinearConstraint commands can only occur within
-              an Optimize/EndOptimize command sequence. </para></entry>
+              <entry><para> <guilabel>NonlinearConstraint</guilabel> commands
+              can only occur within an
+              <guilabel>Optimize/EndOptimize</guilabel> command sequence.
+              </para></entry>
             </row>
 
             <row>
               <entry><guilabel>Vary command</guilabel></entry>
 
               <entry><para> Every Optimization sequence must contain at least
-              one Vary command. Vary commands are used to define the control
-              variables associated with an Optimization sequence.
-              </para></entry>
+              one <guilabel>Vary</guilabel> command. <guilabel>Vary</guilabel>
+              commands are used to define the control variables associated
+              with an Optimization sequence. </para></entry>
             </row>
 
             <row>
               <entry><guilabel>Minimize command</guilabel></entry>
 
-              <entry><para> A Minimize command is used within an Optimization
-              sequence to define the Objective function that will be
-              minimized. Note that an optimization sequence is allowed to
-              contain, at most, one Minimize command. (An Optimization
-              sequence is not required to contain a Minimize command)  
-              </para></entry>
+              <entry><para> A <guilabel>Minimize</guilabel> command is used
+              within an Optimization sequence to define the objective function
+              that will be minimized. Note that an optimization sequence is
+              allowed to contain, at most, one <guilabel>Minimize</guilabel>
+              command. (An Optimization sequence is not required to contain a
+              <guilabel>Minimize</guilabel> command)   </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -409,5 +426,11 @@
         </code>
       </programlisting>
     </informalexample>
+
+    <para>As mentioned above, the <guilabel>NonlinearConstraint</guilabel>
+    command only occurs within an <guilabel>Optimize</guilabel> sequence. See
+    the <guilabel><xref linkend="Optimize"/></guilabel> command help for
+    complete examples showing the use of the
+    <guilabel>NonlinearConstraint</guilabel> command.</para>
   </refsection>
 </refentry>
