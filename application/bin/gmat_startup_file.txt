@@ -106,7 +106,7 @@ MGNP180U_FILE          = VENUS_POT_PATH/MGNP180U.cof
 LP165P_FILE            = LUNA_POT_PATH/LP165P.cof
 #-----------------------------------------------------------
 GUI_CONFIG_PATH        = DATA_PATH/gui_config/
-PERSONALIZATION_FILE   = DATA_PATH/gui_config/MyGmat.ini
+PERSONALIZATION_FILE   = GUI_CONFIG_PATH/MyGmat.ini
 #-----------------------------------------------------------
 ICON_PATH              = DATA_PATH/graphics/icons/
 MAIN_ICON_FILE         = ICON_PATH/GMATWin32.ico
