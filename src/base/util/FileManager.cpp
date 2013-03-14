@@ -251,7 +251,7 @@ bool FileManager::RenameFile(const std::string &oldName,
 // std::string GetStartupFileDir()
 //------------------------------------------------------------------------------
 /*
- * Returns startup file name without directory.
+ * Returns startup file directory without name.
  */
 //------------------------------------------------------------------------------
 std::string FileManager::GetStartupFileDir()
@@ -2204,7 +2204,7 @@ void FileManager::RefreshFiles()
    AddFileType("GUI_CONFIG_PATH", "DATA_PATH/gui_config/");
    
    // personalization file
-   AddFileType("PERSONALIZATION_FILE", "DATA_PATH/gui_config/MyGmat.ini");
+   AddFileType("PERSONALIZATION_FILE", "GUI_CONFIG_PATH/MyGmat.ini");
    
    // icon path and main icon file
    AddFileType("ICON_PATH", "DATA_PATH/graphics/icons/");
