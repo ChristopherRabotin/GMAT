@@ -2204,7 +2204,7 @@ void FileManager::RefreshFiles()
    AddFileType("GUI_CONFIG_PATH", "DATA_PATH/gui_config/");
    
    // personalization file
-   AddFileType("PERSONALIZATION_FILE", "GUI_CONFIG_PATH/MyGmat.ini");
+   AddFileType("PERSONALIZATION_FILE", "OUTPUT_PATH/MyGmat.ini");
    
    // icon path and main icon file
    AddFileType("ICON_PATH", "DATA_PATH/graphics/icons/");
