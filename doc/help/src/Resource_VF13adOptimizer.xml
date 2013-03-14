@@ -235,7 +235,7 @@
             message window and to the report specified by field
             <guilabel>ReportFile</guilabel> for each iteration of the solver
             (When <guilabel>ShowProgress</guilabel> is true).  Currently, the
-            <literal>Normal</literal>, <literal>debug</literal>, and
+            <literal>Normal</literal>, <literal>Debug</literal>, and
             <literal>Concise</literal> options contain the same information:
             the values for the control variables, the constraints, and the
             objective function.  In addition to this information, the
@@ -356,7 +356,7 @@
           <row>
             <entry><guilabel>Tolerance</guilabel></entry>
 
-            <entry><para> Specifies the measure the optimizer will use to
+            <entry><para>Specifies the measure the optimizer will use to
             determine when an optimal solution has been found based on the
             value of the goal set in a Minimize command.  </para>
             <variablelist>
