@@ -2165,6 +2165,19 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
       // compute vector from origin of the base system to origin of this system
       Rvector6 rif =  origin->GetMJ2000State(epoch) - 
                       (j2000Body->GetMJ2000State(epoch));
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
       outState = inState + rif;
       #ifdef DEBUG_TRANSLATION
          Rvector6 tmpOrigin = origin->GetMJ2000State(epoch);
@@ -2238,6 +2251,19 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
       Rvector6 rif =  origin->GetMJ2000State(epoch) -
                       (j2000Body->GetMJ2000State(epoch));
       
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
       #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage("   rif = %s\n", rif.ToString().c_str());
       #endif
@@ -2293,6 +2319,20 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
       // compute vector from origin of of this system to origin of the base system
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
+
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
       outState = inState + rif;
    }
    #ifdef DEBUG_TRANSLATION
@@ -2342,6 +2382,20 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
       #endif
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
+
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
       #ifdef DEBUG_TRANSLATION
          MessageInterface::ShowMessage(
                "In TranslateFromBaseSystem (2), rif = %s\n",rif.ToString().c_str());

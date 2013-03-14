@@ -441,6 +441,12 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 }
 
 
+Rmatrix33 CoordinateConverter::GetRotationMatrixFromICRFToFK5(const A1Mjd &atEpoch)
+{
+	RotationMatrixFromICRFToFK5(atEpoch);
+	return icrfToFK5; 
+}
+
 //------------------------------------------------------------------------------
 // bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
 //          SolarSystem *solarSystem,
@@ -534,7 +540,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    }
 
    // Get rotation and rotation dot matrixes:
-   RotationMatrixFromICRFToFK5(epoch, true);
+   RotationMatrixFromICRFToFK5(epoch);
    const Real* iToF = icrfToFK5.GetDataVector();
    
 
@@ -571,8 +577,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    return true;
 }
 
-void CoordinateConverter::RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch,
-                                            bool forceComputation)
+void CoordinateConverter::RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch)
 {
    Real theEpoch = atEpoch.Get();
    #ifdef DEBUG_ICRF_TOFK5

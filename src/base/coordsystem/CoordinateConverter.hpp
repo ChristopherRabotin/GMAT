@@ -57,6 +57,7 @@ public:
    // method to return the rotation matrix used to do the last conversion
    Rmatrix33    GetLastRotationMatrix() const;
    Rmatrix33    GetLastRotationDotMatrix() const;
+   Rmatrix33    GetRotationMatrixFromICRFToFK5(const A1Mjd &atEpoch);
 
 protected:
    Rmatrix33 lastRotMatrix;
@@ -70,7 +71,7 @@ protected:
                                       const Real *inBaseState,    Real *outBaseState);
    
 private:
-   void         RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch, bool forceComputation);
+   void         RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch);
    Rmatrix33 icrfToFK5;
    Rmatrix33 icrfToFK5Dot;
 
