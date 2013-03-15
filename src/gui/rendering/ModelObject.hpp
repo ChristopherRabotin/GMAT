@@ -25,7 +25,6 @@
 #include "Rmatrix.hpp"
 #include "Rvector3.hpp"
 
-// Since we are indexing into arrays with a short, is this realistic?
 #define MAX_VERTICES 200000  // Maximum vertices per object
 //#define MAX_VERTICES 80000  // Maximum vertices per object
 
@@ -83,7 +82,9 @@ typedef struct
    rgba_type mat_ambient;              // The ambient color of the material
    rgba_type mat_diffuse;              // The diffuse color of the material
    rgba_type mat_specular;             // The specular color of the material
-   unsigned short mat_shininess;       // The shininess factor of the material (between 0 and 100%, 100 being the highest)
+   // ??? This is a float throughout the code
+//   unsigned short mat_shininess;       // The shininess factor of the material (between 0 and 100%, 100 being the highest)
+   float mat_shininess;                // The shininess factor of the material (between 0 and 100%, 100 being the highest)
    int id_texture;                     // The id of the bound texture
 } material_type, *material_type_ptr;
 

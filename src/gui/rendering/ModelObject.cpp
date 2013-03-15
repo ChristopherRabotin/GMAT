@@ -61,16 +61,15 @@
  * Constructor
  */
 //------------------------------------------------------------------------------
-ModelObject::ModelObject()
+ModelObject::ModelObject() :
+   num_vertices      (0),
+   num_polygons      (0),
+   num_materials     (0),
+   isLoaded          (false),
+   mass              (0.0),
+   bsphere_radius    (10.0),
+   id_texture        (-1)
 {
-   num_vertices = 0;
-   num_polygons = 0;
-   num_materials = 0;
-   isLoaded = false;
-
-   mass  = 0.0;              // Object's mass
-   bsphere_radius = 10.0;    // the radius of the object's bounding sphere
-   id_texture = -1;          // The id of the object's texture
 }
 
 
@@ -96,7 +95,14 @@ ModelObject::~ModelObject()
  * style.
  */
 //------------------------------------------------------------------------------
-ModelObject::ModelObject(const ModelObject& mo)
+ModelObject::ModelObject(const ModelObject& mo) :
+   num_vertices      (0),
+   num_polygons      (0),
+   num_materials     (0),
+   isLoaded          (false),
+   mass              (0.0),
+   bsphere_radius    (10.0),
+   id_texture        (-1)
 {
    MessageInterface::ShowMessage("ModelObject::ModelObject(const ModelObject& )"
          "called but not implemented\n");

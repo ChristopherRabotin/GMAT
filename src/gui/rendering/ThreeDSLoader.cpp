@@ -127,7 +127,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
          int subtype = 0;
 
          // Flag used to indicate of a face list was just loaded
-         bool faceListLoaded = false;
+//         bool faceListLoaded = false;
 
 
          // Read the file until an error occurs or we reach the end, processing
@@ -276,7 +276,7 @@ bool ThreeDSLoader::LoadFileIntoModel(ModelObject *model,
                   currentMaterial->mat_specular.b =
                   currentMaterial->mat_specular.a = 0.5;
 
-                  currentMaterial->mat_shininess = 0.5;
+                  currentMaterial->mat_shininess = 0.50;
 
                   currentMaterial->id_texture = -1;
 
@@ -475,7 +475,8 @@ bool ThreeDSLoader::LoadVertexData()
 {
    bool retval = false;
    float v;
-   unsigned short vertexCount, totalVertexCount;
+   unsigned short vertexCount;
+   Integer totalVertexCount;
 
    // Retrieve the number of new vertices
    fread(&vertexCount, sizeof(unsigned short), 1, theFile);
@@ -498,7 +499,7 @@ bool ThreeDSLoader::LoadVertexData()
          MessageInterface::ShowMessage("%d to %d\n", vertexStart,
                totalVertexCount-1);
       #endif
-      for (unsigned short i = vertexStart; i < totalVertexCount; ++i)
+      for (Integer i = vertexStart; i < totalVertexCount; ++i)
       {
          fread(&v, sizeof(float), 1, theFile);
          vertex[i].x = v;
@@ -803,7 +804,7 @@ bool ThreeDSLoader::ReadTextureMapping()
       #endif
 
       // Go through all of the mappings and store them
-      for (unsigned short i = vertexCount-mapCount; i < vertexCount; i++)
+      for (Integer i = vertexCount-mapCount; i < vertexCount; i++)
       {
          fread(&(mapcoord[i]), sizeof(float), 2, theFile);
          mapcoord[i].v = -mapcoord[i].v;
@@ -989,12 +990,12 @@ bool ThreeDSLoader::LoadDefaultMaterial()
    bool retval = false;
 
    Integer polyCount = theModel->GetNumPolygons();
-   Integer coveredCount = 0;
 
    if ((polyCount > 0) && usesColors)
    {
 #ifdef DEBUG_DEFAULT_MATERIAL
       bool *coverage = new bool[polyCount];
+      Integer coveredCount = 0;
       for (Integer i = 0; i < polyCount; ++i)
          coverage[i] = false;
 
