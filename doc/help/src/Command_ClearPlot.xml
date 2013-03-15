@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="ClearPlot"
+<refentry version="5.0" xml:id="ClearPlot"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,9 +24,8 @@
   <refnamediv>
     <refname>ClearPlot</refname>
 
-    <refpurpose>
-      The <guilabel>ClearPlot</guilabel> Command allows you to clear all data from an <guilabel>XYPlot</guilabel>.
-    </refpurpose>
+    <refpurpose>The ClearPlot command allows you to clear all data from an
+    XYPlot.</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -35,33 +33,34 @@
 
     <synopsis>
       <literal>ClearPlot</literal> <replaceable>OutputNames</replaceable>
-      <replaceable>OutputNames</replaceable>
-           <replaceable>OutputNames</replaceable> is the list of subscribers whose data is to be cleared. 
-           When data of multiple subscribers is to be cleared, then they need to be separated by a space.
+      <replaceable>
+      OutputNames</replaceable>
+           <replaceable>OutputNames</replaceable> is the list of subscribers whose data is to be 
+           cleared. When data of multiple subscribers is to be cleared, 
+           then they need to be separated by a space.
     </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>ClearPlot</guilabel> Command allows you to clear all data from an <guilabel>XYPlot</guilabel> after it has been plotted. 
-      The <guilabel>ClearPlot</guilabel> command works only for the <guilabel>XYPlot</guilabel> object and data from multiple <guilabel>XYPlot</guilabel> objects 
-      can be cleared. <guilabel>ClearPlot</guilabel> command can be used through GMAT’s GUI or the script interface.
-    </para>
+    <para>The <guilabel>ClearPlot</guilabel> command allows you to clear all
+    data from an <guilabel>XYPlot</guilabel> after it has been plotted. The
+    <guilabel>ClearPlot</guilabel> command works only for the
+    <guilabel>XYPlot</guilabel> object and data from multiple
+    <guilabel>XYPlot</guilabel> objects can be cleared.
+    <guilabel>ClearPlot</guilabel> command can be used through GMAT’s GUI or
+    the script interface.</para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -73,24 +72,17 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>OutputNames</guilabel>
-            </entry>
+            <entry><guilabel>OutputNames</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ClearPlot</guilabel> command allows the user to clear data from a 
-                <guilabel>XYPlot</guilabel> subscriber. When more than one subscriber is being used, 
-                they need to be separated by a space.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ClearPlot</guilabel> command allows
+            the user to clear data from an <guilabel>XYPlot</guilabel>
+            subscriber. When more than one subscriber is being used, the
+            subscribers need to be separated by a space. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      Subscriber(s)
-                    </para>
+                    <para>Subscriber(s)</para>
                   </listitem>
                 </varlistentry>
 
@@ -98,9 +90,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any number of XYPlot objects
-                    </para>
+                    <para>Any number of XYPlot objects</para>
                   </listitem>
                 </varlistentry>
 
@@ -108,9 +98,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      None
-                    </para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -118,9 +106,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -128,13 +114,10 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -144,92 +127,89 @@
   <refsection>
     <title>GUI</title>
 
+    <para>Figure below shows default settings for
+    <guilabel>ClearPlot</guilabel> command.</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
-                     fileref="files/images/Command_ClearPlot_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_ClearPlot_GUI_2.png"
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para>
-      Figure above shows default settings for <guilabel>ClearPlot</guilabel> command.
-    </para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
-    <para>
-      GMAT allows you to insert <guilabel>ClearPlot</guilabel> Command into the Mission tree at any location. 
-      This allows you to clear data output from an <guilabel>XYPlot</guilabel> at any point in your mission. 
-      The <guilabel>XYPlot</guilabel> subscriber plots data at each propagation step of the entire mission duration. 
-      If you want to report data to an <guilabel>XYPlot</guilabel> at specific points in your mission, then a <guilabel>ClearPlot</guilabel> 
-      command can be inserted into the mission sequence to control when a subscriber plots data. See 
-      the Examples section below to see how <guilabel>ClearPlot</guilabel> command can be used in the Mission tree.
-    </para>
-   
+    <para>GMAT allows you to insert <guilabel>ClearPlot</guilabel> command
+    into the <guilabel>Mission</guilabel> tree at any location. This allows
+    you to clear data output from an <guilabel>XYPlot</guilabel> at any point
+    in your mission. The <guilabel>XYPlot</guilabel> subscriber plots data at
+    each propagation step of the entire mission duration. If you want to
+    report data to an <guilabel>XYPlot</guilabel> at specific points in your
+    mission, then a <guilabel>ClearPlot</guilabel> command can be inserted
+    into the mission sequence to control when a subscriber plots data. Refer
+    to the Examples section below to see how <guilabel>ClearPlot</guilabel>
+    command can be used in the <guilabel>Mission</guilabel> tree.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        This example shows how to use <guilabel>ClearPlot</guilabel> Command on multiple subscribers. 
-        Data from <guilabel>XYPlot</guilabel> subscribers is cleared after 2 days of the propagation:
-      </para>
+      <para>This example shows how to use <guilabel>ClearPlot</guilabel>
+      command on multiple subscribers. Data from <guilabel>XYPlot</guilabel>
+      subscribers is cleared after 2 days of the propagation:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create XYPlot aPlot1 aPlot2 aPlot3;
+  Create XYPlot aPlot1 aPlot2 aPlot3
 
-  GMAT aPlot1.XVariable = aSat.ElapsedSecs;
-  GMAT aPlot1.YVariables = {aSat.EarthMJ2000Eq.X};
+  aPlot1.XVariable = aSat.ElapsedSecs
+  aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
 
-  GMAT aPlot2.XVariable = aSat.ElapsedSecs;
-  GMAT aPlot2.YVariables = {aSat.EarthMJ2000Eq.Y};
+  aPlot2.XVariable = aSat.ElapsedSecs
+  aPlot2.YVariables = {aSat.EarthMJ2000Eq.Y}
 
-  GMAT aPlot3.XVariable = aSat.ElapsedSecs;
-  GMAT aPlot3.YVariables = {aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, aSat.EarthMJ2000Eq.VZ};
+  aPlot3.XVariable = aSat.ElapsedSecs
+  aPlot3.YVariables = {aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, ...
+  aSat.EarthMJ2000Eq.VZ}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
-  ClearPlot aPlot1 aPlot2 aPlot3;
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+  ClearPlot aPlot1 aPlot2 aPlot3
         </code>
       </programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        This example shows how to use <guilabel>ClearPlot</guilabel> Command on a single subscriber. 
-        Data from <guilabel>XYPlot</guilabel> is cleared for the first 3 days of the propagation and only 
-        the data retrieved from last day of propagation is plotted:
-      </para>
+      <para>This example shows how to use <guilabel>ClearPlot</guilabel>
+      command on a single subscriber. Data from <guilabel>XYPlot</guilabel> is
+      cleared for the first 3 days of the propagation and only the data
+      retrieved from last day of propagation is plotted:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create XYPlot aPlot1;
+  Create XYPlot aPlot1
 
-  GMAT aPlot1.XVariable = aSat.ElapsedDays;
-  GMAT aPlot1.YVariables = {aSat.EarthMJ2000Eq.X, aSat.EarthMJ2000Eq.Y};
+  aPlot1.XVariable = aSat.ElapsedDays
+  aPlot1.YVariables = {aSat.EarthMJ2000Eq.X, aSat.EarthMJ2000Eq.Y}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 3};
-  ClearPlot aPlot1;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+  Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+  ClearPlot aPlot1
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
         </code>
       </programlisting>
     </informalexample>
