@@ -1064,7 +1064,7 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
 //         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
 //         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
 //         Real length = sqrt(x2 + y2);
-         Real length = fabs(mouseY - mLastMouseY);
+         Real length = abs(mouseY - mLastMouseY);
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
 //         mZoomAmount = length * distance / 1000000;
