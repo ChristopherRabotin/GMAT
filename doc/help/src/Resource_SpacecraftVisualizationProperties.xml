@@ -30,7 +30,7 @@
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>spacecraft visualization properties</guilabel> lets
+    <para>The <guilabel>Spacecraft Visualization Properties</guilabel> lets
     you define a spacecraft model, translate the spacecraft in X,Y, Z
     directions or apply a fixed rotation to the attitude orientation of the
     model. You can also adjust the scale factor of the spacecraft model size.
@@ -44,18 +44,18 @@
   <refsection>
     <title>GUI</title>
 
+    <para>The figure below shows the default settings for the
+    <guilabel>Spacecraft Visualization Properties</guilabel> resource</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_SpacecraftVisualizationProperties_GUI.png"
+                     fileref="files/images/Resource_SpacecraftVisualizationProperties_GUI_2.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para>The figure above shows the default settings for the Spacecraft
-    Visualization properties resource</para>
 
     <para>The GUI interface for <guilabel>spacecraft visualization
     properties</guilabel> is contained on the Visualization tab of the
@@ -107,23 +107,23 @@
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  GMAT aSat.ModelFile = '../data/vehicle/models/aura.3ds';
-  GMAT aSat.ModelOffsetX = 1.5;
-  GMAT aSat.ModelOffsetY = -2;
-  GMAT aSat.ModelOffsetZ = 3;
-  GMAT aSat.ModelRotationX = 180;
-  GMAT aSat.ModelRotationY = 180;
-  GMAT aSat.ModelRotationZ = 90;
-  GMAT aSat.ModelScale = 15;
+  Create Spacecraft aSat
+  aSat.ModelFile = '../data/vehicle/models/aura.3ds'
+  aSat.ModelOffsetX = 1.5
+  aSat.ModelOffsetY = -2
+  aSat.ModelOffsetZ = 3
+  aSat.ModelRotationX = 180
+  aSat.ModelRotationY = 180
+  aSat.ModelRotationZ = 90
+  aSat.ModelScale = 15
 
-  Create Propagator aProp;
+  Create Propagator aProp
 
-  Create OrbitView aOrbitView;
-  GMAT aOrbitView.Add = {aSat, Earth};
+  Create OrbitView aOrbitView
+  aOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence;
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 9000};
+  BeginMissionSequence
+  Propagate aProp(aSat) {aSat.ElapsedSecs = 9000}
         </code>
       </programlisting>
     </informalexample>
