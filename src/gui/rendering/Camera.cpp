@@ -223,10 +223,17 @@ void Camera::Relocate (Rvector3 new_position, Rvector3 new_center){
 // Zoom the camera in by zoom
 // Accomplishes this by decreasing the camera's FOV
 // Maybe move the camera instead?
-void Camera::ZoomIn(Real zoom){
+void Camera::ZoomIn(Real zoom)
+{
+   Real oldFov = fovDeg;
+
    fovDeg -= zoom;
-	if (fovDeg == 0)
-		fovDeg = 1;
+
+   if (fovDeg <= 0.0)
+      fovDeg = oldFov;
+
+//	if (fovDeg == 0)
+//		fovDeg = 1;
    /*if (fovDeg < MINZOOM)
       fovDeg = MINZOOM;
    if (fovDeg > MAXZOOM)
@@ -236,10 +243,17 @@ void Camera::ZoomIn(Real zoom){
 // Zoom the camera out by zoom
 // Accomplishes this by increasing the camera's FOV
 // Maybe move the camera instead?
-void Camera::ZoomOut(Real zoom){
+void Camera::ZoomOut(Real zoom)
+{
+   Real oldFov = fovDeg;
+
    fovDeg += zoom;
-	if (fovDeg == 0)
-		fovDeg = 1;
+
+   if (fovDeg > 180.0)
+      fovDeg = oldFov;
+
+//	if (fovDeg == 0)
+//		fovDeg = 1;
    /*if (fovDeg < MINZOOM)
       fovDeg = MINZOOM;
    if (fovDeg > MAXZOOM)
