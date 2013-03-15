@@ -1061,12 +1061,15 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
       else if (event.ShiftDown() && event.RightIsDown())
       {
          // Find the zoom amount
-         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
-         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
-         Real length = sqrt(x2 + y2);        
+//         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
+//         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
+//         Real length = sqrt(x2 + y2);
+         Real length = fabs(mouseY - mLastMouseY);
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
-         mZoomAmount = length * distance / 500;
+//         mZoomAmount = length * distance / 1000000;
+         Real maxLimiter = (mCamera.fovDeg < 30.0 ? mCamera.fovDeg : 30.0);
+         mZoomAmount = length * distance / 5000000.0 * maxLimiter;
          
          if (mouseY > mLastMouseY)
             mCamera.ZoomOut(mZoomAmount);
