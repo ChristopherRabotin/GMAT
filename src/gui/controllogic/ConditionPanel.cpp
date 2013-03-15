@@ -378,7 +378,7 @@ void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
       wxString strArray[] = {wxT("&"), wxT("|")};        
       
       wxSingleChoiceDialog dialog(this, _T("Logical Operator Selection:"),
-                                        _T("LogicalOperators"), 2, strArray);
+                                        _T("Logical Operators"), 2, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -401,7 +401,7 @@ void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("RelationalOperators"), 6, strArray);
+                                        _T("Relational Operators"), 6, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -551,7 +551,7 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
       wxString strArray[] = {wxT("&"), wxT("|")};        
       
       wxSingleChoiceDialog dialog(this, _T("Logical Operator Selection:"),
-                                        _T("LogicalOperators"), 2, strArray);
+                                        _T("Logical Operators"), 2, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -574,7 +574,7 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("RelationalOperators"), 6, strArray);
+                                        _T("Relational Operators"), 6, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
