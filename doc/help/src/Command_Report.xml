@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="Report"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Report" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -25,9 +23,8 @@
   <refnamediv>
     <refname>Report</refname>
 
-    <refpurpose>
-      The Report Command allows you to write data to a text file.
-    </refpurpose>
+    <refpurpose>The Report Command allows you to write data to a text
+    file.</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -41,43 +38,159 @@
           ReportFile for data output.
       <replaceable>DataList</replaceable>
           <replaceable>DataList</replaceable> option allows you to output data to the Filename 
-          specified by the <replaceable>ReportName</replaceable>. 
-          Multiple objects can be written in the <replaceable>DataList</replaceable> 
-          when they are separated by spaces.
+          specified by the <replaceable>ReportName</replaceable>. Multiple objects can be written 
+          in the <replaceable>DataList</replaceable> when they are separated by spaces.
     </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>Report</guilabel> command allows you to report data at specific points in your mission sequence. 
-      GMAT allows you to insert <guilabel>Report</guilabel> command into the <guilabel>Mission</guilabel> tree at various locations. <guilabel>Report</guilabel> 
-      command can be used through GMAT’s GUI or the script interface. The parameters reported by <guilabel>Report</guilabel> 
-      command are placed into a report file that can be accessed at a later time.
-    </para>
+    <para>The <guilabel>Report</guilabel> command allows you to report data at
+    specific points in your mission sequence. GMAT allows you to insert
+    <guilabel>Report</guilabel> command into the <guilabel>Mission</guilabel>
+    tree at any location. <guilabel>Report</guilabel> command can be used
+    through GMAT’s GUI or via the script interface. The parameters reported by
+    <guilabel>Report</guilabel> command are placed into a report file that can
+    be accessed at the end of the mission run.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="ReportFile"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="ReportFile"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Options</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Option</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>ReportName</guilabel></entry>
+
+            <entry><para> The <guilabel>ReportName</guilabel> option allows
+            the user to specify the <guilabel>ReportFile</guilabel> for data
+            output. </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>ReportFile</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any ReportFile resource that is created</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultReportFile</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DataList</guilabel></entry>
+
+            <entry><para> The <guilabel>DataList </guilabel>option allows the
+            user to output data to the file name that is specified by the
+            <guilabel>ReportName</guilabel>. Multiple objects can be in the
+            <guilabel>DataList </guilabel>when they are separated by
+            spaces.</para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Any parameter</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Spacecraft or Impulsive Burn reportable Parameters,
+                    Array, Array Element, Variable, or a String.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DefaultSC.A1ModJulian</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
     <title>GUI</title>
-    
-    <para>
-      Figure below shows default settings for Report command:
-    </para>
+
+    <para>Figure below shows default settings for <guilabel>Report</guilabel>
+    command:</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
-                     fileref="files/images/Command_Report_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_Report_GUI_2.png"
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -85,70 +198,89 @@
 
   <refsection>
     <title>Remarks</title>
-    
-    <para>
-      <guilabel>Report</guilabel> command only allows you to report data to a report file at specific 
-      points in your mission. If you want data to be reported at each propagation 
-      step of the entire mission duration, then you should not use <guilabel>Report</guilabel> command. 
-      Instead you should use <guilabel>ReportFile</guilabel> resource. See <guilabel>ReportFile</guilabel> resource section for 
-      details on the syntax that allows you to report data at each propagation step.
-    </para>
-    
+
+    <para><guilabel>Report</guilabel> command can be used to report data to a
+    report file at specific points in your mission. If you want data to be
+    reported at each propagation step of the entire mission duration, then you
+    should not use <guilabel>Report</guilabel> command. Instead you should use
+    <guilabel>ReportFile</guilabel> resource. See
+    <guilabel>ReportFile</guilabel> resource section of the User's Guide to
+    learn about the syntax that allows you to report data at each raw
+    integrator steps.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Propagate an orbit for two days and report epoch and 
-        selected orbital elements to a report file using the Report command.
-      </para>
+      <para>Propagate an orbit for two days and report epoch and selected
+      orbital elements to a report file using the <guilabel>Report</guilabel>
+      command.</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create ReportFile aReport;
+  Create Spacecraft aSat
+  Create ReportFile aReport
 
-  Create Propagator aProp;
+  Create Propagator aProp
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
-
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
-
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+  aSat.EarthMJ2000Eq.RAAN
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+  aSat.EarthMJ2000Eq.RAAN
         </code>
       </programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Report user-defined parameters such as variables,
-        array elements and a string to a report file, using the Report command.
-      </para>
+      <para>Report user-defined parameters such as variables, array elements
+      and a string to a report file using the <guilabel>Report</guilabel>
+      command.</para>
 
       <programlisting>
         <code>
-  Create ReportFile aReport;
+  Create ReportFile aReport
 
   Create Variable aVar aVar2
-  GMAT aVar = 100;
-  GMAT aVar2 = 2000;
+  aVar = 100
+  aVar2 = 2000
 
-  Create Array aArray[2,2];
-  GMAT aArray(1, 1) = 2;
-  GMAT aArray(1, 2) = 3;
-  GMAT aArray(2, 1) = 4;
-  GMAT aArray(2, 2) = 5;
+  Create Array aArray[2,2]
+  aArray(1, 1) = 2
+  aArray(1, 2) = 3
+  aArray(2, 1) = 4
+  aArray(2, 2) = 5
 
   Create String aString
-  GMAT aString = 'GMAT is awesome';
+  aString = 'GMAT is awesome'
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) aArray(2,2) aString;
+  Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) ...
+  aArray(2,2) aString
+        </code>
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>While spacecraft propagates for less than a day, report
+      spacecraft's true anomaly, eccentricity and altitude after every 3600
+      seconds using the <guilabel>Report</guilabel> command:</para>
+
+      <programlisting>
+  Create Spacecraft aSat
+  Create ReportFile aReport
+  Create Propagator aProp <code>
+
+  BeginMissionSequence
+
+  While aSat.ElapsedDays &lt; 1
+    Propagate aProp(aSat) {aSat.ElapsedSecs = 3600 }
+    Report aReport aSat.Earth.TA aSat.Earth.ECC aSat.Earth.Altitude
+  EndWhile
         </code>
       </programlisting>
     </informalexample>

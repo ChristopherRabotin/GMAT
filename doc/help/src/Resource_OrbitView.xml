@@ -1,6 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="OrbitView"
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="OrbitView"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,49 +24,47 @@
   <refnamediv>
     <refname>OrbitView</refname>
 
-    <refpurpose>OrbitView is a user-defined resource that plots 3-Dimensional trajectories</refpurpose>
+    <refpurpose>OrbitView is a user-defined resource that plots 3-Dimensional
+    trajectories</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>OrbitView</guilabel> resource allows you to plot trajectories of a spacecraft or a celestial body.
-      GMAT also allows you to plot trajectories associated with multiple spacecrafts or celestial bodies.
-      You can create multiple <guilabel>OrbitView</guilabel> objects by using either the GUI or script interface of GMAT. <guilabel>OrbitView</guilabel>
-      plots also come with multiple options that allow you to customize the view of spacecraft’s trajectories.
-      See the Fields section below for detailed discussion on available plotting and drawing options.
-    </para>
+    <para>The <guilabel>OrbitView</guilabel> resource allows you to plot
+    trajectories of a spacecraft or a celestial body. GMAT also allows you to
+    plot trajectories associated with multiple spacecrafts or celestial
+    bodies. You can create multiple <guilabel>OrbitView</guilabel> objects by
+    using either the GUI or script interface of GMAT.
+    <guilabel>OrbitView</guilabel> plots also come with multiple options that
+    allow you to customize the view of spacecraft’s trajectories. See the
+    Fields section below for detailed discussion on available plotting and
+    drawing options.</para>
 
-    <para>
-      GMAT also provides the option of when to start and stop plotting spacecraft’s trajectories to an
-      <guilabel>OrbitView</guilabel> resource through the Toggle On/Off command. See the Remarks section below for detailed discussion
-      of the interaction between an <guilabel>OrbitView</guilabel> object and the <guilabel>Toggle</guilabel> command. GMAT’s
-      <guilabel>Spacecraft</guilabel>, <guilabel>SolarSystem</guilabel> and <guilabel>OrbitView</guilabel>
-      objects also interact with each other throughout the entire mission duration. Discussion of the interaction between
-      these objects is also mentioned in the Remarks section.
-    </para>
+    <para>GMAT also provides the option of when to start and stop plotting
+    spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
+    through the <guilabel>Toggle On/Off</guilabel> command. See the Remarks
+    section below for detailed discussion of the interaction between an
+    <guilabel>OrbitView</guilabel> object and the <guilabel>Toggle</guilabel>
+    command. GMAT’s <guilabel>Spacecraft</guilabel>,
+    <guilabel>SolarSystem</guilabel> and <guilabel>OrbitView</guilabel>
+    objects also interact with each other throughout the entire mission
+    duration. Discussion of the interaction between these objects is also
+    mentioned in the Remarks section.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>:
-      <xref linkend="Toggle"/>,
-      <xref linkend="Spacecraft"/>,
-      <xref linkend="SolarSystem"/>,
-      <xref linkend="CoordinateSystem"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
+    linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -79,28 +76,31 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>Add</guilabel>
-            </entry>
+            <entry><guilabel>Add</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Add</guilabel> subfield adds a <guilabel>spacecraft</guilabel>, <guilabel>celestial body</guilabel>, <guilabel>libration point</guilabel>, or <guilabel>barycenter</guilabel> to a plot.
-                When creating a plot the <guilabel>Earth</guilabel> is added as a default body and may be removed by the user. The
-                user can add a <guilabel>spacecraft</guilabel>, <guilabel>celestial body</guilabel>, <guilabel>libration point</guilabel>, or <guilabel>barycenter</guilabel> to a plot by using the name
-                used to create the object. The GUI's <guilabel>Selected</guilabel> field is the equivalent of the script's <guilabel>Add</guilabel> field. In the event of
-                no <guilabel>Add</guilabel> command or no objects in the <guilabel>Selected</guilabel> field, GMAT should run without the <guilabel>OrbitView</guilabel> plot and a warning message
-                displayed in the message window. The following warning message is sufficient: The OrbitView named "DefaultOrbitView"
-                will be turned off. No SpacePoints were added to plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Add</guilabel> field adds a
+            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
+            body</guilabel>, <guilabel>Libration Point</guilabel>, or
+            <guilabel>Barycenter</guilabel> to a plot. When creating a plot,
+            the <guilabel>Earth</guilabel> is added as a default body and may
+            be removed by the user. The user can add a
+            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
+            body</guilabel>, <guilabel>Libration Point</guilabel>, or
+            <guilabel>Barycenter</guilabel> to a plot by using the name used
+            to create the object. The GUI's <guilabel>Selected</guilabel>
+            field is the equivalent of the script's <guilabel>Add</guilabel>
+            field. In the event of no <guilabel>Add</guilabel> command or no
+            objects in the <guilabel>Selected</guilabel> field, GMAT should
+            run without the <guilabel>OrbitView</guilabel> plot and a warning
+            message will be displayed in the message window. The following
+            warning message is sufficient: The OrbitView named
+            "DefaultOrbitView" will be turned off. No SpacePoints were added
+            to plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      StringList
-                    </para>
+                    <para>StringList</para>
                   </listitem>
                 </varlistentry>
 
@@ -108,9 +108,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      SpacecraftName, CelestialBodyName, LibrationPointName, BarycenterName
-                    </para>
+                    <para>SpacecraftName, CelestialBodyName,
+                    LibrationPointName, BarycenterName</para>
                   </listitem>
                 </varlistentry>
 
@@ -118,9 +117,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -128,9 +125,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultSC, Earth
-                    </para>
+                    <para>DefaultSC, Earth</para>
                   </listitem>
                 </varlistentry>
 
@@ -146,34 +141,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Axes</guilabel>
-            </entry>
+            <entry><guilabel>Axes</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Axis</guilabel> flag allows the user to tell GMAT to draw the Cartesian axis
-                system associated with the coordinate system selected under the <guilabel>CoordinateSystem</guilabel>
-                field of an <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Axes</guilabel> field allows the user
+            to tell GMAT to draw the Cartesian axis system associated with the
+            coordinate system selected under the
+            <guilabel>CoordinateSystem</guilabel> field of an
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -181,9 +167,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -191,9 +175,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -220,28 +202,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>CelestialPlane</guilabel>
-            </entry>
+            <entry><guilabel>EclipticPlane</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>CelestialPlane</guilabel> field allows the user to tell GMAT
-                to draw a grid representing the <guilabel>ecliptic plane</guilabel> in an <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>EclipticPlane</guilabel> field allows
+            the user to tell GMAT to draw a grid representing the
+            <guilabel>Ecliptic Plane</guilabel> in an
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -249,9 +224,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -259,9 +232,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -269,9 +240,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Off
-                    </para>
+                    <para>Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -290,31 +259,29 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>CoordinateSystem</guilabel>
-            </entry>
+            <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>CoordinateSystem</guilabel> field on an <guilabel>OrbitView</guilabel> plot allows the user 
-                to select which <guilabel>coordinate system</guilabel> to use to draw the plot data. A <guilabel>coordinate system</guilabel> 
-                is defined as an <guilabel>origin</guilabel> and an <guilabel>axis system</guilabel>, and the <guilabel>CoordinateSystem</guilabel> field allows 
-                the user to determine the <guilabel>origin</guilabel> and <guilabel>axis system</guilabel> of an <guilabel>OrbitView</guilabel> plot. See the <guilabel>CoordinateSystem</guilabel> 
-                object fields for information of defining different types of <guilabel>coordinate systems</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>CoordinateSystem</guilabel> field on
+            an <guilabel>OrbitView</guilabel> plot allows the user to select
+            which <guilabel>coordinate system</guilabel> to use to draw the
+            plot data. A <guilabel>coordinate system</guilabel> is defined as
+            an <guilabel>origin</guilabel> and an <guilabel>axis
+            system</guilabel>. The <guilabel>CoordinateSystem</guilabel> field
+            allows the user to determine the <guilabel>origin</guilabel> and
+            <guilabel>axis system</guilabel> of an
+            <guilabel>OrbitView</guilabel> plot. See the
+            <guilabel>CoordinateSystem</guilabel> object fields for
+            information of defining different types of <guilabel>coordinate
+            systems</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      UserDefString
-                    </para>
+                    <para>UserDefString</para>
                   </listitem>
                 </varlistentry>
 
@@ -322,9 +289,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any default or user defined coordinate system
-                    </para>
+                    <para>Any default or user defined coordinate system</para>
                   </listitem>
                 </varlistentry>
 
@@ -332,9 +297,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -342,9 +305,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      EarthMJ2000Eq
-                    </para>
+                    <para>EarthMJ2000Eq</para>
                   </listitem>
                 </varlistentry>
 
@@ -363,30 +324,26 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>DataCollectFrequency</guilabel>
-            </entry>
+            <entry><guilabel>DataCollectFrequency</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>DataCollectFrequency</guilabel> field allows the user to define how data is collected for plotting. It is often inefficient
-                to draw every ephemeris point associated with a trajectory. Often, drawing a smaller subset of the data still results in smooth
-                trajectory plots, while executing more quickly. The <guilabel>DataCollectFrequency</guilabel> is an integer that represents how often to
-                collect data and store for plotting. If <guilabel>DataCollectFrequency</guilabel> is set to 10, then <guilabel>Data</guilabel> is collected every 10 integration steps.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>DataCollectFrequency</guilabel> field
+            allows the user to define how data is collected for plotting. It
+            is often inefficient to draw every ephemeris point associated with
+            a trajectory. Often, drawing a smaller subset of the data still
+            results in smooth trajectory plots, while executing more quickly.
+            The <guilabel>DataCollectFrequency</guilabel> is an integer that
+            represents how often to collect data and store for plotting. If
+            <guilabel>DataCollectFrequency</guilabel> is set to 10, then data
+            is collected every 10 integration steps. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -394,9 +351,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer ≥ 1
-                    </para>
+                    <para>Integer ≥ 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -404,9 +359,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -414,9 +367,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      1
-                    </para>
+                    <para>1</para>
                   </listitem>
                 </varlistentry>
 
@@ -424,9 +375,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      Integration Steps
-                    </para>
+                    <para>Integration Steps</para>
                   </listitem>
                 </varlistentry>
 
@@ -437,29 +386,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>DrawObject</guilabel>
-            </entry>
+            <entry><guilabel>DrawObject</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>DrawObject</guilabel> field allows the user to option of
-                displaying <guilabel>Spacecraft</guilabel> or <guilabel>Celestial</guilabel> 
-                objects on the <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>DrawObject</guilabel> field allows the
+            user the option of displaying <guilabel>Spacecraft</guilabel> or
+            <guilabel>Celestial</guilabel> objects on the
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -467,9 +408,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true, false
-                    </para>
+                    <para>true, false</para>
                   </listitem>
                 </varlistentry>
 
@@ -477,9 +416,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -487,9 +424,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [true true]
-                    </para>
+                    <para>[true true]</para>
                   </listitem>
                 </varlistentry>
 
@@ -508,28 +443,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>EnableConstellations </guilabel>
-            </entry>
+            <entry><guilabel>EnableConstellations </guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>EnableConstellations</guilabel> field allows the user the 
-                option of displaying star constellations on the <guilabel>OrbitView</guilabel> Plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>EnableConstellations</guilabel> field
+            allows the user the option of displaying star constellations on
+            the <guilabel>OrbitView</guilabel> Plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -537,9 +464,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -547,9 +472,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -557,9 +480,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      On
-                    </para>
+                    <para>On</para>
                   </listitem>
                 </varlistentry>
 
@@ -578,28 +499,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>EnableStars </guilabel>
-            </entry>
+            <entry><guilabel>EnableStars </guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>EnableStars</guilabel> field allows the user the option of displaying stars on the <guilabel>OrbitView</guilabel> Plot. 
-                When the <guilabel>EnableStars</guilabel> field is turned off, then <guilabel>EnableConstellations</guilabel> field is automatically diabled.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>EnableStars</guilabel> field allows
+            the user the option of displaying stars on the
+            <guilabel>OrbitView</guilabel> Plot. When the
+            <guilabel>EnableStars</guilabel> field is turned off, then
+            <guilabel>EnableConstellations</guilabel> field is automatically
+            diabled. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -607,9 +523,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -617,9 +531,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -627,9 +539,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      On
-                    </para>
+                    <para>On</para>
                   </listitem>
                 </varlistentry>
 
@@ -648,28 +558,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Grid </guilabel>
-            </entry>
+            <entry><guilabel>Grid </guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Grid</guilabel> flag allows the user to tell GMAT to draw a grid representing the 
-                longitude and latitude lines celestial bodies added to an <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Grid</guilabel> field allows the user
+            to draw a grid representing the longitude and latitude lines on
+            the celestial bodies added to an <guilabel>OrbitView</guilabel>
+            plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -677,9 +580,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -687,9 +588,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -697,9 +596,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Off
-                    </para>
+                    <para>Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -718,27 +615,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Maximized</guilabel>
-            </entry>
+            <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Maximized</guilabel> field allows the user to maximize the <guilabel>OrbitView</guilabel> Plot window.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Maximized</guilabel> field allows the
+            user to maximize the <guilabel>OrbitView</guilabel> plot window.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -746,9 +636,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      True, False
-                    </para>
+                    <para>True, False</para>
                   </listitem>
                 </varlistentry>
 
@@ -756,9 +644,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -766,9 +652,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      false
-                    </para>
+                    <para>false</para>
                   </listitem>
                 </varlistentry>
 
@@ -787,29 +671,24 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>NumPointsToRedraw</guilabel>
-            </entry>
+            <entry><guilabel>NumPointsToRedraw</guilabel></entry>
 
-            <entry>
-              <para>
-                When <guilabel>NumPointsToRedraw</guilabel> is set to zero, all ephemeris points are drawn. When <guilabel>NumPointsToRedraw</guilabel> is 
-                set to a positive integer, say 10 for example, only the last 10 collected data points are drawn. 
-                See <guilabel>DataCollectFrequency</guilabel> for explanation of how data is collected for an <guilabel>OrbitView</guilabel> Plot.
-              </para>
-              <variablelist>
+            <entry><para> When <guilabel>NumPointsToRedraw</guilabel> field is
+            set to zero, all ephemeris points are drawn. When
+            <guilabel>NumPointsToRedraw</guilabel> is set to a positive
+            integer, say 10 for example, only the last 10 collected data
+            points are drawn. See <guilabel>DataCollectFrequency</guilabel>
+            for explanation of how data is collected for an
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -817,9 +696,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer ≥ 1
-                    </para>
+                    <para>Integer ≥ 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -827,9 +704,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -837,9 +712,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -858,28 +731,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>OrbitColor</guilabel>
-            </entry>
+            <entry><guilabel>OrbitColor</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>OrbitColor</guilabel> field allows the user to be able to select colors 
-                for both spacecraft and celestial body trajectories.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>OrbitColor</guilabel> field allows the
+            user to be able to select colors for both spacecraft and celestial
+            body trajectories. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -887,9 +752,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any color available from the Orbit Color selectbox
-                    </para>
+                    <para>Any color available from the Orbit Color
+                    selectbox</para>
                   </listitem>
                 </varlistentry>
 
@@ -897,9 +761,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -907,9 +769,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [ 255 32768 ]
-                    </para>
+                    <para>[ 255 32768 ]</para>
                   </listitem>
                 </varlistentry>
 
@@ -928,29 +788,25 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>RelativeZOrder</guilabel>
-            </entry>
+            <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry>
-              <para>
-                <guilabel>RelativeZOrder</guilabel> field allows the user to select which <guilabel>OrbitView</guilabel> window to display first on the screen. 
-                The <guilabel>OrbitViewPlot</guilabel> with lowest <guilabel>RelativeZOrder</guilabel> value will be displayed last while <guilabel>OrbitViewPlot</guilabel> with highest 
-                <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-              </para>
-              <variablelist>
+            <entry><para> <guilabel>RelativeZOrder</guilabel> field allows the
+            user to select which <guilabel>OrbitView</guilabel> window to
+            display first on the screen. The <guilabel>
+            OrbitViewPlot</guilabel> with lowest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed last
+            while <guilabel>OrbitViewPlot</guilabel> with highest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -958,9 +814,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any real number
-                    </para>
+                    <para>Any real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -968,9 +822,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -978,9 +830,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -999,28 +849,22 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ShowPlot</guilabel>
-            </entry>
+            <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ShowPlot</guilabel> field allows the user to turn off a plot for a particular run, without deleting the plot object, or
-                removing it from the script. If you select true, then the plot will be shown. If you select false, then the plot will not be shown.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ShowPlot</guilabel> field allows the
+            user to turn off a plot for a particular run, without deleting the
+            plot object, or removing it from the script. If you select true,
+            then the plot will be shown. If you select false, then the plot
+            will not be shown. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1028,9 +872,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      True, False
-                    </para>
+                    <para>True, False</para>
                   </listitem>
                 </varlistentry>
 
@@ -1038,9 +880,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1048,9 +888,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      True
-                    </para>
+                    <para>True</para>
                   </listitem>
                 </varlistentry>
 
@@ -1069,29 +907,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Size</guilabel>
-            </entry>
+            <entry><guilabel>Size</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Size</guilabel> field allows the user to control the display size of <guilabel>OrbitViewPlot</guilabel> window. 
-                First value in [0 0] matrix controls horizonal size and second value controls vertical size of 
-                OrbitViewPlot display window.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Size</guilabel> field allows the user
+            to control the display size of <guilabel>OrbitViewPlot</guilabel>
+            window. First value in [0 0] matrix controls horizonal size and
+            second value controls vertical size of
+            <guilabel>OrbitViewPlot</guilabel> display window. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1099,9 +931,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any Real number
-                    </para>
+                    <para>Any Real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -1109,9 +939,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1119,9 +947,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [0  0]
-                    </para>
+                    <para>[0 0]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1140,34 +966,32 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>SolverIterations</guilabel>
-            </entry>
+            <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>SolverIterations</guilabel> field determines whether or not data associated
-                with perturbed trajectories during a solver (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
-                sequence is plotted to <guilabel>OrbitView</guilabel>. When <guilabel>SolverIterations</guilabel> is set to
-                All, all perturbations/iterations are plotted to an <guilabel>OrbitView</guilabel> plot. When
-                <guilabel>SolverIterations</guilabel> is set to <guilabel>Current</guilabel>, only current solution is plotted to an <guilabel>OrbitView</guilabel>. 
-                When <guilabel>SolverIterations</guilabel> is set to <guilabel>None</guilabel>, this shows only final
-                solution after the end of an iterative process and draws only final
-                trajectory to an <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            determines whether or not data associated with perturbed
+            trajectories during a solver (<guilabel>Targeter</guilabel>,
+            <guilabel>Optimize</guilabel>) sequence is plotted to
+            <guilabel>OrbitView</guilabel>. When
+            <guilabel>SolverIterations</guilabel> is set to
+            <guilabel>All</guilabel>, all perturbations/iterations are plotted
+            to an <guilabel>OrbitView</guilabel> plot. When
+            <guilabel>SolverIterations</guilabel> is set to
+            <guilabel>Current</guilabel>, only current solution is plotted to
+            an <guilabel>OrbitView</guilabel>. When
+            <guilabel>SolverIterations</guilabel> is set to
+            <guilabel>None</guilabel>, this shows only final solution after
+            the end of an iterative process and draws only final trajectory to
+            an <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1175,9 +999,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      All, Current, None
-                    </para>
+                    <para>All, Current, None</para>
                   </listitem>
                 </varlistentry>
 
@@ -1185,9 +1007,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1195,9 +1015,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Current
-                    </para>
+                    <para>Current</para>
                   </listitem>
                 </varlistentry>
 
@@ -1216,28 +1034,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>StarCount</guilabel>
-            </entry>
+            <entry><guilabel>StarCount</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>StarCount</guilabel> field allows the user to enter the 
-                number of stars that need to be displayed in an <guilabel>OrbitView</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>StarCount</guilabel> field allows the
+            user to enter the number of stars that need to be displayed in an
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -1245,9 +1055,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer ≥ 1
-                    </para>
+                    <para>Integer ≥ 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -1255,9 +1063,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1265,9 +1071,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      7000
-                    </para>
+                    <para>7000</para>
                   </listitem>
                 </varlistentry>
 
@@ -1286,29 +1090,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>SunLine</guilabel>
-            </entry>
+            <entry><guilabel>SunLine</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>SunLines</guilabel> allows the user to tell GMAT to draw a line that 
-                starts at the center of central body and points towards the
-                <guilabel>Sun</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>SunLine</guilabel> field allows the
+            user to tell GMAT to draw a line that starts at the center of
+            central body and points towards the <guilabel>Sun</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1316,9 +1112,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -1326,9 +1120,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1336,9 +1128,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Off
-                    </para>
+                    <para>Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -1357,29 +1147,22 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>TargetColor</guilabel>
-            </entry>
+            <entry><guilabel>TargetColor</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>TargetColor</guilabel> field allows the user to select any available 
-                color for perturbing trajectories during iterative processes such as 
-                <guilabel>Differential Correction</guilabel> or <guilabel>Optimization</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>TargetColor</guilabel> field allows
+            the user to select any available color for perturbing trajectories
+            during iterative processes such as <guilabel>Differential
+            Correction</guilabel> or <guilabel>Optimization</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1387,9 +1170,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any color available from Target Color select box
-                    </para>
+                    <para>Any color available from Target Color select
+                    box</para>
                   </listitem>
                 </varlistentry>
 
@@ -1397,9 +1179,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1407,9 +1187,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [ 8421440 0 ]
-                    </para>
+                    <para>[ 8421440 0 ]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1428,35 +1206,30 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UpdatePlotFrequency</guilabel>
-            </entry>
+            <entry><guilabel>UpdatePlotFrequency</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>UpdatePlotFrequency</guilabel> field allows the user to
-                specify how often to update an <guilabel>OpenGL</guilabel> plot is updated with new
-                data collected during the process of propagating spacecraft and
-                running a mission. Data is collected for a plot according the
-                value defined by <guilabel>DataCollectFrequency</guilabel>. An <guilabel>OpenGL</guilabel> plot is updated
-                with the new data, according to the value set in
-                <guilabel>UpdatePlotFrequency</guilabel>. If <guilabel>UpdatePlotFrequency</guilabel> is set to 10 and
-                <guilabel>DataCollectFrequency</guilabel> is set to 2, then the plot is updated with
-                new data every 20 (10*2) integration steps.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>UpdatePlotFrequency</guilabel> field
+            allows the user to specify how often to update an
+            <guilabel>OrbitView</guilabel> plot is updated with new data
+            collected during the process of propagating spacecraft and running
+            a mission. Data is collected for a plot according to the value
+            defined by <guilabel>DataCollectFrequency</guilabel>. An
+            <guilabel>OrbitView</guilabel> plot is updated with the new data,
+            according to the value set in
+            <guilabel>UpdatePlotFrequency</guilabel>. If
+            <guilabel>UpdatePlotFrequency</guilabel> is set to 10 and
+            <guilabel>DataCollectFrequency</guilabel> is set to 2, then the
+            plot is updated with new data every 20 (10*2) integration steps.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -1464,9 +1237,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer ≥ 1
-                    </para>
+                    <para>Integer ≥ 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -1474,9 +1245,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1484,9 +1253,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      50
-                    </para>
+                    <para>50</para>
                   </listitem>
                 </varlistentry>
 
@@ -1505,29 +1272,22 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UpperLeft</guilabel>
-            </entry>
+            <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>UpperLeft</guilabel> field allows the user to pan the <guilabel>OrbitViewPlot</guilabel> display window in any direction. 
-                First value in [0 0] matrix helps to pan the <guilabel>OrbitView</guilabel> window horizontally and second value 
-                helps to pan the window vertically.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>UpperLeft</guilabel> field allows the
+            user to pan the <guilabel>OrbitView </guilabel>plot window in any
+            direction. First value in [0 0] matrix helps to pan the
+            <guilabel>OrbitView</guilabel> window horizontally and second
+            value helps to pan the window vertically. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1535,9 +1295,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any Real number
-                    </para>
+                    <para>Any Real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -1545,9 +1303,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1555,9 +1311,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [0 0]
-                    </para>
+                    <para>[0 0]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1576,36 +1330,30 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UseInitialView</guilabel>
-            </entry>
+            <entry><guilabel>UseInitialView</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>UseInitialView</guilabel> field allows the user to control the view
-                of an <guilabel>OrbitView</guilabel> plot between multiple runs of a mission sequence. The
-                first time a specific <guilabel>OrbitView</guilabel> plot is created, GMAT will
-                automatically use the view as defined by the fields associated
-                with <guilabel>View Definition</guilabel>, <guilabel>View Up Direction</guilabel>, and <guilabel>Field of View</guilabel>.
-                However, if the user changes the view using the mouse, GMAT will
-                retain this view upon rerunning the mission if <guilabel>UseInitialView</guilabel> is
-                set to false. If <guilabel>UseInitialView</guilabel> is set to true, the view for an
-                <guilabel>OrbitView</guilabel> plot will be returned to the view defined by the initial
-                settings.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>UseInitialView</guilabel> field allows
+            the user to control the view of an <guilabel>OrbitView</guilabel>
+            plot between multiple runs of a mission sequence. The first time a
+            specific <guilabel>OrbitView</guilabel> plot is created, GMAT will
+            automatically use the view as defined by the fields associated
+            with <guilabel>View Definition</guilabel>, <guilabel>View Up
+            Direction</guilabel>, and <guilabel>View Option</guilabel>.
+            However, if the user changes the view using the mouse, GMAT will
+            retain this view upon rerunning the mission as long as
+            <guilabel>UseInitialView</guilabel> is set to false. If
+            <guilabel>UseInitialView</guilabel> is set to true, the view for
+            an <guilabel>OrbitView</guilabel> plot will be returned to the
+            view defined by the initial settings. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1613,9 +1361,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -1623,9 +1369,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1633,9 +1377,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      On
-                    </para>
+                    <para>On</para>
                   </listitem>
                 </varlistentry>
 
@@ -1654,33 +1396,30 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ViewDirection</guilabel>
-            </entry>
+            <entry><guilabel>ViewDirection</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ViewDirection</guilabel> field allows the user to select the direction of view in an <guilabel>OrbitView</guilabel> plot. The
-                user can specify the view direction by choosing an object to point
-                at such as a <guilabel>spacecraft</guilabel>, <guilabel>celestial body</guilabel>, <guilabel>libration point</guilabel>, or
-                <guilabel>barycenter</guilabel>. Alternatively, the user can specify a vector of the
-                form [x y z]. If the user specification of <guilabel>ViewDirection</guilabel>,
-                <guilabel>ViewPointReference</guilabel>, and <guilabel>ViewPointVector</guilabel>, results in a zero vector,
-                GMAT uses [0 0 10000] for <guilabel>ViewDirection</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ViewDirection</guilabel> field allows
+            the user to select the direction of view in an
+            <guilabel>OrbitView</guilabel> plot. The user can specify the view
+            direction by choosing an object to point at such as a
+            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
+            body</guilabel>, <guilabel>Libration Point</guilabel>, or
+            <guilabel>Barycenter</guilabel>. Alternatively, the user can
+            specify a vector of the form [x y z]. If the user specification of
+            <guilabel>ViewDirection</guilabel>,
+            <guilabel>ViewPointReference</guilabel>, and
+            <guilabel>ViewPointVector</guilabel> results in a zero vector,
+            GMAT uses [0 0 10000] for <guilabel>ViewDirection</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1688,10 +1427,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      SpacecraftName, CelestialBodyName, LibrationPointName, BarycenterName, or a 3-vector
-                      of numerical values
-                    </para>
+                    <para>SpacecraftName, CelestialBodyName,
+                    LibrationPointName, BarycenterName, or a 3-vector of
+                    numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1699,9 +1437,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1709,165 +1445,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Earth
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>
-                      km or N/A
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
-
-          <row>
-            <entry>
-              <guilabel>ViewPointReference</guilabel>
-            </entry>
-
-            <entry>
-              <para>
-                The <guilabel>ViewPointReference</guilabel> field
-                is an optional field that allows the user to change the reference
-                point from which <guilabel>ViewPointVector</guilabel> is measured. <guilabel>ViewPointReference</guilabel>
-                defaults to the origin of the coordinate system for the plot. A
-                <guilabel>ViewPointReference</guilabel> can be any <guilabel>spacecraft</guilabel>, <guilabel>celestial body</guilabel>,
-                <guilabel>libration point</guilabel>, or <guilabel>barycenter</guilabel>.
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>
-                      String
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>
-                      SpacecraftName, CelestialBodyName, LibrationPointName, BarycenterName, or a 3-vector
-                      of numerical values
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>
-                      set
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      Earth
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>
-                      km or N/A
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
-
-          <row>
-            <entry>
-              <guilabel>ViewPointVector</guilabel>
-            </entry>
-
-            <entry>
-              <para>
-                The product of <guilabel>ViewScaleFactor</guilabel> and <guilabel>ViewPointVector</guilabel> field
-                determines the view point location with respect to
-                <guilabel>ViewPointReference</guilabel>. <guilabel>ViewPointVector</guilabel> can be a vector, or any of the
-                following objects: <guilabel>spacecraft</guilabel>, <guilabel>celestial body</guilabel>, <guilabel>libration point</guilabel>, or
-                <guilabel>barycenter</guilabel>. The location of the <guilabel>Viewpoint</guilabel> in three-space is
-                defined as the vector addition of <guilabel>ViewPointReference</guilabel>, and the
-                vector defined by product of <guilabel>ViewScaleFactor</guilabel> and <guilabel>ViewPointVector</guilabel>
-                in the coordinate system chosen by the user.
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>
-                      String
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>
-                      SpacecraftName, CelestialBodyName, LibrationPointName,
-                      BarycenterName, or a 3-vector of numerical values
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>
-                      set
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      [30000 0 0]
-                    </para>
+                    <para>Earth</para>
                   </listitem>
                 </varlistentry>
 
@@ -1886,30 +1464,26 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ViewScaleFactor</guilabel>
-            </entry>
+            <entry><guilabel>ViewPointReference</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ViewScaleFactor</guilabel> field scales <guilabel>ViewPointVector</guilabel>
-                before adding it to <guilabel>ViewPointReference</guilabel>. The <guilabel>ViewScaleFactor</guilabel> allows
-                the user to back away from an object to fit in the field of
-                view.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ViewPointReference</guilabel> field is
+            an optional field that allows the user to change the reference
+            point from which <guilabel>ViewPointVector</guilabel> is measured.
+            <guilabel>ViewPointReference</guilabel> defaults to the origin of
+            the coordinate system for the plot. A
+            <guilabel>ViewPointReference</guilabel> can be any
+            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
+            body</guilabel>, <guilabel>Libration Point</guilabel>, or
+            <guilabel>Barycenter</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1917,9 +1491,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real Number ≥ 0
-                    </para>
+                    <para>SpacecraftName, CelestialBodyName,
+                    LibrationPointName, BarycenterName, or a 3-vector of
+                    numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1927,9 +1501,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1937,9 +1509,133 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      1
-                    </para>
+                    <para>Earth</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ViewPointVector</guilabel></entry>
+
+            <entry><para> The product of <guilabel>ViewScaleFactor</guilabel>
+            and <guilabel>ViewPointVector</guilabel> field determines the view
+            point location with respect to
+            <guilabel>ViewPointReference</guilabel>.
+            <guilabel>ViewPointVector</guilabel> can be a vector, or any of
+            the following objects: <guilabel>Spacecraft</guilabel>,
+            <guilabel>Celestial body</guilabel>, <guilabel>Libration
+            Point</guilabel>, or <guilabel>Barycenter</guilabel>. The location
+            of the view point in three-dimensional space is defined as the
+            vector addition of <guilabel>ViewPointReference</guilabel> and the
+            vector defined by product of <guilabel>ViewScaleFactor</guilabel>
+            and <guilabel>ViewPointVector</guilabel> in the coordinate system
+            chosen by the user. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>SpacecraftName, CelestialBodyName,
+                    LibrationPointName, BarycenterName, or a 3-vector of
+                    numerical values</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[30000 0 0]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ViewScaleFactor</guilabel></entry>
+
+            <entry><para> The <guilabel>ViewScaleFactor</guilabel> field
+            scales <guilabel>ViewPointVector</guilabel> before adding it to
+            <guilabel>ViewPointReference</guilabel>. The
+            <guilabel>ViewScaleFactor</guilabel> allows the user to back away
+            from an object to fit in the field of view. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real Number ≥ 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
                   </listitem>
                 </varlistentry>
 
@@ -1958,31 +1654,24 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ViewUpAxis</guilabel>
-            </entry>
+            <entry><guilabel>ViewUpAxis</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ViewUpAxis</guilabel> allows the user to define
-                which axis of the <guilabel>ViewUpCoordinateSystem</guilabel> that will appear as the
-                up direction in an <guilabel>Orbitview</guilabel> plot. See the comments under
-                <guilabel>ViewUpCoordinateSystem</guilabel> for more details of fields used to
-                determine the up direction in an <guilabel>Orbitview</guilabel> plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ViewUpAxis</guilabel> field allows the
+            user to define which axis of the
+            <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as
+            the up direction in an <guilabel>OrbitView</guilabel> plot. See
+            the comments under <guilabel>ViewUpCoordinateSystem</guilabel> for
+            more details of fields used to determine the up direction in an
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1990,9 +1679,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      X , -X , Y , -Y , Z , -Z
-                    </para>
+                    <para>X , -X , Y , -Y , Z , -Z</para>
                   </listitem>
                 </varlistentry>
 
@@ -2000,9 +1687,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -2010,9 +1695,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Z
-                    </para>
+                    <para>Z</para>
                   </listitem>
                 </varlistentry>
 
@@ -2031,40 +1714,36 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ViewUpCoordinateSystem</guilabel>
-            </entry>
+            <entry><guilabel>ViewUpCoordinateSystem</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ViewUpCoordinateSystem</guilabel> and <guilabel>ViewUpAxis</guilabel> fields are used to determine
-                which direction appears as up in an <guilabel>Orbitview</guilabel> plot and together with
-                the fields associated the the <guilabel>View Direction</guilabel>, uniquely define the
-                view. The fields associated with the <guilabel>View Definition</guilabel> allow the
-                user to define the point of view in 3-space, and the direction of
-                the line of sight. However, this information alone is not enough
-                to uniquely define the view. We also must provide how the view is
-                oriented about the line of sight. This is accomplished by defining
-                what direction should appear as the up direction in the plot and
-                is configured using the <guilabel>ViewUpCoordinateSystem</guilabel> field and the
-                <guilabel>ViewUpAxis</guilabel> field. The <guilabel>ViewUpCoordinateSystem</guilabel> allows the user to
-                select a coordinate system to define the up direction. Most of the
-                time this system will be the same as the coordinate system chosen
-                under the <guilabel>CoordinateSystem</guilabel> field.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ViewUpCoordinateSystem</guilabel> and
+            <guilabel>ViewUpAxis</guilabel> fields are used to determine which
+            direction appears as up in an <guilabel>OrbitView</guilabel> plot
+            and together with the fields associated the the <guilabel>View
+            Direction</guilabel>, uniquely define the view. The fields
+            associated with the <guilabel>View Definition</guilabel> allow the
+            user to define the point of view in three-dimensional space, and
+            the direction of the line of sight. However, this information
+            alone is not enough to uniquely define the view. We also must
+            provide how the view is oriented about the line of sight. This is
+            accomplished by defining what direction should appear as the up
+            direction in the plot and is configured using the
+            <guilabel>ViewUpCoordinateSystem</guilabel> field and the
+            <guilabel>ViewUpAxis</guilabel> field. The
+            <guilabel>ViewUpCoordinateSystem</guilabel> allows the user to
+            select a coordinate system to define the up direction. Most of the
+            time this system will be the same as the coordinate system chosen
+            under the <guilabel>CoordinateSystem</guilabel> field. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -2072,9 +1751,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any default or user defined coordinate system
-                    </para>
+                    <para>Any default or user defined coordinate system</para>
                   </listitem>
                 </varlistentry>
 
@@ -2082,9 +1759,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -2092,9 +1767,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      EarthMJ2000Eq
-                    </para>
+                    <para>EarthMJ2000Eq</para>
                   </listitem>
                 </varlistentry>
 
@@ -2113,30 +1786,22 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>WireFrame</guilabel>
-            </entry>
+            <entry><guilabel>WireFrame</guilabel></entry>
 
-            <entry>
-              <para>
-                When the <guilabel>WireFrame</guilabel> field is set to <guilabel>On</guilabel>, celestial
-                bodies are drawn using a wireframe model. When the <guilabel>WireFrame</guilabel> field
-                is set to <guilabel>Off</guilabel>, then celestial bodies are drawn using a full
-                map.
-              </para>
-              <variablelist>
+            <entry><para> When the <guilabel>WireFrame</guilabel> field is set
+            to <guilabel>On</guilabel>, celestial bodies are drawn using a
+            wireframe model. When the <guilabel>WireFrame</guilabel> field is
+            set to <guilabel>Off</guilabel>, then celestial bodies are drawn
+            using a full map. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -2144,9 +1809,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Off, On
-                    </para>
+                    <para>Off, On</para>
                   </listitem>
                 </varlistentry>
 
@@ -2154,9 +1817,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -2164,9 +1825,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Off
-                    </para>
+                    <para>Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -2185,29 +1844,22 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>XYPlane</guilabel>
-            </entry>
+            <entry><guilabel>XYPlane</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>XYPlane</guilabel> flag allows the user to tell GMAT to draw a grid
-                representing the <guilabel>XY-plane</guilabel> of the coordinate system selected under
-                the <guilabel>CoordinateSystem</guilabel> field of the OrbitView plot.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>XYPlane</guilabel> flag allows the
+            user to tell GMAT to draw a grid representing the
+            <guilabel>XY-plane</guilabel> of the coordinate system selected
+            under the <guilabel>CoordinateSystem</guilabel> field of the
+            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -2215,9 +1867,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -2225,9 +1875,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -2235,9 +1883,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      On
-                    </para>
+                    <para>On</para>
                   </listitem>
                 </varlistentry>
 
@@ -2256,8 +1902,7 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -2266,39 +1911,33 @@
 
   <refsection>
     <title>GUI</title>
-    
+
+    <para>The figure below shows the default settings for the
+    <guilabel>OrbitView</guilabel> resource:</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_OrbitView_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
-      <!--<info>
-        Figure: Default Name and Settings for the OrbitView Object Dialog Box
-      </info>-->
     </screenshot>
 
     <refsection>
       <title>OrbitView Window Mouse Controls</title>
 
-      <para>
-        The list of controls in the table below helps you navigate through the
-        <guilabel>OrbitView</guilabel> graphics window. "<guilabel>Left</guilabel>" and "<guilabel>Right</guilabel>" designate the mouse button
-        which has to be pressed.
-      </para>
+      <para>The list of controls in the table below helps you navigate through
+      the <guilabel>OrbitView</guilabel> graphics window.
+      "<guilabel>Left</guilabel>" and "<guilabel>Right</guilabel>" designate
+      the mouse button which has to be pressed.</para>
 
-      <informaltable colsep="0"
-                     frame="topbot">
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1"
-                   colwidth=".5*"/>
+          <colspec colnum="1" colwidth=".5*"/>
 
-          <colspec colnum="2"
-                   colwidth="3*"/>
+          <colspec colnum="2" colwidth="3*"/>
 
           <thead>
             <row>
@@ -2310,43 +1949,29 @@
 
           <tbody>
             <row>
-              <entry>
-                <guilabel>Left Drag</guilabel>
-              </entry>
+              <entry><guilabel>Left Drag</guilabel></entry>
 
-              <entry>
-                <para>
-                  Helps to change camera orientation. Camera orientation can be changed in
-                  <guilabel>Up</guilabel>/<guilabel>Down</guilabel>/<guilabel>Left</guilabel>/<guilabel>Right</guilabel>
-                  directions.
-                </para>
-              </entry>
+              <entry><para> Helps to change camera orientation. Camera
+              orientation can be changed in
+              <guilabel>Up</guilabel>/<guilabel>Down</guilabel>/<guilabel>Left</guilabel>/<guilabel>Right</guilabel>
+              directions. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>Right Drag</guilabel>
-              </entry>
+              <entry><guilabel>Right Drag</guilabel></entry>
 
-              <entry>
-                <para>
-                  Helps to zoom in and out of the graphics window.
-                  Moving the cursor in <guilabel>Left</guilabel>/<guilabel>Right</guilabel> or <guilabel>Up</guilabel>/<guilabel>Down</guilabel>
-                  directions helps to zoom in and out of the graphics window.
-                </para>
-              </entry>
+              <entry><para> Helps to zoom in and out of the graphics window.
+              Moving the cursor in
+              <guilabel>Left</guilabel>/<guilabel>Right</guilabel> or
+              <guilabel>Up</guilabel>/<guilabel>Down</guilabel> directions
+              helps to zoom in and out of the graphics window. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>Shift+Right Drag</guilabel>
-              </entry>
+              <entry><guilabel>Shift+Right Drag</guilabel></entry>
 
-              <entry>
-                <para>
-                  Helps to adjust the <guilabel>Field of View</guilabel>.
-                </para>
-              </entry>
+              <entry><para> Helps to adjust the <guilabel>Field of
+              View</guilabel>. </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -2356,65 +1981,70 @@
 
   <refsection>
     <title>Remarks</title>
-    
-    <refsection>
-      <title>Behavior when using OrbitView Resource &amp; Toggle Command</title>
 
-      <para>
-        The <guilabel>OrbitView</guilabel> resource plots spacecraft’s trajectory at each propagation step of the entire mission duration.
-        If you want to report data to an <guilabel>OrbitView</guilabel> at specific points in your mission, then a <guilabel>Toggle</guilabel> <guilabel>On</guilabel>/<guilabel>Off</guilabel> command can 
-        be inserted into the mission sequence to control when <guilabel>OrbitView</guilabel> is to plot a given trajectory. When <guilabel>Toggle Off</guilabel> 
-        command is issued for an <guilabel>OrbitView</guilabel>, no trajectory is drawn until a <guilabel>Toggle On</guilabel> command is issued. Similarly when a 
-        <guilabel>Toggle On</guilabel> command is used, trajectory is plotted at each integration step until a <guilabel>Toggle Off</guilabel> command is used.
-      </para>
+    <refsection>
+      <title>Behavior when using OrbitView Resource &amp; Toggle
+      Command</title>
+
+      <para>The <guilabel>OrbitView</guilabel> resource plots spacecraft’s
+      trajectory at each propagation step of the entire mission duration. If
+      you want to report data to an <guilabel>OrbitView</guilabel> plot at
+      specific points in your mission, then a <guilabel>Toggle</guilabel>
+      <guilabel>On</guilabel>/<guilabel>Off</guilabel> command can be inserted
+      into the mission sequence to control when <guilabel>OrbitView</guilabel>
+      is to plot a given trajectory. When <guilabel>Toggle Off</guilabel>
+      command is issued for an <guilabel>OrbitView</guilabel>, no trajectory
+      is drawn until a <guilabel>Toggle On</guilabel> command is issued.
+      Similarly, when a <guilabel>Toggle On</guilabel> command is used,
+      trajectory is plotted at each integration step until a <guilabel>Toggle
+      Off</guilabel> command is used.</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create OrbitView aOrbitView;
-  GMAT aOrbitView.Add = {aSat, Earth};
+  Create OrbitView aOrbitView
+  aOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Toggle aOrbitView Off;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
-  Toggle aOrbitView On;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+  Toggle aOrbitView Off
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+  Toggle aOrbitView On
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
         </code>
       </programlisting>
     </refsection>
 
     <refsection>
-      <title>Behavior when using OrbitView, Spacecraft and SolarSystem resources</title>
+      <title>Behavior when using OrbitView, Spacecraft and SolarSystem
+      Resources</title>
 
-      <para>
-        <guilabel>Spacecraft</guilabel> resource contains information about spacecraft’s orbit. <guilabel>Spacecraft</guilabel> resource 
-        interacts with orbitView throughout the entire mission duration. The trajectory data retrieved 
-        from the spacecraft is what gets plotted at each propagation step of the entire mission duration. 
-        Similarly, the sun and all other planets available under the <guilabel>SolarSystem</guilabel> resource may be plotted or 
-        referenced in the <guilabel>OrbitView</guilabel> resource as well.
-      </para>
+      <para><guilabel>Spacecraft</guilabel> resource contains information
+      about spacecraft’s orbit. <guilabel>Spacecraft</guilabel> resource
+      interacts with <guilabel>OrbitView</guilabel> throughout the entire
+      mission duration. The trajectory data retrieved from the spacecraft is
+      what gets plotted at each propagation step of the entire mission
+      duration. Similarly, the sun and all other planets available under the
+      <guilabel>SolarSystem</guilabel> resource may be plotted or referenced
+      in the <guilabel>OrbitView</guilabel> resource as well.</para>
     </refsection>
 
     <refsection>
       <title>Behavior when reporting data in Iterative Processes</title>
 
-      <para>
-        GMAT allows you to specify how trajectories are plotted during iterative processes 
-        such as differential correction or optimization. The <guilabel>SolverIterations</guilabel> field of <guilabel>OrbitView</guilabel> 
-        resource supports 3 options which are described in the table below:
-      </para>
+      <para>GMAT allows you to specify how trajectories are plotted during
+      iterative processes such as differential correction or optimization. The
+      <guilabel>SolverIterations</guilabel> field of
+      <guilabel>OrbitView</guilabel> resource supports 3 options which are
+      described in the table below:</para>
 
-      <informaltable colsep="0"
-                     frame="topbot">
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1"
-                   colwidth=".5*"/>
+          <colspec colnum="1" colwidth="0.75*"/>
 
-          <colspec colnum="2"
-                   colwidth="3*"/>
+          <colspec colnum="2" colwidth="3*"/>
 
           <thead>
             <row>
@@ -2426,39 +2056,25 @@
 
           <tbody>
             <row>
-              <entry>
-                <guilabel>Current</guilabel>
-              </entry>
+              <entry><guilabel>Current</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows only current iteration/perturbation in an iterative process and plots current trajectory.
-                </para>
-              </entry>
+              <entry><para> Shows only current iteration/perturbation in an
+              iterative process and plots current trajectory. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>All</guilabel>
-              </entry>
+              <entry><guilabel>All</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows all iterations/perturbations in an iterative process and plots all perturbed trajectories.
-                </para>
-              </entry>
+              <entry><para> Shows all iterations/perturbations in an iterative
+              process and plots all perturbed trajectories. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>None</guilabel>
-              </entry>
+              <entry><guilabel>None</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows only the final solution after the end of an iterative process and plots only that final trajectory.
-                </para>
-              </entry>
+              <entry><para> Shows only the final solution after the end of an
+              iterative process and plots only that final trajectory.
+              </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -2468,38 +2084,53 @@
     <refsection>
       <title>Behavior when plotting multiple spacecrafts</title>
 
-      <para>
-        GMAT allows you to plot trajectories of any number of spacecrafts when using the <guilabel>OrbitView</guilabel> resource. 
-        The initial epoch of all the spacecrafts must be same in order to plot the trajectories. If initial epoch 
-        of one of the spacecrafts does not match with initial epoch of other spacecrafts, then GMAT throws in an error 
-        alerting you that there is a coupled propagation error mismatch between the spacecrafts. GMAT also allows you to
-        propagate trajectories of spacecrafts using any combination of the propagators that the user creates.
-      </para>
+      <para>GMAT allows you to plot trajectories of any number of spacecrafts
+      when using the <guilabel>OrbitView</guilabel> resource. The initial
+      epoch of all the spacecrafts must be same in order to plot the
+      trajectories. If initial epoch of one of the spacecrafts does not match
+      with initial epoch of other spacecrafts, then GMAT throws in an error
+      alerting you that there is a coupled propagation error mismatch between
+      the spacecrafts. GMAT also allows you to propagate trajectories of
+      spacecrafts using any combination of the propagators that the user
+      creates.</para>
 
-      <para>
-        Below is an example script snippet that shows how to plot trajectories of multiple spacecrafts that use different propagators:
-      </para>
+      <para>Below is an example script snippet that shows how to plot
+      trajectories of multiple spacecrafts that use different
+      propagators:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat aSat2 aSat3;
-  GMAT aSat2.INC = 45.0;
-  GMAT aSat3.INC = 90.0;
-  GMAT aSat3.SMA = 9000;
+  Create Spacecraft aSat aSat2 aSat3
+  aSat2.INC = 45.0
+  aSat3.INC = 90.0
+  aSat3.SMA = 9000
 
-  Create Propagator aProp;
-  Create Propagator bProp;
+  Create Propagator aProp
+  Create Propagator bProp
 
-  Create OrbitView aOrbitView aOrbitView2;
+  Create OrbitView aOrbitView aOrbitView2
 
-  GMAT aOrbitView.Add = {aSat, aSat2, Earth};
-  GMAT aOrbitView2.Add = {aSat3, Earth};
+  aOrbitView.Add = {aSat, aSat2, Earth}
+  aOrbitView2.Add = {aSat3, Earth}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0};
+  Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}
         </code>
       </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior when using View Definition panel of OrbitView
+      Resource</title>
+
+      <para>Currently in <guilabel>OrbitView</guilabel> resource’s View
+      Definition panel, fields like <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel> and
+      <guilabel>ViewDirection</guilabel> are initialized but not dynamically
+      updated during a mission run. <guilabel>OrbitView</guilabel> resource’s
+      View Definition panel sets up geometry at initial epoch and then mouse
+      controls geometry of the simulation from that point on.</para>
     </refsection>
   </refsection>
 
@@ -2507,47 +2138,192 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Propagate spacecraft for 1 day and plot the orbit at every integrator step:</para>
+      <para>Propagate spacecraft for 1 day and plot the orbit at every
+      integrator step:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create OrbitView aOrbitView;
-  GMAT aOrbitView.Add = {aSat, Earth};
+  Create OrbitView aOrbitView
+  aOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
         </code>
       </programlisting>
     </informalexample>
+
     <informalexample>
-      <para>
-        Plotting orbit during an iterative process. Notice SolverIterations field is selected as All. This means all iterations/perturbations will be plotted.
-      </para>
+      <para>Plotting orbit during an iterative process. Notice
+      <guilabel>SolverIterations</guilabel> field is selected as
+      <guilabel>All</guilabel>. This means all iterations/perturbations will
+      be plotted.</para>
+
       <programlisting>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create ImpulsiveBurn TOI;
-  Create DifferentialCorrector aDC;
+  Create ImpulsiveBurn TOI
+  Create DifferentialCorrector aDC
 
-  Create OrbitView aOrbitView;
-  GMAT aOrbitView.Add = {aSat, Earth};
-  GMAT aOrbitView.SolverIterations = All;
+  Create OrbitView aOrbitView
+  aOrbitView.Add = {aSat, Earth}
+  aOrbitView.SolverIterations = All
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.Earth.Periapsis};
+  Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
-  Target aDC;
-    Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, Upper = 3.14159, MaxStep = 0.5});
-    Maneuver TOI(aSat);
-    Propagate aProp(aSat) {aSat.Earth.Apoapsis};
-    Achieve aDC(aSat.Earth.RMAG = 42165);
-  EndTarget;
+  Target aDC
+    Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+    Upper = 3.14159, MaxStep = 0.5})
+    Maneuver TOI(aSat)
+    Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+    Achieve aDC(aSat.Earth.RMAG = 42165)
+  EndTarget
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Plotting spacecraft’s trajectory around non-default central body.
+      This example shows how to plot a spacecraft’s trajectory around
+      Luna:</para>
+
+      <programlisting>
+  Create Spacecraft aSat
+  
+  Create CoordinateSystem LunaMJ2000Eq
+  LunaMJ2000Eq.Origin = Luna
+  LunaMJ2000Eq.Axes = MJ2000Eq
+
+  aSat.CoordinateSystem = LunaMJ2000Eq
+  aSat.SMA = 7300
+  aSat.ECC = 0.4
+  aSat.INC = 90
+  aSat.RAAN = 270
+  aSat.AOP = 315
+  aSat.TA = 180
+
+  Create ForceModel aFM
+  aFM.CentralBody = Luna
+  aFM.PointMasses = {Luna}
+
+  Create Propagator aProp
+  aProp.FM = aFM
+
+  Create OrbitView anOrbitView
+
+  anOrbitView.Add = {aSat, Luna}
+  anOrbitView.CoordinateSystem = LunaMJ2000Eq
+  anOrbitView.ViewPointReference = Luna
+  anOrbitView.ViewDirection = Luna
+
+  BeginMissionSequence
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Plotting spacecraft’s trajectory around non-default central body.
+      This example shows how to plot a spacecraft’s trajectory around
+      Mars:</para>
+
+      <programlisting>
+  Create Spacecraft aSat
+
+  Create CoordinateSystem MarsMJ2000Eq
+  MarsMJ2000Eq.Origin = Mars
+  MarsMJ2000Eq.Axes = MJ2000Eq
+
+  aSat.CoordinateSystem = MarsMJ2000Eq
+  aSat.SMA = 7300
+  aSat.ECC = 0.4
+  aSat.INC = 90
+  aSat.RAAN = 270
+  aSat.AOP = 315
+  aSat.TA = 180
+
+  Create ForceModel aFM
+  aFM.CentralBody = Mars
+  aFM.PointMasses = {Mars}
+
+  Create Propagator aProp
+  aProp.FM = aFM
+
+  Create OrbitView anOrbitView
+
+  anOrbitView.Add = {aSat, Mars}
+  anOrbitView.CoordinateSystem = MarsMJ2000Eq
+  anOrbitView.ViewPointReference = Mars
+  anOrbitView.ViewDirection = Mars
+
+  BeginMissionSequence
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+      </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Plotting spacecraft’s trajectory around non-default central body.
+      This example shows how to plot a spacecraft’s trajectory around Sun.
+      This is an interplanetary trajectory. Spacecraft is shown on an
+      out-going hyperbolic trajectory in an EarthView and then an
+      interplanetary trajectory is drawn around Sun in a SunView. Mars Orbit
+      around Sun is also shown:</para>
+
+      <programlisting>
+  Create Spacecraft aSat
+
+  aSat.CoordinateSystem = EarthMJ2000Eq
+  aSat.DateFormat = UTCGregorian
+  aSat.Epoch = '18 Nov 2013 20:26:24.315'
+
+  aSat.X = 3728.345810006184
+  aSat.Y = 4697.943961035268
+  aSat.Z = -2784.040094879185
+  aSat.VX = -9.502477543864449
+  aSat.VY = 5.935188001372066
+  aSat.VZ = -2.696272103530009
+
+  Create ForceModel aFM
+  aFM.CentralBody = Earth
+  aFM.PointMasses = {Earth}
+
+  Create ForceModel bFM
+  aFM.CentralBody = Sun
+  aFM.PointMasses = {Sun}
+
+  Create Propagator aProp
+  aProp.FM = aFM
+
+  Create Propagator bProp
+  aProp.FM = bFM
+
+  Create CoordinateSystem SunEcliptic
+  SunEcliptic.Origin = Sun
+  SunEcliptic.Axes = MJ2000Ec
+
+  Create OrbitView EarthView SunView
+
+  EarthView.Add = {aSat, Earth}
+  EarthView.CoordinateSystem = EarthMJ2000Eq
+  EarthView.ViewPointReference = Earth
+  EarthView.ViewDirection = Earth
+
+  SunView.Add = {aSat, Mars, Sun}
+  SunView.CoordinateSystem = SunEcliptic
+  SunView.ViewPointReference = Sun
+  SunView.ViewDirection = Sun
+  SunView.ViewPointVector = [ 0 0 500000000 ]
+
+  BeginMissionSequence
+
+  Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+  Propagate bProp(aSat) {aSat.ElapsedDays = 225}
       </programlisting>
     </informalexample>
   </refsection>
