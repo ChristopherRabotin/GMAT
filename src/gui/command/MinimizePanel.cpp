@@ -190,7 +190,7 @@ void MinimizePanel::SaveData()
       {
          MessageInterface::PopupMessage
             (Gmat::ERROR_, mMsgFormat.c_str(),
-             variableName.c_str(), "Variable to be Minimized",
+             variableName.c_str(), "Variable to be Minimized","",
              "Variable, Array element, Spacecraft parameter");
          
          canClose = false;
