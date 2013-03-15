@@ -1279,10 +1279,14 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          GmatCommand *branch = cmd->GetNext();
          wxString branchTypeName = branch->GetTypeName().c_str();
          wxString label = branch->GetSummaryName().c_str();
-         label.Replace(branchTypeName, cmdTypeName);
+		 if (label.StartsWith(branchTypeName + " "))
+			label.Replace(branchTypeName, cmdTypeName, false);
          // Replace first End with End+Space
          // (TGG: 2012.07.17 for bug GMT-2901)
-         label.Replace("End", "End ", false);
+		 if ((!label.StartsWith("End")) && (!label.StartsWith("Else")))
+			 label.Prepend("End ");
+		 else
+			label.Replace("End", "End ", false);
          nodeName.Printf("%s", label.c_str());
       }
       
