@@ -225,7 +225,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          W     =  38.3213 
                 + 13.17635815 * d    -  1.4E-12 * d * d   +  3.5610 * Sin(p1)
                 +  0.1208 * Sin(p2)  -  0.0642 * Sin(p3)  +  0.0158 * Sin(p4)
-                -  0.0252 * Sin(p5)  -  0.0066 * Sin(p6)  -  0.0047 * Sin(p7)
+                +  0.0252 * Sin(p5)  -  0.0066 * Sin(p6)  -  0.0047 * Sin(p7)
                 -  0.0046 * Sin(p8)  +  0.0028 * Sin(p9)  +  0.0052 * Sin(p10)
                 +  0.0040 * Sin(p11) +  0.0019 * Sin(p12) -  0.0044 * Sin(p13);
          Wdot  =  13.17635815
