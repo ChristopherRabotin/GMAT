@@ -704,8 +704,8 @@
       situation. You should use multiple stopping conditions so that a long
       propagation cannot occur. For example, if fmincon controls
       variable,<guilabel> myVar</guilabel>, and we know
-      <guilabel>myVar</guilabel> should never be more than 2, then do this.
-      </para>
+      <guilabel>myVar</guilabel> should never be more than 2, then do
+      this.</para>
 
       <programlisting>
         <code>
@@ -734,17 +734,17 @@ Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}
 
       <programlisting>
         <code>
-  Create FminconOptimizer SQP1;
-  GMAT SQP1.ShowProgress = true;
-  GMAT SQP1.ReportStyle = Normal;
-  GMAT SQP1.ReportFile = 'FminconOptimizerSQP1.data';
-  GMAT SQP1.MaximumIterations = 25;
-  GMAT SQP1.DiffMaxChange = '0.1000';
-  GMAT SQP1.DiffMinChange = '1.0000e-08';
-  GMAT SQP1.MaxFunEvals = '1000';
-  GMAT SQP1.TolX = '1.0000e-04';
-  GMAT SQP1.TolFun = '1.0000e-04';
-  GMAT SQP1.TolCon = '1.0000e-04';
+  Create FminconOptimizer SQP1
+  SQP1.ShowProgress = true
+  SQP1.ReportStyle = Normal
+  SQP1.ReportFile = 'FminconOptimizerSQP1.data'
+  SQP1.MaximumIterations = 25
+  SQP1.DiffMaxChange = '0.1000'
+  SQP1.DiffMinChange = '1.0000e-08'
+  SQP1.MaxFunEvals = '1000'
+  SQP1.TolX = '1.0000e-04'
+  SQP1.TolFun = '1.0000e-04'
+  SQP1.TolCon = '1.0000e-04'
         </code>
       </programlisting>
     </informalexample>
