@@ -691,6 +691,30 @@
     </refsection>
 
     <refsection>
+      <title>GMAT Stop Button Does Not work, in Some Situations, When Using
+      Fmincon</title>
+
+      <para>Sometimes, when developing GMAT scripts, you may inadvertently
+      create a situation where GMAT goes into an inifinite propagation loop.
+      The usual remedy for this situation is to apply the GMAT
+      <guilabel>Stop</guilabel> button. Currently, however, if the infinite
+      loop occurs within an <guilabel>Optimize</guilabel> sequence using
+      fmincon, there is no way to stop GMAT and you have to shut GMAT down.
+      Fortunately, there are some procedures you can employ to avoid this
+      situation. You should use multiple stopping conditions so that a long
+      propagation cannot occur. For example, if fmincon controls
+      variable,<guilabel> myVar</guilabel>, and we know
+      <guilabel>myVar</guilabel> should never be more than 2, then do this.
+      </para>
+
+      <programlisting>
+        <code>
+Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}
+        </code>
+  </programlisting>
+    </refsection>
+
+    <refsection>
       <title>Object and Command Interactions</title>
 
       <para>The <guilabel>FminconOptimizer</guilabel> object can only be used
