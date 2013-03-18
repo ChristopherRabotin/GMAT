@@ -524,6 +524,13 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             GmatGlobal::Instance()->SetWriteGmatKeyword(false);
          }
       }
+      else if (type == "HIDE_SAVEMISSION")
+      {
+          if (name == "TRUE")
+			GmatGlobal::Instance()->AddHiddenCommand("SaveMission");
+		  else
+			  GmatGlobal::Instance()->RemoveHiddenCommand("SaveMission");
+      }
       else
       {
          // Ignore old VERSION specification (2011.03.18)
@@ -2292,6 +2299,7 @@ FileManager::FileManager()
    mPathSeparator = GetPathSeparator();
    mStartupFileDir = GmatFileUtil::GetWorkingDirectory() + mPathSeparator;
    mStartupFileName = "gmat_startup_file.txt";
+   GmatGlobal::Instance()->AddHiddenCommand("SaveMission");
 
    #ifdef DEBUG_STARTUP_FILE
    MessageInterface::ShowMessage
