@@ -1385,19 +1385,31 @@ void Vary::SetInitialValue(Solver *theSolver)
 {
    if (solver == theSolver)
    {
-      Real var = solver->GetSolverVariable(variableID);
-      initialValue->SetReal(var);
-
-      MessageInterface::ShowMessage("Apply Corrections has changed the initial "
-            "guess for %s from %s to %.12lf\n", variableName.c_str(),
-            initialValueName.c_str(), var);
-      
-      if (initialValue->GetWrapperType() == Gmat::NUMBER_WT)
+      if ((initialValue->GetWrapperType() != Gmat::VARIABLE_WT) &&
+          (initialValue->GetWrapperType() != Gmat::ARRAY_ELEMENT_WT))
       {
-         std::stringstream numString;
-         numString.precision(16);
-         numString << var;
-         initialValueName = numString.str();
+         Real var = solver->GetSolverVariable(variableID);
+         bool rv = initialValue->SetReal(var);
+
+         MessageInterface::ShowMessage("Apply Corrections has changed the "
+               "initial guess for %s from %s to %.12lf\n", variableName.c_str(),
+               initialValueName.c_str(), var);
+
+         if (initialValue->GetWrapperType() == Gmat::NUMBER_WT)
+         {
+            std::stringstream numString;
+            numString.precision(16);
+            numString << var;
+            initialValueName = numString.str();
+         }
+      }
+      else
+      {
+         MessageInterface::ShowMessage("*** Warning*** Apply Corrections did "
+               "not change the initial guess setting %s from %s because "
+               "Variables and Array elements cannot be reset using the Apply "
+               "Corrections button\n",  variableName.c_str(),
+               initialValueName.c_str());
       }
    }
    else
