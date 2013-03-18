@@ -332,6 +332,7 @@ void EndFiniteBurnPanel::SaveData()
    }
    catch (BaseException &e)
    {
+	  canClose = false;
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
