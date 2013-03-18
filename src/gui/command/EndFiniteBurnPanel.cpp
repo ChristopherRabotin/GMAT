@@ -349,7 +349,7 @@ void EndFiniteBurnPanel::OnButtonClicked(wxCommandEvent& event)
    // Allow multiple selection on spacecraft
    ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                   GuiItemManager::SHOW_WHOLE_OBJECT_ONLY, 1,
-                                  true, false, false, false, false, "Spacecraft");
+                                  false, false, false, false, false, "Spacecraft");
    
    paramDlg.SetParamNameArray(mSpacecraftList);
    paramDlg.ShowModal();
