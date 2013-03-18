@@ -3287,7 +3287,8 @@ wxMenu* MissionTree::CreateSubMenu(GmatTree::ItemType type, ActionType action)
    else
    {
       for (i=0; i<mCommandList.GetCount(); i++)
-         menu->Append(GetMenuId(mCommandList[i], action), mCommandList[i]);
+		  if (!GmatGlobal::Instance()->IsHiddenCommand(mCommandList[i].c_str()))
+			menu->Append(GetMenuId(mCommandList[i], action), mCommandList[i]);
       
       menu->Append(MT_CONTROL_LOGIC, "Control Logic",
                    CreateControlLogicSubMenu(type, action));
