@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include "GmatGlobal.hpp"
+#include <algorithm>                    // Required for GCC 4.3
 
 //---------------------------------
 // static members
@@ -653,6 +654,118 @@ void GmatGlobal::SetItrfCoefficientsFile(ItrfCoefficientsFile *itrf)
 {
    theItrfFile = itrf;
 }
+
+
+//------------------------------------------------------------------------------
+// void  AddHiddenCommand(const std::string &cmd)
+//------------------------------------------------------------------------------
+/*
+ * Add command to hide in menu
+ *
+ * @param  cmd  command name to be added
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::AddHiddenCommand(const std::string &cmd)
+{
+   #ifdef DEBUG_HIDDEN_COMMAND
+   MessageInterface::ShowMessage
+      ("FileManager::AddHiddenCommand() Adding %s to HiddenCommands\n",
+       cmd.c_str());
+   #endif
+
+   mHiddenCommands.push_back(cmd);
+
+   #ifdef DEBUG_HIDDEN_COMMAND
+   std::list<std::string>::iterator pos;
+   pos = mHiddenCommands.begin();
+   while (pos != mHiddenCommands.end())
+   {
+      MessageInterface::ShowMessage
+         ("   mHiddenCommands=%s\n",(*pos).c_str());
+      ++pos;
+   }
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetHiddenCommands()
+//------------------------------------------------------------------------------
+const StringArray& GmatGlobal::GetHiddenCommands()
+{
+   mHiddenCommandsArray.clear();
+
+   std::list<std::string>::iterator listpos = mHiddenCommands.begin();
+   while (listpos != mHiddenCommands.end())
+   {
+      mHiddenCommandsArray.push_back(*listpos);
+      ++listpos;
+   }
+
+   return mHiddenCommandsArray;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearHiddenCommands()
+//------------------------------------------------------------------------------
+void GmatGlobal::ClearHiddenCommands()
+{
+   mHiddenCommands.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void  IsHiddenCommand(const std::string &cmd)
+//------------------------------------------------------------------------------
+/*
+ * returns true if this command should not be shown in menu
+ *
+ * @return  true to hide
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsHiddenCommand(const std::string &cmd)
+{
+   std::list<std::string>::iterator pos =
+      find(mHiddenCommands.begin(), mHiddenCommands.end(), cmd);
+   return pos != mHiddenCommands.end();
+}
+
+
+
+//------------------------------------------------------------------------------
+// void  RemoveHiddenCommand(const std::string &cmd)
+//------------------------------------------------------------------------------
+/*
+ * Remove command so that it is shown in menu
+ *
+ * @param  cmd  command name to be removed
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::RemoveHiddenCommand(const std::string &cmd)
+{
+   #ifdef DEBUG_HIDDEN_COMMAND
+   MessageInterface::ShowMessage
+      ("FileManager::RemoveHiddenCommand() Removing %s to HiddenCommands\n",
+       cmd.c_str());
+   #endif
+
+   std::list<std::string>::iterator pos =
+      find(mHiddenCommands.begin(), mHiddenCommands.end(), cmd);
+   if (pos != mHiddenCommands.end())
+	mHiddenCommands.erase(pos);
+
+   #ifdef DEBUG_HIDDEN_COMMAND
+   pos = mHiddenCommands.begin();
+   while (pos != mHiddenCommands.end())
+   {
+      MessageInterface::ShowMessage
+         ("   mHiddenCommands=%s\n",(*pos).c_str());
+      ++pos;
+   }
+   #endif
+}
+
 
 //---------------------------------
 // private methods

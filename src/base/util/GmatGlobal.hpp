@@ -160,7 +160,14 @@ public:
    
    void SetToDefaultFormat();
    void SetToCurrentFormat();
-   
+
+   // hidden commands (not in menu)
+   void ClearHiddenCommands();
+   void AddHiddenCommand(const std::string &cmd);
+   bool IsHiddenCommand(const std::string &cmd);
+   void RemoveHiddenCommand(const std::string &cmd);
+   const StringArray& GetHiddenCommands();
+
    // Files
    EopFile* GetEopFile();
    ItrfCoefficientsFile* GetItrfCoefficientsFile();
@@ -249,6 +256,9 @@ private:
    IoFormat actualFormat;
    
    std::string matlabExt;
+
+   std::list<std::string> mHiddenCommands;
+   StringArray mHiddenCommandsArray;
 
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
