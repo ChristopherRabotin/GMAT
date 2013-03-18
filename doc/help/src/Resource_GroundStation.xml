@@ -1,96 +1,320 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="GroundStation"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="GroundStation" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>GroundStation</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>GroundStation</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>GroundStation</refname>
+    <refname><guilabel>GroundStation</guilabel></refname>
 
-    <refpurpose>Under Construction.</refpurpose>
+    <refpurpose>A ground station model.</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis> Under Construction.
-   </synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>Under Construction.</para>
+    <para>A <guilabel>GroundStation</guilabel> models a facility fixed to the
+    surface of a <guilabel>CelestialBody</guilabel>. There are several state
+    representations available for defining the location of a ground station
+    including Cartesian and spherical.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="CoordinateSystem"/></para>
+
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Field Name</term>
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <listitem>
-          <para>Description....</para>
+        <colspec colnum="2" colwidth="3*"/>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Type</term>
+        <thead>
+          <row>
+            <entry>Field</entry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-            <varlistentry>
-              <term>Default</term>
+        <tbody>
+          <row>
+            <entry><guilabel>FieldName</guilabel></entry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+            <entry><para>Description of the field. Use special formatting for
+            <guilabel>command names</guilabel> and <guilabel>field
+            names</guilabel>. See the next cell for an
+            example.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>a list of data types from the Data Type column of
+                    the Field Spec</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                  <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>a range spec of list of allowed values from the
+                    Range column of the Field Spec</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get, or only one (from the Access column of the
+                    Field Spec)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>value from the Default Value column of the Field
+                    Spec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>the unit or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script, or only one</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Start</guilabel></entry>
+
+            <entry><para>The <guilabel>Start</guilabel> parameter is the
+            initial value for the <guilabel>Index</guilabel>
+            parameter.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real Number, Variable, Array Element, or Scalar Real
+                    Object Parameter</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>Start</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get, or only one (from the Access column of the
+                    Field Spec)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>the unit or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <para>To create a <guilabel>GroundSation</guilabel>, starting from the
+    <guilabel>Resource Tree</guilabel>:</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>Right-click the <guilabel>GroundStation</guilabel> folder and
+        select <guilabel>Add Ground Station</guilabel>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Double-click <guilabel>GroundStation1</guilabel>.</para>
+      </listitem>
+    </orderedlist>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_GroundStation_Default.png"
+                     scalefit="1" width="60%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>You can set the ground station location in several state
+    representations. The Cartesian representation is illustrated above. To set
+    the Longitude, Latitude, and Altitude to 45 deg., 270 deg., and 0.1 km
+    respectively, with respect to the reference ellipsoid:</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>In the <guilabel>StateType</guilabel> menu, select
+        <guilabel>Spherical</guilabel>.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>HorizonReference</guilabel> menu, select
+        <guilabel>Ellipsoid.</guilabel></para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Latitude</guilabel> text box, type
+        <userinput>45</userinput>.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Longitude</guilabel> text box, type
+        <userinput>270</userinput>.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Altitude</guilabel> text box, type
+        <userinput>0.1</userinput>.</para>
+      </listitem>
+    </orderedlist>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_GroundStation_Ellipsoid.png"
+                     scalefit="1" width="60%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para>The <guilabel>GroundStation</guilabel> model allows you to configure
+    a facility by defining the location in body-fixed coordinates using one of
+    several state representations. GMAT supports Cartesian, spherical, and
+    ellipsoidal representations and examples below show how to configure a
+    <guilabel>GroundStation</guilabel> in each representation. When using the
+    ellipsoidal model or spherical representations, GMAT uses the physical
+    properties - flattening and radius for example - defined on the
+    <guilabel>CelestialBody</guilabel> resource.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <example>
-      <title>Example Script</title>
+    <informalexample>
+      <para>Configure a <guilabel>GroundStation</guilabel> in Geodetic
+      coordinates.</para>
 
-      <programlisting>% 
+      <programlisting><code>aGroundStation.CentralBody      = Earth
+aGroundStation.StateType        = Spherical
+aGroundStation.HorizonReference = Ellipsoid
+aGroundStation.Location1        = 60
+aGroundStation.Location2        = 45
+aGroundStation.Location3        = 0.01
 
-</programlisting>
-    </example>
+% or alternatively
+
+aGroundStation.Latitude  = 60
+aGroundStation.Longitude = 45
+aGroundStation.Altitude  = 0.01</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Configure a <guilabel>GroundStation</guilabel> in Geocentric
+      coordinates.</para>
+
+      <programlisting><code>Create GroundStation aGroundStation
+aGroundStation.CentralBody      = Earth
+aGroundStation.StateType        = Spherical
+aGroundStation.HorizonReference = Sphere
+aGroundStation.Location1        = 59.83308194090783
+aGroundStation.Location2        = 45
+aGroundStation.Location3        = -15.99424674414058
+
+% or alternatively
+
+aGroundStation.Latitude        = 59.83308194090783
+aGroundStation.Longitude       = 45
+aGroundStation.Altitude        = -15.99424674414058
+</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Configure a <guilabel>GroundStation</guilabel> in Geocentric
+      coordinates.</para>
+
+      <programlisting><code>Create GroundStation aGroundStation
+aGroundStation.CentralBody = Earth
+aGroundStation.StateType   = Cartesian
+aGroundStation.Location1   = 2260.697433050543
+aGroundStation.Location2   = 2260.697433050542
+aGroundStation.Location3   = 5500.485954732006
+</code></programlisting>
+    </informalexample>
   </refsection>
 </refentry>

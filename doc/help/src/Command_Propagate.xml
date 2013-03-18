@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="Propagate"
+<refentry version="5.0" xml:id="Propagate"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,35 +24,31 @@
   <refnamediv>
     <refname>Propagate</refname>
 
-    <refpurpose>
-      Propagates spacecraft to a requested stopping condition
-    </refpurpose>
+    <refpurpose>Propagates spacecraft to a requested stopping
+    condition</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <para>
-      The <guilabel>Propagate</guilabel> command is a complex command that supports multiple propagators, multiple spacecraft, 
-      and multiple stopping conditions. In the syntax definition below, SatList 
-      is a comma separated list of spacecraft and StopList is a comma separated list of 
-      stopping conditions. The general syntax of the Propagate command is:
-    </para>
+    <para>The <guilabel>Propagate</guilabel> command is a complex command that
+    supports multiple propagators, multiple spacecraft, and multiple stopping
+    conditions. In the syntax definition below, SatList is a comma separated
+    list of spacecraft and StopList is a comma separated list of stopping
+    conditions. The general syntax of the Propagate command is:</para>
 
     <synopsis>
       <literal>Propagate</literal> [Mode] [BackProp] <replaceable>Propagator1Name</replaceable>(<replaceable>SatList1</replaceable>,{<replaceable>StopList1</replaceable>})...
-                                                     <replaceable>Propagator2Name</replaceable>(<replaceable>SatList2</replaceable>,{<replaceable>StopList2</replaceable>})
+                      <replaceable>Propagator2Name</replaceable>(<replaceable>SatList2</replaceable>,{<replaceable>StopList2</replaceable>}
 
       or
 
       <literal>Propagate</literal> [Mode] [BackProp] <replaceable>Propagator1Name</replaceable>(<replaceable>SatList1</replaceable>)...
-                                                     <replaceable>Propagator2Name</replaceable>(<replaceable>SatList2</replaceable>){<replaceable>StopList</replaceable>}
+                      <replaceable>Propagator2Name</replaceable>(<replaceable>SatList2</replaceable>){<replaceable>StopList</replaceable>}
     </synopsis>
 
-    <para>
-      Most applications propagate a single spacecraft, forward, 
-      to a single stopping condition. In that case, the syntax simplifies to:
-    </para>
+    <para>Most applications propagate a single spacecraft, forward, to a
+    single stopping condition. In that case, the syntax simplifies to:</para>
 
     <synopsis>
       <literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>,{<replaceable>StopCond</replaceable>});
@@ -67,65 +62,56 @@
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>Propagate</guilabel> command controls the time evolution of spacecraft. 
-      GMAT allows you to propagate single spacecraft, multiple non-cooperative spacecraft, 
-      and formations in a single propagate command.  The <guilabel>Propagate</guilabel> command is complex and controls 
-      the following aspects of the temporal modelling of spacecraft:
-    </para>
+    <para>The <guilabel>Propagate</guilabel> command controls the time
+    evolution of spacecraft. GMAT allows you to propagate single spacecraft,
+    multiple non-cooperative spacecraft, and formations in a single propagate
+    command. The <guilabel>Propagate</guilabel> command is complex and
+    controls the following aspects of the temporal modelling of
+    spacecraft:</para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          The spacecraft to be propagated
-        </para>
+        <para>The spacecraft to be propagated</para>
       </listitem>
+
       <listitem>
-        <para>
-          The model(s) used for the propagation (numerical integration, ephemeris interpolation)
-        </para>
+        <para>The model(s) used for the propagation (numerical integration,
+        ephemeris interpolation)</para>
       </listitem>
+
       <listitem>
-        <para>
-          The condition(s) to be satisfied at the termination of propagation
-        </para>
+        <para>The condition(s) to be satisfied at the termination of
+        propagation</para>
       </listitem>
+
       <listitem>
-        <para>
-          The direction of propagation (forwards or backwards in time)
-        </para>
+        <para>The direction of propagation (forwards or backwards in
+        time)</para>
       </listitem>
+
       <listitem>
-        <para>
-          The time synchronization of multiple spacecraft
-        </para>
+        <para>The time synchronization of multiple spacecraft</para>
       </listitem>
+
       <listitem>
-        <para>
-          Propagation of STM and computation of state Jacobian (A-matrix)
-        </para>
+        <para>Propagation of STM and computation of state Jacobian
+        (A-matrix)</para>
       </listitem>
     </itemizedlist>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="Propagator"/>, 
-      <xref linkend="Spacecraft"/>,
-      <xref linkend="Formation"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Propagator" />, <xref linkend="Spacecraft" />, <xref
+    linkend="Formation" /></para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*" />
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*" />
 
         <thead>
           <row>
@@ -137,23 +123,16 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>Synchronized</guilabel>
-            </entry>
+            <entry><guilabel>Synchronized</guilabel></entry>
 
-            <entry>
-              <para>
-                Optional flag to time-synchronize propagation of spacecraft 
-                performed by multiple propagators in a single propagate command. See Remarks for more details.
-              </para>
-              <variablelist>
+            <entry><para> Optional flag to time-synchronize propagation of
+            spacecraft performed by multiple propagators in a single propagate
+            command. See Remarks for more details. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -161,9 +140,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Synchronized
-                    </para>
+                    <para>Synchronized</para>
                   </listitem>
                 </varlistentry>
 
@@ -171,9 +148,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Not Used
-                    </para>
+                    <para>Not Used</para>
                   </listitem>
                 </varlistentry>
 
@@ -181,9 +156,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -191,33 +164,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>BackProp</guilabel>
-            </entry>
+            <entry><guilabel>BackProp</guilabel></entry>
 
-            <entry>
-              <para>
-                Optional flag to propagate all spacecraft 
-                in a <guilabel>Propagate</guilabel> command backwards in time.
-              </para>
-              <variablelist>
+            <entry><para> Optional flag to propagate all spacecraft in a
+            <guilabel>Propagate</guilabel> command backwards in time. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -225,9 +188,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      BackProp
-                    </para>
+                    <para>BackProp</para>
                   </listitem>
                 </varlistentry>
 
@@ -235,9 +196,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Not Used
-                    </para>
+                    <para>Not Used</para>
                   </listitem>
                 </varlistentry>
 
@@ -245,9 +204,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -255,34 +212,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>StopList</guilabel>
-            </entry>
+            <entry><guilabel>StopList</guilabel></entry>
 
-            <entry>
-              <para>
-                A comma separated list of stopping conditions. 
-                Stopping conditions must be paramateres of propagates 
-                spacecraft in SatList. See Remarks for more details.
-              </para>
-              <variablelist>
+            <entry><para> A comma separated list of stopping conditions.
+            Stopping conditions must be paramateres of propagates spacecraft
+            in SatList. See Remarks for more details. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -290,9 +236,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid list of stopping conditions.
-                    </para>
+                    <para>Valid list of stopping conditions.</para>
                   </listitem>
                 </varlistentry>
 
@@ -300,9 +244,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      ElapsedSecs = 12000
-                    </para>
+                    <para>ElapsedSecs = 12000</para>
                   </listitem>
                 </varlistentry>
 
@@ -310,9 +252,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -320,34 +260,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>SatList</guilabel>
-            </entry>
+            <entry><guilabel>SatList</guilabel></entry>
 
-            <entry>
-              <para>
-                A comma separated list of spacecraft. 
-                For SPK type propagators, the spacecraft 
-                must be configured with valid SPK kernels.
-              </para>
-              <variablelist>
+            <entry><para> A comma separated list of spacecraft. For SPK type
+            propagators, the spacecraft must be configured with valid SPK
+            kernels. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -355,9 +284,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid list of spacecraft and/or formations.
-                    </para>
+                    <para>Valid list of spacecraft and/or formations.</para>
                   </listitem>
                 </varlistentry>
 
@@ -365,9 +292,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultSC
-                    </para>
+                    <para>DefaultSC</para>
                   </listitem>
                 </varlistentry>
 
@@ -375,9 +300,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -385,32 +308,21 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>PropagatorName</guilabel>
-            </entry>
+            <entry><guilabel>PropagatorName</guilabel></entry>
 
-            <entry>
-              <para>
-                A propagator name.
-              </para>
-              <variablelist>
+            <entry><para> A propagator name. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -418,9 +330,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid propagator name.
-                    </para>
+                    <para>Valid propagator name.</para>
                   </listitem>
                 </varlistentry>
 
@@ -428,9 +338,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultProp
-                    </para>
+                    <para>DefaultProp</para>
                   </listitem>
                 </varlistentry>
 
@@ -438,9 +346,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      yes
-                    </para>
+                    <para>yes</para>
                   </listitem>
                 </varlistentry>
 
@@ -448,32 +354,22 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>StopTolerance</guilabel>
-            </entry>
+            <entry><guilabel>StopTolerance</guilabel></entry>
 
-            <entry>
-              <para>
-                Tolerance on the stopping condition root location. See Remarks for more details.
-              </para>
-              <variablelist>
+            <entry><para> Tolerance on the stopping condition root location.
+            See Remarks for more details. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -481,9 +377,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real number &gt; 0
-                    </para>
+                    <para>Real number &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -491,9 +385,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0.0000001
-                    </para>
+                    <para>0.0000001</para>
                   </listitem>
                 </varlistentry>
 
@@ -501,9 +393,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -511,33 +401,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>STM</guilabel>
-            </entry>
+            <entry><guilabel>STM</guilabel></entry>
 
-            <entry>
-              <para>
-                Optional flag to propagate orbit STM.  
-                STM propagation only occurs for numerical integrator type propagators.
-              </para>
-              <variablelist>
+            <entry><para> Optional flag to propagate orbit STM. STM
+            propagation only occurs for numerical integrator type propagators.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -545,9 +425,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      'STM'
-                    </para>
+                    <para>'STM'</para>
                   </listitem>
                 </varlistentry>
 
@@ -555,9 +433,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Not Used
-                    </para>
+                    <para>Not Used</para>
                   </listitem>
                 </varlistentry>
 
@@ -565,9 +441,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -575,32 +449,21 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>AMatrix</guilabel>
-            </entry>
+            <entry><guilabel>AMatrix</guilabel></entry>
 
-            <entry>
-              <para>
-                Descript
-              </para>
-              <variablelist>
+            <entry><para> Descript </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-
-                    </para>
+                    <para />
                   </listitem>
                 </varlistentry>
 
@@ -608,9 +471,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      'AMatrix'
-                    </para>
+                    <para>'AMatrix'</para>
                   </listitem>
                 </varlistentry>
 
@@ -618,9 +479,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Not Used
-                    </para>
+                    <para>Not Used</para>
                   </listitem>
                 </varlistentry>
 
@@ -628,9 +487,7 @@
                   <term>Required</term>
 
                   <listitem>
-                    <para>
-                      no
-                    </para>
+                    <para>no</para>
                   </listitem>
                 </varlistentry>
 
@@ -638,13 +495,10 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -657,475 +511,401 @@
     <refsection>
       <title>Introduction</title>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command GUI provides an interface to assign spacecraft to
-        propagators used for propagation and to define a set of conditions to terminate propagation.
-        The GUI also allows you to define the direction of propagation, the synchronization mode for multiple spacecraft,
-        and whether or not to propagate the STM and compute the A-Matrix.
-      </para>
-      
-      <para>
-        To follow the examples below, you can load the following script snippet or create a new mission with three 
-        spacecraft (named sat1, sat2, and sat3) and two propagators (named prop1 and prop2).
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command GUI provides an
+      interface to assign spacecraft to propagators used for propagation and
+      to define a set of conditions to terminate propagation. The GUI also
+      allows you to define the direction of propagation, the synchronization
+      mode for multiple spacecraft, and whether or not to propagate the STM
+      and compute the A-Matrix.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft sat1 sat2 sat3
-  Create Propagator prop1 prop2
-  BeginMissionSequence
-        </code>
-      </programlisting>
+      <para>To follow the examples below, you can load the following script
+      snippet or create a new mission with three spacecraft (named sat1, sat2,
+      and sat3) and two propagators (named prop1 and prop2).</para>
+
+      <programlisting><code>Create Spacecraft sat1 sat2 sat3
+Create Propagator prop1 prop2
+BeginMissionSequence</code>r</programlisting>
     </refsection>
 
     <refsection>
       <title>Defining Spacecraft and Propagators</title>
 
-      <para>
-        To demonstrate how to define a set of propagators and spacecraft for propagation,
-        you will set up a <guilabel>Propagate</guilabel> command to propagate a spacecraft named sat1 using a
-        <guilabel>Propagator</guilabel> named prop1 and spacecraft named sat2 and sat3 using a <guilabel>Propagator</guilabel> named prop2.
-        You will configure the command to propagate for 1 day or until sat2 reaches periapsis, whichever
-        happens first. You will need to configure GMAT as described in the Introduction section above and add
-        a new propagate command to your mission sequence.  GMAT auto-populates the <guilabel>Propagate</guilabel> command GUI with
-        the first propagator in the GUI list and the first spacecraft when you add a new propagate command so
-        you should start from this point.
-      </para>
+      <para>To demonstrate how to define a set of propagators and spacecraft
+      for propagation, you will set up a <guilabel>Propagate</guilabel>
+      command to propagate a spacecraft named sat1 using a
+      <guilabel>Propagator</guilabel> named prop1 and spacecraft named sat2
+      and sat3 using a <guilabel>Propagator</guilabel> named prop2. You will
+      configure the command to propagate for 1 day or until sat2 reaches
+      periapsis, whichever happens first. You will need to configure GMAT as
+      described in the Introduction section above and add a new propagate
+      command to your mission sequence. GMAT auto-populates the
+      <guilabel>Propagate</guilabel> command GUI with the first propagator in
+      the GUI list and the first spacecraft when you add a new propagate
+      command so you should start from this point.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Command_Propagate_GUI_1.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        Figure 1 Propagator1 Properties
-      </para>
+      <para>Figure 1 Propagator1 Properties</para>
 
-      <para>
-        To add a second propagator to propagate sat2 and sat3 using prop2:
-      </para>
+      <para>To add a second propagator to propagate sat2 and sat3 using
+      prop2:</para>
 
       <orderedlist>
         <listitem>
-          <para>
-            In the Propagator list, click the ellipsis button in the second row to open the Propagator Select Dialog.
-          </para>
+          <para>In the Propagator list, click the ellipsis button in the
+          second row to open the Propagator Select Dialog.</para>
+
           <screenshot>
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
-                           contentdepth="100%"
+                <imagedata align="center" contentdepth="100%"
                            fileref="files/images/Command_Propagate_GUI_2.png"
-                           scalefit="1"
-                           width="100%"/>
+                           scalefit="1" width="100%"></imagedata>
               </imageobject>
             </mediaobject>
           </screenshot>
         </listitem>
+
         <listitem>
-          <para>
-            In the Available Propagators list, click on prop2, and click OK.
-          </para>
+          <para>In the Available Propagators list, click on prop2, and click
+          OK.</para>
         </listitem>
+
         <listitem>
-          <para>
-            In the Spacecraft list, click the ellipsis button in the second row to open the Space Object Select dialog.
-          </para>
+          <para>In the Spacecraft list, click the ellipsis button in the
+          second row to open the Space Object Select dialog.</para>
         </listitem>
+
         <listitem>
-          <para>
-            Click the right-arrow twice to add sat2 and sat3 to the list of selected spacecraft and click Ok.
-          </para>
+          <para>Click the right-arrow twice to add sat2 and sat3 to the list
+          of selected spacecraft and click Ok.</para>
         </listitem>
       </orderedlist>
-
 
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Command_Propagate_GUI_3.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        Figure 3 Propagator1 Properties Set
-      </para>
+      <para>Figure 3 Propagator1 Properties Set</para>
     </refsection>
 
     <refsection>
       <title>Stopping conditions</title>
 
-      <para>
-        Continuing with the example above, now you will configure GMAT to propagate for one elapsed day or until sat 2 reaches periapsis.
-      </para>
+      <para>Continuing with the example above, now you will configure GMAT to
+      propagate for one elapsed day or until sat 2 reaches periapsis.</para>
 
       <orderedlist>
         <listitem>
-          <para>
-            In the Parameter list, click the ellipsis button in the first row to bring up the Parameter Select Dialog.
-          </para>
+          <para>In the Parameter list, click the ellipsis button in the first
+          row to bring up the Parameter Select Dialog.</para>
         </listitem>
+
         <listitem>
-          <para>
-            In the ObjectProperties list, double click ElapsedDays, and click OK.
-          </para>
-            <screenshot>
-              <mediaobject>
-                <imageobject>
-                  <imagedata align="center"
-                             contentdepth="100%"
-                             fileref="files/images/Command_Propagate_GUI_4.png"
-                             scalefit="1"
-                             width="100%"/>
-                </imageobject>
-              </mediaobject>
-            </screenshot>
+          <para>In the ObjectProperties list, double click ElapsedDays, and
+          click OK.</para>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Command_Propagate_GUI_4.png"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
         </listitem>
+
         <listitem>
-          <para>
-            In the Condition list, double click the first row containing 12000, type 1, and click OK.
-          </para>
+          <para>In the Condition list, double click the first row containing
+          12000, type 1, and click OK.</para>
         </listitem>
+
         <listitem>
-          <para>
-            In the Parameter list, click the ellipsis button in the second row to bring up the Parameter Select Dialog.
-          </para>
+          <para>In the Parameter list, click the ellipsis button in the second
+          row to bring up the Parameter Select Dialog.</para>
         </listitem>
+
         <listitem>
-          <para>
-            In the Object list, click Sat2.
-          </para>
+          <para>In the Object list, click Sat2.</para>
         </listitem>
+
         <listitem>
-          <para>
-            In the ObjectProperties list, double click Periapsis and click OK.
-          </para>
+          <para>In the ObjectProperties list, double click Periapsis and click
+          OK.</para>
         </listitem>
       </orderedlist>
 
-      <para>
-        The Propagate1 dialog should now look like the image below.
-      </para>
-      
+      <para>The Propagate1 dialog should now look like the image below.</para>
+
       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
-                       contentdepth="100%"
+            <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Command_Propagate_GUI_5.png"
-                       scalefit="1"
-                       width="100%"/>
+                       scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>
-        Figure 5 Propagator1 Conditions Set
-      </para>      
+      <para>Figure 5 Propagator1 Conditions Set</para>
     </refsection>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
+
     <refsection>
       <title>Introduction</title>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command documentation below describes how to propagate single and 
-        multiple spacecraft to desired conditions forward and backwards in time.  
-        To streamline the script examples, the objects <guilabel>numSat</guilabel>, 
-        <guilabel>spkSat</guilabel>, <guilabel>numProp</guilabel>, and <guilabel>spkProp</guilabel> 
-        are assumed to be configured as shown below.  GMAT is distributed with the SPK kernels
-        used in the examples.
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command documentation below
+      describes how to propagate single and multiple spacecraft to desired
+      conditions forward and backwards in time. To streamline the script
+      examples, the objects <guilabel>numSat</guilabel>,
+      <guilabel>spkSat</guilabel>, <guilabel>numProp</guilabel>, and
+      <guilabel>spkProp</guilabel> are assumed to be configured as shown
+      below. GMAT is distributed with the SPK kernels used in the
+      examples.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft spkSat;
-  spkSat.Epoch.UTCGregorian   = '02 Jun 2004 12:00:00.000'
-  spkSat.NAIFId               = -123456789;
-  spkSat.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\GEOSat.bsp'};
+      <programlisting><code>Create Spacecraft spkSat;
+spkSat.Epoch.UTCGregorian   = '02 Jun 2004 12:00:00.000'
+spkSat.NAIFId               = -123456789;
+spkSat.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\GEOSat.bsp'};
 
-  Create Spacecraft numSat
-  numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+Create Spacecraft numSat
+numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
 
-  Create Propagator spkProp;
-  spkProp.Type       = SPK;
-  spkProp.StartEpoch = FromSpacecraft
+Create Propagator spkProp;
+spkProp.Type       = SPK;
+spkProp.StartEpoch = FromSpacecraft
 
-  Create Propagator numProp
-  numProp.Type = PrinceDormand78
+Create Propagator numProp
+numProp.Type = PrinceDormand78
 
-  BeginMissionSequence
-        </code>
-      </programlisting>
+BeginMissionSequence</code></programlisting>
     </refsection>
 
     <refsection>
       <title>How to Propagate a Single Spacecraft</title>
 
-      <para>
-        <literal>Note:</literal> See the Introduction section for a script snippet to configure GMAT to execute the examples in this section.
-      </para>
+      <para><literal>Note:</literal> See the Introduction section for a script
+      snippet to configure GMAT to execute the examples in this
+      section.</para>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command provides a simple interface to propagate a 
-        spacecraft to a stopping condition or to take a single propagation step.  
-        To propagate a single spacecraft you must specify the desired propagator, the 
-        spacecraft to propagate, and if desired, the stopping condition.  The <guilabel>Propagate</guilabel> 
-        command supports numerical integrator and ephemeris type propagators.  For single 
-        spacecraft propagation, the syntax is the same regardless of propagator type.  For
-        example, to propagate a spacecraft using a numerical integrator, you can use the following script snippet
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command provides a simple
+      interface to propagate a spacecraft to a stopping condition or to take a
+      single propagation step. To propagate a single spacecraft you must
+      specify the desired propagator, the spacecraft to propagate, and if
+      desired, the stopping condition. The <guilabel>Propagate</guilabel>
+      command supports numerical integrator and ephemeris type propagators.
+      For single spacecraft propagation, the syntax is the same regardless of
+      propagator type. For example, to propagate a spacecraft using a
+      numerical integrator, you can use the following script snippet</para>
 
-      <programlisting>
-        <code>
-  Propagate numProp(numSat){numSat.Periapsis}
-  or
-  Propagate numProp(numSat,{numSat.Periapsis})
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate numProp(numSat){numSat.Periapsis}
+% or
+Propagate numProp(numSat,{numSat.Periapsis})</code></programlisting>
 
-      <para>
-        To propagate a single spacecraft using a propagator configured to use an SPK kernel use the following.
-      </para>
+      <para>To propagate a single spacecraft using a propagator configured to
+      use an SPK kernel use the following.</para>
 
-      <programlisting>
-        <code>
-  Propagate spkProp(spkSat){spkSat.TA = 90}
-  or
-  Propagate spkProp(spkSat,{spkSat.TA = 90})
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate spkProp(spkSat){spkSat.TA = 90}
+% or
+Propagate spkProp(spkSat,{spkSat.TA = 90})</code></programlisting>
 
-      <para>
-        To take a single propagation step, simply omit the stopping conditions as shown below.  
-        The propagator will take a step based on its step size control algorithm.  
-        See the <guilabel>Propagator</guilabel> documentation for more information on step size control.
-      </para>
+      <para>To take a single propagation step, simply omit the stopping
+      conditions as shown below. The propagator will take a step based on its
+      step size control algorithm. See the <guilabel>Propagator</guilabel>
+      documentation for more information on step size control.</para>
 
-      <programlisting>
-        <code>
-  Propagate numProp(numSat)
-  or
-  Propagate spkProp(spkSat)
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate numProp(numSat)
+% or
+Propagate spkProp(spkSat) </code></programlisting>
     </refsection>
 
     <refsection>
       <title>How to Propagate Multiple Spacecraft</title>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command allows you to propagate multiple spacecraft by 
-        including a list of spacecraft in a single propagator, by including a 
-        formation in a propagator, and/or by including multiple propagators in a single command. 
-        For example purposes, here is a script snippet that propagates multiple spacecraft.
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command allows you to propagate
+      multiple spacecraft by including a list of spacecraft in a single
+      propagator, by including a formation in a propagator, and/or by
+      including multiple propagators in a single command. For example
+      purposes, here is a script snippet that propagates multiple
+      spacecraft.</para>
 
-      <programlisting>
-        <code>
-  Propagate Synchronized Prop1(Sat1,Sat2) Prop2(Sat3,Sat4)...
-            Prop3(aFormation){Sat1.Earth.Periapsis};
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Synchronized Prop1(Sat1,Sat2) Prop2(Sat3,Sat4)...
+Prop3(aFormation){Sat1.Earth.Periapsis}</code></programlisting>
 
-      <para>
-        In the script line above Sat1 and Sat2 are propagated using Prop1; 
-        Prop2 is used to propagate Sat3 and Sat4; all spacecraft added to aFormation 
-        are propagated using Prop3.  The <guilabel>Propagate</guilabel> command configured above propagates 
-        all spacecraft until Sat1 reaches Earth periapsis.
-      </para>
+      <para>In the script line above Sat1 and Sat2 are propagated using Prop1;
+      Prop2 is used to propagate Sat3 and Sat4; all spacecraft added to
+      aFormation are propagated using Prop3. The
+      <guilabel>Propagate</guilabel> command configured above propagates all
+      spacecraft until Sat1 reaches Earth periapsis.</para>
 
-      <para>
-        All spacecraft propagated by the same propagator are time synchronized during propagation.  
-        By time synchronization, we mean that all spacecraft are propagated across the same time step.  
-        The <guilabel>Synchronized</guilabel> keyword tells GMAT to keep spacecraft propagated by different propagators synchronized 
-        in time during propagation.  Time synchronization among multiple propagators is performed by taking a single 
-        step for all spacecraft controlled by the first propagator (Prop1 in the above example), and then stepping 
-        all other propagators to that time.  When the synchronized keyword is omitted, spacecraft propagated by different 
-        propagators are not synchronized in time.  In that case, each propagator takes steps determined by its step size control 
-        algorithm without regard to the other propagators in the propagate command.   Time synchronization is particularly useful if 
-        you need ephemeris files for multiple spacecraft with consistent time tags, or if you are visualizing multiple spacecraft in an <guilabel>OrbitView</guilabel>.
-      </para>
+      <para>All spacecraft propagated by the same propagator are time
+      synchronized during propagation. By time synchronization, we mean that
+      all spacecraft are propagated across the same time step. The
+      <guilabel>Synchronized</guilabel> keyword tells GMAT to keep spacecraft
+      propagated by different propagators synchronized in time during
+      propagation. Time synchronization among multiple propagators is
+      performed by taking a single step for all spacecraft controlled by the
+      first propagator (Prop1 in the above example), and then stepping all
+      other propagators to that time. When the synchronized keyword is
+      omitted, spacecraft propagated by different propagators are not
+      synchronized in time. In that case, each propagator takes steps
+      determined by its step size control algorithm without regard to the
+      other propagators in the propagate command. Time synchronization is
+      particularly useful if you need ephemeris files for multiple spacecraft
+      with consistent time tags, or if you are visualizing multiple spacecraft
+      in an <guilabel>OrbitView</guilabel>.</para>
 
       <warning>
-        <para>
-          Caution:  When using a propagator is configured to use SPK kernels, you can only have one spacecraft per propagator.
-        </para>
-        <para>
-          This following is supported:
-          Propagate numProp(numSat) spkProp(spkSat1) spkProp(spkSat2)
-         </para>
-        <para>
-          This is NOT supported!
-          Propagate numProp(numSat) spkProp(spkSat1,spkSat2)
-        </para>
+        <para>Caution: When using a propagator is configured to use SPK
+        kernels, you can only have one spacecraft per propagator.</para>
+
+        <para>This following is supported: Propagate numProp(numSat)
+        spkProp(spkSat1) spkProp(spkSat2)</para>
+
+        <para>This is NOT supported! Propagate numProp(numSat)
+        spkProp(spkSat1,spkSat2)</para>
       </warning>
     </refsection>
 
     <refsection>
       <title>Behavior of Stopping Conditions</title>
 
-      <para>
-        GMAT allows you to define a set of stopping conditions when propagating 
-        spacecraft that define conditions that must be satisfied at the termination of 
-        the <guilabel>Propagate</guilabel> command.  For example, it is often useful to propagate to an orbital location such as Apogee.  
-        When no stopping condition is provided, the propagate command takes a single step.  
-        When given a set of stopping conditions, the Propagate command propagates the spacecraft 
-        to the condition that occurs first in elapsed propagation time and terminates propagation.  
-        There are several ways to define stopping conditions via the script interface. One is to include 
-        a comma separated list of stopping conditions with each propagator like this.
-      </para>
+      <para>GMAT allows you to define a set of stopping conditions when
+      propagating spacecraft that define conditions that must be satisfied at
+      the termination of the <guilabel>Propagate</guilabel> command. For
+      example, it is often useful to propagate to an orbital location such as
+      Apogee. When no stopping condition is provided, the propagate command
+      takes a single step. When given a set of stopping conditions, the
+      Propagate command propagates the spacecraft to the condition that occurs
+      first in elapsed propagation time and terminates propagation. There are
+      several ways to define stopping conditions via the script interface. One
+      is to include a comma separated list of stopping conditions with each
+      propagator like this.</para>
 
-      <programlisting>
-        <code>
-          Propagate Prop1(Sat1,{Sat1.Periapsis}) ...
-                    Prop2(Sat2,{Sat2.Periapsis})
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Prop1(Sat1,{Sat1.Periapsis}) Prop2(Sat2,{Sat2.Periapsis}) </code></programlisting>
 
-      <para>
-        A second approach is to define a comma separated list of stopping conditions at the end of the propagate command like this.
-      </para>
+      <para>A second approach is to define a comma separated list of stopping
+      conditions at the end of the propagate command like this.</para>
 
-      <programlisting>
-        <code>
-          Propagate Prop1(Sat1) Prop2(Sat2) {Sat1.Periapsis,Sat2.Periapsis}
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Prop1(Sat1) Prop2(Sat2) {Sat1.Periapsis,Sat2.Periapsis}</code></programlisting>
 
-      <para>
-        Note that the above two methods result in the same stopping epoch.  
-        When you provide a set of stopping conditions, regardless of where in the command the 
-        stopping condition is defined, GMAT builds a list of all conditions and tracks them until 
-        the first condition occurs.
-      </para>
+      <para>Note that the above two methods result in the same stopping epoch.
+      When you provide a set of stopping conditions, regardless of where in
+      the command the stopping condition is defined, GMAT builds a list of all
+      conditions and tracks them until the first condition occurs.</para>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command currently requires that the left hand side of a stopping 
-        condition is a valid spacecraft parameter.  For example, the first line in the 
-        following example is supported and the second line is not supported.
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command currently requires that
+      the left hand side of a stopping condition is a valid spacecraft
+      parameter. For example, the first line in the following example is
+      supported and the second line is not supported.</para>
 
-      <programlisting>
-        <code>
- Propagate Prop1(Sat1) {Sat1.TA = 45};  % Supported
- Propagate Prop1(Sat1) {45 = Sat1.TA};  % Not supported
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Prop1(Sat1) {Sat1.TA = 45};  % Supported
+Propagate Prop1(Sat1) {45 = Sat1.TA};  % Not supported </code></programlisting>
 
-      <para>
-        You can define the tolerance on the stopping condition by including the 
-        <guilabel>StopTolerance</guilabel> keyword in the Propagate command as shown below.  In this example, 
-        GMAT will propagate until the true anomaly of Sat1 is 90 degrees to within +/- 1e-5 degrees.
-      </para>
+      <para>You can define the tolerance on the stopping condition by
+      including the <guilabel>StopTolerance</guilabel> keyword in the
+      Propagate command as shown below. In this example, GMAT will propagate
+      until the true anomaly of Sat1 is 90 degrees to within +/- 1e-5
+      degrees.</para>
 
-      <programlisting>
-        <code>
- Propagate Prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-5}
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-5}</code></programlisting>
 
       <warning>
-        <para>
-          Caution:  GMAT currently propagates spacecraft to a time quantization of a few microseconds. 
-          Depending upon the rate of the stopping condition function, it may not be possible to locate the 
-          stopping condition to the requested StopTolerance. In that case, GMAT throws a warning to alert you 
-          that the tolerance was not satisfied and provides information on the achieved stopping value and the 
-          requested tolerance.
-        </para>
+        <para>Caution: GMAT currently propagates spacecraft to a time
+        quantization of a few microseconds. Depending upon the rate of the
+        stopping condition function, it may not be possible to locate the
+        stopping condition to the requested StopTolerance. In that case, GMAT
+        throws a warning to alert you that the tolerance was not satisfied and
+        provides information on the achieved stopping value and the requested
+        tolerance.</para>
 
-        <para>
-          Note: GMAT does not currently support tolerances on a per stopping condition basis.
-          If you include StopTolerance multiple times in a single propagate command, GMAT uses the last value provided.
-        </para>
+        <para>Note: GMAT does not currently support tolerances on a per
+        stopping condition basis. If you include StopTolerance multiple times
+        in a single propagate command, GMAT uses the last value
+        provided.</para>
       </warning>
 
-      <para>
-        The <guilabel>Propagate</guilabel> command uses an algorithm called the First Step Algorithm 
-        (FSA) when back-to-back propagations occur and both propagations have at least 
-        one stopping condition that is the same in both commands.  For example:
-      </para>
+      <para>The <guilabel>Propagate</guilabel> command uses an algorithm
+      called the First Step Algorithm (FSA) when back-to-back propagations
+      occur and both propagations have at least one stopping condition that is
+      the same in both commands. For example:</para>
 
-      <programlisting>
-        <code>
-          Propagate prop1(Sat1) {Sat1.TA = 90};
-          Propagate prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-4}
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate prop1(Sat1) {Sat1.TA = 90};
+Propagate prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-4}</code></programlisting>
 
-      <para>
-        The <guilabel>FSA</guilabel> determines the behavior of the first step when the last propagation 
-        performed on a spacecraft was terminated using a stopping condition listed in the current command.  
-        If the error in the stopping condition at the initial epoch of the second propagate command is less 
-        than SafetyFactor*StopTolerance, the propagate command will take one integration step before attempting to 
-        locate the stopping condition again.  In the FSA, SafetyFactor = 10, and the StopTolerance is from the second 
-        <guilabel>Propagate</guilabel> command.  Continuing with the example above, if abs(TA_Achieved - TA_Desired) &lt; 1e-3 -- where TA_Achieved is 
-        the TA after the first propagate command and TA_Desired is the requested value of TA in the second propagate command -- 
-        then the <guilabel>Propagate</guilabel> command will take one step before attempting to locate the stopping condition. The first step algorithm 
-        works the same way for forward propagation, backwards propagation, and changing propagation directions.
-      </para>
+      <para>The <guilabel>FSA</guilabel> determines the behavior of the first
+      step when the last propagation performed on a spacecraft was terminated
+      using a stopping condition listed in the current command. If the error
+      in the stopping condition at the initial epoch of the second propagate
+      command is less than SafetyFactor*StopTolerance, the propagate command
+      will take one integration step before attempting to locate the stopping
+      condition again. In the FSA, SafetyFactor = 10, and the StopTolerance is
+      from the second <guilabel>Propagate</guilabel> command. Continuing with
+      the example above, if abs(TA_Achieved - TA_Desired) &lt; 1e-3 -- where
+      TA_Achieved is the TA after the first propagate command and TA_Desired
+      is the requested value of TA in the second propagate command -- then the
+      <guilabel>Propagate</guilabel> command will take one step before
+      attempting to locate the stopping condition. The first step algorithm
+      works the same way for forward propagation, backwards propagation, and
+      changing propagation directions.</para>
 
       <warning>
-        <para>
-          Caution:  It is possible to specify a StopTolerance that cannot be 
-          satisfied by the stopping condition root locators and in that case, a warning is thrown.  
-          However, subsequent Propagate commands using the same stopping conditions may not behave as 
-          desired.  For the FSA algorithm to work as designed, you must provide StopTolerance values that are achievable.
-        </para>
+        <para>Caution: It is possible to specify a StopTolerance that cannot
+        be satisfied by the stopping condition root locators and in that case,
+        a warning is thrown. However, subsequent Propagate commands using the
+        same stopping conditions may not behave as desired. For the FSA
+        algorithm to work as designed, you must provide StopTolerance values
+        that are achievable.</para>
       </warning>
     </refsection>
 
     <refsection>
       <title>How to Propagate Backwards</title>
 
-      <para>
-        To propagate backwards using the script interface, include the 
-        keyword <guilabel>BackProp</guilabel> between the <guilabel>Propagate</guilabel> command and the first Propagator 
-        in the command as shown below.  All propagators in the command will propagate backwards.
-      </para>
+      <para>To propagate backwards using the script interface, include the
+      keyword <guilabel>BackProp</guilabel> between the
+      <guilabel>Propagate</guilabel> command and the first Propagator in the
+      command as shown below. All propagators in the command will propagate
+      backwards.</para>
 
-      <programlisting>
-        <code>
- Propagate Synchronized BackProp Prop1(Sat1,Sat2) Prop2(Sat3,Sat4)...
+      <programlisting><code>Propagate Synchronized BackProp Prop1(Sat1,Sat2) Prop2(Sat3,Sat4)...
            Prop3(aFormation){Sat1.Earth.Periapsis};
 
- Propagate Backprop numProp(numSat){numSat.Periapsis}
-        </code>
-      </programlisting>
+Propagate Backprop numProp(numSat){numSat.Periapsis}</code></programlisting>
     </refsection>
 
     <refsection>
-      <title>How to Propagate the STM and Compute the Jacobian (A-matrix)</title>
+      <title>How to Propagate the STM and Compute the Jacobian
+      (A-matrix)</title>
 
-      <para>
-        GMAT propagates the STM for all spacecraft propagated using numerical integrators by including the 
-        ‘STM’ keyword in a Propagator as shown below.  If the STM keyword is included anywhere in a <guilabel>Propagate</guilabel> command, 
-        the STM is propagated for all spacecraft using numerical propagators.
-      </para>
+      <para>GMAT propagates the STM for all spacecraft propagated using
+      numerical integrators by including the ‘STM’ keyword in a Propagator as
+      shown below. If the STM keyword is included anywhere in a
+      <guilabel>Propagate</guilabel> command, the STM is propagated for all
+      spacecraft using numerical propagators.</para>
 
-      <programlisting>
-        <code>
- Propagate Backprop numProp(numSat,’STM’){numSat.Periapsis}
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate Backprop numProp(numSat,’STM’){numSat.Periapsis}</code></programlisting>
 
-      <para>
-        GMAT does not currently support propagating the STM when propagating formation objects or when using SPK type propagators.
-      </para>
+      <para>GMAT does not currently support propagating the STM when
+      propagating formation objects or when using SPK type propagators.</para>
     </refsection>
 
     <refsection>
@@ -1133,19 +913,18 @@
 
       <itemizedlist>
         <listitem>
-          <para>
-            When using an SPK type propagator, only a single spacecraft can be propagated by a given propagator.
-          </para>
+          <para>When using an SPK type propagator, only a single spacecraft
+          can be propagated by a given propagator.</para>
         </listitem>
+
         <listitem>
-          <para>
-            GMAT does not currently support propagating the STM when propagating formation objects.
-          </para>
+          <para>GMAT does not currently support propagating the STM when
+          propagating formation objects.</para>
         </listitem>
+
         <listitem>
-          <para>
-            When computing the A-matrix during propagation, the A-matrix values are only accessible via the C-Interface.
-          </para>
+          <para>When computing the A-matrix during propagation, the A-matrix
+          values are only accessible via the C-Interface.</para>
         </listitem>
       </itemizedlist>
     </refsection>
@@ -1155,89 +934,67 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Propagate a single spacecraft to Earth periapsis
-      </para>
+      <para>Propagate a single spacecraft to Earth periapsis</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft numSat
-  numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+      <programlisting><code>Create Spacecraft numSat
+numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
 
-  Create Propagator numProp
-  numProp.Type = PrinceDormand78
+Create Propagator numProp
+numProp.Type = PrinceDormand78
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate numProp(numSat) {numSat.Earth.Periapsis}
-        </code>
-      </programlisting>
+Propagate numProp(numSat) {numSat.Earth.Periapsis}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Propagate a single spacecraft for one day.
-      </para>
+      <para>Propagate a single spacecraft for one day.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft numSat
-  numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+      <programlisting><code>Create Spacecraft numSat
+numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
 
-  Create Propagator numProp
-  numProp.Type = PrinceDormand78
+Create Propagator numProp
+numProp.Type = PrinceDormand78
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate numProp(numSat) {numSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate numProp(numSat) {numSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Propagate a single spacecraft backwards to true anomaly of 90 degrees.
-      </para>
+      <para>Propagate a single spacecraft backwards to true anomaly of 90
+      degrees.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft numSat
-  numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+      <programlisting><code>Create Spacecraft numSat
+numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
 
-  Create Propagator numProp
-  numProp.Type = PrinceDormand78
+Create Propagator numProp
+numProp.Type = PrinceDormand78
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate BackProp numProp(numSat) {numSat.TA = 90}
-        </code>
-      </programlisting>
+Propagate BackProp numProp(numSat) {numSat.TA = 90}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Propagate two spacecraft, each using a different propagator, 
-        but keep the spacecraft synchronized in time.  Propagate until either spacecraft reaches a mean anomaly of 45 degrees.
-      </para>
+      <para>Propagate two spacecraft, each using a different propagator, but
+      keep the spacecraft synchronized in time. Propagate until either
+      spacecraft reaches a mean anomaly of 45 degrees.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat1 aSat2
-  aSat1.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
-  aSat2.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
-  aSat2.TA = 0;
+      <programlisting><code>Create Spacecraft aSat1 aSat2
+aSat1.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+aSat2.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
+aSat2.TA = 0;
 
-  Create Propagator aProp1
-  aProp1.Type = PrinceDormand78
-  Create Propagator aProp2
-  aProp2.Type = PrinceDormand78
+Create Propagator aProp1
+aProp1.Type = PrinceDormand78
+Create Propagator aProp2
+aProp2.Type = PrinceDormand78
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate Synchronized aProp2(aSat1) aProp2(aSat2) ...
-                          {aSat1.MA = 45,aSat2.MA = 45}
-        </code>
-      </programlisting>
+Propagate Synchronized aProp2(aSat1) aProp2(aSat2) ...
+                      {aSat1.MA = 45,aSat2.MA = 45}</code> </programlisting>
     </informalexample>
   </refsection>
 </refentry>

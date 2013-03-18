@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="SolarSystem"
+<refentry version="5.0" xml:id="SolarSystem"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,40 +24,31 @@
   <refnamediv>
     <refname>SolarSystem</refname>
 
-    <refpurpose>
-      High level solar system configuration options
-    </refpurpose>
+    <refpurpose>High level solar system configuration options</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>SolarSystem</guilabel> resource allows you to define global properties for the model of the 
-      solar system including the ephemeris source for built-in celestial bodies and selected 
-      settings to improve performance when medium fidelity modelling is acceptable for your application.
-    </para>
+    <para>The <guilabel>SolarSystem</guilabel> resource allows you to define
+    global properties for the model of the solar system including the
+    ephemeris source for built-in celestial bodies and selected settings to
+    improve performance when medium fidelity modelling is acceptable for your
+    application.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>:
-        <xref linkend="CelestialBody"/>, 
-        <xref linkend="LibrationPoint"/>,
-        <xref linkend="Barycenter"/>,
-        <xref linkend="CoordinateSystem"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="CelestialBody" />, <xref linkend="LibrationPoint" />, <xref
+    linkend="Barycenter" />, <xref linkend="CoordinateSystem" /></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*" />
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*" />
 
         <thead>
           <row>
@@ -70,22 +60,15 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>DEFilename</guilabel>
-            </entry>
+            <entry><guilabel>DEFilename</guilabel></entry>
 
-            <entry>
-              <para>
-                The path and name of the DE file.
-              </para>
-              <variablelist>
+            <entry><para> The path and name of the DE file. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>FileName</para>
                   </listitem>
                 </varlistentry>
 
@@ -93,9 +76,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid DE file
-                    </para>
+                    <para>Valid DE file</para>
                   </listitem>
                 </varlistentry>
 
@@ -103,9 +84,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -113,9 +92,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      ../data/planetary_ephem/de/leDE1941.405
-                    </para>
+                    <para>../data/planetary_ephem/de/leDE1941.405</para>
                   </listitem>
                 </varlistentry>
 
@@ -134,27 +111,19 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>EphemerisSource</guilabel>
-            </entry>
+            <entry><guilabel>EphemerisSource</guilabel></entry>
 
-            <entry>
-              <para>
-                The ephemeris model for built-in celestial bodies.
-              </para>
-              <variablelist>
+            <entry><para> The ephemeris model for built-in celestial bodies.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>FileName</para>
                   </listitem>
                 </varlistentry>
 
@@ -162,9 +131,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      DE405, DE421, DE424, or SPICE
-                    </para>
+                    <para>DE405, DE421, DE424, or SPICE</para>
                   </listitem>
                 </varlistentry>
 
@@ -172,9 +139,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -182,9 +147,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DE405
-                    </para>
+                    <para>DE405</para>
                   </listitem>
                 </varlistentry>
 
@@ -203,27 +166,19 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>LSKFilename</guilabel>
-            </entry>
+            <entry><guilabel>LSKFilename</guilabel></entry>
 
-            <entry>
-              <para>
-                The path and name of the SPK leap second kernel.
-              </para>
-              <variablelist>
+            <entry><para> The path and name of the SPK leap second kernel.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>FileName</para>
                   </listitem>
                 </varlistentry>
 
@@ -231,9 +186,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid SPK leapsecond kernel
-                    </para>
+                    <para>Valid SPK leapsecond kernel</para>
                   </listitem>
                 </varlistentry>
 
@@ -241,9 +194,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -251,9 +202,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      ../data/time/naif0010.tls
-                    </para>
+                    <para>../data/time/naif0010.tls</para>
                   </listitem>
                 </varlistentry>
 
@@ -272,27 +221,19 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>SPKFilename</guilabel>
-            </entry>
+            <entry><guilabel>SPKFilename</guilabel></entry>
 
-            <entry>
-              <para>
-                desc
-              </para>
-              <variablelist>
+            <entry><para> desc </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      The path and name of the SPK orbit ephemeris kernel.
-                    </para>
+                    <para>The path and name of the SPK orbit ephemeris
+                    kernel.</para>
                   </listitem>
                 </varlistentry>
 
@@ -300,9 +241,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valis SPK ephemeris kernel (.bsp)
-                    </para>
+                    <para>Valis SPK ephemeris kernel (.bsp)</para>
                   </listitem>
                 </varlistentry>
 
@@ -310,9 +249,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -320,9 +257,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      ../data/planetary_ephem/spk/DE421AllPlanets.bsp
-                    </para>
+                    <para>../data/planetary_ephem/spk/DE421AllPlanets.bsp</para>
                   </listitem>
                 </varlistentry>
 
@@ -341,31 +276,24 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>EphemerisUpdateInterval</guilabel>
-            </entry>
+            <entry><guilabel>EphemerisUpdateInterval</guilabel></entry>
 
-            <entry>
-              <para>
-                The time between updates for celetial body ephemeris.  For example, if 
-                EphemerisUpdateInterval = 60, if an ephemeris call is made at time t = 1200, 
-                and a subsequent call is made at time t = 1210, the same ephemeris will be returned 
-                for the second call.   This option is for high speed, low fidelity modelling or for use 
-                when modelling orbits far from third body perturbation sources.
-              </para>
-              <variablelist>
+            <entry><para> The time between updates for celetial body
+            ephemeris. For example, if EphemerisUpdateInterval = 60, if an
+            ephemeris call is made at time t = 1200, and a subsequent call is
+            made at time t = 1210, the same ephemeris will be returned for the
+            second call. This option is for high speed, low fidelity modelling
+            or for use when modelling orbits far from third body perturbation
+            sources. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Real
-                    </para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -373,9 +301,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real &gt;= 0
-                    </para>
+                    <para>Real &gt;= 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -383,9 +309,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -393,9 +317,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -414,27 +336,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UseTTForEphemeris</guilabel>
-            </entry>
+            <entry><guilabel>UseTTForEphemeris</guilabel></entry>
 
-            <entry>
-              <para>
-                Flag to use TerrestrialTime as input to the orbital ephemeris routines.  When set to False TDB is used.
-              </para>
-              <variablelist>
+            <entry><para> Flag to use TerrestrialTime as input to the orbital
+            ephemeris routines. When set to False TDB is used. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -442,9 +357,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true,false
-                    </para>
+                    <para>true,false</para>
                   </listitem>
                 </varlistentry>
 
@@ -452,9 +365,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -462,9 +373,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      false
-                    </para>
+                    <para>false</para>
                   </listitem>
                 </varlistentry>
 
@@ -483,8 +392,7 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -497,138 +405,119 @@
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SolarSystem_GUI_1.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      The <guilabel>SolarSystem</guilabel> dialog box allows you to configure global properties for solar system modelling and the default 
-      configuration is illustrated above.  Use <guilabel>EphemerisSource</guilabel> to choose the ephemeris model for built-in celestial bodies.  
-      If you select either DE405, DE421, or DE424 the dialog box above illustrates available options.
-    </para>
+    <para>The <guilabel>SolarSystem</guilabel> dialog box allows you to
+    configure global properties for solar system modelling and the default
+    configuration is illustrated above. Use
+    <guilabel>EphemerisSource</guilabel> to choose the ephemeris model for
+    built-in celestial bodies. If you select either DE405, DE421, or DE424 the
+    dialog box above illustrates available options.</para>
 
     <warning>
-      <para>
-        Caution:  GMAT allows you to provide user-created DE or SPK kernel files but we recommend using the 
-        files distributed with GMAT.  The files provided with GMAT have been extensively tested for consistency 
-        and accuracy with the original data provided by JPL and other models in GMAT.  Using inconsistent ephemeris 
-        files or user-generated files can result in instability or numerical issues if the files are not generated correctly.
-      </para>
+      <para>Caution: GMAT allows you to provide user-created DE or SPK kernel
+      files but we recommend using the files distributed with GMAT. The files
+      provided with GMAT have been extensively tested for consistency and
+      accuracy with the original data provided by JPL and other models in
+      GMAT. Using inconsistent ephemeris files or user-generated files can
+      result in instability or numerical issues if the files are not generated
+      correctly.</para>
 
-      <para>
-        Changing the ephemeris source for an application is equivalent to making a 
-        fundamental change to the model of the solar system.  We recommend selecting the 
-        EphemerisSource early in the design process and using that model consistently.  In the event 
-        that an ephemeris model change is necessary, we recommend that you change the model in the script 
-        file and not via the GUI. We allow you to change EphemerisSource via the GUI for convenience in early 
-        design phases when rigorous consistency in modelling is less important.
-      </para>
+      <para>Changing the ephemeris source for an application is equivalent to
+      making a fundamental change to the model of the solar system. We
+      recommend selecting the EphemerisSource early in the design process and
+      using that model consistently. In the event that an ephemeris model
+      change is necessary, we recommend that you change the model in the
+      script file and not via the GUI. We allow you to change EphemerisSource
+      via the GUI for convenience in early design phases when rigorous
+      consistency in modelling is less important.</para>
     </warning>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_SolarSystem_GUI_2.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      If you select SPICE for EphemerisSource, the SolarSystem dialog box 
-      reconfigures to allow you to define the SPK Kernel and the leap second kernel.
-    </para>
+    <para>If you select SPICE for EphemerisSource, the SolarSystem dialog box
+    reconfigures to allow you to define the SPK Kernel and the leap second
+    kernel.</para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
-    <para>
-      GMAT uses the ephemeris file selected in the <guilabel>EphemerisSource</guilabel> 
-      field for all built-in celestial bodies.   For user-defined bodies, 
-      the ephemeris model is specified on the <guilabel>CelestialBody</guilabel> object.
-    </para>
+    <para>GMAT uses the ephemeris file selected in the
+    <guilabel>EphemerisSource</guilabel> field for all built-in celestial
+    bodies. For user-defined bodies, the ephemeris model is specified on the
+    <guilabel>CelestialBody</guilabel> object.</para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          For more information on the DE files provide by JPL see the readme file here(http://iau-comm4.jpl.nasa.gov/README).
-        </para>
+        <para>For more information on the DE files provide by JPL see the
+        readme file here(http://iau-comm4.jpl.nasa.gov/README).</para>
       </listitem>
+
       <listitem>
-        <para>
-          For general information on SPICE ephemeris files see http://naif.jpl.nasa.gov/naif/toolkit.html
-        </para>
+        <para>For general information on SPICE ephemeris files see
+        http://naif.jpl.nasa.gov/naif/toolkit.html</para>
       </listitem>
+
       <listitem>
-        <para>
-          For information on the SPK kernel named DE421AllPlanets.bsp distributed with GMAT see the 
-          SPK.README located in data\planetary_ephem\spk in the GMAT distribution.
-        </para>
+        <para>For information on the SPK kernel named DE421AllPlanets.bsp
+        distributed with GMAT see the SPK.README located in
+        data\planetary_ephem\spk in the GMAT distribution.</para>
       </listitem>
     </itemizedlist>
 
-      <para>
-        Note: The SolarSystem and built-in CelestialBody resources require several hundred fields for full configuration.  
-        GMAT only saves non-default values for SolarSystem and CelestialBody to the script so that 
-        scripts are not populated with hundreds of default settings.
-      </para>
-    
+    <para>Note: The SolarSystem and built-in CelestialBody resources require
+    several hundred fields for full configuration. GMAT only saves non-default
+    values for SolarSystem and CelestialBody to the script so that scripts are
+    not populated with hundreds of default settings.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Use DE421 for Ephemeris.
-      </para>
+      <para>Use DE421 for Ephemeris.</para>
 
-      <programlisting>
-        <code>
-  GMAT SolarSystem.EphemerisSource = 'DE421';
+      <programlisting><code>GMAT SolarSystem.EphemerisSource = 'DE421'
 
-  Create Spacecraft aSpacecraft;
-  Create Propagator aPropagator;
-  aPropagator.FM = aForceModel;
-  Create ForceModel aForceModel
-  aForceModel.PointMasses = {Luna, Sun};
+Create Spacecraft aSpacecraft
+Create Propagator aPropagator
+aPropagator.FM = aForceModel
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Luna, Sun}
 
-  BeginMissionSequence;
+BeginMissionSequence
 
-  Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0};
-        </code>
-      </programlisting>
+Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Use SPICE for Ephemeris.
-      </para>
+      <para>Use SPICE for Ephemeris.</para>
 
-      <programlisting>
-        <code>
-  GMAT SolarSystem.EphemerisSource = 'SPICE';
+      <programlisting><code>GMAT SolarSystem.EphemerisSource = 'SPICE'
 
-  Create Spacecraft aSpacecraft;
-  Create Propagator aPropagator;
-  aPropagator.FM = aForceModel;
-  Create ForceModel aForceModel
-  aForceModel.PointMasses = {Luna, Sun};
+Create Spacecraft aSpacecraft
+Create Propagator aPropagator
+aPropagator.FM = aForceModel
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Luna, Sun}
 
-  BeginMissionSequence;
+BeginMissionSequence
 
-  Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0};
-        </code>
-      </programlisting>
+Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0}</code>      </programlisting>
     </informalexample>
   </refsection>
 </refentry>

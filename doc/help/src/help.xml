@@ -45,6 +45,7 @@
     <title>Tutorials</title>
     <xi:include href="Tut_SimulatingAnOrbit.xml"/>
     <xi:include href="Tut_SimpleOrbitTransfer.xml" />
+	<xi:include href="Tut_OptimalLunarFlyby.xml" />
     <!--
         <xi:include href="Tut_LEOStationKeeping.xml"/>
 
