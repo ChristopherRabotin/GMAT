@@ -1389,7 +1389,7 @@ void Vary::SetInitialValue(Solver *theSolver)
           (initialValue->GetWrapperType() != Gmat::ARRAY_ELEMENT_WT))
       {
          Real var = solver->GetSolverVariable(variableID);
-         bool rv = initialValue->SetReal(var);
+         initialValue->SetReal(var);
 
          MessageInterface::ShowMessage("Apply Corrections has changed the "
                "initial guess for %s from %s to %.12lf\n", variableName.c_str(),
