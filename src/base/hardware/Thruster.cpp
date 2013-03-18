@@ -931,6 +931,14 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
       case GRAVITATIONAL_ACCELERATION:
          if (value > 0.0)
             gravityAccel = value;
+         else
+         {
+            HardwareException he;
+            he.SetDetails(errorMessageFormat.c_str(),
+                          GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                          "GravitationalAccel", "Real Number > 0.0");
+            throw he;
+         }
          return gravityAccel;
 
 

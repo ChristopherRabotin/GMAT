@@ -8615,6 +8615,40 @@ bool Interpreter::FinalPass()
             continue;
          }
       }
+
+      StringArray tankNames = obj->GetStringArrayParameter("Tank");
+      for (StringArray::iterator theName = tankNames.begin();
+            theName != tankNames.end(); ++theName)
+      {
+         GmatBase *theObj = FindObject(*theName);
+
+         // To catch as many errors we can, continue with next object
+         if (theObj == NULL)
+         {
+            InterpreterException ex
+               ("The Tank \"" + *theName + "\" for the Thruster \"" +
+                obj->GetName() + "\" could not be found");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+
+         #if DBGLVL_FINAL_PASS > 1
+         MessageInterface::ShowMessage
+            ("   Calling '%s'->SetRefObject(%s(%p), %d)\n", obj->GetName().c_str(),
+             theObj->GetName().c_str(), theObj, theObj->GetType());
+         #endif
+
+         if (theObj->GetType() != Gmat::FUEL_TANK)
+         {
+            InterpreterException ex
+               ("The Thruster \"" + obj->GetName() + "\" failed to set "
+                "\"Tank\" to \"" + *theName + "\"");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+      }
    }
 
    //-------------------------------------------------------------------
