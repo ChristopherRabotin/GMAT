@@ -8662,7 +8662,7 @@ bool Interpreter::FinalPass()
       std::string overlaps;
 
       // Make sure formation members are all SpaceObjects (note: Formations can
-      // contain formations)
+      // no longer contain formations, at least for R2013a)
       for (UnsignedInt i = 0; i < objList.size(); ++i)
       {
          f1 = theModerator->GetConfiguredObject(objList[i]);
@@ -8673,11 +8673,17 @@ bool Interpreter::FinalPass()
             obj = theModerator->GetConfiguredObject(f1List[j]);
             if (obj != NULL)
             {
-               if (obj->IsOfType("SpaceObject") == false)
+//               if (obj->IsOfType("SpaceObject") == false)
+               if (obj->IsOfType("Spacecraft") == false)
                {
-                  overlaps += "   ";
-                  overlaps += f1List[j] + " cannot propagate in the formation " +
-                              f1->GetName() + ".\n";
+                  if (obj->IsOfType("Formation"))
+                     overlaps += "   GMAT does not allow Formations of "
+                            "Formations, so the Formation \"" + obj->GetName() +
+                            "\" cannot be added to the Formation \"" +
+                            f1->GetName() + "\".";
+                  else
+                     overlaps += "   " + f1List[j] + " cannot propagate in the "
+                           "formation " + f1->GetName() + ".\n";
                }
             }
          }

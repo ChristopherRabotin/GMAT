@@ -722,6 +722,18 @@ const StringArray& Formation::GetStringArrayParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param label The script string for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a
+ *         StringArray.
+ */
+//------------------------------------------------------------------------------
 const StringArray& 
          Formation::GetStringArrayParameter(const std::string &label) const
 {
@@ -813,6 +825,12 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                throw SpaceObjectException(errorMsg);
             }
          components.push_back(so);
+      }
+      if (type == Gmat::FORMATION)
+      {
+         throw SpaceObjectException("GMAT does not allow Formations of "
+               "Formations, so the Formation \"" + name + "\" cannot be added "
+               "to the Formation \"" + instanceName + "\".");
       }
       
       return true;
