@@ -101,8 +101,7 @@ void MissionTreeToolBar::SetMissionTree(MissionTree *missionTree)
 void MissionTreeToolBar::ClearFilters()
 {
    ResetMissionTreeTools();
-   wxArrayString cmdsToInclude;
-   mMissionTree->SetViewLevel(0);
+   mMissionTree->SetViewLevel(10);
 }
 
 
@@ -412,7 +411,6 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       }
       
 	  ClearFilters();
-      mMissionTree->SetViewLevel(10);
 
       break;
    case TOOL_INC_PHYSICS:
@@ -426,9 +424,7 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       {
          //ToggleTool(eventId, true);
          ToggleTool(eventId, false);
-         ResetMissionTreeTools();
-         cmdsToInclude.Add("All");
-         mMissionTree->SetViewCommands(cmdsToInclude);
+		 ClearFilters();
          return;
       }
       
@@ -484,9 +480,7 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
       {
          //ToggleTool(eventId, true);
          ToggleTool(eventId, false);
-         ResetMissionTreeTools();
-         cmdsToInclude.Add("All");
-         mMissionTree->SetViewCommands(cmdsToInclude);
+		 ClearFilters();
          return;
       }
       
