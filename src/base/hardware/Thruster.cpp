@@ -1243,6 +1243,27 @@ const StringArray& Thruster::GetPropertyEnumStrings(const std::string &label) co
    return GetPropertyEnumStrings(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType Thruster::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case TANK:
+      return Gmat::FUEL_TANK;
+   default:
+      return Hardware::GetPropertyObjectType(id);
+   }
+}
 
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const

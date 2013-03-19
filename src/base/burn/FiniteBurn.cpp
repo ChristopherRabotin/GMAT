@@ -872,6 +872,29 @@ bool FiniteBurn::DepletesMass()
    return retval;
 }
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType FiniteBurn::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case THRUSTER:
+      return Gmat::THRUSTER;
+   case FUEL_TANK:
+      return Gmat::FUEL_TANK;
+   default:
+      return Burn::GetPropertyObjectType(id);
+   }
+}
 
 //------------------------------------------------------------------------------
 // bool FiniteBurn::Initialize()

@@ -72,6 +72,8 @@ public:
                                      const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
    
    virtual bool         Initialize();
    

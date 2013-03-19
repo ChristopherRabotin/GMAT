@@ -82,6 +82,8 @@ public:
                         GetPropertyEnumStrings(const Integer id) const;
    virtual const StringArray&
                         GetPropertyEnumStrings(const std::string &label) const;
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
    
    // Ref. object access methods - overridden from GmatBase
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;

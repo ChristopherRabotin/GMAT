@@ -1647,7 +1647,7 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
 {
    #ifdef DEBUG_FIND_PROP_ID
    MessageInterface::ShowMessage
-      ("Interpreter::FindPropertyID() obj=<%p><%s>, chunk=<%s>\n", obj,
+      ("Interpreter::FindPropertyID() entered, obj=<%p><%s>, chunk=<%s>\n", obj,
        (obj == NULL ? "NULL" : obj->GetName().c_str()), chunk.c_str());
    #endif
    
@@ -1676,6 +1676,9 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    }
    catch (BaseException &)
    {
+      #ifdef DEBUG_FIND_PROP_ID
+      MessageInterface::ShowMessage("   Trying to find id from the owned object\n");
+      #endif
       // Owned objects are not configurable and they are local objects
       if (FindOwnedObject(obj, prop, owner, id, type))
       {
@@ -1710,8 +1713,9 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    
    #ifdef DEBUG_FIND_PROP_ID
    MessageInterface::ShowMessage
-      ("Interpreter::FindPropertyID() returning owner=<%p><%s><%s>, retval=%d\n",
-       *owner, ((*owner) == NULL ? "NULL" : (*owner)->GetTypeName().c_str()),
+      ("Interpreter::FindPropertyID() returning id=%d, type=%d, owner=<%p><%s><%s>, "
+       "retval=%d\n", id, type, *owner,
+       ((*owner) == NULL ? "NULL" : (*owner)->GetTypeName().c_str()),
        ((*owner) == NULL ? "NULL" : (*owner)->GetName().c_str()), retval);
    #endif
    
@@ -3989,7 +3993,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
 {
    #ifdef DEBUG_MAKE_ASSIGNMENT
    MessageInterface::ShowMessage
-      ("Interpreter::MakeAssignment() lhs=<%s>, rhs=<%s>\n", lhs.c_str(), rhs.c_str());
+      ("\nInterpreter::MakeAssignment() lhs=<%s>, rhs=<%s>\n", lhs.c_str(), rhs.c_str());
    MessageInterface::ShowMessage
       ("   inCommandMode=%d, inRealCommandMode=%d\n", inCommandMode, inRealCommandMode);
    MessageInterface::ShowMessage
@@ -4243,6 +4247,23 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       
       // Check LHS property type
       FindPropertyID(lhsObj, lhsPropName, &toObj, toId, toType);
+      
+      // Check invalid object id
+      // We don't allow setting Parameters in resource mode, so write an error message
+      // (LOJ: 2013.03.18 GMT-3155 FIX)
+      if (toId == -1)
+      {
+         // Special case for spacecraft epoch, since we can set "sat.Epoch.UTCGregorian" 
+         // instead of "sat.Epoch = 01 Jan 2000 11:59:27.966" and "sat.DateFormat = UTCGregorian"
+         // Special case for drag force model, fm.Drag.AtmosphereModel.
+         if (lhs.find(".Epoch.") == lhs.npos && lhs.find(".Drag.") == lhs.npos)
+         {
+            InterpreterException ex
+               ("The field name \"" + lhsPropName + "\" on object \"" + lhsObjName + "\" is not permitted");
+            HandleError(ex);
+            return false;
+         }
+      }
       
       // Only object type of property is allowed to set to another object
       if (toType != Gmat::OBJECT_TYPE && toType != Gmat::OBJECTARRAY_TYPE)
@@ -4744,8 +4765,8 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
          
          #ifdef DEBUG_SET
          MessageInterface::ShowMessage
-            ("   ===> added to delayed blocks: line:%s, %s\n", lineNumStr.c_str(),
-             currentBlock.c_str());
+            ("Interpreter::SetPropertyToObject() returning true, added to delayed "
+             "blocks: line:%s, %s\n", lineNumStr.c_str(), currentBlock.c_str());
          #endif
          
          return true;
@@ -4754,13 +4775,21 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
    catch (BaseException &)
    {
       if (parsingDelayedBlock)
+      {
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("Interpreter::SetPropertyToObject() returning false,  Caught exception "
+             "in parsing delayed block mode\n");
+         #endif
          return false;
+      }
       
       delayedBlocks.push_back(currentBlock);
       
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage
-         ("   ===> added to delayed blocks: %s\n", currentBlock.c_str());
+         ("Interpreter::SetPropertyToObject() returning true, added to delayed "
+          "blocks: %s\n", currentBlock.c_str());
       #endif
       
       return true;
@@ -4775,10 +4804,14 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
    try
    {
       std::string fromTypeName = fromObj->GetTypeName();
+      bool continueNext = false;
       
+      // Handle if RHS is Parameter
       if (fromObj->GetType() == Gmat::PARAMETER)
-      {
-         Gmat::ParameterType fromType = ((Parameter*)fromObj)->GetReturnType();
+      {        
+         Parameter *fromParam = (Parameter*)fromObj;
+         Gmat::ParameterType fromType = fromParam->GetReturnType();
+         Gmat::ObjectType toObjPropObjType = toObj->GetPropertyObjectType(toId);
          
          #ifdef DEBUG_SET
          MessageInterface::ShowMessage
@@ -4786,44 +4819,69 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
              toId, fromType, toType);
          #endif
          
+         if (toType == Gmat::OBJECT_TYPE && toObjPropObjType == Gmat::PARAMETER)
+            toObj->SetStringParameter(toId, fromObj->GetName());
+         else
+         {
+            InterpreterException ex
+               ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
+                "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+            HandleError(ex);
+            return false;
+         }
+         
+         //================================================================
+         // Currently setting object field to Parameter is not allowed.
+         // @see FRAC-10 ScriptLanguage
+         // Only literal assignments are allowed in initialization section;
+         // no execution of commands or evaluation of parameters is done
+         //================================================================
+         /*
          if (fromType == toType)
          {
             if (toType == Gmat::STRING_TYPE)
                toObj->SetStringParameter(toId, fromObj->GetStringParameter("Value"));
             else if (toType == Gmat::REAL_TYPE)
                toObj->SetRealParameter(toId, fromObj->GetRealParameter("Value"));
+            else
+               continueNext = true;
          }
          else
          {
-            bool errorCond = false;
+            bool success = true;
             if (fromTypeName == "String")
             {
+               std::string fromValueToUse = fromParam->GetString();
+               #ifdef DEBUG_SET
+               MessageInterface::ShowMessage("   fromValueToUse='%s'\n", fromValueToUse.c_str());
+               #endif
                if (toType == Gmat::STRING_TYPE || toType == Gmat::STRINGARRAY_TYPE)
-                  toObj->SetStringParameter(toId, fromObj->GetStringParameter("Value"));
+                  success = toObj->SetStringParameter(toId, fromObj->GetStringParameter("Value"));
                else if (toType == Gmat::OBJECT_TYPE || toType == Gmat::OBJECTARRAY_TYPE)
-                  toObj->SetStringParameter(toId, fromObj->GetName());               
+                  success = toObj->SetStringParameter(toId, fromObj->GetName());
                else
-                  errorCond = true;
+                  success = false;
             }
             else if (fromTypeName == "Variable")
             {
                if (toType == Gmat::REAL_TYPE)
                   toObj->SetRealParameter(toId, fromObj->GetRealParameter("Value"));
                // Added to fix GMAT XYPlot1.IndVar = Var; (loj: 2008.08.01)
-               else if (toType == Gmat::OBJECT_TYPE && toObj->IsOfType(Gmat::XY_PLOT))
+               //else if (toType == Gmat::OBJECT_TYPE && toObj->IsOfType(Gmat::XY_PLOT))
+               else if (toType == Gmat::OBJECT_TYPE && toObjPropObjType == Gmat::PARAMETER)
                   toObj->SetStringParameter(toId, fromObj->GetName());
                else
-                  errorCond = true;
+                  success = false;
             }
             else
             {
                if (toType == Gmat::OBJECT_TYPE || toType == Gmat::OBJECTARRAY_TYPE)
                   toObj->SetStringParameter(toId, fromObj->GetName());
                else
-                  errorCond = true;
+                  success = false;
             }
             
-            if (errorCond)
+            if (!success)
             {
                InterpreterException ex
                   ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
@@ -4831,7 +4889,11 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
                HandleError(ex);
                return false;
             }
+            else
+               continueNext = true;
          }
+         */
+         //================================================================
       }
       else
       {
@@ -4841,22 +4903,71 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
              fromObj->GetName().c_str());
          #endif
          
-         toObj->SetStringParameter(toProp, fromObj->GetName());
+         bool success = false;
+         Gmat::ObjectType objPropType = Gmat::UNKNOWN_OBJECT;
+         
+         // Check if object name is valid object type
          if (toObj->IsOwnedObject(toId))
          {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage("   '%s' is owned object\n", toProp.c_str());
+            #endif
+            toObj->SetStringParameter(toProp, fromObj->GetName());
             toObj->SetRefObject(fromObj, fromObj->GetType(), fromObj->GetName());
-            
-            // Since CoordinateSystem::SetRefObject() clones AxisSystem, delete it from here
-            if (toObj->GetType() == Gmat::COORDINATE_SYSTEM &&
-                (fromObj->GetType() == Gmat::AXIS_SYSTEM))
+            objPropType = toObj->GetPropertyObjectType(toId);
+            if (objPropType == Gmat::UNKNOWN_OBJECT || 
+                (objPropType != Gmat::UNKNOWN_OBJECT && fromObj->IsOfType(objPropType)))
             {
-               #ifdef DEBUG_MEMORY
-               MemoryTracker::Instance()->Remove
-                  (fromObj, "oldLocalAxes", "Interpreter::SetPropertyToObject()",
-                   "deleting oldLocalAxes");
+               success = true;
+               // Since CoordinateSystem::SetRefObject() clones AxisSystem, delete it from here
+               if (toObj->GetType() == Gmat::COORDINATE_SYSTEM &&
+                   (fromObj->GetType() == Gmat::AXIS_SYSTEM))
+               {
+                  #ifdef DEBUG_MEMORY
+                  MemoryTracker::Instance()->Remove
+                     (fromObj, "oldLocalAxes", "Interpreter::SetPropertyToObject()",
+                      "deleting oldLocalAxes");
+                  #endif
+                  delete fromObj;
+                  fromObj = NULL;
+               }
+            }
+         }
+         else
+         {
+            toObj->SetStringParameter(toProp, fromObj->GetName());
+            objPropType = toObj->GetPropertyObjectType(toId);
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   '%s' is not owned object, objPropType=%d<%s>, fromObjTypeName='%s'\n",
+                toProp.c_str(), objPropType, GmatBase::GetObjectTypeString(objPropType).c_str(),
+                fromObj->GetTypeName().c_str());
+            #endif
+            if (objPropType == Gmat::UNKNOWN_OBJECT || 
+                (objPropType != Gmat::UNKNOWN_OBJECT && fromObj->IsOfType(objPropType)))
+            {
+               #ifdef DEBUG_SET
+               MessageInterface::ShowMessage
+                  ("   Calling SetStringParameter(%s, %s)\n", toProp.c_str(),
+                   fromObj->GetName().c_str());
                #endif
-               delete fromObj;
-               fromObj = NULL;
+               success = true;
+            }
+         }
+
+         // Setting was not successful, handle error message
+         if (!success)
+         {
+            // Ignore error if GetPropertyObjectType() returns Gmat::UNKNOWN_OBJECT.
+            // Since not all classes implemented GetPropertyObjectType(), GmatBase
+            // returns Gmat::UNKNOWN_OBJECT
+            if (objPropType != Gmat::UNKNOWN_OBJECT)
+            {
+               InterpreterException ex
+                  ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
+                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+               HandleError(ex);
+               return false;
             }
          }
       }
@@ -5026,7 +5137,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
          HandleError(ex);
       }
    }
@@ -5182,7 +5293,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
             ignoreError = true;
             return false;
          }
-         
+                  
          if (toObj == NULL)
          {
             if (parsingDelayedBlock)
@@ -5224,7 +5335,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
          HandleError(ex);
       }
    }
@@ -5750,7 +5861,7 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
    
    debugMsg = "In SetPropertyObjectValue()";
    Parameter *param = NULL;
-
+   
    // Remove enclosing single quotes first (LOJ: 2009.06.08)
    std::string valueToUse = value;
    valueToUse = GmatStringUtil::RemoveEnclosingString(valueToUse, "'");
@@ -5822,7 +5933,7 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
             else
                errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
-            errorMsg2 = "  The allowed value is Object Name";
+            //errorMsg2 = ".  The allowed value is valid Object Name";
             return false;
          }
       }
@@ -5852,7 +5963,7 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                   errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
                else
                   errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
-               errorMsg2 = "  The allowed value is Object Name";
+               //errorMsg2 = ".  The allowed value is valid Object Name";
                return false;
             }
          }
@@ -5876,32 +5987,64 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
          {
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage
-               ("   Found the object type of %s\n", configObj->GetTypeName().c_str());
+               ("   Found configured object type of %s\n", configObj->GetTypeName().c_str());
             #endif
             
-            // Set as String parameter, so it can be validated in FinalPass()
             bool retval = true;
-            if (index != -1)
-            {
-               #ifdef DEBUG_SET
-               MessageInterface::ShowMessage
-                  ("   Calling '%s'->SetStringParameter(%d, %s, %d)\n",
-                   obj->GetName().c_str(), id, valueToUse.c_str(), index);
-               #endif
-               
-               retval = obj->SetStringParameter(id, valueToUse, index);
-            }
             
-            // if it has no index or failed setting with index, try without index
-            if (index == -1 || !retval)
+            // Check if object is valid object type
+            // (LOJ: 2013.03.18 GMT-3155 FIX)
+            Gmat::ObjectType objPropType = obj->GetPropertyObjectType(id);
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   objPropType=%d<%s>\n", objPropType, GmatBase::GetObjectTypeString(objPropType).c_str());
+            #endif
+            if (objPropType == Gmat::UNKNOWN_OBJECT ||
+                (objPropType != Gmat::UNKNOWN_OBJECT && configObj->IsOfType(objPropType)))
             {
-               #ifdef DEBUG_SET
-               MessageInterface::ShowMessage
-                  ("   Calling '%s'->SetStringParameter(%d, %s)\n",
-                   obj->GetName().c_str(), id, valueToUse.c_str());
-               #endif
+               // Set as String parameter, so it can be validated in FinalPass()
+               if (index != -1)
+               {
+                  #ifdef DEBUG_SET
+                  MessageInterface::ShowMessage
+                     ("   Calling '%s'->SetStringParameter(%d, %s, %d)\n",
+                      obj->GetName().c_str(), id, valueToUse.c_str(), index);
+                  #endif
+                  
+                  retval = obj->SetStringParameter(id, valueToUse, index);
+               }
                
-               obj->SetStringParameter(id, valueToUse);
+               // if it has no index or failed setting with index, try without index
+               if (index == -1 || !retval)
+               {
+                  #ifdef DEBUG_SET
+                  MessageInterface::ShowMessage
+                     ("   Calling '%s'->SetStringParameter(%d, %s)\n",
+                      obj->GetName().c_str(), id, valueToUse.c_str());
+                  #endif
+                  
+                  obj->SetStringParameter(id, valueToUse);
+               }
+            }
+            else
+            {
+               // Ignore error if GetPropertyObjectType() returns Gmat::UNKNOWN_OBJECT.
+               // Since not all classes implemented GetPropertyObjectType(), GmatBase
+               // returns Gmat::UNKNOWN_OBJECT
+               if (objPropType != Gmat::UNKNOWN_OBJECT)
+               {
+                  std::string toProp = obj->GetParameterText(id);
+                  // Handle error message for multiple invalid values
+                  if (errorMsg1 == "")
+                     errorMsg1 = errorMsg1 + "The value of \"" + value + "\" ";
+                  else
+                     errorMsg1 = errorMsg1 + "and \"" + value + "\" ";
+                  #ifdef DEBUG_SET
+                  MessageInterface::ShowMessage
+                     ("Interpreter::SetPropertyObjectValue() returning false\n");
+                  #endif
+                  return false;
+               }
             }
          }
          else
@@ -6034,12 +6177,16 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
       
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage
-         ("Interpreter::SetPropertyObjectValue() returning false\n");
+         ("Interpreter::SetPropertyObjectValue() Caught BaseException and returning false\n");
       #endif
       
       return false;
    }
-
+   
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetPropertyObjectValue() returning false\n");
+   #endif
    return false;     // Function must have return type on all paths
 }
 

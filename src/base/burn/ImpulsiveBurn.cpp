@@ -776,6 +776,28 @@ const StringArray& ImpulsiveBurn::GetStringArrayParameter(const Integer id) cons
 }
 
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType ImpulsiveBurn::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case FUEL_TANK:
+      return Gmat::FUEL_TANK;
+   default:
+      return Burn::GetPropertyObjectType(id);
+   }
+}
+
 //------------------------------------------------------------------------------
 // virtual bool HasRefObjectTypeArray()
 //------------------------------------------------------------------------------

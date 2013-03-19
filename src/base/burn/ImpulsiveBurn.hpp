@@ -73,6 +73,8 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
    // for Ref. objects
    virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&

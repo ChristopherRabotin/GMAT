@@ -2196,9 +2196,11 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       
       if (attrInLineStr != "")
       {
+         #ifdef DEBUG_PARSE_ASSIGNMENT
          MessageInterface::ShowMessage
-            ("==> Calling SetInlineAttributeComment() paramID=%d, attrInLineStr=<%s>\n",
+            ("   Calling SetInlineAttributeComment() paramID=%d, attrInLineStr=<%s>\n",
              paramID, attrInLineStr.c_str());
+         #endif
          owner->SetInlineAttributeComment(paramID, attrInLineStr);
       }
       

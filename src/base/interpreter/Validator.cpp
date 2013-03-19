@@ -233,8 +233,12 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
    
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::CheckUndefinedReference() type='%s', name='%s', refTypes.size()=%d\n",
-       obj->GetTypeName().c_str(), obj->GetName().c_str(), refTypes.size());
+      ("Validator::CheckUndefinedReference() type='%s', name='%s'\n",
+       obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   There are %d allowed ref types\n", refTypes.size());
+   for (unsigned int i = 0; i < refTypes.size(); i++)
+      MessageInterface::ShowMessage("      %d\n", refTypes[i]);
    MessageInterface::ShowMessage
       ("   %s %s owned objects as surrogates\n",
        obj->GetTypeName().c_str(), (includeOwnedObjects ? "allows" :
@@ -666,19 +670,50 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    if (GmatStringUtil::IsEnclosedWith(theDescription, "'") ||
        GmatStringUtil::IsEnclosedWithBraces(theDescription))
    {
-      ew = new StringWrapper();
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Add
-         (ew, theDescription, "Validator::CreateElementWrapper()", "ew = new StringWrapper()");
+      bool createObjectWrapper = false;
+      std::string withoutQuotes = GmatStringUtil::RemoveEnclosingString(theDescription, "'");
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   withoutQuotes='%s'\n", withoutQuotes.c_str());
       #endif
-      ew->SetDescription(theDescription);
-      itsType = Gmat::STRING_WT;
+      // If enclosed with quotes, see if it is object name without quotes
+      if (GmatStringUtil::IsEnclosedWith(theDescription, "'"))
+      {
+         if (FindObject(withoutQuotes) != NULL)
+            createObjectWrapper = true;
+      }
       
-      #if DBGLVL_WRAPPERS
-      MessageInterface::ShowMessage
-         (">>> In Validator, it's enclosed with quotes or braces so created a StringWrapper "
-          "<%p> for \"%s\"\n", ew, theDescription.c_str(), "\"\n");
-      #endif
+      if (createObjectWrapper)
+      {
+         ew = new ObjectWrapper();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (ew, theDescription, "Validator::CreateElementWrapper()", "ew = new ObjectWrapper()");
+         #endif
+         ew->SetDescription(withoutQuotes);
+         itsType = Gmat::OBJECT_WT;
+         
+         #if DBGLVL_WRAPPERS
+         MessageInterface::ShowMessage
+            (">>> In Validator, it's enclosed with quotes but object name found, "
+             "so created a ObjectWrapper <%p> for \"%s\"\n", ew, theDescription.c_str(), "\"\n");
+         #endif
+      }
+      else
+      {
+         ew = new StringWrapper();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (ew, theDescription, "Validator::CreateElementWrapper()", "ew = new StringWrapper()");
+         #endif
+         ew->SetDescription(theDescription);
+         itsType = Gmat::STRING_WT;
+         
+         #if DBGLVL_WRAPPERS
+         MessageInterface::ShowMessage
+            (">>> In Validator, it's enclosed with quotes or braces, so created a StringWrapper "
+             "<%p> for \"%s\"\n", ew, theDescription.c_str(), "\"\n");
+         #endif
+      }
    }
    // and then, check to see if it is a number
    else if (GmatStringUtil::ToReal(theDescription,rval))
@@ -2977,14 +3012,36 @@ bool Validator::ValidateParameter(const StringArray &refNames, GmatBase *obj)
 {
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::ValidateParameter() entered. There are %d ref objects\n",
-       refNames.size());
+      ("Validator::ValidateParameter() entered. There are %d ref objects, obj=<%p>'%s'\n",
+       refNames.size(), obj, obj ? obj->GetName().c_str() : "NULL");
    #endif
-   bool retval = true;
    
+   if (obj == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("*** INTERNAL ERROR *** in Validator::ValidateParameter(), object has null pointer.\n");
+      return false;
+   }
+   
+   bool retval = true;
+   std::string objName = obj->GetName();
    for (UnsignedInt j=0; j<refNames.size(); j++)
    {
-      if (FindObject(refNames[j]) == NULL)
+      //#if 1
+      GmatBase *refObj = FindObject(refNames[j]);
+      if (refObj != NULL)
+      {
+         if (!(refObj->IsOfType(Gmat::PARAMETER)))
+         {
+            theErrorMsg = "\"" + refNames[j] + "\" referenced in the " + objName +
+               " is not an object of Parameter";
+            HandleError();
+            retval = false;
+         }
+      }
+      else
+         //#endif
+         //if (FindObject(refNames[j]) == NULL)
       {
          std::string type, ownerName, depObj;
          GmatStringUtil::ParseParameter(refNames[j], type, ownerName, depObj);

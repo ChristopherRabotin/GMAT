@@ -1305,6 +1305,31 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 }
 
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType XyPlot::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case XVARIABLE:
+   case YVARIABLES:
+   case IND_VAR:
+   case ADD:
+      return Gmat::PARAMETER;
+   default:
+      return Subscriber::GetPropertyObjectType(id);
+   }
+}
+
 //------------------------------------------------------------------------------
 // const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------

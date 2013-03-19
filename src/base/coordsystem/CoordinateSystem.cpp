@@ -1933,6 +1933,28 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return CoordinateBase::SetRefObject(obj, type, name);
 }
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType CoordinateSystem::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case AXES:
+      return Gmat::AXIS_SYSTEM;
+   default:
+      return CoordinateBase::GetPropertyObjectType(id);
+   }
+}
+
 
 //----------------------------
 // public static methods

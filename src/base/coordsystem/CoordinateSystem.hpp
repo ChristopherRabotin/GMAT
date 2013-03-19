@@ -156,6 +156,9 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   
    static CoordinateSystem* CreateLocalCoordinateSystem(
                             const std::string &csName, const std::string &axesType,
                             SpacePoint *origin, SpacePoint *primary,

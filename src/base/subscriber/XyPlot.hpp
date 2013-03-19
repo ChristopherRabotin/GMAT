@@ -113,6 +113,9 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   
    // methods for setting up the items to subscribe
    virtual const StringArray&
                         GetWrapperObjectNameArray(bool completeSet = false);
