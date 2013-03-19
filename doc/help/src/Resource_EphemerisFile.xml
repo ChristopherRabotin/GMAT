@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="EphemerisFile"
+<refentry version="5.0" xml:id="EphemerisFile"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,47 +24,45 @@
   <refnamediv>
     <refname>EphemerisFile</refname>
 
-    <refpurpose>
-      Generate spacecraft’s ephemeris data
-    </refpurpose>
+    <refpurpose>Generate spacecraft’s ephemeris data</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      <guilabel>EphemerisFile</guilabel> is a user-defined resource that generates spacecraft’s ephemeris data in a report format. 
-      You can generate spacecraft’s ephemeris data in any of the user-defined coordinate frames. GMAT allows you 
-      to output ephemeris data in either CCSDS or SPK file formats. See the Remarks section for more details. 
-      <guilabel>EphemerisFile</guilabel> resource can be configured to generate ephemeris data at default integration steps or by entering user-selected step sizes.
-    </para>
+    <para><guilabel>EphemerisFile</guilabel> is a user-defined resource that
+    generates spacecraft’s ephemeris data in a report format. You can generate
+    spacecraft’s ephemeris data in any of the user-defined coordinate frames.
+    GMAT allows you to output ephemeris data in either CCSDS or SPK file
+    formats. See the Remarks section for more details.
+    <guilabel>EphemerisFile</guilabel> resource can be configured to generate
+    ephemeris data at default integration steps or by entering user-selected
+    step sizes.</para>
 
-    <para>
-      GMAT allows you to generate any number of ephemeris data files by creating multiple <guilabel>EphermisFile</guilabel> resources. 
-      Spacecraft’s ephemeris data is always provided in UTC epoch format. An <guilabel>EphemerisFile</guilabel> resource can be created
-      using either the GUI or script interface. GMAT also provides the option of when to write and stop writing ephemeris 
-      data to a text file through the <guilabel>Toggle</guilabel> <guilabel>On</guilabel>/<guilabel>Off</guilabel> commands. See the Remarks section below for detailed discussion of the 
-      interaction between EphemerisFile resource and <guilabel>Toggle</guilabel> command.
-    </para>
+    <para>GMAT allows you to generate any number of ephemeris data files by
+    creating multiple <guilabel>EphermisFile</guilabel> resources.
+    Spacecraft’s ephemeris data is always provided in UTC epoch format. An
+    <guilabel>EphemerisFile</guilabel> resource can be created using either
+    the GUI or script interface. GMAT also provides the option of when to
+    write and stop writing ephemeris data to a text file through the
+    <guilabel>Toggle</guilabel>
+    <guilabel>On</guilabel>/<guilabel>Off</guilabel> commands. See the Remarks
+    section below for detailed discussion of the interaction between
+    <guilabel>EphemerisFile</guilabel> resource and
+    <guilabel>Toggle</guilabel> command.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="CoordinateSystem"/>, 
-      <xref linkend="Toggle"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="CoordinateSystem"/>, <xref linkend="Toggle"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -77,24 +74,17 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>InterpolationOrder</guilabel>
-            </entry>
+            <entry><guilabel>InterpolationOrder</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>InterpolationOrder</guilabel> field allows you to set the interpolation 
-                order for the available interpolator methods (Lagrange or Hermite)
-                for either CCSDS-OEM or SPK file formats.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>InterpolationOrder</guilabel> field
+            allows you to set the interpolation order for the available
+            interpolator methods (Lagrange or Hermite) for either CCSDS-OEM or
+            SPK file formats. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -102,9 +92,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      1 &lt;= Integer Number &lt;= 10
-                    </para>
+                    <para>1 &lt;= Integer Number &lt;= 10</para>
                   </listitem>
                 </varlistentry>
 
@@ -112,9 +100,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      Set
-                    </para>
+                    <para>Set</para>
                   </listitem>
                 </varlistentry>
 
@@ -122,9 +108,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      7
-                    </para>
+                    <para>7</para>
                   </listitem>
                 </varlistentry>
 
@@ -132,9 +116,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -142,34 +124,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>StepSize</guilabel>
-            </entry>
+            <entry><guilabel>StepSize</guilabel></entry>
 
-            <entry>
-              <para>
-                The ephemeris file is generated at the step size that is specified for <guilabel>StepSize</guilabel> field.  
-                The user can generate ephemeris file at default  Integration step size (using raw integrator steps)
-                or by defining a Fixed step size provided by user.
-              </para>
-              <variablelist>
+            <entry><para> The ephemeris file is generated at the step size
+            that is specified for <guilabel>StepSize</guilabel> field. The
+            user can generate ephemeris file at default Integration step size
+            (using raw integrator steps) or by defining a Fixed step size
+            provided by user. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Real
-                    </para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -177,9 +150,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Real Number &gt; 0.0 or equals 'IntegratorSteps'
-                    </para>
+                    <para>Real Number &gt; 0.0 or equals
+                    'IntegratorSteps'</para>
                   </listitem>
                 </varlistentry>
 
@@ -187,9 +159,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      Set
-                    </para>
+                    <para>Set</para>
                   </listitem>
                 </varlistentry>
 
@@ -197,9 +167,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      IntegratorSteps
-                    </para>
+                    <para>IntegratorSteps</para>
                   </listitem>
                 </varlistentry>
 
@@ -207,9 +175,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -217,32 +183,24 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>EpochFormat</guilabel>
-            </entry>
+            <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>EpochFormat</guilabel> field allows the user to select format of the epoch.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>EpochFormat</guilabel> field allows
+            you to select format of the epoch that the user defines in
+            <guilabel>InitialEpoch</guilabel> and
+            <guilabel>FinalEpoch</guilabel> fields. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      type
-                    </para>
+                    <para>type</para>
                   </listitem>
                 </varlistentry>
 
@@ -250,9 +208,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -260,9 +216,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      Set
-                    </para>
+                    <para>Set</para>
                   </listitem>
                 </varlistentry>
 
@@ -270,9 +224,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      UTCGregorian
-                    </para>
+                    <para>UTCGregorian</para>
                   </listitem>
                 </varlistentry>
 
@@ -280,9 +232,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -290,33 +240,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>FileFormat</guilabel>
-            </entry>
+            <entry><guilabel>FileFormat</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>FileFormat</guilabel> field allows the user to 
-                generate ephemeris file in two available file formats: CCSDS-OEM or SPK
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>FileFormat</guilabel> field allows the
+            user to generate ephemeris file in two available file formats:
+            CCSDS-OEM or SPK </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -324,9 +264,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      CCSDS-OEM, SPK
-                    </para>
+                    <para>CCSDS-OEM, SPK</para>
                   </listitem>
                 </varlistentry>
 
@@ -334,9 +272,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      Set
-                    </para>
+                    <para>Set</para>
                   </listitem>
                 </varlistentry>
 
@@ -344,9 +280,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      CCSDS-OEM
-                    </para>
+                    <para>CCSDS-OEM</para>
                   </listitem>
                 </varlistentry>
 
@@ -354,9 +288,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -364,109 +296,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
-          </row>
-
-
-          <row>
-            <entry>
-              <guilabel>FileName</guilabel>
-            </entry>
-
-            <entry>
-              <para>
-                The <guilabel>FileName</guilabel> field allows the user to name 
-                the generated ephemeris file and save it in user-specified location.
-              </para>
-              <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>
-                      String
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>
-                      Valid File Path and Name
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>
-                      set
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      EphemerisFile1.eph
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>
-                      N/A
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>
-                      GUI, script
-                    </para>
-                  </listitem>
-                </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>FinalEpoch</guilabel>
-            </entry>
+            <entry><guilabel>FileName</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>FinalEpoch</guilabel> field allows the user to specify the time span of 
-                an ephemeris file. Ephemeris file is generated up to final epoch 
-                that is specified in FinalEpoch field.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>FileName</guilabel> field allows the
+            user to name the generated ephemeris file and save it in
+            user-specified location. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -474,9 +320,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      user-defined final epoch or 'FinalSpacecraftEpoch'
-                    </para>
+                    <para>Valid File Path and Name</para>
                   </listitem>
                 </varlistentry>
 
@@ -484,9 +328,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -494,9 +336,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      FinalSpacecraftEpoch
-                    </para>
+                    <para>EphemerisFile1.eph</para>
                   </listitem>
                 </varlistentry>
 
@@ -504,9 +344,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -514,33 +352,24 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>InitialEpoch</guilabel>
-            </entry>
+            <entry><guilabel>FinalEpoch</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>InitialEpoch</guilabel> field allows the user to specify the starting epoch of the ephemeris file.
-                Ephemeris file is generated starting from the epoch that is defined in InitialEpoch field.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>FinalEpoch</guilabel> field allows the
+            user to specify the time span of an ephemeris file. Ephemeris file
+            is generated up to final epoch that is specified in
+            <guilabel>FinalEpoch</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -548,9 +377,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      user-defined initial epoch or 'InitialSpacecraftEpoch'
-                    </para>
+                    <para>user-defined final epoch or
+                    'FinalSpacecraftEpoch'</para>
                   </listitem>
                 </varlistentry>
 
@@ -558,9 +386,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -568,9 +394,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      InitialSpacecraftEpoch
-                    </para>
+                    <para>FinalSpacecraftEpoch</para>
                   </listitem>
                 </varlistentry>
 
@@ -578,9 +402,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -588,34 +410,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Interpolator</guilabel>
-            </entry>
+            <entry><guilabel>InitialEpoch</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Interpolator</guilabel> field defines the available interpolator
-                method that was used to generate ephemeris file. 
-                Available <guilabel>Interpolators</guilabel> are <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>InitialEpoch</guilabel> field allows
+            the user to specify the starting epoch of the ephemeris file.
+            Ephemeris file is generated starting from the epoch that is
+            defined in <guilabel>InitialEpoch</guilabel> field. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -623,9 +436,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Lagrange for CCSDS file, Hermite for SPK file
-                    </para>
+                    <para>user-defined initial epoch or
+                    'InitialSpacecraftEpoch'</para>
                   </listitem>
                 </varlistentry>
 
@@ -633,9 +445,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -643,9 +453,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Lagrange
-                    </para>
+                    <para>InitialSpacecraftEpoch</para>
                   </listitem>
                 </varlistentry>
 
@@ -653,9 +461,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -663,33 +469,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>WriteEphemeris</guilabel>
-            </entry>
+            <entry><guilabel>Interpolator</guilabel></entry>
 
-            <entry>
-              <para>
-                <guilabel>WriteEphemeris</guilabel> field allows the user to optionally 
-                calculate/write or not calculate/write an ephemeris that has been created and configured.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Interpolator</guilabel> field defines
+            the available interpolator method that was used to generate
+            ephemeris file. Available <guilabel>Interpolators</guilabel> are
+            <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -697,9 +495,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true,false
-                    </para>
+                    <para>Lagrange for CCSDS file, Hermite for SPK file</para>
                   </listitem>
                 </varlistentry>
 
@@ -707,9 +503,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -717,9 +511,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      true
-                    </para>
+                    <para>Lagrange</para>
                   </listitem>
                 </varlistentry>
 
@@ -727,9 +519,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      Unit
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -737,34 +527,24 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>CoordinateSystem</guilabel>
-            </entry>
+            <entry><guilabel>WriteEphemeris</guilabel></entry>
 
-            <entry>
-              <para>
-                <guilabel>CoordinateSystem</guilabel> field allows the user to generate ephemeris data in the coordinate 
-                system that is selected from <guilabel>CoordinateSystem</guilabel> field. The user can choose to also generate 
-                ephemeris data in user-defined coordinate system.
-              </para>
-              <variablelist>
+            <entry><para> <guilabel>WriteEphemeris</guilabel> field allows the
+            user to optionally calculate/write or not calculate/write an
+            ephemeris that has been created and configured. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      type
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -772,9 +552,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      UserDefString
-                    </para>
+                    <para>true,false</para>
                   </listitem>
                 </varlistentry>
 
@@ -782,9 +560,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set, get
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -792,9 +568,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      EarthMJ2000Eq
-                    </para>
+                    <para>true</para>
                   </listitem>
                 </varlistentry>
 
@@ -802,9 +576,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>Unit</para>
                   </listitem>
                 </varlistentry>
 
@@ -812,33 +584,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Spacecraft</guilabel>
-            </entry>
+            <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Spacecraft</guilabel> field allows the user to generate ephemeris 
-                data of spacecraft(s) that are defined in Spacecraft field.
-              </para>
-              <variablelist>
+            <entry><para> <guilabel>CoordinateSystem</guilabel> field allows
+            the user to generate ephemeris data in the coordinate system that
+            is selected from <guilabel>CoordinateSystem</guilabel> field. The
+            user can choose to also generate ephemeris data in user-defined
+            coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      UserDefString
-                    </para>
+                    <para>type</para>
                   </listitem>
                 </varlistentry>
 
@@ -846,9 +610,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Default spacecraft or any number of user-defined spacecrafts or formations
-                    </para>
+                    <para>UserDefString</para>
                   </listitem>
                 </varlistentry>
 
@@ -856,9 +618,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set, get
-                    </para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -866,9 +626,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      DefaultSC
-                    </para>
+                    <para>EarthMJ2000Eq</para>
                   </listitem>
                 </varlistentry>
 
@@ -876,9 +634,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -886,35 +642,23 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      GUI, script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>UpperLeft</guilabel>
-            </entry>
+            <entry><guilabel>Spacecraft</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>UpperLeft</guilabel> field allows the user to pan the generated ephemeris file display
-                window in any direction. First value in [0 0] matrix helps to pan the
-                window horizontally and second value helps to pan the
-                window vertically.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Spacecraft</guilabel> field allows the
+            user to generate ephemeris data of spacecraft(s) that are defined
+            in <guilabel>Spacecraft</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>UserDefString</para>
                   </listitem>
                 </varlistentry>
 
@@ -922,9 +666,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any Real number
-                    </para>
+                    <para>Default spacecraft or any number of user-defined
+                    spacecrafts or formations</para>
                   </listitem>
                 </varlistentry>
 
@@ -932,9 +675,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -942,9 +683,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [ 0 0 ]
-                    </para>
+                    <para>DefaultSC</para>
                   </listitem>
                 </varlistentry>
 
@@ -952,9 +691,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -962,34 +699,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      script
-                    </para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Size</guilabel>
-            </entry>
+            <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Size</guilabel> field allows the user to control the display size of generated ephemeris file panel. First value in [0 0] matrix controls horizonal
-                size and second value controls vertical size of ephemeris file display
-                window.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>UpperLeft</guilabel> field allows the
+            user to pan the generated ephemeris file display window in any
+            direction. First value in [0 0] matrix helps to pan the window
+            horizontally and second value helps to pan the window vertically.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -997,9 +725,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any Real number
-                    </para>
+                    <para>Any Real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -1007,9 +733,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1017,9 +741,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      [ 0 0 ]
-                    </para>
+                    <para>[ 0 0 ]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1027,9 +749,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1037,35 +757,25 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      script
-                    </para>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>RelativeZOrder</guilabel>
-            </entry>
+            <entry><guilabel>Size</guilabel></entry>
 
-            <entry>
-              <para>
-                <guilabel>RelativeZOrder</guilabel> field allows the user to select which generated ephemeris file display window is to
-                displayed first on the screen. The <guilabel>EphemerisFile</guilabel> object with lowest
-                <guilabel>RelativeZOrder</guilabel> value will be displayed last while <guilabel>EphemerisFile</guilabel> object with
-                highest <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Size</guilabel> field allows the user
+            to control the display size of generated ephemeris file panel.
+            First value in [0 0] matrix controls horizonal size and second
+            value controls vertical size of ephemeris file display window.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1073,9 +783,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any Real number
-                    </para>
+                    <para>Any Real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -1083,9 +791,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1093,9 +799,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      0
-                    </para>
+                    <para>[ 0 0 ]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1103,9 +807,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1113,32 +815,28 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      script
-                    </para>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Maximized</guilabel>
-            </entry>
+            <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Maximized</guilabel> field allows the user to maximize the generated ephemeris file window.
-              </para>
-              <variablelist>
+            <entry><para> <guilabel>RelativeZOrder</guilabel> field allows the
+            user to select which generated ephemeris file display window is to
+            displayed first on the screen. The
+            <guilabel>EphemerisFile</guilabel> object with lowest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed last
+            while <guilabel>EphemerisFile</guilabel> object with highest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1146,9 +844,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      true,false
-                    </para>
+                    <para>Any Real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -1156,9 +852,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1166,9 +860,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      false
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -1176,9 +868,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1186,14 +876,67 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>
-                      script
-                    </para>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
-          </row>         
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Maximized</guilabel></entry>
+
+            <entry><para> The <guilabel>Maximized</guilabel> field allows the
+            user to maximize the generated ephemeris file window. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true,false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -1202,170 +945,176 @@
   <refsection>
     <title>GUI</title>
 
+    <para>The figure below shows the default settings for the
+    <guilabel>EphemerisFile</guilabel> resource:</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_EphemeriesFile_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      The figure above shows the default settings for the <guilabel>EphemerisFile</guilabel> resource
-    </para>
+    <para>GMAT allows you to modify <guilabel>InitialEpoch</guilabel>,
+    <guilabel>FinalEpoch</guilabel> and <guilabel>StepSize</guilabel> fields
+    of <guilabel>EphemerisFile</guilabel> resource. Instead of always
+    generating the ephemeris file at default time span settings of
+    <guilabel>InitialSpacecraftEpoch</guilabel> and
+    <guilabel>FinalSpacecraftEpoch</guilabel>, you can define your own initial
+    and final epochs. Similarly, instead of using the default
+    <guilabel>IntegratorSteps</guilabel> setting for
+    <guilabel>StepSize</guilabel> field, you can generate the ephemeris file
+    at the step size of your choice.</para>
 
-    <para>
-      GMAT allows you to modify <guilabel>InitialEpoch</guilabel>, <guilabel>FinalEpoch</guilabel> and <guilabel>StepSize</guilabel> fields of <guilabel>EphemerisFile</guilabel> resource. 
-      Instead of always generating the ephemeris file at default time span settings of ‘<guilabel>InitialSpacecraftEpoch</guilabel>’
-      and ‘<guilabel>FinalSpacecraftEpoch</guilabel>’, you can define your own initial and final epochs. Similarly, instead of using the 
-      default ‘<guilabel>IntegratorSteps</guilabel>’ setting for <guilabel>StepSize</guilabel> field, you can generate the ephemeris file at the step size of your choice.
-    </para>
-
-    <para>
-      The GUI example below, shows ephemeris file which is generated from initial epoch of ‘01 Jan
-      2000 14:00:00.000’ to final epoch of ‘01 Jan 2000 20:00:00.000’ while using non-default step size of 300 seconds:
-    </para>
+    <para>The GUI figure below shows ephemeris file which will be generated
+    from initial epoch of 01 Jan 2000 14:00:00.000 to final epoch of 01 Jan
+    2000 20:00:00.000 while using non-default step size of 300 seconds:</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_EphemeriesFile_GUI_2.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
-
-    <para>
-      Above: Customized Step Size and Epochs Settings for the EphemerisFile
-    </para>
   </refsection>
+
   <refsection>
     <title>Remarks</title>
 
     <refsection>
       <title>Behavior of Coordinate System Field for CCSDS File Format</title>
 
-      <para>
-        If the selected <guilabel>CoordinateSystem</guilabel> uses MJ2000Eq axes, the CCSDS ephemeris file contains
-        “EME2000” for the REF_FRAME according to CCSDS convention. By CCSDS requirements, non-standard
-        axes names are allowed when documented in an ICD. The <guilabel>CoordinateSystems</guilabel> specifications document in
-        the user's guide is the ICD for all axes supported by GMAT. Also if you create a new coordinate system
-        whose origin is Luna, then the CCSDS ephemeris file contains “Moon” for the CENTER_NAME.
-      </para>
+      <para>If the selected <guilabel>CoordinateSystem</guilabel> uses
+      MJ2000Eq axes, the CCSDS ephemeris file contains “EME2000” for the
+      REF_FRAME according to CCSDS convention. By CCSDS requirements,
+      non-standard axes names are allowed when documented in an ICD. The
+      <guilabel>CoordinateSystems</guilabel> specifications document in the
+      user's guide is the ICD for all axes supported by GMAT. Also if you
+      create a new coordinate system whose origin is Luna, then the CCSDS
+      ephemeris file contains “Moon” for the CENTER_NAME.</para>
 
-      <para>
-        There is one important difference between GMAT and IAU conventions. By IAU convention,
-        there is no name for the IAU2000 axes that is independent of the origin. GCRF is coordinate
-        system centered at earth with IAU2000 axes, and ICRF is a coordinate system centered at the solar
-        system barycenter with IAU2000 axes. We have chosen to name the IAU2000 axes ICRF regardless of the origin.
-        Please refer to <guilabel>CoordinateSystems</guilabel> specifications document to read more about built-in coordinate systems and
-        description of Axes types that GMAT supports.
-      </para>
+      <para>There is one important difference between GMAT and IAU
+      conventions. By IAU convention, there is no name for the IAU2000 axes
+      that is independent of the origin. GCRF is coordinate system centered at
+      earth with IAU2000 axes, and ICRF is a coordinate system centered at the
+      solar system barycenter with IAU2000 axes. We have chosen to name the
+      IAU2000 axes ICRF regardless of the origin. Please refer to
+      <guilabel>CoordinateSystems</guilabel> specifications document to read
+      more about built-in coordinate systems and description of Axes types
+      that GMAT supports.</para>
     </refsection>
 
     <refsection>
-      <title>Behavior of Ephemeris File during Discontinuous &amp; Iterative Processes </title>
+      <title>Behavior of Ephemeris File during Discontinuous &amp; Iterative
+      Processes</title>
 
+      <para>When generating an ephemeris file for a mission sequence, GMAT
+      separately interpolates ephemeris segments that are bounded by
+      discontinuous or discrete mission events. Discontinuous or discrete
+      mission sequence events can range from impulsive or finite-burn
+      maneuvers, changes in dynamics models or when using assignment commands.
+      Furthermore, when a mission sequence employs iterative processes such as
+      differential correction or optimization, GMAT only writes the ephemeris
+      for the final solution from the iterative processes. See the Examples
+      section below to see how an ephemeris file is generated during a
+      discontinuous event such as an impulsive burn and iterative process like
+      differential correction.</para>
 
-      <para>
-        When generating an ephemeris file for a mission sequence, GMAT separately interpolates ephemeris
-        segments that are bounded by discontinuous or discrete mission events. Discontinuous or discrete mission
-        sequence events can range from impulsive or finite-burn maneuvers, changes in dynamics models or when using
-        assignment commands. Furthermore, when a mission sequence employs iterative processes such as differential
-        correction or optimization, GMAT only writes the ephemeris for the final solution from the iterative processes.
-        See the Examples section below to see how an ephemeris file is generated during a discontinuous event such as an
-        impulsive burn and iterative process like differential correction.
-      </para>
-
-      <para>
-        Version 1 of CCSDS Orbit Data Messages (ODMs) document used to require that the ephemeris
-        be generated in increasing time order and only going forward. However version 2 of CCSDS ODM
-        document now allows for ephemeris file to be generated backwards as well. Currently in GMAT, when
-        you propagate a spacecraft backwards in time, then the ephemeris is also generated backwards.
-      </para>
+      <para>Version 1 of CCSDS Orbit Data Messages (ODMs) document used to
+      require that the ephemeris be generated in increasing time order and
+      only going forward. However version 2 of CCSDS ODM document now allows
+      for ephemeris file to be generated backwards as well. Currently in GMAT,
+      when you propagate a spacecraft backwards in time, then the ephemeris is
+      also generated backwards.</para>
     </refsection>
 
     <refsection>
-      <title>Behavior of Ephemeris File When It Does Not Meet CCSDS File Format Requirements</title>
+      <title>Behavior of Ephemeris File When It Does Not Meet CCSDS File
+      Format Requirements</title>
 
-      <para>
-        When an ephemeris file is generated, it needs to follow the Recommended Standard for ODMs
-        that has been prepared by the CCSDS. The set of orbit data messages described in the Recommended
-        Standard is the baseline concept of trajectory representation in data interchange applications that
-        are cross-supported between Agencies of the CCSDS. CCSDS-ODM Recommended Standard documents establishes a
-        common framework and provides a common basis for the interchange of orbit data.
-      </para>
+      <para>When an ephemeris file is generated, it needs to follow the
+      Recommended Standard for ODMs that has been prepared by the CCSDS. The
+      set of orbit data messages described in the Recommended Standard is the
+      baseline concept of trajectory representation in data interchange
+      applications that are cross-supported between Agencies of the CCSDS.
+      CCSDS-ODM Recommended Standard documents establishes a common framework
+      and provides a common basis for the interchange of orbit data.</para>
 
-      <para>
-        Currently the ephemeris file that is generated by GMAT meets most of the recommended standards that are 
-        prescribed by the CCSDS. However whenever there is a case when GMAT’s ephemeris violates CCSDS file format 
-        requirements, then the generated ephemeris file will display a warning in ephemeris file’s Header section.
-        More specifically, this warning will be given under COMMENT and it will let you know that this ephemeris file 
-        does not fully satisfy CCSDS file formatting requirements.
-      </para>
+      <para>Currently, the ephemeris file that is generated by GMAT meets most
+      of the recommended standards that are prescribed by the CCSDS. However
+      whenever there is a case when GMAT’s ephemeris violates CCSDS file
+      format requirements, then the generated ephemeris file will display a
+      warning in ephemeris file’s Header section. More specifically, this
+      warning will be given under COMMENT and it will let you know that this
+      ephemeris file does not fully satisfy CCSDS file formatting
+      requirements.</para>
     </refsection>
 
     <refsection>
-      <title>Behavior of Interpolation Order Field for CCSDS and SPK File Formats</title>
+      <title>Behavior of Interpolation Order Field for CCSDS and SPK File
+      Formats</title>
 
-      <para>
-        For CCSDS file formats, whenever there is not enough raw data available to support the requested 
-        interpolation type and order, GMA throws an error message and stops interpolation. GMAT still generates 
-        the ephemeris file but no spacecraft ephemeris data is written to the file and only the file’s Header section 
-        will be there. Within the Header section and under COMMENT, a message will be thrown saying that not enough raw 
-        data is available to generate spacecraft ephemeris data at the requested interpolation order.
-      </para>
+      <para>For CCSDS file formats, whenever there is not enough raw data
+      available to support the requested interpolation type and order, GMA
+      throws an error message and stops interpolation. GMAT still generates
+      the ephemeris file but no spacecraft ephemeris data is written to the
+      file and only the file’s Header section will be there. Within the Header
+      section and under COMMENT, a message will be thrown saying that not
+      enough raw data is available to generate spacecraft ephemeris data at
+      the requested interpolation order.</para>
 
-      <para>
-        For SPK file formats, raw data is always collected at every integrator step for each 
-        segment and then sent to SPK kernel writer. No interpolation takes place for SPK ephemeris file.
-      </para>
+      <para>For SPK file formats, raw data is always collected at every
+      integrator step for each segment and then sent to SPK kernel writer. No
+      interpolation takes place for SPK ephemeris file.</para>
     </refsection>
 
     <refsection>
-      <title>
-        Behavior When Using EphemerisFile Resource &amp; Toggle Command
-      </title>
+      <title>Behavior When Using EphemerisFile Resource &amp; Toggle
+      Command</title>
 
-      <para>
-        <guilabel>EphemerisFile</guilabel> resource generates ephemeris file at each propagation step of the entire mission duration. 
-        If you want to generate ephemeris data during specific points in your mission, then a <guilabel>Toggle</guilabel> On/Off command
-        can be inserted into the mission sequence to control when the EphemerisFile writes data. When <guilabel>Toggle</guilabel> Off
-        command is issued for an <guilabel>EphemerisFile</guilabel> subscriber, no data is sent to a file until a <guilabel>Toggle</guilabel> On command is
-        issued. Similarly, when a <guilabel>Toggle</guilabel> On command is used, ephemeris data is sent to a file at each integration 
-        step until a <guilabel>Toggle</guilabel> Off command is used.
-      </para>
+      <para><guilabel>EphemerisFile</guilabel> resource generates ephemeris
+      file at each propagation step of the entire mission duration. If you
+      want to generate ephemeris data during specific points in your mission,
+      then a <guilabel>Toggle</guilabel> <guilabel>On/Off</guilabel> command
+      can be inserted into the <guilabel>Mission</guilabel> tree to control
+      when the <guilabel>EphemerisFile </guilabel>resource writes data. When
+      <guilabel>Toggle</guilabel> <guilabel>Off</guilabel> command is issued
+      for an <guilabel>EphemerisFile</guilabel> subscriber, no data is sent to
+      a file until a <guilabel>Toggle</guilabel> <guilabel>On</guilabel>
+      command is issued. Similarly, when a <guilabel>Toggle</guilabel>
+      <guilabel>On</guilabel> command is used, ephemeris data is sent to a
+      file at each integration step until a <guilabel>Toggle</guilabel> Off
+      command is used.</para>
 
-      <para>
-        Below is an example script snippet that shows how to use Toggle Off/On commands while 
-        using the EphemerisFile resource. No ephemeris data is sent for first two days of propagation 
-        and only the data that is collected during last four days of propagation is sent to text file called ‘EphemerisFile1.eph’:
-      </para>
+      <para>Below is an example script snippet that shows how to use
+      <guilabel>Toggle Off/On</guilabel> commands while using the
+      <guilabel>EphemerisFile</guilabel> resource. No ephemeris data is sent
+      for first two days of propagation and only the data that is collected
+      during last four days of propagation is sent to text file called
+      ‘EphemerisFile1.eph’:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create EphemerisFile anEphmerisFile;
+  Create EphemerisFile anEphmerisFile
 
-  GMAT anEphmerisFile.Spacecraft = aSat;
-  GMAT anEphmerisFile.Filename = 'EphemerisFile1.eph';
+  anEphmerisFile.Spacecraft = aSat
+  anEphmerisFile.Filename = 'EphemerisFile1.eph'
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Toggle anEphmerisFile Off;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
-  Toggle anEphmerisFile On;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+  Toggle anEphmerisFile Off
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+  Toggle anEphmerisFile On
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
         </code>
       </programlisting>
     </refsection>
@@ -1375,61 +1124,61 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        This example shows how to generate a simple ephemeris file. Ephemeris file is generated for two days of 
-        propagation. At default settings, ephemeris file is generated at each integrator step and in CCSDS file 
-        format. Ephemeris data is sent to text file called ‘EphemerisFile2.eph’:
-      </para>
+      <para>This example shows how to generate a simple ephemeris file.
+      Ephemeris file is generated for two days of propagation. At default
+      settings, ephemeris file is generated at each integrator step and in
+      CCSDS file format. Ephemeris data is sent to text file called
+      ‘EphemerisFile2.eph’:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create EphemerisFile anEphmerisFile;
+  Create EphemerisFile anEphmerisFile
 
-  GMAT anEphmerisFile.Spacecraft = aSat;
-  GMAT anEphmerisFile.Filename = 'EphemerisFile2.eph';
+  anEphmerisFile.Spacecraft = aSat
+  anEphmerisFile.Filename = 'EphemerisFile2.eph'
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
         </code>
       </programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        This example shows how an ephemeris file is generated during an iterative process like differential 
-        correction that includes a discontinuous event like an impulsive burn. Ephemeris data is sent to text 
-        file called ‘EphemerisFile3.eph’:
-      </para>
+      <para>This example shows how an ephemeris file is generated during an
+      iterative process like differential correction that includes a
+      discontinuous event like an impulsive burn. Ephemeris data is sent to
+      text file called ‘EphemerisFile3.eph’:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create ImpulsiveBurn TOI;
-  Create DifferentialCorrector aDC;
+  Create ImpulsiveBurn TOI
+  Create DifferentialCorrector aDC
 
-  Create EphemerisFile anEphmerisFile;
+  Create EphemerisFile anEphmerisFile
 
-  GMAT anEphmerisFile.Spacecraft = aSat;
-  GMAT anEphmerisFile.Filename = 'EphemerisFile3.eph';
+  anEphmerisFile.Spacecraft = aSat
+  anEphmerisFile.Filename = 'EphemerisFile3.eph'
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.Earth.Periapsis};
+  Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
-  Target aDC;
-  Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, Upper = 3.14159, MaxStep = 0.5});
-    Maneuver TOI(aSat);
-    Propagate aProp(aSat) {aSat.Earth.Apoapsis};
-    Achieve aDC(aSat.Earth.RMAG = 42165);
-  EndTarget;
+  Target aDC
+  Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+  Upper = 3.14159, MaxStep = 0.5})
+    Maneuver TOI(aSat)
+    Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+    Achieve aDC(aSat.Earth.RMAG = 42165)
+  EndTarget
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
         </code>
       </programlisting>
     </informalexample>
