@@ -68,6 +68,7 @@
 //#define DEBUG_SPICE_KERNELS
 //#define DEBUG_HARDWARE
 //#define DEBUG_SC_INPUT_TYPES
+//#define DEBUG_GEN_STRING
 
 
 #ifdef DEBUG_SPACECRAFT
@@ -1576,10 +1577,6 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    else if (type == Gmat::ATTITUDE)
    {
-      #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage("Setting attitude object on spacecraft %s\n",
-         instanceName.c_str());
-      #endif
       if ((attitude != NULL) && (attitude != (Attitude*) obj))
       {
          #ifdef DEBUG_MEMORY
@@ -1600,8 +1597,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       ownedObjectCount++;
       // set epoch ...
       #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage("Setting attitude object on spacecraft %s\n",
-         instanceName.c_str());
+         MessageInterface::ShowMessage("Setting attitude object <%p> on spacecraft %s <%p>\n",
+         attitude, instanceName.c_str(), this);
          MessageInterface::ShowMessage(
          "Setting epoch on attitude object for spacecraft %s\n",
          instanceName.c_str());
@@ -4713,18 +4710,22 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
        " thruster count = %d\n", this, GetName().c_str(), att, tnks.size(), thrs.size());
    #endif
 
-   // We can't assume that the attitude has been deleted previous to this call
-//   if (attitude)
-//   {
-//      delete attitude;   //since Attitudes are NOT configured items at this time
-      attitude = NULL;
-//      ownedObjectCount--;
-//   }
 
    // clone the attitude
    if (att)
    {
+      #ifdef DEBUG_SC_OWNED_OBJECT
+      MessageInterface::ShowMessage
+         ("Spacecraft::CloneOwnedObjects() ---> cloning attitude <%p> of type %s\n",
+          att, att->GetTypeName().c_str());
+      #endif
+      attitude = NULL;
       attitude = (Attitude*) att->Clone();
+      #ifdef DEBUG_SC_OWNED_OBJECT
+      MessageInterface::ShowMessage
+         ("Spacecraft::CloneOwnedObjects() ------> new CLONED attitude <%p> is of type %s\n",
+          attitude, attitude->GetTypeName().c_str());
+      #endif
       attitude->SetEpoch(state.GetEpoch());
       ownedObjectCount++;
       #ifdef DEBUG_SC_OWNED_OBJECT
@@ -5323,9 +5324,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    // not written out (LOJ: 2009.09.14)
    for (i = 0; i < GetOwnedObjectCount(); ++i)
    {
-      newprefix = prefix;
+      newprefix   = prefix;
       ownedObject = GetOwnedObject(i);
-      nomme = ownedObject->GetName();
+      nomme       = ownedObject->GetName();
 
       #ifdef DEBUG_OWNED_OBJECT_STRINGS
           MessageInterface::ShowMessage(

@@ -43,6 +43,7 @@
 //#define DEBUG_ATTITUDE_PANEL 1
 //#define DEBUG_ATTITUDE_SAVE
 //#define DEBUG_ATTITUDE_RATE
+//#define DEBUG_ATTITUDE_ANG_VEL
 //#define DEBUG_ATTITUDE_PANEL_DCM
 
 //------------------------------------------------------------------------------
@@ -194,11 +195,11 @@ void AttitudePanel::Create()
    unsigned int x;
    for (x = 0; x < 3; ++x)
    {
-      eulerAngles[x] = new wxString();
+      eulerAngles[x]     = new wxString();
       eulerAngleRates[x] = new wxString();
-      quaternion[x] = new wxString();
+      quaternion[x]      = new wxString();
       MRPs[x]            = new wxString();    // Dunn Added
-      angVel[x] = new wxString();
+      angVel[x]          = new wxString();
    }
    quaternion[3] = new wxString();
    for (x = 0; x < 9; ++x)
@@ -629,10 +630,12 @@ void AttitudePanel::LoadData()
 //------------------------------------------------------------------------------
 void AttitudePanel::SaveData()
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_SAVE
       MessageInterface::ShowMessage("AttitudePanel::SaveData() entered\n");
    #endif
    #ifdef DEBUG_ATTITUDE_SAVE
+      MessageInterface::ShowMessage("   theAttitude <%p> is of type %s\n",
+            theAttitude, (theAttitude->GetTypeName()).c_str());
       MessageInterface::ShowMessage("   modelModified = %s, seqModified = %s\n",
             (modelModified? "true" : "false"),  (seqModified? "true" : "false"));
       MessageInterface::ShowMessage("   csModified = %s, stateTypeModified = %s\n",
@@ -651,24 +654,29 @@ void AttitudePanel::SaveData()
          canClose = false;
      return;
    }
-   canClose = true;
+   canClose    = true;
    dataChanged = false;
    
    // if the user selected a different attitude model, we will need to create it
-   bool isNewAttitude = false;
-   bool isModelModified = modelModified;
+   bool isNewAttitude    = false;
+   bool isModelModified  = modelModified;
    Attitude *useAttitude = NULL;
    if (modelModified)  
    {
       try
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
+         #ifdef DEBUG_ATTITUDE_SAVE
             MessageInterface::ShowMessage(
             "   about to create a new attitude of type %s\n", 
             attitudeModel.c_str());
          #endif
          useAttitude = (Attitude *)theGuiInterpreter->
                        CreateObject(attitudeModel, ""); // Use no name
+         #ifdef DEBUG_ATTITUDE_SAVE
+            MessageInterface::ShowMessage(
+            "   Created a new attitude of type %s <%p>\n",
+            attitudeModel.c_str(), useAttitude);
+         #endif
       }
       catch (BaseException &ex)
       {
@@ -679,7 +687,7 @@ void AttitudePanel::SaveData()
    }
    else useAttitude = theAttitude;
    
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_SAVE
       if (!useAttitude)
         MessageInterface::ShowMessage("   Attitude pointer is NULL\n");
    #endif
@@ -688,37 +696,9 @@ void AttitudePanel::SaveData()
    bool canSetAttitude = useAttitude->SetInitialAttitudeAllowed();
    try
    {
-      if (seqModified || isNewAttitude)
-      {
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("   Setting new sequence: %s\n",
-            eulerSequence.c_str());
-         #endif
-         useAttitude->SetStringParameter("EulerAngleSequence", eulerSequence);
-
-         // set attitude state and rate as well, to match what the user sees on the screen
-         if (canSetAttitude)
-         {
-            if (attStateType == stateTypeArray[EULER_ANGLES])
-               useAttitude->SetRvectorParameter("EulerAngles", ea);
-            else if (attStateType == stateTypeArray[QUATERNION])
-               useAttitude->SetRvectorParameter("Quaternion", q);
-            else if (attStateType == stateTypeArray[MRPS])
-               useAttitude->SetRvectorParameter("MRPs", mrp);	 // Added by Dunn
-            else
-               useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
-
-            if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
-               useAttitude->SetRvectorParameter("EulerAngleRates", ear);
-            else
-               useAttitude->SetRvectorParameter("AngularVelocity", av);
-         }
-         seqModified = false;
-      }
-
       if (csModified || isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
+         #ifdef DEBUG_ATTITUDE_SAVE
             MessageInterface::ShowMessage("   Setting new coordinate system: %s\n",
             attCoordSystem.c_str());
          #endif
@@ -729,11 +709,39 @@ void AttitudePanel::SaveData()
          }
          csModified = false;
       }
+
+      if (seqModified || isNewAttitude)
+      {
+         #ifdef DEBUG_ATTITUDE_SAVE
+            MessageInterface::ShowMessage("   Setting new sequence: %s\n",
+            eulerSequence.c_str());
+         #endif
+         useAttitude->SetStringParameter("EulerAngleSequence", eulerSequence);
+
+//         // set attitude state and rate as well, to match what the user sees on the screen
+//         if (canSetAttitude)
+//         {
+//            if (attStateType == stateTypeArray[EULER_ANGLES])
+//               useAttitude->SetRvectorParameter("EulerAngles", ea);
+//            else if (attStateType == stateTypeArray[QUATERNION])
+//               useAttitude->SetRvectorParameter("Quaternion", q);
+//            else if (attStateType == stateTypeArray[MRPS])
+//               useAttitude->SetRvectorParameter("MRPs", mrp);	 // Added by Dunn
+//            else
+//               useAttitude->SetRmatrixParameter("DirectionCosineMatrix", dcmat);
+//
+//            if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
+//               useAttitude->SetRvectorParameter("EulerAngleRates", ear);
+//            else
+//               useAttitude->SetRvectorParameter("AngularVelocity", av);
+//         }
+         seqModified = false;
+      }
       
       if (stateTypeModified || isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("   Setting new state type to ...\n",
+         #ifdef DEBUG_ATTITUDE_SAVE
+            MessageInterface::ShowMessage("   Setting new state type to ...%s\n",
             attStateType.c_str());
          #endif
          useAttitude->SetStringParameter("AttitudeDisplayStateType", attStateType);
@@ -741,7 +749,7 @@ void AttitudePanel::SaveData()
          
       if (stateModified || isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
+         #ifdef DEBUG_ATTITUDE_SAVE
             MessageInterface::ShowMessage("   Setting new state ...\n");
             if (attStateType == stateTypeArray[QUATERNION])
             {
@@ -766,8 +774,8 @@ void AttitudePanel::SaveData()
 
       if (rateStateTypeModified || isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("   Setting new rate state type to ...\n",
+         #ifdef DEBUG_ATTITUDE_SAVE
+            MessageInterface::ShowMessage("   Setting new rate state type to ...%s\n",
             attRateStateType.c_str());
          #endif
          useAttitude->SetStringParameter("AttitudeRateDisplayStateType", attRateStateType);
@@ -775,13 +783,18 @@ void AttitudePanel::SaveData()
    
       if (stateRateModified || isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("   Setting new state rate ...\n");
-         #endif
          if (canSetAttitude)
          {
+            #ifdef DEBUG_ATTITUDE_SAVE
+               MessageInterface::ShowMessage("   Setting new state rate ...\n");
+               MessageInterface::ShowMessage("   state rate type = %s\n", attRateStateType.c_str());
+               MessageInterface::ShowMessage("   ear = %s\n", ear.ToString().c_str());
+               MessageInterface::ShowMessage("   av  = %s\n", av.ToString().c_str());
+            #endif
             if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
+            {
                useAttitude->SetRvectorParameter("EulerAngleRates", ear);
+            }
             else
                useAttitude->SetRvectorParameter("AngularVelocity", av);
          }
@@ -790,9 +803,9 @@ void AttitudePanel::SaveData()
       
       if (isNewAttitude)
       {
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("Setting new attitude model of type %s on spacecraft\n",
-            attitudeModel.c_str());
+         #ifdef DEBUG_ATTITUDE_SAVE
+            MessageInterface::ShowMessage("Setting new attitude model <%p> of type %s on spacecraft %s<%p>\n",
+            useAttitude, attitudeModel.c_str(), theSpacecraft->GetName().c_str(), theSpacecraft);
          #endif
          theSpacecraft->SetRefObject(useAttitude, Gmat::ATTITUDE, "");
          // spacecraft deletes the old attitude pointer
@@ -801,15 +814,15 @@ void AttitudePanel::SaveData()
    }
    catch (BaseException &ex)
    {
-      canClose = false;
-      dataChanged = true;
-	  modelModified = isModelModified;
+      canClose      = false;
+      dataChanged   = true;
+	   modelModified = isModelModified;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
    if (canClose) 
    {
 		ResetStateFlags("Both", canClose);
-	    dataChanged = false;
+		dataChanged = false;
    }
 }
 
@@ -1203,6 +1216,9 @@ bool AttitudePanel::ValidateState(const std::string which,
                retval = false;
             else  ear[2] = tmpVal;
          }
+         #ifdef DEBUG_ATTITUDE_SAVE
+                  MessageInterface::ShowMessage(">>>> ear has been set to: %s\n", ear.ToString().c_str());
+         #endif
       }
       else if (attRateStateType == stateRateTypeArray[ANGULAR_VELOCITY])
       {
@@ -1227,6 +1243,9 @@ bool AttitudePanel::ValidateState(const std::string which,
                retval = false;
             else  av[2] = tmpVal;
          }
+         #ifdef DEBUG_ATTITUDE_SAVE
+                  MessageInterface::ShowMessage(">>>> av has been set to: %s\n", av.ToString().c_str());
+         #endif
       }
    }
    canClose = retval;
@@ -2491,15 +2510,27 @@ bool AttitudePanel::UpdateAngularVelocity()
       {
          retval = UpdateEulerAngles();
          #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() retval = %s\n",
+            MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() retval from UpdateEulerAngles = %s\n",
                   (retval? "true" : "false"));
          #endif
          if (retval)
          {
+            #ifdef DEBUG_ATTITUDE_ANG_VEL
+               MessageInterface::ShowMessage(
+                     "AttitudePanel::UpdateAngularVelocity() converting ear (%le, %le, %le) to Ang Vel\n",
+                     ear[0], ear[1], ear[2]);
+               MessageInterface::ShowMessage("   with seq = %d  %d  %d\n",
+                     (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
+            #endif
             av = Attitude::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
                            ea * GmatMathConstants::RAD_PER_DEG,
                            (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                            * GmatMathConstants::DEG_PER_RAD;
+            #ifdef DEBUG_ATTITUDE_ANG_VEL
+               MessageInterface::ShowMessage(
+                     "AttitudePanel::UpdateAngularVelocity() resulting av = (%le, %le, %le)\n",
+                     av[0], av[1], av[2]);
+            #endif
             // update string versions of av values
             for (unsigned int x = 0; x < 3; ++x)
                *angVel[x] = theGuiManager->ToWxString(av[x]);

@@ -51,6 +51,9 @@
 //#define DEBUG_EULER_ANGLE_RATES
 //#define DEBUG_TO_DCM
 //#define DEBUG_ATTITUDE_PARAM_TYPE
+//#define DEBUG_ATTITUDE_INIT
+//#define DEBUG_UPDATE_STATE
+//#define DEBUG_SET_RATE
 
 //------------------------------------------------------------------------------
 // static data
@@ -1379,6 +1382,12 @@ Attitude::Attitude(const Attitude& att) :
    warnNoCSWritten         (att.warnNoCSWritten),
    warnNoAttitudeWritten   (att.warnNoAttitudeWritten)
 {
+#ifdef DEBUG_ATTITUDE_INIT
+   MessageInterface::ShowMessage("New attitude created by copying attitude <%p> of type %s\n",
+         &att, (att.typeName).c_str()); // **********************
+   MessageInterface::ShowMessage("eulerAngleRates = %s\n", eulerAngleRates.ToString().c_str());
+   MessageInterface::ShowMessage("att.eulerAngleRates = %s\n", (att.eulerAngleRates).ToString().c_str());
+#endif
 }
  
 //------------------------------------------------------------------------------
@@ -1480,7 +1489,9 @@ bool Attitude::Validate()
          case GmatAttitude::ANGULAR_VELOCITY_TYPE:
             break;
          case GmatAttitude::EULER_ANGLE_RATES_TYPE:
+            (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
             ValidateEulerSequence(eulerSequence);
+            ValidateEulerAngles(eulerAngles, eulerSequenceArray);
             angVel = Attitude::ToAngularVelocity(eulerAngleRates,
                                eulerAngles,
                                (Integer) eulerSequenceArray.at(0),
@@ -1562,6 +1573,7 @@ bool Attitude::Initialize()
          case GmatAttitude::ANGULAR_VELOCITY_TYPE:
             break;
          case GmatAttitude::EULER_ANGLE_RATES_TYPE:
+            (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
             ValidateEulerSequence(eulerSequence);
             angVel = Attitude::ToAngularVelocity(eulerAngleRates,
                                eulerAngles,
@@ -2363,6 +2375,8 @@ Real Attitude::GetRealParameter(const Integer id) const
    MessageInterface::ShowMessage(
    "Entering Attitude::GetReal with id = %d (%s)\n", id,
    (GetParameterText(id)).c_str());
+   MessageInterface::ShowMessage("--- and isInitialized = %s, and needsReinit = %s\n",
+         (isInitialized? "true" : "false"), (needsReinit? "true" : "false"));
    #endif
    // re-initialize, if some input has changed
    if (!isInitialized || needsReinit) (const_cast<Attitude*>(this))->Initialize();
@@ -2433,7 +2447,15 @@ Real Attitude::GetRealParameter(const Integer id) const
    if (id == DCM_33)             return dcm(2,2);
    if (id == EULER_ANGLE_RATE_1)
    {
+      #ifdef DEBUG_ATTITUDE_GET_REAL
+         MessageInterface::ShowMessage("In GetRealP (Attitude <%p>), before UpdateState for ea1, rates = %s\n",
+               this, eulerAngleRates.ToString().c_str());
+      #endif
       (const_cast<Attitude*>(this))->UpdateState("EulerAngleRates");
+      #ifdef DEBUG_ATTITUDE_GET_REAL
+         MessageInterface::ShowMessage("In GetRealP (Attitude <%p>), AFTER UpdateState ea1, rates = %s\n",
+               this, eulerAngleRates.ToString().c_str());
+      #endif
       return eulerAngleRates(0) * GmatMathConstants::DEG_PER_RAD;
    }
    if (id == EULER_ANGLE_RATE_2)
@@ -3073,6 +3095,7 @@ Real Attitude::SetRealParameter(const Integer id, const Real value,
          throw AttitudeException("Error: the Euler Angle Rate index is out-of-range\n");
       }
       eulerAngleRates(index) = value * GmatMathConstants::RAD_PER_DEG;
+      (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
       angVel = Attitude::ToAngularVelocity(eulerAngleRates, eulerAngles,
                          eulerSequenceArray.at(0),
                          eulerSequenceArray.at(1),
@@ -3299,15 +3322,29 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
    }
    if (id == EULER_ANGLE_RATES)
    {
+      #ifdef DEBUG_SET_RATE
+         MessageInterface::ShowMessage("In SetRvector with value = %s\n", value.ToString().c_str());
+      #endif
       if (sz != 3) throw AttitudeException(
                   "Incorrectly sized Rvector passed in for euler angle rates.");
       for (i=0;i<3;i++) 
          eulerAngleRates(i) = value(i) * GmatMathConstants::RAD_PER_DEG;
+      #ifdef DEBUG_SET_RATE
+      MessageInterface::ShowMessage("      and eulerAngleRates set to %s\n", eulerAngleRates.ToString().c_str());
+      MessageInterface::ShowMessage("      and eulerAngles are currently set to %s\n", eulerAngles.ToString().c_str());
+      #endif
+      (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
       angVel = Attitude::ToAngularVelocity(eulerAngleRates,
                          eulerAngles,
                          eulerSequenceArray.at(0),
                          eulerSequenceArray.at(1),
                          eulerSequenceArray.at(2));                         
+      #ifdef DEBUG_SET_RATE
+         MessageInterface::ShowMessage(">>>>>> and angVel computed as %le %le %le\n",
+               angVel[0] * GmatMathConstants::DEG_PER_RAD,
+               angVel[1] * GmatMathConstants::DEG_PER_RAD,
+               angVel[2] * GmatMathConstants::DEG_PER_RAD);
+      #endif
       inputAttitudeRateType = GmatAttitude::EULER_ANGLE_RATES_TYPE;
       if (isInitialized) needsReinit = true;
       return eulerAngleRates;
@@ -3562,8 +3599,13 @@ bool Attitude::SetStringParameter(const Integer     id,
    }
    if (id == EULER_ANGLE_SEQUENCE)
    {
+      #ifdef DEBUG_ATTITUDE_SET
+         MessageInterface::ShowMessage("****** SETTING Euler angle sequence to %s\n",
+               value.c_str());
+      #endif
       ValidateEulerSequence(value);
       UnsignedIntArray newSeq = Attitude::ExtractEulerSequence(value);
+
       (const_cast<Attitude*>(this))->UpdateState("EulerAngleRates"); // updates euler angles and euler angle rates
       #ifdef DEBUG_ATTITUDE_SET
          MessageInterface::ShowMessage("*** Current euler angles are : %12.10f  %12.10f  %12.10f\n",
@@ -3745,7 +3787,8 @@ const std::string& Attitude::GetGeneratingString(Gmat::WriteMode   mode,
       nomme = instanceName;
    nomme += ".";
 
-   if (mode == Gmat::OWNED_OBJECT) {
+   if (mode == Gmat::OWNED_OBJECT)
+   {
       preface = prefix;
       nomme = "";
    }
@@ -4082,14 +4125,30 @@ void Attitude::UpdateState(const std::string &rep)
    }
    else if (rep == "EulerAngleRates")
    {
+      #ifdef DEBUG_UPDATE_STATE
+         MessageInterface::ShowMessage("UpdateState for EAR ... \n");
+         MessageInterface::ShowMessage(" ... eulerAngles = %s\n", eulerAngles.ToString().c_str());
+         MessageInterface::ShowMessage(" ... mrps        = %s\n", mrps.ToString().c_str());
+         MessageInterface::ShowMessage(" ... euler sequence array = %d %d %d\n",
+               (Integer) eulerSequenceArray.at(0),
+               (Integer) eulerSequenceArray.at(1),
+               (Integer) eulerSequenceArray.at(2));
+      #endif
       if (inputAttitudeRateType == GmatAttitude::ANGULAR_VELOCITY_TYPE)
       {
+         #ifdef DEBUG_UPDATE_STATE
+            MessageInterface::ShowMessage("UpdateState for EAR ... type is Angular Velocity\n");
+         #endif
          (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
          eulerAngleRates   = Attitude::ToEulerAngleRates(angVel,
                              eulerAngles,
                              (Integer) eulerSequenceArray.at(0),
                              (Integer) eulerSequenceArray.at(1),
                              (Integer) eulerSequenceArray.at(2));
+         #ifdef DEBUG_UPDATE_STATE
+            MessageInterface::ShowMessage("UpdateState for EAR after conversion, eulerAngleRates = %s\n",
+                  eulerAngleRates.ToString().c_str());
+         #endif
       }
       // else it is already the up-to-date euler angle rates (as input)
    }
@@ -4097,7 +4156,7 @@ void Attitude::UpdateState(const std::string &rep)
    {
       if (inputAttitudeRateType == GmatAttitude::EULER_ANGLE_RATES_TYPE)
       {
-         (const_cast<Attitude*>(this))->UpdateState("EulerAngleRates");
+         (const_cast<Attitude*>(this))->UpdateState("EulerAngles");
          angVel            = Attitude::ToAngularVelocity(eulerAngleRates, eulerAngles,
                              (Integer) eulerSequenceArray.at(0),
                              (Integer) eulerSequenceArray.at(1),

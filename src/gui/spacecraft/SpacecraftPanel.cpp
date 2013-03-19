@@ -33,6 +33,7 @@
 
 //#define DEBUG_SPACECRAFT_PANEL 1
 //#define DEBUG_SC_PANEL_EVENT
+//#define DEBUG_SPACECRAFT_CLONE_AND_COPY
 
 
 //------------------------------
@@ -106,6 +107,12 @@ void SpacecraftPanel::Create()
    
    SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    currentSpacecraft = new Spacecraft(*theSpacecraft);
+   #ifdef DEBUG_SPACECRAFT_CLONE_AND_COPY
+   MessageInterface::ShowMessage(
+         "SpacecraftPanel::Create() copied spacecraft %s<%p> to new spacecraft %s<%p>\n",
+         theSpacecraft->GetName().c_str(), theSpacecraft,
+         currentSpacecraft->GetName().c_str(), currentSpacecraft);
+   #endif
    
    try
    {
@@ -304,6 +311,11 @@ void SpacecraftPanel::SaveData()
    
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);
+   #ifdef DEBUG_SPACECRAFT_CLONE_AND_COPY
+      MessageInterface::ShowMessage("Copied data from SC %s<%p> back to SC %s<%p>\n",
+            currentSpacecraft->GetName().c_str(), currentSpacecraft,
+            theSpacecraft->GetName().c_str(), theSpacecraft);
+   #endif
    EnableUpdate(false);
 }
 
