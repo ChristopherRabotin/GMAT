@@ -600,106 +600,112 @@ bool SPKPropagator::Initialize()
          MessageInterface::ShowMessage("Clearing %d naifIds\n", naifIds.size());
       #endif
       naifIds.clear();
-      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+
+      // The PSM isn't set until PrepareToPropagate fires.  The following is
+      // also last minute setup, so only do it if the PSM has been set
+      if (psm != NULL)
       {
-         Integer id = propObjects[i]->GetIntegerParameter("NAIFId");
-         naifIds.push_back(id);
-
-         // Load the SPICE files for each propObject
-         StringArray spices;
-         if (propObjects[i]->IsOfType(Gmat::SPACECRAFT))
-            spices = propObjects[i]->GetStringArrayParameter(
-                  "OrbitSpiceKernelName");
-         else
-            throw PropagatorException("Spice (SPK) propagators only work for "
-                  "Spacecraft right now.");
-
-         if (spices.size() == 0)
-            throw PropagatorException("Spice (SPK) propagator requires at "
-                  "least one orbit SPICE kernel,");
-
-         std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
-         for (UnsignedInt j = 0; j < spices.size(); ++j)
+         for (UnsignedInt i = 0; i < propObjects.size(); ++i)
          {
-            fullPath = spices[j];
+            Integer id = propObjects[i]->GetIntegerParameter("NAIFId");
+            naifIds.push_back(id);
 
-            // Check to see if this name includes path information
-            // If no path designation slash character is found, add the default path
-            if ((fullPath.find('/') == std::string::npos) &&
-                (fullPath.find('\\') == std::string::npos))
+            // Load the SPICE files for each propObject
+            StringArray spices;
+            if (propObjects[i]->IsOfType(Gmat::SPACECRAFT))
+               spices = propObjects[i]->GetStringArrayParameter(
+                     "OrbitSpiceKernelName");
+            else
+               throw PropagatorException("Spice (SPK) propagators only work for "
+                     "Spacecraft right now.");
+
+            if (spices.size() == 0)
+               throw PropagatorException("Spice (SPK) propagator requires at "
+                     "least one orbit SPICE kernel,");
+
+            std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
+            for (UnsignedInt j = 0; j < spices.size(); ++j)
             {
-               fullPath = ephemPath + fullPath;
-            }
-            #ifdef DEBUG_INITIALIZATION
-               MessageInterface::ShowMessage("Checking for kernel %s\n",
-                     fullPath.c_str());
-            #endif
-            if (skr->IsLoaded(fullPath) == false)
-               skr->LoadKernel(fullPath);
+               fullPath = spices[j];
 
-            if (find(spkFileNames.begin(), spkFileNames.end(), fullPath) ==
-                  spkFileNames.end())
-               spkFileNames.push_back(fullPath);
-         }
-
-         // Load the initial data point
-         if (skr)
-         {
-            try
-            {
-               Rvector6  outState;
-
-               for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+               // Check to see if this name includes path information
+               // If no path designation slash character is found, add the default path
+               if ((fullPath.find('/') == std::string::npos) &&
+                   (fullPath.find('\\') == std::string::npos))
                {
-                  std::string scName = propObjectNames[i];
-                  Integer id = naifIds[i];
-
-                  currentEpoch = initialEpoch + timeFromEpoch /
-                        GmatTimeConstants::SECS_PER_DAY;
-
-                  // Allow for slop in the last few bits
-                  if ((currentEpoch < ephemStart - 1e-10) ||
-                      (currentEpoch > ephemEnd + 1e-10))
-                  {
-                     std::stringstream errmsg;
-                     errmsg.precision(16);
-                     errmsg << "The SPKPropagator "
-                            << instanceName
-                            << " is attempting to initialize outside of the "
-                               "timespan  of the ephemeris data; halting.  ";
-                     errmsg << "The current SPICE ephemeris covers the A.1 "
-                               "modified Julian span ";
-                     errmsg << ephemStart << " to " << ephemEnd << " and the "
-                              "requested epoch is " << currentEpoch << ".\n";
-                     throw PropagatorException(errmsg.str());
-                  }
-                  #ifdef DEBUG_INITIALIZATION
-                     MessageInterface::ShowMessage("Getting target state in %p "
-                           "for %s (ID = %ld) at epoch %lf and CB %s\n", this,
-                           scName.c_str(), id, currentEpoch,
-                           spkCentralBody.c_str());
-                  #endif
-                  outState = skr->GetTargetState(scName, id, currentEpoch,
-                        spkCentralBody, spkCentralBodyNaifId);
-
-                  std::memcpy(state, outState.GetDataVector(),
-                        dimension*sizeof(Real));
+                  fullPath = ephemPath + fullPath;
                }
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("Checking for kernel %s\n",
+                        fullPath.c_str());
+               #endif
+               if (skr->IsLoaded(fullPath) == false)
+                  skr->LoadKernel(fullPath);
 
-               UpdateSpaceObject(currentEpoch);
-
-               retval = true;
+               if (find(spkFileNames.begin(), spkFileNames.end(), fullPath) ==
+                     spkFileNames.end())
+                  spkFileNames.push_back(fullPath);
             }
-            catch (BaseException &e)
+
+            // Load the initial data point
+            if (skr)
             {
-               MessageInterface::ShowMessage(e.GetFullMessage());
-               retval = false;
-               throw;
+               try
+               {
+                  Rvector6  outState;
+
+                  for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+                  {
+                     std::string scName = propObjectNames[i];
+                     Integer id = naifIds[i];
+
+                     currentEpoch = initialEpoch + timeFromEpoch /
+                           GmatTimeConstants::SECS_PER_DAY;
+
+                     // Allow for slop in the last few bits
+                     if ((currentEpoch < ephemStart - 1e-10) ||
+                         (currentEpoch > ephemEnd + 1e-10))
+                     {
+                        std::stringstream errmsg;
+                        errmsg.precision(16);
+                        errmsg << "The SPKPropagator "
+                               << instanceName
+                               << " is attempting to initialize outside of the "
+                                  "timespan  of the ephemeris data; halting.  ";
+                        errmsg << "The current SPICE ephemeris covers the A.1 "
+                                  "modified Julian span ";
+                        errmsg << ephemStart << " to " << ephemEnd << " and the "
+                                 "requested epoch is " << currentEpoch << ".\n";
+                        throw PropagatorException(errmsg.str());
+                     }
+                     #ifdef DEBUG_INITIALIZATION
+                        MessageInterface::ShowMessage("Getting target state in %p "
+                              "for %s (ID = %ld) at epoch %lf and CB %s\n", this,
+                              scName.c_str(), id, currentEpoch,
+                              spkCentralBody.c_str());
+                     #endif
+                     outState = skr->GetTargetState(scName, id, currentEpoch,
+                           spkCentralBody, spkCentralBodyNaifId);
+
+                     std::memcpy(state, outState.GetDataVector(),
+                           dimension*sizeof(Real));
+                  }
+
+                  UpdateSpaceObject(currentEpoch);
+
+                  retval = true;
+               }
+               catch (BaseException &e)
+               {
+                  MessageInterface::ShowMessage(e.GetFullMessage());
+                  retval = false;
+                  throw;
+               }
             }
          }
-      }
 
-      SetEphemSpan();
+         SetEphemSpan();
+      }
    }
 
    #ifdef DEBUG_INITIALIZATION
