@@ -567,15 +567,30 @@ void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
 wxBitmap WelcomePanel::LoadBitmap( wxString filename, int width, int height )
 {
    wxBitmap bitmap;
+   std::string ext = GmatFileUtil::ParseFileExtension(filename.c_str());
+   std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
    // Check for file exist first, otherwise the system hangs for non-existent file
-   if (GmatFileUtil::DoesDirectoryExist(filename.c_str(), false))
+   if (GmatFileUtil::DoesDirectoryExist(filename.c_str(), false) && 
+	   ((ext == "JPG") || (ext == "JPEG") || (ext == "PNG")))
    {
-      wxImage::AddHandler(new wxJPEGHandler);
-      if (bitmap.LoadFile(filename, wxBITMAP_TYPE_JPEG))
-      {
-         wxImage image = bitmap.ConvertToImage();
-         bitmap = wxBitmap(image.Scale(width, height));
-      }
+	   if ((ext == "JPG") || (ext == "JPEG"))
+	   {
+		  wxImage::AddHandler(new wxJPEGHandler);
+		  if (bitmap.LoadFile(filename, wxBITMAP_TYPE_JPEG))
+		  {
+			 wxImage image = bitmap.ConvertToImage();
+			 bitmap = wxBitmap(image.Scale(width, height));
+		  }
+	   }
+	   else
+	   {
+		   wxImage::AddHandler(new wxPNGHandler);
+		   if (bitmap.LoadFile(filename, wxBITMAP_TYPE_PNG))
+		   {
+			 wxImage image = bitmap.ConvertToImage();
+			 bitmap = wxBitmap(image.Scale(width, height));
+		   }
+	   }
    }
    else
    {
