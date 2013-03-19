@@ -58,9 +58,12 @@ Spinner::Spinner(const std::string &itsName) :
    objectTypeNames.push_back("Spinner");
    attitudeModelName     = "Spinner";
    modifyCoordSysAllowed = false;
- }
- 
- //------------------------------------------------------------------------------
+   // Reserve spaces to handle attribute comments for owned object
+   // LOJ: 2013.03.01 for GMT-3353 FIX
+   FinalizeCreation();
+}
+
+//------------------------------------------------------------------------------
 //  Spinner(const Spinner &att)
 //------------------------------------------------------------------------------
 /**

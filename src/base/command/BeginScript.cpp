@@ -347,7 +347,7 @@ void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd,
    }
    
    if (indentCommentOnly)
-      gen << prefix << cmd->GetTypeName() << ";";
+      gen << prefix << cmd->GetTypeName() << ";" << cmd->GetInlineComment();
 }
 
 

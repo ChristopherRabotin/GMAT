@@ -83,7 +83,15 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
-
+   virtual const std::string
+                        GetAttributeCommentLine(Integer index);
+   virtual void         SetAttributeCommentLine(Integer index,
+                                                const std::string &comment);
+   virtual const std::string
+                        GetInlineAttributeComment(Integer index);
+   virtual void         SetInlineAttributeComment(Integer index,
+                                                  const std::string &comment);
+   
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
 
    virtual bool         HasRefObjectTypeArray();
@@ -171,7 +179,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
-
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   
    virtual bool         Validate();
    virtual bool         Initialize();
 
@@ -312,7 +322,7 @@ protected:
    };
    // these are the corresponding strings
    static const std::string MULT_REP_STRINGS[EndMultipleReps - CART_X];
-
+   
    /// Spacecraft parameter types
    static const Gmat::ParameterType
                   PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount];
@@ -329,12 +339,14 @@ protected:
       SPHERICAL_RADEC_ID,
       EQUINOCTIAL_ID
    };
-
+   
    static const Integer ATTITUDE_ID_OFFSET;
    static const Real    UNSET_ELEMENT_VALUE;
-
+   
    std::map <std::string, std::string> elementLabelMap;
-
+   std::map <std::string, std::string> attribCommentLineMap;
+   std::map <std::string, std::string> inlineAttribCommentMap;
+   
    /// State element labels
    StringArray       stateElementLabel;
    /// State element units

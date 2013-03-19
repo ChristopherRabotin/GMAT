@@ -2444,7 +2444,7 @@ void GmatBase::SetInlineAttributeComment(Integer index,
       #endif
       return;
    }
-
+   
    #ifdef DEBUG_COMMENTS_ATTRIBUTE
    MessageInterface::ShowMessage
       ("Setting Inline attribute comment - %s.\n", comment.c_str());
@@ -3571,6 +3571,11 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 void GmatBase::FinalizeCreation()
 {
+   #ifdef DEBUG_FINALIZE_CREATION
+   MessageInterface::ShowMessage
+      ("GmatBase::FinalizeCreation() entered for <%s>'%s'\n", GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
    PrepCommentTables();
 }
 
@@ -4050,7 +4055,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 
                   // overwrite tmp variable for attribute cmt line
                   attCmtLn = GetInlineAttributeComment(id);
-
+                  
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                       (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn << "\n";
@@ -4081,7 +4086,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       newprefix = prefix;
       ownedObject = GetOwnedObject(i);
       nomme = ownedObject->GetName();
-
+      
       #ifdef DEBUG_OWNED_OBJECT_STRINGS
       MessageInterface::ShowMessage
          ("   id %d has owned object of type name <%s> and name \"%s\"\n", i,
@@ -4380,6 +4385,10 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 //------------------------------------------------------------------------------
 void GmatBase::PrepCommentTables()
 {
+   #ifdef DEBUG_FINALIZE_CREATION
+   MessageInterface::ShowMessage
+      ("GmatBase::PrepCommentTables() entered, parameterCount=%d\n", parameterCount);
+   #endif
    attributeCommentLines.resize(parameterCount);
    attributeInlineComments.resize(parameterCount);
    for (Integer i = 0; i < parameterCount; ++i)
@@ -4389,32 +4398,45 @@ void GmatBase::PrepCommentTables()
    }
 }
 
-
+//------------------------------------------------------------------------------
+// bool HasDynamicParameterSTM(Integer parameterId)
+//------------------------------------------------------------------------------
 bool GmatBase::HasDynamicParameterSTM(Integer parameterId)
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterSTM(Integer parameterId)
+//------------------------------------------------------------------------------
 Rmatrix* GmatBase::GetParameterSTM(Integer parameterId)
 {
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// Integer HasParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
 Integer GmatBase::HasParameterCovariances(Integer parameterId)
 {
    return -1;
 }
 
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
 Rmatrix* GmatBase::GetParameterCovariances(Integer parameterId)
 {
    return NULL; //&covariance;
 }
 
+//------------------------------------------------------------------------------
+// Covariance* GetCovariance()
+//------------------------------------------------------------------------------
 Covariance* GmatBase::GetCovariance()
 {
    return &covariance;
 }
-
 
 //------------------------------------------------------------------------------
 // void UpdateClonedObject(GmatBase *obj)

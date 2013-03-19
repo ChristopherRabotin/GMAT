@@ -1061,6 +1061,166 @@ bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+//  const std::string GetAttributeCommentLine(Integer index))
+//---------------------------------------------------------------------------
+const std::string Spacecraft::GetAttributeCommentLine(Integer index)
+{
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("Spacecraft::GetAttributeCommentLine() entered, index=%d\n", index);
+   #endif
+   
+   std::string comment;
+   std::string text = GetParameterText(index);
+
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   #endif
+   
+   // Return attribute comment for multiple state reps here
+   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   {
+      if (attribCommentLineMap.find(text) != attribCommentLineMap.end())
+         comment = attribCommentLineMap[text];
+
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("===> Returning '%s' for '%s'\n", comment.c_str(), text.c_str());
+      #endif
+      return comment;
+   }
+   else if (index >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude)
+         comment = attitude->GetAttributeCommentLine(index - ATTITUDE_ID_OFFSET);
+      
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("===> Returning '%s' for Attitude\n", comment.c_str());
+      #endif
+      return comment;
+   }
+   else
+      return SpaceObject::GetAttributeCommentLine(index);
+}
+
+//---------------------------------------------------------------------------
+//  void SetAttributeCommentLine(Integer index, const std::string &comment)
+//---------------------------------------------------------------------------
+void Spacecraft::SetAttributeCommentLine(Integer index,
+                                         const std::string &comment)
+{
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("===> Spacecraft::SetAttributeCommentLine() entered, index=%d, comment='%s'\n",
+       index, comment.c_str());
+   #endif
+   std::string text = GetParameterText(index);
+
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   #endif
+   
+   // Save attribute comment for multiple state reps here
+   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   {
+      attribCommentLineMap[text] = comment;
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage("===> '%s' set to attribCommentLineMap\n", text.c_str());
+      #endif
+   }
+   else if (index >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude)
+         attitude->SetAttributeCommentLine(index - ATTITUDE_ID_OFFSET, comment);
+   }
+   else
+      SpaceObject::SetAttributeCommentLine(index, comment);
+}
+
+//---------------------------------------------------------------------------
+//  const std::string GetInlineAttributeComment(Integer index)
+//---------------------------------------------------------------------------
+const std::string Spacecraft::GetInlineAttributeComment(Integer index)
+{
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("Spacecraft::GetInlineAttributeComment() entered, index=%d\n", index);
+   #endif
+   
+   std::string comment;
+   std::string text = GetParameterText(index);
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   #endif
+   // Return inline attribute comment for multiple state reps here
+   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   {
+      if (inlineAttribCommentMap.find(text) != inlineAttribCommentMap.end())
+         comment = inlineAttribCommentMap[text];
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("Spacecraft::GetInlineAttributeComment() returning '%s' for '%s'\n",
+          comment.c_str(), text.c_str());
+      #endif
+      return comment;
+   }
+   else if (index >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude)
+         comment = attitude->GetInlineAttributeComment(index - ATTITUDE_ID_OFFSET);
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("Spacecraft::GetInlineAttributeComment() returning '%s' for Attitude\n",
+          comment.c_str());
+      #endif
+      return comment;
+   }
+   else
+      return SpaceObject::GetInlineAttributeComment(index);
+}
+
+//---------------------------------------------------------------------------
+//  void SetInlineAttributeComment(Integer index, const std::string &comment)
+//---------------------------------------------------------------------------
+void Spacecraft::SetInlineAttributeComment(Integer index,
+                                           const std::string &comment)
+{
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetInlineAttributeComment() entered, index=%d, comment='%s'\n",
+       index, comment.c_str());
+   #endif
+   std::string text = GetParameterText(index);
+   
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage("   parameter text='%s'\n", text.c_str());
+   #endif
+   
+   // Save inline attribute comment for multiple state reps here
+   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   {
+      inlineAttribCommentMap[text] = comment;
+      
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("   '%s' set to inlineAttribCommentMap\n", text.c_str());
+      #endif
+   }
+   else if (index >= ATTITUDE_ID_OFFSET)
+   {
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("   Trying to set comment to attitude<%p>\n", attitude);
+      #endif
+      if (attitude)
+         attitude->SetInlineAttributeComment(index - ATTITUDE_ID_OFFSET, comment);
+   }
+   else
+      SpaceObject::SetInlineAttributeComment(index, comment);
+}
+
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -3668,6 +3828,32 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case COORD_SYS_ID:
+      return Gmat::COORDINATE_SYSTEM;
+   case FUEL_TANK_ID:
+      return Gmat::FUEL_TANK;
+   case THRUSTER_ID:
+      return Gmat::THRUSTER;
+   default:
+      return SpaceObject::GetPropertyObjectType(id);
+   }
+}
+
 //------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
@@ -5192,7 +5378,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       ("   displayStateType=%s, repState=%s\n", displayStateType.c_str(),
        repState.ToString().c_str());
    #endif
-
+   
+   std::string fieldComment;
+   std::string inlineFieldComment;
    for (i = 0; i < parameterCount; ++i)
    {
       if ((IsParameterReadOnly(parmOrder[i]) == false) &&
@@ -5202,7 +5390,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
           (parmOrder[i] != ATTITUDE))
       {
          parmType = GetParameterType(parmOrder[i]);
-
+         fieldComment = GetAttributeCommentLine(parmOrder[i]);
+         inlineFieldComment = GetInlineAttributeComment(parmOrder[i]);
+         
          // Handle StringArray parameters separately
          if (parmType != Gmat::STRINGARRAY_TYPE &&
              parmType != Gmat::OBJECTARRAY_TYPE)
@@ -5261,10 +5451,17 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   WriteParameterValue(parmOrder[i], value);
                }
 
+               #ifdef DEBUG_WRITE_PARAMETERS
+               MessageInterface::ShowMessage
+                  ("   <%s> = <%s>\n", GetParameterText(parmOrder[i]).c_str(), value.str().c_str());
+               #endif
                if (value.str() != "")
                {
-                  stream << prefix << GetParameterText(parmOrder[i])
-                         << " = " << value.str() << ";\n";
+                  // Write inline attribute comment (LOJ: 2013.03.01 for GMT-3353 fix)
+                  //stream << prefix << GetParameterText(parmOrder[i])
+                  //       << " = " << value.str() << ";\n";
+                  stream << fieldComment << prefix << GetParameterText(parmOrder[i])
+                         << " = " << value.str() << ";" << inlineFieldComment << "\n";
                }
             }
          }
@@ -5287,7 +5484,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   if (writeQuotes)
                      stream << "'";
                }
-               stream << "};\n";
+               // Write inline attribute comment (LOJ: 2013.03.01 for GMT-3353 fix)
+               //stream << "};\n";
+               stream << "};" << inlineFieldComment << "\n";
             }
          }
       }
@@ -5297,9 +5496,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          if (attitude)
          {
             if (inMatlabMode)
-               stream << prefix << "Attitude = '" << attitude->GetAttitudeModelName() << "';\n";
+               stream << prefix << "Attitude = '" << attitude->GetAttitudeModelName() << "';" << inlineFieldComment << "\n";
             else
-               stream << prefix << "Attitude = " << attitude->GetAttitudeModelName() << ";\n";
+               stream << prefix << "Attitude = " << attitude->GetAttitudeModelName() << ";" << inlineFieldComment << "\n";
          }
          else
          {
@@ -5307,9 +5506,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                ("*** INTERNAL ERROR *** attitude is NULL\n");
          }
       }
-
    }
-
+   
    // Prep in case spacecraft "own" the attached hardware
    GmatBase *ownedObject;
    std::string nomme, newprefix;

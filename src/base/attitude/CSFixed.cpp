@@ -52,9 +52,12 @@ CSFixed::CSFixed(const std::string &itsName) :
    objectTypeNames.push_back("CoordinateSystemFixed");
    attitudeModelName         = "CoordinateSystemFixed";
    setInitialAttitudeAllowed = false;
- }
- 
- //------------------------------------------------------------------------------
+   // Reserve spaces to handle attribute comments for owned object
+   // LOJ: 2013.03.01 for GMT-3353 FIX
+   FinalizeCreation();
+}
+
+//------------------------------------------------------------------------------
 //  CSFixed(const CSFixed &att)
 //------------------------------------------------------------------------------
 /**
