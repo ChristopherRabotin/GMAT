@@ -31,7 +31,7 @@
 #include "Array.hpp"
 #include "gmatdefs.hpp"
 #include "ArraySetupDialog.hpp"
-#include "bitmaps/NewMission.xpm"
+#include "bitmaps/Erase.xpm"
 
 #include <wx/tglbtn.h>
 #include <wx/notebook.h>
@@ -179,7 +179,7 @@ void ParameterCreateDialog::Create()
 
    int bsize = 2;
    std::string CreateLabel = "="GUI_ACCEL_KEY">";
-   wxBitmap clearBitmap = wxBitmap(NewMission_xpm);
+   wxBitmap clearBitmap = wxBitmap(Erase_xpm);
    
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
