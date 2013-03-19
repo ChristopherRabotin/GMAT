@@ -1919,7 +1919,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_OrbitView_GUI.png"
+                     fileref="files/images/Resource_OrbitView_GUI_2.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -1935,7 +1935,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colnum="1" colwidth=".75*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 
@@ -2004,14 +2004,14 @@
   Create Spacecraft aSat
   Create Propagator aProp
 
-  Create OrbitView aOrbitView
-  aOrbitView.Add = {aSat, Earth}
+  Create OrbitView anOrbitView
+  anOrbitView.Add = {aSat, Earth}
 
   BeginMissionSequence
 
-  Toggle aOrbitView Off
+  Toggle anOrbitView Off
   Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle aOrbitView On
+  Toggle anOrbitView On
   Propagate aProp(aSat) {aSat.ElapsedDays = 4}
         </code>
       </programlisting>
@@ -2108,10 +2108,10 @@
   Create Propagator aProp
   Create Propagator bProp
 
-  Create OrbitView aOrbitView aOrbitView2
+  Create OrbitView anOrbitView anOrbitView2
 
-  aOrbitView.Add = {aSat, aSat2, Earth}
-  aOrbitView2.Add = {aSat3, Earth}
+  anOrbitView.Add = {aSat, aSat2, Earth}
+  anOrbitView2.Add = {aSat3, Earth}
 
   BeginMissionSequence
 
@@ -2132,6 +2132,24 @@
       View Definition panel sets up geometry at initial epoch and then mouse
       controls geometry of the simulation from that point on.</para>
     </refsection>
+
+    <refsection>
+      <title>Spacecraft Model Considerations in GMAT's OrbitView</title>
+
+      <para>GMAT displays spacecraft models by reading model data from 3D
+      Studio files describing the spacecraft shape and colors. These files
+      have the file extension .3ds, and are generally called 3ds files. 3ds
+      files contain data that defines the 3-dimensional coordinates of
+      vertices outlining the spacecraft, a mapping of those vertices into
+      triangles used to create the displayed surface of the spacecraft, and
+      information about the colors and texture maps used to fill in the
+      displayed triangles.</para>
+
+      <para>GMAT's implementation of the spacecraft model can display models
+      consisting of up to 200,000 vertices that map up to 100,000 triangles.
+      The GMAT model can use up 500 separate color or texture maps to fill in
+      these triangles.</para>
+    </refsection>
   </refsection>
 
   <refsection>
@@ -2146,8 +2164,8 @@
   Create Spacecraft aSat
   Create Propagator aProp
 
-  Create OrbitView aOrbitView
-  aOrbitView.Add = {aSat, Earth}
+  Create OrbitView anOrbitView
+  anOrbitView.Add = {aSat, Earth}
 
   BeginMissionSequence
 
@@ -2169,9 +2187,9 @@
   Create ImpulsiveBurn TOI
   Create DifferentialCorrector aDC
 
-  Create OrbitView aOrbitView
-  aOrbitView.Add = {aSat, Earth}
-  aOrbitView.SolverIterations = All
+  Create OrbitView anOrbitView
+  anOrbitView.Add = {aSat, Earth}
+  anOrbitView.SolverIterations = All
 
   BeginMissionSequence
 

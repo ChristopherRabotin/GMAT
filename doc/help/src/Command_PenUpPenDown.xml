@@ -37,6 +37,7 @@
 
     <synopsis>
       <literal>PenUp</literal> <replaceable>OutputNames</replaceable>
+
          <replaceable>OutputNames</replaceable>
             <replaceable>OutputNames</replaceable> is the list of subscribers that 
             <replaceable>PenUp</replaceable> command operates on. When <replaceable>PenUp</replaceable> 
@@ -44,6 +45,7 @@
             need to be separated by a space.
 
       <literal>PenDown</literal> <replaceable>OutputNames</replaceable>
+
          <replaceable>OutputNames</replaceable>
             <replaceable>OutputNames</replaceable> is the list of subscribers 
             that <replaceable>PenDown</replaceable> command operates on. 

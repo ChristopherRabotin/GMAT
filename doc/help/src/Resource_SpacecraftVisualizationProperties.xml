@@ -42,10 +42,480 @@
   </refsection>
 
   <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>ModelOffsetX</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelOffsetX</guilabel> field lets you
+            translate a spacecraft in +X or -X axis of central body's
+            coordinate system. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelOffsetY</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelOffsetY</guilabel> field lets you
+            translate a spacecraft in +Y or -Y axis of central body's
+            coordinate system.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelOffsetZ</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelOffsetZ</guilabel> field lets you
+            translate a spacecraft in +Z or -Z axis of central body's
+            coordinate system. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelRotationX</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelRotationX</guilabel> field lets
+            you perform a fixed rotation of spacecraft's attitude w.r.t X-axis
+            of central body's coordinate system. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelRotationY</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelRotationY</guilabel> field lets
+            you perform a fixed rotation of spacecraft's attitude w.r.t Y-axis
+            of central body's coordinate system. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelRotationZ</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelRotationZ</guilabel> field lets
+            you perform a fixed rotation of spacecraft's attitude w.r.t Z-axis
+            of central body's coordinate system. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelScale</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelScale</guilabel> field lets you
+            apply a scale factor to the spacecraft model's size.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0.001 &lt;= Real &lt;= 1000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>3.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ModelFile</guilabel></entry>
+
+            <entry><para> The <guilabel>ModelFile</guilabel> field allows you
+            to load spacecraft models that are in .3ds model formats. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>FileName</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>. 3ds spacecraft model formats only</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>../data/vehicle/models/aura.3ds</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
     <title>GUI</title>
 
     <para>The figure below shows the default settings for the
-    <guilabel>Spacecraft Visualization Properties</guilabel> resource</para>
+    <guilabel>Spacecraft Visualization Properties</guilabel> resource:</para>
 
     <screenshot>
       <mediaobject>
@@ -63,11 +533,14 @@
     properties of the spacecraft and visualize the changes in the Display
     window.</para>
 
-    <para>Within the Display window, you can left click and drag your mouse to
-    change camera orientation. Camera orientation can be changed in
-    Up/Down/Left/Right directions. You can also right click and drag your
-    mouse to zoom in and out of the Display window. Moving the cursor in
-    Left/Right or Up/Down directions helps to zoom in and out of the Display
+    <para>Within the <guilabel>Display </guilabel>window, you can
+    <guilabel>Left </guilabel>click and drag your mouse to change camera
+    orientation. Camera orientation can be changed in
+    <guilabel>Up/Down/Left/Righ</guilabel>t directions. You can also
+    <guilabel>Right</guilabel> click and drag your mouse to zoom in and out of
+    the <guilabel>Display</guilabel> window. Moving the cursor in
+    <guilabel>Left/Right</guilabel> or <guilabel>Up/Down</guilabel> directions
+    helps to zoom in and out of the <guilabel>Display</guilabel>
     window.</para>
   </refsection>
 
@@ -102,8 +575,9 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>This example shows you how to configure Spacecraft Visualization
-      properties. All values are non-default values.</para>
+      <para>This example shows you how to configure <guilabel>Spacecraft
+      Visualization Properties</guilabel> resource. All values are non-default
+      values.</para>
 
       <programlisting>
         <code>
@@ -119,8 +593,8 @@
 
   Create Propagator aProp
 
-  Create OrbitView aOrbitView
-  aOrbitView.Add = {aSat, Earth}
+  Create OrbitView anOrbitView
+  anOrbitView.Add = {aSat, Earth}
 
   BeginMissionSequence
   Propagate aProp(aSat) {aSat.ElapsedSecs = 9000}
