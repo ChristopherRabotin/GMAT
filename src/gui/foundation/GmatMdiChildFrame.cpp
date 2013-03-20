@@ -551,7 +551,8 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);   
    wxSafeYield();
-   event.Skip();
+   // This causes crash on exit with Red X/button on XP and Mac - wcs 2013.03.20
+//   event.Skip();
    
    #ifdef DEBUG_CLOSE
    MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() leaving\n");
