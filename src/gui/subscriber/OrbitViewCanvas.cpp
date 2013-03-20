@@ -1088,9 +1088,10 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
          // Find the zoom amount
-         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
-         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
-         Real length = sqrt(x2 + y2);         
+//         Real x2 = (mLastMouseX - mouseX) * (mLastMouseX - mouseX);
+//         Real y2 = (mouseY - mLastMouseY) * (mouseY - mLastMouseY);
+//         Real length = sqrt(x2 + y2);
+         Real length = abs(mouseY - mLastMouseY);
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
          mZoomAmount = length * distance / 500;
@@ -1105,30 +1106,38 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
          
          // For zoom in out, move camera forward or backward in z direction
          // If dragging from upper right corner to lower left corner (zoom in)
-         if (mouseX < mLastMouseX && mouseY > mLastMouseY)
+         //if (mouseX < mLastMouseX && mouseY > mLastMouseY)
+
+         // If dragging from top to bottom, zoom in
+         if (mouseY > mLastMouseY)
          {
             // In the future, if we want to limit the zoom in, we can check for
             // the distance, ie. if (distance < (mOriginRadius * 1.2)) return
             mCamera.Translate(0, 0, mZoomAmount, false);
          }
          // If dragging from lower left corner to upper right corner (zoom out)
-         else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
+         //else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
+
+         // If dragging from bottom to top, zoom out
+         else if (mouseY < mLastMouseY)
          {
             mCamera.Translate(0, 0, -mZoomAmount, false);
          }
-         else
-         {
-            // If mouse moves toward left then zoom in
-            if (mouseX < mLastMouseX || mouseY < mLastMouseY)
-            {
-               // In the future, if we want to limit the zoom in, we can check for
-               // the distance, ie. if (distance < (mOriginRadius * 1.2)) return
-               mCamera.Translate(0, 0, mZoomAmount, false);
-            }
-            // Else mouse moves toward right so zoom out
-            else
-               mCamera.Translate(0, 0, -mZoomAmount, false);
-         }
+
+         // per GMT-3600, left/right motion does not apply zooming
+//         else
+//         {
+//            // If mouse moves toward left then zoom in
+//            if (mouseX < mLastMouseX || mouseY < mLastMouseY)
+//            {
+//               // In the future, if we want to limit the zoom in, we can check for
+//               // the distance, ie. if (distance < (mOriginRadius * 1.2)) return
+//               mCamera.Translate(0, 0, mZoomAmount, false);
+//            }
+//            // Else mouse moves toward right so zoom out
+//            else
+//               mCamera.Translate(0, 0, -mZoomAmount, false);
+//         }
          
          Refresh(false);
       }
