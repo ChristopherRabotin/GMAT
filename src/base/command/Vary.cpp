@@ -1386,9 +1386,16 @@ void Vary::SetInitialValue(Solver *theSolver)
    if (solver == theSolver)
    {
       if ((initialValue->GetWrapperType() != Gmat::VARIABLE_WT) &&
-          (initialValue->GetWrapperType() != Gmat::ARRAY_ELEMENT_WT))
+          (initialValue->GetWrapperType() != Gmat::ARRAY_ELEMENT_WT) &&
+          (initialValue->GetWrapperType() != Gmat::OBJECT_PROPERTY_WT) &&
+          (initialValue->GetWrapperType() != Gmat::PARAMETER_WT))
       {
          Real var = solver->GetSolverVariable(variableID);
+
+         // Unscale the variables using Eq. 13.6 of Architecture document
+         var = var / multiplicativeScaleFactor->EvaluateReal() -
+            additiveScaleFactor->EvaluateReal();
+
          initialValue->SetReal(var);
 
          MessageInterface::ShowMessage("Apply Corrections has changed the "
@@ -1407,8 +1414,8 @@ void Vary::SetInitialValue(Solver *theSolver)
       {
          MessageInterface::ShowMessage("*** Warning*** Apply Corrections did "
                "not change the initial guess setting %s from %s because "
-               "Variables and Array elements cannot be reset using the Apply "
-               "Corrections button\n",  variableName.c_str(),
+               "Variables, Array elements, and object fields cannot be reset "
+               "using the Apply Corrections button\n",  variableName.c_str(),
                initialValueName.c_str());
       }
    }
