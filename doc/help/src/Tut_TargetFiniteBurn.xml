@@ -1,0 +1,1151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="Tut_TargetFiniteBurn"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Target Finite Burn to Raise Apogee</title>
+
+  <variablelist>
+    <varlistentry>
+      <term>Audience</term>
+
+      <listitem>
+        <para>Intermediate level</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Length</term>
+
+      <listitem>
+        <para>45 minutes</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Prerequisites</term>
+
+      <listitem>
+        <para>Complete Simulating an Orbit and Simple Orbit Transfer</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Script File</term>
+
+      <listitem>
+        <para><filename>Target_Finite_Burn_to_Raise_Apogee.script
+        TODO</filename></para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <note>
+      <para>One of the most common operational problems in space mission
+      design is the design of a finite burn that achieves a given orbital
+      goal. A finite burn model, as opposed to the idealized impulsive burn
+      model used for preliminary design, is needed to accurately model actual
+      spacecraft maneuvers.</para>
+    </note>
+
+    <para>In this tutorial, we will use GMAT to perform a finite burn for a
+    spacecraft in low Earth orbit.  The goal of this finite burn is to achieve
+    a certain desired apogee radius.  Since the most efficient orbital
+    location to affect apoapsis is at periapsis, the first step in this
+    tutorial is to propagate the spacecraft to perigee.  </para>
+
+    <para>To calculate the duration of the perigee burn needed to achieve a
+    desired apogee radius of 12000 km, we must create the appropriate
+    targeting sequence.  The main portion of the target sequence employs a
+    Begin/End FiniteBurn command pair, for a velocity direction maneuver,
+    followed by a command to propagate the spacecraft to orbit apogee.</para>
+
+    <para>Target Finite Burn to Raise Apogee.script</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>Create and configure the spacecraft hardware and Finite Burn
+        resources</para>
+      </listitem>
+
+      <listitem>
+        <para>Create the Differential Corrector and Target Control
+        Variable</para>
+      </listitem>
+
+      <listitem>
+        <para>Configure the Mission Sequence. To do this, we will</para>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>Create Begin/End FiniteBurn commands with default
+            settings.</para>
+          </listitem>
+
+          <listitem>
+            <para>Create a Target sequence to achieve a 12000 km apogee
+            radius.</para>
+          </listitem>
+        </orderedlist>
+      </listitem>
+
+      <listitem>
+        <para>Configure the Mission Sequence. To do this, we will</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Create and Configure Spacecraft Hardware and Finite Burn</title>
+
+    <para>For this tutorial, you’ll need GMAT open, with the default mission
+    loaded. To load the default mission, click New Mission ( ) or start a new
+    GMAT session. We will use the default configurations for the spacecraft
+    (DefaultSC) and the propagator (DefaultProp). DefaultSC is configured by
+    default to a near-circular orbit, and DefaultProp is configured to use
+    Earth as the central body with a nonspherical gravity model of degree and
+    order 4. You may want to open the dialog boxes for these objects and
+    inspect them more closely as we will leave them at their default
+    settings.</para>
+
+    <section>
+      <title>Create a Thruster and a Fuel Tank</title>
+
+      <para>To model thrust and fuel use associated with a finite burn, we
+      must create a thruster and a fuel tank and then attach the newly created
+      fuel tank to the thruster.</para>
+
+      <procedure>
+        <step>
+          <para>In the <guilabel>Resources</guilabel> tree, right-click on the
+          <guilabel>Hardware</guilabel> folder, point to
+          <guilabel>Add</guilabel>, and click <guilabel>Thruster</guilabel>.
+           A resource named <guilabel>Thruster1</guilabel> will be
+          created.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Resources</guilabel> tree, right-click on the
+          Hardware folder, point to Add, and click Fuel Tank.  A resource
+          named FuelTank1 will be created.</para>
+        </step>
+
+        <step>
+          <para>Double-click Thruster1 to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>Select the Decrement Mass box so that GMAT will model fuel use
+          associated with a finite burn.</para>
+        </step>
+
+        <step>
+          <para>Use the drop down menu to the right of the Tank field to
+          select FuelTank1 as the fuel source for Thruster1.  Click OK.
+           </para>
+        </step>
+      </procedure>
+
+      <para>Figure 1 below shows the default FuelTank1 configuration that we
+      will use and Figure 2 shows the finished Thruster1 configuration.</para>
+
+      <figure>
+        <title>Figure 1. FuelTank1 Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <para>Figure 1. FuelTank1 Configuration</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 2. Thruster1 Configuration</para>
+
+      <para>Note that the default Thruster1 Coordinate System, as shown in
+      Figure 2, is Earth-based Velocity, Normal, Bi-normal (VNB) and that the
+      default Thrust Vector of (1,0,0) represents our desired velocity
+      oriented maneuver direction.</para>
+
+      <para>For a general finite burn, if desired, we can specify how both the
+      thrust and the fuel use depend upon fuel tank pressure. The user does
+      this by inputting coefficients of certain pre-defined polynomials. To
+      view the values for the thrust coefficients, click the Edit Thruster
+      Coef. button and to view the ISP coefficients which determine fuel use,
+      click the Edit Impulse Coef. button. For this tutorial, we will use the
+      default ISP polynomial coefficient values but we will change the
+      Thruster polynomial coefficients as follows.</para>
+    </section>
+
+    <section>
+      <title>Modify Thruster1 Thrust Coefficients</title>
+
+      <para>Paragraph Text</para>
+
+      <procedure>
+        <step>
+          <para>In the Resources tree, double-click Thruster1 to edit its
+          properties</para>
+        </step>
+
+        <step>
+          <para>Click the Edit Thruster Coef. button to bring up the
+          ThrusterCoefficientDialog box. Replace the default C1 coefficient
+          value of 10 with 1000. Click OK.</para>
+        </step>
+      </procedure>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 3. Thruster1 Thrust Coefficients</para>
+
+      <para>The exact form of the pre-defined Thrust polynomial, associated
+      with the coefficients above, are given in the Thruster help. We note
+      that, by default, all of the Thrust coefficients associated with terms
+      that involve tank pressure are zero. We have kept the default zero
+      values for all of these coefficients. We simply changed the constant
+      term in the Thrust polynomial from 10 to 1000 which is much larger than
+      the thrust for a typical chemical thruster. The Thrust and ISP
+      polynomials used in this tutorial are given below.</para>
+
+      <para>?? How Indent? Thrust = 1000 (Newtons)</para>
+
+      <para>Thrust = 1000 (Newtons)</para>
+    </section>
+
+    <section>
+      <title>Attach FuelTank1 and Thruster1 to DefaultSC</title>
+
+      <para>Paragraph Text</para>
+
+      <procedure>
+        <step>
+          <para>In the Resources tree, double-click DefaultSC to edit its
+          properties.</para>
+        </step>
+
+        <step>
+          <para>Select the Tanks tab. In the Available Tanks, select
+          FuelTank1. Then click How add image inline?? to add FuelTank1 to the
+          SelectedTanks list. Click Apply.</para>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Right_Arrow.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </step>
+
+        <step>
+          <para>Select the Actuators tab. In the Available Thrusters, select
+          Thrurster1. Then click ?? to add Thruster1 to the SelectedThrusters
+          list. Click OK.</para>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Right_Arrow.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </step>
+      </procedure>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 4. Attach FuelTank1 to DefaultSC</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 5. Attach Thruster1 to DefaultSC</para>
+    </section>
+
+    <section>
+      <title>Create the Finite Burn Maneuver</title>
+
+      <para>We’ll need a single FiniteBurn resource for this tutorial.</para>
+
+      <procedure>
+        <step>
+          <para>In the Resources tree, right-click the Burns folder and add a
+          FiniteBurn. A resource named FiniteBurn1 will be created.</para>
+        </step>
+
+        <step>
+          <para>Double-click FiniteBurn1 to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>Use the menu to the right of the Thruster field to select
+          Thruster1 as the thruster associated with FiniteBurn1. Click
+          OK.</para>
+        </step>
+      </procedure>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 6. Creation of FiniteBurn Resource FiniteBurn1</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Create the Differential Corrector and Target Control
+    Variable</title>
+
+    <para>For this tutorial, you’ll need GMAT open, with the default mission
+    loaded. To load the default mission, click New Mission ( ) or start a new
+    GMAT session. We will use the default configurations for the spacecraft
+    (DefaultSC) and the propagator (DefaultProp). DefaultSC is configured by
+    default to a near-circular orbit, and DefaultProp is configured to use
+    Earth as the central body with a nonspherical gravity model of degree and
+    order 4. You may want to open the dialog boxes for these objects and
+    inspect them more closely as we will leave them at their default
+    settings.</para>
+
+    <para>The Target sequence we will create later needs a
+    DifferentialCorrector resource to operate, so let’s create one now. We'll
+    leave the settings at their defaults.</para>
+
+    <procedure>
+      <step>
+        <para>In the Resources tree, expand the Solvers folder if it isn’t
+        already.</para>
+      </step>
+
+      <step>
+        <para>Right-click the Boundary Value Solvers folder, point to Add, and
+        click DifferentialCorrec- tor. A new resource called DC1 will be
+        created.</para>
+      </step>
+    </procedure>
+
+    <para>The Target sequence we will later create uses the Vary command to
+    adjust a user defined target control variable in order to achieve the
+    desired orbital goal of raising apogee to 12000 km. We must first create
+    this variable which we will name BurnDuration.</para>
+
+    <procedure>
+      <step>
+        <para>In the Resources tree, right-click the Variables/Arrays/Strings
+        folder, point to Add, and click Variable. A new window will come up
+        with two input fields, Variable Name and Variable Value. For Variable
+        Name, input BurnDuration and for Variable Value, input 0. Click the
+        Create (?? ) button and then the Close button.</para>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Create.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </step>
+
+      <step>
+        <para>To verify that we have created this new variable correctly,
+        double-click BurnDuration to view its properties.</para>
+      </step>
+    </procedure>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Tut_TargetFiniteBurn_Fig7_Creation_of_Variable_Resource_BurnDuration.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Figure 7. Creation of Variable Resource, BurnDuration</para>
+  </section>
+
+  <section>
+    <title>Configure the Mission Sequence</title>
+
+    <para>Now we will configure a Target sequence to solve for the finite burn
+    duration required to raise apogee to 12000 km. We’ll begin by creating the
+    initial Propagate command, then the Target sequence itself.</para>
+
+    <section>
+      <title>Configure the Initial Propagate Command</title>
+
+      <procedure>
+        <step>
+          <para>Click on the Mission tab to show the Mission tree.</para>
+        </step>
+
+        <step>
+          <para>Configure Propagate1 to propagate to
+          DefaultSC.Earth.Periapsis.</para>
+        </step>
+
+        <step>
+          <para>Rename Propagate1 to Prop To Perigee.</para>
+        </step>
+      </procedure>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 8. Prop To Perigee Command Configuration</para>
+    </section>
+
+    <section>
+      <title>Create the Target Sequence</title>
+
+      <para>Now create the commands necessary to perform the Target sequence.
+      Figure 9 illustrates the configuration of the Mission tree after we have
+      completed the steps in this section. We’ll discuss the Target sequence
+      after it has been created.</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 9. Final Mission Sequence</para>
+
+      <para>To create the Target sequence:</para>
+
+      <procedure>
+        <step>
+          <para>In the Mission tree, right-click Prop To Perigee, point to
+          Insert After, and click Target. This will insert two separate
+          commands: Target1 and EndTarget1.</para>
+        </step>
+
+        <step>
+          <para>Right-click Target1 and click Rename. Type Raise Apogee and
+          click OK.</para>
+        </step>
+
+        <step>
+          <para>Right-click Raise Apogee, point to Append, and click Vary.
+          Rename the newly created command as Vary Burn Duration.</para>
+        </step>
+
+        <step>
+          <para>Right-click Vary Burn Duration, point to Insert After, and
+          click BeginFiniteBurn. Rename the newly created command as Turn
+          Thruster On.</para>
+        </step>
+
+        <step>
+          <para>Complete the Target sequence by inserting the commands shown
+          in Table 1.</para>
+        </step>
+      </procedure>
+
+      <para>??? How add table???</para>
+    </section>
+
+    <section>
+      <title>Configure the Target Sequence</title>
+
+      <para>Now that the structure is created, we need to configure the
+      various parts of the Target sequence to do what we want.</para>
+
+      <section>
+        <title>Configure the Raise Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Raise Apogee to edit its properties.</para>
+          </step>
+
+          <step>
+            <para>In the ExitMode list, click SaveAndContinue. This instructs
+            GMAT to save the final solution of the targeting problem after you
+            run it.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig10_Raise_Apogee_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 10. Raise Apogee Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Vary Burn Duration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Vary Burn Duration to edit its properties. We
+            want this command to adjust (or “Vary”) the finite burn duration
+            represented by the previously created control variable,
+            BurnDuration. To accomplish this, click on the Edit button to
+            bring up the ParameterSelectDialog. Use the ObjectType menu to
+            select the Variable object type. The ObjectList menu will then
+            display a list of user defined variables. Double-click on the
+            variable, BurnDuration, so that BurnDuration appears in the
+            SelectedValues(s) menu. Click the OK button to save the changes
+            and return to the Vary Burn Duration command menu.</para>
+          </step>
+
+          <step>
+            <para>In the Initial Value box, type 200</para>
+          </step>
+
+          <step>
+            <para>In the Upper box, type 10000</para>
+          </step>
+
+          <step>
+            <para>In the Max Step box, type 100.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig11_Vary_Burn_Duration_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 11. Vary Burn Duration Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster On Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Turn Thruster On to edit its properties. Notice
+            that the command is already set to apply the FiniteBurn1 to the
+            DefaultSC spacecraft, so we don’t need to change anything
+            here.</para>
+          </step>
+
+          <step>
+            <para>Click OK.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig12_Turn_Thruster_On_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 12. Turn Thruster On Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Prop BurnDuration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Prop BurnDuration to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>We will use the default Parameter value of
+            DefaultSC.ElapsedSecs.</para>
+          </step>
+
+          <step>
+            <para>Under Condition, replace the default value with Variable,
+            BurnDuration.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig13_Prop_BurnDuration_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 13. Prop BurnDuration Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster Off Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Turn Thruster Off to edit its properties.
+            Notice that the command is already set to end FiniteBurn1 as
+            applied to the DefaultSC spacecraft, so we don’t need to change
+            anything here..</para>
+          </step>
+
+          <step>
+            <para>Click OK.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster%20Off_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 14. Turn Thruster Off Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Prop To Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Prop to Apogee to edit its properties.</para>
+          </step>
+
+          <step>
+            <para>Under Parameter, replace DefaultSC.ElapsedSecs with
+            DefaultSC.Earth.Apoapsis.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig15_Prop_To_Apogee_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 15. Prop To Apogee Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Achieve Apogee Radius = 12000 Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Achieve Apogee Radius = 12000 to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>Notice that Goal is set to DefaultSC.Earth.RMAG. This is
+            what we need, so we make no changes here.</para>
+          </step>
+
+          <step>
+            <para>In the Value box, type 12000</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig16_Achieve_Apogee_Radius_12000_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 16. Achieve Apogee Radius = 12000 Command
+        Configuration</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Run the Mission</title>
+
+    <para>Before running the mission, click Save ( ) and save the mission to a
+    file of your choice. Now click Run ( ). As the mission runs, you will see
+    GMAT solve the targeting problem. Each iteration and perturbation is shown
+    in DefaultOrbitView window in light blue, and the final solution is shown
+    in red. After the mission completes, the 3D view should appear as shown in
+    the image shown below. You may want to run the mission several times to
+    see the targeting in progress.</para>
+
+    <section>
+      <title>Configure the Initial Propagate Command</title>
+
+      <procedure>
+        <step>
+          <para>Click on the Mission tab to show the Mission tree.</para>
+        </step>
+
+        <step>
+          <para>Configure Propagate1 to propagate to
+          DefaultSC.Earth.Periapsis.</para>
+        </step>
+
+        <step>
+          <para>Rename Propagate1 to Prop To Perigee.</para>
+        </step>
+      </procedure>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 8. Prop To Perigee Command Configuration</para>
+    </section>
+
+    <section>
+      <title>Create the Target Sequence</title>
+
+      <para>Now create the commands necessary to perform the Target sequence.
+      Figure 9 illustrates the configuration of the Mission tree after we have
+      completed the steps in this section. We’ll discuss the Target sequence
+      after it has been created.</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Figure 9. Final Mission Sequence</para>
+
+      <para>To create the Target sequence:</para>
+
+      <procedure>
+        <step>
+          <para>In the Mission tree, right-click Prop To Perigee, point to
+          Insert After, and click Target. This will insert two separate
+          commands: Target1 and EndTarget1.</para>
+        </step>
+
+        <step>
+          <para>Right-click Target1 and click Rename. Type Raise Apogee and
+          click OK.</para>
+        </step>
+
+        <step>
+          <para>Right-click Raise Apogee, point to Append, and click Vary.
+          Rename the newly created command as Vary Burn Duration.</para>
+        </step>
+
+        <step>
+          <para>Right-click Vary Burn Duration, point to Insert After, and
+          click BeginFiniteBurn. Rename the newly created command as Turn
+          Thruster On.</para>
+        </step>
+
+        <step>
+          <para>Complete the Target sequence by inserting the commands shown
+          in Table 1.</para>
+        </step>
+      </procedure>
+
+      <table colsep="0" frame="topbot" rowsep="0">
+        <title>Additional Target Sequence Commands</title>
+
+        <tgroup cols="2">
+          <thead>
+            <row rowsep="1">
+              <entry>Command</entry>
+
+              <entry>Name </entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>Propagate</guilabel></entry>
+
+              <entry><userinput>Prop BurnDuration</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EndFiniteBurn</guilabel></entry>
+
+              <entry><userinput>Turn Thruster Off</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagate</guilabel></entry>
+
+              <entry><userinput>Prop To Apogee</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Achieve</guilabel></entry>
+
+              <entry><userinput>Achieve Apogee Radius =
+              12000</userinput></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Configure the Target Sequence</title>
+
+      <para>Now that the structure is created, we need to configure the
+      various parts of the Target sequence to do what we want.</para>
+
+      <section>
+        <title>Configure the Raise Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Raise Apogee to edit its properties.</para>
+          </step>
+
+          <step>
+            <para>In the ExitMode list, click SaveAndContinue. This instructs
+            GMAT to save the final solution of the targeting problem after you
+            run it.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig10_Raise_Apogee_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 10. Raise Apogee Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Vary Burn Duration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Vary Burn Duration to edit its properties. We
+            want this command to adjust (or “Vary”) the finite burn duration
+            represented by the previously created control variable,
+            BurnDuration. To accomplish this, click on the Edit button to
+            bring up the ParameterSelectDialog. Use the ObjectType menu to
+            select the Variable object type. The ObjectList menu will then
+            display a list of user defined variables. Double-click on the
+            variable, BurnDuration, so that BurnDuration appears in the
+            SelectedValues(s) menu. Click the OK button to save the changes
+            and return to the Vary Burn Duration command menu.</para>
+          </step>
+
+          <step>
+            <para>In the Initial Value box, type 200</para>
+          </step>
+
+          <step>
+            <para>In the Upper box, type 10000</para>
+          </step>
+
+          <step>
+            <para>In the Max Step box, type 100.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig11_Vary_Burn_Duration_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 11. Vary Burn Duration Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster On Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Turn Thruster On to edit its properties. Notice
+            that the command is already set to apply the FiniteBurn1 to the
+            DefaultSC spacecraft, so we don’t need to change anything
+            here.</para>
+          </step>
+
+          <step>
+            <para>Click OK.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig12_Turn_Thruster_On_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 12. Turn Thruster On Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Prop BurnDuration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Prop BurnDuration to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>We will use the default Parameter value of
+            DefaultSC.ElapsedSecs.</para>
+          </step>
+
+          <step>
+            <para>Under Condition, replace the default value with Variable,
+            BurnDuration.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig13_Prop_BurnDuration_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 13. Prop BurnDuration Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster Off Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Turn Thruster Off to edit its properties.
+            Notice that the command is already set to end FiniteBurn1 as
+            applied to the DefaultSC spacecraft, so we don’t need to change
+            anything here..</para>
+          </step>
+
+          <step>
+            <para>Click OK.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster%20Off_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 14. Turn Thruster Off Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Prop To Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Prop to Apogee to edit its properties.</para>
+          </step>
+
+          <step>
+            <para>Under Parameter, replace DefaultSC.ElapsedSecs with
+            DefaultSC.Earth.Apoapsis.</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes.</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig15_Prop_To_Apogee_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 15. Prop To Apogee Command Configuration</para>
+      </section>
+
+      <section>
+        <title>Configure the Achieve Apogee Radius = 12000 Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click Achieve Apogee Radius = 12000 to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>Notice that Goal is set to DefaultSC.Earth.RMAG. This is
+            what we need, so we make no changes here.</para>
+          </step>
+
+          <step>
+            <para>In the Value box, type 12000</para>
+          </step>
+
+          <step>
+            <para>Click OK to save these changes</para>
+          </step>
+        </procedure>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig16_Achieve_Apogee_Radius_12000_Command_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+
+        <para>Figure 16. Achieve Apogee Radius = 12000 Command
+        Configuration</para>
+      </section>
+    </section>
+  </section>
+</chapter>
