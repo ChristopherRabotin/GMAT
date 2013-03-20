@@ -705,11 +705,11 @@ void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void Subscriber::SetDataCoordSystem(CoordinateSystem *cs)
 {
-   //#ifdef DEBUG_SUBSCRIBER
+   #ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Subscriber::SetDataCoordSystem()<%s> set to %s<%p>\n",
        instanceName.c_str(), cs->GetName().c_str(), cs);
-   //#endif
+   #endif
    
    theDataCoordSystem = cs;
 }

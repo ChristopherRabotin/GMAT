@@ -794,9 +794,15 @@ bool EphemerisFile::TakeAction(const std::string &action,
    {
       return true;
    }
+
+   if (action == "ToggleOn")
+   {
+      writeEphemeris = true;
+   }
    
    if (action == "ToggleOff")
    {
+      writeEphemeris = false;
       // If toggle off, finish writing ephemeris and restart interpolation
       if (action == "ToggleOff")
          RestartInterpolation("", true, true);
@@ -1766,7 +1772,9 @@ void EphemerisFile::HandleCcsdsOrbitData(bool writeData)
    }
    
    #ifdef DEBUG_EPHEMFILE_CCSDS
-   MessageInterface::ShowMessage("EphemerisFile::HandleCcsdsOrbitData() leaving\n");
+   MessageInterface::ShowMessage
+      ("EphemerisFile::HandleCcsdsOrbitData() leaving, firstTimeWriting=%d, "
+       "writingNewSegment=%d\n", firstTimeWriting, writingNewSegment);
    #endif
 }
 
@@ -1819,9 +1827,19 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s', "
-       "writeAfterData=%d, ignoreBlankComments=%d, canFinalize\n", comments.c_str(),
-       writeAfterData, ignoreBlankComments, canFinalize);
+       "writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
+       comments.c_str(), writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
    #endif
+   
+   // If no first data has written out yet, just return
+   if (firstTimeWriting)
+   {
+      #ifdef DEBUG_EPHEMFILE_RESTART
+      MessageInterface::ShowMessage
+         ("EphemerisFile::RestartInterpolation() returning, no first data written out yet\n");
+      #endif
+      return;
+   }
    
    // Write data for the rest of time on waiting, pass false to indicate that is not
    // the end of data receive.
@@ -2156,9 +2174,9 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
       ("EphemerisFile::FinishUpWriting() '%s' entered, canFinalize=%d, isFinalized=%d, "
-       "interpolatorStatus=%d, continuousSegment=%d\n   lastEpochWrote= %.15f, "
-       "currEpochInSecs=%.15f\n", GetName().c_str(), canFinalize, isFinalized, interpolatorStatus,
-       continuousSegment, lastEpochWrote, currEpochInSecs);
+       "firstTimeWriting=%d\n   interpolatorStatus=%d, continuousSegment=%d\n",
+       GetName().c_str(), canFinalize, isFinalized, firstTimeWriting, interpolatorStatus,
+       continuousSegment);
    DebugWriteTime("    lastEpochWrote = ", lastEpochWrote);
    DebugWriteTime("   currEpochInSecs = ", currEpochInSecs);
    #ifdef DEBUG_EPHEMFILE_FINISH_MORE

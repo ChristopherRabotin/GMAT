@@ -273,8 +273,10 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
          AppendItem(mReportItem, objName, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
       }
-      else if (objTypeName == "EphemerisFile" &&
-               sub->GetBooleanParameter("WriteEphemeris"))
+      // Removed checking for write ephemeris flag sice ephemeris file can be
+      // toggled on after it is intially toggled off (LOJ: 2013.03.20)
+      else if (objTypeName == "EphemerisFile")
+         //&& sub->GetBooleanParameter("WriteEphemeris"))
       {
          if (sub->GetStringParameter("FileFormat") == "CCSDS-OEM")
          {
