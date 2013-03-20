@@ -663,7 +663,6 @@ bool SolverBranchCommand::TakeAction(const std::string &action,
    #endif
    if (action == "ApplyCorrections")
    {
-//      MessageInterface::ShowMessage("Applying corrections\n");
       if (theSolver == NULL)
       {
          MessageInterface::PopupMessage(Gmat::INFO_, 
