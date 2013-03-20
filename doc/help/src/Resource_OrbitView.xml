@@ -2150,6 +2150,33 @@
       The GMAT model can use up 500 separate color or texture maps to fill in
       these triangles.</para>
     </refsection>
+
+    <refsection>
+      <title>Behavior When Specifying Empty Brackets in OrbitView's Add
+      Field</title>
+
+      <para>When using <guilabel>OrbitView.Add</guilabel> field, if brackets
+      are not populated with user-defined spacecrafts, then GMAT turns off
+      <guilabel>OrbitView</guilabel> resource and no plot is generated. If you
+      run the script with <guilabel>Add</guilabel> field having empty
+      brackets, then GMAT throws in a warning message in the Message Window
+      indicating that <guilabel>OrbitView</guilabel> resource will be turned
+      off since no SpacePoints were added to the plot. Below is a sample
+      script snippet that generates such a warning message:</para>
+
+      <programlisting>    
+        <code>
+  Create Spacecraft aSat aSat2
+  Create Propagator aProp
+
+  Create OrbitView anOrbitView
+  anOrbitView.Add = {}
+
+  BeginMissionSequence
+  Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}
+        </code>
+      </programlisting>
+    </refsection>
   </refsection>
 
   <refsection>

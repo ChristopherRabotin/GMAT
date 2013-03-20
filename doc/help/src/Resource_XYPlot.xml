@@ -688,6 +688,34 @@
     </refsection>
 
     <refsection>
+      <title>Behavior When Specifying Empty Brackets in XYPlot's YVariables
+      Field</title>
+
+      <para>When using <guilabel>XYPlot.YVariables</guilabel> field, GMAT does
+      not allow brackets to be left empty. The brackets must always be
+      populated with values that you wish to plot against a variable in
+      <guilabel>XVariable </guilabel>field. If brackets are left empty, then
+      GMAT throws in an exception. Below is a sample script snippet that shows
+      an example of empty brackets. If you were to run this script, then GMAT
+      throws in an execption reminding you that brackets for
+      <guilabel>YVariables</guilabel> field cannot be left empty.</para>
+
+      <programlisting>    
+        <code>
+Create Spacecraft aSat
+Create Propagator aProp
+Create XYPlot aXYPlot
+
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {}
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+
+</code></programlisting>
+    </refsection>
+
+    <refsection>
       <title>Behavior when Reporting Data in Iterative Processes</title>
 
       <para>GMAT allows you to specify how data is plotted onto a plot during

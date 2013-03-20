@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="ReportFile"
+<refentry version="5.0" xml:id="ReportFile"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,42 +24,40 @@
   <refnamediv>
     <refname>ReportFile</refname>
 
-    <refpurpose>
-      The ReportFile is a user-defined file where values of selected objects can be viewed in a report format. 
-    </refpurpose>
+    <refpurpose>A ReportFile is a user-defined file where values of selected
+    objects can be viewed in a report format</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>ReportFile</guilabel> allows you to write data to a text file that can be viewed after a mission run 
-      has been completed. GMAT allows you to report user-defined <guilabel>arrays</guilabel>, <guilabel>array elements</guilabel>, <guilabel>user-defined strings </guilabel> 
-      or <guilabel>variables</guilabel> and <guilabel>parameters</guilabel>. GMAT gives you control over setting formatting properties of the
-      report file that is generated at the end of a mission run. GMAT allows you to create <guilabel>ReportFiles</guilabel> in either 
-      the GUI or script interface. GMAT also provides the option of when to write and stop writing data to a text 
-      file through the <guilabel>Toggle</guilabel> <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section below for detailed discussion of the interaction 
-      between <guilabel>ReportFile</guilabel> object and <guilabel>Toggle</guilabel> command.
-    </para>
+    <para>The <guilabel>ReportFile</guilabel> resource allows you to write
+    data to a text file that can be viewed after a mission run has been
+    completed. GMAT allows you to report user-defined <guilabel>Variables,
+    Arrays</guilabel>, <guilabel>Strings</guilabel> and <guilabel>Object
+    Parameters</guilabel>. GMAT gives you control over setting formatting
+    properties of the output report file that is generated at the end of a
+    mission run. You can create <guilabel>ReportFile</guilabel> resource in
+    either the GUI or script interface. GMAT also provides the option of when
+    to write and stop writing data to a text file through the
+    <guilabel>Toggle</guilabel>
+    <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks
+    section below for detailed discussion of the interaction between
+    <guilabel>ReportFile</guilabel> object and <guilabel>Toggle</guilabel>
+    command.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-        <xref linkend="Report"/>, 
-        <xref linkend="Toggle"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Report"/>, <xref linkend="Toggle"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -72,27 +69,22 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>Add</guilabel>
-            </entry>
+            <entry><guilabel>Add</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Add</guilabel> field allows a user to add user-defined variables to a report file. 
-                To add multiple user-defined variables, enclose the variables with curly brackets. Ex. 
-                MyReportName.Add ={Sat.X, Sat.Y, Var1, Array(1,1)}; The GUI's <guilabel>Selected</guilabel> field is the equivalent of 
-                the script's <guilabel>Add</guilabel> field. In the event of no <guilabel>Add</guilabel> command or no objects in the <guilabel>Selected</guilabel> field, GMAT should 
-                run without the Report output and a warning message displayed in the message window. The following warning 
-                message is sufficient: "Report plot will be turned off. No object has been selected for reporting."
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Add</guilabel> field allows a user to
+            add any number of user-defined <guilabel>Variables</guilabel>,
+            <guilabel>Arrays</guilabel>, <guilabel>Strings</guilabel> or
+            <guilabel>Object Parameters</guilabel> to a report file. To add
+            multiple user-defined variables or parameters, enclose the
+            reported values with curly brackets. Ex. MyReportName.Add ={Sat.X,
+            Sat.Y, Var1, Array(1,1)}; The GUI's <guilabel>Selected</guilabel>
+            <guilabel>Value(s</guilabel>) field is the equivalent of the
+            script's <guilabel>Add</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      UserDefStringList
-                    </para>
+                    <para>UserDefStringList</para>
                   </listitem>
                 </varlistentry>
 
@@ -100,9 +92,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any user-defined parameter. Ex. Variables, Arrays, S/C parameters
-                    </para>
+                    <para>Any user-defined parameter. Ex. Variables, Arrays,
+                    Strings, or Object parameters</para>
                   </listitem>
                 </varlistentry>
 
@@ -110,9 +101,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -120,9 +109,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      {DefaultSC.A1ModJulian, DefaultSC.EarthMJ2000Eq.X}
-                    </para>
+                    <para>{DefaultSC.A1ModJulian,
+                    DefaultSC.EarthMJ2000Eq.X}</para>
                   </listitem>
                 </varlistentry>
 
@@ -141,29 +129,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ColumnWidth</guilabel>
-            </entry>
+            <entry><guilabel>ColumnWidth</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ColumnWidth</guilabel> field is used to define the width of the data columns in a report file. 
-                The value for <guilabel>ColumnWidth</guilabel> is applied to all columns of data. For example, if <guilabel>ColumnWidth</guilabel> is 
-                set to 20, then each data column will be 20 white-spaces wide.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ColumnWidth</guilabel> field defines
+            the width of the data columns in a report file. The value for
+            <guilabel>ColumnWidth</guilabel> is applied to all columns of
+            data. For example, if <guilabel>ColumnWidth</guilabel> is set to
+            20, then each data column will be 20 white-spaces wide. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -171,9 +153,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer > 1
-                    </para>
+                    <para>Integer &gt; 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -181,9 +161,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -191,9 +169,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      20
-                    </para>
+                    <para>20</para>
                   </listitem>
                 </varlistentry>
 
@@ -212,27 +188,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Filename</guilabel>
-            </entry>
+            <entry><guilabel>Filename</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>FileName</guilabel> field allows the user to define the file path and file name for a report.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>FileName</guilabel> field allows the
+            user to define the file path and file name for a report
+            file.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>FileName</para>
                   </listitem>
                 </varlistentry>
 
@@ -240,9 +209,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid File Path and Name
-                    </para>
+                    <para>Valid File Path and Name</para>
                   </listitem>
                 </varlistentry>
 
@@ -250,9 +217,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -260,9 +225,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      ReportFile1.txt
-                    </para>
+                    <para>ReportFile1.txt</para>
                   </listitem>
                 </varlistentry>
 
@@ -281,29 +244,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>LeftJustify</guilabel>
-            </entry>
+            <entry><guilabel>LeftJustify</guilabel></entry>
 
-            <entry>
-              <para>
-                When the <guilabel>LeftJustify</guilabel> field is set to <guilabel>On</guilabel>, then the data is left justified and 
-                appears at the left most side of the column. If the <guilabel>LeftJustify</guilabel> field is set to 
-                <guilabel>Off</guilabel>, then the data is centered in the column.
-              </para>
-              <variablelist>
+            <entry><para> When the <guilabel>LeftJustify</guilabel> field is
+            set to <guilabel>On</guilabel>, then the data is left justified
+            and appears at the left most side of the column. If the
+            <guilabel>LeftJustify</guilabel> field is set to
+            <guilabel>Off</guilabel>, then the data is centered in the column.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -311,9 +268,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -321,9 +276,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -331,9 +284,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      On
-                    </para>
+                    <para>On</para>
                   </listitem>
                 </varlistentry>
 
@@ -352,27 +303,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>Precision</guilabel>
-            </entry>
+            <entry><guilabel>Precision</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>Precision</guilabel> field allows the user to set the number of digits of the data written to a report.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>Precision</guilabel> field allows the
+            user to set the number of digits of the data written to a report.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      Integer
-                    </para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -380,9 +324,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Integer > 1
-                    </para>
+                    <para>Integer &gt; 1</para>
                   </listitem>
                 </varlistentry>
 
@@ -390,9 +332,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -400,9 +340,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      16
-                    </para>
+                    <para>16</para>
                   </listitem>
                 </varlistentry>
 
@@ -421,32 +359,30 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>SolverIterations</guilabel>
-            </entry>
+            <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>SolverIterations</guilabel> field determines whether or not data associated with 
-                perturbed trajectories during a solver (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>) sequence is written 
-                to a report file. When <guilabel>SolverIterations</guilabel> is set to <guilabel>All</guilabel>, all perturbations/iterations 
-                are written to a reportfile. When <guilabel>SolverIterations</guilabel> is set to <guilabel>Current</guilabel>, only current solution 
-                is written to a reportfile. When <guilabel>SolverIterations</guilabel> is set to <guilabel>None</guilabel>, this shows only final solution 
-                after the end of an iterative process and reports only final solution to a report file.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            determines whether or not data associated with perturbed
+            trajectories during a solver (<guilabel>Targeter</guilabel>,
+            <guilabel>Optimize</guilabel>) sequence is written to a report
+            file. When <guilabel>SolverIterations</guilabel> is set to
+            <guilabel>All</guilabel>, all perturbations/iterations are written
+            to a report file. When <guilabel>SolverIterations</guilabel> is
+            set to <guilabel>Current</guilabel>, only current solution is
+            written to a report file. When
+            <guilabel>SolverIterations</guilabel> is set to
+            <guilabel>None</guilabel>, this shows only final solution after
+            the end of an iterative process and reports only final solution to
+            a report file. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -454,9 +390,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      All, Current, None
-                    </para>
+                    <para>All, Current, None</para>
                   </listitem>
                 </varlistentry>
 
@@ -464,9 +398,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -474,9 +406,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Current
-                    </para>
+                    <para>Current</para>
                   </listitem>
                 </varlistentry>
 
@@ -495,27 +425,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>WriteHeaders</guilabel>
-            </entry>
+            <entry><guilabel>WriteHeaders</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>WriteHeaders</guilabel> field specifies whether to includeheaders that describe the variables in a report.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>WriteHeaders</guilabel> field
+            specifies whether to include headers that describe the variables
+            in a report file.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -523,9 +446,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      True, False
-                    </para>
+                    <para>True, False</para>
                   </listitem>
                 </varlistentry>
 
@@ -533,9 +454,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -543,9 +462,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      True
-                    </para>
+                    <para>True</para>
                   </listitem>
                 </varlistentry>
 
@@ -564,27 +481,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>WriteReport</guilabel>
-            </entry>
+            <entry><guilabel>WriteReport</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>WriteReport</guilabel> field specifies whether to write data to the report <guilabel>FileName</guilabel>.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>WriteReport</guilabel> field specifies
+            whether to write data to the report <guilabel>FileName</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -592,9 +502,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      True, False
-                    </para>
+                    <para>True, False</para>
                   </listitem>
                 </varlistentry>
 
@@ -602,9 +510,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -612,9 +518,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      True
-                    </para>
+                    <para>True</para>
                   </listitem>
                 </varlistentry>
 
@@ -633,27 +537,20 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry>
-              <guilabel>ZeroFill</guilabel>
-            </entry>
+            <entry><guilabel>ZeroFill</guilabel></entry>
 
-            <entry>
-              <para>
-                The <guilabel>ZeroFill</guilabel> allows zeros to be placed in data written to a report to match set precision.
-              </para>
-              <variablelist>
+            <entry><para> The <guilabel>ZeroFill</guilabel> allows zeros to be
+            placed in data written to a report to match set precision. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      String
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -661,9 +558,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      On, Off
-                    </para>
+                    <para>On, Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -671,9 +566,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set
-                    </para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -681,9 +574,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      Off
-                    </para>
+                    <para>Off</para>
                   </listitem>
                 </varlistentry>
 
@@ -702,8 +593,7 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -713,50 +603,46 @@
   <refsection>
     <title>GUI</title>
 
-    <para>
-        Default Name and Settings for the ReportFile Object Dialog Box
-    </para>
+    <para>Figure below shows default name and settings for the
+    <guilabel>ReportFile</guilabel> resource:</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
-                     fileref="files/images/Resource_ReportFile_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_ReportFile_GUI_2.png"
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
   </refsection>
+
   <refsection>
     <title>Remarks</title>
+
     <refsection>
       <title>Behavior When using Filename field</title>
 
-      <para>
-        GMAT allows you to specify the name of the report file in two ways: 
-        The default naming convention for a report file when using <guilabel>FileName</guilabel> field is shown below:
-      </para>
+      <para>GMAT allows you to specify the name of the report file in two
+      ways. The default naming convention for a report file when using
+      <guilabel>FileName</guilabel> field is shown below:</para>
 
       <programlisting>
         <code>
-  Create ReportFile aReport;
-  GMAT aReport.Filename = 'ReportFile1.txt';
-  GMAT aReport.WriteReport = true;
+  Create ReportFile aReport
+  aReport.Filename = 'ReportFile1.txt'
+  aReport.WriteReport = true
         </code>
       </programlisting>
 
-      <para>
-        An alternate method for naming a report file is to name the 
-        file without using any single quotes around the report file’s name.
-      </para>
+      <para>An alternate method for naming a report file is to name the file
+      without using any single quotes around the report file’s name.</para>
 
       <programlisting>
         <code>
-  Create ReportFile aReport;
-  GMAT aReport.Filename = ReportFile1.txt;
-  GMAT aReport.WriteReport = true;
+  Create ReportFile aReport
+  aReport.Filename = ReportFile1.txt
+  aReport.WriteReport = true
         </code>
       </programlisting>
     </refsection>
@@ -764,117 +650,120 @@
     <refsection>
       <title>How data is reported to a report file</title>
 
-      <para>
-        GMAT allows you to report data to a report file in two ways: 
-        You can use <guilabel>ReportFile.Add</guilabel> field or a <guilabel>Report</guilabel> command.
-      </para>
+      <para>GMAT allows you to report data to a report file in two ways: You
+      can use <guilabel>ReportFile.Add</guilabel> field or a
+      <guilabel>Report</guilabel> command.</para>
 
-      <para>
-        You can add data using the <guilabel>.Add</guilabel> field of <guilabel>ReportFile</guilabel> resource and this method reports 
-        data to the report file at each propagation step. Below is an example script snippet that 
-        shows how to report epoch and selected orbital elements using the <guilabel>ReportFile.Add</guilabel> field:
-      </para>
+      <para>You can add data using the <guilabel>.Add</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource and this method reports data to
+      the report file at each propagation step. Below is an example script
+      snippet that shows how to report epoch and selected orbital elements
+      using the <guilabel>.Add</guilabel> field:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create ReportFile aReport;
+  Create Spacecraft aSat
+  Create ReportFile aReport
 
-  GMAT aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN};
+  aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, ...
+  aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN}
 
-  Create Propagator aProp;
+  Create Propagator aProp
 
-  BeginMissionSequence;
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0};
+  BeginMissionSequence
+  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
         </code>
       </programlisting>
 
-      <para>
-          GMAT’s ReportFile.Add field will not report selected data to the report file at each propagation step if Propagate command is not included under the BeginMissionSequence.
-      </para>
-      
-      <para>
-        An alternative method of reporting data to the report file is via the Report command. Using the 
-        <guilabel>Report</guilabel> command allows you to report data to the report file at specific points in your mission.
-        Below is an example script snippet that shows how to report epoch and selected 
-        orbital elements using the Report command:
-      </para>
+      <para>GMAT’s <guilabel>ReportFile.Add</guilabel> field will not report
+      selected data to the report file at each propagation step if
+      <guilabel>Propagate</guilabel> command is not included under the
+      <guilabel>BeginMissionSequence</guilabel>.</para>
+
+      <para>An alternative method of reporting data to the report file is via
+      the <guilabel>Report</guilabel> command. Using the
+      <guilabel>Report</guilabel> command allows you to report data to the
+      report file at specific points in your mission. Below is an example
+      script snippet that shows how to report epoch and selected orbital
+      elements using the <guilabel>Report </guilabel>command:</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create ReportFile aReport;
+  Create Spacecraft aSat
+  Create ReportFile aReport
 
-  Create Propagator aProp;
+  Create Propagator aProp
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+  aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
 
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0};
+  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+  aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
         </code>
       </programlisting>
     </refsection>
 
     <refsection>
-      <title>Behavior and Interactions when using ReportFile Resource &amp; Report Command</title>
+      <title>Behavior and Interactions when using ReportFile Resource &amp;
+      Report Command</title>
 
-      <para>
-        Suppose you utilize a <guilabel>ReportFile</guilabel> resource and opt not to write a 
-        report and select false for the field name <guilabel>WriteReport</guilabel>, as shown in the example below:
-      </para>
+      <para>Suppose you utilize a <guilabel>ReportFile</guilabel> resource and
+      opt not to write a report and select <guilabel>false</guilabel> for the
+      field name <guilabel>WriteReport</guilabel>, as shown in the example
+      below:</para>
 
       <programlisting>
         <code>
-  Create ReportFile aReport;
-  GMAT aReport.Filename = ReportFile1.txt;
-  GMAT aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA};
-  GMAT aReport.WriteReport = false;
+  Create ReportFile aReport
+  aReport.Filename = ReportFile1.txt
+  aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA}
+  aReport.WriteReport = false
         </code>
       </programlisting>
 
-      <para>
-        Now assume that at the same time, you decide to utilize 
-        <guilabel>Report</guilabel> Command, as shown in the example script snippet below:
-      </para>
+      <para>Now assume that at the same time, you decide to utilize
+      <guilabel>Report</guilabel> command in the <guilabel>Mission</guilabel>
+      tree, as shown in the example script snippet below:</para>
 
       <programlisting>
         <code>
   BeginMissionSequence;
-  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC;
-  Propagate aProp(aSat) {aSat.Earth.Periapsis};
-  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC;
+  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
+  Propagate aProp(aSat) {aSat.Earth.Periapsis}
+  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
         </code>
       </programlisting>
 
-      <para>
-        At this point, you may think that since false option is selected under the field name 
-        <guilabel>WriteReport</guilabel> in <guilabel>ReportFile</guilabel> resource, hence GMAT will not generate the report file called 
-        ReportFile1.txt. On the Contrary, GMAT will generate a report called ReportFile1.txt but 
-        that report will only contain data that was requested using the <guilabel>Report</guilabel> Command. ReportFile1.txt 
-        text file will contain epoch, semi-major-axis and eccentricity only at specific points of the mission.
-      </para>
+      <para>At this point, you may think that since false option is selected
+      under the field name <guilabel>WriteReport</guilabel> in
+      <guilabel>ReportFile</guilabel> resource, hence GMAT will not generate
+      the report file called <literal>ReportFile1.txt</literal>. On the
+      Contrary, GMAT will generate a report called
+      <literal>ReportFile1.txt</literal>, but this report will only contain
+      data that was requested using the <guilabel>Report</guilabel> command.
+      <literal>ReportFile1.txt</literal> text file will contain epoch,
+      semi-major-axis and eccentricity only at specific points of the
+      mission.</para>
     </refsection>
 
     <refsection>
       <title>Behavior when reporting data in Iterative Processes</title>
 
-      <para>
-        GMAT allows you to specify how data is written to reports during iterative processes such as differential 
-        correction or optimization. SolverIterations field of ReportFile resource supports 
-        3 options which are described in the table below:
-      </para>
+      <para>GMAT allows you to specify how data is written to reports during
+      iterative processes such as differential correction or optimization.
+      <guilabel>SolverIterations</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource supports 3 options which are
+      described in the table below:</para>
 
-      <informaltable colsep="0"
-                     frame="topbot">
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1"
-                   colwidth=".5*"/>
+          <colspec colnum="1" colwidth=".75*"/>
 
-          <colspec colnum="2"
-                   colwidth="3*"/>
+          <colspec colnum="2" colwidth="3*"/>
 
           <thead>
             <row>
@@ -886,39 +775,27 @@
 
           <tbody>
             <row>
-              <entry>
-                <guilabel>All</guilabel>
-              </entry>
+              <entry><guilabel>All</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows only current iteration/perturbation after the end of an iterative process and reports current solution to a report file.
-                </para>
-              </entry>
+              <entry><para> Shows only current iteration/perturbation after
+              the end of an iterative process and reports current solution to
+              a report file. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>Current</guilabel>
-              </entry>
+              <entry><guilabel>Current</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows all iterations/perturbations in an iterative process and reports all iterations/perturbations to a report file.
-                </para>
-              </entry>
+              <entry><para> Shows all iterations/perturbations in an iterative
+              process and reports all iterations/perturbations to a report
+              file. </para></entry>
             </row>
 
             <row>
-              <entry>
-                <guilabel>None</guilabel>
-              </entry>
+              <entry><guilabel>None</guilabel></entry>
 
-              <entry>
-                <para>
-                  Shows only final solution after the end of an iterative process and reports only final solution to a report file.
-                </para>
-              </entry>
+              <entry><para> Shows only final solution after the end of an
+              iterative process and reports only final solution to a report
+              file. </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -928,123 +805,176 @@
     <refsection>
       <title>Where Reports are written</title>
 
-      <para>
-        GMAT allows you to write reports to any desired path or location. You can do this by going to GMAT’s startup file called
-        <guilabel>gmat_startup_file.txt</guilabel> and define a path under <guilabel>OUTPUT_PATH</guilabel>.
-        If no path is provided and only name of the report file is defined in the <guilabel>FileName</guilabel> field of <guilabel>ReportFile</guilabel> resource, 
-        then report files are written to the default path defined in <guilabel>gmat_startup_file.txt</guilabel>. The default path where reports are 
-        written to is the output folder located in the main directory where GMAT is installed.
-      </para>
+      <para>GMAT allows you to write reports to any desired path or location.
+      You can do this by going to GMAT’s startup file called
+      <literal>gmat_startup_file.txt </literal>and define an absolute path
+      under <literal>OUTPUT_PATH</literal>. This allows you to save report
+      files in the directory of your choice as oppose to saving report files
+      in GMAT's default Output folder. In
+      <guilabel>ReportFile.FileName</guilabel> field, If no path is provided
+      and only name of the report file is defined, then report files are
+      written to GMAT's default Output folder. The default path where reports
+      are written to is the Output folder located in the main directory where
+      GMAT is installed.</para>
 
-      <para>
-        Below is an example script snippet that shows where generated reports are
-        written to when only report file’s name is provided under the <guilabel>FileName</guilabel> field. 
-        In this example, ‘ReportFile1.txt’ report is written to the output folder located 
-        in the main directory where GMAT is installed:
-      </para>
+      <para>Below is an example script snippet that shows where generated
+      reports are written when only report file’s name is provided under the
+      <guilabel>FileName</guilabel> field. In this example,
+      <literal>'ReportFile1.txt'</literal>report is written to the Output
+      folder located in the main directory where GMAT is installed:</para>
 
       <programlisting>
         <code>
-  Create ReportFile aReport;
+  Create ReportFile aReport
 
-  GMAT aReport.Filename = 'ReportFile1.txt';
-  GMAT aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC};
+  aReport.Filename = 'ReportFile1.txt'
+  aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}
         </code>
       </programlisting>
 
-      <para>
-        An alternate method where report files can be written is by defining a relative path.
-        You can define the relative path in GMAT’s startup file gmat_startup_file.txt under OUTPUT_PATH. For example, you can set a relative path by setting
-        OUTPUT_PATH = C:/Users/rqureshi/Desktop/GMAT/mytestfolder/../output2/.
-        In the above path, the syntax ".." means to “go up one level”. When the script is executed,
-        the generated report file named under <guilabel>FileName</guilabel> field will be written to a path C:\Users\rqureshi\Desktop\GMAT\output2
+      <para>An alternate method where report files can be written is by
+      defining a relative path. You can define the relative path in GMAT’s
+      startup file <literal>gmat_startup_file.txt</literal> under
+      <literal>OUTPUT_PATH</literal>. For example, you can set a relative path
+      by setting <literal>OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/../output2/</literal>. In
+      this path, the syntax ".." means to “go up one level”. After saving the
+      startup file, when the script is executed, the generated report file
+      named under <guilabel>FileName</guilabel> field will be written to a
+      path <literal>C:\Users\rqureshi\Desktop\GMAT\output2</literal>.</para>
 
-        Another method where report files can be written to is by defining an absolute path in
-        GMAT’s startup file gmat_startup_file.txt under OUTPUT_PATH. For example, you can set an absolute path by setting
-        OUTPUT_PATH = C:/Users/rqureshi/Desktop/GMAT/mytestfolder/
-        When the script is executed, report file named under <guilabel>FileName</guilabel> field will be written to an absolute
-        path C:\Users\rqureshi\Desktop\GMAT\mytestfolder
-      </para>
+      <para>Another method where report files can be written to is by defining
+      an absolute path in GMAT’s startup file
+      <literal>gmat_startup_file.txt</literal> under
+      <literal>OUTPUT_PATH</literal>. For example, you can set an absolute
+      path by setting <literal>OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/</literal>. When the script
+      is executed, report file named under <guilabel>FileName</guilabel> field
+      will be written to an absolute path
+      <literal>C:\Users\rqureshi\Desktop\GMAT\mytestfolder</literal>.</para>
+
+      <para>Instead of defining a relative or an absolute path in GMAT's
+      startup file, you can choose to define an absolute path under
+      <guilabel>FileName</guilabel> field too. For example, if you set
+      <literal>ReportFile.FileName =
+      C:\Users\rqureshi\Desktop\GMAT\mytestfolder\ReportFile.txt</literal>,
+      then report file will be saved in
+      <literal>mytestfolder</literal>.</para>
     </refsection>
+
     <refsection>
-      <title>Behavior when using ReportFile Resource &amp; Toggle Command</title>
+      <title>Behavior when using ReportFile Resource &amp; Toggle
+      Command</title>
 
-      <para>
-        GMAT allows you to use <guilabel>Toggle</guilabel> command while using the <guilabel>Add</guilabel> field of <guilabel>ReportFile</guilabel> resource. 
-        When <guilabel>Toggle Off</guilabel> command is issued for a <guilabel>ReportFile</guilabel>, not data is sent to a report file until 
-        a <guilabel>Toggle On</guilabel> command is issued. Similarly when a <guilabel>Toggle On</guilabel> command is used, data is sent to a 
-        report file at each integration step until a <guilabel>Toggle Off</guilabel> command is used.
-      </para>
+      <para>GMAT allows you to use <guilabel>Toggle</guilabel> command while
+      using the <guilabel>Add</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource. When <guilabel>Toggle
+      Off</guilabel> command is issued for a <guilabel>ReportFile</guilabel>,
+      not data is sent to a report file until a <guilabel>Toggle On</guilabel>
+      command is issued. Similarly, when a <guilabel>Toggle On</guilabel>
+      command is used, data is sent to a report file at each integration step
+      until a <guilabel>Toggle Off</guilabel> command is used.</para>
 
-      <para>
-        Below is an example script snippet that shows how to use <guilabel>Toggle Off</guilabel> and 
-        <guilabel>Toggle On</guilabel> command while using the <guilabel>ReportFile</guilabel> resource. Spacecraft’s 
-        cartesian position vector is reported to the report file.
-      </para>
+      <para>Below is an example script snippet that shows how to use
+      <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel>
+      command while using the <guilabel>ReportFile</guilabel> resource.
+      Spacecraft’s cartesian position vector is reported to the report
+      file.</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create ReportFile aReport;
-  GMAT aReport.Filename = 'ReportFile1.txt';
-  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z};
+  Create ReportFile aReport
+  aReport.Filename = 'ReportFile1.txt'
+  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+  aSat.EarthMJ2000Eq.Z}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Toggle aReport Off;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2};
-  Toggle aReport On;
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4};
+  Toggle aReport Off
+  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+  Toggle aReport On
+  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
+        </code>
+      </programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior When Specifying Empty Brackets in ReportFile's Add
+      Field</title>
+
+      <para>When using <guilabel>ReportFile.Add</guilabel> field, GMAT does
+      not allow brackets to be left empty. The brackets must always be
+      populated with values that you wish to report. If brackets are left
+      empty, then GMAT throws in an exception. Below is a sample script
+      snippet that shows an example of empty brackets. If you were to run this
+      script, then GMAT throws in an execption reminding you that brackets
+      cannot be left empty. </para>
+
+      <programlisting>    <code>
+  Create Spacecraft aSat
+  Create Propagator aProp
+  Create ReportFile aReport
+
+  aReport.Add = {}
+
+  BeginMissionSequence
+  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
         </code>
       </programlisting>
     </refsection>
   </refsection>
-  
+
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Propagate an orbit and write cartesian state to a report file at every integrator step
-      </para>
+      <para>Propagate an orbit and write cartesian state to a report file at
+      every integrator step</para>
 
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create ReportFile aReport;
-  GMAT aReport.Filename = 'ReportFile1.txt';
-  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ};
+  Create ReportFile aReport
+  GMAT aReport.Filename = 'ReportFile1.txt'
+  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ}
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0};
+  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
         </code>
       </programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Propagate an orbit for 1 day and write cartesian state to a report file at specific points in your mission
-      </para>
+      <para>Propagate an orbit for 1 day and write cartesian state to a report
+      file at specific points in your mission</para>
+
       <programlisting>
         <code>
-  Create Spacecraft aSat;
-  Create Propagator aProp;
+  Create Spacecraft aSat
+  Create Propagator aProp
 
-  Create ReportFile aReport;
-  GMAT aReport.Filename = 'ReportFile1.txt';
+  Create ReportFile aReport
+  GMAT aReport.Filename = 'ReportFile1.txt'
 
-  BeginMissionSequence;
+  BeginMissionSequence
 
-  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1};
+  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
 
-  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
         </code>
       </programlisting>
     </informalexample>

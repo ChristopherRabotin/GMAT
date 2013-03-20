@@ -666,6 +666,34 @@
         or its oblateness.</para>
       </warning>
     </refsection>
+
+
+    <refsection>
+      <title>Behavior When Specifying Empty Brackets in GroundTrackPlot's Add
+      Field</title>
+
+      <para>When using <guilabel>GroundTrackPlot.Add</guilabel> field, if brackets
+      are not populated with user-defined spacecrafts, then GMAT turns off
+      <guilabel>GroundTrackPlot</guilabel> resource and no plot is generated. If you
+      run the script with <guilabel>Add</guilabel> field having empty
+      brackets, then GMAT throws in a warning message in the Message Window
+      indicating that <guilabel>GroundTrackPlot</guilabel> resource will be turned
+      off since no SpacePoints were added to the plot. Below is a sample
+      script snippet that generates such a warning message:</para>
+
+      <programlisting>    
+        <code>
+  Create Spacecraft aSat aSat2
+  Create Propagator aProp
+  Create GroundTrackPlot aGroundTrackPlot
+
+  aGroundTrackPlot.Add = {}
+
+  BeginMissionSequence;
+  Propagate aProp(aSat, aSat2) {aSat.ElapsedDays = 1}
+        </code>
+      </programlisting>
+    </refsection>
   </refsection>
 
   <refsection>
