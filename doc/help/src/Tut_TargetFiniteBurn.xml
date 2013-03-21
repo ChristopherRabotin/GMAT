@@ -153,11 +153,14 @@
         </step>
       </procedure>
 
-      <para>Figure 1 below shows the default FuelTank1 configuration that we
-      will use and Figure 2 shows the finished Thruster1 configuration.</para>
+      <para><xref
+      linkend="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration"/> below
+      shows the default FuelTank1 configuration that we will use and <xref
+      linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/> shows the
+      finished Thruster1 configuration.</para>
 
-      <figure>
-        <title>Figure 1. FuelTank1 Configuration</title>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration">
+        <title>FuelTank1 Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -170,8 +173,8 @@
         </screenshot>
       </figure>
 
-      <figure>
-        <title>Figure 2. Thruster1 Configuration</title>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration">
+        <title>Thruster1 Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -185,9 +188,10 @@
       </figure>
 
       <para>Note that the default Thruster1 Coordinate System, as shown in
-      Figure 2, is Earth-based Velocity, Normal, Bi-normal (VNB) and that the
-      default Thrust Vector of (1,0,0) represents our desired velocity
-      oriented maneuver direction.</para>
+      <xref linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/>, is
+      Earth-based Velocity, Normal, Bi-normal (VNB) and that the default
+      Thrust Vector of (1,0,0) represents our desired velocity oriented
+      maneuver direction.</para>
 
       <para>For a general finite burn, if desired, we can specify how both the
       thrust and the fuel use depend upon fuel tank pressure. The user does
@@ -212,13 +216,15 @@
 
         <step>
           <para>Click the Edit Thruster Coef. button to bring up the
-          ThrusterCoefficientDialog box. Replace the default C1 coefficient
-          value of 10 with 1000. Click OK.</para>
+          ThrusterCoefficientDialog box, shown in <xref
+          linkend="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients"/>.
+          Replace the default C1 coefficient value of 10 with 1000. Click
+          OK.</para>
         </step>
       </procedure>
 
-      <figure>
-        <title>Figure 3. Thruster1 Thrust Coefficients</title>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients">
+        <title>Thruster1 Thrust Coefficients</title>
 
         <screenshot>
           <mediaobject>
