@@ -39,7 +39,7 @@
 
       <listitem>
         <para><filename>Target_Finite_Burn_to_Raise_Apogee.script
-        TODO</filename></para>
+        ??</filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -170,19 +170,19 @@
         </screenshot>
       </figure>
 
-      <para>Figure 1. FuelTank1 Configuration</para>
+      <figure>
+        <title>Figure 2. Thruster1 Configuration</title>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>Figure 2. Thruster1 Configuration</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
 
       <para>Note that the default Thruster1 Coordinate System, as shown in
       Figure 2, is Earth-based Velocity, Normal, Bi-normal (VNB) and that the
@@ -217,17 +217,19 @@
         </step>
       </procedure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 3. Thruster1 Thrust Coefficients</title>
 
-      <para>Figure 3. Thruster1 Thrust Coefficients</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
 
       <para>The exact form of the pre-defined Thrust polynomial, associated
       with the coefficients above, are given in the Thruster help. We note
@@ -256,60 +258,65 @@
 
         <step>
           <para>Select the Tanks tab. In the Available Tanks, select
-          FuelTank1. Then click How add image inline?? to add FuelTank1 to the
-          SelectedTanks list. Click Apply.</para>
-
-          <screenshot>
-            <mediaobject>
+          FuelTank1. Then click <inlinemediaobject>
               <imageobject>
-                <imagedata align="center" contentdepth="100%"
-                           fileref="files/images/Tut_TargetFiniteBurn_Right_Arrow.png"
-                           scalefit="1" width="100%"/>
+                <imagedata align="center" contentdepth="10pt"
+                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
+                           width="1em"/>
               </imageobject>
-            </mediaobject>
-          </screenshot>
+            </inlinemediaobject> to add FuelTank1 to the SelectedTanks list.
+          Click Apply.</para>
+
+          <para><guibutton>New Mission</guibutton>
+          (<subscript><inlinemediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="8pt"
+                           fileref="files/images/icons/NewMission.png"
+                           width="1em"/>
+              </imageobject>
+            </inlinemediaobject></subscript>)</para>
         </step>
 
         <step>
           <para>Select the Actuators tab. In the Available Thrusters, select
-          Thrurster1. Then click ?? to add Thruster1 to the SelectedThrusters
-          list. Click OK.</para>
-
-          <screenshot>
-            <mediaobject>
+          Thrurster1. Then click <inlinemediaobject>
               <imageobject>
-                <imagedata align="center" contentdepth="100%"
-                           fileref="files/images/Tut_TargetFiniteBurn_Right_Arrow.png"
-                           scalefit="1" width="100%"/>
+                <imagedata align="center" contentdepth="10pt"
+                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
+                           width="1em"/>
               </imageobject>
-            </mediaobject>
-          </screenshot>
+            </inlinemediaobject> to add Thruster1 to the SelectedThrusters
+          list. Click OK.</para>
         </step>
       </procedure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 4. Attach FuelTank1 to DefaultSC</title>
 
-      <para>Figure 4. Attach FuelTank1 to DefaultSC</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 5. Attach Thruster1 to DefaultSC</title>
 
-      <para>Figure 5. Attach Thruster1 to DefaultSC</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
     </section>
 
     <section>
@@ -334,17 +341,19 @@
         </step>
       </procedure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 6. Creation of FiniteBurn Resource FiniteBurn1</title>
 
-      <para>Figure 6. Creation of FiniteBurn Resource FiniteBurn1</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
     </section>
   </section>
 
@@ -409,17 +418,19 @@
       </step>
     </procedure>
 
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_TargetFiniteBurn_Fig7_Creation_of_Variable_Resource_BurnDuration.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+    <figure>
+      <title>Figure 7. Creation of Variable Resource, BurnDuration</title>
 
-    <para>Figure 7. Creation of Variable Resource, BurnDuration</para>
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_TargetFiniteBurn_Fig7_Creation_of_Variable_Resource_BurnDuration.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
   </section>
 
   <section>
@@ -447,17 +458,19 @@
         </step>
       </procedure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 8. Prop To Perigee Command Configuration</title>
 
-      <para>Figure 8. Prop To Perigee Command Configuration</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
     </section>
 
     <section>
@@ -468,17 +481,19 @@
       completed the steps in this section. We’ll discuss the Target sequence
       after it has been created.</para>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 9. Final Mission Sequence</title>
 
-      <para>Figure 9. Final Mission Sequence</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
 
       <para>To create the Target sequence:</para>
 
@@ -511,7 +526,46 @@
         </step>
       </procedure>
 
-      <para>??? How add table???</para>
+      <table colsep="0" frame="topbot" rowsep="0">
+        <title>Additional Target Sequence Commands</title>
+
+        <tgroup cols="2">
+          <thead>
+            <row rowsep="1">
+              <entry>Command</entry>
+
+              <entry>Name</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>Propagate</guilabel></entry>
+
+              <entry><userinput>Prop BurnDuration</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EndFiniteBurn</guilabel></entry>
+
+              <entry><userinput>Turn Thruster Off</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagate</guilabel></entry>
+
+              <entry><userinput>Prop To Apogee</userinput></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Achieve</guilabel></entry>
+
+              <entry><userinput>Achieve Apogee Radius =
+              12000</userinput></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
     </section>
 
     <section>
@@ -539,17 +593,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig10_Raise_Apogee_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 10. Raise Apogee Command Configuration</title>
 
-        <para>Figure 10. Raise Apogee Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig10_Raise_Apogee_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -586,17 +642,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig11_Vary_Burn_Duration_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 11. Vary Burn Duration Command Configuration</title>
 
-        <para>Figure 11. Vary Burn Duration Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig11_Vary_Burn_Duration_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -615,17 +673,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig12_Turn_Thruster_On_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 12. Turn Thruster On Command Configuration</title>
 
-        <para>Figure 12. Turn Thruster On Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig12_Turn_Thruster_On_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -652,17 +712,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig13_Prop_BurnDuration_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 13. Prop BurnDuration Command Configuration</title>
 
-        <para>Figure 13. Prop BurnDuration Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig13_Prop_BurnDuration_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -681,17 +743,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster%20Off_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 14. Turn Thruster Off Command Configuration</title>
 
-        <para>Figure 14. Turn Thruster Off Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster%20Off_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -712,17 +776,19 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig15_Prop_To_Apogee_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 15. Prop To Apogee Command Configuration</title>
 
-        <para>Figure 15. Prop To Apogee Command Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig15_Prop_To_Apogee_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
 
       <section>
@@ -748,18 +814,20 @@
           </step>
         </procedure>
 
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Fig16_Achieve_Apogee_Radius_12000_Command_Configuration.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
+        <figure>
+          <title>Figure 16. Achieve Apogee Radius = 12000 Command
+          Configuration</title>
 
-        <para>Figure 16. Achieve Apogee Radius = 12000 Command
-        Configuration</para>
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig16_Achieve_Apogee_Radius_12000_Command_Configuration.png"
+                           scalefit="1" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </section>
     </section>
   </section>
@@ -780,7 +848,7 @@
 
       <para>All of the commands in the Mission tree have associated Command
       Summary reports. As shown below, we review these reports to help verify
-      that our script performed as expected. </para>
+      that our script performed as expected.</para>
 
       <procedure>
         <step>
@@ -797,23 +865,25 @@
         </step>
       </procedure>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <figure>
+        <title>Figure 17. 3D View of Finite Burn to Raise Apogee</title>
 
-      <para>Figure 17. 3D View of Finite Burn to Raise Apogee</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_TargetFiniteBurn_Fig17_3D_View_of_Finite_Burn_to_Raise_Apogee.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
 
       <para>As shown below, we view the output message window to determine the
       number of iterations it took the differential corrector to converge and
       the final value of the control variable, BurnDuration</para>
 
-      <para>Ok to leave blank space? </para>
+      <para>Ok to leave blank space?</para>
 
       <para/>
 
@@ -821,7 +891,7 @@
 
       <para>*** Targeting Completed in 13 iterations</para>
 
-      <para>Final Variable values: </para>
+      <para>Final Variable values:</para>
 
       <para>BurnDuration = 1213.19316329</para>
     </section>
@@ -831,7 +901,7 @@
 
       <para>All of the commands in the Mission tree have associated Command
       Summary reports. As shown below, we review these reports to help verify
-      that our script performed as expected. </para>
+      that our script performed as expected.</para>
 
       <procedure>
         <step>
@@ -840,38 +910,54 @@
           DefaultSC after the Prop To Perigee command has been performed. We
           verify perigee has indeed been achieved by finding the mean anomaly
           value of DefaultSC. To do this, we look at the value of MA under the
-          Keplerian State. As expected, the mean anomaly is zero. </para>
+          Keplerian State. As expected, the mean anomaly is zero.</para>
         </step>
 
         <step>
           <para>View the Turn Thruster On command summary. Note that, as
           expected, prior to the start of the maneuver, the fuel mass is 756
-          kg. </para>
+          kg.</para>
         </step>
 
         <step>
-          <para>View the Turn Thruster Off command summary. </para>
-		  <SubSteps><para>Note that the mean anomaly at the end of the maneuver is 25.13 degrees.  Thus, as the burn occurred, 
-		  the mean anomaly increased from 0 to 25.13 degrees.  By orbital theory, we know that an apogee raising burn is best performed at perigee.  
-		  Thus, we may be able to achieve our orbital goal using less fuel if we “center” the burn.  For example, we could try starting our burn at a 
-		  mean anomaly of –(25.13/2) instead of 0 degrees.  </para></SubSteps>
-		  
-		  		  <SubSteps><para>Note that, at the end of the maneuver, the fuel mass is 343.76990815648 kg.  Thus, 
-				  this finite burn used approximately 756 – 343.8 = 412.2 kg of fuel.   </para></SubSteps>
+          <para>View the Turn Thruster Off command summary.</para>
+
+          <substeps>
+            <step>
+              <para>Note that the mean anomaly at the end of the maneuver is
+              25.13 degrees. Thus, as the burn occurred, the mean anomaly
+              increased from 0 to 25.13 degrees. By orbital theory, we know
+              that an apogee raising burn is best performed at perigee. Thus,
+              we may be able to achieve our orbital goal using less fuel if we
+              “center” the burn. For example, we could try starting our burn
+              at a mean anomaly of –(25.13/2) instead of 0 degrees.</para>
+            </step>
+
+            <step>
+              <para>Note that, at the end of the maneuver, the fuel mass is
+              343.76990815648 kg. Thus, this finite burn used approximately
+              756 – 343.8 = 412.2 kg of fuel.</para>
+            </step>
+          </substeps>
+        </step>
+
+        <step>
+          <para>View the Prop To Apogee command summary.</para>
+
+          <substeps>
+            <step>
+              <para>We note that the mean anomaly is 180 degrees which proves
+              that we are indeed at apogee.</para>
+            </step>
+
+            <step>
+              <para>We note that the orbital radius (RMAG) is 11999.999998192
+              km which proves that we have achieved our desired 12000 km
+              apogee radius to within our desired tolerance of 0.1 km.</para>
+            </step>
+          </substeps>
         </step>
       </procedure>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_TargetFiniteBurn_Fig8.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>Figure 8. Prop To Perigee Command Configuration</para>
     </section>
   </section>
 </chapter>
