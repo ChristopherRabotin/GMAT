@@ -176,29 +176,8 @@ void MinimizePanel::SaveData()
    {
       std::string varName = variableName.c_str();
       
-      int retval = theGuiManager->IsValidVariable(varName, Gmat::SPACECRAFT);
-      
-      if (retval == -1)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "The variable \"" + varName + "\" does not exist.\n"
-             "Press \"Choose\" or create from the resource tree.");
-         
-         canClose = false;
-      }
-      else if (retval == 0)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, mMsgFormat.c_str(),
-             variableName.c_str(), "Variable to be Minimized","",
-             "Variable, Array element, Spacecraft parameter");
-         
-         canClose = false;
-      }
-      else
-      {
-         mVarNameChanged = false;
-      }      
+	  canClose = CheckVariable(varName, Gmat::SPACECRAFT, "Variable to be Minimized", "Variable, Array element, Spacecraft parameter");
+      mVarNameChanged = !canClose;
    }
    
    if (!canClose)
