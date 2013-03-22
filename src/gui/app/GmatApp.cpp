@@ -439,19 +439,33 @@ bool GmatApp::ProcessCommandLineOptions()
    #endif
    
    bool retval = true;
+
+   std::string gmatUsage;
+   std::string gmatText =
+         "If no arguments are specified, GMAT opens with the full GUI and with the default\n"
+         "mission loaded.  If a GMAT script name is provided for 'scriptname', GMAT will\n"
+         "open with the specified script loaded.  GMAT is started whether or not any of the\n"
+         "listed options are used.\n";
+   #ifdef __WXMAC__
+      gmatUsage =
+            "Usage: open GMAT.app [--args [options] [scriptname]]\n\n";
+      gmatText +=
+            "The \"--args\" must appear before any specified options or a scriptname.\n";
+   #else
+      gmatUsage =
+            "Usage: gmat [options] [scriptname]\n\n";
+   #endif
+   std::string gmatHelp = gmatUsage + gmatText + "\n";
+   gmatHelp +=
+         "-h, \t--help        \t\tDisplay command line usage information in the Message Window\n"
+         "-m, \t--minimize    \t\tOpen GMAT with a minimized interface\n"
+         "-r, \t--run         \t\tAutomatically run the specified script after loading\n"
+         "    \t              \t\t[has no effect if no script is specified]\n"
+         "-v, \t--version     \t\tDisplay version information in the Message Window\n"
+         "-x, \t--exit        \t\tExit GMAT after running the specified script\n"
+         "    \t              \t\t[has no effect if no script is specified]\n";
    
-   wxString commandLineOptions =
-      "Valid command line options are:\n"
-      "   --help, -h\t\tShows available options\n"
-      "   --version, -v\t\tShows GMAT build date\n"
-      #ifdef __ADD_GMAT_SERVER__
-      // GmatServer is disabled (GMT-3320)
-      "   --start-server          Starts GMAT server on start-up\n"
-      #endif
-      "   --run, -r <scriptname>\tBuilds and runs the script\n"
-      "   --minimize, -m\t\tMinimizes GMAT window\n"
-      "   --nits, -n\t\tRun as a NITS client\n"
-      "   --exit, -x\t\tExits GMAT after a script is run\n\n";
+   wxString commandLineOptions = wxT(gmatHelp.c_str());
 
    #ifdef DEBUG_CMD_LINE
    MessageInterface::ShowMessage("argc = %d\n", argc);
