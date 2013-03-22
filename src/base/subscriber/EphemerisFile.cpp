@@ -1394,6 +1394,7 @@ void EphemerisFile::InitializeData()
    eventEpochInSecs     = -999.999;
    writingNewSegment    = true;
    continuousSegment    = false;
+   firstTimeMetaData    = true; ///// LOJ: 2013.03.21
    saveMetaDataStart    = true;
    
    #ifdef DEBUG_EPHEMFILE_RESTART
@@ -2159,14 +2160,14 @@ void EphemerisFile::WriteAttitude()
 
 
 //------------------------------------------------------------------------------
-// void FinishUpWriting(bool canFinalize)
+// void FinishUpWriting(bool canFinalize = true)
 //------------------------------------------------------------------------------
 /*
  * Finishes up writing data at epochs on waiting.
  *
  * @param  canFinalize  If this flag is true it will process epochs on waiting
  *                      and write or overwrite metadata depends on the metadata
- *                      write option
+ *                      write option [true]
  */
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWriting(bool canFinalize)
@@ -2285,8 +2286,8 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
                      {
                         #ifdef DEBUG_EPHEMFILE_FINISH
                         MessageInterface::ShowMessage
-                           ("   ===> %.15f > %.15f so writing final data\n", currEpochInSecs,
-                            lastEpochWrote);
+                           ("   ===> %.15f > %.15f and not using step size, so writing final data\n",
+                            currEpochInSecs, lastEpochWrote);
                         #endif
                         WriteOrbit(currEpochInSecs, currState);
                      }
@@ -3064,8 +3065,12 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
    
    if (saveMetaDataStart)
    {
-      metaDataStart = (a1MjdArray.front())->GetReal();
-      metaDataStartStr = ToUtcGregorian(metaDataStart, true, 2);
+      // Do not overwrite meta data start time (LOJ: 2013.03.21 GMT-3716 Fix)
+      if (metaDataStartStr == "YYYY-MM-DDTHH:MM:SS.SSS")
+      {
+         metaDataStart = (a1MjdArray.front())->GetReal();
+         metaDataStartStr = ToUtcGregorian(metaDataStart, true, 2);
+      }
    }
    metaDataStop  = (a1MjdArray.back())->GetReal();
    metaDataStopStr = ToUtcGregorian(metaDataStop, true, 2);
@@ -3126,7 +3131,10 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage
-      ("===> Setting metaDataBegPosition=%ld\n", (long)metaDataBegPosition);
+      ("   ==> Setting metaDataBegPosition=%ld\n", (long)metaDataBegPosition);
+   MessageInterface::ShowMessage
+      ("   metaDataStartStr='%s', metaDataStopStr='%s'\n", metaDataStartStr.c_str(),
+       metaDataStopStr.c_str());
    #endif
    
    std::string origin = "UNKNOWN";
@@ -4005,14 +4013,18 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
 {
    #if DBGLVL_EPHEMFILE_MANEUVER > 1
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleManeuvering() '%s' entered, originator=<%p>, maneuver %s, "
+      ("EphemerisFile::HandleManeuvering() '%s' entered, originator=<%p><%s>, maneuver %s, "
        "epoch=%.15f, %s\n   satNames.size()=%d, satNames[0]='%s', desc='%s'\n"
        "   prevRunState=%d, runstate=%d, maneuversHandled.size()=%d\n", GetName().c_str(),
-       originator, maneuvering ? "started" : "stopped", epoch,
-       ToUtcGregorian(epoch, true).c_str(), satNames.size(),
-       satNames.empty() ? "NULL" : satNames[0].c_str(), desc.c_str(), prevRunState,
-       runstate, maneuversHandled.size());
+       originator, originator ? originator->GetTypeName().c_str() : "NULL",
+       maneuvering ? "started" : "stopped", epoch, ToUtcGregorian(epoch, true).c_str(),
+       satNames.size(), satNames.empty() ? "NULL" : satNames[0].c_str(), desc.c_str(),
+       prevRunState, runstate, maneuversHandled.size());
    #endif
+   
+   if (originator == NULL)
+      throw SubscriberException
+         ("Cannot continue with ephemeris file writing, the maneuvering burn object is NULL");
    
    // Check spacecraft name first   
    if (find(satNames.begin(), satNames.end(), spacecraftName) == satNames.end())
@@ -4087,6 +4099,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       }
    }
    
+   // Write any data in the buffer
+   FinishUpWriting();
+   
    if (restart)
    {
       maneuverEpochInDays = epoch;
@@ -4100,7 +4115,17 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       #endif
       
       // Restart interpolation
-      RestartInterpolation("This block begins after " + desc + " at " + epochStr + "\n", true);
+      std::string comment;
+      bool writeComment = false;
+      if (maneuvering)
+         writeComment = true;
+      else if (originator->IsOfType("EndFiniteBurn"))
+         writeComment = true;
+      
+      if (writeComment)
+         comment = "This block begins after " + desc + " at " + epochStr;
+      
+      RestartInterpolation(comment, true);
    }
    
    prevRunState = runstate;
@@ -4161,8 +4186,9 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
                         #endif
                         
                         // Restart interpolation
-                        RestartInterpolation("This block begins after propagator change from " +
-                                             prevPropName + " to " + currPropName + "\n", true);
+                        std::string comment = "This block begins after propagator change from " +
+                           prevPropName + " to " + currPropName;
+                        RestartInterpolation(comment, true);
                      }
                      
                      prevPropName = currPropName;
@@ -4217,14 +4243,23 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    DebugWriteTime("   event epoch ", epoch, true);
    #endif
    
+   if (originator == NULL)
+      throw SubscriberException
+         ("Cannot continue with ephemeris file writing, the spacecraft of which "
+          "property changed is NULL");
+   
    eventEpochInSecs = epoch * GmatTimeConstants::SECS_PER_DAY;
    std::string epochStr = ToUtcGregorian(epoch, true, 2);
    
    if (spacecraftName == satName)
    {
+      // Write any data in the buffer
+      FinishUpWriting();
+      
       // Restart interpolation
-      RestartInterpolation("This block begins after spacecraft setting " +
-                           desc + " at " + epochStr + "\n", true);
+      std::string comment = "This block begins after spacecraft setting " +
+         desc + " at " + epochStr;
+      RestartInterpolation(comment, true);
    }
    
    #ifdef DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
