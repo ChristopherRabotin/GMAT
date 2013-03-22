@@ -1523,11 +1523,10 @@ void GmatMainFrame::SetAutoExitAfterRun(bool autoExit)
 //------------------------------------------------------------------------------
 /*
  * Removes the output child with given name from the list and deletes it
- * if it is opened.
  *
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::RemoveOutputIfOpened(const wxString &name)
+void GmatMainFrame::RemoveOutput(const wxString &name)
 {
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
@@ -1541,9 +1540,24 @@ void GmatMainFrame::RemoveOutputIfOpened(const wxString &name)
    else if (IsChildOpen(name, GmatTree::OUTPUT_GROUND_TRACK_PLOT, false))
       RemoveChild(name, GmatTree::OUTPUT_GROUND_TRACK_PLOT);
    else if (IsChildOpen(name, GmatTree::OUTPUT_REPORT, false))
+   {
       RemoveChild(name, GmatTree::OUTPUT_REPORT);
+	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
+		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
+   }
+   else if (IsChildOpen(name, GmatTree::OUTPUT_CCSDS_OEM_FILE, false))
+   {
+      RemoveChild(name, GmatTree::OUTPUT_CCSDS_OEM_FILE);
+	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
+		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+   }
    else if (IsChildOpen(name, GmatTree::OUTPUT_EVENT_REPORT, false))
       RemoveChild(name, GmatTree::OUTPUT_EVENT_REPORT);
+   else if (GmatAppData::Instance()->GetOutputTree() != NULL)
+   {
+      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
+      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+   }
    
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage

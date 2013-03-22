@@ -95,7 +95,7 @@ public:
    bool RemoveChild(const wxString &name, GmatTree::ItemType itemType,
                     bool deleteChild = true);
    void SetAutoExitAfterRun(bool autoExit);
-   void RemoveOutputIfOpened(const wxString &name);
+   void RemoveOutput(const wxString &name);
    void CloseChild(const wxString &name, GmatTree::ItemType itemType);
    void CloseChild(GmatMdiChildFrame *child);
    void CloseWelcomePanel();
