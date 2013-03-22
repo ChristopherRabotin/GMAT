@@ -2330,7 +2330,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       theGuiManager->UpdateAll(objType);
       
       // Remove output also
-      theMainFrame->RemoveOutputIfOpened(itemName);
+      theMainFrame->RemoveOutput(itemName);
       
       // Set GUI dirty (LOJ: 2012.05.18)
       theMainFrame->UpdateGuiScriptSyncStatus(2, 0);
