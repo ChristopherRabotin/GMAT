@@ -144,6 +144,15 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    //if line is not blank and is not comment line, return this line
    if (!IsBlank(newLine) && (!IsComment(newLine)))
    {
+      if (HasEllipse(newLine))
+      {
+         // overwrite result with multiple lines separated by ellipsis
+         newLine = HandleEllipsis(newLine);
+         #ifdef DEBUG_FIRST_BLOCK
+            MessageInterface::ShowMessage("After handling ellipses, newLine "
+                  "= <<%s>>\n", newLine.c_str());
+         #endif
+      }
       firstBlock = newLine;
       return;
    }
@@ -171,6 +180,16 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
          // If non-blank and non-comment line found, return
          if (!IsBlank(newLine) && (!IsComment(newLine)))
          {
+            if (HasEllipse(newLine))
+            {
+               // overwrite result with multiple lines separated  by ellipsis
+               newLine = HandleEllipsis(newLine);
+               #ifdef DEBUG_FIRST_BLOCK
+                  MessageInterface::ShowMessage("After handling ellipses, newLine "
+                        "= <<%s>>\n", newLine.c_str());
+               #endif
+            }
+
             firstBlock = newLine + "\n";
             
             if (skipHeader)
@@ -218,6 +237,16 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
       // If non-blank and non-comment line found, break
       if (!IsBlank(newLine) && (!IsComment(newLine)))
       {
+         if (HasEllipse(newLine))
+         {
+            // overwrite result with multiple lines separated  by ellipsis
+            newLine = HandleEllipsis(newLine);
+            #ifdef DEBUG_FIRST_BLOCK
+               MessageInterface::ShowMessage("After handling ellipses, newLine "
+                     "= <<%s>>\n", newLine.c_str());
+            #endif
+         }
+
          firstBlock = firstBlock + newLine + "\n";
          break;
       }
@@ -235,6 +264,8 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    MessageInterface::ShowMessage
       ("ReadFirstBlock() header=<<<%s>>>\nfirstBlock=<<<%s>>>\n", header.c_str(),
        firstBlock.c_str());
+   MessageInterface::ShowMessage
+      ("ReadFirstBlock() newLine=<<<%s>>>\n", newLine.c_str());
    #endif
 }
 
