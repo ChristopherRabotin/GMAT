@@ -238,10 +238,12 @@ void Assignment::SetFunction(Function *function)
 {
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("Assignment::SetFunction() function=%p\n", function);
+      ("Assignment::SetFunction() function=%p, type = %s\n", function,
+            (function == NULL ? "NULL function" :
+             function->GetTypeName().c_str()));
    #endif
    
-   if (mathTree)
+   if (mathTree && (function != NULL))
       mathTree->SetFunction(function);
    
    #ifdef DEBUG_FUNCTION
