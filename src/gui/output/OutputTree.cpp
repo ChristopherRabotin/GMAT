@@ -92,9 +92,10 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
  *
  * @param <type> The item type to removed
  * @param <name> The name of the node to be removed
+ * @param <forceRemove> remove item no matter what
  */
 //------------------------------------------------------------------------------
-void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
+void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool forceRemove)
 {
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
@@ -114,14 +115,33 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
    case GmatTree::OUTPUT_XY_PLOT:
       parentId = mXyPlotItem;
       break;
+   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
    case GmatTree::OUTPUT_REPORT:
    case GmatTree::OUTPUT_EVENT_REPORT:
-      #if DEBUG_OUTPUT_TREE
-      MessageInterface::ShowMessage
-         ("*** OutputTree::RemoveItem() just returning, removing reports are disabled "
-          "to allow users to view the reports after mission run.\n");
-      #endif
-      return;
+	{
+		if (!forceRemove)
+		{
+		  #if DEBUG_OUTPUT_TREE
+		  MessageInterface::ShowMessage
+			 ("*** OutputTree::RemoveItem() just returning, removing reports are disabled "
+			  "to allow users to view the reports after mission run.\n");
+		  #endif
+		  return;
+		}
+		switch (type)
+		{
+			case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+				parentId = mEphemFileItem;
+				break;
+			case GmatTree::OUTPUT_REPORT:
+				parentId = mReportItem;
+				break;
+			case GmatTree::OUTPUT_EVENT_REPORT:
+				parentId = mEventsItem;
+				break;
+		}
+		break;
+	}
    default:
       #if DEBUG_OUTPUT_TREE
       MessageInterface::ShowMessage

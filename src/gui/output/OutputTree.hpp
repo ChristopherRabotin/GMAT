@@ -36,7 +36,7 @@ public:
    OutputTree(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
               const wxSize& size, long style);
    
-   void RemoveItem(GmatTree::ItemType type, const wxString &name);
+   void RemoveItem(GmatTree::ItemType type, const wxString &name, bool forceRemove = false);
    void UpdateOutput(bool resetTree, bool removeReports, bool removePlots);
    
 private:
