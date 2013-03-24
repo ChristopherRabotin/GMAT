@@ -2111,7 +2111,12 @@
             <entry><guilabel>Tank</guilabel></entry>
 
             <entry><para><guilabel>FuelTank</guilabel> from which the
-            <guilabel>Thruster</guilabel> draws propellant from. </para>
+            <guilabel>Thruster</guilabel> draws propellant from. In a script
+            command, an empty list, e.g., <literal>Thruster1.Tank =
+            {}</literal>, is NOT allowed. Via the script, if you wish to
+            indicate that no <guilabel>FuelTank</guilabel> is associated with
+            a <guilabel>Thruster</guilabel>, do not include commands such as
+            <literal>Thruster1.Tank = ...</literal> in your script. </para>
             <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -2125,7 +2130,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>User defined list of FuelTanks.</para>
+                    <para>User defined list of<guilabel>
+                    FuelTank(s)</guilabel>.</para>
                   </listitem>
                 </varlistentry>
 
