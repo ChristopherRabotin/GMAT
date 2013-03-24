@@ -63,7 +63,10 @@
 
             <entry><para>This field is used to attach
             <guilabel>FuelTank(s)</guilabel> to a
-            <guilabel>Spacecraft</guilabel>. </para><variablelist>
+            <guilabel>Spacecraft</guilabel>. In a script command, an empty
+            list, e.g., <literal>DefaultSC.Tanks={}</literal>, is allowed and
+            is used to indicate that no <guilabel>FuelTank(s)</guilabel> is
+            attached to the spacecraft. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -120,7 +123,10 @@
 
             <entry><para>This field is used to attach
             <guilabel>Thruster(s)</guilabel> to a
-            <guilabel>Spacecraft</guilabel>. </para><variablelist>
+            <guilabel>Spacecraft</guilabel>. In a script command, an empty
+            list, e.g., <literal>DefaultSC.Thrusters={}</literal>, is allowed
+            and is used to indicate that no <guilabel>Thrusters</guilabel> are
+            attached to the spacecraft. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
