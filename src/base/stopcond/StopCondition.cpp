@@ -2351,8 +2351,7 @@ bool StopCondition::SetStringParameter(const Integer id, const std::string &valu
 
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label,
-//                         const std::string &value)
+// bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 bool StopCondition::SetStringParameter(const std::string &label,
                                            const std::string &value)
