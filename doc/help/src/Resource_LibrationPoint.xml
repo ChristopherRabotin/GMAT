@@ -34,13 +34,12 @@
     <para>A <guilabel>LibrationPoint</guilabel>, also called a Lagrange point,
     is an equilibrium point in the circular restricted three-body problem
     (CRTBP). There are five libration points, three of which are unstable in
-    the CRTBP sense, and two that are stable. See the Remarks section for a
-    detailed explanation of the different libration points and see the
-    Examples for how to configure GMAT for common libration point
-    regimes.</para>
+    the CRTBP sense, and two that are stable. See the discussion below for a
+    detailed explanation of the different libration points and for examples
+    configuring GMAT for common libration point regimes.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Barycenter" /></para>
+    linkend="Barycenter"/></para>
   </refsection>
 
   <refsection>
@@ -48,9 +47,9 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*" />
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2" colwidth="3*" />
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -123,7 +122,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>User defined string</para>
                   </listitem>
                 </varlistentry>
 
@@ -182,7 +181,7 @@
                   <term>Secondary</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>User defined string</para>
                   </listitem>
                 </varlistentry>
 
@@ -245,7 +244,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_Libration_Default.jpeg"
-                     scalefit="1" width="100%"></imagedata>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -285,7 +284,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/LibrationPoint_Geometry.png"
-                     scalefit="1" width="100%"></imagedata>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -310,54 +309,54 @@
       <guilabel>LibrationPoint.</guilabel></para>
 
       <programlisting><code>%  Create the libration point and rotating libration point coordinate system
-Create LibrationPoint EarthMoonL2;
-GMAT EarthMoonL2.Primary   = Earth;
-GMAT EarthMoonL2.Secondary = Luna;
-GMAT EarthMoonL2.Point     = L2;
+Create LibrationPoint EarthMoonL2
+EarthMoonL2.Primary   = Earth
+EarthMoonL2.Secondary = Luna
+EarthMoonL2.Point     = L2
 
-Create CoordinateSystem EarthMoonRotLibCoord;
-GMAT EarthMoonRotLibCoord.Origin    = EarthMoonL2;
-GMAT EarthMoonRotLibCoord.Axes      = ObjectReferenced;
-GMAT EarthMoonRotLibCoord.XAxis     = R;
-GMAT EarthMoonRotLibCoord.ZAxis     = N;
-GMAT EarthMoonRotLibCoord.Primary   = Earth;
-GMAT EarthMoonRotLibCoord.Secondary = Luna;
+Create CoordinateSystem EarthMoonRotLibCoord
+EarthMoonRotLibCoord.Origin    = EarthMoonL2
+EarthMoonRotLibCoord.Axes      = ObjectReferenced
+EarthMoonRotLibCoord.XAxis     = R
+EarthMoonRotLibCoord.ZAxis     = N
+EarthMoonRotLibCoord.Primary   = Earth
+EarthMoonRotLibCoord.Secondary = Luna
 
 %  Configure the spacecraft and propagator
-Create Spacecraft aSat;
-GMAT aSat.DateFormat       = TAIModJulian;
-GMAT aSat.Epoch            = '25220.0006220895';
-GMAT aSat.CoordinateSystem = EarthMoonRotLibCoord;
-GMAT aSat.DisplayStateType = Cartesian;
-GMAT aSat.X  = 9999.752137149568;
-GMAT aSat.Y  = 1.774296833900735e-007;
-GMAT aSat.Z  = 21000.02640446094;
-GMAT aSat.VX = -1.497748388797418e-005;
-GMAT aSat.VY = -0.2087816321971509;
-GMAT aSat.VZ = -5.42471673237177e-006;
+Create Spacecraft aSat
+aSat.DateFormat       = TAIModJulian
+aSat.Epoch            = '25220.0006220895'
+aSat.CoordinateSystem = EarthMoonRotLibCoord
+aSat.DisplayStateType = Cartesian
+aSat.X  = 9999.752137149568
+aSat.Y  = 1.774296833900735e-007
+aSat.Z  = 21000.02640446094
+aSat.VX = -1.497748388797418e-005
+aSat.VY = -0.2087816321971509
+aSat.VZ = -5.42471673237177e-006
 
-Create ForceModel EarthMoonL2Prop_ForceModel;
-GMAT EarthMoonL2Prop_ForceModel.PointMasses = {Earth, Luna, Sun};
-Create Propagator EarthMoonL2Prop;
-GMAT EarthMoonL2Prop.FM = EarthMoonL2Prop_ForceModel;
+Create ForceModel EarthMoonL2Prop_ForceModel
+EarthMoonL2Prop_ForceModel.PointMasses = {Earth, Luna, Sun}
+Create Propagator EarthMoonL2Prop
+EarthMoonL2Prop.FM = EarthMoonL2Prop_ForceModel
 
 %  Create the orbit view
-Create OrbitView ViewEarthMoonRot;
-GMAT ViewEarthMoonRot.Add                = {Earth, Luna, Sun,...
-                                            aSat, EarthMoonL2};
-GMAT ViewEarthMoonRot.CoordinateSystem   = EarthMoonRotLibCoord;
-GMAT ViewEarthMoonRot.ViewPointReference = EarthMoonL2;
-GMAT ViewEarthMoonRot.ViewDirection      = EarthMoonL2;
-GMAT ViewEarthMoonRot.ViewScaleFactor    = 5;
+Create OrbitView ViewEarthMoonRot
+ViewEarthMoonRot.Add                = {Earth, Luna, Sun,...
+                                            aSat, EarthMoonL2}
+ViewEarthMoonRot.CoordinateSystem   = EarthMoonRotLibCoord
+ViewEarthMoonRot.ViewPointReference = EarthMoonL2
+ViewEarthMoonRot.ViewDirection      = EarthMoonL2
+ViewEarthMoonRot.ViewScaleFactor    = 5
 
 Create Variable I
 
-BeginMissionSequence;
+BeginMissionSequence
 
 % Prop for 3 xz-plane crossings
 For I = 1:3
   Propagate 'Prop to Y Crossing' EarthMoonL2Prop(aSat) ...
-                      {aSat.EarthMoonRotLibCoord.Y = 0};
+                      {aSat.EarthMoonRotLibCoord.Y = 0}
 EndFor</code></programlisting>
     </informalexample>
 
@@ -367,54 +366,54 @@ EndFor</code></programlisting>
 
       <programlisting><code>%  Create the Earth-Moon Barycenter and Libration Point
 Create Barycenter EarthMoonBary
-EarthMoonBary.BodyNames = {Earth,Luna};
+EarthMoonBary.BodyNames = {Earth,Luna}
 
 Create LibrationPoint SunEarthMoonL1
-SunEarthMoonL1.Primary   = Sun;
+SunEarthMoonL1.Primary   = Sun
 SunEarthMoonL1.Secondary = EarthMoonBary
-SunEarthMoonL1.Point     = L1;
+SunEarthMoonL1.Point     = L1
 
 %  Create the coordinate system
-Create CoordinateSystem RotatingSEML1Coord;
-GMAT RotatingSEML1Coord.Origin    = SunEarthMoonL1;
-GMAT RotatingSEML1Coord.Axes      = ObjectReferenced;
-GMAT RotatingSEML1Coord.XAxis     = R;
-GMAT RotatingSEML1Coord.ZAxis     = N;
-GMAT RotatingSEML1Coord.Primary   = Sun;
-GMAT RotatingSEML1Coord.Secondary = EarthMoonBary;
+Create CoordinateSystem RotatingSEML1Coord
+RotatingSEML1Coord.Origin    = SunEarthMoonL1
+RotatingSEML1Coord.Axes      = ObjectReferenced
+RotatingSEML1Coord.XAxis     = R
+RotatingSEML1Coord.ZAxis     = N
+RotatingSEML1Coord.Primary   = Sun
+RotatingSEML1Coord.Secondary = EarthMoonBary
 
 %  Create the spacecraft and propagator
 Create Spacecraft aSpacecraft
-GMAT aSpacecraft.DateFormat       = UTCGregorian;
-GMAT aSpacecraft.Epoch            = '09 Dec 2005 13:00:00.000';
-GMAT aSpacecraft.CoordinateSystem = RotatingSEML1Coord;
-GMAT aSpacecraft.X  = -32197.88223741966;
-GMAT aSpacecraft.Y  = 211529.1500044117;
-GMAT aSpacecraft.Z  = 44708.57017366499;
-GMAT aSpacecraft.VX = 0.03209516489451751;
-GMAT aSpacecraft.VY = 0.06100386504053736;
-GMAT aSpacecraft.VZ = 0.0550442738917212;
+aSpacecraft.DateFormat       = UTCGregorian
+aSpacecraft.Epoch            = '09 Dec 2005 13:00:00.000'
+aSpacecraft.CoordinateSystem = RotatingSEML1Coord
+aSpacecraft.X  = -32197.88223741966
+aSpacecraft.Y  = 211529.1500044117
+aSpacecraft.Z  = 44708.57017366499
+aSpacecraft.VX = 0.03209516489451751
+aSpacecraft.VY = 0.06100386504053736
+aSpacecraft.VZ = 0.0550442738917212
 
 Create Propagator aPropagator
-aPropagator.FM           = aForceModel;
-GMAT aPropagator.MaxStep = 86400;
+aPropagator.FM           = aForceModel
+aPropagator.MaxStep = 86400
 Create ForceModel aForceModel
-aForceModel.PointMasses = {Earth,Sun,Luna};
+aForceModel.PointMasses = {Earth,Sun,Luna}
 
 % Create a 3-D graphic
-Create OrbitView anOrbitView;
-anOrbitView.Add                     = {aSpacecraft,  Earth, Sun, Luna};
-anOrbitView.CoordinateSystem        = RotatingSEML1Coord;
-anOrbitView.ViewPointReference      = SunEarthMoonL1;
-anOrbitView.ViewPointVector         = [-1500000 0 0 ];
-anOrbitView.ViewDirection           = SunEarthMoonL1;
-anOrbitView.ViewUpCoordinateSystem = RotatingSEML1Coord;
-anOrbitView.Axes                    = Off;
-anOrbitView.XYPlane                 = Off;
+Create OrbitView anOrbitView
+anOrbitView.Add                     = {aSpacecraft,  Earth, Sun, Luna}
+anOrbitView.CoordinateSystem        = RotatingSEML1Coord
+anOrbitView.ViewPointReference      = SunEarthMoonL1
+anOrbitView.ViewPointVector         = [-1500000 0 0 ]
+anOrbitView.ViewDirection           = SunEarthMoonL1
+anOrbitView.ViewUpCoordinateSystem = RotatingSEML1Coord
+anOrbitView.Axes                    = Off
+anOrbitView.XYPlane                 = Off
 
 BeginMissionSequence
            
-Propagate aPropagator(aSpacecraft, {aSpacecraft.ElapsedDays = 180});</code></programlisting>
+Propagate aPropagator(aSpacecraft, {aSpacecraft.ElapsedDays = 180})</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
