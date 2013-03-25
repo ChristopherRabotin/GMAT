@@ -249,6 +249,20 @@ void EditorPanel::OnTextOverMaxLen(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
+// void ClickButton( bool run )
+//------------------------------------------------------------------------------
+void EditorPanel::ClickButton( bool run )
+{
+	wxCommandEvent event;
+	if (run)
+		event.SetEventObject(mSaveSyncRunButton);
+	else
+		event.SetEventObject(mSaveSyncButton);
+	OnButton(event);
+}
+
+
+//------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 /**

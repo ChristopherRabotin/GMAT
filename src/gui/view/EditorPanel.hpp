@@ -36,6 +36,7 @@ public:
    
    // method to retrieve the Editor
    Editor* GetEditor() { return mEditor; };
+   void ClickButton( bool run = false );
    
 private:
    Editor   *mEditor;

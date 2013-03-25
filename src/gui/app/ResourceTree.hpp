@@ -211,6 +211,7 @@ protected:
    //void OnNewScript(wxCommandEvent &event);
    void OnRemoveAllScripts(wxCommandEvent &event);
    void OnRemoveScript(wxCommandEvent &event);
+   void OnScriptRecover(wxCommandEvent& event);
    void OnScriptBuildObject(wxCommandEvent& event);
    void OnScriptBuildAndRun(wxCommandEvent& event);
 
@@ -309,6 +310,7 @@ protected:
       POPUP_RUN_SCRIPTS_FROM_FOLDER,
       POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER,
       POPUP_REMOVE_SCRIPT_FOLDER,
+      POPUP_RECOVER_SCRIPT,
       POPUP_BUILD_SCRIPT,
       POPUP_BUILD_AND_RUN_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,

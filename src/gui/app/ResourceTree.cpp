@@ -102,6 +102,10 @@
 #include "ResourceTree.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
+#include "ScriptPanel.hpp"
+#ifdef __USE_STC_EDITOR__
+#include "EditorPanel.hpp"
+#endif
 #include "MissionTree.hpp"
 #include "MessageInterface.hpp"
 #include "GmatTreeItemData.hpp"
@@ -236,6 +240,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_REMOVE_SCRIPT_FOLDER, ResourceTree::OnRemoveScriptFolder)
    EVT_MENU(POPUP_REMOVE_ALL_SCRIPTS, ResourceTree::OnRemoveAllScripts)
    EVT_MENU(POPUP_REMOVE_SCRIPT, ResourceTree::OnRemoveScript)
+   EVT_MENU(POPUP_RECOVER_SCRIPT, ResourceTree::OnScriptRecover)
    EVT_MENU(POPUP_BUILD_SCRIPT, ResourceTree::OnScriptBuildObject)
    EVT_MENU(POPUP_BUILD_AND_RUN_SCRIPT, ResourceTree::OnScriptBuildAndRun)
 
@@ -4025,6 +4030,28 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
+// bool OnScriptRecover(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnScriptRecover(wxCommandEvent& event)
+{
+   #ifdef DEBUG_BUILD_OBJECT
+   MessageInterface::ShowMessage
+      ("OnScriptRecover() entered and calling BuildScript()\n");
+   #endif
+   
+   // Get info from selected item
+   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+
+   if (theMainFrame->IsChildOpen(item))
+	   theMainFrame->CloseChild(theMainFrame->GetChild(item->GetName()));
+
+   wxString filename = item->GetName();
+
+   BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
+}
+
+
+//------------------------------------------------------------------------------
 // bool OnScriptBuildObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
@@ -4036,9 +4063,22 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   wxString filename = item->GetName();
 
-   BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
+   if (theMainFrame->IsChildOpen(item))
+   {
+	   #ifdef __USE_STC_EDITOR__
+	   EditorPanel *panel = (EditorPanel *) theMainFrame->GetChild(item->GetName())->GetAssociatedWindow();
+	   panel->ClickButton(false);
+	   #else
+	   ScriptPanel *panel = (ScriptPanel *) theMainFrame->GetChild(item->GetName())->GetAssociatedWindow();
+	   panel->ClickButton(false);
+	   #endif
+   }
+   else
+   {
+	   wxString filename = item->GetName();
+	   BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
+   }
 }
 
 
@@ -4053,11 +4093,19 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
 
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   wxString filename = item->GetName();
 
-   if (BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT))
-      theMainFrame->RunCurrentMission();
-
+   if (!theMainFrame->IsChildOpen(item))
+   {
+	   wxString filename = item->GetName();
+	   BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
+   }
+   #ifdef __USE_STC_EDITOR__
+   EditorPanel *panel = (EditorPanel *) theMainFrame->GetChild(item->GetName())->GetAssociatedWindow();
+   panel->ClickButton(true);
+   #else
+   ScriptPanel *panel = (ScriptPanel *) theMainFrame->GetChild(item->GetName())->GetAssociatedWindow();
+   panel->ClickButton(true);
+   #endif
 }
 
 
@@ -4809,8 +4857,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
       menu.AppendSeparator();
-      menu.Append(POPUP_BUILD_SCRIPT, wxT("Build"));
-      menu.Append(POPUP_BUILD_AND_RUN_SCRIPT, wxT("Build and Run"));
+      menu.Append(POPUP_BUILD_SCRIPT, wxT("Save, Sync"));
+      menu.Append(POPUP_BUILD_AND_RUN_SCRIPT, wxT("Save, Sync, Run"));
+      menu.Append(POPUP_RECOVER_SCRIPT, wxT("Reload"));
       menu.AppendSeparator();
       menu.Append(POPUP_REMOVE_SCRIPT, wxT("Remove"));
       break;

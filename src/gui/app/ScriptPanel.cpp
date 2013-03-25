@@ -213,6 +213,20 @@ void ScriptPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
+// void ClickButton( bool run )
+//------------------------------------------------------------------------------
+void ScriptPanel::ClickButton( bool run )
+{
+	wxCommandEvent event;
+	if (run)
+		event.SetEventObject(mSaveSyncRunButton);
+	else
+		event.SetEventObject(mSaveSyncButton);
+	OnButton(event);
+}
+
+
+//------------------------------------------------------------------------------
 // void OnTextEnterPressed(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ScriptPanel::OnTextEnterPressed(wxCommandEvent& event)

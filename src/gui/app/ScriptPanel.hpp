@@ -31,6 +31,7 @@ public:
    // constructors
    ScriptPanel(wxWindow *parent, const wxString &name, bool activeScript = false);
    wxTextCtrl *mFileContentsTextCtrl;
+   void ClickButton( bool run = false );
    
 private:
    int  mOldLineNumber;
