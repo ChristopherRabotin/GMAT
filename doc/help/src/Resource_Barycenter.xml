@@ -68,7 +68,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>StringList</para>
+                    <para>String list</para>
                   </listitem>
                 </varlistentry>
 
@@ -76,8 +76,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Celestial Body. You cannot add bodies to the
-                    built-in <guilabel>SolarySystemBarycenter</guilabel>
+                    <para>List of celestial bodies. You cannot add bodies to
+                    the built-in <guilabel>SolarySystemBarycenter</guilabel>
                     resource. A <guilabel>CelestialBody</guilabel> can only
                     appear once in the <guilabel>BodyNames</guilabel>
                     list.</para>
@@ -155,7 +155,7 @@
       </mediaobject>
     </screenshot>
 
-    <para>The <guibutton>SolarySystemBarycenter</guibutton> dialob box shown
+    <para>The <guibutton>SolarySystemBarycenter</guibutton> dialog box shown
     above is a built-in object and you cannot modify its configuration. See
     the Remarks section for details regarding the model for the
     <guibutton>SolarSystemBarycenter</guibutton>.</para>
