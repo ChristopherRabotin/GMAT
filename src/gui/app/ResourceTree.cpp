@@ -4831,7 +4831,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       break;
    case GmatTree::SCRIPT_FOLDER:
       menu.Append(POPUP_ADD_SCRIPT, wxT("Add Script"));
-	  if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+	  if ((GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING) ||
+		  (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS))
 		menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder"));
       menu.AppendSeparator();
       menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
