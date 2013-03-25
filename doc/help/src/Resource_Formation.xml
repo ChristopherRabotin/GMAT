@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Formation" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Formation"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -37,7 +38,6 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Propagate"/></para>
-
   </refsection>
 
   <refsection>
@@ -61,13 +61,13 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para>Adds a list of spacecraft to the
-            formation.</para><variablelist>
+            <entry><para>Adds a list of spacecraft to the formation. The list
+            cannot be empty. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FILL THIS IN WHEN ADDED TO SPEC</para>
+                    <para>Object array</para>
                   </listitem>
                 </varlistentry>
 
@@ -162,7 +162,8 @@
     </screenshot>
 
     <note>
-      <para>A spacecraft can only be added to one Formation.</para>
+      <para>A <guilabel>Spacecraft</guilabel> can only be added to one
+      Formation.</para>
     </note>
   </refsection>
 
@@ -175,7 +176,7 @@
     <guilabel>Formation</guilabel> using the <guilabel>Add</guilabel> field as
     shown in the script examples below or in the GUI example above. The
     primary reasons to use a <guilabel>Formation</guilabel>
-    <guilabel>Resource</guilabel> is (1) to simplify the propagation of
+    <guilabel>Resource</guilabel> are (1) to simplify the propagation of
     multiple spacecraft and (2) for performance reasons. GMAT’s propagation
     subsystem models <guilabel>Formations</guilabel> as a coupled dynamic
     system. Once spacecraft have been added to a
@@ -216,7 +217,7 @@ Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</computeroutput></pro
       <programlisting><code>Create Spacecraft aSat1 aSat2
 
 Create Formation aFormation
-GMAT aFormation.Add = {aSat1, aSat2}
+aFormation.Add = {aSat1, aSat2}
 
 Create Propagator aPropagator
 
