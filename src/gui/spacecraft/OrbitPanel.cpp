@@ -891,7 +891,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
             try
             {
                Real mu = GetOriginMu(theSpacecraft->GetOrigin()); //  ********** OR get from coord system?
-               Rvector6 st = StateConversionUtil::Convert(mu, mCartState, "Keplerian", "TA");
+               Rvector6 st = StateConversionUtil::Convert(mu, mCartState, mFromStateTypeStr, "Keplerian", "TA");
                mTrueAnomaly = st[5];
                mAnomaly = mTrueAnomaly;
                mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
@@ -1213,7 +1213,7 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
    Integer baseUnit  = theSpacecraft->GetParameterID("Element1Units");
    
    std::string st = theSpacecraft->GetStringParameter("DisplayStateType");
-   theSpacecraft->SetStringParameter("DisplayStateType", stateType);
+   theSpacecraft->UpdateElementLabels(stateType);
    
    description1->SetLabel(theSpacecraft->GetParameterText(baseLabel).c_str());
    textCtrl[0]->SetToolTip(pConfig->Read(_T(("Elements"+theSpacecraft->GetParameterText(baseLabel)+"Hint").c_str())));
@@ -1254,7 +1254,7 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
       anomalyComboBox->Show(false);
    }
    
-   theSpacecraft->SetStringParameter("DisplayStateType", st);
+   theSpacecraft->UpdateElementLabels(st);
 }
 
 //------------------------------------------------------------------------------

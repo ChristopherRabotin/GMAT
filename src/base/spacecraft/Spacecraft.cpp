@@ -5553,6 +5553,18 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels()
 {
+	UpdateElementLabels(displayStateType);
+}
+
+//------------------------------------------------------------------------------
+// void UpdateElementLabels()
+//------------------------------------------------------------------------------
+/**
+ * Code used to set the element labels.
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::UpdateElementLabels(std::string displayStateType)
+{
    //if (stateType == "Cartesian")
    if (displayStateType == "Cartesian")
    {

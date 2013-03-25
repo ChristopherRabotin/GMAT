@@ -224,6 +224,9 @@ public:
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
          Integer updatedParameterId);
 
+   virtual void      UpdateElementLabels();
+   virtual void      UpdateElementLabels(std::string displayStateType);
+
 protected:
    enum SC_Param_ID
    {
@@ -462,7 +465,6 @@ protected:
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                         std::stringstream &stream);
 
-   virtual void      UpdateElementLabels();
    Rvector6          GetStateInRepresentation(std::string rep = "", bool useDefaultCartesian = false);
    Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID, bool useDefaultCartesian = false);
    void              SetStateFromRepresentation(std::string rep, Rvector6 &st);
