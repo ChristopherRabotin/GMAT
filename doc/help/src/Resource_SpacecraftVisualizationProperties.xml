@@ -527,28 +527,28 @@
       </mediaobject>
     </screenshot>
 
-    <para>The GUI interface for <guilabel>spacecraft visualization
-    properties</guilabel> is contained on the Visualization tab of the
+    <para>The GUI interface for <guilabel>Spacecraft Visualization
+    Properties</guilabel> is contained on the Visualization tab of the
     <guilabel>Spacecraft</guilabel> resource. You can configure visualization
-    properties of the spacecraft and visualize the changes in the Display
-    window.</para>
+    properties of the spacecraft and visualize the changes in the
+    <guilabel>Display</guilabel> window.</para>
 
     <para>Within the <guilabel>Display </guilabel>window, you can
     <guilabel>Left </guilabel>click and drag your mouse to change camera
     orientation. Camera orientation can be changed in
     <guilabel>Up/Down/Left/Righ</guilabel>t directions. You can also
     <guilabel>Right</guilabel> click and drag your mouse to zoom in and out of
-    the <guilabel>Display</guilabel> window. Moving the cursor in
-    <guilabel>Left/Right</guilabel> or <guilabel>Up/Down</guilabel> directions
-    helps to zoom in and out of the <guilabel>Display</guilabel>
-    window.</para>
+    the <guilabel>Display</guilabel> window. <guilabel>Right</guilabel> click
+    and moving the cursor in <guilabel>Up </guilabel>direction helps to zoom
+    out and moving the cursor in <guilabel>Down</guilabel> direction helps to
+    zoom in.</para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>Configuring Spacecraft Visualization properties</title>
+      <title>Configuring Spacecraft Visualization Properties</title>
 
       <para>GMAT lets you define any spacecraft model but currently GMAT
       supports only .3ds model format. The following two websites list many

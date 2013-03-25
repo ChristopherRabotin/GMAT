@@ -1931,7 +1931,7 @@
       <para>The list of controls in the table below helps you navigate through
       the <guilabel>OrbitView</guilabel> graphics window.
       "<guilabel>Left</guilabel>" and "<guilabel>Right</guilabel>" designate
-      the mouse button which has to be pressed.</para>
+      the mouse button which have to be pressed.</para>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
@@ -1961,10 +1961,10 @@
               <entry><guilabel>Right Drag</guilabel></entry>
 
               <entry><para> Helps to zoom in and out of the graphics window.
-              Moving the cursor in
-              <guilabel>Left</guilabel>/<guilabel>Right</guilabel> or
-              <guilabel>Up</guilabel>/<guilabel>Down</guilabel> directions
-              helps to zoom in and out of the graphics window. </para></entry>
+              Moving the cursor in <guilabel>Up</guilabel> direction leads to
+              zoom out of the graphics window. Moving the cursor in
+              <guilabel>Down</guilabel> direction helps to zoom into the
+              graphics window. </para></entry>
             </row>
 
             <row>
