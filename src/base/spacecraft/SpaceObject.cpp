@@ -661,7 +661,7 @@ bool SpaceObject::WasLastStopTriggered(const std::string &stopCondName)
    #ifdef DEBUG_STOPCONDITION_TRACKING
       MessageInterface::ShowMessage(
          "Checking to see if triggered stop \"%s\" on \"%s\" is in the last "
-         "stop triggered list\n", lastStopTriggered.c_str(), 
+         "stop triggered list\n", stopCondName.c_str(),
          instanceName.c_str());
    #endif
 
