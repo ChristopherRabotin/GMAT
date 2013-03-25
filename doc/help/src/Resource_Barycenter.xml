@@ -221,19 +221,19 @@
       <guilabel>SolarSystemBarycenter</guilabel> coordinates.</para>
 
       <programlisting><code>Create CoordinateSystem SSB
-SSB.Origin = SolarSystemBarycenter;
-SSB.Axes   = MJ2000Eq;
+SSB.Origin = SolarSystemBarycenter
+SSB.Axes   = MJ2000Eq
 
 Create ReportFile aReport
 
 Create Spacecraft aSpacecraft
-aSpacecraft.CoordinateSystem = SSB;
-aSpacecraft.X  = -27560491.88656896;
-aSpacecraft.Y  = 132361266.8009069;
-aSpacecraft.Z  = 57419875.95483227;
-aSpacecraft.VX = -29.78491261798486;
-aSpacecraft.VY = 2.320067257851091;
-aSpacecraft.VZ = -1.180722388963864;
+aSpacecraft.CoordinateSystem = SSB
+aSpacecraft.X  = -27560491.88656896
+aSpacecraft.Y  = 132361266.8009069
+aSpacecraft.Z  = 57419875.95483227
+aSpacecraft.VX = -29.78491261798486
+aSpacecraft.VY = 2.320067257851091
+aSpacecraft.VZ = -1.180722388963864
 
 BeginMissionSequence
 
@@ -246,10 +246,10 @@ Report aReport aSpacecraft.EarthMJ2000Eq.X aSpacecraft.EarthMJ2000Eq.Y ...
       <guilabel>SolarSystemBarycenter</guilabel> coordinates.</para>
 
       <programlisting><code>Create CoordinateSystem SSB
-SSB.Origin = SolarSystemBarycenter;
-SSB.Axes   = MJ2000Eq;
+SSB.Origin = SolarSystemBarycenter
+SSB.Axes   = MJ2000Eq
 
-Create Spacecraft aSpacecraft;
+Create Spacecraft aSpacecraft
 Create ReportFile aReport
 
 BeginMissionSequence
@@ -263,27 +263,27 @@ Report aReport aSpacecraft.SSB.X aSpacecraft.SSB.Y aSpacecraft.SSB.Z ...
       a Sun-Earth-Moon <guilabel>LibrationPoint</guilabel>.</para>
 
       <programlisting><code>Create Barycenter EarthMoonBary
-EarthMoonBary.BodyNames = {Earth,Luna};
+EarthMoonBary.BodyNames = {Earth,Luna}
 
 Create LibrationPoint SunEarthMoonL2
-SunEarthMoonL2.Primary   = Sun;
+SunEarthMoonL2.Primary   = Sun
 SunEarthMoonL2.Secondary = EarthMoonBary
-SunEarthMoonL2.Point     = L2;
+SunEarthMoonL2.Point     = L2
 
-Create CoordinateSystem SEML2Coordinates;
-SEML2Coordinates.Origin = SunEarthMoonL2;
-SEML2Coordinates.Axes   = MJ2000Eq;
+Create CoordinateSystem SEML2Coordinates
+SEML2Coordinates.Origin = SunEarthMoonL2
+SEML2Coordinates.Axes   = MJ2000Eq
 
 Create Spacecraft aSpacecraft
-GMAT aSpacecraft.DateFormat = UTCGregorian;
-GMAT aSpacecraft.Epoch = '09 Dec 2005 13:00:00.000';
-GMAT aSpacecraft.CoordinateSystem = SEML2Coordinates;
-GMAT aSpacecraft.X  = -32197.88223741966;
-GMAT aSpacecraft.Y  = 211529.1500044117;
-GMAT aSpacecraft.Z  = 44708.57017366499;
-GMAT aSpacecraft.VX = 0.03209516489451751;
-GMAT aSpacecraft.VY = 0.06086386504053736;
-GMAT aSpacecraft.VZ = 0.0550442738917212;
+GMAT aSpacecraft.DateFormat = UTCGregorian
+GMAT aSpacecraft.Epoch = '09 Dec 2005 13:00:00.000'
+GMAT aSpacecraft.CoordinateSystem = SEML2Coordinates
+GMAT aSpacecraft.X  = -32197.88223741966
+GMAT aSpacecraft.Y  = 211529.1500044117
+GMAT aSpacecraft.Z  = 44708.57017366499
+GMAT aSpacecraft.VX = 0.03209516489451751
+GMAT aSpacecraft.VY = 0.06086386504053736
+GMAT aSpacecraft.VZ = 0.0550442738917212
 
 Create ReportFile aReport
 
