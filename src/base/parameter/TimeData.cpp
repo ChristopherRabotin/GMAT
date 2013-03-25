@@ -134,6 +134,18 @@ bool TimeData::IsInitialEpochSet()
 }
 
 //------------------------------------------------------------------------------
+// void ClearIsInitialEpochSet()
+//------------------------------------------------------------------------------
+/**
+ * Clears the flag indicating if initial epoch is set
+ */
+//------------------------------------------------------------------------------
+void TimeData::ClearIsInitialEpochSet()
+{
+   mIsInitialEpochSet = false;
+}
+
+//------------------------------------------------------------------------------
 // Real GetInitialEpoch() const
 //------------------------------------------------------------------------------
 /**
@@ -405,6 +417,12 @@ Real TimeData::GetElapsedTimeReal(Integer id)
 {
    Real a1mjd = GetTimeReal(A1);
    
+   if (!mIsInitialEpochSet)
+   {
+      mInitialEpoch = a1mjd;
+      mIsInitialEpochSet = true;
+   }
+
    switch (id)
    {
    //case YEARS:

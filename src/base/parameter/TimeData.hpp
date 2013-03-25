@@ -37,6 +37,7 @@ public:
    virtual ~TimeData();
    
    bool IsInitialEpochSet();
+   void ClearIsInitialEpochSet();
    Real GetInitialEpoch() const;
    void SetInitialEpoch(const Real &initialEpoch);
    

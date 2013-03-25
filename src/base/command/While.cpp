@@ -23,6 +23,7 @@
 #include "While.hpp"
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
+#include "TimeReal.hpp"          // For the Elapsed time hack in Execute
 
 //#define DEBUG_WHILE
 //#define DEBUG_WHILE_RERUN
@@ -97,6 +98,8 @@ While& While::operator=(const While &wc)
 //------------------------------------------------------------------------------
 While::~While()
 {
+   for (UnsignedInt i = 0; i < localParameters.size(); ++i)
+      delete localParameters[i];
 }
 
 //------------------------------------------------------------------------------
@@ -175,6 +178,83 @@ bool While::Append(GmatCommand *cmd)
 }
 
 //------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Sets up command specific elements prior to execution
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool While::Initialize()
+{
+   bool retval = false;
+
+   if (ConditionalBranch::Initialize())
+   {
+      // Replace global ElapsedDays and ElepsedSecs Parameters with local clones
+      for (UnsignedInt i = 0; i < localParameters.size(); ++i)
+         delete localParameters[i];
+      localParameters.clear();
+
+      for (UnsignedInt i = 0; i < lhsWrappers.size(); ++i)
+      {
+         if (lhsWrappers[i] != NULL)
+         {
+            std::string desc = lhsWrappers[i]->GetDescription();
+
+            // For now, only clone the Elapsed time parameters
+            if (desc.find("Elapsed") != std::string::npos)
+            {
+               // Make a local clone of the ElapsedTime parameters if we're not
+               // running from one already
+               GmatBase *obj = lhsWrappers[i]->GetRefObject("");
+               #ifdef DEBUG_WHILE
+                  MessageInterface::ShowMessage("Replacing lhs Parm for "
+                        "%s\n", desc.c_str());
+               #endif
+               Parameter *parm = (Parameter*)(obj->Clone());
+               lhsWrappers[i]->SetRefObject(parm);
+               localParameters.push_back(parm);
+            }
+         }
+      }
+      for (UnsignedInt i = 0; i < rhsWrappers.size(); ++i)
+      {
+         if (rhsWrappers[i] != NULL)
+         {
+            std::string desc = rhsWrappers[i]->GetDescription();
+
+            // For now, only clone the Elapsed time parameters
+            if (desc.find("Elapsed") != std::string::npos)
+            {
+               // Make a local clone of the ElapsedTime parameters if we're not
+               // running from one already
+               GmatBase *obj = rhsWrappers[i]->GetRefObject("");
+               #ifdef DEBUG_WHILE
+                  MessageInterface::ShowMessage("Replacing rhs Parm for "
+                        "%s\n", desc.c_str());
+               #endif
+               Parameter *parm = (Parameter*)(obj->Clone());
+               rhsWrappers[i]->SetRefObject(parm);
+               localParameters.push_back(parm);
+            }
+         }
+      }
+      #ifdef DEBUG_WHILE
+         MessageInterface::ShowMessage("Local parameter vector has %d "
+               "members; there are %d lhs wrappers and %d rhs wrappers\n",
+               localParameters.size(), lhsWrappers.size(), rhsWrappers.size());
+      #endif
+
+      retval = true;
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool Execute()
 //------------------------------------------------------------------------------
 /**
@@ -198,6 +278,48 @@ bool While::Execute()
    #endif
 
    bool retval = true;
+
+   if (!commandExecuting)
+   {
+      // Reset elapsed time conditions
+      for (UnsignedInt i = 0; i < lhsWrappers.size(); ++i)
+      {
+         if (lhsWrappers[i] != NULL)
+         {
+            std::string desc = lhsWrappers[i]->GetDescription();
+            // A bit of a hack to make elapsed time behave more consistently
+            if (desc.find("Elapsed") != std::string::npos)
+            {
+               #ifdef DEBUG_WHILE
+                  MessageInterface::ShowMessage("Resetting lhs flag for %s\n",
+                        desc.c_str());
+               #endif
+               GmatBase *obj = lhsWrappers[i]->GetRefObject("");
+               TimeReal *tobj = (TimeReal *)obj;
+               tobj->ClearIsInitialEpochSet();
+            }
+         }
+      }
+      // Reset elapsed time conditions
+      for (UnsignedInt i = 0; i < rhsWrappers.size(); ++i)
+      {
+         if (rhsWrappers[i] != NULL)
+         {
+            std::string desc = rhsWrappers[i]->GetDescription();
+            // A bit of a hack part 2: for the RHS
+            if (desc.find("Elapsed") != std::string::npos)
+            {
+               #ifdef DEBUG_WHILE
+                  MessageInterface::ShowMessage("Resetting rhs flag for %s\n",
+                        desc.c_str());
+               #endif
+               GmatBase *obj = rhsWrappers[i]->GetRefObject("");
+               TimeReal *tobj = (TimeReal *)obj;
+               tobj->ClearIsInitialEpochSet();
+            }
+         }
+      }
+   }
 
    // First see if we're in a branch run
    if (branchExecuting)

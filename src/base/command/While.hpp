@@ -48,6 +48,7 @@ public:
    virtual bool         Append(GmatCommand *cmd);
 
    // Methods used to run the command
+   virtual bool         Initialize();
    virtual bool         Execute();
 
    // inherited from GmatBase
@@ -84,5 +85,7 @@ protected:
    
    /// Counter to track the depth of the While
    Integer                  nestLevel;
+   /// Container for locally cloned Parameters
+   std::vector<Parameter*> localParameters;
 };
 #endif  // While_hpp
