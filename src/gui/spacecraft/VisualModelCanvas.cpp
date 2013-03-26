@@ -263,9 +263,9 @@ void VisualModelCanvas::OnMouse(wxMouseEvent &event)
          
          Real zoom = length * distance / 500;
          if (mouseY < lastMouseY)
-            mCamera.Translate(0, 0, zoom, false);
-         else
             mCamera.Translate(0, 0, -zoom, false);
+         else
+            mCamera.Translate(0, 0, zoom, false);
          Refresh(false);
       }
       if (event.MiddleIsDown())
