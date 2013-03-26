@@ -131,6 +131,7 @@
       <xi:include href="Command_Assignment.xml" />
       <xi:include href="Command_BeginFiniteBurn.xml" />
       <xi:include href="Command_BeginMissionSequence.xml" />
+	  <xi:include href="Command_BeginScript.xml" />
       <xi:include href="Command_CallGmatFunction.xml" />
       <xi:include href="Command_CallMatlabFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
@@ -150,7 +151,6 @@
       <xi:include href="Command_Report.xml" />
       <xi:include href="Command_Save.xml" />
       <xi:include href="Command_SaveMission.xml" />
-      <xi:include href="Command_ScriptEvent.xml" />
       <xi:include href="Command_Stop.xml" />
       <xi:include href="Command_Target.xml" />
       <xi:include href="Command_Toggle.xml" />
