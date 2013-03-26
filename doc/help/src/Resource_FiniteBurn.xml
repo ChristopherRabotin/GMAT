@@ -68,12 +68,21 @@
           <row>
             <entry><guilabel>Thruster</guilabel></entry>
 
-            <entry><para> The <guilabel>Thruster</guilabel> field allows the
-            selection of which thruster, from a list of previously created
-            thrusters, to use when applying a finite burn. Currently, using
-            the GUI, you can only select  one thruster to attach to a
-            FiniteBurn resource. Using the scripting interface, you may attach
-            multiple thrusters to a FiniteBurn resource. </para> <variablelist>
+            <entry><para>The <guilabel>Thruster</guilabel> field allows the
+            selection of which <guilabel>Thruster</guilabel>, from a list of
+            previously created thrusters, to use when applying a finite burn.
+            Currently, using the GUI, you can only select  one
+            <guilabel>Thruster</guilabel> to attach to a
+            <guilabel>FiniteBurn</guilabel> resource. Using the scripting
+            interface, you may attach multiple thrusters to a
+            <guilabel>FiniteBurn</guilabel> resource. Using the scripting
+            interface, you may attach multiple thrusters to a
+            <guilabel>FiniteBurn</guilabel> resource. In a script command, an
+            empty list, e.g., <literal>FiniteBurn1.Thruster={}</literal>, is
+            allowed but is of limited utility since the GUI will automatically
+            associate a <guilabel>Thruster</guilabel>, if one has been
+            created, with the <guilabel>FiniteBurn</guilabel>. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -86,7 +95,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any thruster created by user</para>
+                    <para>Any <guilabel>Thruster</guilabel> created by
+                    user</para>
                   </listitem>
                 </varlistentry>
 
