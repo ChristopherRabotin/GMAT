@@ -157,7 +157,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    
    // licence and thrid party
    wxStaticText *licenceText = new wxStaticText(this, -1, " - Licensed under");
-   wxString agreement = "NASA Open Source Agreement";
+   //wxString agreement = "NASA Open Source Agreement";
+   wxString agreement = "Apache License, Version 2.0";
    theLicenseLink =
       new wxHyperlinkCtrl(this, ID_HYPERLINK, agreement, "");
    wxBoxSizer *licenceSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -167,7 +168,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    wxString use;
    use = use + " - Uses " + wxVERSION_STRING + "\n";
    use = use + " - Uses TSPlot\n";
-   use = use + " - Uses Perl Compatible Regular Expressions\n";
+   //use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - Uses JPL SPICE Library\n";
    use = use + " - Uses IAU SOFA Library\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
@@ -246,8 +247,10 @@ void AboutDialog::OnHyperLinkClick(wxHyperlinkEvent &event)
    if (event.GetEventObject() == theLicenseLink)
    {
       ViewTextDialog *dlg =
-         new ViewTextDialog(this, _T("NASA Open Source Agreement"), false,
-                            wxDefaultPosition, wxSize(450, 300));
+         //new ViewTextDialog(this, _T("NASA Open Source Agreement"), false,
+         //                   wxDefaultPosition, wxSize(450, 300));
+         new ViewTextDialog(this, _T("Apache License, Version 2.0"), false,
+                            wxDefaultPosition, wxSize(400, 300));
       
       wxString rootPath = FileManager::Instance()->GetRootPath().c_str();
       wxString fileName = rootPath + "License.txt";
