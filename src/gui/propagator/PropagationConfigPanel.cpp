@@ -3555,22 +3555,31 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 
       filename = dialog.GetPath();
 
-      GmatGrav::GravityFileType gft = GravityFileUtil::GetFileType(filename.c_str());
-      switch (gft)
+      try
       {
-         case GmatGrav::GFT_COF:
-            ParseCOFGravityFile(filename);
-            break;
-         case GmatGrav::GFT_GRV:
-            ParseGRVGravityFile(filename);
-            break;
-         case GmatGrav::GFT_DAT:
-            ParseDATGravityFile(filename);
-            break;
-         default:
-            MessageInterface::PopupMessage
-            (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
-            return;
+         GmatGrav::GravityFileType gft = GravityFileUtil::GetFileType(filename.c_str());
+         switch (gft)
+         {
+            case GmatGrav::GFT_COF:
+               ParseCOFGravityFile(filename);
+               break;
+            case GmatGrav::GFT_GRV:
+               ParseGRVGravityFile(filename);
+               break;
+            case GmatGrav::GFT_DAT:
+               ParseDATGravityFile(filename);
+               break;
+            default:
+               MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
+               return;
+         }
+      }
+      catch (BaseException &be)
+      {
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "File \"" + filename + "\" is not a valid gravity file.");
+         return;
       }
       GmatGrav::GravityModelType bodyGravModelType = GravityFileUtil::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
       primaryBodyData->gravType                  = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
