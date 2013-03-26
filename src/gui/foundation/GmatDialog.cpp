@@ -206,6 +206,7 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
    #endif
    
    wxString objLink;
+   wxString sHTML;
    wxString baseHelpLink;
    char msgBuffer[255];
    
@@ -237,16 +238,16 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 		#endif
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
-		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(objLink));
+		sHTML = objLink+".html";
+		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(sHTML));
 
-		if (!theHelpController->KeywordSearch(objLink)) 
+		if (!theHelpController->DisplaySection(objLink)) 
 			theHelpController->DisplayContents();
 	}
 	else
 	{
 	   // get base help link if available
-	   baseHelpLink = pConfig->Read(_T("BaseHelpLink"),
-									_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
+       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
 	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
    
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
