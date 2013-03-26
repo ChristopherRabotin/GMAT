@@ -1056,7 +1056,7 @@ void  PointMassForce::ShowDerivative(const std::string &header, Real *state,
       
          for (Integer i = 0; i < satCount; i++) 
          {
-            i6 = cartIndex + i * 6;
+            i6 = cartesianStart + i * 6;
             MessageInterface::ShowMessage
                ("sc#=%d  state=%s\n", i, stateVec.ToString().c_str());
          
