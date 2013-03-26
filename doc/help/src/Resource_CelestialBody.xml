@@ -187,7 +187,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>TO DO FILL THIS OUT</para>
+                    <para>.jpeg .bmp .png .gif .tif .pcx .pnm .tga .xpm
+                    </para>
                   </listitem>
                 </varlistentry>
 
