@@ -2935,16 +2935,29 @@ void GmatCommand::InsertCommandName(std::string &genString)
 {
    if (instanceName != "")
    {
-      std::string::size_type insertPoint = genString.find_first_of(typeName);
+      // Most commands use typeName as the script syntax, but a few do not --
+      // CallMatlabFunction, for example.  So we do a bit of name substitution
+      // here
+      std::string useName = typeName;
+      if ((useName == "CallGmatFunction") || (useName == "CallMatlabFunction"))
+      {
+         if (GmatGlobal::Instance()->IsWritingGmatKeyword())
+            useName = "GMAT";
+         else
+            useName = "";
+      }
+
+      std::string::size_type insertPoint = genString.find_first_of(useName);
       std::string nameInQuotes = "'" + instanceName + "'";
       #if DEBUG_GEN_STRING
       MessageInterface::ShowMessage
-         ("   typeName = <%s>, command name = <%s>, insertPoint = %d\n",
-          typeName.c_str(), instanceName.c_str(), insertPoint);
+         ("   typeName = <%s>, useName = <%s>, command name = <%s>, "
+          "insertPoint = %d\n", typeName.c_str(), useName.c_str(),
+          instanceName.c_str(), insertPoint);
       #endif
       if (insertPoint != genString.npos)
       {
-         insertPoint = insertPoint + typeName.size();
+         insertPoint = insertPoint + useName.size();
          #if DEBUG_GEN_STRING
          MessageInterface::ShowMessage("   insertPoint = %d\n", insertPoint);
          #endif
