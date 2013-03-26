@@ -209,6 +209,7 @@ Report aReport aVar</code></programlisting>
 
       <programlisting><code>Create Spacecraft aSat
 Create ForceModel anFM
+Create ReportFile aReport
 
 Create Propagator aProp
 aProp.FM = anFM
@@ -218,13 +219,14 @@ Create Variable i step totalDuration nSteps
 BeginMissionSequence
 
 step = 60
-totalDuration = 365*24*60^2     % one year
+totalDuration = 24*60^2     % one day
 nSteps = totalDuration / step
 
-% Report Keplerian elements every 60 seconds for one year
+% Report Keplerian elements every 60 seconds for one day
 For i=1:nSteps
    Propagate aProp(aSat) {aSat.ElapsedSecs = step}
-   Report aReport aSat.TAIModJulian aSat.SMA aSat.ECC aSat.INC
+   Report aReport aSat.TAIModJulian aSat.SMA aSat.ECC aSat.INC ...
+      aSat.RAAN aSat.AOP aSat.TA
 EndFor</code></programlisting>
     </informalexample>
   </refsection>
