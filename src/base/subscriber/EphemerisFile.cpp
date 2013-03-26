@@ -28,7 +28,7 @@
 #include "RealUtilities.hpp"         // for IsEven()
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
-#include <sstream>                   // for <<
+#include <sstream>                   // for <<, std::endl
 
 #ifdef __USE_SPICE__
 #include "SpiceOrbitKernelWriter.hpp"
@@ -50,11 +50,11 @@
 //#define DEBUG_EPHEMFILE_TIME
 //#define DEBUG_EPHEMFILE_ORBIT
 //#define DEBUG_EPHEMFILE_WRITE
+//#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_RESTART
 //#define DEBUG_EPHEMFILE_COMMENTS
 //#define DEBUG_EPHEMFILE_HEADER
 //#define DEBUG_EPHEMFILE_METADATA
-//#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
 //#define DEBUG_EPHEMFILE_TEXT
 //#define DEBUG_EPHEMFILE_SOLVER_DATA
@@ -154,6 +154,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    writeMetaDataOption  (0),
    metaDataBegPosition  (0),
    metaDataEndPosition  (0),
+   lastCommentBegPos    (0),
    interpolationOrder   (7),
    interpolatorStatus   (-1),
    initialCount         (0),
@@ -334,6 +335,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    writeMetaDataOption  (0),
    metaDataBegPosition  (0),
    metaDataEndPosition  (0),
+   lastCommentBegPos    (0),
    interpolationOrder   (ef.interpolationOrder),
    interpolatorStatus   (ef.interpolatorStatus),
    initialCount         (ef.initialCount),
@@ -416,6 +418,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    writeMetaDataOption  = 0;
    metaDataBegPosition  = 0;
    metaDataEndPosition  = 0;
+   lastCommentBegPos    = 0;
    interpolationOrder   = ef.interpolationOrder;
    interpolatorStatus   = ef.interpolatorStatus;
    initialCount         = ef.initialCount;
@@ -640,6 +643,7 @@ bool EphemerisFile::Initialize()
    writeMetaDataOption = 0;
    metaDataBegPosition = 0;
    metaDataEndPosition = 0;
+   lastCommentBegPos   = 0;
    firstTimeWriting = true;
    firstTimeMetaData = true;
    saveMetaDataStart = true;
@@ -1827,7 +1831,7 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      ("===== EphemerisFile::RestartInterpolation() entered, comments='%s', "
+      ("===== EphemerisFile::RestartInterpolation() entered, comments='%s'\n   "
        "writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
        comments.c_str(), writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
    #endif
@@ -2722,13 +2726,15 @@ void EphemerisFile::WriteMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteComments(const std::string &comments, bool ignoreBlankComments = true)
+// void WriteComments(const std::string &comments, bool ignoreBlankComments = true,
+//                    bool writeKeyword = true)
 //------------------------------------------------------------------------------
 /**
  * Writes comments to specific file.
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::WriteComments(const std::string &comments, bool ignoreBlankComments)
+void EphemerisFile::WriteComments(const std::string &comments, bool ignoreBlankComments,
+                                  bool writeKeyword)
 {
    #ifdef DEBUG_EPHEMFILE_COMMENTS
    MessageInterface::ShowMessage
@@ -2740,7 +2746,7 @@ void EphemerisFile::WriteComments(const std::string &comments, bool ignoreBlankC
       return;
    
    if (fileType == CCSDS_OEM || fileType == CCSDS_AEM)
-      WriteCcsdsComments(comments);
+      WriteCcsdsComments(comments, writeKeyword);
    else if (fileType == SPK_ORBIT)
       WriteSpkComments(comments);
    
@@ -3151,6 +3157,28 @@ void EphemerisFile::WriteCcsdsOemMetaData()
          origin = "Moon";
    }
    
+   Integer actualInterpOrder = interpolationOrder;
+   Integer numData = a1MjdArray.size();
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("   actualInterpOrder=%d, numData=%d\n", actualInterpOrder, numData);
+   #endif
+   
+   if (writeMetaDataOption == 2)
+   {
+      if (numData <= interpolationOrder)
+      {
+         actualInterpOrder = numData - 1;
+         if (numData < 2)
+            actualInterpOrder = 1;
+      }
+   }
+   
+   // Format interpolation order, width of 2 with left justified
+   char interpOrdBuff[5];
+   sprintf(interpOrdBuff, "%-2d", actualInterpOrder);
+   
    std::stringstream ss("");
    ss << std::endl;
    ss << "META_START" << std::endl;
@@ -3164,7 +3192,7 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    ss << "USEABLE_STOP_TIME    = " << metaDataStopStr << std::endl;
    ss << "STOP_TIME            = " << metaDataStopStr << std::endl;
    ss << "INTERPOLATION        = " << interpolatorName << std::endl;
-   ss << "INTERPOLATION_DEGREE = " << interpolationOrder << std::endl;
+   ss << "INTERPOLATION_DEGREE = " << interpOrdBuff << std::endl;
    ss << "META_STOP" << std::endl << std::endl;
    
    #ifdef DEBUG_EPHEMFILE_METADATA
@@ -3175,6 +3203,29 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    
    // Save meta data end position
    metaDataEndPosition = dstream.tellp();
+   
+   if (writeMetaDataOption == 2)
+   {
+      if (numData < 2)
+      {
+         #ifdef DEBUG_EPHEMFILE_METADATA
+         MessageInterface::ShowMessage("   ==> numData is less than 2, so writing COMMENT\n");
+         #endif
+         WriteComments
+            ("There should be at least two data points when writing at integrator steps.\n");
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_EPHEMFILE_METADATA
+      MessageInterface::ShowMessage("   ==> Writing empty comment to reserve spaces\n");
+      #endif
+      // Reserve space for COMMENT section for interpolation order warning,
+      // since meta data is written out after data records are written
+      WriteComments
+         ("                                                                          \n",
+          false, false);
+   }
    
    // //=================================================================
    // #else
@@ -3274,11 +3325,22 @@ void EphemerisFile::WriteCcsdsAemData(Real reqEpochInSecs, const Real quat[4])
 
 
 //------------------------------------------------------------------------------
-// void WriteCcsdsComments(const std::string &comments)
+// void WriteCcsdsComments(const std::string &comments, bool writeKeyword = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::WriteCcsdsComments(const std::string &comments)
+/**
+ * Writes actual COMMENT section
+ *
+ * @param  comments  Comments to write
+ * @param  writeKeyword  Writes COMMENT keyword followed by comments, 
+ *                       writes blank otherwise
+ */
+//------------------------------------------------------------------------------
+void EphemerisFile::WriteCcsdsComments(const std::string &comments, bool writeKeyword)
 {
    std::string ccsdsComments = "COMMENT  " + comments;
+   if (!writeKeyword)
+      ccsdsComments = "         " + comments;
+   
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
    WriteString("\n" + ccsdsComments + "\n");
    #endif
@@ -3853,13 +3915,51 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    
    if (isEndOfReceive && isEndOfDataBlock)
    {
+      std::string lastEpochWroteStr = ToUtcGregorian(lastEpochWrote);
       #ifdef DEBUG_EPHEMFILE_FINISH
+      std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
+      std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
       MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() Calling FinishUpWriting(), "
-          "isEndOfReceive=%d, len=%d\n", isEndOfReceive, len);
+         ("EphemerisFile::Distribute() Calling FinishUpWriting(), isEndOfReceive=%d, "
+          "isEndOfDataBlock=%d, isEndOfRun=%d, len=%d\n   lastEpochWrote=%s, currEpochInSecs=%s, "
+          "prevEpochInSecs=%s\n", isEndOfReceive, isEndOfDataBlock, isEndOfRun, len,
+          lastEpochWroteStr.c_str(), currEpochStr.c_str(), prevEpochStr.c_str());
       #endif
       
       FinishUpWriting();
+      
+      if (!isEndOfRun)
+      {
+         std::string comment = "This block begins after ";
+         if (runstate == Gmat::SOLVEDPASS)
+            comment = "This block begins after final target sequence at ";
+         
+         // Convert last epoch in secs to gregorian format
+         comment = comment + lastEpochWroteStr;
+         
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage
+            ("=====> Restarting the interpolation at %s\n", lastEpochWroteStr.c_str());
+         #endif
+         
+         lastCommentBegPos = dstream.tellp();
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage
+            ("   lastCommentBegPos=%ld saved\n", (long)lastCommentBegPos);
+         #endif
+         
+         RestartInterpolation(comment, true);
+      }
+      else
+      {
+         // End of run, blank out the last comment
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage("=====> End of run, Removing the last comment\n");
+         #endif
+         std::string comment = "                                                  ";
+         dstream.seekp(lastCommentBegPos, std::ios_base::beg);
+         WriteComments(comment, false, false);
+      }
       
       return true;
    }
@@ -3977,9 +4077,8 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #if DBGLVL_EPHEMFILE_DATA > 0
       MessageInterface::ShowMessage
          ("   Start writing data, currEpochInDays=%.15f, currEpochInSecs=%.15f, %s\n"
-          "   writeData=%d, writeOrbit=%d, writeAttitude=%d\n", currEpochInDays,
-          currEpochInSecs, ToUtcGregorian(currEpochInSecs).c_str(), writeData,
-          writeOrbit, writeAttitude);
+          "   writeOrbit=%d, writeAttitude=%d\n", currEpochInDays, currEpochInSecs,
+          ToUtcGregorian(currEpochInSecs).c_str(), writeOrbit, writeAttitude);
       #endif
       
       // For now we only writes Orbit data
@@ -4056,6 +4155,10 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
    }
    else
    {
+      #if DBGLVL_EPHEMFILE_MANEUVER > 1
+      MessageInterface::ShowMessage
+         ("   ==> Checking if runstate is SOLVEDPASS and Maneuver alrady handled\n");
+      #endif
       bool doNext = true;
       if (prevRunState == runstate && runstate == Gmat::SOLVEDPASS)
       {
@@ -4072,6 +4175,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
          }
       }
       
+      #if DBGLVL_EPHEMFILE_MANEUVER > 1
+      MessageInterface::ShowMessage("   doNext=%d\n", doNext);
+      #endif
       if (doNext && (runstate == Gmat::RUNNING || runstate == Gmat::SOLVEDPASS))
       {
          #if DBGLVL_EPHEMFILE_MANEUVER
@@ -4099,11 +4205,21 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       }
    }
    
-   // Write any data in the buffer
-   FinishUpWriting();
+   // If runstate changed, write any remaining data in the buffer
+   //FinishUpWriting();
+   
+   #if DBGLVL_EPHEMFILE_MANEUVER > 1
+   MessageInterface::ShowMessage("   restart=%d\n", restart);
+   #endif
    
    if (restart)
    {
+      #if DBGLVL_EPHEMFILE_MANEUVER > 1
+      MessageInterface::ShowMessage("   Calling FinishUpWriting()\n");
+      #endif
+      
+      FinishUpWriting();
+      
       maneuverEpochInDays = epoch;
       
       // Convert current epoch to gregorian format

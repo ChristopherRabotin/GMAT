@@ -139,6 +139,7 @@ protected:
    Integer     writeMetaDataOption;
    std::ofstream::pos_type metaDataBegPosition;
    std::ofstream::pos_type metaDataEndPosition;
+   std::ofstream::pos_type lastCommentBegPos;
    
    Integer     interpolationOrder;
    Integer     interpolatorStatus;
@@ -246,7 +247,7 @@ protected:
    void         WriteHeader();
    void         WriteMetaData();
    void         WriteComments(const std::string &comments,
-                              bool ignoreBlank = true);
+                              bool ignoreBlank = true, bool writeKeyword = true);
    
    // General data buffering
    void         BufferOrbitData(Real epochInDays, const Real state[6]);
@@ -261,7 +262,7 @@ protected:
    void         WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6]);
    void         WriteCcsdsAemMetaData();
    void         WriteCcsdsAemData(Real reqEpochInSecs, const Real quat[4]);
-   void         WriteCcsdsComments(const std::string &comments);
+   void         WriteCcsdsComments(const std::string &comments, bool writeKeyword = true);
    
    // CCSDS file actual writing (subclass should overwrite this methods)
    virtual bool OpenRealCcsdsEphemerisFile();
