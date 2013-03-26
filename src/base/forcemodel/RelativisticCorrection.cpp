@@ -234,6 +234,7 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
       bodyMu           = body->GetGravitationalConstant();  // this is passed in by the ODEModel
 
       #ifdef DEBUG_RELATIVISTIC_CORRECTION
+         MessageInterface::ShowMessage("now                    = %12.10f\n", now.Get());
          MessageInterface::ShowMessage("c                      = %12.10f\n", c);
          MessageInterface::ShowMessage("bodyMu                 = %12.10f\n", bodyMu);
       #endif
