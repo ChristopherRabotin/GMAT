@@ -253,6 +253,7 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    inFunctionMode = functionMode;
    inCommandMode = true;
    inRealCommandMode = true;
+   beginMissionSeqFound = true;
    functionDefined = false;
    ignoreRest = false;
    

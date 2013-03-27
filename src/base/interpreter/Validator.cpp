@@ -974,6 +974,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    //-------------------------------------------------------------------
    // Handle LHS
    //-------------------------------------------------------------------
+   bool isLeftValid = true;
    ElementWrapper *leftEw = NULL;
    static bool writeWarning = true; // To write warning messaage per session
    
@@ -1049,7 +1050,14 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       //if (leftEw == NULL)
       //   return false;
       
-      if (leftEw != NULL)
+      // Eventhough LHS wrapper was created, Assignment::SetElementWrapper() may
+      // throw an exceptin when it is not valid, so use the flag instead (LOJ: 2013.03.27)
+      if (leftEw == NULL)
+      {
+         isLeftValid = false;
+      }
+      //if (leftEw != NULL)
+      else
       {
          #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage
@@ -1059,6 +1067,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          
          if (cmd->SetElementWrapper(leftEw, lhs) == false)
          {
+            isLeftValid = false;
             theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
                "\" in Assignment";
             // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
@@ -1088,6 +1097,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    }
    catch (BaseException &ex)
    {
+      isLeftValid = false;
       theErrorMsg = ex.GetFullMessage();
       // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
       //return HandleError(false);
@@ -1394,14 +1404,16 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    // If left side wrapper is NULL, the error message was alredy pushed
    // to buffer when an error was encluntered, so set skipErrorMessage to false
    // to avoid general error message handling.
-   if (leftEw == NULL)
+   //if (leftEw == NULL)
+   if (!isLeftValid)
    {
       skipErrorMessage = true;
       retval = false;
    }
    
    #if DBGLVL_WRAPPERS > 1
-   MessageInterface::ShowMessage("   leftEw=<%p>, rightEw=<%p>\n", leftEw, rightEw);
+   MessageInterface::ShowMessage
+      ("   leftEw=<%p>, rightEw=<%p>, isLeftValid=%d\n", leftEw, rightEw, isLeftValid);
    MessageInterface::ShowMessage
       ("Validator::CreateAssignmentWrappers() returning %d\n", retval);
    #endif

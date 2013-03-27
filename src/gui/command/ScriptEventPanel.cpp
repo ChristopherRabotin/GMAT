@@ -113,6 +113,11 @@ ScriptEventPanel::~ScriptEventPanel()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::SetEditorModified(bool isModified)
 {
+   #ifdef DEBUG_EDITOR_MODIFIED
+   MessageInterface::ShowMessage
+      ("ScriptEventPanel::SetEditorModified() entered, isModified=%d\n", isModified);
+   #endif
+   
    EnableUpdate(isModified);
    mEditorModified = isModified;
 }
@@ -490,9 +495,12 @@ void ScriptEventPanel::SaveData()
    // Save old function list, so that new functions can be deleted if there
    // are script errors
    StringArray oldFunctions = theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
+   
+   #if DBGLVL_SEPANEL_SAVE
    for (UnsignedInt i=0; i<oldFunctions.size(); i++)
       MessageInterface::ShowMessage
          ("   ==> oldFunctions[%d] = '%s'\n", i, oldFunctions[i].c_str());
+   #endif
    
    try
    {
@@ -529,7 +537,9 @@ void ScriptEventPanel::SaveData()
       bool ignoreErrors = canClose;
       if (!canClose)
       {         
-		  MessageInterface::PopupMessage(Gmat::ERROR_,"Errors were found in the ScriptEvent.  The script cannot be saved until all errors are fixed");
+		  MessageInterface::PopupMessage
+           (Gmat::ERROR_,"Errors were found in the ScriptEvent.  "
+            "The script cannot be saved until all errors are fixed");
       }
       
       if (!ignoreErrors)
@@ -616,15 +626,26 @@ void ScriptEventPanel::SaveData()
       ReplaceScriptEvent();
       mObject = mNewCommand;
       theCommand = mNewCommand;
-	  theCommand->SetName(oldName);
+      theCommand->SetName(oldName);
+      
+      #if DBGLVL_SEPANEL_SAVE
+      ShowCommand("   After saving theCommand = ", theCommand);
+      #endif
       
       // We want to save comments regardless it is modified or not since
       // new BeginScript command was created.
       // Fix for GMT-2611 (LOJ: 2012.10.05)
       SaveComments();
+      
       // Since GmatMdiChildFrame uses this TextCtrl for checking
       // modified flag, set the flag to false
+      SetEditorModified(false);
+      #ifdef __USE_STC_EDITOR__
+      // Do we need to do anything here?
+      #else
       mFileContentsTextCtrl->SetModified(false);
+      #endif
+      
       mCommentTextCtrl->SetModified(false);
       EnableUpdate(false);
    }

@@ -223,6 +223,15 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
             // Indent whole block within Begin/EndScript
             IndentChildString(gen, current, indent, mode, beginPrefix, useName, true);
          }
+         else
+         {
+            std::string comment = current->GetCommentLine();
+            #if DBGLVL_GEN_STRING
+            MessageInterface::ShowMessage("   EndScript comment = '%s'\n", comment.c_str());
+            #endif
+            // Only indent inline comment of EndScript (LOJ: 2013.03.27)
+            gen << indent << comment;
+         }
          current = NULL;
       }
    }
