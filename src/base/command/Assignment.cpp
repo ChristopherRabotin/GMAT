@@ -78,14 +78,16 @@
  */
 //------------------------------------------------------------------------------
 Assignment::Assignment  () :
-   GmatCommand          ("GMAT"),
-   lhs                  ("Not_Set"),
-   rhs                  ("Not_Set"),
-   lhsWrapper           (NULL),
-   rhsWrapper           (NULL),
-   mathTree             (NULL),
-   lhsOwner             (NULL),
-   lhsOwnerID           (-1)
+   GmatCommand                   ("GMAT"),
+   lhs                           ("Not_Set"),
+   settabilityError              (""),
+   omitLHSBecauseOfSettability   (false),
+   rhs                           ("Not_Set"),
+   lhsWrapper                    (NULL),
+   rhsWrapper                    (NULL),
+   mathTree                      (NULL),
+   lhsOwner                      (NULL),
+   lhsOwnerID                    (-1)
 {
    objectTypeNames.push_back("GMAT");
    objectTypeNames.push_back("Assignment");
@@ -128,14 +130,16 @@ Assignment::~Assignment()
  */
 //------------------------------------------------------------------------------
 Assignment::Assignment  (const Assignment& a) :
-   GmatCommand          (a),
-   lhs                  (a.lhs),
-   rhs                  (a.rhs),
-   lhsWrapper           (NULL),
-   rhsWrapper           (NULL),
-   mathTree             (a.mathTree),
-   lhsOwner             (NULL),
-   lhsOwnerID           (a.lhsOwnerID)
+   GmatCommand                   (a),
+   lhs                           (a.lhs),
+   settabilityError              (""),
+   omitLHSBecauseOfSettability   (false),
+   rhs                           (a.rhs),
+   lhsWrapper                    (NULL),
+   rhsWrapper                    (NULL),
+   mathTree                      (a.mathTree),
+   lhsOwner                      (NULL),
+   lhsOwnerID                    (a.lhsOwnerID)
 {
 }
 
@@ -156,13 +160,15 @@ Assignment& Assignment::operator=(const Assignment& a)
    if (this == &a)
       return *this;
    
-   lhs        = a.lhs;
-   rhs        = a.rhs;
-   lhsWrapper = NULL;
-   rhsWrapper = NULL;
-   mathTree   = a.mathTree;
-   lhsOwner   = NULL;
-   lhsOwnerID = a.lhsOwnerID;
+   lhs                         = a.lhs;
+   settabilityError            = "";
+   omitLHSBecauseOfSettability = false;
+   rhs                         = a.rhs;
+   lhsWrapper                  = NULL;
+   rhsWrapper                  = NULL;
+   mathTree                    = a.mathTree;
+   lhsOwner                    = NULL;
+   lhsOwnerID                  = a.lhsOwnerID;
    
    return *this;
 }
@@ -599,7 +605,8 @@ const StringArray& Assignment::GetObjectList()
    if (lhsWrapper != NULL)
       objects = lhsWrapper->GetRefObjectNames();
    else
-      objects.push_back(lhs);
+      if (!omitLHSBecauseOfSettability)
+         objects.push_back(lhs);
    if (rhsWrapper != NULL)
    {
       StringArray rhsNames = rhsWrapper->GetRefObjectNames();
@@ -860,7 +867,8 @@ bool Assignment::Validate()
                }
                else
                {
-                  lastErrorMessage = "Array sizes of left and right of the equal sign are not the same.";
+                  lastErrorMessage = "Array sizes of left and right of the "
+                        "equal sign are not the same.";
                   retval = false;
                }
             }
@@ -913,7 +921,12 @@ bool Assignment::Validate()
       if (!rhsWrapper && !mathTree)
          lastErrorMessage = "Right of the equal sign is not valid.";
       else if (rhsWrapper || mathTree)
-         lastErrorMessage = "Left of the equal sign is not valid.";
+      {
+         if (settabilityError.size() > 0)
+            lastErrorMessage = settabilityError;
+         else
+            lastErrorMessage = "Left of the equal sign is not valid.";
+      }
       retval = false;
    }
    
@@ -1452,9 +1465,13 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
          #endif
 
          if (!obj->IsParameterCommandModeSettable(id))
-            throw CommandException("The field " +
+         {
+            settabilityError = "The field " +
                   toWrapper->GetDescription() + " cannot be set after "
-                  "the Mission Sequence has started");
+                  "the Mission Sequence has started";
+            omitLHSBecauseOfSettability = true;
+            return false;
+         }
       }
       else if (toWrapper->GetWrapperType() == Gmat::OBJECT_WT)
       {
@@ -1464,9 +1481,13 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
                         "it is not.");
          #endif
          if (!obj->IsCommandModeAssignable())
-            throw CommandException("Object Assignment is not allowed in "
+         {
+            settabilityError = "Object Assignment is not allowed in "
                   "the Mission Sequence for " + obj->GetTypeName() +
-                  " objects");
+                  " objects";
+            omitLHSBecauseOfSettability = true;
+            return false;
+         }
       }
       else
       {

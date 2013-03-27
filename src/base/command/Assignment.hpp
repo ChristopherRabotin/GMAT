@@ -100,6 +100,10 @@ protected:
    
    /// string on the left side of the equals sign
    std::string          lhs;
+   /// Error message(s) generated if the lhs object is not command mode settable
+   std::string          settabilityError;
+   /// Flag used to decide if lhs goes in the object list - omit if not settable
+   bool                 omitLHSBecauseOfSettability;
    /// string on the right side of the equals sign
    std::string          rhs;
    /// ElementWrapper pointer for the lhs of the equals sign
