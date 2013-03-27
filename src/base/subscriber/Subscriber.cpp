@@ -1057,7 +1057,8 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 //---------------------------------------------------------------------------
 bool Subscriber::IsParameterVisible(const Integer id) const
 {
-   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER|| id == MINIMIZED || id == MAXIMIZED)
+   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE ||
+       id == RELATIVE_Z_ORDER|| id == MINIMIZED || id == MAXIMIZED)
       return false;
    
    return GmatBase::IsParameterVisible(id);
@@ -1090,7 +1091,9 @@ bool Subscriber::IsParameterCommandModeSettable(const Integer id) const
        (id == MAXIMIZED))
       return false;
 
-   return true;
+   // Are there any that should be true?
+
+   return GmatBase::IsParameterCommandModeSettable(id);
 }
 
 
