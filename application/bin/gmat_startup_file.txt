@@ -1,66 +1,71 @@
 #-------------------------------------------------------------------------------
 # General Mission Analysis Tool (GMAT) startup file
 #-------------------------------------------------------------------------------
-# Comment line starts with #
-# Comment line starting with ## will be saved when saving startup file.
+# Comment lines start with #
 #
-# Path/File naming convention:
-#   - Path name should end with _PATH
-#   - File name should end with _FILE
-#   - Path/File names are case sensitive
+# Path/file naming conventions:
+#   - Path name properties end with _PATH and can be referenced elsewhere in the
+#     file
+#   - File name properties end with _FILE
+#   - Path/file names are case sensitive on Linux and Mac OS X
+#   - Relative paths are relative to the GMAT executable or application bundle
+#     (on Mac OS X)
 #
-# You can add potential and texture files by following the naming convention.
-#   - Potential file should begin with planet name and end with _POT_FILE
-#   - Texture file should begin with planet name and end with _TEXTURE_FILE
+# You can add potential and texture files by following the naming convention:
+#   - Potential file properties should begin with celestial body name and end
+#     with _POT_FILE
+#   - Texture file properties should begin with celestial body name and end
+#     with _TEXTURE_FILE
 #
-# If same _FILE is specified multiple times, it will use the last one.
+# If same _FILE is specified multiple times, the last entry will be used.
 #
-# You can have more than one line containing GMAT_FUNCTION_PATH. GMAT will store 
-# the multiple paths you specify and scan for GMAT Functions using the paths 
-# in top to bottom order and use the first function found from the search paths.
+# You can have multiple GMAT_FUNCTION_PATH or MATLAB_FUNCTION_PATH lines.
+# GMAT will search the paths in top-to-bottom order and use the first function
+# file found.
 #
-# In order for an object plugin to work inside GMAT, the path to the plugin
-# dynamic link libraries for Windows (.dll), Linux (.so) or Mac (.dylib) must be
-# specified in a PLUGIN line below. A relative path is interpreted as being
-# relative to the GMAT executable or application. The plugin name should be
-# specified without the file extension.
-#
-# Some available PLUGINs are:
-#   - libCInterface
-#   - libEphemPropagator
-#   - libEventLocator
-#   - libFminconOptimizer
-#   - libGmatEstimation
-#   - libMatlabInterface
-#   - libMsise86
-#   - libNRLMsise00
-#   - libVF13Optimizer
+# In order for an plugin to work, the path to the plugin library for Windows
+# (.dll), Linux (.so) or Mac (.dylib) must be specified in a PLUGIN line below.
+# The plugin name should be specified without the file extension. Plugins are
+# loaded in the order listed.
 #
 #===============================================================================
-#RUN_MODE              = TESTING
-#RUN_MODE              = TESTING_NO_PLOTS
-#RUN_MODE              = EXIT_AFTER_RUN
+
+#-----------------------------------------------------------
+# Runtime options
+#-----------------------------------------------------------
 #MATLAB_MODE           = SINGLE
 #MATLAB_MODE           = SHARED
 #MATLAB_MODE           = NO_MATLAB
+#WRITE_GMAT_KEYWORD    = ON
+
 #-----------------------------------------------------------
-ROOT_PATH              = ../
+# Plugins
 #-----------------------------------------------------------
-PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/libExtraPropagators
-PLUGIN                 = ../plugins/libGmatEstimation
-PLUGIN                 = ../plugins/libMatlabInterface
-PLUGIN                 = ../plugins/libFminconOptimizer
+# Default plugins
 PLUGIN                 = ../plugins/libEphemPropagator
-PLUGIN                 = ../plugins/proprietary/libMarsGRAM
-PLUGIN                 = ../plugins/proprietary/libNRLMsise00
-PLUGIN                 = ../plugins/proprietary/libMsise86
-PLUGIN                 = ../plugins/libEventLocator
-PLUGIN                 = ./libCInterface
-PLUGIN                 = ../plugins/libGmatFunction
-PLUGIN                 = ../plugins/libSaveCommand
 PLUGIN                 = ../plugins/libFormation
 PLUGIN                 = ../plugins/libStation
+PLUGIN                 = ../plugins/libMatlabInterface
+PLUGIN                 = ../plugins/libFminconOptimizer
+
+# Alpha plugins
+#PLUGIN                = ./libCInterface
+#PLUGIN                = ../plugins/libEventLocator
+#PLUGIN                = ../plugins/libExtraPropagators
+#PLUGIN                = ../plugins/libGmatEstimation
+#PLUGIN                = ../plugins/libGmatFunction
+#PLUGIN                = ../plugins/libSaveCommand
+
+# Internal-only plugins
+PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/proprietary/libNRLMsise00
+PLUGIN                 = ../plugins/proprietary/libMsise86
+#PLUGIN                = ../plugins/proprietary/libMarsGRAM
+
+#-----------------------------------------------------------
+# Directory/file paths
+#-----------------------------------------------------------
+ROOT_PATH              = ../
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
@@ -140,3 +145,12 @@ IAUSOFA_FILE           = DATA_PATH/iau_sofa/IAU_SOFA.DAT
 ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 
+#-----------------------------------------------------------
+# Debug options
+#-----------------------------------------------------------
+#RUN_MODE              = TESTING
+#RUN_MODE              = TESTING_NO_PLOTS
+#RUN_MODE              = EXIT_AFTER_RUN
+#DEBUG_PARAMETERS      = OFF
+#HIDE_SAVEMISSION      = TRUE
+#PLOT_MODE             = TILE
