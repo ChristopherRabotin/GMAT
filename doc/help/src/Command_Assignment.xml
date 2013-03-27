@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <refentry version="5.0" xml:id="Assignment"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -11,8 +11,12 @@
     <primary>Assignment</primary>
   </indexterm>
 
+  <indexterm>
+    <primary>Equation</primary>
+  </indexterm>
+
   <refmeta>
-    <refentrytitle>Assignment</refentrytitle>
+    <refentrytitle>Assignment (<literal>=</literal>)</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,97 +26,108 @@
   </refmeta>
 
   <refnamediv>
-    <refname>Assignment</refname>
+    <refname>Assignment (<literal>=</literal>)</refname>
 
-    <refpurpose>
-      Set a variable or parameter to a value, possibly using mathematical expressions
-    </refpurpose>
+    <refpurpose>Set a variable or resource field to a value, possibly using
+    mathematical expressions</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <replaceable>parameter = expression</replaceable>
-    </synopsis>
+    <synopsis><replaceable>settable_item = expression</replaceable></synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The assignment command (in the GUI, the <guilabel>Equation</guilabel> command) allows you to
-      set a resource or resource parameter to a value, possibly using mathematical expressions.
-      GMAT uses the assignment operator ('=') to indicate an assignment command. The assignment
-      operator uses the following syntax, where LHS denotes the left-hand side of the operator,
-      and RHS denotes the right-hand side of the operator:
-    </para>
-    <programlisting>
-      <code>
-        <replaceable>LHS = RHS</replaceable>
-      </code>
-    </programlisting>
-    <para>
-      In this expression, the LHS is being set to the value of the RHS.
-      The syntax of the LHS and RHS expressions vary, but both must evaluate
-      to compatible data types for the command to succeed.
-    </para>
+    <para>The assignment command (in the GUI, the
+    <guilabel>Equation</guilabel> command) allows you to set a resource field
+    or parameter to a value, possibly using mathematical expressions. GMAT
+    uses the assignment operator ('=') to indicate an assignment command. The
+    assignment operator uses the following syntax, where LHS denotes the
+    left-hand side of the operator, and RHS denotes the right-hand side of the
+    operator:</para>
+
+    <programlisting><code><replaceable>LHS</replaceable> = <replaceable>RHS</replaceable></code></programlisting>
+
+    <para>In this expression, the left-hand side
+    (<code><replaceable>LHS</replaceable></code>) is being set to the value of
+    the right-hand side (<code><replaceable>RHS</replaceable></code>). The
+    syntax of the <code><replaceable>LHS</replaceable></code> and
+    <code><replaceable>RHS</replaceable></code> expressions vary, but both
+    must evaluate to compatible data types for the command to succeed.</para>
 
     <refsection>
       <title>Left-hand side</title>
 
-      <para>
-        The left-hand side of the assignment command must be a single item of any of the following types:
-      </para>
-      
+      <para>The left-hand side of the assignment command must be a single item
+      of any of the following types:</para>
+
       <itemizedlist>
         <listitem>
-          <para>allowed resource (e.g. Spacecraft, Variable, Array)</para>
+          <para>allowed resource (e.g. <guilabel>Spacecraft</guilabel>,
+          <guilabel>Variable</guilabel>, <guilabel>Array</guilabel>)</para>
         </listitem>
+
         <listitem>
-          <para>resource field for allowed resources (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)</para>
+          <para>resource field for allowed resources (e.g.
+          <guilabel>Spacecraft</guilabel>.<guilabel>Epoch</guilabel>,
+          <guilabel>Spacecraft</guilabel>.<guilabel>DateFormat</guilabel>)</para>
         </listitem>
+
         <listitem>
-          <para>settable resource parameter (e.g. Spacecraft.X, ReportFile.Precision)</para>
+          <para>settable resource parameter (e.g.
+          <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
+          <guilabel>ReportFile</guilabel>.<guilabel>Precision</guilabel>)</para>
         </listitem>
+
         <listitem>
-          <para>Array or Array element</para>
+          <para><guilabel>Array</guilabel> or <guilabel>Array</guilabel>
+          element</para>
         </listitem>
       </itemizedlist>
-      
-      <para>
-        See the script language reference for a list of allowed resources.
-      </para>
+
+      <para>See the documentation for a particular resource to determine which
+      fields and parameters can be set.</para>
     </refsection>
 
     <refsection>
       <title>Right-hand side</title>
 
-      <para>
-        The right-hand side of the assignment command can consist of any of the following:
-        <itemizedlist>
+      <para>The right-hand side of the assignment command can consist of any
+      of the following: <itemizedlist>
           <listitem>
             <para>literal value</para>
           </listitem>
+
           <listitem>
-            <para>resource (e.g. Spacecraft, Variable, Array)</para>
+            <para>resource (e.g. <guilabel>Spacecraft</guilabel>,
+            <guilabel>Variable</guilabel>, <guilabel>Array</guilabel>)</para>
           </listitem>
+
           <listitem>
-            <para>resource field (e.g. Spacecraft.Epoch, Spacecraft.DateFormat)</para>
+            <para>resource field (e.g.
+            <guilabel>Spacecraft</guilabel>.<guilabel>Epoch</guilabel>,
+            <guilabel>Spacecraft</guilabel>.<guilabel>DateFormat</guilabel>)</para>
           </listitem>
+
           <listitem>
-            <para>resource parameter (e.g. Spacecraft.X, Thruster.K1)</para>
+            <para>resource parameter (e.g.
+            <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
+            <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
           </listitem>
+
           <listitem>
-            <para>Array or Array element</para>
+            <para><guilabel>Array</guilabel> or <guilabel>Array</guilabel>
+            element</para>
           </listitem>
+
           <listitem>
             <para>mathematical expression (see below)</para>
           </listitem>
-        </itemizedlist>
-        GMAT and MATLAB function calls are considered distinct from the assignment command.
-        See their respective reference pages for more information.
-      </para>
+        </itemizedlist>MATLAB function calls are considered distinct from the
+      assignment command. See the reference pages for more information.</para>
     </refsection>
   </refsection>
 
@@ -129,14 +144,16 @@
       </mediaobject>
     </screenshot>
 
-    <para>
-      The Assignment command in the script language corresponds to the Equation command in
-      the GUI. The Equation properties box allows you to input both sides of the expression
-      into free-form text boxes. The default values on each side are “Not_Set”; these are
-      placeholders only, and are not valid during the mission run. You can type into each box the same
-      syntax described above for the script language. When you click OK or Apply, GMAT validates each
-      side of the expression and provides feedback for any warnings or errors.
-    </para>
+    <para>The assignment command in the script language corresponds to the
+    <guilabel>Equation</guilabel> command in the GUI. The
+    <guilabel>Equation</guilabel> properties box allows you to input both
+    sides of the expression into free-form text boxes. The default values on
+    each side are “<literal>Not_Set</literal>”; these are placeholders only,
+    and are not valid during the mission run. You can type into each box the
+    same syntax described above for the script language. When you click
+    <guilabel>OK</guilabel> or <guilabel>Apply</guilabel>, GMAT validates each
+    side of the expression and provides feedback for any warnings or
+    errors.</para>
   </refsection>
 
   <refsection>
@@ -145,119 +162,124 @@
     <refsection>
       <title>Data type compatibility</title>
 
-
-      <para>
-        In general, the data types of the LHS and the RHS must match after all expressions are evaluated.
-        This means that a Spacecraft resource can only be set to another Spacecraft resource, numeric parameters
-        can only be set to numeric values, and String resources can only be set to string values. Additionally,
-        the dimension of Array instances must match for the command to succeed.
-        For numeric quantities, the assignment command does not distinguish between integers and floating-point values.
-      </para>
+      <para>In general, the data types of the left-hand side and the
+      right-hand side must match after all expressions are evaluated. This
+      means that a <guilabel>Spacecraft</guilabel> resource can only be set to
+      another <guilabel>Spacecraft</guilabel> resource, numeric parameters can
+      only be set to numeric values, and <guilabel>String</guilabel> resources
+      can only be set to string values. Additionally, the dimension of
+      <guilabel>Array</guilabel> instances must match for the command to
+      succeed. For numeric quantities, the assignment command does not
+      distinguish between integers and floating-point values.</para>
     </refsection>
 
     <refsection>
       <title>Parameters</title>
 
-      <para>
-        Parameters can be used on either side of an assignment command, but there may be certain restrictions.
-      </para>
-      <para>
-        On the right-hand side of the command, any parameter can be used. If a parameter accepts a dependency
-        (such as Spacecraft.CoordinateSystem.X) and the dependency is omitted, a default dependency value will be used.
-        For coordinate-system-dependent parameters, the default is <guilabel>EarthMJ2000Eq</guilabel> For central-body-dependent parameters,
-        the default is <guilabel>Earth</guilabel>.
-      </para>
-      <para>
-        On the left-hand side, only settable (writable) parameters can be used. Furthermore,
-        no dependency can be specified, except in the special case that the dependencies on both sides of the
-        assignment command are equivalent. On the left-hand side, the default values of omitted dependencies are automatically
-        taken to be the current values of <guilabel>Spacecraft.CoordinateSystem</guilabel> and its central body.
-      </para>
+      <para>Parameters can be used on either side of an assignment command,
+      but there may be certain restrictions.</para>
+
+      <para>On the right-hand side of the command, any parameter can be used.
+      If a parameter accepts a dependency (such as
+      <guilabel>Spacecraft</guilabel>.<guilabel><replaceable>CoordinateSystem</replaceable></guilabel>.<guilabel>X</guilabel>)
+      and the dependency is omitted, a default dependency value will be used.
+      For coordinate-system-dependent parameters, the default is
+      <guilabel>EarthMJ2000Eq</guilabel>. For central-body-dependent
+      parameters, the default is <guilabel>Earth</guilabel>.</para>
+
+      <para>On the left-hand side, only settable (writable) parameters can be
+      used. Furthermore, no dependency can be specified, except in the special
+      case that the dependencies on both sides of the assignment command are
+      equivalent. On the left-hand side, the default values of omitted
+      dependencies are automatically taken to be the current values of the
+      <guilabel>CoordinateSystem</guilabel> field of the referenced
+      <guilabel>Spacecraft</guilabel> and its origin.</para>
 
       <informalexample>
-        <para>These examples show valid and invalid usage of parameters:</para>
-        <programlisting>
-          <code>
-            Create Spacecraft aSat1 aSat2
-            aSat2.CoordinateSystem = 'EarthFixed'
-            Create Variable x
-            BeginMissionSequence
+        <para>These examples show valid and invalid usage of
+        parameters:</para>
 
-            x = aSat1.EarthFixed.X       % Valid: Parameter with dependency on RHS
-            x = aSat1.EarthMJ2000Eq.X    % Valid: This and next statement are equiv.
-            x = aSat1.X                  % Valid: Default dep. value is EarthMJ2000Eq.
+        <programlisting><code>Create Spacecraft aSat1 aSat2
+aSat2.CoordinateSystem = 'EarthFixed'
+Create Variable x
+BeginMissionSequence
+x = aSat1.EarthFixed.X       % Valid: Parameter with dependency on RHS
+x = aSat1.EarthMJ2000Eq.X    % Valid: This and next statement are equiv.
+x = aSat1.X                  % Valid: Default dep. value is EarthMJ2000Eq.
 
-            x = aSat1.Mars.Altitude      % Valid: Parameter with dependency on RHS
-            x = aSat1.Earth.Altitude     % Valid: This and next statement are equiv.
-            x = aSat1.Altitude           % Valid: Default dependency value is Earth.
+x = aSat1.Mars.Altitude      % Valid: Parameter with dependency on RHS
+x = aSat1.Earth.Altitude     % Valid: This and next statement are equiv.
+x = aSat1.Altitude           % Valid: Default dependency value is Earth.
 
-            aSat2.X = 1e5                % Valid: Default parameter value is EarthFixed.
-            aSat2.EarthMJ2000Eq.X = 1e5  % INVALID: Dependencies not allowed on LHS.
-            aSat2.EarthFixed.X = 1e5     % Valid: Special case because value = default.
+aSat2.X = 1e5                % Valid: Default parameter value is EarthFixed.
+aSat2.EarthMJ2000Eq.X = 1e5  % INVALID: Dependencies not allowed on LHS.
+aSat2.EarthFixed.X = 1e5     % Valid: Special case because value = default.
 
-            aSat2.EarthMJ2000Eq.X = aSat1.EarthFixed.X    % INVALID: Dependency on LHS
-            aSat2.EarthMJ2000Eq.X = aSat1.EarthMJ2000Eq.X % INVALID: Dependency on LHS
-            aSat2.EarthFixed.X = aSat1.EarthFixed.X       % Valid: Special case
+aSat2.EarthMJ2000Eq.X = aSat1.EarthFixed.X    % INVALID: Dependency on LHS
+aSat2.EarthMJ2000Eq.X = aSat1.EarthMJ2000Eq.X % INVALID: Dependency on LHS
+aSat2.EarthFixed.X = aSat1.EarthFixed.X       % Valid: Special case
 
-            % DANGEROUS! Valid, but sets EarthMJ2000Eq RHS values to EarthFixed LHS param.
-            aSat2.X = aSat1.EarthMJ2000Eq.X
+% DANGEROUS! Valid, but sets EarthMJ2000Eq RHS values to EarthFixed LHS param.
+aSat2.X = aSat1.EarthMJ2000Eq.X
 
-            % DANGEROUS! RHS default is EarthMJ2000Eq, LHS default is current setting on
-            % aSat2 (EarthFixed in this case).
-            aSat2.X = aSat1.X
-          </code>
-        </programlisting>
+% DANGEROUS! RHS default is EarthMJ2000Eq, LHS default is current setting on
+% aSat2 (EarthFixed in this case).
+aSat2.X = aSat1.X</code>        </programlisting>
       </informalexample>
     </refsection>
 
     <refsection>
-      <title>Mathematical expressions</title>
+      <title>Mathematical Expressions</title>
 
-      <para>
-        The assignment command supports the use of inline mathematical expressions
-        on the right-hand side of the command. These expressions follow the general syntax
-        rules of MATLAB expressions, and can use a variety of operators and built-in functions.
-      </para>
+      <para>The assignment command supports the use of inline mathematical
+      expressions on the right-hand side of the command. These expressions
+      follow the general syntax rules of MATLAB expressions, and can use a
+      variety of operators and built-in functions.</para>
 
       <refsection>
         <title>Parsing</title>
 
-        <para>
-          Mathematical expressions are recognized by the presence of any of the operators or
-          built-in functions described below. Before execution, all white space (e.g. spaces and tabs)
-          is removed from the expression.
-        </para>
+        <para>Mathematical expressions are recognized by the presence of any
+        of the operators or built-in functions described below. Before
+        execution, all white space (e.g. spaces and tabs) is removed from the
+        expression.</para>
       </refsection>
 
       <refsection>
         <title>Data Types</title>
 
-        <para>
-          Mathematical expressions operate on numeric values
-          (integers or floating-point numbers). This includes the following:
-          <itemizedlist>
+        <para>Mathematical expressions operate on numeric values (integers or
+        floating-point numbers). This includes the following: <itemizedlist>
             <listitem>
               <para>literal values</para>
             </listitem>
+
             <listitem>
-              <para>numeric resources (Variable, Array)</para>
+              <para>numeric resources (<guilabel>Variable</guilabel>,
+              <guilabel>Array</guilabel>)</para>
             </listitem>
+
             <listitem>
-              <para>gettable resource parameters (e.g. Spacecraft.X, Thruster.K1)</para>
+              <para>gettable resource parameters (e.g.
+              <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
+              <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
             </listitem>
+
             <listitem>
-              <para>Array elements</para>
+              <para><guilabel>Array</guilabel> elements</para>
             </listitem>
+
             <listitem>
-              <para>calculation parameters (e.g. Spacecraft.OrbitPeriod)</para>
+              <para>calculation parameters (e.g.
+              <guilabel>Spacecraft</guilabel>.<guilabel>OrbitPeriod</guilabel>)</para>
             </listitem>
+
             <listitem>
               <para>nested mathematical expressions</para>
             </listitem>
-          </itemizedlist>
-          Several of GMAT’s operators and functions are vectorized,
-          so they operate on full Array resources as well as scalar numeric values.
-        </para>
+          </itemizedlist> Several of GMAT’s operators and functions are
+        vectorized, so they operate on full <guilabel>Array</guilabel>
+        resources as well as scalar numeric values.</para>
       </refsection>
 
       <refsection>
@@ -269,146 +291,147 @@
 
             <colspec colnum="2" colwidth="3*"/>
 
-            <thead>
-              <row>
-                <entry>Operator Type</entry>
-
-                <entry>Description</entry>
-              </row>
-            </thead>
-
             <tbody>
               <row>
-                <entry>
-                  <guilabel>Vectorized operators</guilabel>
-                </entry>
+                <entry><guilabel>Vectorized operators</guilabel></entry>
 
-                <entry>
-                  <variablelist>
+                <entry><variablelist>
                     <varlistentry>
-                      <term>+</term>
+                      <term><literal>+</literal></term>
 
                       <listitem>
-                        <para>
-                          Addition or unary plus. X+Y adds X and Y. X and Y
-                          must have the same dimensions unless either is a scalar.
-                        </para>
+                        <para>Addition or unary plus. <literal>X+Y</literal>
+                        adds <literal>X</literal> and <literal>Y</literal>.
+                        <literal>X</literal> and <literal>Y</literal> must
+                        have the same dimensions unless either is a
+                        scalar.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>-</term>
+                      <term><literal>-</literal></term>
 
                       <listitem>
-                        <para>
-                          Subtraction or unary minus. -X is the negative of
-                          X, where X can be any size. X-Y subtracts Y from X. X and Y
-                          must have the same dimensions unless either is a scalar.
-                        </para>
+                        <para>Subtraction or unary minus.
+                        <literal>-X</literal> is the negative of
+                        <literal>X</literal>, where <literal>X</literal> can
+                        be any size. <literal>X-Y</literal> subtracts
+                        <literal>Y</literal> from <literal>X</literal>.
+                        <literal>X</literal> and <literal>Y</literal> must
+                        have the same dimensions unless either is a
+                        scalar.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>*</term>
+                      <term><literal>*</literal></term>
 
                       <listitem>
-                        <para>
-                          Multiplication. X*Y is the product of X and Y. If both
-                          X and Y are scalars, this is the simple algebraic product. If
-                          X is a matrix or vector and Y is a scalar, all elements of X are
-                          multiplied by Y (and vice versa). If both X and Y are non-scalar,
-                          X*Y performs matrix multiplication and the number of columns in X
-                          must equal the number of rows in Y.
-                        </para>
+                        <para>Multiplication. <literal>X*Y</literal> is the
+                        product of <literal>X</literal> and
+                        <literal>Y</literal>. If both <literal>X</literal> and
+                        <literal>Y</literal> are scalars, this is the simple
+                        algebraic product. If <literal>X</literal> is a matrix
+                        or vector and <literal>Y</literal> is a scalar, all
+                        elements of <literal>X</literal> are multiplied by
+                        <literal>Y</literal> (and vice versa). If both
+                        <literal>X</literal> and <literal>Y</literal> are
+                        non-scalar, <literal>X*Y</literal> performs matrix
+                        multiplication and the number of columns in
+                        <literal>X</literal> must equal the number of rows in
+                        <literal>Y</literal>.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>'</term>
+                      <term><literal>'</literal></term>
 
                       <listitem>
-                        <para>
-                          Transpose. X' is the transpose of X. If X is a scalar,
-                          X' is equal to X.
-                        </para>
+                        <para>Transpose. <literal>X'</literal> is the
+                        transpose of <literal>X</literal>. If
+                        <literal>X</literal> is a scalar,
+                        <literal>X'</literal> is equal to
+                        <literal>X</literal>.</para>
                       </listitem>
                     </varlistentry>
-                  </variablelist>
-                </entry>
+                  </variablelist></entry>
               </row>
 
               <row>
-                <entry>
-                  <guilabel>Scalar operators</guilabel>
-                </entry>
+                <entry><guilabel>Scalar operators</guilabel></entry>
 
-                <entry>
-                  <variablelist>
+                <entry><variablelist>
                     <varlistentry>
-                      <term>/</term>
+                      <term><literal>/</literal></term>
 
                       <listitem>
-                        <para>
-                          Division. X/Y divides X by Y. If both X and Y are scalars,
-                          this is the simple algebraic quotient. If X is a matrix or
-                          vector, each element is divided by Y. Y must be a non-zero scalar
-                          quantity.
-                        </para>
+                        <para>Division. <literal>X/Y</literal> divides
+                        <literal>X</literal> by <literal>Y</literal>. If both
+                        <literal>X</literal> and <literal>Y</literal> are
+                        scalars, this is the simple algebraic quotient. If
+                        <literal>X</literal> is a matrix or vector, each
+                        element is divided by <literal>Y</literal>.
+                        <literal>Y</literal> must be a non-zero scalar
+                        quantity.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>^</term>
+                      <term><literal>^</literal></term>
 
                       <listitem>
-                        <para>
-                          Power. X^Y raises X to the Y power. X and Y must be scalar quantities.
-                          A special case is X^(-1), which when applied to a square matrix X, returns
-                          the inverse of X.
-                        </para>
+                        <para>Power. <literal>X^Y</literal> raises
+                        <literal>X</literal> to the <literal>Y</literal>
+                        power. <literal>X</literal> and <literal>Y</literal>
+                        must be scalar quantities. A special case is
+                        <literal>X^(-1)</literal>, which when applied to a
+                        square matrix <literal>X</literal>, returns the
+                        inverse of <literal>X</literal>.</para>
                       </listitem>
                     </varlistentry>
-                  </variablelist>
-                </entry>
+                  </variablelist></entry>
               </row>
             </tbody>
           </tgroup>
         </informaltable>
-        <para>
-          When multiple expressions are combined,
-          GMAT uses the following order of operations.
-          Operations begin with those operators at the top
-          of the list and and continue downwards. Within each
-          level, operations proceed left-to-right.
-          <orderedlist>
+
+        <para>When multiple expressions are combined, GMAT uses the following
+        order of operations. Operations begin with those operators at the top
+        of the list and and continue downwards. Within each level, operations
+        proceed left-to-right. <orderedlist>
             <listitem>
-              <para>parentheses ()</para>
+              <para>parentheses <literal>()</literal></para>
             </listitem>
+
             <listitem>
-              <para>transpose ('), power (^)</para>
+              <para>transpose (<literal>'</literal>), power
+              (<literal>^</literal>)</para>
             </listitem>
+
             <listitem>
-              <para>unary plus (+), unary minus (-)</para>
+              <para>unary plus (<literal>+</literal>), unary minus
+              (<literal>-</literal>)</para>
             </listitem>
+
             <listitem>
-              <para>multiplication (*), division (/)</para>
+              <para>multiplication (<literal>*</literal>), division
+              (<literal>/</literal>)</para>
             </listitem>
+
             <listitem>
-              <para>addition (+), subtraction (-)</para>
+              <para>addition (<literal>+</literal>), subtraction
+              (<literal>-</literal>)</para>
             </listitem>
-          </orderedlist>
-        </para>
+          </orderedlist></para>
       </refsection>
 
       <refsection>
-        <title>Built-in functions</title>
+        <title>Built-in Functions</title>
 
-        <para>
-          GMAT supports the following built-in functions
-          in mathematical expressions. Such functions are either
-          scalar, meaning they accept a single value only, or are
-          matrix functions that operate on an entire matrix or vector.
-        </para>
+        <para>GMAT supports the following built-in functions in mathematical
+        expressions. Such functions are either scalar, meaning they accept a
+        single value only, or are matrix functions that operate on an entire
+        matrix or vector.</para>
 
         <informaltable colsep="0" frame="topbot">
           <tgroup cols="2">
@@ -416,230 +439,224 @@
 
             <colspec colnum="2" colwidth="3*"/>
 
-            <thead>
-              <row>
-                <entry>Function type</entry>
-
-                <entry>Functions</entry>
-              </row>
-            </thead>
-
             <tbody>
-
               <row>
-                <entry>
-                  <guilabel>Scalar functions</guilabel>
-                </entry>
-                <entry>
-                  <variablelist>
+                <entry><guilabel>Scalar functions</guilabel></entry>
 
+                <entry><variablelist>
                     <varlistentry>
-                      <term>sin</term>
+                      <term><literal>sin</literal></term>
 
                       <listitem>
-                        <para>
-                          Sine. In Y = sin(X), Y is the sine of the angle X.
-                          X must be in radians. Y will be in the range [-1, 1].
-                        </para>
+                        <para>Sine. In <literal>Y = sin(X)</literal>,
+                        <literal>Y</literal> is the sine of the angle
+                        <literal>X</literal>. <literal>X</literal> must be in
+                        radians. <literal>Y</literal> will be in the range
+                        [-1, 1].</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>cos</term>
+                      <term><literal>cos</literal></term>
 
                       <listitem>
-                        <para>
-                          Cosine. In Y = cos(X), Y is the cosine of the angle X.
-                          X must be in radians. Y will be in the range [-1, 1].
-                        </para>
+                        <para>Cosine. In <literal>Y = cos(X)</literal>,
+                        <literal>Y</literal> is the cosine of the angle
+                        <literal>X</literal>. <literal>X</literal> must be in
+                        radians. <literal>Y</literal> will be in the range
+                        [-1, 1].</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>tan</term>
+                      <term><literal>tan</literal></term>
 
                       <listitem>
-                        <para>
-                          Tangent. In Y = tan(X), Y is the tangent of the angle X.
-                          X must be in radians. The tangent function is undefined at angles
-                          that normalize to π/2 or -π/2.
-                        </para>
+                        <para>Tangent. In <literal>Y = tan(X)</literal>,
+                        <literal>Y</literal> is the tangent of the angle
+                        <literal>X</literal>. <literal>X</literal> must be in
+                        radians. The tangent function is undefined at angles
+                        that normalize to π/2 or -π/2.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>asin</term>
+                      <term><literal>asin</literal></term>
 
                       <listitem>
-                        <para>
-                          Arcsine. In Y = asin(X), Y is the arcsine of X.
-                          X must be in the range [-1, 1], and Y will be in the
-                          range [-π/2, π/2].
-                        </para>
+                        <para>Arcsine. In <literal>Y = asin(X)</literal>,
+                        <literal>Y</literal> is the arcsine of
+                        <literal>X</literal>. <literal>X</literal> must be in
+                        the range [-1, 1], and <literal>Y</literal> will be in
+                        the range [-π/2, π/2].</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>acos</term>
+                      <term><literal>acos</literal></term>
 
                       <listitem>
-                        <para>
-                          Arccosine. In Y = acos(X),
-                          Y is the arccosine of X. X must be in the
-                          range [-1, 1], and Y will be in the range [0, π].
-                        </para>
+                        <para>Arccosine. In <literal>Y = acos(X)</literal>,
+                        <literal>Y</literal> is the arccosine of
+                        <literal>X</literal>. <literal>X</literal> must be in
+                        the range [-1, 1], and <literal>Y</literal> will be in
+                        the range [0, π].</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>atan</term>
+                      <term><literal>atan</literal></term>
 
                       <listitem>
-                        <para>
-                          Arctangent. In Y = atan(X), Y is the arctangent of X.
-                          Y will be in the range (-π/2, π/2).
-                        </para>
+                        <para>Arctangent. In <literal>Y = atan(X)</literal>,
+                        <literal>Y</literal> is the arctangent of
+                        <literal>X</literal>. <literal>Y</literal> will be in
+                        the range (-π/2, π/2).</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>atan2</term>
+                      <term><literal>atan2</literal></term>
 
                       <listitem>
-                        <para>
-                          Four-quadrant arctangent. In A = atan2(Y, X), A is
-                          the arctangent of Y/X. A will be in the range (-π, π].
-                          atan2(Y, X) is equivalent to atan(Y/X) except for the
-                          expanded range.
-                        </para>
+                        <para>Four-quadrant arctangent. In <literal>A =
+                        atan2(Y, X)</literal>, <literal>A</literal> is the
+                        arctangent of <literal>Y/X</literal>.
+                        <literal>A</literal> will be in the range (-π, π].
+                        <literal>atan2(Y, X)</literal> is equivalent to
+                        <literal>atan(Y/X)</literal> except for the expanded
+                        range.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>log</term>
+                      <term><literal>log</literal></term>
 
                       <listitem>
-                        <para>
-                          Natural logarithm. In Y = log(X),
-                          Y is the natural logarithm of X. X must
-                          be non-zero positive.
-                        </para>
+                        <para>Natural logarithm. In <literal>Y =
+                        log(X)</literal>, <literal>Y</literal> is the natural
+                        logarithm of <literal>X</literal>.
+                        <literal>X</literal> must be non-zero positive.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>log10</term>
+                      <term><literal>log10</literal></term>
 
                       <listitem>
-                        <para>
-                          Common logarithm. In Y = log10(X), Y is the common (base-10)
-                          logarithm of X. X must be non-zero positive.
-                        </para>
+                        <para>Common logarithm. In <literal>Y =
+                        log10(X)</literal>, <literal>Y</literal> is the common
+                        (base-10) logarithm of <literal>X</literal>.
+                        <literal>X</literal> must be non-zero positive.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>exp</term>
+                      <term><literal>exp</literal></term>
 
                       <listitem>
-                        <para>
-                          Exponential. In Y = exp(X), Y is exponential of X (eX).
-                        </para>
+                        <para>Exponential. In <literal>Y = exp(X)</literal>,
+                        <literal>Y</literal> is exponential of
+                        <literal>X</literal>
+                        (e<superscript>X</superscript>).</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>DegToRad</term>
+                      <term><literal>DegToRad</literal></term>
 
                       <listitem>
-                        <para>
-                          Radian conversion. In Y = DegToRad(X), Y is the angle X in units of radians.
-                          X must be an angle in degrees.
-                        </para>
+                        <para>Radian conversion. In <literal>Y =
+                        DegToRad(X)</literal>, <literal>Y</literal> is the
+                        angle <literal>X</literal> in units of radians.
+                        <literal>X</literal> must be an angle in
+                        degrees.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>RadToDeg</term>
+                      <term><literal>RadToDeg</literal></term>
 
                       <listitem>
-                        <para>
-                          Degree conversion. In Y = RadToDeg(X), Y is the angle X
-                          in units of degrees. X must be an angle in radians.
-                        </para>
+                        <para>Degree conversion. In <literal>Y =
+                        RadToDeg(X)</literal>, <literal>Y</literal> is the
+                        angle <literal>X</literal> in units of degrees.
+                        <literal>X</literal> must be an angle in
+                        radians.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>abs</term>
+                      <term><literal>abs</literal></term>
 
                       <listitem>
-                        <para>
-                          Absolute value. In Y = abs(X), Y is the absolute value of X.
-                        </para>
+                        <para>Absolute value. In <literal>Y =
+                        abs(X)</literal>, <literal>Y</literal> is the absolute
+                        value of <literal>X</literal>.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>sqrt</term>
+                      <term><literal>sqrt</literal></term>
 
                       <listitem>
-                        <para>
-                          Square root. In Y = sqrt(X),
-                          Y is the square root of X. X must be non-negative.
-                        </para>
+                        <para>Square root. In <literal>Y = sqrt(X)</literal>,
+                        <literal>Y</literal> is the square root of
+                        <literal>X</literal>. <literal>X</literal> must be
+                        non-negative.</para>
                       </listitem>
                     </varlistentry>
-                  </variablelist>
-                </entry>
+                  </variablelist></entry>
               </row>
 
               <row>
-                <entry>
-                  <guilabel>Matrix functions</guilabel>
-                </entry>
-                <entry>
-                  <variablelist>
+                <entry><guilabel>Matrix functions</guilabel></entry>
 
+                <entry><variablelist>
                     <varlistentry>
-                      <term>norm</term>
+                      <term><literal>norm</literal></term>
 
                       <listitem>
-                        <para>
-                          2-norm. In Y = norm(X), Y is the 2-norm of X, where
-                          X must be a vector (i.e. one dimension must be 1). If
-                          X is a scalar, Y is equal to X.
-                        </para>
+                        <para>2-norm. In <literal>Y = norm(X)</literal>,
+                        <literal>Y</literal> is the 2-norm of
+                        <literal>X</literal>, where <literal>X</literal> must
+                        be a vector (i.e. one dimension must be 1). If
+                        <literal>X</literal> is a scalar, <literal>Y</literal>
+                        is equal to <literal>X</literal>.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>det</term>
+                      <term><literal>det</literal></term>
 
                       <listitem>
-                        <para>
-                          Determinant. In Y = det(X), Y is the determinant of X.
-                          X must be a matrix or a scalar. If X is a matrix, the number
-                          of rows must equal the number of columns. If X is a scalar,
-                          Y is equal to X. For efficiency, GMAT’s implementation of the
-                          determinant is currently limited to matrices 9×9 or smaller.
-                        </para>
+                        <para>Determinant. In <literal>Y = det(X)</literal>,
+                        <literal>Y</literal> is the determinant of
+                        <literal>X</literal>. <literal>X</literal> must be a
+                        matrix or a scalar. If <literal>X</literal> is a
+                        matrix, the number of rows must equal the number of
+                        columns. If <literal>X</literal> is a scalar,
+                        <literal>Y</literal> is equal to <literal>X</literal>.
+                        For efficiency, GMAT’s implementation of the
+                        determinant is currently limited to matrices 9×9 or
+                        smaller.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term>inv</term>
+                      <term><literal>inv</literal></term>
 
                       <listitem>
-                        <para>
-                          Inverse. In Y = inv(X), Y is the inverse of X. X must be a matrix or a scalar.
-                          If X is a matrix, the number of rows must equal the number of columns. X^(-1)
-                          is an alternate syntax.
-                        </para>
+                        <para>Inverse. In <literal>Y = inv(X)</literal>,
+                        <literal>Y</literal> is the inverse of
+                        <literal>X</literal>. <literal>X</literal> must be a
+                        matrix or a scalar. If <literal>X</literal> is a
+                        matrix, the number of rows must equal the number of
+                        columns. <literal>X^(-1)</literal> is an alternate
+                        syntax.</para>
                       </listitem>
                     </varlistentry>
-                  </variablelist>
-                </entry>
+                  </variablelist></entry>
               </row>
             </tbody>
           </tgroup>
@@ -654,91 +671,78 @@
     <informalexample>
       <para>Evaluate a basic algebraic equation:</para>
 
-      <programlisting>
-        <code>
-          Create Variable A B C x y
-          x = 1
-          Create ReportFile aReport
+      <programlisting><code>Create Variable A B C x y
+x = 1
+Create ReportFile aReport
 
-          BeginMissionSequence
+BeginMissionSequence
 
-          A = 10
-          B = 20
-          C = 2
+A = 10
+B = 20
+C = 2
 
-          y = A*x^2 + B*x + C
-          Report aReport y
-        </code>
-      </programlisting>
+y = A*x^2 + B*x + C
+Report aReport y</code></programlisting>
     </informalexample>
+
     <informalexample>
       <para>Matrix manipulation:</para>
 
-      <programlisting>
-        <code>
-          Create Array A[2,2] B[2,2] C[3,3] x[2,1] y[2,1]
-          Create ReportFile aReport
+      <programlisting><code>Create Array A[2,2] B[2,2] C[2,2] x[2,1] y[2,1]
+Create ReportFile aReport
 
-          A(1,1) = 10
-          A(2,1) = 5
-          A(1,2) = .10
-          A(2,2) = 1
+A(1,1) = 10
+A(2,1) = 5
+A(1,2) = .10
+A(2,2) = 1
 
-          x(1,1) = 2
-          x(2,1) = 3
+x(1,1) = 2
+x(2,1) = 3
 
-          BeginMissionSequence
+BeginMissionSequence
 
-          B = inv(A)
-          C = B'
-          y = C*x
-          Report aReport A B C x y
-        </code>
-      </programlisting>
+B = inv(A)
+C = B'
+y = C*x
+Report aReport A B C x y</code></programlisting>
     </informalexample>
+
     <informalexample>
       <para>Cloning a resource:</para>
-      <programlisting>
-        <code>
-          Create Spacecraft Sat1 Sat2
-          Sat1.Cd = 1.87
-          Sat1.DryMass = 123.456
 
-          Create ReportFile aReport
+      <programlisting><code>Create Spacecraft Sat1 Sat2
+Sat1.Cd = 1.87
+Sat1.DryMass = 123.456
 
-          BeginMissionSequence
+Create ReportFile aReport
 
-          Sat2 = Sat1
-          Report aReport Sat2.Cd Sat2.DryMass
-        </code>
-      </programlisting>
+BeginMissionSequence
+
+Sat2 = Sat1
+Report aReport Sat2.Cd Sat2.DryMass</code></programlisting>
     </informalexample>
+
     <informalexample>
       <para>Using built-in functions:</para>
-      <programlisting>
-        <code>
-          Create Variable pi x y1 y2 y3
-          Create Array A[3,3]
-          Create Spacecraft aSat
-          Create ReportFile aReport
 
-          BeginMissionSequence
+      <programlisting><code>Create Variable pi x y1 y2 y3
+Create Array A[3,3]
+Create Spacecraft aSat
+Create ReportFile aReport
 
-          pi = acos(-1)
+BeginMissionSequence
 
-          aSat.TA = pi/4
-          x = pi/4
-          A(1,1) = pi/4
+pi = acos(-1)
 
-          y1 = sin(x)
-          y2 = sin(aSat.TA)
-          y3 = sin(A(1,1))
+aSat.TA = pi/4
+x = pi/4
+A(1,1) = pi/4
 
-          Report aReport y1 y2 y3
-        </code>
-      </programlisting>
+y1 = sin(x)
+y2 = sin(aSat.TA)
+y3 = sin(A(1,1))
+
+Report aReport y1 y2 y3</code></programlisting>
     </informalexample>
-
-
   </refsection>
 </refentry>

@@ -41,7 +41,8 @@
     portion of a GMAT script. It must appear once as the first command in the
     script, and must follow all resource creation lines.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: Script Language</para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="ScriptLanguage"/></para>
   </refsection>
 
   <refsection>
@@ -63,7 +64,8 @@
     resource initialization that can be performed in any order, and that the
     portion below the command consists of mission sequence commands that must
     be executed sequentially. This and other rules of the scripting language
-    are discussed in detail in the script language reference.</para>
+    are discussed in detail in the <link linkend="ScriptLanguage">script
+    language reference</link>.</para>
   </refsection>
 
   <refsection>
