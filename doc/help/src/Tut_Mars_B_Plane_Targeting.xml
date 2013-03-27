@@ -67,10 +67,7 @@
       performing a Trajectory Correction Maneuver (TCM) that targets Mars
       B-Plane. Once the spacecraft gets close to Mars, then an orbit insertion
       maneuver can be performed to capture into Mars orbit.</para>
-
-      <para/>
     </note>
-
     <figure xml:id="Tut_Mars_B_Plane_Targeting_B_Plane_1">
       <title><guilabel>Geometry of the B-Plane</guilabel> as seen from a
       viewpoint perpendicular to the B-Plane</title>
@@ -79,8 +76,8 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="files/images/Tut_Mars_B_Plane_Targeting_B_Plane_1.png"
-                       scale="75"/>
+                       fileref="files/images/Tut_Mars_B_Plane_Targeting_B_Plane_1A.png"
+                       scale="85"/>
           </imageobject>
         </mediaobject>
       </screenshot>
@@ -2104,7 +2101,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_Mars_B_Plane departure hyperbola EarthView.png"
+                       fileref="files/images/Tut_Mars_B_Plane departure hyperbola EarthView_better.png"    
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
@@ -2177,7 +2174,6 @@
         Initial Value box have been updated to the final solution of the first
         <guilabel>Target</guilabel> sequence.</para>
       </step>
-
     </procedure>
 
     <para>If you want to know TCM maneuver’s delta-V vector values and how
@@ -2194,57 +2190,662 @@
         <para>Scroll down and under <literal>Maneuver Summary</literal>
         heading, values for delta-V vector are:</para>
 
-<para><literal>Delta V Vector:</literal></para>
+        <para><literal>Delta V Vector:</literal></para>
 
-<para><literal>Element 1:    0.0039376963731 km/s</literal></para>
-<para><literal>Element 2:    0.0060423170483 km/s</literal></para>
-<para><literal>Element 3:   -0.0006747125434 km/s</literal></para>
-     </step>
+        <para><literal>Element 1: 0.0039376963731 km/s</literal></para>
 
+        <para><literal>Element 2: 0.0060423170483 km/s</literal></para>
 
-
-      <step>
-        <para>Scroll down and under <literal>Mass depletion from MainTank</literal> heading, <literal>Delta V</literal> and <literal>Mass Change</literal>
-        tells you TCM maneuver’s magnitude and how much fuel was used for the maneuver: </para>  
-
-<para><literal>Delta V:        0.0072436375569 km/s</literal></para>
-<para><literal>Mass change:   -6.3128738639690 kg</literal></para>
-
-     </step>
-
-
-     <step>
-        <para>Click <guilabel>OK</guilabel> to close <guilabel>Command Summary</guilabel> window. </para>
+        <para><literal>Element 3: -0.0006747125434 km/s</literal></para>
       </step>
 
+      <step>
+        <para>Scroll down and under <literal>Mass depletion from
+        MainTank</literal> heading, <literal>Delta V</literal> and
+        <literal>Mass Change</literal> tells you TCM maneuver’s magnitude and
+        how much fuel was used for the maneuver:</para>
+
+        <para><literal>Delta V: 0.0072436375569 km/s</literal></para>
+
+        <para><literal>Mass change: -6.3128738639690 kg</literal></para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> to close <guilabel>Command
+        Summary</guilabel> window.</para>
+      </step>
     </procedure>
 
-    <para>Just to make sure that the goals of first <guilabel>Target</guilabel> sequence were met successfully, 
-    let us access command summary for <guilabel>Prop to Mars Periapsis</guilabel> command by doing the following steps:</para>
+    <para>Just to make sure that the goals of first
+    <guilabel>Target</guilabel> sequence were met successfully, let us access
+    command summary for <guilabel>Prop to Mars Periapsis</guilabel> command by
+    doing the following steps:</para>
 
     <procedure>
       <step>
-        <para>In the <guilabel>Mission</guilabel> tree, right-click <guilabel>Prop to Mars Periapsis</guilabel>, and click on <guilabel>Command Summary</guilabel>.</para>
+        <para>In the <guilabel>Mission</guilabel> tree, right-click
+        <guilabel>Prop to Mars Periapsis</guilabel>, and click on
+        <guilabel>Command Summary</guilabel>.</para>
       </step>
 
       <step>
-        <para>Under <guilabel>Coordinate System</guilabel>, select <guilabel>MarsInertial</guilabel>.</para>
+        <para>Under <guilabel>Coordinate System</guilabel>, select
+        <guilabel>MarsInertial</guilabel>.</para>
       </step>
 
       <step>
-        <para>Under <literal>Hyperbolic Parameters</literal> heading, see the values of <literal>BdotT</literal> and <literal>BdotR</literal>. 
-        Under <literal>Keplerian State</literal>, see the value for <literal>INC</literal>. You can see that the desired B-Plane coordinates 
-        were achieved which result in a 90 degree inclined trajectory: </para>
+        <para>Under <literal>Hyperbolic Parameters</literal> heading, see the
+        values of <literal>BdotT</literal> and <literal>BdotR</literal>. Under
+        <literal>Keplerian State</literal>, see the value for
+        <literal>INC</literal>. You can see that the desired B-Plane
+        coordinates were achieved which result in a 90 degree inclined
+        trajectory:</para>
+
+        <para><literal>BdotT = -0.0000053320678 km</literal></para>
+
+        <para><literal>BdotR = -7000.0000019398 km</literal></para>
+
+        <para><literal>INC = 90.000000039301 deg</literal></para>
+      </step>
+    </procedure>
+
+    <section>
+      <title>Create the Second Target Sequence</title>
+
+      <para>Recall that we still need to create second
+      <guilabel>Target</guilabel> sequence in order to perform Mars Orbit
+      Insertion maneuver to achieve the desired capture orbit. In the
+      <guilabel>Mission</guilabel> tree, we will create the second
+      <guilabel>Target</guilabel> sequence right after the first
+      <guilabel>Target</guilabel> sequence.</para>
+
+      <para>Now let’s create the commands necessary to perform the second
+      <guilabel>Target</guilabel> sequence. <xref
+      linkend="Tut_Mars_B_Plane_Targeting_B_MissionTree_2"/> illustrates the
+      configuration of the <guilabel>Mission</guilabel> tree after you have
+      completed the steps in this section. Notice that in <xref
+      linkend="Tut_Mars_B_Plane_Targeting_B_MissionTree_2"/>, the second
+      <guilabel>Target</guilabel> sequence is created after the first
+      <guilabel>Target</guilabel> sequence. We’ll discuss the second
+      <guilabel>Target</guilabel> sequence after it has been created.</para>
+
+      <figure xml:id="Tut_Mars_B_Plane_Targeting_B_MissionTree_2">
+        <title>Mission Sequence showing first and second Target
+        sequences</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane_Targeting_B_MissionTree_2.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <para>To create the second <guilabel>Target</guilabel> sequence:</para>
+
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Mission</guilabel> tree, right-click on
+          <guilabel>Mission Sequence</guilabel> folder, point to
+          <guilabel>Append</guilabel>, and click <guilabel>Target</guilabel>.
+          This will insert two separate commands: <guilabel>Target2</guilabel>
+          and <guilabel>EndTarget2</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Target2</guilabel> and click
+          <guilabel>Rename</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Type <guilabel>Mars Capture</guilabel> and click
+          <guilabel>OK</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Mars Capture</guilabel>, point to
+          <guilabel>Append</guilabel>, and click <guilabel>Vary</guilabel>. A
+          new command called <guilabel>Vary4</guilabel> will be
+          created.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Vary4</guilabel> and click
+          <guilabel>Rename</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Rename</guilabel> box, type <guilabel>Vary
+          MOI.V</guilabel> and click <guilabel>OK</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Complete the <guilabel>Target</guilabel> sequence by appending
+          the commands in <xref
+          linkend="Tut_Mars_B_Plane_Second_Targeting_CommandTable"/>.</para>
+
+          <para><table colsep="0" frame="topbot" rowsep="0"
+              xml:id="Tut_Mars_B_Plane_Second_Targeting_CommandTable">
+              <title>Additional Second <guilabel>Target</guilabel> Sequence
+              Commands</title>
+
+              <tgroup cols="2">
+                <thead>
+                  <row rowsep="1">
+                    <entry>Command</entry>
+
+                    <entry>Name</entry>
+                  </row>
+                </thead>
+
+                <tbody>
+                  <row>
+                    <entry><guilabel>Maneuver</guilabel></entry>
+
+                    <entry><userinput>Apply MOI</userinput></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>Propagate</guilabel></entry>
+
+                    <entry><userinput>Prop to Mars
+                    Apoapsis</userinput></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>Achieve</guilabel></entry>
+
+                    <entry><userinput>Achieve RMAG</userinput></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </table></para>
+        </step>
+      </procedure>
+
+      <note>
+        <para>Let’s discuss what the second <guilabel>Target</guilabel>
+        sequence does. We know that a maneuver is required for the Mars
+        capture orbit. We also know that the desired radius of capture orbit
+        at apoapsis must be 12,000 km. However, we don’t know the size (or ΔV
+        magnitude) of the <guilabel>MOI</guilabel> maneuver that will
+        precisely achieve the desired orbital conditions. You use the second
+        <guilabel>Target</guilabel> sequence to solve for that precise
+        maneuver value. You must tell GMAT what controls are available (in
+        this case, a single maneuver) and what conditions must be satisfied
+        (in this case, radius magnitude value). Once again, just like in the
+        first <guilabel>Target</guilabel> sequence, here we accomplish this by
+        using the <guilabel>Vary</guilabel> and <guilabel>Achieve</guilabel>
+        commands. Using the <guilabel>Vary</guilabel> command, you tell GMAT
+        what to solve for—in this case, the ΔV value for
+        <guilabel>MOI</guilabel>. You use the <guilabel>Achieve</guilabel>
+        command to tell GMAT what conditions the solution must satisfy—in this
+        case, RMAG value of 12,000 km.</para>
+      </note>
+    </section>
+
+    <section>
+      <title>Create the Final Propagate Command</title>
+
+      <para>We need a <guilabel>Propagate</guilabel> command after the second
+      <guilabel>Target</guilabel> sequence so that we can see our final
+      orbit.</para>
+
+      <procedure>
+        <step>
+          <para>In the <guilabel>Mission</guilabel> tree, right-click
+          <guilabel>End Mars Capture</guilabel>, point to <guilabel>Insert
+          After</guilabel>, and click <guilabel>Propagate</guilabel>. A new
+          <guilabel>Propagate6</guilabel> command will appear.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Propagate6</guilabel> and click
+          <guilabel>Rename</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Type <guilabel>Prop for 1 day</guilabel> and click
+          <guilabel>OK</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Double-click <guilabel>Prop for 1 day</guilabel> to edit its
+          properties.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Propagator</guilabel>, replace
+          <guilabel>NearEarth</guilabel> with
+          <guilabel>NearMars</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Parameter</guilabel>, replace
+          <guilabel>MAVEN.ElapsedSeconds</guilabel> with
+          <guilabel>MAVEN.ElapsedDays</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Condition</guilabel>, replace the value
+          <guilabel>0.0</guilabel> with <guilabel>1</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes</para>
+        </step>
+      </procedure>
+
+      <figure>
+        <title><guilabel>Prop for 1 day</guilabel> Command
+        Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Prop For 1 Day.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Configure the second Target Sequence</title>
+
+      <para>Now that the structure is created, we need to configure various parts of the second <guilabel>Target</guilabel> sequence to do what we want.</para>
+
+    </section>
+
+    <section>
+      <title>Configure the Mars Capture Command</title>
+
+      <procedure>
+        <step>
+          <para>Double-click <guilabel>Mars Capture</guilabel> to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>ExitMode</guilabel> list, click <guilabel>SaveAndContinue</guilabel>. This instructs GMAT to save the final solution of the targeting problem after you run it.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes</para>
+        </step>
+
+      </procedure>
+
+      <figure>
+        <title><guilabel>Mars Capture</guilabel> Command
+        Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Mars Capture.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Configure the Vary MOI.V Command</title>
+
+      <procedure>
+        <step>
+          <para>Double-click <guilabel>Vary MOI.V</guilabel> to edit its
+          properties. Notice that the variable in the
+          <guilabel>Variable</guilabel> box is
+          <guilabel>TCM.Element1</guilabel>. We want
+          <guilabel>MOI.Element1</guilabel> which is the velocity component of <guilabel>MOI</guilabel> in the local VNB coordinate system. So let’s change that.</para>
+        </step>
+
+        <step>
+          <para>Next to <guilabel>Variable</guilabel>, click the
+          <guilabel>Edit</guilabel> button.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Object</guilabel> List, click
+          <guilabel>MOI</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Object Properties</guilabel> list,
+          double-click <guilabel>Element1</guilabel> to move it to the
+          <guilabel>Selected Value(s)</guilabel> list. See the image below for
+          results.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to close the
+          <guilabel>ParameterSelectDialog window</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Initial Value</guilabel> box, type
+          <guilabel>-1.0</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Perturbation</guilabel> box, type
+          <guilabel>0.00001</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Lower</guilabel> box, type
+          <guilabel>-10e300</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Upper</guilabel> box, type
+          <guilabel>10e300</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Max Step</guilabel> box, type
+          <guilabel>0.1</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+        </step>
+      </procedure>
+
+      <figure>
+        <title><guilabel>Vary MOI</guilabel> Parameter Selection</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane_Vary MOI_V Parameter Select.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <figure>
+        <title><guilabel>Vary MOI</guilabel> Command Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Vary MOI_V Command.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Configure the Apply MOI Command</title>
+
+      <procedure>
+        <step>
+          <para>Double-click <guilabel>Apply MOI</guilabel> to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Burn</guilabel> list, click <guilabel>MOI</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+        </step>
+
+      </procedure>
+
+      <figure>
+        <title><guilabel>Apply MOI</guilabel> Command
+        Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Apply MOI.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Configure the Prop to Mars Apoapsis Command</title>
+
+      <procedure>
+        <step>
+          <para>Double-click <guilabel>Prop to Mars Apoapsis</guilabel> to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Propagator</guilabel>, replace <guilabel>NearEarth</guilabel> with <guilabel>NearMars</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Parameter</guilabel>, replace <guilabel>MAVEN.ElapsedSeconds</guilabel> with <guilabel>MAVEN.Mars.Apoapsis</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+        </step>
+
+      </procedure>
+
+      <figure>
+        <title><guilabel>Prop to Mars Apoapsis</guilabel> Command
+        Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Prop to Mars Apoapsis.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Configure the Achieve RMAG Command</title>
+
+      <procedure>
+        <step>
+          <para>Double-click <guilabel>Achieve RMAG</guilabel> to edit its properties.</para>
+        </step>
+
+        <step>
+          <para>Next to <guilabel>Goal</guilabel>, click the <guilabel>Edit</guilabel> button.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Object Properties</guilabel> list, click <guilabel>RMAG</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Under <guilabel>Central Body</guilabel>, select <guilabel>Mars</guilabel> and double-click on <guilabel>RMAG</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to close the <guilabel>ParameterSelectDialog</guilabel> window.</para>
+        </step>
+
+        <step>
+          <para>In the <guilabel>Value</guilabel> box, type <guilabel>12000</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+        </step>
+      </procedure>
+
+      <figure>
+        <title><guilabel>Achieve RMAG</guilabel> Command
+        Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Mars_B_Plane Achieve RMAG.png"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+  </section>
+ 
+  <section>
+    <title>Run the Mission with first and second Target Sequences</title>
+
+    <para>Before running the mission, click <guilabel>Save</guilabel>
+    (<subscript><inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/SaveMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject></subscript>). This will save the additional changes that we implemented in the <guilabel>Mission</guilabel> tree.  Now click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/RunMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject></subscript>). The first <guilabel>Target</guilabel> sequence will converge in one-iteration. 
+      This is because earlier, we stored the solution as the initial conditions. The second <guilabel>Target</guilabel> sequence may converge after 10 to11 iterations.</para>
 
 
+    <para>As the mission runs, you will see GMAT solve the second <guilabel>Target</guilabel> sequence’s targeting problem. 
+	Each iteration and perturbation is shown in <guilabel>MarsView</guilabel> windows in light blue, and the final solution 
+	is shown in red. After the mission completes, the <guilabel>MarsView</guilabel> 3D view should appear as in  the image shown below. 
+	<guilabel>EarthView</guilabel> and <guilabel>SolarSystemView</guilabel> 3D views are same as before. You may want to run the mission several times to see the targeting in progress.</para>
 
-<para><literal>BdotT =  -0.0000053320678 km</literal></para>
-<para><literal>BdotR =  -7000.0000019398 km</literal></para>
-<para><literal>INC  =   90.000000039301 deg</literal></para>
-        
-     </step>
+    <figure>
+      <title>3D view of Mars Capture orbit after MOI maneuver (MarsView)</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_Mars_B_Plane Mars Capture MarsView_2.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
+
+
+    <para>If you were to continue developing this mission, you can store the final solution
+	of the second <guilabel>Target</guilabel> sequence as the initial condition of <guilabel>MOI</guilabel> resource. This is so that
+	when you make small changes, the subsequent runs will take less time. To do this, follow these steps:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, double-click
+        <guilabel>Mars Capture</guilabel> to edit its
+        properties.</para>
+      </step>
+
+      <step>
+        <para>Click Apply Corrections.</para>
+      </step>
+
+      <step>
+        <para>Now re-run the mission. If you inspect the results in the message window, you will see that now
+        the second <guilabel>Target</guilabel> sequence also converges in one iteration. This is because you stored the solution as the 
+        initial condition. Now whenever you re-run the mission, both first and second Target sequences will converge in just one iteration.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, double-click
+        <guilabel>Vary MOI.V</guilabel>, you will notice that the values in
+        <guilabel>Initial Value</guilabel> box have been updated to the final solution of the second
+        <guilabel>Target</guilabel> sequence.</para>
+      </step>
+    </procedure>
+
+    <para>If you want to know MOI maneuver’s delta-V vector values and how
+    much fuel was expended during the maneuver, do the following steps:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, right-click
+        <guilabel>Apply MOI</guilabel>, and click on <guilabel>Command
+        Summary</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Scroll down and under <literal>Maneuver Summary</literal>
+        heading, values for delta-V vector are:</para>
+
+        <para><literal>Delta V Vector:</literal></para>
+
+        <para><literal>Element 1:   -1.6034665169868 km/s</literal></para>
+
+        <para><literal>Element 2:    0.0000000000000 km/s</literal></para>
+
+        <para><literal>Element 3:    0.0000000000000 km/s</literal></para>
+      </step>
+
+      <step>
+        <para>Scroll down and under <literal>Mass depletion from
+        MainTank</literal> heading, <literal>Delta V</literal> and
+        <literal>Mass Change</literal> tells you MOI maneuver’s magnitude and
+        how much fuel was used for the maneuver:</para>
+
+        <para><literal>Delta V:        1.6034665169868 km/s</literal></para>
+
+        <para><literal>Mass change:   -1076.0639629424 kg</literal></para>
+      </step>
 
     </procedure>
 
+    <para>Just to make sure that the goal of second
+    <guilabel>Target</guilabel> sequence was met successfully, let us access
+    command summary for <guilabel>Achieve RMAG</guilabel> command by
+    doing the following steps:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, right-click
+        <guilabel>Achieve RMAG</guilabel>, and click on
+        <guilabel>Command Summary</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Under <guilabel>Coordinate System</guilabel>, select
+        <guilabel>MarsInertial</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Under <literal>Keplerian State</literal> and <literal>and Spherical State</literal> headings, see the
+        values of <literal>TA</literal> and <literal>RMAG</literal>. You can see that the desired radius of the capture orbit at apoapsis was achieved successfully:</para>
+
+        <para><literal>TA   =   180.00000241484 deg</literal></para>
+
+        <para><literal>RMAG =   12000.019889021 km</literal></para>
+
+      </step>
+    </procedure>
   </section>
 </chapter>
