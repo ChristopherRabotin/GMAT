@@ -2382,11 +2382,25 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    std::string lhs;
    StringArray outArray;
    
-   // get output arguments if there was an equal sign
-   if (GmatStringUtil::IsThereEqualSign(desc))
+   // Get the command name, if there is one
+   std::string newDesc = desc;
+   if (!ParseAndSetCommandName(cmd, cmdTypeName, desc, newDesc))
    {
-      index1 = desc.find("=");
-      lhs = desc.substr(0, index1);
+      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+         MessageInterface::ShowMessage("The command is not named\n");
+      #endif
+   }
+   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+      else
+         MessageInterface::ShowMessage("The command is named \"%s\"\n",
+               cmd->GetName().c_str());
+   #endif
+
+   // get output arguments if there was an equal sign
+   if (GmatStringUtil::IsThereEqualSign(newDesc))
+   {
+      index1 = newDesc.find("=");
+      lhs = newDesc.substr(0, index1);
       outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
       index1 = index1 + 1;
    }
@@ -2394,21 +2408,21 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Function Name, Input
    StringArray inArray;
    std::string funcName;
-   std::string::size_type index2 = desc.find("(", index1);
+   std::string::size_type index2 = newDesc.find("(", index1);
    
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage
       ("   Starting index=%u, open parenthesis index=%u\n", index1, index2);
    #endif
    
-   if (index2 == desc.npos)
+   if (index2 == newDesc.npos)
    {      
-      funcName = desc.substr(index1);
+      funcName = newDesc.substr(index1);
    }
    else
    {
-      funcName = desc.substr(index1, index2-index1);
-      std::string rhs = desc.substr(index2);
+      funcName = newDesc.substr(index1, index2-index1);
+      std::string rhs = newDesc.substr(index2);
       rhs = GmatStringUtil::RemoveOuterString(rhs, "(", ")");
       
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
@@ -9025,11 +9039,11 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
                GmatBase* obj = theModerator->GetConfiguredObject(refs[i]);
                if (current->AcceptsObjectType(obj->GetType()) == false)
                   MessageInterface::ShowMessage("Configured object type not allowed\n");
+               #ifdef DEBUG_COMMAND_VALIDATION
+                  else
+                     MessageInterface::ShowMessage("Found!\n");
+               #endif
             }
-            #ifdef DEBUG_COMMAND_VALIDATION
-               else
-                  MessageInterface::ShowMessage("Found!\n");
-            #endif
          }
 
          if (missing.length() > 0)
