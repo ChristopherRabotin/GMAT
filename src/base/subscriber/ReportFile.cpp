@@ -842,6 +842,15 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ReportFile::IsParameterCommandModeSettable(const Integer id) const
 {
+   // Turn these off
+   if ((id == ADD) || (id == FILENAME))
+      return false;
+
+   // Turn on the rest that are ReportFile specific
+   if (id >= SubscriberParamCount)
+      return true;
+
+   // And let the base class handle its own
    return Subscriber::IsParameterCommandModeSettable(id);
 }
 
