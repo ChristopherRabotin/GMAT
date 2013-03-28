@@ -574,11 +574,14 @@ bool Assignment::InterpretAction()
       }
       else // if not an equation, check for unexpected commas on the right-hand-side
       {
-         // Check if all brackets are balanced
-         if (!GmatStringUtil::AreAllBracketsBalanced(rhs, "[({])}"))
-            throw CommandException
-               ("Parentheses or braces are unbalanced on the right-hand-side of "
-                "an assignment command"); 
+         // Check if all brackets are balanced if not enclosed with single quotes
+         if (!GmatStringUtil::IsEnclosedWith(rhs, "'"))
+         {
+            if (!GmatStringUtil::AreAllBracketsBalanced(rhs, "[({])}"))
+               throw CommandException
+                  ("Parentheses or braces are unbalanced on the right-hand-side of "
+                   "an assignment command");
+         }
       }
    }
    
@@ -1505,10 +1508,18 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
            toWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT))
       {
          // To handle Count = Count + 1, old lhsWrapper cannot be deleted here
+         // Note: for sat.X = sat.X + 1; LHS sat.X is ObjectPropertyWrapper but
+         // sat.X is ParameterWrapper since only Parameters are allowed in the
+         // equation - needs an improvment to use wrappers in the equation.
          if (lhsWrapper != toWrapper)
          {
-            lhsOldWrapper = lhsWrapper;
-            lhsWrapper = toWrapper;
+            // Only replace if same wrapper type
+            if (lhsWrapper == NULL ||
+                (lhsWrapper != NULL && lhsWrapper->GetWrapperType() == toWrapper->GetWrapperType()))
+            {
+               lhsOldWrapper = lhsWrapper;
+               lhsWrapper = toWrapper;
+            }
          }
          retval = true;
       }
@@ -1520,8 +1531,13 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
          {
             if (lhsWrapper != toWrapper)
             {
-               lhsOldWrapper = lhsWrapper;
-               lhsWrapper = toWrapper;
+               // Only replace if same wrapper type
+               if (lhsWrapper == NULL ||
+                   (lhsWrapper != NULL && lhsWrapper->GetWrapperType() == toWrapper->GetWrapperType()))
+               {
+                  lhsOldWrapper = lhsWrapper;
+                  lhsWrapper = toWrapper;
+               }
             }
             retval = true;
          }

@@ -237,6 +237,12 @@ void OrbitData::SetReal(Integer item, Real rval)
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
+      ("   Parameter CS        = <%p>'%s'\n", mOutCoordSystem,
+       mOutCoordSystem ? mOutCoordSystem->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("   Sat       CS        = <%p>'%s'\n", satCS,
+       satCS ? satCS->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
       ("   Parameter CS Origin = <%p>'%s'\n", mOutCoordSystem,
        mOutCoordSystem ? mOutCoordSystem->GetOriginName().c_str() : "NULL");
    MessageInterface::ShowMessage
@@ -259,15 +265,20 @@ void OrbitData::SetReal(Integer item, Real rval)
       }
    }
    
-   if (mOutCoordSystem != NULL && mOutCoordSystem != satCS)
+   // Check for different coordinate system (2013.03.28)
+   //if (mOutCoordSystem != NULL && mOutCoordSystem != satCS)
+   if (!mIsParamOriginDep && mOutCoordSystem != NULL && satCS != NULL)
    {
-      ParameterException pe;
-      pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
-                    "requires values to be in the '%s' coordinate system (setting "
-                    "values in different coordinate systems will be implemented in "
-                    "future builds)",  mActualParamName.c_str(),
-                    mSpacecraft->GetName().c_str(), satCS->GetName().c_str());
-      throw pe;
+      if (mOutCoordSystem->GetName() != satCS->GetName())
+      {
+         ParameterException pe;
+         pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
+                       "requires values to be in the '%s' coordinate system (setting "
+                       "values in different coordinate systems will be implemented in "
+                       "future builds)",  mActualParamName.c_str(),
+                       mSpacecraft->GetName().c_str(), satCS->GetName().c_str());
+         throw pe;
+      }
    }
    
    #ifdef DEBUG_ORBITDATA_SET
