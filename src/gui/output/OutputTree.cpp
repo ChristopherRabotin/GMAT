@@ -405,10 +405,13 @@ void OutputTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
 
    //----- Event Reports
-   mEventsItem =
-      AppendItem(output, wxT("Events"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
-                 new GmatTreeItemData(wxT("Events"),
-                                      GmatTree::EVENTS_FOLDER));
+   if (GmatGlobal::Instance()->IsEventLocationAvailable())
+   {
+      mEventsItem =
+         AppendItem(output, wxT("Events"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
+                    new GmatTreeItemData(wxT("Events"),
+                                         GmatTree::EVENTS_FOLDER));
+   }
 
    SetItemImage(mXyPlotItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
