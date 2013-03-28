@@ -11,12 +11,14 @@ vpath %.xml $(srcdir)
 srcdir = ./src
 configdir = ./config
 contribdir = ../build/contrib
+docbookxsldir = $(contribdir)/docbook-xsl-ns-1.78.1
+fopdir = $(contribdir)/fop-1.1
 
 # tools
-FOP = $(JAVA) -Dfop.home=$(contribdir)/fop $(JAVAFLAGS) -jar $(contribdir)/fop/build/fop.jar -c $(configdir)/fop.xconf
+FOP = $(JAVA) -Dfop.home=$(fopdir) $(JAVAFLAGS) -jar $(fopdir)/build/fop.jar -c $(configdir)/fop.xconf
 JAVA = java
 JING = $(JAVA) $(ALL_JAVAFLAGS) -jar $(contribdir)/jing/bin/jing.jar
-XALAN = $(JAVA) -cp $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar:$(contribdir)/docbook-xsl-ns/extensions/xalan27.jar $(ALL_JAVAFLAGS) org.apache.xalan.xslt.Process
+XALAN = $(JAVA) -cp $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar:$(docbookxsldir)/extensions/xalan27.jar $(ALL_JAVAFLAGS) org.apache.xalan.xslt.Process
 
 # flags
 ALL_JAVAFLAGS = -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache.xerces.parsers.XIncludeParserConfiguration $(JAVAFLAGS)
@@ -96,7 +98,7 @@ help-pre.xml: validate-pre $(helpsrc) $(srcfiles)
 	$(XALAN) \
 	    -PARAM profile.condition ug \
 	    -IN $(helpsrc) \
-	    -XSL $(contribdir)/docbook-xsl-ns/profiling/profile.xsl \
+	    -XSL $(docbookxsldir)/profiling/profile.xsl \
 	    -OUT $@
 	$(JING) $(contribdir)/docbook/docbookxi.rng $@
 
@@ -104,7 +106,7 @@ training-pre.xml: validate-pre $(helpsrc) $(srcfiles)
 	$(XALAN) \
 	    -PARAM profile.condition tm \
 	    -IN $(helpsrc) \
-	    -XSL $(contribdir)/docbook-xsl-ns/profiling/profile.xsl \
+	    -XSL $(docbookxsldir)/profiling/profile.xsl \
 	    -OUT $@
 	$(JING) $(contribdir)/docbook/docbookxi.rng $@
 
@@ -122,7 +124,7 @@ training-a4.pdf: training-a4.fo $(fopconf)
 
 help-letter.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
-	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM admon.graphics.path $(docbookxsldir)/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
 	    -IN help-pre.xml \
@@ -132,7 +134,7 @@ help-letter.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 
 training-letter.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
-	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM admon.graphics.path $(docbookxsldir)/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
 	    -IN training-pre.xml \
@@ -142,7 +144,7 @@ training-letter.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 
 help-a4.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
-	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM admon.graphics.path $(docbookxsldir)/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
 	    -IN help-pre.xml \
@@ -152,7 +154,7 @@ help-a4.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 
 training-a4.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
-	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM admon.graphics.path $(docbookxsldir)/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
 	    -IN training-pre.xml \
@@ -166,7 +168,7 @@ help.html: help-pre.xml files/style.css
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
-	    -XSL $(contribdir)/docbook-xsl-ns/html/docbook.xsl \
+	    -XSL $(docbookxsldir)/html/docbook.xsl \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
@@ -179,7 +181,7 @@ html/index.html: help-pre.xml files/style.css
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
-	    -XSL $(contribdir)/docbook-xsl-ns/html/chunkfast.xsl \
+	    -XSL $(docbookxsldir)/html/chunkfast.xsl \
 	    $(ALL_XALANFLAGS)
 
 files/style.css: $(srcdir)/files/style.css
@@ -202,7 +204,7 @@ help.chm: help-pre.xml files/style.css
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
-	    -XSL $(contribdir)/docbook-xsl-ns/htmlhelp/htmlhelp.xsl \
+	    -XSL $(docbookxsldir)/htmlhelp/htmlhelp.xsl \
 	    $(ALL_XALANFLAGS)
 	cp -pR files chm/files
 	-hhc chm/htmlhelp.hhp
@@ -211,7 +213,7 @@ help.chm: help-pre.xml files/style.css
 fo.titlepage.templates.xsl: xform/fo.titlepage.templates.xml
 	$(XALAN) \
 	-IN $< \
-	-XSL $(contribdir)/docbook-xsl-ns/template/titlepage.xsl \
+	-XSL $(docbookxsldir)/template/titlepage.xsl \
 	-OUT $@
 
 %.pdf: %.fo
@@ -219,7 +221,7 @@ fo.titlepage.templates.xsl: xform/fo.titlepage.templates.xml
 
 %.fo: %.xml
 	$(XALAN) \
-	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
+	    -PARAM admon.graphics.path $(docbookxsldir)/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
 	    -IN $< \

@@ -5,7 +5,7 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
     version="1.0"> 
 
-    <xsl:import href="../../build/contrib/docbook-xsl-ns/fo/docbook.xsl"/>
+    <xsl:import href="../../build/contrib/docbook-xsl-ns-1.78.1/fo/docbook.xsl"/>
     
     <!-- Title page -->
     <xsl:import href="../fo.titlepage.templates.xsl"/>
