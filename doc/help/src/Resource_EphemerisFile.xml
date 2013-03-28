@@ -1099,24 +1099,20 @@
       during last four days of propagation is sent to text file called
       ‘EphemerisFile1.eph’:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create EphemerisFile anEphmerisFile
+Create EphemerisFile anEphmerisFile
 
-  anEphmerisFile.Spacecraft = aSat
-  anEphmerisFile.Filename = 'EphemerisFile1.eph'
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile1.eph'
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle anEphmerisFile Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle anEphmerisFile On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle anEphmerisFile Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle anEphmerisFile On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
   </refsection>
 
@@ -1130,21 +1126,17 @@
       CCSDS file format. Ephemeris data is sent to text file called
       ‘EphemerisFile2.eph’:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create EphemerisFile anEphmerisFile
+Create EphemerisFile anEphmerisFile
 
-  anEphmerisFile.Spacecraft = aSat
-  anEphmerisFile.Filename = 'EphemerisFile2.eph'
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile2.eph'
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -1153,34 +1145,30 @@
       discontinuous event like an impulsive burn. Ephemeris data is sent to
       text file called ‘EphemerisFile3.eph’:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ImpulsiveBurn TOI
-  Create DifferentialCorrector aDC
+Create ImpulsiveBurn TOI
+Create DifferentialCorrector aDC
 
-  Create EphemerisFile anEphmerisFile
+Create EphemerisFile anEphmerisFile
 
-  anEphmerisFile.Spacecraft = aSat
-  anEphmerisFile.Filename = 'EphemerisFile3.eph'
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile3.eph'
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
-  Target aDC
-  Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
-  Upper = 3.14159, MaxStep = 0.5})
-    Maneuver TOI(aSat)
-    Propagate aProp(aSat) {aSat.Earth.Apoapsis}
-    Achieve aDC(aSat.Earth.RMAG = 42165)
-  EndTarget
+Target aDC
+Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+Upper = 3.14159, MaxStep = 0.5})
+  Maneuver TOI(aSat)
+  Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+  Achieve aDC(aSat.Earth.RMAG = 42165)
+EndTarget
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
