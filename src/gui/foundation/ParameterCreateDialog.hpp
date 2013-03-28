@@ -47,6 +47,7 @@ public:
    bool IsParamCreated()
       { return mIsParamCreated; }
    virtual void SetParameterType( ParameterType paramType );
+   virtual void OnHelp(wxCommandEvent &event);
    
    // OK button works like Close so reimplement here
    virtual void OnOK(wxCommandEvent &event);

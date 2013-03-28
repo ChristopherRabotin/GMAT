@@ -20,6 +20,9 @@
 
 #include "ParameterCreateDialog.hpp"
 #include "ParameterSelectDialog.hpp"
+#include "GmatMainFrame.hpp"
+#include "FileManager.hpp"
+#include "FileUtil.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "GmatAppData.hpp"              // for GetResourceTree()
 #include "ResourceTree.hpp"
@@ -33,6 +36,7 @@
 #include "ArraySetupDialog.hpp"
 #include "bitmaps/Erase.xpm"
 
+#include <wx/help.h>
 #include <wx/tglbtn.h>
 #include <wx/notebook.h>
 #include <wx/config.h>
@@ -862,6 +866,86 @@ void ParameterCreateDialog::OnSelectButtonClick(wxCommandEvent& event)
          mVarValueTextCtrl->Clear();
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnHelp(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnHelp(wxCommandEvent &event)
+{
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage
+      ("GmatDialog::OnHelp() entered, mObject=<%p><%s>'%s'\n", mObject,
+       mObject ? mObject->GetTypeName().c_str() : "NULL",
+       mObject ? mObject->GetName().c_str() : "NULL");
+   #endif
+   
+   wxString objLink;
+   wxString sHTML;
+   wxString baseHelpLink;
+   char msgBuffer[255];
+   
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   pConfig->SetPath(wxT("/Help"));
+   objLink = "VariableArrayString";
+   
+    wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
+	if (theHelpController != NULL)
+	{
+		#ifdef DEBUG_GMAT_DIALOG_HELP
+		MessageInterface::ShowMessage
+			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
+			"File to display=%s\n", theHelpController,
+			s);
+		#endif
+		// displays chm, not html
+		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
+		sHTML = objLink+".html";
+		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(sHTML));
+
+		if (!theHelpController->DisplaySection(objLink)) 
+			theHelpController->DisplayContents();
+	}
+	else
+	{
+	   // get base help link if available
+       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
+	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
+   
+	   #ifdef DEBUG_GMAT_DIALOG_HELP
+	   MessageInterface::ShowMessage
+		  ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
+		   objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
+	   #endif
+   
+	   // open separate window to show help
+	   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+	   #ifdef DEBUG_GMAT_DIALOG_HELP
+	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
+	   #endif
+
+       // if path is relative, try to append it to gmat root 
+	   if (GmatFileUtil::IsPathRelative(objLink.c_str()))
+	   {
+			FileManager *fm = FileManager::Instance();
+			if (GmatStringUtil::EndsWithPathSeparator(fm->GetRootPath()))
+				objLink = fm->GetRootPath().c_str() + objLink;
+			else
+			{
+			   wxString pathSep = GmatFileUtil::GetPathSeparator().c_str();
+				objLink = fm->GetRootPath().c_str() + pathSep + objLink;
+			}
+
+	   }
+	   wxLaunchDefaultBrowser(objLink);
+	}
+   
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage("GmatDialog::OnHelp() leaving\n");
+   #endif
+
 }
 
 
