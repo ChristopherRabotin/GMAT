@@ -627,24 +627,16 @@
       ways. The default naming convention for a report file when using
       <guilabel>FileName</guilabel> field is shown below:</para>
 
-      <programlisting>
-        <code>
-  Create ReportFile aReport
-  aReport.Filename = 'ReportFile1.txt'
-  aReport.WriteReport = true
-        </code>
-      </programlisting>
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.WriteReport = true</code></programlisting>
 
       <para>An alternate method for naming a report file is to name the file
       without using any single quotes around the report file’s name.</para>
 
-      <programlisting>
-        <code>
-  Create ReportFile aReport
-  aReport.Filename = ReportFile1.txt
-  aReport.WriteReport = true
-        </code>
-      </programlisting>
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.WriteReport = true</code></programlisting>
     </refsection>
 
     <refsection>
@@ -660,20 +652,16 @@
       snippet that shows how to report epoch and selected orbital elements
       using the <guilabel>.Add</guilabel> field:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create ReportFile aReport
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
 
-  aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, ...
-  aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN}
+aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, ...
+aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN}
 
-  Create Propagator aProp
+Create Propagator aProp
 
-  BeginMissionSequence
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
-        </code>
-      </programlisting>
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></programlisting>
 
       <para>GMAT’s <guilabel>ReportFile.Add</guilabel> field will not report
       selected data to the report file at each propagation step if
@@ -687,24 +675,20 @@
       script snippet that shows how to report epoch and selected orbital
       elements using the <guilabel>Report </guilabel>command:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create ReportFile aReport
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
 
-  Create Propagator aProp
+Create Propagator aProp
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
-  aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
 
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
-  aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
-        </code>
-      </programlisting>
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN</code></programlisting>
     </refsection>
 
     <refsection>
@@ -716,27 +700,19 @@
       field name <guilabel>WriteReport</guilabel>, as shown in the example
       below:</para>
 
-      <programlisting>
-        <code>
-  Create ReportFile aReport
-  aReport.Filename = ReportFile1.txt
-  aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA}
-  aReport.WriteReport = false
-        </code>
-      </programlisting>
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA}
+aReport.WriteReport = false</code></programlisting>
 
       <para>Now assume that at the same time, you decide to utilize
       <guilabel>Report</guilabel> command in the <guilabel>Mission</guilabel>
       tree, as shown in the example script snippet below:</para>
 
-      <programlisting>
-        <code>
-  BeginMissionSequence;
-  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
-  Propagate aProp(aSat) {aSat.Earth.Periapsis}
-  Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
-        </code>
-      </programlisting>
+      <programlisting><code>BeginMissionSequence;
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC</code></programlisting>
 
       <para>At this point, you may think that since false option is selected
       under the field name <guilabel>WriteReport</guilabel> in
@@ -823,14 +799,10 @@
       <literal>'ReportFile1.txt'</literal>report is written to the Output
       folder located in the main directory where GMAT is installed:</para>
 
-      <programlisting>
-        <code>
-  Create ReportFile aReport
+      <programlisting><code>Create ReportFile aReport
 
-  aReport.Filename = 'ReportFile1.txt'
-  aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}
-        </code>
-      </programlisting>
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}</code></programlisting>
 
       <para>An alternate method where report files can be written is by
       defining a relative path. You can define the relative path in GMAT’s
@@ -881,24 +853,20 @@
       Spacecraft’s cartesian position vector is reported to the report
       file.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ReportFile aReport
-  aReport.Filename = 'ReportFile1.txt'
-  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
-  aSat.EarthMJ2000Eq.Z}
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.UTCGregorian, aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aReport Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle aReport On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle aReport Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aReport On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -911,19 +879,16 @@
       empty, then GMAT throws in an exception. Below is a sample script
       snippet that shows an example of empty brackets. If you were to run this
       script, then GMAT throws in an execption reminding you that brackets
-      cannot be left empty. </para>
+      cannot be left empty.</para>
 
-      <programlisting>    <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
-  Create ReportFile aReport
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
+Create ReportFile aReport
 
-  aReport.Add = {}
+aReport.Add = {}
 
-  BeginMissionSequence
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
-        </code>
-      </programlisting>
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></programlisting>
     </refsection>
   </refsection>
 
@@ -934,49 +899,43 @@
       <para>Propagate an orbit and write cartesian state to a report file at
       every integrator step</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ReportFile aReport
-  GMAT aReport.Filename = 'ReportFile1.txt'
-  aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
-  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
-  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ}
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+</code></programlisting>
     </informalexample>
 
     <informalexample>
       <para>Propagate an orbit for 1 day and write cartesian state to a report
       file at specific points in your mission</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ReportFile aReport
-  GMAT aReport.Filename = 'ReportFile1.txt'
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
-  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
-  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
 
-  Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
-  aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
-  aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
-        </code>
-      </programlisting>
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
