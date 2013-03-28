@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>ResourceName</primary>
+    <primary>Script Language</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>ResourceName</refentrytitle>
+    <refentrytitle>Script Language</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,7 +22,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>ResourceName</refname>
+    <refname>Script Language</refname>
 
     <refpurpose>The GMAT script language</refpurpose>
   </refnamediv>
@@ -38,8 +38,8 @@
     <para>At the highest level, a GMAT script is made up of two sections:
     Initialization and the Mission Sequence. These sections each contain
     statements, but they have different rules about which sorts of statements
-    are valid. The BeginMissionSequence command defines the beginning of the
-    Mission Sequence section.</para>
+    are valid. The <guilabel>BeginMissionSequence</guilabel> command defines
+    the beginning of the Mission Sequence section.</para>
 
     <screenshot>
       <mediaobject>
@@ -61,7 +61,8 @@
 
       <itemizedlist>
         <listitem>
-          <para>resource creation statements (the Create statement)</para>
+          <para>resource creation statements (the <guilabel>Create</guilabel>
+          statement)</para>
         </listitem>
 
         <listitem>
@@ -91,15 +92,16 @@
       </itemizedlist>
 
       <para>The Mission Sequence begins at the first instance of the
-      BeginMissionSequence command; therefore, this must be the first command
-      statement in the script file. For backwards compatibility, if the
-      BeginMissionSequence command is missing, the Mission Sequence begins
-      with the first command encountered.</para>
+      <guilabel>BeginMissionSequence</guilabel> command; therefore, this must
+      be the first command statement in the script file. For backwards
+      compatibility, if the <guilabel>BeginMissionSequence</guilabel> command
+      is missing, the Mission Sequence begins with the first command
+      encountered.</para>
 
       <para>In the GUI, the Mission Sequence section maps directly to the
       Mission tree. Each statement in the script (with the exception of the
-      BeginScript/EndScript compound command) is displayed as a single element
-      in the tree.</para>
+      <guilabel>BeginScript</guilabel>/<guilabel>EndScript</guilabel> compound
+      command) is displayed as a single element in the tree.</para>
     </refsection>
   </refsection>
 
@@ -111,8 +113,9 @@
 
       <para>A GMAT script consists of a single file containing characters from
       the 7-bit US-ASCII character set. The script language is case-sensitive,
-      so this line creates four different Variable resources: Create Variable
-      x X y Y</para>
+      so this line creates four different Variable resources:</para>
+
+      <para><code>Create Variable x X y Y</code></para>
 
       <para>The script language is made up of lines. A line can be:</para>
 
@@ -122,16 +125,18 @@
         </listitem>
 
         <listitem>
-          <para>a comment (see Comments, below)</para>
+          <para>a comment (see <xref linkend="ScriptLanguage_Comments"
+          xrefstyle="select:title"/>, below)</para>
         </listitem>
 
         <listitem>
-          <para>a statement (see Statements)</para>
+          <para>a statement (see <xref linkend="ScriptLanguage_Statements"
+          xrefstyle="select:title"/>)</para>
         </listitem>
       </itemizedlist>
 
       <para>Statement lines can be split over multiple physical lines with the
-      continuation marker (“...”).</para>
+      continuation marker (“<literal>...</literal>”).</para>
     </refsection>
 
     <refsection>
@@ -176,12 +181,12 @@
       are converted to spaces internally.</para>
     </refsection>
 
-    <refsection>
+    <refsection xml:id="ScriptLanguage_Comments">
       <title>Comments</title>
 
-      <para>Comments begin with the percent symbol (“%”, hex: 25) and extend
-      to the end of the line. There is no multi-line or embedded comment in
-      the script language.</para>
+      <para>Comments begin with the percent symbol (“<literal>%</literal>”,
+      hex: 25) and extend to the end of the line. There is no multi-line or
+      embedded comment in the script language.</para>
     </refsection>
 
     <refsection>
@@ -195,13 +200,9 @@
       GMAT, and can be mixed in a single path. The following three paths are
       considered identical:</para>
 
-      <programlisting>
-        <code>
-  data/planetary_ephem/spk/de421.bsp
-  data\planetary_ephem\spk\de421.bsp
-  data\planetary_ephem/spk\de421.bsp
-        </code>
-      </programlisting>
+      <programlisting><code>data/planetary_ephem/spk/de421.bsp
+data\planetary_ephem\spk\de421.bsp
+data\planetary_ephem/spk\de421.bsp</code></programlisting>
 
       <para>Absolute paths are passed to the underlying operating system
       as-is, aside from normalizing the slashes.</para>
@@ -211,13 +212,15 @@
       file. For details, see the reference documentation for each resource
       type.</para>
 
-      <para>File paths are written as string literals (see the String Literal
-      section under Data Types). Quotes are mandatory if the path contains
-      spaces, but are optional otherwise.</para>
+      <para>File paths are written as string literals (see <xref
+      linkend="ScriptLanguage_Strings" xrefstyle="select:title"/> under <xref
+      linkend="ScriptLanguage_DataTypes" xrefstyle="select:title"/>). Quotes
+      are mandatory if the path contains spaces, but are optional
+      otherwise.</para>
     </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="ScriptLanguage_DataTypes">
     <title>Data Types</title>
 
     <refsection>
@@ -227,8 +230,8 @@
         <title>Integers</title>
 
         <para>Integers are written as a sequence of literal digits, with no
-        decimal. Preceding zeros and prepended signs (<code>+</code> or
-        <code>-</code>) are allowed. Scientific notation is not
+        decimal. Preceding zeros and prepended signs (<literal>+</literal> or
+        <literal>-</literal>) are allowed. Scientific notation is not
         permitted.</para>
       </refsection>
 
@@ -240,34 +243,37 @@
 
         <itemizedlist>
           <listitem>
-            <para>12 (whole number)</para>
+            <para><literal>12</literal> (whole number)</para>
           </listitem>
 
           <listitem>
-            <para>12.5 (decimal)</para>
+            <para><literal>12.5</literal> (decimal)</para>
           </listitem>
 
           <listitem>
-            <para>1.25e1 or 1.25e-1 (scientific notation)</para>
+            <para><literal>1.25e1</literal> or <literal>1.25e-1</literal>
+            (scientific notation)</para>
           </listitem>
         </itemizedlist>
 
         <para>In all formats, the base can contain preceding or trailing
         zeros. In scientific notation, the exponent can be prepended by a sign
-        (+ or -) and can contain preceding zeros, but cannot contain a
-        decimal. The exponent delimiter is case-insensitive (e.g. ‘e’ or
-        ‘E’).</para>
+        (<literal>+</literal> or <literal>-</literal>) and can contain
+        preceding zeros, but cannot contain a decimal. The exponent delimiter
+        is case-insensitive (e.g. "<literal>e</literal>" or
+        "<literal>E</literal>").</para>
       </refsection>
 
-      <refsection>
+      <refsection xml:id="ScriptLanguage_Strings">
         <title>Strings</title>
 
-        <para>String literals are delimited by single-quote characters (“'”,
-        hex: 27).</para>
+        <para>String literals are delimited by single-quote characters
+        (“<literal>'</literal>”, hex: 27).</para>
 
         <para>All language-supported characters are allowed in strings, with
         the exceptions below. There are no escape characters or character
-        substitute sequences (such as “\n” for line feed).</para>
+        substitute sequences (such as “<literal>\n</literal>” for line
+        feed).</para>
 
         <para>In Initialization, the following characters are not allowed in
         string literals:</para>
@@ -283,7 +289,7 @@
           </listitem>
 
           <listitem>
-            <para>percent character (“%”) (hex: 25)</para>
+            <para>percent character (“<literal>%</literal>”) (hex: 25)</para>
           </listitem>
         </itemizedlist>
 
@@ -301,16 +307,18 @@
           </listitem>
 
           <listitem>
-            <para>percent character (“%”) (hex: 25)</para>
+            <para>percent character (“<literal>%</literal>”) (hex: 25)</para>
           </listitem>
 
           <listitem>
-            <para>brackets (“(“, “)”, “[“, “]”, “{“, “}”) (hex: 28, 29, 5B,
+            <para>brackets (“<literal>(</literal>“, “<literal>)</literal>”,
+            “<literal>[</literal>“, “<literal>]</literal>”,
+            “<literal>{</literal>“, “<literal>}</literal>”) (hex: 28, 29, 5B,
             5D, 7B, 7D)</para>
           </listitem>
 
           <listitem>
-            <para>semicolon (“;”) (hex: 3B)</para>
+            <para>semicolon (“<literal>;</literal>”) (hex: 3B)</para>
           </listitem>
         </itemizedlist>
 
@@ -330,11 +338,13 @@
 
         <itemizedlist>
           <listitem>
-            <para>true (alias: on)</para>
+            <para><literal>true</literal> (alias:
+            <literal>on</literal>)</para>
           </listitem>
 
           <listitem>
-            <para>false (alias: off)</para>
+            <para><literal>false</literal> (alias:
+            <literal>off</literal>)</para>
           </listitem>
         </itemizedlist>
 
@@ -345,10 +355,11 @@
         <title>Enumerated Values</title>
 
         <para>Many resource fields accept enumerated values. For example,
-        Spacecraft.DateFormat accepts one of 10 values (A1ModJulian,
-        A1Gregorian, etc.). Enumerated values are written as string literals.
-        Quotes are always optional, as none contain spaces or special
-        characters.</para>
+        <guilabel>Spacecraft</guilabel>.<guilabel>DateFormat</guilabel>
+        accepts one of 10 values (<guilabel>A1ModJulian</guilabel>,
+        <guilabel>A1Gregorian</guilabel>, etc.). Enumerated values are written
+        as string literals. Quotes are always optional, as none contain spaces
+        or special characters.</para>
       </refsection>
 
       <refsection>
@@ -369,15 +380,19 @@
 
         <para>Resources in GMAT are instances of a base resource type that are
         given user-defined names and store data independently of other
-        resources of the same type. Resource types include Spacecraft,
-        GroundStation, and Variable. They cannot be used directly; they must
-        first be instantiated with the Create statement. For example: Create
-        Spacecraft aSat</para>
+        resources of the same type. Resource types include
+        <guilabel>Spacecraft</guilabel>, <guilabel>GroundStation</guilabel>,
+        and <guilabel>Variable</guilabel>. They cannot be used directly; they
+        must first be instantiated with the <guilabel>Create</guilabel>
+        statement. For example:</para>
 
-        <para>In the example, Spacecraft is the resource type and aSat is the
-        resource. This is similar to the concept of classes and objects in
-        object-oriented programming, where GMAT’s resource types are analogous
-        to classes and its resources are analogous to objects.</para>
+        <para><code>Create Spacecraft aSat</code></para>
+
+        <para>In the example, <code>Spacecraft</code> is the resource type and
+        <code>aSat</code> is the resource. This is similar to the concept of
+        classes and objects in object-oriented programming, where GMAT’s
+        resource types are analogous to classes and its resources are
+        analogous to objects.</para>
       </refsection>
 
       <refsection>
@@ -388,12 +403,14 @@
         <itemizedlist>
           <listitem>
             <para>Name must be made up of ASCII letters, numbers, or the
-            underscore character (“_”). This corresponds to hex values 30–39,
-            41–5A, 5F, and 61–7A.</para>
+            underscore character (“<literal>_</literal>”). This corresponds to
+            hex values 30–39, 41–5A, 5F, and 61–7A.</para>
           </listitem>
 
           <listitem>
-            <para>Name must begin with a letter (A–Z or a–z, hex: 41–5A or
+            <para>Name must begin with a letter
+            (<literal>A</literal>–<literal>Z</literal> or
+            <literal>a</literal>–<literal>z</literal>, hex: 41–5A or
             61–7A)</para>
           </listitem>
 
@@ -412,35 +429,33 @@
 
         <para>Resource names must be unique within a script. If a script
         attempts to create multiple resources that have the same
-        case-sensitive name, the first Create statement in the script with
-        that name is executed and all subsequent ones are ignored. The
-        conflict is noted in a warning message.</para>
+        case-sensitive name, the first <guilabel>Create</guilabel> statement
+        in the script with that name is executed and all subsequent ones are
+        ignored. The conflict is noted in a warning message.</para>
 
         <para>Command names and keywords are reserved. They cannot be used as
-        resource names. See the Keywords section for a list of
-        keywords.</para>
+        resource names. See the <xref linkend="ScriptLanguage_Keywords"
+        xrefstyle="select:title"/> section for a list of keywords.</para>
 
-        <para>Built-in function names (like sin or cos) can be used as
-        resource names with one exception: a reference to, for example,
-        “sin(1)” on the right-hand side of an equal sign will be interpreted
-        as a call to the sin built-in function, not element 1 of an Array
-        resource named sin. The same is true for the other built-in
-        functions.</para>
+        <para>Built-in function names (like <literal>sin</literal> or
+        <literal>cos</literal>) can be used as resource names with one
+        exception: a reference to, for example, “<literal>sin(1)</literal>” on
+        the right-hand side of an equal sign will be interpreted as a call to
+        the <literal>sin</literal> built-in function, not element 1 of an
+        <guilabel>Array</guilabel> resource named <guilabel>sin</guilabel>.
+        The same is true for the other built-in functions.</para>
 
-        <para>Resource type names (like “Spacecraft”) can be used as resource
-        names. In such an instance, the conflict is resolved by the context.
-        For example:</para>
+        <para>Resource type names (like “<guilabel>Spacecraft</guilabel>”) can
+        be used as resource names. In such an instance, the conflict is
+        resolved by the context. For example:</para>
 
-        <programlisting>
-          <code>
-  Create Spacecraft Spacecraft
-  Create Spacecraft aSat
-          </code>
-        </programlisting>
+        <programlisting><code>Create Spacecraft Spacecraft
+Create Spacecraft aSat</code></programlisting>
 
-        <para>In the example, GMAT knows by context that in the second Create
-        statement, the argument “Spacecraft” refers to the resource type, not
-        the resource instance created in the first statement.</para>
+        <para>In the example, GMAT knows by context that in the second
+        <guilabel>Create</guilabel> statement, the argument
+        “<code>Spacecraft</code>” refers to the resource type, not the
+        resource instance created in the first statement.</para>
       </refsection>
     </refsection>
 
@@ -458,14 +473,11 @@
         one-dimensional arrays of literals are supported. See the following
         examples.</para>
 
-        <programlisting>
-          <code>
-  anOrbitView.DrawObject = [true true]             % boolean array
-  anOrbitView.OrbitColor = [255 32768]             % integer array
-  anOrbitView.ViewPointVector = [3e4, 1.2, -14]    % real array
-  aSpacecraft.OrbitSpiceKernelName = {'file1.bsp', 'file2.bsp'}  % string array
-          </code>
-        </programlisting>
+        <programlisting><code>anOrbitView.DrawObject = [true true]             % boolean array
+anOrbitView.OrbitColor = [255 32768]             % integer array
+anOrbitView.ViewPointVector = [3e4, 1.2, -14]    % real array
+aSpacecraft.OrbitSpiceKernelName = ...
+    {'file1.bsp', 'file2.bsp'}                   % string array</code></programlisting>
       </refsection>
 
       <refsection>
@@ -478,12 +490,8 @@
         supported. The values can optionally be surrounded by single quotes.
         See the following example.</para>
 
-        <programlisting>
-          <code>
- aForceModel.PointMasses = {'Luna', Mars}    % array of resource references
- aReport.Add = {Sat1.X, 'Sat1.Y', Sat1.Z}    % array of parameter references
-          </code>
-        </programlisting>
+        <programlisting><code>aForceModel.PointMasses = {'Luna', Mars}  % array of resource references
+aReport.Add = {Sat1.X, 'Sat1.Y', Sat1.Z}  % array of parameter references</code></programlisting>
       </refsection>
 
       <refsection>
@@ -498,22 +506,22 @@
         individual commands.</para>
       </refsection>
 
-      <refsection>
+      <refsection xml:id="ScriptLanguage_Keywords">
         <title>Keywords</title>
 
         <para>The script language recognized these reserved keywords:</para>
 
         <itemizedlist>
           <listitem>
-            <para>Create</para>
+            <para><literal>Create</literal></para>
           </listitem>
 
           <listitem>
-            <para>GMAT</para>
+            <para><literal>GMAT</literal></para>
           </listitem>
 
           <listitem>
-            <para>function</para>
+            <para><literal>function</literal></para>
           </listitem>
         </itemizedlist>
 
@@ -527,8 +535,10 @@
     <title>Expressions</title>
 
     <para>The only types of expressions common to multiple commands are
-    logical expressions, which are used by the If/Else and While commands.
-    They are documented here instead of in both command references.</para>
+    logical expressions, which are used by the
+    <guilabel>If</guilabel>/<guilabel>Else</guilabel> and
+    <guilabel>While</guilabel> commands. They are documented here instead of
+    in both command references.</para>
 
     <refsection>
       <title>Relational Operators</title>
@@ -544,63 +554,60 @@
 
           <tbody>
             <row>
-              <entry><guilabel>&lt;</guilabel></entry>
+              <entry><literal>&lt;</literal></entry>
 
-              <entry><para> Less than </para></entry>
+              <entry><para> less than </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>&lt;=</guilabel></entry>
+              <entry><literal>&lt;=</literal></entry>
 
-              <entry><para> Less than or equal to </para></entry>
+              <entry><para> less than or equal to </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>&gt;</guilabel></entry>
+              <entry><literal>&gt;</literal></entry>
 
-              <entry><para> Greater than </para></entry>
+              <entry><para> greater than </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>&gt;</guilabel></entry>
+              <entry><literal>&gt;</literal></entry>
 
-              <entry><para> Greater than or equal to </para></entry>
+              <entry><para> greater than or equal to </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>==</guilabel></entry>
+              <entry><literal>==</literal></entry>
 
-              <entry><para> Equal to </para></entry>
+              <entry><para> equal to </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>~=</guilabel></entry>
+              <entry><literal>~=</literal></entry>
 
-              <entry><para> Not equal to </para></entry>
+              <entry><para> not equal to </para></entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
 
       <para>The relational operators are scalar operators; they do not operate
-      on Array resources (only individual elements).</para>
+      on <guilabel>Array</guilabel> resources (only individual
+      elements).</para>
 
       <para>Each relational operator operates on the values of its arguments,
       not on their identity. Consider the example:</para>
 
-      <programlisting>
-        <code>
-  Create Variable x y
-  x = 5
-  y = 5
+      <programlisting><code>Create Variable x y
+x = 5
+y = 5
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  If x == y
+If x == y
     % body
-  EndIf
-        </code>
-      </programlisting>
+EndIf</code> </programlisting>
     </refsection>
 
     <refsection>
@@ -617,16 +624,16 @@
 
           <tbody>
             <row>
-              <entry><guilabel>&amp;</guilabel></entry>
+              <entry><literal>&amp;</literal></entry>
 
-              <entry><para> Logical AND (short-circuit operator)
+              <entry><para> logical AND (short-circuit operator)
               </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>|</guilabel></entry>
+              <entry><literal>|</literal></entry>
 
-              <entry><para> Logical OR </para></entry>
+              <entry><para> logical OR </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -649,41 +656,32 @@
       numeric values are not interpreted as truth or falsehood. See the
       following examples:</para>
 
-      <programlisting>
-        <code>
-  1 == 5          % false
-  1 ~= 5          % true
-  true            % error
-  1               % error
-  A               % where "A" is an Array resource; error
-  1 == 5 &lt;= 3     % error
-        </code>
-      </programlisting>
+      <programlisting><code>1 == 5          % false
+1 ~= 5          % true
+true            % error
+1               % error
+A               % where "A" is an Array resource; error
+1 == 5 &lt;= 3     % error</code></programlisting>
 
       <para>Logical expressions must contain at least one relational
       expression. Multiple relational expressions are combined using logical
       operators. All relational expressions are evaluated first, from left to
       right, then the full logical expression is evaluated from left to right,
-      though the short-circuit AND operator (“&amp;”) may terminate the full
-      evaluation. Parentheses are not allowed. See the following
-      examples:</para>
+      though the short-circuit AND operator (“<literal>&amp;</literal>”) may
+      terminate the full evaluation. Parentheses are not allowed. See the
+      following examples:</para>
 
-      <programlisting>
-        <code>
-1 == 1                   % true
+      <programlisting><code>1 == 1                   % true
 2 ~= 4 | 3 == 3          % true
 8 &gt;= 3 &amp; 3 &lt; 4           % true
 2 &lt; 4 &amp; 1 &gt; 3 | 5 == 5   % true
 2 &lt; 4 &amp; (1 &gt; 3 | 5 == 5) % error
 1 &amp; 1                    % error
-true | false             % error
-
-        </code>
-      </programlisting>
+true | false             % error</code>      </programlisting>
     </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="ScriptLanguage_Statements">
     <title>Statements</title>
 
     <refsection>
@@ -693,7 +691,7 @@ true | false             % error
 
       <orderedlist>
         <listitem>
-          <para>Optional GMAT prefix</para>
+          <para>Optional "<literal>GMAT </literal>" prefix</para>
         </listitem>
 
         <listitem>
@@ -711,17 +709,18 @@ true | false             % error
       </orderedlist>
 
       <para>Any statement in the script may be prefixed by the characters
-      “GMAT “. This prefix is optional and has no effect, but is supported for
-      backward compatibility.</para>
+      “<literal>GMAT </literal>“. This prefix is optional and has no effect,
+      but is supported for backward compatibility.</para>
 
       <para>A statement can be split over multiple physical lines by using the
-      line continuation marker, three sequential period characters (“...”,
-      hex: 2E2E2E), before each line break within the statement.</para>
+      line continuation marker, three sequential period characters
+      (“<literal>...</literal>”, hex: 2E2E2E), before each line break within
+      the statement.</para>
 
-      <para>Any statement may be terminated with a semicolon character (“;”,
-      hex: 3B). The semicolon is optional and has no effect, but is supported
-      for backward compatibility. Multiple statements cannot be combined on a
-      line.</para>
+      <para>Any statement may be terminated with a semicolon character
+      (“<literal>;</literal>”, hex: 3B). The semicolon is optional and has no
+      effect, but is supported for backward compatibility. Multiple statements
+      cannot be combined on a line.</para>
 
       <para>White space may occur before or after a statement, or between any
       of the components listed above. It is also generally allowed anywhere
@@ -732,13 +731,14 @@ true | false             % error
     <refsection>
       <title>The Create Statement</title>
 
-      <para>The Create statement is a special statement that creates resources
-      and assigns them names. It is only valid in the Initialization section
-      of the script. It has the following components:</para>
+      <para>The <guilabel>Create</guilabel> statement is a special statement
+      that creates resources and assigns them names. It is only valid in the
+      Initialization section of the script. It has the following
+      components:</para>
 
       <orderedlist>
         <listitem>
-          <para>Create keyword</para>
+          <para><literal>Create</literal> keyword</para>
         </listitem>
 
         <listitem>
@@ -750,32 +750,29 @@ true | false             % error
         </listitem>
       </orderedlist>
 
-      <para>The Create keyword indicates the start of the statement. It is
-      followed by the resource type, which indicates the type of resource to
-      create. This is followed by a resource name, a user-defined name that is
-      then used to refer to that particular resource. This name must follow
-      the resource naming rules, listed previously.</para>
+      <para>The <literal>Create</literal> keyword indicates the start of the
+      statement. It is followed by the resource type, which indicates the type
+      of resource to create. This is followed by a resource name, a
+      user-defined name that is then used to refer to that particular
+      resource. This name must follow the resource naming rules, listed
+      previously.</para>
 
-      <para>The only exception to this syntax is when creating an Array
-      resource, in which case the dimension of the resource must also be
-      specified</para>
+      <para>The only exception to this syntax is when creating an
+      <guilabel>Array</guilabel> resource, in which case the dimension of the
+      resource must also be specified</para>
 
       <para>Multiple resource names are allowed, in which case multiple
       resources of the same type will be created. Multiple names are separated
-      by white space or by commas (“,”, hex: 2C).</para>
+      by white space or by commas (“<literal>,</literal>”, hex: 2C).</para>
 
       <para>See the following examples:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat    % creates a resource named "aSat" of type Spacecraft
-  Create ForceModel aFM
-  Create Propagator aProp
-  Create Variable x y       % creates two Variable resources: "x" and "y"
-  Create String s1, s2      % creates two String resources: "s1" and "s2"
-  Create Array A[2,2]       % creates a 2x2 Array resource named "A"
-        </code>
-      </programlisting>
+      <programlisting><code>Create Spacecraft aSat  % creates a resource "aSat" of type Spacecraft
+Create ForceModel aFM
+Create Propagator aProp
+Create Variable x y     % creates two Variable resources: "x" and "y"
+Create String s1, s2    % creates two String resources: "s1" and "s2"
+Create Array A[2,2]     % creates a 2x2 Array resource named "A"</code></programlisting>
     </refsection>
 
     <refsection>
@@ -786,20 +783,12 @@ true | false             % error
       Initialization section of the script, and generally take the following
       form:</para>
 
-      <programlisting>
-        <code>
- resource.field = value
-        </code>
-      </programlisting>
+      <programlisting><code><replaceable>resource</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable></code></programlisting>
 
       <para>Some fields, like those on ForceModel resources, have a
       multiple-dotted form:</para>
 
-      <programlisting>
-        <code>
- ForceModel.GravityField.PrimaryBody.Degree = value
-        </code>
-      </programlisting>
+      <programlisting><code><replaceable>ForceModel</replaceable>.GravityField.<replaceable>PrimaryBody</replaceable>.Degree = <replaceable>value</replaceable></code></programlisting>
 
       <para>All initialization statements are composed of the following
       elements:</para>
@@ -810,7 +799,7 @@ true | false             % error
         </listitem>
 
         <listitem>
-          <para>Period character (“.”, hex: 2E)</para>
+          <para>Period character (“<literal>.</literal>”, hex: 2E)</para>
         </listitem>
 
         <listitem>
@@ -818,7 +807,7 @@ true | false             % error
         </listitem>
 
         <listitem>
-          <para>Equal character (“=”, hex: 3D)</para>
+          <para>Equal character (“<literal>=</literal>”, hex: 3D)</para>
         </listitem>
 
         <listitem>
@@ -840,23 +829,19 @@ true | false             % error
       resource names and parameters are stored as references. See the
       following example:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create XYPlot aPlot
-  Create Variable x y z
+      <programlisting><code>Create Spacecraft aSat
+Create XYPlot aPlot
+Create Variable x y z
 
-  x = 7100                   % valid
-  aSat.X = 7100              % valid
-  aSat.X = 7100 + 2          % error (mathematical expression)
+x = 7100                   % valid
+aSat.X = 7100              % valid
+aSat.X = 7100 + 2          % error (mathematical expression)
 
-  aSat.X = x                 % error (field accepts literal, and variable
-  % evaluation does not occur)
-  aPlot.XVariable = x        % valid (field accepts reference to Variable x)
-  aPlot.YVariables = {y, z}  % valid (field accepts array of references to
-  % Variables y and z)
-        </code>
-      </programlisting>
+aSat.X = x                 % error (field accepts literal, and variable
+                           % evaluation does not occur)
+aPlot.XVariable = x        % valid (field accepts reference to Variable x)
+aPlot.YVariables = {y, z}  % valid (field accepts array of references to
+                           % Variables y and z)</code></programlisting>
 
       <para>For backwards compatibility, there is one exception to the
       literal-value rule: <guilabel>Spacecraft</guilabel> resources can copied
@@ -875,18 +860,20 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
 
       <para>Command statements invoke GMAT commands. They must appear in the
       Mission Sequence section of the script. One special command,
-      BeginMissionSequence, initiates the Mission Sequence.</para>
+      <guilabel>BeginMissionSequence</guilabel>, initiates the Mission
+      Sequence.</para>
 
       <para>Command statements are displayed by the GUI as individual line
       items in the Mission tree. The only exception is the
-      BeginScript/EndScript compound command; this is displayed as a single
-      ScriptEvent item by the GUI.</para>
+      <guilabel>BeginScript</guilabel>/<guilabel>EndScript</guilabel> compound
+      command; this is displayed as a single <guilabel>ScriptEvent</guilabel>
+      item by the GUI.</para>
 
       <para>Command statements are composed of the following elements:</para>
 
       <orderedlist>
         <listitem>
-          <para>Command name (except Assignment commands)</para>
+          <para>Command name (except assignment commands)</para>
         </listitem>
 
         <listitem>
@@ -899,9 +886,10 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
       </orderedlist>
 
       <para>The command name is the name of the command being invoked (e.g.
-      Propagate or BeginFiniteBurn). The command name is mandatory with one
-      exception: the Assignment command is indicated by its structure (“LHS =
-      RHS”) instead of its name.</para>
+      <guilabel>Propagate</guilabel> or <guilabel>BeginFiniteBurn</guilabel>).
+      The command name is mandatory with one exception: the assignment command
+      is indicated by its structure (“<code><replaceable>LHS</replaceable> =
+      <replaceable>RHS</replaceable></code>”) instead of its name.</para>
 
       <para>A command label is an optional string literal that can be added
       immediately after the command name. This label is used by the GUI to
@@ -909,28 +897,27 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
       text description to aid the user. It must be single-quoted, whether or
       not it contains spaces. The command label may contain any ASCII
       character except certain non-printable characters (NUL, SUB), line
-      termination characters (LF, CR), the percent sign (“%”), and the single
-      quote (“‘“). If the command label is omitted, the Mission tree statement
-      is given a default label made up of the command name and an ID number.
-      For example, if the third Propagate command in the script is unlabeled,
-      it will be given the default label “Propagate3”.</para>
+      termination characters (LF, CR), the percent sign
+      (“<literal>%</literal>”), and the single quote (“<literal>'</literal>“).
+      If the command label is omitted, the Mission tree statement is given a
+      default label made up of the command name and an ID number. For example,
+      if the third <guilabel>Propagate</guilabel> command in the script is
+      unlabeled, it will be given the default label
+      “<guilabel>Propagate3</guilabel>”.</para>
 
       <para>The command arguments control the behavior of the command. The
       syntax of the arguments is specified by each command individually, and
-      is documented separately. Some commands, such as Stop, have no
-      arguments.</para>
+      is documented separately. Some commands, such as
+      <guilabel>Stop</guilabel>, have no arguments.</para>
 
       <para>See the following example:</para>
 
-      <programlisting>
-        <code>
- Propagate 'Prop to periapsis' aProp(aSat) {aSat.Periapsis}
-        </code>
-      </programlisting>
+      <programlisting><code>Propagate 'Prop to periapsis' aProp(aSat) {aSat.Periapsis}</code></programlisting>
 
-      <para>In the example, “Propagate” is the command name, “'Prop to
-      periapsis'” is the command label, and “aProp(aSat) {aSat.Periapsis}” is
-      the argument string.</para>
+      <para>In the example, “<code>Propagate</code>” is the command name,
+      “<code>'Prop to periapsis'</code>” is the command label, and
+      “<code>aProp(aSat) {aSat.Periapsis}</code>” is the argument
+      string.</para>
     </refsection>
 
     <refsection>
@@ -955,29 +942,22 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
       </orderedlist>
 
       <para>The begin statement carries the name of the command itself, while
-      the end statement begins with the string “End”. For example, the While
-      command is a compound command composed of two statements:</para>
-
-      <programlisting>
-        <code>
-  While ['label'] arguments
-    [body]
-  EndWhile
-        </code>
-      </programlisting>
-
-      <para>The If/Else compound command is composed of three
+      the end statement begins with the string “End”. For example, the
+      <guilabel>While</guilabel> command is a compound command composed of two
       statements:</para>
 
-      <programlisting>
-        <code>
-  If ['label'] arguments
-    [body]
-  Else
-    [body]
-  EndIf
-        </code>
-      </programlisting>
+      <programlisting><code>While ['<replaceable>label</replaceable>'] <replaceable>arguments</replaceable>
+    [<replaceable>body</replaceable>]
+EndWhile</code></programlisting>
+
+      <para>The <guilabel>If</guilabel>/<guilabel>Else</guilabel> compound
+      command is composed of three statements:</para>
+
+      <programlisting><code>If ['<replaceable>label</replaceable>'] <replaceable>arguments</replaceable>
+    [<replaceable>body</replaceable>]
+Else
+    [<replaceable>body</replaceable>]
+EndIf</code> </programlisting>
 
       <para>The body of a compound command may consist of independent command
       statements, possibly including other compound statements. Certain
@@ -1001,55 +981,48 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
 
       <para>GMAT interprets a script in two stages: a parsing stage and a
       validation stage. In the parsing stage, GMAT reads and interprets each
-      line of the script sequentially. As it interprets a line, t checks it
+      line of the script sequentially. As it interprets a line, it checks it
       for syntactic correctness and performs any initialization needed by the
-      line. For example, if the line being interpreted is a Create statement,
-      the related resource is created. If GMAT encounters an initialization
-      line, it assigns the appropriate value to the indicated resource field.
-      And if it encounters a command statement, it creates the command
-      structure and interprets its arguments. All language, resource
-      initialization, and command syntax errors are caught during this parsing
-      stage.</para>
+      line. For example, if the line being interpreted is a
+      <guilabel>Create</guilabel> statement, the related resource is created.
+      If GMAT encounters an initialization line, it assigns the appropriate
+      value to the indicated resource field. And if it encounters a command
+      statement, it creates the command structure and interprets its
+      arguments. All language, resource initialization, and command syntax
+      errors are caught during this parsing stage.</para>
 
       <para>In the validation stage, GMAT checks that all references between
       resources are valid. For example, if the script indicates that a
-      Spacecraft resource should be defined in relation to a specific
-      CoordinateSystem resource, the reference is validated during this stage.
-      The validation checks that all referenced resources exist and are of the
-      correct type.</para>
+      <guilabel>Spacecraft</guilabel> resource should be defined in relation
+      to a specific <guilabel>CoordinateSystem</guilabel> resource, the
+      reference is validated during this stage. The validation checks that all
+      referenced resources exist and are of the correct type.</para>
 
       <para>The two-stage interpretation method affects the order of
-      statements in the script. For example, Create statements must appear in
-      the script above any initialization statements that reference the
-      resource being created. But because validation is performed separately,
-      the Create statement for a CoordinateSystem resource can appear in the
-      script below an initialization line that references this resource. See
-      the following examples:</para>
+      statements in the script. For example, <guilabel>Create</guilabel>
+      statements must appear in the script above any initialization statements
+      that reference the resource being created. But because validation is
+      performed separately, the <guilabel>Create</guilabel> statement for a
+      <guilabel>CoordinateSystem</guilabel> resource can appear in the script
+      below an initialization line that references this resource. See the
+      following examples:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 
-  % This is valid; the aSat resource has been created by the line above.
-  aSat.DateFormat = TAIGregorian
+% This is valid; the aSat resource has been created by the line above.
+aSat.DateFormat = TAIGregorian
 
-  % This is invalid; the aReport resource has not yet been created.
-  aReport.Filename = 'report.txt'
-  Create ReportFile aReport
-        </code>
-      </programlisting>
+% This is invalid; the aReport resource has not yet been created.
+aReport.Filename = 'report.txt'
+Create ReportFile aReport</code></programlisting>
 
-      <programlisting>
-        <code>
-  Create XYPlot aPlot
+      <programlisting><code>Create XYPlot aPlot
 
-  % This is valid; the reference to aSat is validated
-  % after all resources are created.
-  aPlot.XVariable = aSat.A1ModJulian
+% This is valid; the reference to aSat is validated
+% after all resources are created.
+aPlot.XVariable = aSat.A1ModJulian
 
-  Create Spacecraft aSat
-        </code>
-      </programlisting>
+Create Spacecraft aSat</code></programlisting>
 
       <para>Once both stages have completed, the script has been loaded into
       GMAT. In the GUI, if any, the Resources tree is populated with the
@@ -1082,12 +1055,14 @@ aSat2 = aSat1                   % Valid only for Spacecraft resources</programli
 
       <itemizedlist>
         <listitem>
-          <para>SolarSystem</para>
+          <para><guilabel>SolarSystem</guilabel></para>
         </listitem>
 
         <listitem>
-          <para>Default CoordinateSystem resources: EarthMJ2000Eq,
-          EarthMJ2000Ec, EarthFixed, EarthICRF</para>
+          <para>Default <guilabel>CoordinateSystem</guilabel> resources:
+          <guilabel>EarthMJ2000Eq</guilabel>,
+          <guilabel>EarthMJ2000Ec</guilabel>, <guilabel>EarthFixed</guilabel>,
+          <guilabel>EarthICRF</guilabel></para>
         </listitem>
       </itemizedlist>
 

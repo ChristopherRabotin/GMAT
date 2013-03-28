@@ -103,7 +103,6 @@
       <xi:include href="Resource_ReportFile.xml" />
       <xi:include href="Resource_ResourceTree.xml" />
       <xi:include href="Resource_ScriptEditor.xml" />
-      <xi:include href="Resource_ScriptLanguage.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
       <xi:include href="Resource_Spacecraft.xml" />
       <xi:include href="Resource_SpacecraftHardware.xml" />
@@ -128,50 +127,41 @@
     </reference>
 
     <reference xml:id="Commands">
-      <title>Commands</title>
-      <xi:include href="Command_Achieve.xml" />
-      <xi:include href="Command_Assignment.xml" />
-      <xi:include href="Command_BeginFiniteBurn.xml" />
-      <xi:include href="Command_BeginMissionSequence.xml" />
-	  <xi:include href="Command_BeginScript.xml" />
-      <xi:include href="Command_CallGmatFunction.xml" />
-      <xi:include href="Command_CallMatlabFunction.xml" />
-      <xi:include href="Command_ClearPlot.xml" />
-      <xi:include href="Command_EndFiniteBurn.xml" />
-      <xi:include href="Command_Equation.xml" />
-      <xi:include href="Command_For.xml" />
-      <xi:include href="Command_Global.xml" />
-      <xi:include href="Command_If.xml" />
-      <xi:include href="Command_Maneuver.xml" />
-      <xi:include href="Command_MarkPoint.xml" />
-      <xi:include href="Command_Minimize.xml" />
-      <xi:include href="Command_NonlinearConstraint.xml" />
-      <xi:include href="Command_Optimize.xml" />
-      <xi:include href="Command_PenUpPenDown.xml" />
-      <xi:include href="Command_Propagate.xml" />
-      <xi:include href="Command_Report.xml" />
-      <xi:include href="Command_Save.xml" />
-      <xi:include href="Command_SaveMission.xml" />
-      <xi:include href="Command_Stop.xml" />
-      <xi:include href="Command_Target.xml" />
-      <xi:include href="Command_Toggle.xml" />
-      <xi:include href="Command_Vary.xml" />
-      <xi:include href="Command_While.xml" />
+        <title>Commands</title>
+        <xi:include href="Command_Achieve.xml" />
+        <xi:include href="Command_Assignment.xml" />
+        <xi:include href="Command_BeginFiniteBurn.xml" />
+        <xi:include href="Command_BeginMissionSequence.xml" />
+        <xi:include href="Command_BeginScript.xml" />
+        <xi:include href="Command_CallGmatFunction.xml" />
+        <xi:include href="Command_CallMatlabFunction.xml" />
+        <xi:include href="Command_ClearPlot.xml" />
+        <xi:include href="Command_EndFiniteBurn.xml" />
+        <xi:include href="Command_Equation.xml" />
+        <xi:include href="Command_For.xml" />
+        <xi:include href="Command_Global.xml" />
+        <xi:include href="Command_If.xml" />
+        <xi:include href="Command_Maneuver.xml" />
+        <xi:include href="Command_MarkPoint.xml" />
+        <xi:include href="Command_Minimize.xml" />
+        <xi:include href="Command_NonlinearConstraint.xml" />
+        <xi:include href="Command_Optimize.xml" />
+        <xi:include href="Command_PenUpPenDown.xml" />
+        <xi:include href="Command_Propagate.xml" />
+        <xi:include href="Command_Report.xml" />
+        <xi:include href="Command_Save.xml" />
+        <xi:include href="Command_SaveMission.xml" />
+        <xi:include href="Command_Stop.xml" />
+        <xi:include href="Command_Target.xml" />
+        <xi:include href="Command_Toggle.xml" />
+        <xi:include href="Command_Vary.xml" />
+        <xi:include href="Command_While.xml" />
     </reference>
     
-      <chapter>
-        <title>Reference: Miscellaneous</title>
-
-        <xi:include href="FeatureSpec_MissionTree.xml" />
-
-        <!--<xi:include href="Misc_MathOperatorsinScripting.xml" />
-
-        <xi:include href="Misc_ScriptEditorShortcutKeys.xml" />
-
-        <xi:include href="Misc_GMATCommandsinMATLAB.xml" />
-
-        <xi:include href="Misc_GMATConsoleInstructions.xml" />-->
-      </chapter>
+    <reference>
+        <title>System</title>
+        <xi:include href="System_ScriptLanguage.xml" />
+    </reference>
       
   </part>
   <part condition="ug"
