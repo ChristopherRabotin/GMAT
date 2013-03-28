@@ -137,7 +137,6 @@
       <xi:include href="Command_CallGmatFunction.xml" />
       <xi:include href="Command_CallMatlabFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
-      <xi:include href="Command_Else.xml" />
       <xi:include href="Command_EndFiniteBurn.xml" />
       <xi:include href="Command_Equation.xml" />
       <xi:include href="Command_For.xml" />
