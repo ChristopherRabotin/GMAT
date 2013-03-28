@@ -245,7 +245,8 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
    {
       Collapse(mReportItem);
       Collapse(mEphemFileItem);
-      Collapse(mEventsItem);
+      if (GmatGlobal::Instance()->IsEventLocationAvailable())
+         Collapse(mEventsItem);
    }
    
    // Remove all plots
@@ -261,7 +262,8 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
    {
       DeleteChildren(mReportItem);
       DeleteChildren(mEphemFileItem);
-      DeleteChildren(mEventsItem);
+      if (GmatGlobal::Instance()->IsEventLocationAvailable())
+         DeleteChildren(mEventsItem);
    }
    
    // Delete all plots
@@ -325,16 +327,19 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
    }
 
    // get list of Event Locators
-   StringArray listOfEls = theGuiInterpreter->GetListOfObjects(Gmat::EVENT_LOCATOR);
-   for (UnsignedInt i = 0; i < listOfEls.size(); ++i)
+   if (GmatGlobal::Instance()->IsEventLocationAvailable())
    {
-      EventLocator *el =
-         (EventLocator*)theGuiInterpreter->GetConfiguredObject(listOfEls[i]);
-      if (el != NULL)
+      StringArray listOfEls = theGuiInterpreter->GetListOfObjects(Gmat::EVENT_LOCATOR);
+      for (UnsignedInt i = 0; i < listOfEls.size(); ++i)
       {
-         wxString objName = wxString(listOfEls[i].c_str());
-         AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
-               new GmatTreeItemData(objName, GmatTree::OUTPUT_EVENT_REPORT));
+         EventLocator *el =
+            (EventLocator*)theGuiInterpreter->GetConfiguredObject(listOfEls[i]);
+         if (el != NULL)
+         {
+            wxString objName = wxString(listOfEls[i].c_str());
+            AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
+                  new GmatTreeItemData(objName, GmatTree::OUTPUT_EVENT_REPORT));
+         }
       }
    }
 
@@ -343,7 +348,8 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
    Expand(mOrbitViewItem);
    Expand(mGroundTrackItem);
    Expand(mXyPlotItem);
-   Expand(mEventsItem);
+   if (GmatGlobal::Instance()->IsEventLocationAvailable())
+      Expand(mEventsItem);
 }
 
 //------------------------------------------------------------------------------
