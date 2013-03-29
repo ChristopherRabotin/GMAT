@@ -740,6 +740,27 @@ bool XyPlot::IsParameterReadOnly(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool XyPlot::IsParameterCommandModeSettable(const Integer id) const
+{
+   // Override for base class setting
+   if ((id == SOLVER_ITERATIONS) )
+      return true;
+
+   return Subscriber::IsParameterCommandModeSettable(id);
+}
+
+
+//------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Integer XyPlot::GetIntegerParameter(const Integer id) const

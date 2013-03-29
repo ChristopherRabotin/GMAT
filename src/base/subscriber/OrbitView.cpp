@@ -792,6 +792,27 @@ bool OrbitView::IsParameterReadOnly(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool OrbitView::IsParameterCommandModeSettable(const Integer id) const
+{
+   // Override for base class setting
+   if ((id == SOLVER_ITERATIONS) )
+      return true;
+
+   return Subscriber::IsParameterCommandModeSettable(id);
+}
+
+
+//------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OrbitView::GetIntegerParameter(const Integer id) const

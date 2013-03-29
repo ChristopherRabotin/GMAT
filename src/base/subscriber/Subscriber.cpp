@@ -1091,8 +1091,6 @@ bool Subscriber::IsParameterCommandModeSettable(const Integer id) const
        (id == MAXIMIZED))
       return false;
 
-   // Are there any that should be true?
-
    return GmatBase::IsParameterCommandModeSettable(id);
 }
 

@@ -842,11 +842,16 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ReportFile::IsParameterCommandModeSettable(const Integer id) const
 {
+   // Override this one from the base class
+   if (id == SOLVER_ITERATIONS)
+      return true;
+
    // Turn these off
-   if ((id == ADD) || (id == FILENAME))
+   if (id == ADD)
       return false;
 
-   // Turn on the rest that are ReportFile specific
+   // Turn on the rest that are ReportFile specific (FILENAME, PRECISION, ADD,
+   // WRITE_HEADERS, LEFT_JUSTIFY, ZERO_FILL, COL_WIDTH, and WRITE_REPORT)
    if (id >= SubscriberParamCount)
       return true;
 
