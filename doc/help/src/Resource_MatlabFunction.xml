@@ -40,11 +40,11 @@
 
     <para>GMAT supports passing data to and from MATLAB through the function.
     It requires that a supported and properly configured version of MATLAB
-    exist on the system. See the <xref linkend="MATLABInterface"/>
+    exist on the system. See the <xref linkend="MatlabInterface"/>
     documentation for general details on the interface.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CallMatlabFunction"/>, <xref linkend="MATLABInterface"/></para>
+    linkend="CallMatlabFunction"/>, <xref linkend="MatlabInterface"/></para>
   </refsection>
 
   <refsection>

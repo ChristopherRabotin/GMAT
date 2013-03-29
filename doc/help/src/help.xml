@@ -96,7 +96,6 @@
       <xi:include href="Resource_ImpulsiveBurn.xml" />
       <xi:include href="Resource_LibrationPoint.xml" />
       <xi:include href="Resource_MatlabFunction.xml" />
-      <xi:include href="Resource_MATLABInterface.xml"/>
       <xi:include href="Resource_OrbitView.xml" />
       <xi:include href="Resource_Output.xml"/>
       <xi:include href="Resource_Propagator.xml" />
@@ -160,6 +159,7 @@
     
     <reference>
         <title>System</title>
+        <xi:include href="System_MatlabInterface.xml" />
         <xi:include href="System_ScriptLanguage.xml" />
     </reference>
       
