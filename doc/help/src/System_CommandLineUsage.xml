@@ -7,6 +7,14 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Command-Line Usage</primary>
+  </indexterm>
+
+  <indexterm>
+    <primary><filename>GMAT</filename> command</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>Command-Line Usage</refentrytitle>
 
