@@ -159,6 +159,7 @@
     
     <reference>
         <title>System</title>
+        <xi:include href="System_CommandLineUsage.xml" />
         <xi:include href="System_MatlabInterface.xml" />
         <xi:include href="System_ScriptLanguage.xml" />
     </reference>
