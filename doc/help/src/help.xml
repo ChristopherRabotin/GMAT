@@ -162,6 +162,7 @@
         <xi:include href="System_CommandLineUsage.xml" />
         <xi:include href="System_MatlabInterface.xml" />
         <xi:include href="System_ScriptLanguage.xml" />
+        <xi:include href="System_StartupFile.xml" />
     </reference>
       
   </part>
