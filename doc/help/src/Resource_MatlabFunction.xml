@@ -226,7 +226,7 @@ mu = 398600.4415
 
 BeginMissionSequence
 
-% calculate burns for circular Hohmann transfer
+% calculate burns for circular Hohmann transfer (example)
 [dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
 
 % perform first maneuver
