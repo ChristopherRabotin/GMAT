@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0"
-          xml:id="MatlabFunction"
+<refentry version="5.0" xml:id="MatlabFunction"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -25,41 +24,37 @@
   <refnamediv>
     <refname>MatlabFunction</refname>
 
-    <refpurpose>
-      Declaration of an external MATLAB function
-    </refpurpose>
+    <refpurpose>Declaration of an external MATLAB function</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>
-      The <guilabel>MatlabFunction</guilabel> resource declares to GMAT that the name given refers to an existing external function in the MATLAB language. 
-      This function can be called in the Mission Sequence like a built-in function, with some limitations. See the <guilabel>MATLAB Function Call</guilabel> 
-      reference for details. Both user-created functions and built-in functions (like cos or path) are supported.
-    </para>
+    <para>The <guilabel>MatlabFunction</guilabel> resource declares to GMAT
+    that the name given refers to an existing external function in the MATLAB
+    language. This function can be called in the Mission Sequence like a
+    built-in function, with some limitations. See the <guilabel><xref
+    linkend="CallMatlabFunction"/></guilabel> reference for details. Both
+    user-created functions and built-in functions (like cos or path) are
+    supported.</para>
 
-    <para>
-      GMAT supports passing data to and from MATLAB through the function. It requires that a supported and properly configured version of MATLAB exist on the system.
-    </para>
+    <para>GMAT supports passing data to and from MATLAB through the function.
+    It requires that a supported and properly configured version of MATLAB
+    exist on the system. See the <xref linkend="MATLABInterface"/>
+    documentation for general details on the interface.</para>
 
-    <para>
-      <phrase role="ref_seealso">See Also</phrase>: 
-      <xref linkend="CallMatlabFunction"/>
-    </para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="CallMatlabFunction"/>, <xref linkend="MATLABInterface"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <informaltable colsep="0"
-                   frame="topbot">
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1"
-                 colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2"
-                 colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -71,22 +66,17 @@
 
         <tbody>
           <row>
-            <entry>
-              <guilabel>FunctionPath</guilabel>
-            </entry>
+            <entry><guilabel>FunctionPath</guilabel></entry>
 
-            <entry>
-              <para>
-                The location in a file system that contains MATLAB function.
-              </para>
-              <variablelist>
+            <entry><para>Paths to add to the MATLAB search path when the
+            associated function is called. Separate multiple paths with
+            semicolons (on Windows) or colons (on other platforms).</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>
-                      FileName
-                    </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -94,9 +84,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Valid file path
-                    </para>
+                    <para>Valid file path(s)</para>
                   </listitem>
                 </varlistentry>
 
@@ -104,9 +92,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>
-                      set, get
-                    </para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -114,9 +100,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      MATLAB_FUNCTION_PATH from the gmat_startup_file
-                    </para>
+                    <para><literal>MATLAB_FUNCTION_PATH</literal> properties
+                    in the startup file</para>
                   </listitem>
                 </varlistentry>
 
@@ -124,9 +109,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>
-                      N/A
-                    </para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -137,8 +120,7 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist>
-            </entry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
@@ -151,151 +133,128 @@
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
-                     contentdepth="100%"
+          <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_MatlabFunction_GUI.png"
-                     scalefit="1"
-                     width="100%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <para>
-      The <guilabel>MatlabFunction</guilabel> GUI window is very simple; it has a single file input box for the function path, and a Browse button that lets you graphically select the path.
-    </para>
+    <para>The <guilabel>MatlabFunction</guilabel> GUI window is very simple;
+    it has a single file input box for the function path, and a Browse button
+    that lets you graphically select the path.</para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
+
     <refsection>
       <title>Search Path</title>
-      <para>
-        When a function declared as a <guilabel>MatlabFunction</guilabel> is called, GMAT starts MATLAB in the background with a custom, 
-        configurable search path. MATLAB then searches for the named function in this search path. The search is 
-        case-sensitive, so the name of the function name and the <guilabel>MatlabFunction</guilabel> resource must be identical.
-      </para>
 
-      <para>
-        The search path consists of the following components, in order:
-      </para>
+      <para>When a function declared as a <guilabel>MatlabFunction</guilabel>
+      is called, GMAT starts MATLAB in the background with a custom,
+      configurable search path. MATLAB then searches for the named function in
+      this search path. The search is case-sensitive, so the name of the
+      function name and the <guilabel>MatlabFunction</guilabel> resource must
+      be identical.</para>
+
+      <para>The search path consists of the following components, in
+      order:</para>
+
       <orderedlist>
         <listitem>
-          <para>
-            <guilabel>FunctionPath</guilabel> field of the associated <guilabel>MatlabFunction</guilabel> resource (default: empty)
-          </para>
+          <para><guilabel>FunctionPath</guilabel> field of the associated
+          <guilabel>MatlabFunction</guilabel> resource (default: empty)</para>
         </listitem>
+
         <listitem>
-          <para>
-            MATLAB_FUNCTION_PATH entries in the GMAT startup file (default: &lt;GMAT&gt;\userfunctions\matlab)
-          </para>
+          <para><literal>MATLAB_FUNCTION_PATH</literal> entries in the GMAT
+          startup file (default:
+          <filename><replaceable>GMAT</replaceable>\userfunctions\matlab</filename>)</para>
         </listitem>
+
         <listitem>
-          <para>
-            MATLAB search path (returned by the MATLAB path() function)
-          </para>
+          <para>MATLAB search path (returned by the MATLAB
+          <literal>path()</literal> function)</para>
         </listitem>
       </orderedlist>
 
+      <para>If multiple MATLAB functions are called within a run, the
+      <guilabel>FunctionPath</guilabel> fields for each are prepended to the
+      search path at the time of the function call.</para>
 
-      <para>
-        If multiple MATLAB functions are called within a run, 
-        the <guilabel>FunctionPath</guilabel> fields for each are prepended to the search path at the time of the function call.
-      </para>
-
-      <para>
-        Multiple paths can be combined in the <guilabel>FunctionPath</guilabel> field by separating the paths with a semicolon (on Windows) or a colon (on Mac OS X and Linux).
-      </para>
+      <para>Multiple paths can be combined in the
+      <guilabel>FunctionPath</guilabel> field by separating the paths with a
+      semicolon (on Windows) or a colon (on Mac OS X and Linux).</para>
     </refsection>
 
     <refsection>
-      <title>
-        Working Directory
-      </title>
+      <title>Working Directory</title>
 
-      <para>
-        When MATLAB starts in the background, its working directory is set to the GMAT bin directory.
-      </para>
+      <para>When MATLAB starts in the background, its working directory is set
+      to the GMAT <filename>bin</filename> directory.</para>
     </refsection>
-    
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>
-        Call a simple built-in MATLAB function:
-      </para>
+      <para>Call a simple built-in MATLAB function:</para>
 
-      <programlisting>
-        <code>
-  Create MatlabFunction sinh
-  Create Variable x y
+      <programlisting><code>Create MatlabFunction sinh
+Create Variable x y
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  x = 1
-  [y] = sinh(x)
-        </code>
-      </programlisting>
+x = 1
+[y] = sinh(x)</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Call an external custom MATLAB function:
-      </para>
+      <para>Call an external custom MATLAB function:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create ImpulsiveBurn aBurn
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create ImpulsiveBurn aBurn
+Create Propagator aProp
 
-  Create MatlabFunction CalcHohmann
-  CalcHohmann.FunctionPath = 'C:\path\to\functions'
+Create MatlabFunction CalcHohmann
+CalcHohmann.FunctionPath = 'C:\path\to\functions'
 
-  Create Variable a_target mu dv1 dv2
-  mu = 398600.4415
+Create Variable a_target mu dv1 dv2
+mu = 398600.4415
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  % calculate burns for circular Hohmann transfer
-  [dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
+% calculate burns for circular Hohmann transfer
+[dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
 
-  % perform first maneuver
-  aBurn.Element1 = dv1
-  Maneuver aBurn(aSat)
+% perform first maneuver
+aBurn.Element1 = dv1
+Maneuver aBurn(aSat)
 
-  % propagate to apoapsis
-  Propagate aProp(aSat) {aSat.Apoapsis}
+% propagate to apoapsis
+Propagate aProp(aSat) {aSat.Apoapsis}
 
-  % perform second burn
-  aBurn.Element1 = dv2
-  Maneuver aBurn(aSat)
-        </code>
-      </programlisting>
+% perform second burn
+aBurn.Element1 = dv2
+Maneuver aBurn(aSat)</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>
-        Return the MATLAB search path and working directory:
-      </para>
-      
-      <programlisting>
-        <code>
-  Create MatlabFunction path pwd
-  Create String pathStr pwdStr
-  Create ReportFile aReport
+      <para>Return the MATLAB search path and working directory:</para>
 
-  BeginMissionSequence
+      <programlisting><code>Create MatlabFunction path pwd
+Create String pathStr pwdStr
+Create ReportFile aReport
 
-  [pathStr] = path
-  [pwdStr] = pwd
+BeginMissionSequence
 
-  Report aReport pathStr
-  Report aReport pwdStr
-        </code>
-      </programlisting>
+[pathStr] = path
+[pwdStr] = pwd
+
+Report aReport pathStr
+Report aReport pwdStr</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
