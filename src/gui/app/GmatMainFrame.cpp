@@ -3714,14 +3714,18 @@ void GmatMainFrame::OnHelpContents(wxCommandEvent& WXUNUSED(event))
 		theHelpController->DisplayContents();
 	else
 	{
-	   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
-	   config->SetPath("/Welcome/Links");
-	   wxString url = config->Read("Online Help");
-	   #ifdef DEBUG_MENU_HELP
-	   MessageInterface::ShowMessage
-		  ("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
-	   #endif
-	   ::wxLaunchDefaultBrowser(url);
+		wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+		config->SetPath("/Welcome/Links");
+		wxString url = config->Read("Online Help");
+		#ifdef DEBUG_MENU_HELP
+		MessageInterface::ShowMessage
+			("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
+		#endif
+		if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
+			url.Contains("\\") || url.Contains("/") || url.Contains(":") )
+			::wxLaunchDefaultBrowser(url);
+		else
+			GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);		
 	}
 }
 
@@ -3737,8 +3741,18 @@ void GmatMainFrame::OnHelpContents(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpOnline(wxCommandEvent& WXUNUSED(event))
 {
-	wxCommandEvent event;
-	OnHelpContents(event);
+	wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+	config->SetPath("/Welcome/Links");
+	wxString url = config->Read("Online Help", "http://gmat.sourceforge.net/docs/latest/html");
+	#ifdef DEBUG_MENU_HELP
+	MessageInterface::ShowMessage
+		("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
+	#endif
+	if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
+		url.Contains("\\") || url.Contains("/") || url.Contains(":") )
+		::wxLaunchDefaultBrowser(url);
+	else
+		GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);		
 }
 
 
@@ -3755,12 +3769,16 @@ void GmatMainFrame::OnHelpTutorial(wxCommandEvent& WXUNUSED(event))
 {
    wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
    config->SetPath("/GettingStarted/Tutorials");
-   wxString url = config->Read("Step By Step Text Tutorials");
+   wxString url = config->Read("Step By Step Text Tutorials","http://gmat.sourceforge.net/docs/latest/html/Tutorials.html");
    #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpTutorial() text tutorials url='%s'\n", url.c_str());
    #endif
-   ::wxLaunchDefaultBrowser(url);
+   if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
+	   url.Contains("\\") || url.Contains("/") || url.Contains(":") )
+	   ::wxLaunchDefaultBrowser(url);
+   else
+	   GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);		
 }
 
 
@@ -3778,12 +3796,16 @@ void GmatMainFrame::OnHelpForum(wxCommandEvent& WXUNUSED(event))
    wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
    config->SetPath("/Welcome/Links");
    wxString path = config->GetPath();
-   wxString url = config->Read("Forums");
+   wxString url = config->Read("Ask the Community a Question","http://gmat.ed-pages.com/forum");
    #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpForum() forum url='%s'\n", url.c_str());
    #endif
-   ::wxLaunchDefaultBrowser(url);
+   if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
+	   url.Contains("\\") || url.Contains("/") || url.Contains(":") )
+	   ::wxLaunchDefaultBrowser(url);
+   else
+	   GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);		
 }
 
 
@@ -3800,7 +3822,7 @@ void GmatMainFrame::OnHelpIssue(wxCommandEvent& WXUNUSED(event))
 {
    wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
    config->SetPath("/Welcome/Links");
-   wxString url = config->Read("Report an Issue");
+   wxString url = config->Read("Report an Issue","http://li64-187.members.linode.com:8080");
    #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpIssue() report issue url='%s'\n", url.c_str());
