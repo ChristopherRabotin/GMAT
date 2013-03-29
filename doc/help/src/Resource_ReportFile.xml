@@ -55,7 +55,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -71,7 +71,7 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para> The <guilabel>Add</guilabel> field allows a user to
+            <entry><para>Allows a user to
             add any number of user-defined <guilabel>Variables</guilabel>,
             <guilabel>Arrays</guilabel>, <guilabel>Strings</guilabel> or
             <guilabel>Object Parameters</guilabel> to a report file. To add
@@ -135,7 +135,7 @@
           <row>
             <entry><guilabel>ColumnWidth</guilabel></entry>
 
-            <entry><para> The <guilabel>ColumnWidth</guilabel> field defines
+            <entry><para>This field defines
             the width of the data columns in a report file. The value for
             <guilabel>ColumnWidth</guilabel> is applied to all columns of
             data. For example, if <guilabel>ColumnWidth</guilabel> is set to
@@ -194,7 +194,7 @@
           <row>
             <entry><guilabel>Filename</guilabel></entry>
 
-            <entry><para> The <guilabel>FileName</guilabel> field allows the
+            <entry><para>Allows the
             user to define the file path and file name for a report
             file.</para> <variablelist>
                 <varlistentry>
@@ -309,7 +309,7 @@
           <row>
             <entry><guilabel>Precision</guilabel></entry>
 
-            <entry><para> The <guilabel>Precision</guilabel> field allows the
+            <entry><para>Allows the
             user to set the number of digits of the data written to a report.
             </para> <variablelist>
                 <varlistentry>
@@ -365,7 +365,7 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            <entry><para> This field
             determines whether or not data associated with perturbed
             trajectories during a solver (<guilabel>Targeter</guilabel>,
             <guilabel>Optimize</guilabel>) sequence is written to a report
@@ -431,7 +431,7 @@
           <row>
             <entry><guilabel>WriteHeaders</guilabel></entry>
 
-            <entry><para> The <guilabel>WriteHeaders</guilabel> field
+            <entry><para> This field
             specifies whether to include headers that describe the variables
             in a report file.</para> <variablelist>
                 <varlistentry>
@@ -487,7 +487,7 @@
           <row>
             <entry><guilabel>WriteReport</guilabel></entry>
 
-            <entry><para> The <guilabel>WriteReport</guilabel> field specifies
+            <entry><para> This field specifies
             whether to write data to the report <guilabel>FileName</guilabel>.
             </para> <variablelist>
                 <varlistentry>
@@ -543,7 +543,7 @@
           <row>
             <entry><guilabel>ZeroFill</guilabel></entry>
 
-            <entry><para> The <guilabel>ZeroFill</guilabel> allows zeros to be
+            <entry><para>Allows zeros to be
             placed in data written to a report to match set precision. </para>
             <variablelist>
                 <varlistentry>

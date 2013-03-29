@@ -55,7 +55,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -71,7 +71,7 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para> The <guilabel>Maximized</guilabel> field allows the
+            <entry><para>Allows the
             user to maximize the <guilabel>XYPlot</guilabel> window. </para>
             <variablelist>
                 <varlistentry>
@@ -127,7 +127,7 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para> The <guilabel>UpperLeft</guilabel> field allows the
+            <entry><para>Allows the
             user to pan the <guilabel>XYPlot</guilabel> display window in any
             direction. First value in [0 0] matrix helps to pan the
             <guilabel>XYPlot</guilabel> window horizontally and second value
@@ -185,7 +185,7 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para> <guilabel>RelativeZOrder</guilabel> field allows the
+            <entry><para>Allows the
             user to select which <guilabel>XYPlot</guilabel> window to display
             first on the screen. The <guilabel>XYPlot</guilabel> with lowest
             <guilabel>RelativeZOrder</guilabel> value will be displayed last
@@ -303,7 +303,7 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para> The <guilabel>ShowPlot</guilabel> field allows the
+            <entry><para>Allows the
             user to turn off a plot for a particular run, without deleting the
             plot object, or removing it from the script. If you select
             <guilabel>True</guilabel>, then the plot will be shown. If you
@@ -362,7 +362,7 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para> The <guilabel>Size</guilabel> field allows the user
+            <entry><para>Allows the user
             to control the display size of <guilabel>XYPlot</guilabel> window.
             First value in [0 0] matrix controls horizonal size and second
             value controls vertical size of <guilabel>XYPlot</guilabel>
@@ -420,7 +420,7 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            <entry><para>This field
             determines whether or not data associated with perturbed
             trajectories during a solver (<guilabel>Targeter</guilabel>,
             <guilabel>Optimize</guilabel>) sequence is displayed in the
@@ -487,11 +487,11 @@
           <row>
             <entry><guilabel>XVariable</guilabel></entry>
 
-            <entry><para> The <guilabel>XVariable</guilabel> field allows the
+            <entry><para>Allows the
             user to define the independent variable for an
             <guilabel>XYPlot</guilabel>. Only one variable can be defined as
             an independent variable. For example, the line
-            <guilabel>MyXYPlot.XVariable = DefaultSC.A1ModJulian </guilabel>
+            <literal>MyXYPlot.XVariable = DefaultSC.A1ModJulian</literal>
             sets the independent variable to be the epoch of
             <guilabel>DefaultSC</guilabel> in the A1 time system and modified
             Julian format. </para> <variablelist>
@@ -547,22 +547,17 @@
           </row>
 
           <row>
-            <entry><guilabel>YVariables</guilabel></entry>
+            <entry><guilabel>YVariable</guilabel></entry>
 
-            <entry><para> </para> <variablelist>
+            <entry><para>Allows the user to add dependent variables to an xy-plot.
+            All dependent variables are plotted on the y-axis vs the independent variable defined by <guilabel>XVariable</guilabel> field.
+            The dependent variable(s) should always be included in curly braces. 
+            For example, <literal>MyXYPlot.YVariables = {DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z}</literal>.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>The <guilabel>YVariables</guilabel> field allows the
-                    user to add dependent variables to an
-                    <guilabel>XYPlot</guilabel>. All dependent variables are
-                    plotted on the y-axis vs the independent variable defined
-                    by <guilabel>XVariable</guilabel> field. The dependent
-                    variable(s) should always be included in curly braces. For
-                    example, <guilabel>MyXYPlot.YVariables =
-                    {DefaultSC.EarthMJ2000Eq.Y,
-                    DefaultSC.EarthMJ2000Eq.Z}</guilabel>.</para>
+                    <para>UserDefString</para>
                   </listitem>
                 </varlistentry>
 
@@ -655,23 +650,19 @@
       <guilabel>Spacecraft’s</guilabel> position magnitude and semi-major-axis
       are plotted as a function of time.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aXYPlot
-  aXYPlot.XVariable = aSat.ElapsedDays
-  aXYPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+Create XYPlot aXYPlot
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aXYPlot Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle aXYPlot On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle aXYPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aXYPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -700,9 +691,7 @@
       throws in an execption reminding you that brackets for
       <guilabel>YVariables</guilabel> field cannot be left empty.</para>
 
-      <programlisting>    
-        <code>
-Create Spacecraft aSat
+<programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 Create XYPlot aXYPlot
 
@@ -710,9 +699,7 @@ aXYPlot.XVariable = aSat.ElapsedDays
 aXYPlot.YVariables = {}
 
 BeginMissionSequence
-Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-
-</code></programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -775,20 +762,16 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 2}
       <para>Propagate an orbit and plot the spacecraft’s altitude as a
       function of time at every integrator step:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aXYPlot
-  aXYPlot.XVariable = aSat.ElapsedSecs
-  aXYPlot.YVariables = {aSat.Earth.Altitude}
+Create XYPlot aXYPlot
+aXYPlot.XVariable = aSat.ElapsedSecs
+aXYPlot.YVariables = {aSat.Earth.Altitude}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -797,31 +780,27 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 2}
       <guilabel>All</guilabel>. This means all iterations/perturbations will
       be plotted.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ImpulsiveBurn TOI
-  Create DifferentialCorrector aDC
+Create ImpulsiveBurn TOI
+Create DifferentialCorrector aDC
 
-  Create XYPlot aXYPlot
-  aXYPlot.SolverIterations = All
-  aXYPlot.XVariable = aSat.ElapsedDays
-  aXYPlot.YVariables = {aSat.Earth.RMAG}
+Create XYPlot aXYPlot
+aXYPlot.SolverIterations = All
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {aSat.Earth.RMAG}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.Earth.Periapsis}
-  Target aDC
-    Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
-    Upper = 3.14159, MaxStep = 0.5})
-    Maneuver TOI(aSat)
-    Propagate aProp(aSat) {aSat.Earth.Apoapsis}
-    Achieve aDC(aSat.Earth.RMAG = 42165)
-  EndTarget
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Target aDC
+ Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat)
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+ Achieve aDC(aSat.Earth.RMAG = 42165)
+EndTarget</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

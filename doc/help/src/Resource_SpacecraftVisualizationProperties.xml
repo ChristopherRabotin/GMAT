@@ -46,7 +46,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -62,7 +62,7 @@
           <row>
             <entry><guilabel>ModelOffsetX</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelOffsetX</guilabel> field lets you
+            <entry><para> This field lets you
             translate a spacecraft in +X or -X axis of central body's
             coordinate system. </para> <variablelist>
                 <varlistentry>
@@ -118,7 +118,7 @@
           <row>
             <entry><guilabel>ModelOffsetY</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelOffsetY</guilabel> field lets you
+            <entry><para>Allows you to
             translate a spacecraft in +Y or -Y axis of central body's
             coordinate system.</para> <variablelist>
                 <varlistentry>
@@ -174,7 +174,7 @@
           <row>
             <entry><guilabel>ModelOffsetZ</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelOffsetZ</guilabel> field lets you
+            <entry><para>Allows you to
             translate a spacecraft in +Z or -Z axis of central body's
             coordinate system. </para> <variablelist>
                 <varlistentry>
@@ -230,8 +230,8 @@
           <row>
             <entry><guilabel>ModelRotationX</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelRotationX</guilabel> field lets
-            you perform a fixed rotation of spacecraft's attitude w.r.t X-axis
+            <entry><para>Allows you to
+            perform a fixed rotation of spacecraft's attitude w.r.t X-axis
             of central body's coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -286,8 +286,8 @@
           <row>
             <entry><guilabel>ModelRotationY</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelRotationY</guilabel> field lets
-            you perform a fixed rotation of spacecraft's attitude w.r.t Y-axis
+            <entry><para>Allows you to
+            perform a fixed rotation of spacecraft's attitude w.r.t Y-axis
             of central body's coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -342,8 +342,8 @@
           <row>
             <entry><guilabel>ModelRotationZ</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelRotationZ</guilabel> field lets
-            you perform a fixed rotation of spacecraft's attitude w.r.t Z-axis
+            <entry><para>Allows you to
+            perform a fixed rotation of spacecraft's attitude w.r.t Z-axis
             of central body's coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -398,7 +398,7 @@
           <row>
             <entry><guilabel>ModelScale</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelScale</guilabel> field lets you
+            <entry><para>Allows you to
             apply a scale factor to the spacecraft model's size.</para>
             <variablelist>
                 <varlistentry>
@@ -454,7 +454,7 @@
           <row>
             <entry><guilabel>ModelFile</guilabel></entry>
 
-            <entry><para> The <guilabel>ModelFile</guilabel> field allows you
+            <entry><para>Allows you
             to load spacecraft models that are in .3ds model formats. </para>
             <variablelist>
                 <varlistentry>
@@ -579,27 +579,23 @@
       Visualization Properties</guilabel> resource. All values are non-default
       values.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  aSat.ModelFile = '../data/vehicle/models/aura.3ds'
-  aSat.ModelOffsetX = 1.5
-  aSat.ModelOffsetY = -2
-  aSat.ModelOffsetZ = 3
-  aSat.ModelRotationX = 180
-  aSat.ModelRotationY = 180
-  aSat.ModelRotationZ = 90
-  aSat.ModelScale = 15
+<programlisting><code>Create Spacecraft aSat
+aSat.ModelFile = '../data/vehicle/models/aura.3ds'
+aSat.ModelOffsetX = 1.5
+aSat.ModelOffsetY = -2
+aSat.ModelOffsetZ = 3
+aSat.ModelRotationX = 180
+aSat.ModelRotationY = 180
+aSat.ModelRotationZ = 90
+aSat.ModelScale = 15
 
-  Create Propagator aProp
+Create Propagator aProp
 
-  Create OrbitView anOrbitView
-  anOrbitView.Add = {aSat, Earth}
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 9000}
-        </code>
-      </programlisting>
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 9000}</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

@@ -62,7 +62,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.25*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -78,7 +78,7 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para> The <guilabel>Add</guilabel> field adds a
+            <entry><para>This field allows you to add a
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
             <guilabel>Barycenter</guilabel> to a plot. When creating a plot,
@@ -150,7 +150,7 @@
           <row>
             <entry><guilabel>Axes</guilabel></entry>
 
-            <entry><para> The <guilabel>Axes</guilabel> field allows the user
+            <entry><para>Allows the user
             to tell GMAT to draw the Cartesian axis system associated with the
             coordinate system selected under the
             <guilabel>CoordinateSystem</guilabel> field of an
@@ -208,7 +208,7 @@
           <row>
             <entry><guilabel>EclipticPlane</guilabel></entry>
 
-            <entry><para> The <guilabel>EclipticPlane</guilabel> field allows
+            <entry><para>Allows
             the user to tell GMAT to draw a grid representing the
             <guilabel>Ecliptic Plane</guilabel> in an
             <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
@@ -265,8 +265,7 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para> The <guilabel>CoordinateSystem</guilabel> field on
-            an <guilabel>OrbitView</guilabel> plot allows the user to select
+            <entry><para>Allows the user to select
             which <guilabel>coordinate system</guilabel> to use to draw the
             plot data. A <guilabel>coordinate system</guilabel> is defined as
             an <guilabel>origin</guilabel> and an <guilabel>axis
@@ -330,8 +329,7 @@
           <row>
             <entry><guilabel>DataCollectFrequency</guilabel></entry>
 
-            <entry><para> The <guilabel>DataCollectFrequency</guilabel> field
-            allows the user to define how data is collected for plotting. It
+            <entry><para>Allows the user to define how data is collected for plotting. It
             is often inefficient to draw every ephemeris point associated with
             a trajectory. Often, drawing a smaller subset of the data still
             results in smooth trajectory plots, while executing more quickly.
@@ -449,8 +447,7 @@
           <row>
             <entry><guilabel>EnableConstellations </guilabel></entry>
 
-            <entry><para> The <guilabel>EnableConstellations</guilabel> field
-            allows the user the option of displaying star constellations on
+            <entry><para>Allows the user the option of displaying star constellations on
             the <guilabel>OrbitView</guilabel> Plot. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -505,7 +502,7 @@
           <row>
             <entry><guilabel>EnableStars </guilabel></entry>
 
-            <entry><para> The <guilabel>EnableStars</guilabel> field allows
+            <entry><para>Allows
             the user the option of displaying stars on the
             <guilabel>OrbitView</guilabel> Plot. When the
             <guilabel>EnableStars</guilabel> field is turned off, then
@@ -564,7 +561,7 @@
           <row>
             <entry><guilabel>Grid </guilabel></entry>
 
-            <entry><para> The <guilabel>Grid</guilabel> field allows the user
+            <entry><para>Allows the user
             to draw a grid representing the longitude and latitude lines on
             the celestial bodies added to an <guilabel>OrbitView</guilabel>
             plot. </para> <variablelist>
@@ -621,7 +618,7 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para> The <guilabel>Maximized</guilabel> field allows the
+            <entry><para>Allows the
             user to maximize the <guilabel>OrbitView</guilabel> plot window.
             </para> <variablelist>
                 <varlistentry>
@@ -737,7 +734,7 @@
           <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
-            <entry><para> The <guilabel>OrbitColor</guilabel> field allows the
+            <entry><para>Allows the
             user to be able to select colors for both spacecraft and celestial
             body trajectories. </para> <variablelist>
                 <varlistentry>
@@ -794,7 +791,7 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para> <guilabel>RelativeZOrder</guilabel> field allows the
+            <entry><para>Allows the
             user to select which <guilabel>OrbitView</guilabel> window to
             display first on the screen. The <guilabel>
             OrbitViewPlot</guilabel> with lowest
@@ -855,7 +852,7 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para> The <guilabel>ShowPlot</guilabel> field allows the
+            <entry><para>Allows the
             user to turn off a plot for a particular run, without deleting the
             plot object, or removing it from the script. If you select true,
             then the plot will be shown. If you select false, then the plot
@@ -913,7 +910,7 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para> The <guilabel>Size</guilabel> field allows the user
+            <entry><para>Allows the user
             to control the display size of <guilabel>OrbitViewPlot</guilabel>
             window. First value in [0 0] matrix controls horizonal size and
             second value controls vertical size of
@@ -972,7 +969,7 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            <entry><para>This field
             determines whether or not data associated with perturbed
             trajectories during a solver (<guilabel>Targeter</guilabel>,
             <guilabel>Optimize</guilabel>) sequence is plotted to
@@ -1040,7 +1037,7 @@
           <row>
             <entry><guilabel>StarCount</guilabel></entry>
 
-            <entry><para> The <guilabel>StarCount</guilabel> field allows the
+            <entry><para>Allows the
             user to enter the number of stars that need to be displayed in an
             <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
                 <varlistentry>
@@ -1096,7 +1093,7 @@
           <row>
             <entry><guilabel>SunLine</guilabel></entry>
 
-            <entry><para> The <guilabel>SunLine</guilabel> field allows the
+            <entry><para>Allows the
             user to tell GMAT to draw a line that starts at the center of
             central body and points towards the <guilabel>Sun</guilabel>.
             </para> <variablelist>
@@ -1153,7 +1150,7 @@
           <row>
             <entry><guilabel>TargetColor</guilabel></entry>
 
-            <entry><para> The <guilabel>TargetColor</guilabel> field allows
+            <entry><para>Allows
             the user to select any available color for perturbing trajectories
             during iterative processes such as <guilabel>Differential
             Correction</guilabel> or <guilabel>Optimization</guilabel>.
@@ -1212,8 +1209,7 @@
           <row>
             <entry><guilabel>UpdatePlotFrequency</guilabel></entry>
 
-            <entry><para> The <guilabel>UpdatePlotFrequency</guilabel> field
-            allows the user to specify how often to update an
+            <entry><para>Allows the user to specify how often to update an
             <guilabel>OrbitView</guilabel> plot is updated with new data
             collected during the process of propagating spacecraft and running
             a mission. Data is collected for a plot according to the value
@@ -1278,7 +1274,7 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para> The <guilabel>UpperLeft</guilabel> field allows the
+            <entry><para>Allows the
             user to pan the <guilabel>OrbitView </guilabel>plot window in any
             direction. First value in [0 0] matrix helps to pan the
             <guilabel>OrbitView</guilabel> window horizontally and second
@@ -1336,7 +1332,7 @@
           <row>
             <entry><guilabel>UseInitialView</guilabel></entry>
 
-            <entry><para> The <guilabel>UseInitialView</guilabel> field allows
+            <entry><para>Allows
             the user to control the view of an <guilabel>OrbitView</guilabel>
             plot between multiple runs of a mission sequence. The first time a
             specific <guilabel>OrbitView</guilabel> plot is created, GMAT will
@@ -1402,7 +1398,7 @@
           <row>
             <entry><guilabel>ViewDirection</guilabel></entry>
 
-            <entry><para> The <guilabel>ViewDirection</guilabel> field allows
+            <entry><para>Allows
             the user to select the direction of view in an
             <guilabel>OrbitView</guilabel> plot. The user can specify the view
             direction by choosing an object to point at such as a
@@ -1470,8 +1466,7 @@
           <row>
             <entry><guilabel>ViewPointReference</guilabel></entry>
 
-            <entry><para> The <guilabel>ViewPointReference</guilabel> field is
-            an optional field that allows the user to change the reference
+            <entry><para>This optional field that allows the user to change the reference
             point from which <guilabel>ViewPointVector</guilabel> is measured.
             <guilabel>ViewPointReference</guilabel> defaults to the origin of
             the coordinate system for the plot. A
@@ -1602,7 +1597,7 @@
           <row>
             <entry><guilabel>ViewScaleFactor</guilabel></entry>
 
-            <entry><para> The <guilabel>ViewScaleFactor</guilabel> field
+            <entry><para>This field
             scales <guilabel>ViewPointVector</guilabel> before adding it to
             <guilabel>ViewPointReference</guilabel>. The
             <guilabel>ViewScaleFactor</guilabel> allows the user to back away
@@ -1660,7 +1655,7 @@
           <row>
             <entry><guilabel>ViewUpAxis</guilabel></entry>
 
-            <entry><para> The <guilabel>ViewUpAxis</guilabel> field allows the
+            <entry><para>Allows the
             user to define which axis of the
             <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as
             the up direction in an <guilabel>OrbitView</guilabel> plot. See
@@ -1850,7 +1845,7 @@
           <row>
             <entry><guilabel>XYPlane</guilabel></entry>
 
-            <entry><para> The <guilabel>XYPlane</guilabel> flag allows the
+            <entry><para>Allows the
             user to tell GMAT to draw a grid representing the
             <guilabel>XY-plane</guilabel> of the coordinate system selected
             under the <guilabel>CoordinateSystem</guilabel> field of the
@@ -1999,22 +1994,18 @@
       trajectory is plotted at each integration step until a <guilabel>Toggle
       Off</guilabel> command is used.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create OrbitView anOrbitView
-  anOrbitView.Add = {aSat, Earth}
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle anOrbitView Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle anOrbitView On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle anOrbitView Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle anOrbitView On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -2098,26 +2089,22 @@
       trajectories of multiple spacecrafts that use different
       propagators:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat aSat2 aSat3
-  aSat2.INC = 45.0
-  aSat3.INC = 90.0
-  aSat3.SMA = 9000
+<programlisting><code>Create Spacecraft aSat aSat2 aSat3
+aSat2.INC = 45.0
+aSat3.INC = 90.0
+aSat3.SMA = 9000
 
-  Create Propagator aProp
-  Create Propagator bProp
+Create Propagator aProp
+Create Propagator bProp
 
-  Create OrbitView anOrbitView anOrbitView2
+Create OrbitView anOrbitView anOrbitView2
 
-  anOrbitView.Add = {aSat, aSat2, Earth}
-  anOrbitView2.Add = {aSat3, Earth}
+anOrbitView.Add = {aSat, aSat2, Earth}
+anOrbitView2.Add = {aSat3, Earth}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}
-        </code>
-      </programlisting>
+Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -2164,18 +2151,14 @@
       off since no SpacePoints were added to the plot. Below is a sample
       script snippet that generates such a warning message:</para>
 
-      <programlisting>    
-        <code>
-  Create Spacecraft aSat aSat2
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat aSat2
+Create Propagator aProp
 
-  Create OrbitView anOrbitView
-  anOrbitView.Add = {}
+Create OrbitView anOrbitView
+anOrbitView.Add = {}
 
-  BeginMissionSequence
-  Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}
-        </code>
-      </programlisting>
+BeginMissionSequence
+Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}</code></programlisting>
     </refsection>
   </refsection>
 
@@ -2186,19 +2169,15 @@
       <para>Propagate spacecraft for 1 day and plot the orbit at every
       integrator step:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create OrbitView anOrbitView
-  anOrbitView.Add = {aSat, Earth}
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -2207,29 +2186,27 @@
       <guilabel>All</guilabel>. This means all iterations/perturbations will
       be plotted.</para>
 
-      <programlisting>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ImpulsiveBurn TOI
-  Create DifferentialCorrector aDC
+Create ImpulsiveBurn TOI
+Create DifferentialCorrector aDC
 
-  Create OrbitView anOrbitView
-  anOrbitView.Add = {aSat, Earth}
-  anOrbitView.SolverIterations = All
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
+anOrbitView.SolverIterations = All
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
-  Target aDC
-    Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
-    Upper = 3.14159, MaxStep = 0.5})
-    Maneuver TOI(aSat)
-    Propagate aProp(aSat) {aSat.Earth.Apoapsis}
-    Achieve aDC(aSat.Earth.RMAG = 42165)
-  EndTarget
-      </programlisting>
+Target aDC
+  Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+  Upper = 3.14159, MaxStep = 0.5})
+  Maneuver TOI(aSat)
+  Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+  Achieve aDC(aSat.Earth.RMAG = 42165)
+EndTarget</programlisting>
     </informalexample>
 
     <informalexample>
@@ -2237,80 +2214,74 @@
       This example shows how to plot a spacecraft’s trajectory around
       Luna:</para>
 
-      <programlisting>
-  Create Spacecraft aSat
+<programlisting>Create Spacecraft aSat
   
-  Create CoordinateSystem LunaMJ2000Eq
-  LunaMJ2000Eq.Origin = Luna
-  LunaMJ2000Eq.Axes = MJ2000Eq
+Create CoordinateSystem LunaMJ2000Eq
+LunaMJ2000Eq.Origin = Luna
+LunaMJ2000Eq.Axes = MJ2000Eq
 
-  aSat.CoordinateSystem = LunaMJ2000Eq
-  aSat.SMA = 7300
-  aSat.ECC = 0.4
-  aSat.INC = 90
-  aSat.RAAN = 270
-  aSat.AOP = 315
-  aSat.TA = 180
+aSat.CoordinateSystem = LunaMJ2000Eq
+aSat.SMA = 7300
+aSat.ECC = 0.4
+aSat.INC = 90
+aSat.RAAN = 270
+aSat.AOP = 315
+aSat.TA = 180
 
-  Create ForceModel aFM
-  aFM.CentralBody = Luna
-  aFM.PointMasses = {Luna}
+Create ForceModel aFM
+aFM.CentralBody = Luna
+aFM.PointMasses = {Luna}
 
-  Create Propagator aProp
-  aProp.FM = aFM
+Create Propagator aProp
+aProp.FM = aFM
 
-  Create OrbitView anOrbitView
+Create OrbitView anOrbitView
 
-  anOrbitView.Add = {aSat, Luna}
-  anOrbitView.CoordinateSystem = LunaMJ2000Eq
-  anOrbitView.ViewPointReference = Luna
-  anOrbitView.ViewDirection = Luna
+anOrbitView.Add = {aSat, Luna}
+anOrbitView.CoordinateSystem = LunaMJ2000Eq
+anOrbitView.ViewPointReference = Luna
+anOrbitView.ViewDirection = Luna
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-      </programlisting>
-    </informalexample>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting></informalexample>
 
     <informalexample>
       <para>Plotting spacecraft’s trajectory around non-default central body.
       This example shows how to plot a spacecraft’s trajectory around
       Mars:</para>
 
-      <programlisting>
-  Create Spacecraft aSat
+<programlisting>Create Spacecraft aSat
 
-  Create CoordinateSystem MarsMJ2000Eq
-  MarsMJ2000Eq.Origin = Mars
-  MarsMJ2000Eq.Axes = MJ2000Eq
+Create CoordinateSystem MarsMJ2000Eq
+MarsMJ2000Eq.Origin = Mars
+MarsMJ2000Eq.Axes = MJ2000Eq
 
-  aSat.CoordinateSystem = MarsMJ2000Eq
-  aSat.SMA = 7300
-  aSat.ECC = 0.4
-  aSat.INC = 90
-  aSat.RAAN = 270
-  aSat.AOP = 315
-  aSat.TA = 180
+aSat.CoordinateSystem = MarsMJ2000Eq
+aSat.SMA = 7300
+aSat.ECC = 0.4
+aSat.INC = 90
+aSat.RAAN = 270
+aSat.AOP = 315
+aSat.TA = 180
 
-  Create ForceModel aFM
-  aFM.CentralBody = Mars
-  aFM.PointMasses = {Mars}
+Create ForceModel aFM
+aFM.CentralBody = Mars
+aFM.PointMasses = {Mars}
 
-  Create Propagator aProp
-  aProp.FM = aFM
+Create Propagator aProp
+aProp.FM = aFM
 
-  Create OrbitView anOrbitView
+Create OrbitView anOrbitView
 
-  anOrbitView.Add = {aSat, Mars}
-  anOrbitView.CoordinateSystem = MarsMJ2000Eq
-  anOrbitView.ViewPointReference = Mars
-  anOrbitView.ViewDirection = Mars
+anOrbitView.Add = {aSat, Mars}
+anOrbitView.CoordinateSystem = MarsMJ2000Eq
+anOrbitView.ViewPointReference = Mars
+anOrbitView.ViewDirection = Mars
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-      </programlisting>
-    </informalexample>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting></informalexample>
 
     <informalexample>
       <para>Plotting spacecraft’s trajectory around non-default central body.
@@ -2320,56 +2291,54 @@
       interplanetary trajectory is drawn around Sun in a SunView. Mars Orbit
       around Sun is also shown:</para>
 
-      <programlisting>
-  Create Spacecraft aSat
+<programlisting>Create Spacecraft aSat
 
-  aSat.CoordinateSystem = EarthMJ2000Eq
-  aSat.DateFormat = UTCGregorian
-  aSat.Epoch = '18 Nov 2013 20:26:24.315'
+aSat.CoordinateSystem = EarthMJ2000Eq
+aSat.DateFormat = UTCGregorian
+aSat.Epoch = '18 Nov 2013 20:26:24.315'
 
-  aSat.X = 3728.345810006184
-  aSat.Y = 4697.943961035268
-  aSat.Z = -2784.040094879185
-  aSat.VX = -9.502477543864449
-  aSat.VY = 5.935188001372066
-  aSat.VZ = -2.696272103530009
+aSat.X = 3728.345810006184
+aSat.Y = 4697.943961035268
+aSat.Z = -2784.040094879185
+aSat.VX = -9.502477543864449
+aSat.VY = 5.935188001372066
+aSat.VZ = -2.696272103530009
 
-  Create ForceModel aFM
-  aFM.CentralBody = Earth
-  aFM.PointMasses = {Earth}
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Earth}
 
-  Create ForceModel bFM
-  aFM.CentralBody = Sun
-  aFM.PointMasses = {Sun}
+Create ForceModel bFM
+aFM.CentralBody = Sun
+aFM.PointMasses = {Sun}
 
-  Create Propagator aProp
-  aProp.FM = aFM
+Create Propagator aProp
+aProp.FM = aFM
 
-  Create Propagator bProp
-  aProp.FM = bFM
+Create Propagator bProp
+aProp.FM = bFM
 
-  Create CoordinateSystem SunEcliptic
-  SunEcliptic.Origin = Sun
-  SunEcliptic.Axes = MJ2000Ec
+Create CoordinateSystem SunEcliptic
+SunEcliptic.Origin = Sun
+SunEcliptic.Axes = MJ2000Ec
 
-  Create OrbitView EarthView SunView
+Create OrbitView EarthView SunView
 
-  EarthView.Add = {aSat, Earth}
-  EarthView.CoordinateSystem = EarthMJ2000Eq
-  EarthView.ViewPointReference = Earth
-  EarthView.ViewDirection = Earth
+EarthView.Add = {aSat, Earth}
+EarthView.CoordinateSystem = EarthMJ2000Eq
+EarthView.ViewPointReference = Earth
+EarthView.ViewDirection = Earth
 
-  SunView.Add = {aSat, Mars, Sun}
-  SunView.CoordinateSystem = SunEcliptic
-  SunView.ViewPointReference = Sun
-  SunView.ViewDirection = Sun
-  SunView.ViewPointVector = [ 0 0 500000000 ]
+SunView.Add = {aSat, Mars, Sun}
+SunView.CoordinateSystem = SunEcliptic
+SunView.ViewPointReference = Sun
+SunView.ViewDirection = Sun
+SunView.ViewPointVector = [ 0 0 500000000 ]
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 3}
-  Propagate bProp(aSat) {aSat.ElapsedDays = 225}
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+Propagate bProp(aSat) {aSat.ElapsedDays = 225}</programlisting>
     </informalexample>
   </refsection>
 </refentry>

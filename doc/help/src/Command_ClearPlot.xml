@@ -31,14 +31,12 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>ClearPlot</literal> <replaceable>OutputNames</replaceable>
-      <replaceable>
-      OutputNames</replaceable>
-           <replaceable>OutputNames</replaceable> is the list of subscribers whose data is to be 
-           cleared. When data of multiple subscribers is to be cleared, 
-           then they need to be separated by a space.
-    </synopsis>
+    <synopsis><literal>ClearPlot</literal>  <replaceable>OutputNames</replaceable>
+<replaceable>
+OutputNames</replaceable>
+  <replaceable>OutputNames</replaceable> is the list of subscribers whose data is to be 
+  cleared. When data of multiple subscribers is to be cleared, 
+  then they need to be separated by a space.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -58,7 +56,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -164,29 +162,25 @@
       command on multiple subscribers. Data from <guilabel>XYPlot</guilabel>
       subscribers is cleared after 2 days of the propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot1 aPlot2 aPlot3
+Create XYPlot aPlot1 aPlot2 aPlot3
 
-  aPlot1.XVariable = aSat.ElapsedSecs
-  aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
+aPlot1.XVariable = aSat.ElapsedSecs
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
 
-  aPlot2.XVariable = aSat.ElapsedSecs
-  aPlot2.YVariables = {aSat.EarthMJ2000Eq.Y}
+aPlot2.XVariable = aSat.ElapsedSecs
+aPlot2.YVariables = {aSat.EarthMJ2000Eq.Y}
 
-  aPlot3.XVariable = aSat.ElapsedSecs
-  aPlot3.YVariables = {aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, ...
-  aSat.EarthMJ2000Eq.VZ}
+aPlot3.XVariable = aSat.ElapsedSecs
+aPlot3.YVariables = {aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, ...
+aSat.EarthMJ2000Eq.VZ}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  ClearPlot aPlot1 aPlot2 aPlot3
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+ClearPlot aPlot1 aPlot2 aPlot3</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -195,23 +189,19 @@
       cleared for the first 3 days of the propagation and only the data
       retrieved from last day of propagation is plotted:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot1
+Create XYPlot aPlot1
 
-  aPlot1.XVariable = aSat.ElapsedDays
-  aPlot1.YVariables = {aSat.EarthMJ2000Eq.X, aSat.EarthMJ2000Eq.Y}
+aPlot1.XVariable = aSat.ElapsedDays
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X, aSat.EarthMJ2000Eq.Y}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 3}
-  ClearPlot aPlot1
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+ClearPlot aPlot1
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

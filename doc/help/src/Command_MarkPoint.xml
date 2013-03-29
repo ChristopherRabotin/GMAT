@@ -31,15 +31,13 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>MarkPoint</literal> <replaceable>OutputNames</replaceable>
-      <replaceable>
-      OutputNames</replaceable>
-           <replaceable>OutputNames</replaceable> is the list of subscribers and a special mark point
-           will be added to each subscriber’s <replaceable>XYPlot</replaceable>. When mark points need
-           to be added to multiple subscribers, then the subscribers need
-           to be separated by a space.
-    </synopsis>
+    <synopsis><literal>MarkPoint</literal>  <replaceable>OutputNames</replaceable>
+<replaceable>
+OutputNames</replaceable>
+  <replaceable>OutputNames</replaceable> is the list of subscribers and a special mark point
+  will be added to each subscriber’s <replaceable>XYPlot</replaceable>. When mark points need
+  to be added to multiple subscribers, then the subscribers need
+  to be separated by a space.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -59,7 +57,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -167,27 +165,23 @@
       <guilabel>XYPlots</guilabel> after every 0.2 days through an iterative
       loop:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot1 aPlot2
+Create XYPlot aPlot1 aPlot2
 
-  aPlot1.XVariable = aSat.A1ModJulian
-  aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
+aPlot1.XVariable = aSat.A1ModJulian
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
 
-  aPlot2.XVariable = aSat.A1ModJulian
-  aPlot2.YVariables = {aSat.EarthMJ2000Eq.VX}
+aPlot2.XVariable = aSat.A1ModJulian
+aPlot2.YVariables = {aSat.EarthMJ2000Eq.VX}
 
-  BeginMissionSequence;
+BeginMissionSequence;
 
-  While aSat.ElapsedDays &lt; 1.0
-    MarkPoint aPlot1 aPlot2
-    Propagate aProp(aSat) {aSat.ElapsedDays = 0.2}
-  EndWhile
-        </code>
-      </programlisting>
+While aSat.ElapsedDays &lt; 1.0
+ MarkPoint aPlot1 aPlot2
+ Propagate aProp(aSat) {aSat.ElapsedDays = 0.2}
+EndWhile</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -197,26 +191,22 @@
       750 Km. Note that mark points are placed on the XYPlot at every
       integration step:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot1
+Create XYPlot aPlot1
 
-  aPlot1.XVariable = aSat.A1ModJulian
-  aPlot1.YVariables = {aSat.Earth.Altitude}
+aPlot1.XVariable = aSat.A1ModJulian
+aPlot1.YVariables = {aSat.Earth.Altitude}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  While aSat.ElapsedDays &lt; 2
-    Propagate aProp(aSat)
-    If aSat.Earth.Altitude &lt; 750
-      MarkPoint aPlot1
-    EndIf
-  EndWhile
-        </code>
-      </programlisting>
+While aSat.ElapsedDays &lt; 2
+ Propagate aProp(aSat)
+ If aSat.Earth.Altitude &lt; 750
+ MarkPoint aPlot1
+ EndIf
+EndWhile</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

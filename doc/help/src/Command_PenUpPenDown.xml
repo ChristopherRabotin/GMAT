@@ -35,23 +35,21 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>PenUp</literal> <replaceable>OutputNames</replaceable>
+    <synopsis><literal>PenUp</literal>  <replaceable>OutputNames</replaceable>
 
-         <replaceable>OutputNames</replaceable>
-            <replaceable>OutputNames</replaceable> is the list of subscribers that 
-            <replaceable>PenUp</replaceable> command operates on. When <replaceable>PenUp</replaceable> 
-            command is used on multiple subscribers, then the subscribers 
-            need to be separated by a space.
+<replaceable>OutputNames</replaceable>
+  <replaceable>OutputNames</replaceable> is the list of subscribers that 
+  <replaceable>PenUp</replaceable> command operates on. When <replaceable>PenUp</replaceable> 
+  command is used on multiple subscribers, then the subscribers 
+  need to be separated by a space.
 
-      <literal>PenDown</literal> <replaceable>OutputNames</replaceable>
+<literal>PenDown</literal> <replaceable>OutputNames</replaceable>
 
-         <replaceable>OutputNames</replaceable>
-            <replaceable>OutputNames</replaceable> is the list of subscribers 
-            that <replaceable>PenDown</replaceable> command operates on. 
-            When <replaceable>PenDown</replaceable> command is used on multiple subscribers, then the 
-            subscribers need to be separated by a space.
-    </synopsis>
+<replaceable>OutputNames</replaceable>
+  <replaceable>OutputNames</replaceable> is the list of subscribers 
+  that <replaceable>PenDown</replaceable> command operates on. 
+  When <replaceable>PenDown</replaceable> command is used on multiple subscribers, then the 
+  subscribers need to be separated by a space.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -75,7 +73,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -250,30 +248,26 @@
       first day of the propagation, turned off for second day of propagation
       and then data is drawn for third day of the propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot
-  aPlot.XVariable = aSat.ElapsedDays
-  aPlot.YVariables = {aSat.Earth.SMA}
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.SMA}
 
-  Create OrbitView anOrbitViewPlot
-  anOrbitViewPlot.Add = {aSat, Earth}
+Create OrbitView anOrbitViewPlot
+anOrbitViewPlot.Add = {aSat, Earth}
 
-  Create GroundTrackPlot aGroundTrackPlot
-  aGroundTrackPlot.Add = {aSat, Earth}
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat, Earth}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-  PenUp aGroundTrackPlot anOrbitViewPlot aPlot
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-  PenDown aGroundTrackPlot anOrbitViewPlot aPlot
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+PenUp aGroundTrackPlot anOrbitViewPlot aPlot
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+PenDown aGroundTrackPlot anOrbitViewPlot aPlot
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -283,35 +277,32 @@
       one-third of the day, turned off for second one-third of the day and
       then data is drawn again for last one-third of the day:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot1
-  aPlot1.XVariable = aSat.ElapsedDays
-  aPlot1.YVariables = {aSat.Earth.Altitude}
+Create XYPlot aPlot1
+aPlot1.XVariable = aSat.ElapsedDays
+aPlot1.YVariables = {aSat.Earth.Altitude}
 
-  Create Variable I
-  I = 0
+Create Variable I
+I = 0
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  While aSat.ElapsedDays &lt; 1.0
+While aSat.ElapsedDays &lt; 1.0
    
-  Propagate aProp(aSat) {aSat.ElapsedSecs = 60}
-    If I == 480
-  PenUp aPlot1
-    EndIf
+ Propagate aProp(aSat) {aSat.ElapsedSecs = 60}
+ If I == 480
+ PenUp aPlot1
+ EndIf
    
-    If I == 960
-  PenDown aPlot1
-    EndIf
+ If I == 960
+ PenDown aPlot1
+ EndIf
    
-    GMAT I = I +1
-  EndWhile
-        </code>
-      </programlisting>
+ GMAT I = I +1
+
+EndWhile</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

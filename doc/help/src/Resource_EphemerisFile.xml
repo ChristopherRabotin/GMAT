@@ -60,7 +60,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -76,8 +76,7 @@
           <row>
             <entry><guilabel>InterpolationOrder</guilabel></entry>
 
-            <entry><para> The <guilabel>InterpolationOrder</guilabel> field
-            allows you to set the interpolation order for the available
+            <entry><para>Allows you to set the interpolation order for the available
             interpolator methods (Lagrange or Hermite) for either CCSDS-OEM or
             SPK file formats. </para> <variablelist>
                 <varlistentry>
@@ -192,7 +191,7 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para> The <guilabel>EpochFormat</guilabel> field allows
+            <entry><para>Allows
             you to select format of the epoch that the user defines in
             <guilabel>InitialEpoch</guilabel> and
             <guilabel>FinalEpoch</guilabel> fields. </para> <variablelist>
@@ -249,7 +248,7 @@
           <row>
             <entry><guilabel>FileFormat</guilabel></entry>
 
-            <entry><para> The <guilabel>FileFormat</guilabel> field allows the
+            <entry><para>Allows the
             user to generate ephemeris file in two available file formats:
             CCSDS-OEM or SPK </para> <variablelist>
                 <varlistentry>
@@ -305,7 +304,7 @@
           <row>
             <entry><guilabel>FileName</guilabel></entry>
 
-            <entry><para> The <guilabel>FileName</guilabel> field allows the
+            <entry><para>Allows the
             user to name the generated ephemeris file and save it in
             user-specified location. </para> <variablelist>
                 <varlistentry>
@@ -361,7 +360,7 @@
           <row>
             <entry><guilabel>FinalEpoch</guilabel></entry>
 
-            <entry><para> The <guilabel>FinalEpoch</guilabel> field allows the
+            <entry><para>Allows the
             user to specify the time span of an ephemeris file. Ephemeris file
             is generated up to final epoch that is specified in
             <guilabel>FinalEpoch</guilabel> field. </para> <variablelist>
@@ -419,7 +418,7 @@
           <row>
             <entry><guilabel>InitialEpoch</guilabel></entry>
 
-            <entry><para> The <guilabel>InitialEpoch</guilabel> field allows
+            <entry><para> Allows
             the user to specify the starting epoch of the ephemeris file.
             Ephemeris file is generated starting from the epoch that is
             defined in <guilabel>InitialEpoch</guilabel> field. </para>
@@ -478,7 +477,7 @@
           <row>
             <entry><guilabel>Interpolator</guilabel></entry>
 
-            <entry><para> The <guilabel>Interpolator</guilabel> field defines
+            <entry><para> This field defines
             the available interpolator method that was used to generate
             ephemeris file. Available <guilabel>Interpolators</guilabel> are
             <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
@@ -536,7 +535,7 @@
           <row>
             <entry><guilabel>WriteEphemeris</guilabel></entry>
 
-            <entry><para> <guilabel>WriteEphemeris</guilabel> field allows the
+            <entry><para>Allows the
             user to optionally calculate/write or not calculate/write an
             ephemeris that has been created and configured. </para>
             <variablelist>
@@ -593,7 +592,7 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para> <guilabel>CoordinateSystem</guilabel> field allows
+            <entry><para>Allows
             the user to generate ephemeris data in the coordinate system that
             is selected from <guilabel>CoordinateSystem</guilabel> field. The
             user can choose to also generate ephemeris data in user-defined
@@ -651,7 +650,7 @@
           <row>
             <entry><guilabel>Spacecraft</guilabel></entry>
 
-            <entry><para> The <guilabel>Spacecraft</guilabel> field allows the
+            <entry><para>Allows the
             user to generate ephemeris data of spacecraft(s) that are defined
             in <guilabel>Spacecraft</guilabel> field. </para> <variablelist>
                 <varlistentry>
@@ -708,7 +707,7 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para> The <guilabel>UpperLeft</guilabel> field allows the
+            <entry><para>Allows the
             user to pan the generated ephemeris file display window in any
             direction. First value in [0 0] matrix helps to pan the window
             horizontally and second value helps to pan the window vertically.
@@ -766,7 +765,7 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para> The <guilabel>Size</guilabel> field allows the user
+            <entry><para>Allows the user
             to control the display size of generated ephemeris file panel.
             First value in [0 0] matrix controls horizonal size and second
             value controls vertical size of ephemeris file display window.
@@ -824,12 +823,12 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para> <guilabel>RelativeZOrder</guilabel> field allows the
+            <entry><para>Allows the
             user to select which generated ephemeris file display window is to
             displayed first on the screen. The
-            <guilabel>EphemerisFile</guilabel> object with lowest
+            <guilabel>EphemerisFile</guilabel> resource with lowest
             <guilabel>RelativeZOrder</guilabel> value will be displayed last
-            while <guilabel>EphemerisFile</guilabel> object with highest
+            while <guilabel>EphemerisFile</guilabel> resource with highest
             <guilabel>RelativeZOrder</guilabel> value will be displayed first.
             </para> <variablelist>
                 <varlistentry>
@@ -885,7 +884,7 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para> The <guilabel>Maximized</guilabel> field allows the
+            <entry><para>Allows the
             user to maximize the generated ephemeris file window. </para>
             <variablelist>
                 <varlistentry>
@@ -1161,11 +1160,11 @@ BeginMissionSequence
 Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
 Target aDC
-Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
-Upper = 3.14159, MaxStep = 0.5})
-  Maneuver TOI(aSat)
-  Propagate aProp(aSat) {aSat.Earth.Apoapsis}
-  Achieve aDC(aSat.Earth.RMAG = 42165)
+ Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat)
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+ Achieve aDC(aSat.Earth.RMAG = 42165)
 EndTarget
 
 Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>

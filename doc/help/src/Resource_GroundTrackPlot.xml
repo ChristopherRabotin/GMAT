@@ -55,7 +55,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.25*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -71,7 +71,7 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para> The <guilabel>Add</guilabel> field allows the user
+            <entry><para>Allows the user
             to pick selected objects such as
             <guilabel>Spacecraft(s)</guilabel> or
             <guilabel>GroundStation(s)</guilabel> whose ground track is drawn
@@ -79,8 +79,8 @@
             <guilabel>Spacecrafts</guilabel> or
             <guilabel>GroundStations</guilabel>, seperate the list by comma
             and enclose the list in curly brackets. For Example:
-            <guilabel>DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
-            bGroundStation}</guilabel></para> <variablelist>
+            <literal>DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
+            bGroundStation}</literal></para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -301,7 +301,7 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para> The <guilabel>ShowPlot</guilabel> field specifies
+            <entry><para>This field specifies
             whether to show ground track plot during a mission run. </para>
             <variablelist>
                 <varlistentry>
@@ -357,7 +357,7 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para> The <guilabel>SolverIterations</guilabel> field
+            <entry><para>This field
             determines whether or not ground track data associated with
             perturbed trajectories during a solver
             (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
@@ -424,7 +424,7 @@
           <row>
             <entry><guilabel>TextureMap</guilabel></entry>
 
-            <entry><para> The <guilabel>TextureMap</guilabel> field allows you
+            <entry><para>Allows you
             to enter or select any user-defined texture map image for the
             central body </para> <variablelist>
                 <varlistentry>
@@ -580,22 +580,18 @@
       <guilabel>GroundTrackPlot</guilabel> is turned off for the first 2 days
       of the propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create GroundTrackPlot aGroundTrackPlot
-  aGroundTrackPlot.Add = {aSat}
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aGroundTrackPlot Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle aGroundTrackPlot On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle aGroundTrackPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aGroundTrackPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
 
     <refsection>
@@ -681,18 +677,14 @@
       off since no SpacePoints were added to the plot. Below is a sample
       script snippet that generates such a warning message:</para>
 
-      <programlisting>    
-        <code>
-  Create Spacecraft aSat aSat2
-  Create Propagator aProp
-  Create GroundTrackPlot aGroundTrackPlot
+<programlisting><code>Create Spacecraft aSat aSat2
+Create Propagator aProp
+Create GroundTrackPlot aGroundTrackPlot
 
-  aGroundTrackPlot.Add = {}
+aGroundTrackPlot.Add = {}
 
-  BeginMissionSequence;
-  Propagate aProp(aSat, aSat2) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+BeginMissionSequence;
+Propagate aProp(aSat, aSat2) {aSat.ElapsedDays = 1}</code></programlisting>
     </refsection>
   </refsection>
 
@@ -705,54 +697,46 @@
       <guilabel>GroundTrackPlot</guilabel>. Spacecraft’s ground track is
       plotted for one day of propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+<programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create GroundStation aGroundStation
+Create GroundStation aGroundStation
 
-  Create GroundTrackPlot aGroundTrackPlot
-  aGroundTrackPlot.Add = {aSat, aGroundStation}
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat, aGroundStation}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
       <para>Propagate a spacecraft for two days around a non-default central
       body. Spacecraft’s ground track is plotted on planet Mars:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  aSat.CoordinateSystem = MarsJ2000Eq
-  aSat.SMA = 8000
-  aSat.ECC = 0.0003
+<programlisting><code>Create Spacecraft aSat
+aSat.CoordinateSystem = MarsJ2000Eq
+aSat.SMA = 8000
+aSat.ECC = 0.0003
 
-  Create ForceModel aFM
-  aFM.CentralBody = Mars
-  aFM.PointMasses = {Mars}
+Create ForceModel aFM
+aFM.CentralBody = Mars
+aFM.PointMasses = {Mars}
 
-  Create Propagator aProp
-  aProp.FM = aFM
+Create Propagator aProp
+aProp.FM = aFM
 
-  Create CoordinateSystem MarsJ2000Eq
-  MarsJ2000Eq.Origin = Mars
-  MarsJ2000Eq.Axes = MJ2000Eq
+Create CoordinateSystem MarsJ2000Eq
+MarsJ2000Eq.Origin = Mars
+MarsJ2000Eq.Axes = MJ2000Eq
 
-  Create GroundTrackPlot aGroundTrackPlot
-  aGroundTrackPlot.Add = {aSat}
-  aGroundTrackPlot.CentralBody = Mars
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat}
+aGroundTrackPlot.CentralBody = Mars
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-        </code>
-      </programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

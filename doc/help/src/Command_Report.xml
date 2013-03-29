@@ -30,17 +30,15 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Report</literal>  <replaceable>ReportName</replaceable>  <replaceable>DataList</replaceable>
+    <synopsis><literal>Report</literal>  <replaceable>ReportName</replaceable>  <replaceable>DataList</replaceable>
 
-      <replaceable>ReportName</replaceable>
-          <replaceable>ReportName</replaceable> option allows you to specify the 
-          ReportFile for data output.
-      <replaceable>DataList</replaceable>
-          <replaceable>DataList</replaceable> option allows you to output data to the Filename 
-          specified by the <replaceable>ReportName</replaceable>. Multiple objects can be written 
-          in the <replaceable>DataList</replaceable> when they are separated by spaces.
-    </synopsis>
+<replaceable>ReportName</replaceable>
+  <replaceable>ReportName</replaceable> option allows you to specify the 
+  ReportFile for data output.
+<replaceable>DataList</replaceable>
+  <replaceable>DataList</replaceable> option allows you to output data to the Filename 
+  specified by the <replaceable>ReportName</replaceable>. Multiple objects can be written 
+  in the <replaceable>DataList</replaceable> when they are separated by spaces.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -63,7 +61,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -217,22 +215,18 @@
       orbital elements to a report file using the <guilabel>Report</guilabel>
       command.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create ReportFile aReport
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
 
-  Create Propagator aProp
+Create Propagator aProp
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
-  aSat.EarthMJ2000Eq.RAAN
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
-  aSat.EarthMJ2000Eq.RAAN
-        </code>
-      </programlisting>
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.EarthMJ2000Eq.RAAN
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.EarthMJ2000Eq.RAAN</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -240,29 +234,25 @@
       and a string to a report file using the <guilabel>Report</guilabel>
       command.</para>
 
-      <programlisting>
-        <code>
-  Create ReportFile aReport
+      <programlisting><code>Create ReportFile aReport
 
-  Create Variable aVar aVar2
-  aVar = 100
-  aVar2 = 2000
+Create Variable aVar aVar2
+aVar = 100
+aVar2 = 2000
 
-  Create Array aArray[2,2]
-  aArray(1, 1) = 2
-  aArray(1, 2) = 3
-  aArray(2, 1) = 4
-  aArray(2, 2) = 5
+Create Array aArray[2,2]
+aArray(1, 1) = 2
+aArray(1, 2) = 3
+aArray(2, 1) = 4
+aArray(2, 2) = 5
 
-  Create String aString
-  aString = 'GMAT is awesome'
+Create String aString
+aString = 'GMAT is awesome'
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) ...
-  aArray(2,2) aString
-        </code>
-      </programlisting>
+Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) ...
+aArray(2,2) aString</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -270,19 +260,16 @@
       spacecraft's true anomaly, eccentricity and altitude after every 3600
       seconds using the <guilabel>Report</guilabel> command:</para>
 
-      <programlisting>
-  Create Spacecraft aSat
-  Create ReportFile aReport
-  Create Propagator aProp <code>
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
+Create Propagator aProp 
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  While aSat.ElapsedDays &lt; 1
-    Propagate aProp(aSat) {aSat.ElapsedSecs = 3600 }
-    Report aReport aSat.Earth.TA aSat.Earth.ECC aSat.Earth.Altitude
-  EndWhile
-        </code>
-      </programlisting>
+While aSat.ElapsedDays &lt; 1
+ Propagate aProp(aSat) {aSat.ElapsedSecs = 3600 }
+ Report aReport aSat.Earth.TA aSat.Earth.ECC aSat.Earth.Altitude
+EndWhile</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

@@ -30,17 +30,15 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Toggle</literal> <replaceable>OutputNames</replaceable> <replaceable>Arg</replaceable>
+    <synopsis><literal>Toggle</literal>  <replaceable>OutputNames</replaceable>  <replaceable>Arg</replaceable>
 
-      <replaceable>OutputNames</replaceable>
-        <replaceable>OutputNames</replaceable> is the list of subscribers that are to be toggled. 
-        When multiple subscribers are being toggled in the <replaceable>OutputNames</replaceable>, 
-        then they need to be separated by a space.
-      <replaceable>Arg</replaceable>
-        <replaceable>Arg</replaceable> option allows you to turn off or on the data output to 
-        the selected subscribers listed in the <replaceable>OutputNames</replaceable>.
-    </synopsis>
+<replaceable>OutputNames</replaceable>
+  <replaceable>OutputNames</replaceable> is the list of subscribers that are to be toggled. 
+  When multiple subscribers are being toggled in the <replaceable>OutputNames</replaceable>, 
+  then they need to be separated by a space.
+<replaceable>Arg</replaceable>
+  <replaceable>Arg</replaceable> option allows you to turn off or on the data output to 
+  the selected subscribers listed in the <replaceable>OutputNames</replaceable>.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -62,7 +60,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -228,23 +226,20 @@
       <guilabel>XYPlot</guilabel> is turned off for the first 2 days of the
       propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create XYPlot aPlot
-  aPlot.XVariable = aSat.ElapsedDays
-  aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aPlot Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-  Toggle aPlot On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle aPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}
+</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -254,24 +249,20 @@
       position vector is reported to the report file. Report file is turned
       off for the first day of the propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ReportFile aReport
-  aReport.Filename = 'ReportFile1.txt'
-  aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
-  aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aReport Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-  Toggle aReport On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 4}
-        </code>
-      </programlisting>
+Toggle aReport Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+Toggle aReport On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -282,31 +273,27 @@
       <guilabel>EphemerisFile</guilabel>. Subscribers are turned off for first
       3 days of the propagation:</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aProp
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-  Create ReportFile aReport
-  aReport.Filename = 'ReportFile1.txt'
-  aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
-  aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
 
-  Create XYPlot aPlot
-  aPlot.XVariable = aSat.ElapsedDays
-  aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
 
-  Create EphemerisFile aEphemerisFile
-  aEphemerisFile.Spacecraft = aSat
+Create EphemerisFile aEphemerisFile
+aEphemerisFile.Spacecraft = aSat
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  Toggle aReport aPlot aEphemerisFile Off
-  Propagate aProp(aSat) {aSat.ElapsedDays = 3}
-  Toggle aReport aPlot aEphemerisFile On
-  Propagate aProp(aSat) {aSat.ElapsedDays = 1}
-        </code>
-      </programlisting>
+Toggle aReport aPlot aEphemerisFile Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+Toggle aReport aPlot aEphemerisFile On
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
