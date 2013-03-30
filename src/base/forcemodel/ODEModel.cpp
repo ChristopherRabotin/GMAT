@@ -85,6 +85,7 @@
 //#define DEBUG_EVENTLOCATION
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DEBUG_FOR_CINTERFACE
+//#define DEBUG_TRANSIENT_FORCES
 
 
 //#ifndef DEBUG_MEMORY
@@ -527,7 +528,16 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          "<%s>'%s'\n", pPhysicalModel->GetTypeName().c_str(),
          pPhysicalModel->GetName().c_str());
    #endif
-   
+
+   #ifdef DEBUG_TRANSIENT_FORCES
+      if (pPhysicalModel->IsTransient())
+         MessageInterface::ShowMessage("+++ Trying to add transient %s with "
+               "sat %s\n",
+               pPhysicalModel->GetTypeName().c_str(),
+               (pPhysicalModel->GetRefObjectNameArray(Gmat::SPACECRAFT))[0].c_str());
+   #endif
+
+
 	#ifdef DEBUG_EVENTLOCATION
       if (pPhysicalModel->IsOfType("EventModel"))
       {
@@ -682,6 +692,14 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
                if (forceList[i]->GetRefObjectNameArray(Gmat::SPACECRAFT)[0] !=
                      pPhysicalModel->GetRefObjectNameArray(Gmat::SPACECRAFT)[0])
                   skipAdd = true;
+               #ifdef DEBUG_TRANSIENT_FORCES
+                  else
+                     MessageInterface::ShowMessage("*** Did not find sat %s "
+                           "for transient force %s\n",
+                           forceList[i]->GetRefObjectNameArray(Gmat::SPACECRAFT)[0].c_str(),
+                           forceList[i]->GetTypeName().c_str());
+
+               #endif
             }
          }
 
