@@ -186,7 +186,7 @@ Propagate::~Propagate()
 {
    EmptyBuffer();
 
-   for (UnsignedInt i=0; i<stopWhen.size(); i++)
+   for (UnsignedInt i = 0; i < stopWhen.size(); ++i)
    {
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
@@ -3048,7 +3048,13 @@ bool Propagate::Initialize()
             if (epochID == -1)
                epochID = so->GetParameterID("A1Epoch");
             if (so->IsManeuvering())
+            {
+               #ifdef DEBUG_FINITE_MANEUVER
+                  MessageInterface::ShowMessage(
+                     "SpaceObject %s is maneuvering\n", so->GetName().c_str());
+               #endif
                finiteBurnActive = true;
+            }
             sats.push_back(so);
 
             // This validation is moved to PrepareToPropagate because there may
@@ -3904,13 +3910,19 @@ bool Propagate::Execute()
             {
                Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy :
                                 firstStepTolerance);
+
                stopWhen[i]->Reset();
                stopWhen[i]->Evaluate();
                #ifdef DEBUG_STOPPING_CONDITIONS
+                  MessageInterface::ShowMessage("timeAccuracy: %le "
+                        "FirstStepTolerance: %le\n", timeAccuracy,
+                        firstStepTolerance);
                   MessageInterface::ShowMessage
-                     ("Achieved: %.12lf Goal: %.12lf Difference: %.12le\n",
-                      stopWhen[i]->GetStopValue(), stopWhen[i]->GetStopGoal(),
-                      stopWhen[i]->GetStopValue() - stopWhen[i]->GetStopGoal());
+                     ("Achieved: %.12lf Goal: %.12lf Difference: %.12le Stop "
+                      "accuracy: %le\n", stopWhen[i]->GetStopValue(),
+                      stopWhen[i]->GetStopGoal(),
+                      stopWhen[i]->GetStopValue() - stopWhen[i]->GetStopGoal(),
+                      accuracy);
                #endif
                // Set the flag to check the first step only if
                //    (1) the stop value is <= stopAccuracy and
@@ -4498,13 +4510,13 @@ void Propagate::CheckStopConditions(Integer epochID)
 
 
 //------------------------------------------------------------------------------
-// bool CheckFirstStep()
+// bool CheckFirstStepStop(Integer i)
 //------------------------------------------------------------------------------
 /**
  * Method used during the first prop step to ensure that a stop encountered on
  * this step is not repeating the last stop encountered.
  *
- * @param <i> Index in the stopping condition list that needs to be checked
+ * @param i Index in the stopping condition list that needs to be checked
  *
  * @return true is the stop is a valid stop -- that is, if it is not a repeat of
  * the last stop -- and false if it is a repeat.
@@ -4936,7 +4948,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
             howClose : accuracy) * 10.0;
 
       #ifdef DEBUG_FIRST_STEP_STOP
-         MessageInterface::ShowMessage("First step tolerance = %le,    "
+         MessageInterface::ShowMessage("Final step; First step tolerance = %le,    "
                "achieved = %le, desired = %le\n", firstStepTolerance, howClose,
                accuracy);
       #endif
@@ -5712,24 +5724,26 @@ GmatBase* Propagate::GetClone(Integer cloneIndex)
  * @param propMan PropagationStateManager for this PropSetup
  */
 //------------------------------------------------------------------------------
-void Propagate::AddTransientForce(StringArray *sats, ODEModel *p,
+void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
       PropagationStateManager *propMan)
 {
    #ifdef DEBUG_TRANSIENT_FORCES
    MessageInterface::ShowMessage
-      ("Propagate::AddTransientForce() entered, ODEModel=<%p>, transientForces=<%p>\n",
-       p, transientForces);
+      ("Propagate::AddTransientForce() entered, ODEModel=<%p>,"
+       " transientForces=<%p>\n", p, transientForces);
    #endif
 
    // Find any transient force that is active and add it to the force model
+   StringArray satsThatManeuver, formsThatManeuver;
+
    for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
         i != transientForces->end(); ++i)
    {
       StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
       // Loop through the spacecraft that go with the force model, and see if
       // they are in the spacecraft list for the current transient force
-      for (StringArray::iterator current = sats->begin();
-           current != sats->end(); ++current)
+      for (StringArray::iterator current = satnames->begin();
+           current != satnames->end(); ++current)
       {
          if (find(tfSats.begin(), tfSats.end(), *current) != tfSats.end())
          {
@@ -5751,7 +5765,106 @@ void Propagate::AddTransientForce(StringArray *sats, ODEModel *p,
             }
             break;      // Avoid multiple adds
          }
+         else
+         {
+            // Check to see if a Formation is masking the Spacecraft, and if so
+            // whine and stop
+            // Find the object that matches the current name
+            GmatBase *obj;
+            for (UnsignedInt i = 0; i < sats.size(); ++i)
+            {
+               if (sats[i]->GetName() == *current)
+               {
+                  obj = sats[i];
+
+                  #ifdef DEBUG_TRANSIENT_FORCES
+                     MessageInterface::ShowMessage("Checking %s\n",
+                           current->c_str());
+                  #endif
+
+                  if (obj->IsOfType(Gmat::FORMATION))
+                  {
+                     StringArray mansats =
+                           ((SpaceObject*)(obj))->GetManeuveringMembers();
+
+                     #ifdef DEBUG_TRANSIENT_FORCES
+                        MessageInterface::ShowMessage("***It's a Formation "
+                              "with %d maneuvering sats\n", mansats.size());
+                     #endif
+
+                     for (UnsignedInt i = 0; i < mansats.size(); ++i)
+                     {
+                        #ifdef DEBUG_TRANSIENT_FORCES
+                           MessageInterface::ShowMessage("   %d: %s is maneuvering\n",
+                                 i, mansats[i].c_str());
+                        #endif
+                        if (find(tfSats.begin(), tfSats.end(), mansats[i]) != tfSats.end())
+                        {
+                           if (find(satsThatManeuver.begin(),
+                                 satsThatManeuver.end(),
+                                 mansats[i]) == satsThatManeuver.end())
+                              satsThatManeuver.push_back(mansats[i]);
+                           if (find(formsThatManeuver.begin(),
+                                 formsThatManeuver.end(), obj->GetName()) ==
+                                       formsThatManeuver.end())
+                              formsThatManeuver.push_back(obj->GetName());
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
+   }
+   if (satsThatManeuver.size() > 0)
+   {
+      std::string whatToSay, formToSay;
+      if (satsThatManeuver.size() == 1)
+         whatToSay = "a maneuvering Spacecraft named \"" +
+                     satsThatManeuver[0] + "\"";
+      else
+      {
+         whatToSay = "maneuvering Spacecraft named ";
+         for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+         {
+            if (i != 0)
+            {
+               if (satsThatManeuver.size() > 2)
+                  whatToSay += ", ";
+               else
+                  whatToSay += " ";
+               if (i == satsThatManeuver.size()-1)
+                  whatToSay += "and ";
+            }
+            whatToSay += "\"" + satsThatManeuver[i] + "\"";
+         }
+      }
+
+      if (formsThatManeuver.size() == 1)
+         formToSay = "Formation \"" + formsThatManeuver[0] + "\" contains " +
+         whatToSay;
+      else
+      {
+         formToSay = "Formations ";
+         for (UnsignedInt i = 0; i < formsThatManeuver.size(); ++i)
+         {
+            if (i != 0)
+            {
+               if (formsThatManeuver.size() > 2)
+                  formToSay += ", ";
+               else
+                  formToSay += " ";
+               if (i == formsThatManeuver.size()-1)
+                  formToSay += "and ";
+            }
+            formToSay += "\"" + formsThatManeuver[i] + "\"";
+         }
+
+         formToSay += " contain " + whatToSay;
+      }
+
+      throw CommandException("The " + formToSay + ", but GMAT does not support "
+            "finite burn maneuvers inside of Formation objects.");
    }
 
    #ifdef DEBUG_TRANSIENT_FORCES

@@ -42,6 +42,8 @@ public:
    virtual Real         SetEpoch(const Real ep);
    virtual bool         IsManeuvering();
    virtual void         IsManeuvering(bool mnvrFlag);
+   virtual const StringArray&
+                        GetManeuveringMembers();
    virtual bool         ParametersHaveChanged();
    virtual void         ParametersHaveChanged(bool flag);
    
@@ -101,6 +103,8 @@ protected:
    GmatState         state;
    /// true when a finite burn needs to be applied to this SpaceObject
    bool              isManeuvering;
+   /// List of maneuvering members
+   StringArray       maneuveringMembers;
    /// Reference SpacePoint for the data
    std::string       originName;
    /// Reference SpacePoint for the data

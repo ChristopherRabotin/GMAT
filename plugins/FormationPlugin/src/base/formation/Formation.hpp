@@ -94,6 +94,10 @@ public:
    virtual void         BuildState();
    virtual void         UpdateElements();
    virtual void         UpdateState();
+   virtual bool         IsManeuvering();
+   virtual const StringArray&
+                        GetManeuveringMembers();
+
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
    virtual void         ClearLastStopTriggered();

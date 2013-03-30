@@ -1076,6 +1076,46 @@ void Formation::UpdateState()
    SetEpoch(ep0);
 }
 
+//------------------------------------------------------------------------------
+// bool Formation::IsManeuvering()
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if any formation members are maneuvering
+ *
+ * @return true if a member is maneuvering, false if not
+ */
+//------------------------------------------------------------------------------
+bool Formation::IsManeuvering()
+{
+   bool retval = false;
+
+   for (UnsignedInt i = 0; i < components.size(); ++i)
+      if (components[i]->IsManeuvering())
+         retval = true;
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetManeuveringMembers()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of maneuvering Formation members
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
+const StringArray& Formation::GetManeuveringMembers()
+{
+   maneuveringMembers.clear();
+
+   for (UnsignedInt i = 0; i < components.size(); ++i)
+      if (components[i]->IsManeuvering())
+         maneuveringMembers.push_back(components[i]->GetName());
+
+   return maneuveringMembers;
+}
+
 
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)

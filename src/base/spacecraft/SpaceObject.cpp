@@ -232,6 +232,30 @@ void SpaceObject::IsManeuvering(bool mnvrFlag)
 
 
 //------------------------------------------------------------------------------
+// const StringArray& GetManeuveringMembers()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of maneuvering members
+ *
+ * For Spacecraft, this method returns the spacecraft name if it is maneuvering.
+ * For Formations, the method is overridden to return names of each maneuvering
+ * spacecraft.
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
+const StringArray& SpaceObject::GetManeuveringMembers()
+{
+   maneuveringMembers.clear();
+
+   if (isManeuvering)
+      maneuveringMembers.push_back(instanceName);
+
+   return maneuveringMembers;
+}
+
+
+//------------------------------------------------------------------------------
 // bool ParametersHaveChanged()
 //------------------------------------------------------------------------------
 /**
