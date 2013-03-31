@@ -85,7 +85,6 @@
 
       <xi:include href="Resource_Array.xml" />
       <xi:include href="Resource_Barycenter.xml" />
-      <xi:include href="Resource_CalculationParameters.xml" />
       <xi:include href="Resource_CelestialBody.xml" />
       <xi:include href="Resource_CoordinateSystem.xml" />
       <xi:include href="Resource_DifferentialCorrector.xml" />
@@ -160,6 +159,7 @@
     
     <reference>
         <title>System</title>
+        <xi:include href="System_CalculationParameters.xml" />
         <xi:include href="System_CommandLineUsage.xml" />
         <xi:include href="System_MatlabInterface.xml" />
         <xi:include href="System_ScriptLanguage.xml" />
