@@ -69,7 +69,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -77,7 +77,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Celestial Body</para>
+                    <para><guilabel>Comet</guilabel>,
+                    <guilabel>Planet</guilabel>,
+                    <guilabel>Asteroid</guilabel>, or
+                    <guilabel>Moon</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -93,8 +96,11 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>For Comet, Planet, Asteroid, the default is Sun. For
-                    Moon, the default is Earth.</para>
+                    <para>For <guilabel>Comet</guilabel>,
+                    <guilabel>Planet</guilabel>,
+                    <guilabel>Asteroid</guilabel>, the default is
+                    <guilabel>Sun</guilabel>. For <guilabel>Moon</guilabel>,
+                    the default is <guilabel>Earth</guilabel>.</para>
                   </listitem>
                 </varlistentry>
 
@@ -179,7 +185,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>File name and/or path</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -187,8 +193,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>.jpeg .bmp .png .gif .tif .pcx .pnm .tga .xpm
-                    </para>
+                    <para>A file of the following format: .jpeg, .bmp, .png,
+                    .gif, .tif, .pcx, .pnm, .tga, or .xpm</para>
                   </listitem>
                 </varlistentry>
 
@@ -204,7 +210,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>'../data/graphics/texture/GenericCelestialBody.jpg'</para>
+                    <para>
+                      <literal>'../data/graphics/texture/GenericCelestialBody.jpg'</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -453,7 +461,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String array</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -881,7 +889,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg/day</para>
+                    <para>deg/century</para>
                   </listitem>
                 </varlistentry>
 
@@ -991,7 +999,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg/day</para>
+                    <para>deg/century</para>
                   </listitem>
                 </varlistentry>
 

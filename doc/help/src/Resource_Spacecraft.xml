@@ -26,7 +26,7 @@
 
     <refpurpose>A spacecraft</refpurpose>
   </refnamediv>
-
+  
   <refsection>
     <title>Description</title>
 
@@ -1748,4 +1748,10 @@ Create Report aReport
 aReport.Add = {aSat.Epoch.A1Gregorian, aSat.Earth.RMAG}</code></programlisting>
     </informalexample>
   </refsection>
+    
+
+
+
 </refentry>
+
+  

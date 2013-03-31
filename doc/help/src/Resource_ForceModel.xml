@@ -24,7 +24,7 @@
   <refnamediv>
     <refname>ForceModel</refname>
 
-    <refpurpose>A model of enviromental forces.</refpurpose>
+    <refpurpose>A model of enviromental forces</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -42,16 +42,15 @@
     <guilabel>ForceModel</guilabel> to numerically solve the orbital equations
     of motion (forwards or backwards in time) using the forces configured in
     the <guilabel>ForceModel</guilabel> object, and may include thrust terms
-    in the case of powered flight. See the Remarks and Examples below for
-    detailed information on how to configure force models for your
-    application.</para>
+    in the case of powered flight. See the discussion below for detailed
+    information on how to configure force models for your application.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Propagator"/></para>
   </refsection>
 
   <refsection>
-    <title>Options</title>
+    <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
@@ -80,7 +79,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>OBJECT_TYPE</para>
+                    <para>Object</para>
                   </listitem>
                 </varlistentry>
 

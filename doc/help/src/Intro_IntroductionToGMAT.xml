@@ -10,20 +10,20 @@
   <title xml:id="IntroductionToGMAT">Introduction to GMAT</title>
 
   <para>GMAT is an open source trajectory design and optimization system
-  developed by NASA and private industry. It is developed in an open source
-  process to maximize technology transfer, to permit anyone to develop and
-  validate new algorithms, and to enable those new algorithms to quickly
-  transition into the high fidelity core.</para>
-
-  <para>GMAT is designed to model and optimize spacecraft trajectories in
-  flight regimes ranging from low Earth orbit to lunar, interplanetary, and
-  other deep space missions. The system supports constrained and unconstrained
-  trajectory optimization and built-in features make defining cost and
-  constraint functions trivial. GMAT also contains initial value solvers
-  (propagators) and boundary value solvers and efficiently propagates
-  spacecraft either singly or as coupled sets. GMAT’s propagators naturally
-  synchronize the epochs of multiple vehicles and avoid fixed step integration
-  and interpolation when doing so.</para>
+  developed by a team of NASA, private industry, public, and private
+  contributors and is used for real-world engineering studies, as a tool for
+  education and public engagement. GMAT is designed to model and optimize
+  spacecraft trajectories in flight regimes ranging from low Earth orbit to
+  lunar, interplanetary, and other deep space missions. The system supports
+  constrained and unconstrained trajectory optimization and built-in features
+  make defining cost and constraint functions trivial. GMAT also contains
+  initial value solvers (propagators) and boundary value solvers and
+  efficiently propagates spacecraft either singly or as coupled sets. GMAT’s
+  propagators naturally synchronize the epochs of multiple vehicles and avoid
+  fixed step integration and interpolation when doing so. It is developed in
+  an open source process to maximize technology transfer, to permit anyone to
+  develop and validate new algorithms, and to enable those new algorithms to
+  quickly transition into the high fidelity core.</para>
 
   <para>Users can interact with GMAT using either a graphical user interface
   (GUI) or a custom scripting language modeled after the syntax used in The
@@ -51,21 +51,24 @@
   <section>
     <title>Licensing</title>
 
-    <para>GMAT is licensed under the NASA Open Source Agreement v1.3. The
-    license text is contained in the file <filename>License.txt</filename> in
-    root directory of the GMAT distribution.</para>
+    <para>GMAT is licensed under the Apache License 2.0. The license text is
+    contained in the file <filename>License.txt</filename> in root directory
+    of the GMAT distribution.</para>
   </section>
 
   <section>
     <title>Platform Support</title>
 
-    <para>GMAT is cross-platform software and runs on Windows, Linux, and
-    Macintosh platforms, on both 32-bit and 64-bit architectures. It uses the
-    wxWidgets cross-platform user interface toolkit and can be built using
-    either Microsoft Visual Studio or the GNU Compiler Collection (GCC). GMAT
-    is written in ANSI standard C++ (approximately 380,000 non-comment source
-    lines of code) using an object-oriented methodology, with a rich class
-    structure designed to make new features simple to incorporate.</para>
+    <para>GMAT has been rigorously tested on the Windows 7 platform and we
+    perform nightly regression tests running over 10000 test cases for the
+    script engine and over 4000 test cases for the GUI. While the system
+    engine is routinely built on Mac and Linux, we consider the software to be
+    in alpha form on those plaforms. GMAT uses the wxWidgets cross-platform
+    user interface toolkit and can be built using either Microsoft Visual
+    Studio or the GNU Compiler Collection (GCC). GMAT is written in ANSI
+    standard C++ (approximately 380,000 non-comment source lines of code)
+    using an object-oriented methodology, with a rich class structure designed
+    to make new features simple to incorporate.</para>
   </section>
 
   <section>
@@ -83,19 +86,15 @@
   <section>
     <title>Development Status</title>
 
-    <para>While GMAT has undergone extensive testing and is mature software,
-    at the present time we consider the software to be in beta form on Windows
-    and alpha on Linux and Mac. GMAT is not yet sufficiently verified to be
-    used as a primary operational analysis system. It has been used to
-    optimize maneuvers for flight projects such as NASA’s LCROSS and ARTEMIS
-    missions, and the Lunar Reconnaissance Orbiter, and for optimization and
-    analysis for the OSIRIS-REx and MMS missions. However, for flight
-    planning, we independently verify solutions generated in GMAT in the
-    primary operational system.</para>
-
-    <para>The GMAT team is currently working on several activities including
-    maintenance, bug fixes, and testing, along with selected new
-    functionality.</para>
+    <para>GMAT has undergone extensive testing and is mature software. The
+    system has been used to optimize maneuvers for flight projects such as
+    NASA’s LCROSS and ARTEMIS missions, and the Lunar Reconnaissance Orbiter,
+    and for optimization and analysis for the OSIRIS-REx and MMS missions.
+    Historically, solutions from GMAT have been verified in other operational
+    systems. However, with release R2013a, the GMAT team will perform final
+    operational certifications testing of the system be completed in Aug.
+    2013. After completion of operaration certification, GMAT will be ready
+    for operational support of flight projects.</para>
   </section>
 
   <section>

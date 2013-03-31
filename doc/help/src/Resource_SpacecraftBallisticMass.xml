@@ -1,123 +1,408 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="BallisticMassTab"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Ballistic Mass Tab</title>
+<refentry version="5.0" xml:id="SpacecraftBallisticMass"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Spacecraft Balistic/Mass Properties</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>Spacecraft Balistic/Mass Properties</refentrytitle>
 
-    <para>The ballistic and mass properties of a spacecraft include the
-    drymass, coefficient of reflectivity and and coefficient of drag to name a
-    few. These properties are grouped under the Ballistic/Mass tab on the
-    spacecraft dialog box.</para>
-  </section>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
 
-  <section>
-    <title>Interfaces</title>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Spacecraft Ballistic
-        Mass Dialog Box</title>
-      </info>
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_SpacecraftBallisticMass_Default.jpeg"></imagedata>
-        </imageobject>
+  <refnamediv>
+    <refname>Spacecraft Balistic/Mass Properties</refname>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Spacecraft Ballistic
-          Mass Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+    <refpurpose>The physical properties of the spacecraft</refpurpose>
+  </refnamediv>
 
-    <programlisting><code>GMAT Sc.DryMass = 850;
-GMAT Sc.Cd = 2.2;
-GMAT Sc.Cr = 1.8;
-GMAT Sc.DragArea = 15;
-GMAT Sc.SRPArea = 1;</code></programlisting>
-  </section>
+  <refsection>
+    <title>Description</title>
 
-  <section>
-    <title>Reference Table</title>
+    <para>The <guilabel>Spacecraft</guilabel> ballistic and mass properties
+    include the drag and SRP areas and coefficients as well as the spacecraft
+    dry mass. These quantities are used primarily in orbital dynamics
+    modelling.</para>
 
-    <informaltable>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Propagate"/>, <xref linkend="Propagator"/>,<xref
+    linkend="Spacecraft"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
         <tbody>
           <row>
-            <entry><para>Cd</para></entry>
+            <entry><guilabel>Cd</guilabel></entry>
 
-            <entry><para>Default: 2.2.</para> <para>Options: { Real Number
-            ~062~ 0 }</para> <para>Cd is the spacecraft's drag coefficient
-            assuming a spherical spacecraft.</para> <para>Units:
-            Dimensionless.</para></entry>
+            <entry><para>The coefficent of drag used to compute the
+            acceleration due to drag.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt;= 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>2.2</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry><para>Cr</para></entry>
+            <entry><guilabel>Cr</guilabel></entry>
 
-            <entry><para>Default: 2.2.</para> <para>Options: { 0 ~060~= Real
-            Number ~060~= 2.0 }</para> <para>Cr is the spacecraft's
-            coefficient of reflectivity.</para> <para>Units:
-            Dimensionless.</para></entry>
+            <entry><para>The coefficent of reflectivity used to compute the
+            acceleration due toSRP.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0 &lt;= Cr &lt;= 2.0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1.8</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry><para>DragArea</para></entry>
+            <entry><guilabel>Drag Area</guilabel></entry>
 
-            <entry><para>Default: 15.0.</para> <para>Options: { Real Number
-            ~062~ 0 }</para> <para>The DragArea is the area of the spacecraft
-            that is used in calculating atmospheric drag.</para> <para>Units:
-            m~094~2</para></entry>
+            <entry><para>The area used to compute acceleration due to
+            atmospheric drag.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; = 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>15</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>m^2</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry><para>SRPArea</para></entry>
+            <entry><guilabel>DryMass</guilabel></entry>
 
-            <entry><para>Default: 1.0.</para> <para>Options: { Real Number
-            ~062~ 0 }</para> <para>The SRPArea is the area of the spacecraft
-            that is used in calculating the force due to solar radiation
-            pressure. SRPArea is the average surface area as seen from the
-            Sun.</para> <para>Units: m~094~2</para></entry>
+            <entry><para>The dry mass of the <guilabel>Spacecraft</guilabel>
+            (does not include fuel mass).</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt;=0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>850</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>kg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
           </row>
 
           <row>
-            <entry><para>DryMass</para></entry>
+            <entry><guilabel>SRPArea</guilabel></entry>
 
-            <entry><para>Default: 850.0.</para> <para>Options: { Real Number
-            ~062~ 0 }</para> <para>The DryMass is the mass of the spacecraft
-            without the mass of tanks and fuel.</para> <para>Units:
-            kg</para></entry>
+            <entry><para>The area used to compute acceleration due to solar
+            radiation pressure.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>m^2</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
           </row>
         </tbody>
       </tgroup>
     </informaltable>
+  </refsection>
 
-    <section>
-      <title>Objects and Command Interactions</title>
+  <refsection>
+    <title>GUI</title>
 
-      <itemizedlist>
-        <listitem>
-          <para>Spacecraft</para>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_Spacecraft_BallisticMass_GUI.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-          <itemizedlist>
-            <listitem>
-              <para>The properties in this section of the spacecraft object
-              involve what the spacecraft will experience while on the
-              mission, thus a spacecraft object is essential.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
-</section>
+    <para>The GUI interface for ballistic and mass properties is contained on
+    the<guilabel> Ballistic/Mass</guilabel> tab of the
+    <guilabel>Spacecraft</guilabel> resource. You can enter physical
+    properties such as the drag and SRP areas and coefficients and the
+    <guilabel>Spacecraft</guilabel> dry mass which are used in orbital
+    dynamics modelling.</para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Configuring Ballistic and Mass Properties</title>
+
+      <para>GMAT uses a cannonball model for drag and SRP. In the cannonball
+      model, the area is assumed to be independent of the spacecraft’s
+      orientation with respect to the local velocity vector and the sun
+      vector. For more details on the computation and configuration of drag
+      and SRP models see the <xref linkend="Propagator_ForceModel"
+      xrefstyle="select:title"/> documentation.</para>
+    </refsection>
+
+    <refsection>
+      <title>Total Mass Computation</title>
+
+      <para>The <guilabel>TotalMass</guilabel> property of a
+      <guilabel>Spacecraft</guilabel> is a read-only property that is the sum
+      of the <guilabel>DryMass</guilabel> value and the sum of the fuel mass
+      in all attached fuel tanks. GMAT’s propagators will not allow the total
+      mass of a spacecraft to be negative. However, GMAT will allow the mass
+      of a <guilabel>FuelTank</guilabel> to be negative. See the <xref linkend="FuelTank"
+      xrefstyle="select:title"/>
+      documentation for details.</para>  
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Configure physical properties.</para>
+
+      <programlisting><code>Create Spacecraft aSpacecraft
+aSpacecraft.Cd        = 2.2
+aSpacecraft.Cr        = 1.8
+aSpacecraft.DragArea  = 40
+aSpacecraft.SRPArea   = 35
+aSpacecraft.DryMass   = 2000
+Create Propagator aPropagator
+
+BeginMissionSequence
+
+Propagate   aPropagator(aSpacecraft, {aSpacecraft.ElapsedSecs = 600})</code></programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

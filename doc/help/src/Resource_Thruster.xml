@@ -20,14 +20,22 @@
   <refnamediv>
     <refname>Thruster</refname>
 
-    <refpurpose>A spacecraft thruster for finite burns.</refpurpose>
+    <refpurpose>A chemical thruster model</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>Thruster</guilabel> directs the thrust of the rocket
-    engine while in space. It is used for finite burns.</para>
+    <para>The <guilabel>Thruster</guilabel> resource is a model of a chemical
+    thruster which uses polynomials to model the thrust and specific impulse
+    as a function of tank pressure and temperature. The
+    <guilabel>Thruster</guilabel> model also allows you to specify properties
+    such as a duty cycle and scale factor and to connect a
+    <guilabel>Thruster</guilabel> with a <guilabel>FuelTank</guilabel>. You
+    can flexibly define the direction of the thrust by specifying the thrust
+    components in coordinate systems such as spacecraft body, local LVLH, or
+    by choosing any configured <guilabel>CoordinateSystem</guilabel>
+    resource.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: , <xref
     linkend="BeginFiniteBurn"/><xref linkend="FuelTank"/>,<xref
@@ -99,9 +107,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>VNB</guilabel>, <guilabel>LVLH</guilabel>,
-                    <guilabel>MJ2000Eq</guilabel>,
-                    <guilabel>SpacecraftBody</guilabel></para>
+                    <para><guilabel>VNB</guilabel>, LVLH, MJ2000Eq,
+                    SpacecraftBody</para>
                   </listitem>
                 </varlistentry>
 

@@ -112,7 +112,7 @@
 
           <tbody>
             <row>
-              <entry><guilabel>Accuracy</guilabel></entry>
+              <entry><literal>Accuracy</literal></entry>
 
               <entry><para>The desired accuracy for an integration step. GMAT
               uses the method selected in the
@@ -182,7 +182,7 @@
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Object type</para>
+                      <para>Resource reference</para>
                     </listitem>
                   </varlistentry>
 
@@ -190,7 +190,8 @@
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>ForceModel</guilabel> resource</para>
+                      <para><userinput><guilabel>ForceModel</guilabel></userinput>
+                      </para>
                     </listitem>
                   </varlistentry>
 
@@ -1076,23 +1077,23 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
       gravity models, atmospheric drag, solar radiation pressure, tide models,
       and relativistic corrections. A <guilabel>ForceModel</guilabel> is
       configured and attached to the <guilabel>Propagator</guilabel> object
-      (see the Propagator object for differences between script and GUI
-      configuration when configuring a Propagator). The
-      <guilabel>Propagator</guilabel>, along with the
-      <guilabel>Propagate</guilabel> command, uses a
+      (see the <guilabel>Propagator</guilabel> object for differences between
+      script and GUI configuration when configuring a
+      <guilabel>Propagator</guilabel>). The <guilabel>Propagator</guilabel>,
+      along with the <guilabel>Propagate</guilabel> command, uses a
       <guilabel>ForceModel</guilabel> to numerically solve the orbital
       equations of motion (forwards or backwards in time) using the forces
       configured in the <guilabel>ForceModel</guilabel> object, and may
-      include thrust terms in the case of powered flight. See the Remarks and
-      Examples below for detailed information on how to configure force models
-      for your application.</para>
+      include thrust terms in the case of powered flight. See the discussion
+      below for detailed information on how to configure force models for your
+      application.</para>
 
       <para><phrase role="ref_seealso">See Also</phrase>: <xref
       linkend="Propagator"/></para>
     </refsection>
 
     <refsection>
-      <title>Options</title>
+      <title>Fields</title>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
@@ -1664,8 +1665,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
               <entry><guilabel>GravityField.​<replaceable>PrimaryBodyName</replaceable>.PotentialFile</guilabel></entry>
 
               <entry><para>The gravity potential file. This field is only
-              active if there is a <guilabel>PrimaryBod</guilabel>y. See the
-              Remarks section below for detailed explanation of supported file
+              active if there is a <guilabel>PrimaryBod</guilabel>y. See
+              discussion below for detailed explanation of supported file
               types and how to configure gravity files.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
@@ -1788,7 +1789,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
               <entry><para>A list of celestial bodies to be treated as point
               masses in the force model. A body cannot be both the
               <guilabel>PrimaryBody</guilabel> and in the
-              <guilabel>PointMasses</guilabel> list.</para><variablelist>
+              <guilabel>PointMasses</guilabel> list. An empty list "{}"
+              removes all points masses from the list.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
