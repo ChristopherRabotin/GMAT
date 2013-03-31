@@ -46,7 +46,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.3*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -154,6 +154,67 @@
                     <para>
                       <guilabel>DE405</guilabel>
                     </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+		  
+		    <row>
+            <entry><guilabel>EphemerisUpdateInterval</guilabel></entry>
+
+            <entry><para>The time between time updates for celetial body
+            ephemeris. For example, if
+            <guilabel>EphemerisUpdateInterval</guilabel> = 60, if an ephemeris
+            call is made at time t = 1200, and a subsequent call is made at
+            time t = 1210, the same ephemeris will be returned for the second
+            call. This option is for high speed, low fidelity modelling or for
+            use when modelling orbits far from third body perturbation
+            sources. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt;= 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -289,66 +350,7 @@
               </variablelist></entry>
           </row>
 
-          <row>
-            <entry><guilabel>EphemerisUpdateInterval</guilabel></entry>
-
-            <entry><para>The time between time updates for celetial body
-            ephemeris. For example, if
-            <guilabel>EphemerisUpdateInterval</guilabel> = 60, if an ephemeris
-            call is made at time t = 1200, and a subsequent call is made at
-            time t = 1210, the same ephemeris will be returned for the second
-            call. This option is for high speed, low fidelity modelling or for
-            use when modelling orbits far from third body perturbation
-            sources. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real &gt;= 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
+        
 
           <row>
             <entry><guilabel>UseTTForEphemeris</guilabel></entry>
@@ -482,15 +484,15 @@
 
     <itemizedlist>
       <listitem>
-        <para>For more information on the DE files provide by JPL see the
+        <para>For more information on the DE files provided by JPL see 
         <link
-        xlink:href="http://iau-comm4.jpl.nasa.gov/README">here</link></para>
+        xlink:href="http://iau-comm4.jpl.nasa.gov/README">here</link>.</para>
       </listitem>
 
       <listitem>
         <para>For general information on SPICE ephemeris files see the <link
         xlink:href="http://naif.jpl.nasa.gov/naif/toolkit.html">JPL NAIF
-        site</link></para>
+        site</link>.</para>
       </listitem>
 
       <listitem>
