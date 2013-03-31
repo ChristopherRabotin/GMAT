@@ -1,14 +1,14 @@
-
-The spk kernel named DE421Planets.bsp was created from the following kernels
-provided by JPL: DE421.bsp, jup282.bsp, sat288.bsp, ura090.bsp, nep081.bsp,
-plu021.bsp.  All of these kernels except plu021 are consistent with the DE421
+The SPK kernel named DE421Planets.bsp was created from the following kernels
+provided by JPL: DE421.bsp, jup282.bsp, sat288.bsp, ura090.bsp, nep081.bsp, and
+plu021.bsp. All of these kernels except plu021 are consistent with the DE421
 ephemeris series.  At the time of creation of the DE421Planets.bsp, an SPK kernel
-for pluto in the DE421 could not be located for the desired time span so and plu021
-is used Planetary Ephemeris Number: DE-0721/LE-0721.
+for Pluto in the DE421 series could not be located for the desired time span so and plu021
+is used where Planetary Ephemeris Number: DE-0721/LE-0721.
 
 The data below summarizes the DE421Planets.bsp file.  The first block of data 
 was created by running the SPK utility "spaceit".  The second block of data
 was copied from the comment files distributed with each kernel.
+
 
 ********************************************************************************
  
