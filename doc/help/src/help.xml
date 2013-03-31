@@ -22,16 +22,20 @@
 
   <xi:include href="Preface.xml"/>
 
-  <part xml:id="Introduction">
-    <title>Introduction</title>
+  <part xml:id="UsingGmat">
+    <title>Using GMAT</title>
 
     <xi:include href="Intro_IntroductionToGMAT.xml" />
     <xi:include href="Intro_GettingStarted.xml" />
+    <chapter xml:id="TourOfGmat">
+        <title>Tour of GMAT</title>
+        <xi:include href="Using_ResourcesTree.xml"/>
+        <xi:include href="Using_MissionTree.xml"/>
+        <xi:include href="Using_OutputTree.xml"/>
+        <xi:include href="Using_ScriptEditor.xml"/>
+        <xi:include href="Using_CommandSummary.xml"/>
+    </chapter>
   </part>
-  <!--
-  <xi:include href="ReleaseNotes.xml" />
-  -->
-
 
   <part xml:id="CommonTasks">
     <title>Common Tasks</title>
@@ -97,11 +101,8 @@
       <xi:include href="Resource_LibrationPoint.xml" />
       <xi:include href="Resource_MatlabFunction.xml" />
       <xi:include href="Resource_OrbitView.xml" />
-      <xi:include href="Resource_Output.xml"/>
       <xi:include href="Resource_Propagator.xml" />
       <xi:include href="Resource_ReportFile.xml" />
-      <xi:include href="Resource_ResourceTree.xml" />
-      <xi:include href="Resource_ScriptEditor.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
       <xi:include href="Resource_Spacecraft.xml" />
       <xi:include href="Resource_SpacecraftHardware.xml" />

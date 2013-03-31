@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="CommandSummary"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Command Summary</title>
+
+  <indexterm>
+    <primary>Command Summary</primary>
+  </indexterm>
+
+  <para>The <guilabel>Command Summary</guilabel> is a summary of orbit and
+  spacecraft state information after execution of a command. For example, if
+  the command is a <guilabel>Propagate</guilabel> command, the
+  <guilabel>Command Summary</guilabel> contains state data after propagation
+  is performed.</para>
+
+  <para>To view the <guilabel>Command Summary</guilabel>, right-click on the
+  desired command, and select <guilabel>Command Summary</guilabel>. Or
+  alternatively, double-click on the desired command, and click the
+  <guilabel>Command Summary</guilabel> icon located near the lower left corner
+  of the panel. You must run the mission before viewing <guilabel>Command
+  Summary</guilabel> data.</para>
+
+  <screenshot>
+    <info>
+      <title/>
+    </info>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata contentdepth="100%"
+                   fileref="files/images/Using_CommandSummary_DefaultMission.png"
+                   scalefit="1" width="100%"/>
+      </imageobject>
+    </mediaobject>
+  </screenshot>
+
+  <section>
+    <title>Data Availability</title>
+
+    <para>To view a <guilabel>Command Summary</guilabel>, you must first run
+    the mission. If the mission has not been run during the current session,
+    the <guilabel>Command Summary</guilabel> will be empty. If changes are
+    made to your configuration, you must rerun the mission for those changes
+    to take effect in the <guilabel>Command Summary</guilabel>.</para>
+  </section>
+
+  <section>
+    <title>Data Contents</title>
+
+    <para>The <guilabel>Command Summary</guilabel> contains several types of
+    data. Orbit state representations include Cartesian, spherical, and
+    Keplerian. For hyperbolic orbits, B-Plane coordinates, DLA and RLA are
+    provided. Planetodetic information includes Longitude and Latitude among
+    others. For a <guilabel>Maneuver</guilabel> command, the Maneuver
+    properties are displayed in the CoordinateSystem specified on the
+    <guilabel>ImpulsiveBurn</guilabel> resource.</para>
+  </section>
+
+  <section>
+    <title>Supported Commands</title>
+
+    <para>For performance reasons, propagation in step mode does not write out
+    a command summary. Additionally, if a command is nested in control logic
+    and that command does not execute as a result, no command summary data is
+    available.</para>
+  </section>
+
+  <section>
+    <title>Coordinate Systems</title>
+
+    <para>The <guilabel>Coordinate System</guilabel> menu at the top of the
+    <guilabel>Command Summary</guilabel> dialog allows you to select the
+    desired coordinate system for the state data. GMAT currently requires that
+    the origin of the coordinate system is a celestial body (this will change
+    in a future release) and the <guilabel>CoordinateSystem</guilabel> cannot
+    reference another spacecraft.</para>
+  </section>
+</section>

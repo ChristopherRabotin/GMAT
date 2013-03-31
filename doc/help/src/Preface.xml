@@ -14,7 +14,7 @@
 
   <itemizedlist spacing="compact">
     <listitem>
-      <para><xref linkend="Introduction" xrefstyle="select:title"/></para>
+      <para><xref linkend="UsingGmat" xrefstyle="select:title"/></para>
     </listitem>
 
     <listitem>
@@ -31,9 +31,9 @@
   </itemizedlist>
 
   <section role="notintoc">
-    <title><xref linkend="Introduction" xrefstyle="select:title"/></title>
+    <title><xref linkend="UsingGmat" xrefstyle="select:title"/></title>
 
-    <para>The <xref linkend="Introduction" xrefstyle="select:title"/> section
+    <para>The <xref linkend="UsingGmat" xrefstyle="select:title"/> section
     contains two major parts: <xref linkend="IntroductionToGmat"/> and <xref
     linkend="GettingStarted"/>.</para>
 
