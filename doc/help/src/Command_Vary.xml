@@ -62,7 +62,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.5*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -503,7 +503,7 @@
           </row>
 
           <row>
-            <entry><guilabel>Variable</guilabel></entry>
+            <entry><guilabel>UserSelectedControl</guilabel></entry>
 
             <entry><para>Allows you to select any single element user-defined
             parameter, except a number, to vary. For example,
@@ -517,7 +517,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Spacecraft parameter, Array element, Variable, or
+                    <para>Parameter, Array element, Variable, or
                     any other single element user-defined parameter, excluding
                     numbers.  Note that the variable chosen must be settable
                     in the <guilabel>Mission</guilabel> tree. </para>
@@ -658,7 +658,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
-          <colspec colnum="1" colwidth="2*"/>
+          <colspec colnum="1" colwidth="2.5*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 
@@ -823,7 +823,7 @@
 
         <informaltable colsep="0" frame="topbot">
           <tgroup cols="2">
-            <colspec colnum="1" colwidth=".5*"/>
+            <colspec colnum="1" colwidth="2.5*"/>
 
             <colspec colnum="2" colwidth="3*"/>
 
