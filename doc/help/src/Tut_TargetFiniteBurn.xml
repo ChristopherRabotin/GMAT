@@ -38,8 +38,8 @@
       <term>Script File</term>
 
       <listitem>
-        <para><filename>Target_Finite_Burn_to_Raise_Apogee.script
-        ??</filename></para>
+        <para><filename>Target Finite Burn to Raise
+        Apogee.script</filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -64,63 +64,71 @@
     <para>To calculate the duration of the perigee burn needed to achieve a
     desired apogee radius of 12000 km, we must create the appropriate
     targeting sequence.  The main portion of the target sequence employs a
-    Begin/End FiniteBurn command pair, for a velocity direction maneuver,
-    followed by a command to propagate the spacecraft to orbit apogee.</para>
+    <guilabel>Begin/End FiniteBurn</guilabel> command pair, for a velocity
+    direction maneuver, followed by a command to propagate the spacecraft to
+    orbit apogee.</para>
 
-    <para>Target Finite Burn to Raise Apogee.script</para>
+    <procedure>
+      <step>
+        <para>Create and configure the spacecraft hardware and
+        <guilabel>FiniteBurn</guilabel> resources</para>
+      </step>
 
-    <orderedlist spacing="compact">
-      <listitem>
-        <para>Create and configure the spacecraft hardware and Finite Burn
-        resources</para>
-      </listitem>
+      <step>
+        <para>Create the <guilabel>DifferentialCorrector</guilabel> and Target
+        Control <guilabel>Variable</guilabel></para>
+      </step>
 
-      <listitem>
-        <para>Create the Differential Corrector and Target Control
-        Variable</para>
-      </listitem>
-
-      <listitem>
+      <step>
         <para>Configure the Mission Sequence. To do this, we will</para>
 
-        <orderedlist spacing="compact">
-          <listitem>
-            <para>Create Begin/End FiniteBurn commands with default
-            settings.</para>
-          </listitem>
+        <substeps>
+          <step>
+            <para>Create <guilabel>Begin/End FiniteBurn</guilabel> commands
+            with default settings.</para>
+          </step>
 
-          <listitem>
-            <para>Create a Target sequence to achieve a 12000 km apogee
-            radius.</para>
-          </listitem>
-        </orderedlist>
-      </listitem>
+          <step>
+            <para>Create a <guilabel>Target</guilabel> sequence to achieve a
+            12000 km apogee radius.</para>
+          </step>
+        </substeps>
+      </step>
 
-      <listitem>
-        <para>Configure the Mission Sequence. To do this, we will</para>
-      </listitem>
-    </orderedlist>
+      <step>
+        <para>Run the mission and analyze the results. </para>
+      </step>
+    </procedure>
   </section>
 
   <section>
     <title>Create and Configure Spacecraft Hardware and Finite Burn</title>
 
     <para>For this tutorial, you’ll need GMAT open, with the default mission
-    loaded. To load the default mission, click New Mission ( ) or start a new
-    GMAT session. We will use the default configurations for the spacecraft
-    (DefaultSC) and the propagator (DefaultProp). DefaultSC is configured by
-    default to a near-circular orbit, and DefaultProp is configured to use
-    Earth as the central body with a nonspherical gravity model of degree and
-    order 4. You may want to open the dialog boxes for these objects and
-    inspect them more closely as we will leave them at their default
-    settings.</para>
+    loaded. To load the default mission, click <guibutton>New
+    Mission</guibutton> (<subscript><inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/NewMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject></subscript>) or start a new GMAT session. We will
+    use the default configurations for the spacecraft
+    (<guilabel>DefaultSC</guilabel>) and the propagator
+    (<guilabel>DefaultProp</guilabel>). <guilabel>DefaultSC</guilabel> is
+    configured by default to a near-circular orbit, and
+    <guilabel>DefaultProp</guilabel> is configured to use Earth as the central
+    body with a nonspherical gravity model of degree and order 4. You may want
+    to open the dialog boxes for these objects and inspect them more closely
+    as we will leave them at their default settings.</para>
 
     <section>
       <title>Create a Thruster and a Fuel Tank</title>
 
       <para>To model thrust and fuel use associated with a finite burn, we
-      must create a thruster and a fuel tank and then attach the newly created
-      fuel tank to the thruster.</para>
+      must create a <guilabel>Thruster</guilabel> and a
+      <guilabel>FuelTank</guilabel> and then attach the newly created
+      <guilabel>FuelTank</guilabel> to the
+      <guilabel>Thruster</guilabel>.</para>
 
       <procedure>
         <step>
@@ -133,34 +141,40 @@
 
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click on the
-          Hardware folder, point to Add, and click Fuel Tank.  A resource
-          named FuelTank1 will be created.</para>
+          <guilabel>Hardware</guilabel> folder, point to
+          <guilabel>Add</guilabel>, and click <guilabel>FuelTank</guilabel>.
+           A resource named <guilabel>FuelTank1</guilabel> will be
+          created.</para>
         </step>
 
         <step>
-          <para>Double-click Thruster1 to edit its properties.</para>
+          <para>Double-click<guilabel> Thruster1</guilabel> to edit its
+          properties.</para>
         </step>
 
         <step>
-          <para>Select the Decrement Mass box so that GMAT will model fuel use
-          associated with a finite burn.</para>
+          <para>Select the <guilabel>Decrement Mass</guilabel> box so that
+          GMAT will model fuel use associated with a finite burn.</para>
         </step>
 
         <step>
-          <para>Use the drop down menu to the right of the Tank field to
-          select FuelTank1 as the fuel source for Thruster1.  Click OK.
+          <para>Use the drop down menu to the right of the
+          <guilabel>Tank</guilabel> field to select
+          <guilabel>FuelTank1</guilabel> as the fuel source for
+          <guilabel>Thruster1</guilabel>.  Click <guilabel>OK</guilabel>.
            </para>
         </step>
       </procedure>
 
       <para><xref
       linkend="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration"/> below
-      shows the default FuelTank1 configuration that we will use and <xref
+      shows the default <guilabel>FuelTank1</guilabel> configuration that we
+      will use and <xref
       linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/> shows the
-      finished Thruster1 configuration.</para>
+      finished <guilabel>Thruster1</guilabel> configuration.</para>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration">
-        <title>FuelTank1 Configuration</title>
+        <title><guilabel>FuelTank1</guilabel> Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -174,7 +188,7 @@
       </figure>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration">
-        <title>Thruster1 Configuration</title>
+        <title><guilabel>Thruster1</guilabel> Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -187,44 +201,46 @@
         </screenshot>
       </figure>
 
-      <para>Note that the default Thruster1 Coordinate System, as shown in
-      <xref linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/>, is
+      <para>Note that the default <guilabel>Thruster1 Coordinate
+      System</guilabel>, as shown in <xref
+      linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/>, is
       Earth-based Velocity, Normal, Bi-normal (VNB) and that the default
-      Thrust Vector of (1,0,0) represents our desired velocity oriented
-      maneuver direction.</para>
+      <guilabel>Thrust Vector</guilabel> of (1,0,0) represents our desired
+      velocity oriented maneuver direction.</para>
 
       <para>For a general finite burn, if desired, we can specify how both the
       thrust and the fuel use depend upon fuel tank pressure. The user does
       this by inputting coefficients of certain pre-defined polynomials. To
-      view the values for the thrust coefficients, click the Edit Thruster
-      Coef. button and to view the ISP coefficients which determine fuel use,
-      click the Edit Impulse Coef. button. For this tutorial, we will use the
-      default ISP polynomial coefficient values but we will change the
-      Thruster polynomial coefficients as follows.</para>
+      view the values for the thrust coefficients, click the <guilabel>Edit
+      Thruster Coef.</guilabel> button and to view the ISP coefficients which
+      determine fuel use, click the <guilabel>Edit Impulse Coef.</guilabel>
+      button. For this tutorial, we will use the default ISP polynomial
+      coefficient values but we will change the <guilabel>Thruster</guilabel>
+      polynomial coefficients as follows.</para>
     </section>
 
     <section>
       <title>Modify Thruster1 Thrust Coefficients</title>
 
-      <para>Paragraph Text</para>
-
       <procedure>
         <step>
-          <para>In the Resources tree, double-click Thruster1 to edit its
-          properties</para>
+          <para>In the <guilabel>Resources</guilabel> tree, double-click
+          <guilabel>Thruster1</guilabel> to edit its properties</para>
         </step>
 
         <step>
-          <para>Click the Edit Thruster Coef. button to bring up the
-          ThrusterCoefficientDialog box, shown in <xref
+          <para>Click the <guilabel>Edit Thruster Coef.</guilabel> button to
+          bring up the <guilabel>ThrusterCoefficientDialog</guilabel> box,
+          shown in <xref
           linkend="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients"/>.
-          Replace the default C1 coefficient value of 10 with 1000. Click
-          OK.</para>
+          Replace the default <guilabel>C1</guilabel> coefficient value of
+          <literal>10</literal> with <literal>1000</literal>. Click
+          <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients">
-        <title>Thruster1 Thrust Coefficients</title>
+        <title><guilabel>Thruster1</guilabel> Thrust Coefficients</title>
 
         <screenshot>
           <mediaobject>
@@ -238,66 +254,68 @@
       </figure>
 
       <para>The exact form of the pre-defined Thrust polynomial, associated
-      with the coefficients above, are given in the Thruster help. We note
-      that, by default, all of the Thrust coefficients associated with terms
-      that involve tank pressure are zero. We have kept the default zero
-      values for all of these coefficients. We simply changed the constant
-      term in the Thrust polynomial from 10 to 1000 which is much larger than
-      the thrust for a typical chemical thruster. The Thrust and ISP
-      polynomials used in this tutorial are given below.</para>
+      with the coefficients above, are given in the
+      <guilabel>Thruster</guilabel> help. We note that, by default, all of the
+      Thrust coefficients associated with terms that involve tank pressure are
+      zero. We have kept the default zero values for all of these
+      coefficients. We simply changed the constant term in the Thrust
+      polynomial from <literal>10</literal> to <literal>1000</literal> which
+      is much larger than the thrust for a typical chemical thruster. The
+      Thrust and ISP polynomials used in this tutorial are given below.</para>
 
-      <para>?? How Indent? Thrust = 1000 (Newtons)</para>
+      <para>Thrust = 1000 (Newtons) ??</para>
 
-      <para>Thrust = 1000 (Newtons)</para>
+      <para>ISO = 300 (seconds)</para>
     </section>
 
     <section>
       <title>Attach FuelTank1 and Thruster1 to DefaultSC</title>
 
-      <para>Paragraph Text</para>
-
       <procedure>
         <step>
-          <para>In the Resources tree, double-click DefaultSC to edit its
-          properties.</para>
+          <para>In the <guilabel>Resources</guilabel> tree, double-click
+          <guilabel>DefaultSC</guilabel> to edit its properties.</para>
         </step>
 
         <step>
-          <para>Select the Tanks tab. In the Available Tanks, select
-          FuelTank1. Then click <inlinemediaobject>
-              <imageobject>
-                <imagedata align="center" contentdepth="10pt"
-                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
-                           width="1em"/>
-              </imageobject>
-            </inlinemediaobject> to add FuelTank1 to the SelectedTanks list.
-          Click Apply.</para>
-
-          <para><guibutton>New Mission</guibutton>
+          <para>Select the <guilabel>Tanks</guilabel> tab. In the
+          <guilabel>Available Tanks</guilabel> column, select
+          <guilabel>FuelTank1</guilabel>. Then ??click
           (<subscript><inlinemediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="8pt"
-                           fileref="files/images/icons/NewMission.png"
+                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
                            width="1em"/>
               </imageobject>
-            </inlinemediaobject></subscript>)</para>
-        </step>
-
-        <step>
-          <para>Select the Actuators tab. In the Available Thrusters, select
-          Thrurster1. Then click <inlinemediaobject>
+            </inlinemediaobject></subscript>) <inlinemediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="10pt"
                            fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
                            width="1em"/>
               </imageobject>
-            </inlinemediaobject> to add Thruster1 to the SelectedThrusters
-          list. Click OK.</para>
+            </inlinemediaobject> to add <guilabel>FuelTank1</guilabel> to the
+          <guilabel>SelectedTanks</guilabel> list. Click
+          <guilabel>Apply</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Select the <guilabel>Actuators</guilabel> tab. In the
+          <guilabel>Available Thrusters</guilabel> column, select
+          <guilabel>Thrurster1</guilabel>. Then ??click <inlinemediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="10pt"
+                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
+                           width="1em"/>
+              </imageobject>
+            </inlinemediaobject> to add <guilabel>Thruster1</guilabel> to the
+          <guilabel>SelectedThrusters</guilabel> list. Click
+          <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>
 
       <figure>
-        <title>Figure 4. Attach FuelTank1 to DefaultSC</title>
+        <title>Attach <guilabel>FuelTank1</guilabel> to
+        <guilabel>DefaultSC</guilabel></title>
 
         <screenshot>
           <mediaobject>
@@ -311,7 +329,8 @@
       </figure>
 
       <figure>
-        <title>Figure 5. Attach Thruster1 to DefaultSC</title>
+        <title>Attach <guilabel>Thruster1</guilabel> to
+        <guilabel>DefaultSC</guilabel></title>
 
         <screenshot>
           <mediaobject>
@@ -328,27 +347,33 @@
     <section>
       <title>Create the Finite Burn Maneuver</title>
 
-      <para>We’ll need a single FiniteBurn resource for this tutorial.</para>
+      <para>We’ll need a single <guilabel>FiniteBurn</guilabel> resource for
+      this tutorial.</para>
 
       <procedure>
         <step>
-          <para>In the Resources tree, right-click the Burns folder and add a
-          FiniteBurn. A resource named FiniteBurn1 will be created.</para>
+          <para>In the <guilabel>Resources</guilabel> tree, right-click the
+          <guilabel>Burns</guilabel> folder and add a
+          <guilabel>FiniteBurn</guilabel>. A resource named<guilabel>
+          FiniteBurn1</guilabel> will be created.</para>
         </step>
 
         <step>
-          <para>Double-click FiniteBurn1 to edit its properties.</para>
+          <para>Double-click <guilabel>FiniteBurn1</guilabel> to edit its
+          properties.</para>
         </step>
 
         <step>
-          <para>Use the menu to the right of the Thruster field to select
-          Thruster1 as the thruster associated with FiniteBurn1. Click
-          OK.</para>
+          <para>Use the menu to the right of the <guilabel>Thruster</guilabel>
+          field to select <guilabel>Thruster1</guilabel> as the thruster
+          associated with <guilabel>FiniteBurn1</guilabel>. Click
+          <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>
 
       <figure>
-        <title>Figure 6. Creation of FiniteBurn Resource FiniteBurn1</title>
+        <title>Creation of <guilabel>FiniteBurn</guilabel> Resource
+        <guilabel>FiniteBurn1</guilabel></title>
 
         <screenshot>
           <mediaobject>
@@ -367,45 +392,42 @@
     <title>Create the Differential Corrector and Target Control
     Variable</title>
 
-    <para>For this tutorial, you’ll need GMAT open, with the default mission
-    loaded. To load the default mission, click New Mission ( ) or start a new
-    GMAT session. We will use the default configurations for the spacecraft
-    (DefaultSC) and the propagator (DefaultProp). DefaultSC is configured by
-    default to a near-circular orbit, and DefaultProp is configured to use
-    Earth as the central body with a nonspherical gravity model of degree and
-    order 4. You may want to open the dialog boxes for these objects and
-    inspect them more closely as we will leave them at their default
-    settings.</para>
-
-    <para>The Target sequence we will create later needs a
-    DifferentialCorrector resource to operate, so let’s create one now. We'll
-    leave the settings at their defaults.</para>
+    <para>The <guilabel>Target</guilabel> sequence we will create later needs
+    a <guilabel>DifferentialCorrector</guilabel> resource to operate, so let’s
+    create one now. We'll leave the settings at their defaults.</para>
 
     <procedure>
       <step>
-        <para>In the Resources tree, expand the Solvers folder if it isn’t
-        already.</para>
+        <para>In the <guilabel>Resources</guilabel> tree, expand the
+        <guilabel>Solvers</guilabel> folder if it isn’t already.</para>
       </step>
 
       <step>
-        <para>Right-click the Boundary Value Solvers folder, point to Add, and
-        click DifferentialCorrec- tor. A new resource called DC1 will be
-        created.</para>
+        <para>Right-click the <guilabel>Boundary Value Solvers</guilabel>
+        folder, point to <guilabel>Add</guilabel>, and click
+        <guilabel>DifferentialCorrector</guilabel>. A new resource called
+        <guilabel>DC1</guilabel> will be created.</para>
       </step>
     </procedure>
 
-    <para>The Target sequence we will later create uses the Vary command to
-    adjust a user defined target control variable in order to achieve the
-    desired orbital goal of raising apogee to 12000 km. We must first create
-    this variable which we will name BurnDuration.</para>
+    <para>The <guilabel>Target</guilabel> sequence we will later create uses
+    the <guilabel>Vary</guilabel> command to adjust a user defined target
+    control variable in order to achieve the desired orbital goal of raising
+    apogee to <literal>12000</literal> km. We must first create this variable
+    which we will name <guilabel>BurnDuration</guilabel>.</para>
 
     <procedure>
       <step>
-        <para>In the Resources tree, right-click the Variables/Arrays/Strings
-        folder, point to Add, and click Variable. A new window will come up
-        with two input fields, Variable Name and Variable Value. For Variable
-        Name, input BurnDuration and for Variable Value, input 0. Click the
-        Create (?? ) button and then the Close button.</para>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click the
+        <guilabel>Variables/Arrays/Strings</guilabel> folder, point to
+        <guilabel>Add</guilabel>, and click <guilabel>Variable</guilabel>. A
+        new window will come up with two input fields, <guilabel>Variable
+        Name</guilabel> and <guilabel>Variable Value</guilabel>. For
+        <guilabel>Variable Name</guilabel>, input
+        <guilabel>BurnDuration</guilabel> and for <guilabel>Variable
+        Value</guilabel>, input <literal>0.</literal> Click the
+        <guilabel>Create</guilabel> (?? ) button and then the
+        <guilabel>Close</guilabel> button.</para>
 
         <screenshot>
           <mediaobject>
@@ -420,12 +442,14 @@
 
       <step>
         <para>To verify that we have created this new variable correctly,
-        double-click BurnDuration to view its properties.</para>
+        double-click <guilabel>BurnDuration</guilabel> to view its
+        properties.</para>
       </step>
     </procedure>
 
     <figure>
-      <title>Figure 7. Creation of Variable Resource, BurnDuration</title>
+      <title>Creation of <guilabel>Variable</guilabel> Resource,
+      <guilabel>BurnDuration</guilabel></title>
 
       <screenshot>
         <mediaobject>
@@ -442,30 +466,35 @@
   <section>
     <title>Configure the Mission Sequence</title>
 
-    <para>Now we will configure a Target sequence to solve for the finite burn
-    duration required to raise apogee to 12000 km. We’ll begin by creating the
-    initial Propagate command, then the Target sequence itself.</para>
+    <para>Now we will configure a <guilabel>Target</guilabel> sequence to
+    solve for the finite burn duration required to raise apogee to
+    <literal>12000</literal> km. We’ll begin by creating the initial
+    <guilabel>Propagate</guilabel> command, then the
+    <guilabel>Target</guilabel> sequence itself.</para>
 
     <section>
       <title>Configure the Initial Propagate Command</title>
 
       <procedure>
         <step>
-          <para>Click on the Mission tab to show the Mission tree.</para>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
         </step>
 
         <step>
-          <para>Configure Propagate1 to propagate to
-          DefaultSC.Earth.Periapsis.</para>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <guilabel>DefaultSC.Earth.Periapsis</guilabel>.</para>
         </step>
 
         <step>
-          <para>Rename Propagate1 to Prop To Perigee.</para>
+          <para>Rename <guilabel>Propagate1</guilabel> to <guilabel>Prop To
+          Perigee</guilabel>.</para>
         </step>
       </procedure>
 
       <figure>
-        <title>Figure 8. Prop To Perigee Command Configuration</title>
+        <title><guilabel>Prop To Perigee </guilabel>Command
+        Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -482,13 +511,14 @@
     <section>
       <title>Create the Target Sequence</title>
 
-      <para>Now create the commands necessary to perform the Target sequence.
-      Figure 9 illustrates the configuration of the Mission tree after we have
-      completed the steps in this section. We’ll discuss the Target sequence
-      after it has been created.</para>
+      <para>Now create the commands necessary to perform the
+      <guilabel>Target</guilabel> sequence. Figure 9?? illustrates the
+      configuration of the <guilabel>Mission</guilabel> tree after we have
+      completed the steps in this section. We’ll discuss the
+      <guilabel>Target</guilabel> sequence after it has been created.</para>
 
       <figure>
-        <title>Figure 9. Final Mission Sequence</title>
+        <title>Final Mission Sequence</title>
 
         <screenshot>
           <mediaobject>
@@ -501,34 +531,40 @@
         </screenshot>
       </figure>
 
-      <para>To create the Target sequence:</para>
+      <para>To create the <guilabel>Target</guilabel> sequence:</para>
 
       <procedure>
         <step>
-          <para>In the Mission tree, right-click Prop To Perigee, point to
-          Insert After, and click Target. This will insert two separate
-          commands: Target1 and EndTarget1.</para>
+          <para>In the <guilabel>Mission</guilabel> tree, right-click
+          <guilabel>Prop To Perigee</guilabel>, point to <guilabel>Insert
+          After</guilabel>, and click <guilabel>Target</guilabel>. This will
+          insert two separate commands: <guilabel>Target1</guilabel> and
+          <guilabel>EndTarget1</guilabel>.</para>
         </step>
 
         <step>
-          <para>Right-click Target1 and click Rename. Type Raise Apogee and
-          click OK.</para>
+          <para>Right-click <guilabel>Target1</guilabel> and click
+          <guilabel>Rename</guilabel>. Type <guilabel>Raise Apogee</guilabel>
+          and click <guilabel>OK</guilabel>.</para>
         </step>
 
         <step>
-          <para>Right-click Raise Apogee, point to Append, and click Vary.
-          Rename the newly created command as Vary Burn Duration.</para>
+          <para>Right-click <guilabel>Raise Apogee</guilabel>, point to
+          <guilabel>Append</guilabel>, and click <guilabel>Vary</guilabel>.
+          Rename the newly created command as <guilabel>Vary Burn
+          Duration</guilabel>.</para>
         </step>
 
         <step>
-          <para>Right-click Vary Burn Duration, point to Insert After, and
-          click BeginFiniteBurn. Rename the newly created command as Turn
-          Thruster On.</para>
+          <para>Right-click <guilabel>Vary Burn Duration</guilabel>, point to
+          <guilabel>Insert After</guilabel>, and click
+          <guilabel>BeginFiniteBurn</guilabel>. Rename the newly created
+          command as <guilabel>Turn Thruster On</guilabel>.</para>
         </step>
 
         <step>
-          <para>Complete the Target sequence by inserting the commands shown
-          in Table 1.</para>
+          <para>Complete the <guilabel>Target</guilabel> sequence by inserting
+          the commands shown in Table 1.</para>
         </step>
       </procedure>
 
@@ -578,29 +614,33 @@
       <title>Configure the Target Sequence</title>
 
       <para>Now that the structure is created, we need to configure the
-      various parts of the Target sequence to do what we want.</para>
+      various parts of the <guilabel>Target</guilabel> sequence to do what we
+      want.</para>
 
       <section>
         <title>Configure the Raise Apogee Command</title>
 
         <procedure>
           <step>
-            <para>Double-click Raise Apogee to edit its properties.</para>
+            <para>Double-click <guilabel>Raise Apogee</guilabel> to edit its
+            properties.</para>
           </step>
 
           <step>
-            <para>In the ExitMode list, click SaveAndContinue. This instructs
-            GMAT to save the final solution of the targeting problem after you
-            run it.</para>
+            <para>In the <guilabel>ExitMode</guilabel> list, click
+            <guilabel>SaveAndContinue</guilabel>. This instructs GMAT to save
+            the final solution of the targeting problem after you run
+            it.</para>
           </step>
 
           <step>
-            <para>Click OK to save these changes.</para>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 10. Raise Apogee Command Configuration</title>
+          <title><guilabel>Raise Apogee</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -619,37 +659,47 @@
 
         <procedure>
           <step>
-            <para>Double-click Vary Burn Duration to edit its properties. We
-            want this command to adjust (or “Vary”) the finite burn duration
-            represented by the previously created control variable,
-            BurnDuration. To accomplish this, click on the Edit button to
-            bring up the ParameterSelectDialog. Use the ObjectType menu to
-            select the Variable object type. The ObjectList menu will then
-            display a list of user defined variables. Double-click on the
-            variable, BurnDuration, so that BurnDuration appears in the
-            SelectedValues(s) menu. Click the OK button to save the changes
-            and return to the Vary Burn Duration command menu.</para>
+            <para>Double-click <guilabel>Vary Burn Duration</guilabel> to edit
+            its properties. We want this command to adjust (or
+            “<guilabel>Vary</guilabel>”) the finite burn duration represented
+            by the previously created control variable,
+            <guilabel>BurnDuration</guilabel>. To accomplish this, click on
+            the <guilabel>Edit</guilabel> button to bring up the
+            <guilabel>ParameterSelectDialog</guilabel>. Use the
+            <guilabel>ObjectType</guilabel> menu to select the
+            <guilabel>Variable</guilabel> object type. The
+            <guilabel>ObjectList</guilabel> menu will then display a list of
+            user defined variables. Double-click on the variable,
+            <guilabel>BurnDuration</guilabel>, so that
+            <guilabel>BurnDuration</guilabel> appears in the
+            <guilabel>SelectedValues(s)</guilabel> menu. Click the
+            <guilabel>OK</guilabel> button to save the changes and return to
+            the <guilabel>Vary Burn Duration</guilabel> command menu.</para>
           </step>
 
           <step>
-            <para>In the Initial Value box, type 200</para>
+            <para>In the <guilabel>Initial Value</guilabel> box, type
+            <literal>200</literal></para>
           </step>
 
           <step>
-            <para>In the Upper box, type 10000</para>
+            <para>In the <guilabel>Upper</guilabel> box, type
+            <literal>10000</literal></para>
           </step>
 
           <step>
-            <para>In the Max Step box, type 100.</para>
+            <para>In the <guilabel>Max Step</guilabel> box, type
+            <literal>100</literal>.</para>
           </step>
 
           <step>
-            <para>Click OK to save these changes.</para>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 11. Vary Burn Duration Command Configuration</title>
+          <title><guilabel>Vary Burn Duration</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -668,19 +718,21 @@
 
         <procedure>
           <step>
-            <para>Double-click Turn Thruster On to edit its properties. Notice
-            that the command is already set to apply the FiniteBurn1 to the
-            DefaultSC spacecraft, so we don’t need to change anything
-            here.</para>
+            <para>Double-click <guilabel>Turn Thruster On</guilabel> to edit
+            its properties. Notice that the command is already set to apply
+            <guilabel>FiniteBurn1</guilabel> to the
+            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
+            change anything here.</para>
           </step>
 
           <step>
-            <para>Click OK.</para>
+            <para>Click <guilabel>OK</guilabel>.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 12. Turn Thruster On Command Configuration</title>
+          <title><guilabel>Turn Thruster On</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -699,27 +751,29 @@
 
         <procedure>
           <step>
-            <para>Double-click Prop BurnDuration to edit its
-            properties.</para>
+            <para>Double-click <guilabel>Prop BurnDuration</guilabel> to edit
+            its properties.</para>
           </step>
 
           <step>
-            <para>We will use the default Parameter value of
-            DefaultSC.ElapsedSecs.</para>
+            <para>We will use the default <guilabel>Parameter</guilabel> value
+            of <guilabel>DefaultSC.ElapsedSecs</guilabel>.</para>
           </step>
 
           <step>
-            <para>Under Condition, replace the default value with Variable,
-            BurnDuration.</para>
+            <para>Under <guilabel>Condition</guilabel>, replace the default
+            value with <guilabel>Variable</guilabel>,
+            <guilabel>BurnDuration</guilabel>.</para>
           </step>
 
           <step>
-            <para>Click OK to save these changes.</para>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 13. Prop BurnDuration Command Configuration</title>
+          <title><guilabel>Prop BurnDuration</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -738,19 +792,21 @@
 
         <procedure>
           <step>
-            <para>Double-click Turn Thruster Off to edit its properties.
-            Notice that the command is already set to end FiniteBurn1 as
-            applied to the DefaultSC spacecraft, so we don’t need to change
-            anything here..</para>
+            <para>Double-click <guilabel>Turn Thruster Off</guilabel> to edit
+            its properties. Notice that the command is already set to end
+            <guilabel>FiniteBurn1</guilabel> as applied to the
+            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
+            change anything here..</para>
           </step>
 
           <step>
-            <para>Click OK.</para>
+            <para>Click <guilabel>OK</guilabel>.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 14. Turn Thruster Off Command Configuration</title>
+          <title><guilabel>Turn Thruster Off</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -769,21 +825,24 @@
 
         <procedure>
           <step>
-            <para>Double-click Prop to Apogee to edit its properties.</para>
+            <para>Double-click <guilabel>Prop to Apogee</guilabel> to edit its
+            properties.</para>
           </step>
 
           <step>
-            <para>Under Parameter, replace DefaultSC.ElapsedSecs with
-            DefaultSC.Earth.Apoapsis.</para>
+            <para>Under <guilabel>Parameter</guilabel>, replace
+            <guilabel>DefaultSC.ElapsedSecs</guilabel> with
+            <guilabel>DefaultSC.Earth.Apoapsis</guilabel>.</para>
           </step>
 
           <step>
-            <para>Click OK to save these changes.</para>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 15. Prop To Apogee Command Configuration</title>
+          <title><guilabel>Prop To Apogee</guilabel> Command
+          Configuration</title>
 
           <screenshot>
             <mediaobject>
@@ -802,26 +861,28 @@
 
         <procedure>
           <step>
-            <para>Double-click Achieve Apogee Radius = 12000 to edit its
-            properties.</para>
+            <para>Double-click <guilabel>Achieve Apogee Radius =
+            12000</guilabel> to edit its properties.</para>
           </step>
 
           <step>
-            <para>Notice that Goal is set to DefaultSC.Earth.RMAG. This is
-            what we need, so we make no changes here.</para>
+            <para>Notice that <guilabel>Goal</guilabel> is set to
+            <guilabel>DefaultSC.Earth.RMAG</guilabel>. This is what we need,
+            so we make no changes here.</para>
           </step>
 
           <step>
-            <para>In the Value box, type 12000</para>
+            <para>In the <guilabel>Value</guilabel> box, type
+            <literal>12000</literal></para>
           </step>
 
           <step>
-            <para>Click OK to save these changes</para>
+            <para>Click <guilabel>OK</guilabel> to save these changes</para>
           </step>
         </procedure>
 
         <figure>
-          <title>Figure 16. Achieve Apogee Radius = 12000 Command
+          <title><guilabel>Achieve Apogee Radius = 12000</guilabel> Command
           Configuration</title>
 
           <screenshot>
@@ -841,38 +902,25 @@
   <section>
     <title>Run the Mission</title>
 
-    <para>Before running the mission, click Save ( ) and save the mission to a
-    file of your choice. Now click Run ( ). As the mission runs, you will see
-    GMAT solve the targeting problem. Each iteration and perturbation is shown
-    in DefaultOrbitView window in light blue, and the final solution is shown
-    in red. After the mission completes, the 3D view should appear as shown in
-    the image shown below. You may want to run the mission several times to
-    see the targeting in progress.</para>
+    <para>Before running the mission, click <guilabel>Save</guilabel> ( Joel
+    script??) and save the mission to a file of your choice. Now click
+    <guilabel>Run</guilabel> (?? ). As the mission runs, you will see GMAT
+    solve the targeting problem. Each iteration and perturbation is shown in
+    <guilabel>DefaultOrbitView</guilabel> window in light blue, and the final
+    solution is shown in red. After the mission completes, the 3D view should
+    appear as shown in the image shown below. You may want to run the mission
+    several times to see the targeting in progress.</para>
 
     <section>
       <title>Inspect Orbit View and Message Window</title>
 
-      <para>All of the commands in the Mission tree have associated Command
-      Summary reports. As shown below, we review these reports to help verify
-      that our script performed as expected.</para>
-
-      <procedure>
-        <step>
-          <para>Click on the Mission tab to show the Mission tree.</para>
-        </step>
-
-        <step>
-          <para>Configure Propagate1 to propagate to
-          DefaultSC.Earth.Periapsis.</para>
-        </step>
-
-        <step>
-          <para>Rename Propagate1 to Prop To Perigee.</para>
-        </step>
-      </procedure>
+      <para>Inspect the 3D DefaultOrbitView window. Manipulate the window as
+      needed to view the orbit "face-on." Visually verify that apogee has
+      indeed been raised. </para>
 
       <figure>
-        <title>Figure 17. 3D View of Finite Burn to Raise Apogee</title>
+        <title>3D View of <guilabel>Finite Burn to Raise
+        Apogee</guilabel></title>
 
         <screenshot>
           <mediaobject>
@@ -886,8 +934,11 @@
       </figure>
 
       <para>As shown below, we view the output message window to determine the
-      number of iterations it took the differential corrector to converge and
-      the final value of the control variable, BurnDuration</para>
+      number of iterations it took the
+      <guilabel>DifferentialCorrector</guilabel> to converge and the final
+      value of the control variable, <guilabel>BurnDuration</guilabel>. Verify
+      that you obtained a similar value for <guilabel>BurnDuration</guilabel>.
+      </para>
 
       <para>Ok to leave blank space?</para>
 
@@ -905,61 +956,72 @@
     <section>
       <title>Explore the Command Summary Reports</title>
 
-      <para>All of the commands in the Mission tree have associated Command
-      Summary reports. As shown below, we review these reports to help verify
-      that our script performed as expected.</para>
+      <para>All of the commands in the <guilabel>Mission</guilabel> tree have
+      associated <guilabel>Command Summary</guilabel> reports. As shown below,
+      we review these reports to help verify that our script performed as
+      expected.</para>
 
       <procedure>
         <step>
-          <para>In the Mission tree, select Prop To Perigee, then right-click
-          to open the associated Command Summary which describes the state of
-          DefaultSC after the Prop To Perigee command has been performed. We
-          verify perigee has indeed been achieved by finding the mean anomaly
-          value of DefaultSC. To do this, we look at the value of MA under the
-          Keplerian State. As expected, the mean anomaly is zero.</para>
+          <para>In the <guilabel>Mission</guilabel> tree, select
+          <guilabel>Prop To Perigee</guilabel>, then right-click to open the
+          associated <guilabel>Command Summary</guilabel> which describes the
+          state of <guilabel>DefaultSC</guilabel> after the <guilabel>Prop To
+          Perigee</guilabel> command has been performed. We verify perigee has
+          indeed been achieved by finding the mean anomaly value of
+          <guilabel>DefaultSC</guilabel>. To do this, we look at the value of
+          <guilabel>MA</guilabel> under the Keplerian State. As expected, the
+          mean anomaly is zero.</para>
         </step>
 
         <step>
-          <para>View the Turn Thruster On command summary. Note that, as
-          expected, prior to the start of the maneuver, the fuel mass is 756
-          kg.</para>
+          <para>View the <guilabel>Turn Thruster On</guilabel> command
+          summary. Note that, as expected, prior to the start of the maneuver,
+          the fuel mass is <literal>756</literal> kg.</para>
         </step>
 
         <step>
-          <para>View the Turn Thruster Off command summary.</para>
+          <para>View the <guilabel>Turn Thruster Off</guilabel> command
+          summary.</para>
 
           <substeps>
             <step>
               <para>Note that the mean anomaly at the end of the maneuver is
-              25.13 degrees. Thus, as the burn occurred, the mean anomaly
-              increased from 0 to 25.13 degrees. By orbital theory, we know
+              <literal>25.13</literal> degrees. Thus, as the burn occurred,
+              the mean anomaly increased from <literal>0</literal> to
+              <literal>25.13</literal> degrees. By orbital theory, we know
               that an apogee raising burn is best performed at perigee. Thus,
               we may be able to achieve our orbital goal using less fuel if we
               “center” the burn. For example, we could try starting our burn
-              at a mean anomaly of –(25.13/2) instead of 0 degrees.</para>
+              at a mean anomaly of <literal>–(25.13/2)</literal> instead of
+              <literal>0</literal> degrees.</para>
             </step>
 
             <step>
               <para>Note that, at the end of the maneuver, the fuel mass is
-              343.76990815648 kg. Thus, this finite burn used approximately
-              756 – 343.8 = 412.2 kg of fuel.</para>
+              <literal>343.76990815648</literal> kg. Thus, this finite burn
+              used approximately <literal>756 – 343.8</literal> =
+              <literal>412.2</literal> kg of fuel.</para>
             </step>
           </substeps>
         </step>
 
         <step>
-          <para>View the Prop To Apogee command summary.</para>
+          <para>View the <guilabel>Prop To Apogee</guilabel> command
+          summary.</para>
 
           <substeps>
             <step>
-              <para>We note that the mean anomaly is 180 degrees which proves
-              that we are indeed at apogee.</para>
+              <para>We note that the mean anomaly is <literal>180</literal>
+              degrees which proves that we are indeed at apogee.</para>
             </step>
 
             <step>
-              <para>We note that the orbital radius (RMAG) is 11999.999998192
-              km which proves that we have achieved our desired 12000 km
-              apogee radius to within our desired tolerance of 0.1 km.</para>
+              <para>We note that the orbital radius (RMAG) is
+              <literal>11999.999998192</literal> km which proves that we have
+              achieved our desired <literal>12000</literal> km apogee radius
+              to within our desired tolerance of <literal>0.1</literal>
+              km.</para>
             </step>
           </substeps>
         </step>
