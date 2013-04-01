@@ -311,13 +311,6 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
           </listitem>
 
           <listitem>
-            <para>brackets (“<literal>(</literal>“, “<literal>)</literal>”,
-            “<literal>[</literal>“, “<literal>]</literal>”,
-            “<literal>{</literal>“, “<literal>}</literal>”) (hex: 28, 29, 5B,
-            5D, 7B, 7D)</para>
-          </listitem>
-
-          <listitem>
             <para>semicolon (“<literal>;</literal>”) (hex: 3B)</para>
           </listitem>
         </itemizedlist>
