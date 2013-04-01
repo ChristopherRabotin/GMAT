@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xml:id="ReleaseNotesR2012a"
+<section version="5.0" xml:id="ReleaseNotesR2012a"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -548,4 +548,4 @@
     xlink:href="http://li64-187.members.linode.com:8080/secure/IssueNavigator.jspa?mode=hide&amp;requestId=11104">the
     "Known issues in R2012a" report</link> in JIRA.</para>
   </section>
-</chapter>
+</section>

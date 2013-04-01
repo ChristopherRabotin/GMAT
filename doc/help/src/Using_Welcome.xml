@@ -7,7 +7,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title xml:id="IntroductionToGMAT">Introduction to GMAT</title>
+  <title xml:id="Welcome">Welcome to GMAT</title>
 
   <para>GMAT is an open source trajectory design and optimization system
   developed by a team of NASA, private industry, public, and private
@@ -48,15 +48,15 @@
   object in the display. The trajectory view can be animated so users can
   watch the evolution of the trajectory over time.</para>
 
-  <section>
+  <simplesect>
     <title>Licensing</title>
 
     <para>GMAT is licensed under the Apache License 2.0. The license text is
     contained in the file <filename>License.txt</filename> in root directory
     of the GMAT distribution.</para>
-  </section>
+  </simplesect>
 
-  <section>
+  <simplesect>
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
@@ -69,9 +69,9 @@
     standard C++ (approximately 380,000 non-comment source lines of code)
     using an object-oriented methodology, with a rich class structure designed
     to make new features simple to incorporate.</para>
-  </section>
+  </simplesect>
 
-  <section>
+  <simplesect>
     <title>User Interfaces</title>
 
     <para>GMAT has several user interfaces. The interactive graphical user
@@ -81,9 +81,9 @@
     running the system via calls from MATLAB to GMAT and allows GMAT to call
     MATLAB functions from within the GMAT command sequence. A low-level C API
     is also currently under development.</para>
-  </section>
+  </simplesect>
 
-  <section>
+  <simplesect>
     <title>Development Status</title>
 
     <para>GMAT has undergone extensive testing and is mature software. The
@@ -95,9 +95,9 @@
     operational certifications testing of the system be completed in Aug.
     2013. After completion of operaration certification, GMAT will be ready
     for operational support of flight projects.</para>
-  </section>
+  </simplesect>
 
-  <section>
+  <simplesect>
     <title>Contributors</title>
 
     <para>The Navigation and Mission Design Branch at NASA’s Goddard Space
@@ -148,5 +148,5 @@
     Space Agency’s (ESA) Advanced Concepts team has developed optimizer
     plug-ins for the Non-Linear Programming (NLP) solvers SNOPT (Sparse
     Nonlinear OPTimizer) and IPOPT (Interior Point OPTimizer).</para>
-  </section>
+  </simplesect>
 </chapter>

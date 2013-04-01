@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="SimulatingAnOrbit"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -379,10 +379,10 @@
         </listitem>
 
         <listitem>
-          <para>In the three boxes to the right of
-          <guilabel>View Point Vector</guilabel>, type the values
-          <userinput>-60000</userinput>, <userinput>30000</userinput>, and
-          <userinput>20000</userinput> respectively.</para>
+          <para>In the three boxes to the right of <guilabel>View Point
+          Vector</guilabel>, type the values <userinput>-60000</userinput>,
+          <userinput>30000</userinput>, and <userinput>20000</userinput>
+          respectively.</para>
         </listitem>
 
         <listitem>
@@ -531,9 +531,8 @@
       <listitem>
         <para>Manipulate the <guilabel>DefaultOrbitView</guilabel> plot using
         your mouse to orient the trajectory so that you can to verify that at
-        the final location the spacecraft is at periapsis. See <xref
-        linkend="HowTo_ManipulatingThe3DOrbitView" xrefstyle="select:title"/>
-        for details.</para>
+        the final location the spacecraft is at periapsis. See the <xref
+        linkend="OrbitView"/> reference for details.</para>
       </listitem>
 
       <listitem>

@@ -20,30 +20,32 @@
     </author>
   </info>
 
-  <xi:include href="Preface.xml"/>
+  <!--<xi:include href="Preface.xml"/>-->
 
   <part xml:id="UsingGmat">
     <title>Using GMAT</title>
 
-    <xi:include href="Intro_IntroductionToGMAT.xml" />
-    <xi:include href="Intro_GettingStarted.xml" />
-    <chapter xml:id="TourOfGmat">
-        <title>Tour of GMAT</title>
-        <xi:include href="Using_ResourcesTree.xml"/>
-        <xi:include href="Using_MissionTree.xml"/>
-        <xi:include href="Using_OutputTree.xml"/>
-        <xi:include href="Using_ScriptEditor.xml"/>
-        <xi:include href="Using_CommandSummary.xml"/>
+    <xi:include href="Using_Welcome.xml" />
 
+    <chapter xml:id="GettingStarted">
+      <title>Getting Started</title>
+      <xi:include href="Using_Installation.xml"/>
+      <xi:include href="Using_RunningGmat.xml"/>
+      <xi:include href="Using_SampleMissions.xml"/>
+      <xi:include href="Using_GettingHelp.xml"/>
     </chapter>
-  </part>
 
-  <part xml:id="CommonTasks">
-    <title>Common Tasks</title>
-    <xi:include href="CommonTask_ConfiguringASpacecraft.xml"/>
-    <xi:include href="CommonTask_PropagatingASpacecraft.xml"/>
-    <xi:include href="CommonTask_ReportingData.xml"/>
-    <xi:include href="CommonTask_VisualizingData.xml"/>
+    <chapter xml:id="TourOfGmat">
+      <title>Tour of GMAT</title>
+      <xi:include href="Using_UserInterfaces.xml"/>
+      <xi:include href="Using_ResourcesTree.xml"/>
+      <xi:include href="Using_MissionTree.xml"/>
+      <xi:include href="Using_CommandSummary.xml"/>
+      <xi:include href="Using_OutputTree.xml"/>
+      <xi:include href="Using_ScriptEditor.xml"/>
+    </chapter>
+
+    <xi:include href="Using_ConfiguringGmat.xml"/>
   </part>
 
   <part xml:id="Tutorials">
@@ -53,37 +55,13 @@
     <xi:include href="Tut_TargetFiniteBurn.xml" />
     <xi:include href="Tut_Mars_B_Plane_Targeting.xml" /> 
     <xi:include href="Tut_OptimalLunarFlyby.xml" />
-
-
-    <!--
-        <xi:include href="Tut_LEOStationKeeping.xml"/>
-
-        <xi:include href="Tut_AlgebraicOptimization.xml"/>
-
-        <xi:include href="Tut_MarsB-PlaneTargeting.xml" />
-
-                <xi:include href="Tut_FormationRendezvous.xml"/>
-                <xi:include href="Tut_L2Transfer.xml"/>
-            <xi:include href="Tut_MinFuelLunarTransfer.xml"/>
-            <xi:include href="Tut_ACEStationKeeping.xml"/>
-                <xi:include href="Resource_CoordinateSystems.xml"/>
-                <xi:include href="Tut_LunarTransfer.xml" />
-        <xi:include href="Tut_MinFuelOrbitTransfer.xml" />
-        -->
   </part>
-  <!-- 
-    <chapter>
-        <title>Using the GMAT Interface</title>
 
-        <xi:include href="Using_OrbitDesigner.xml" />
-    </chapter>
--->
   <part condition="ug"
         xml:id="RefGuide">
     <title>Reference Guide</title>
     <reference xml:id="Resources">
       <title>Resources</title>
-
       <xi:include href="Resource_Array.xml" />
       <xi:include href="Resource_Barycenter.xml" />
       <xi:include href="Resource_CelestialBody.xml" />
@@ -94,7 +72,6 @@
       <xi:include href="Resource_FminconOptimizer.xml"/>
       <xi:include href="Resource_Formation.xml" />
       <xi:include href="Resource_FuelTank.xml" />
-      <xi:include href="Resource_GmatFunction.xml" />
       <xi:include href="Resource_GroundStation.xml" />
       <xi:include href="Resource_GroundTrackPlot.xml" />
       <xi:include href="Resource_ImpulsiveBurn.xml" />
@@ -105,11 +82,11 @@
       <xi:include href="Resource_ReportFile.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
       <xi:include href="Resource_Spacecraft.xml" />
-	  <xi:include href="Resource_SpacecraftAttitude.xml"/>
-	  <xi:include href="Resource_SpacecraftBallisticMass.xml" />
-	  <xi:include href="Resource_SpacecraftEpoch.xml" />
+      <xi:include href="Resource_SpacecraftAttitude.xml"/>
+      <xi:include href="Resource_SpacecraftBallisticMass.xml" />
+      <xi:include href="Resource_SpacecraftEpoch.xml" />
       <xi:include href="Resource_SpacecraftHardware.xml" />
-	  <xi:include href="Resource_SpacecraftOrbitState.xml"/>
+      <xi:include href="Resource_SpacecraftOrbitState.xml"/>
       <xi:include href="Resource_SpacecraftProperties.xml" />
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
       <xi:include href="Resource_String.xml" />
@@ -117,57 +94,55 @@
       <xi:include href="Resource_Variable.xml" />
       <xi:include href="Resource_VF13adOptimizer.xml" />
       <xi:include href="Resource_XYPlot.xml" />
-
     </reference>
 
     <reference xml:id="Commands">
-        <title>Commands</title>
-        <xi:include href="Command_Achieve.xml" />
-        <xi:include href="Command_Assignment.xml" />
-        <xi:include href="Command_BeginFiniteBurn.xml" />
-        <xi:include href="Command_BeginMissionSequence.xml" />
-        <xi:include href="Command_BeginScript.xml" />
-        <xi:include href="Command_CallGmatFunction.xml" />
-        <xi:include href="Command_CallMatlabFunction.xml" />
-        <xi:include href="Command_ClearPlot.xml" />
-        <xi:include href="Command_EndFiniteBurn.xml" />
-        <xi:include href="Command_Equation.xml" />
-        <xi:include href="Command_For.xml" />
-        <xi:include href="Command_Global.xml" />
-        <xi:include href="Command_If.xml" />
-        <xi:include href="Command_Maneuver.xml" />
-        <xi:include href="Command_MarkPoint.xml" />
-        <xi:include href="Command_Minimize.xml" />
-        <xi:include href="Command_NonlinearConstraint.xml" />
-        <xi:include href="Command_Optimize.xml" />
-        <xi:include href="Command_PenUpPenDown.xml" />
-        <xi:include href="Command_Propagate.xml" />
-        <xi:include href="Command_Report.xml" />
-        <xi:include href="Command_Save.xml" />
-        <xi:include href="Command_SaveMission.xml" />
-        <xi:include href="Command_Stop.xml" />
-        <xi:include href="Command_Target.xml" />
-        <xi:include href="Command_Toggle.xml" />
-        <xi:include href="Command_Vary.xml" />
-        <xi:include href="Command_While.xml" />
+      <title>Commands</title>
+      <xi:include href="Command_Achieve.xml" />
+      <xi:include href="Command_Assignment.xml" />
+      <xi:include href="Command_BeginFiniteBurn.xml" />
+      <xi:include href="Command_BeginMissionSequence.xml" />
+      <xi:include href="Command_BeginScript.xml" />
+      <xi:include href="Command_CallMatlabFunction.xml" />
+      <xi:include href="Command_ClearPlot.xml" />
+      <xi:include href="Command_EndFiniteBurn.xml" />
+      <xi:include href="Command_Equation.xml" />
+      <xi:include href="Command_For.xml" />
+      <xi:include href="Command_If.xml" />
+      <xi:include href="Command_Maneuver.xml" />
+      <xi:include href="Command_MarkPoint.xml" />
+      <xi:include href="Command_Minimize.xml" />
+      <xi:include href="Command_NonlinearConstraint.xml" />
+      <xi:include href="Command_Optimize.xml" />
+      <xi:include href="Command_PenUpPenDown.xml" />
+      <xi:include href="Command_Propagate.xml" />
+      <xi:include href="Command_Report.xml" />
+      <xi:include href="Command_Stop.xml" />
+      <xi:include href="Command_Target.xml" />
+      <xi:include href="Command_Toggle.xml" />
+      <xi:include href="Command_Vary.xml" />
+      <xi:include href="Command_While.xml" />
     </reference>
-    
+
     <reference>
-        <title>System</title>
-        <xi:include href="System_CalculationParameters.xml" />
-        <xi:include href="System_CommandLineUsage.xml" />
-        <xi:include href="System_MatlabInterface.xml" />
-        <xi:include href="System_ScriptLanguage.xml" />
-        <xi:include href="System_StartupFile.xml" />
+      <title>System</title>
+      <xi:include href="System_CalculationParameters.xml" />
+      <xi:include href="System_CommandLineUsage.xml" />
+      <xi:include href="System_MatlabInterface.xml" />
+      <xi:include href="System_ScriptLanguage.xml" />
+      <xi:include href="System_StartupFile.xml" />
     </reference>
-      
+
   </part>
-  <part condition="ug"
-        xml:id="ReleaseNotes">
+
+  <appendix condition="ug"
+            xml:id="ReleaseNotes">
     <title>Release Notes</title>
-    <xi:include href="ReleaseNotes_R2011a.xml" />
     <xi:include href="ReleaseNotes_R2012a.xml" />
-  </part>
+    <xi:include href="ReleaseNotes_R2011a.xml" />
+  </appendix>
+
   <index condition="ug"
          xml:id="BookIndex" />
+
 </book>

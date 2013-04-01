@@ -44,15 +44,19 @@
     </itemizedlist> The following figure shows a basic script editor session
   with the major features labeled.</para>
 
-  <screenshot xml:id="ScriptEditor_Fig1">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_ScriptEditor_GUI_1.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
+  <figure xml:id="ScriptEditor_Fig1">
+    <title>Parts of the script editor</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_ScriptEditor_GUI_1.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </figure>
 
   <section>
     <title>Active Script</title>
@@ -66,15 +70,19 @@
     scripts are inactive, but can be viewed and edited in the script
     editor.</para>
 
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ScriptEditor_GUI_2.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+    <figure>
+      <title>Active script indicators</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_ScriptEditor_GUI_2.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
 
     <para>To synchronize with the GUI, you must make an inactive script active
     by clicking either of the synchronization buttons (described in the next

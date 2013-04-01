@@ -20,17 +20,22 @@
   GMAT GUI or by loading or syncing a script file. All objects created in a
   GMAT script using a <guilabel>Create</guilabel> command are found in the
   Resources tree in the GMAT desktop. The default Resource tree is displayed
-  below (<xref linkend="ResourcesTree_Fig_Default"/>).</para>
+  below (<xref linkend="ResourcesTree_Fig_Default"
+  xrefstyle="select:label"/>).</para>
 
-  <screenshot xml:id="ResourcesTree_Fig_Default">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_ResourceTree_GUI_1.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
+  <figure xml:id="ResourcesTree_Fig_Default">
+    <title>Default Resources tree</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_ResourceTree_GUI_1.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </figure>
 
   <section>
     <title>Organization</title>
@@ -51,41 +56,49 @@
     only one available resource type; for example if the
     <guilabel>Spacecraft</guilabel> folder is right-clicked, the user can only
     click “<guimenuitem>Add Spacecraft</guimenuitem>” (<xref
-    linkend="ResourcesTree_Fig_AddSpacecraft"/>). Other folders have multiple
-    objects that can be added and the user must first select the
-    “<guimenuitem>Add</guimenuitem>” menu before selecting the object; for
-    example to add a <guilabel>FuelTank</guilabel>, right click the
-    “<guilabel>Hardware</guilabel>” folder, select
+    linkend="ResourcesTree_Fig_AddSpacecraft" xrefstyle="select:label"/>).
+    Other folders have multiple objects that can be added and the user must
+    first select the “<guimenuitem>Add</guimenuitem>” menu before selecting
+    the object; for example to add a <guilabel>FuelTank</guilabel>, right
+    click the “<guilabel>Hardware</guilabel>” folder, select
     “<guimenuitem>Add</guimenuitem>”, then the list of available resource
     types is displayed and the user can click “<guimenuitem>Fuel
-    Tank</guimenuitem>” (<xref linkend="ResourcesTree_Fig_AddFuelTank"/>).
-    User-defined solar system resources are added by right-clicking either
-    <guilabel>Sun</guilabel> or a default <guilabel>CelestialBody</guilabel>
-    resource. By right-clicking <guilabel>Sun</guilabel> the user can add a
-    <guilabel>Planet</guilabel>, <guilabel>Comet</guilabel>, or
-    <guilabel>Asteroid</guilabel> to the solar system. By right-clicking a
-    <guilabel>Planet</guilabel> the user can add a <guilabel>Moon</guilabel>
-    to that <guilabel>Planet</guilabel>.</para>
+    Tank</guimenuitem>” (<xref linkend="ResourcesTree_Fig_AddFuelTank"
+    xrefstyle="select:label"/>). User-defined solar system resources are added
+    by right-clicking either <guilabel>Sun</guilabel> or a default
+    <guilabel>CelestialBody</guilabel> resource. By right-clicking
+    <guilabel>Sun</guilabel> the user can add a <guilabel>Planet</guilabel>,
+    <guilabel>Comet</guilabel>, or <guilabel>Asteroid</guilabel> to the solar
+    system. By right-clicking a <guilabel>Planet</guilabel> the user can add a
+    <guilabel>Moon</guilabel> to that <guilabel>Planet</guilabel>.</para>
 
-    <screenshot xml:id="ResourcesTree_Fig_AddSpacecraft">
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ResourceTree_GUI_2.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+    <figure xml:id="ResourcesTree_Fig_AddSpacecraft">
+      <title>Folder menu for <guilabel>Spacecraft</guilabel></title>
 
-    <screenshot xml:id="ResourcesTree_Fig_AddFuelTank">
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ResourceTree_GUI_3.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_ResourceTree_GUI_2.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
+
+    <figure xml:id="ResourcesTree_Fig_AddFuelTank">
+      <title>Folder menu for <guilabel>Hardware</guilabel></title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_ResourceTree_GUI_3.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
   </section>
 
   <section>
@@ -93,17 +106,22 @@
 
     <para>Resources can be edited by right-clicking on the resources and
     selecting one of the options from the menu (<xref
-    linkend="ResourcesTree_Fig_ResourceMenu"/>).</para>
+    linkend="ResourcesTree_Fig_ResourceMenu"
+    xrefstyle="select:label"/>).</para>
 
-    <screenshot xml:id="ResourcesTree_Fig_ResourceMenu">
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ResourceTree_GUI_4.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+    <figure xml:id="ResourcesTree_Fig_ResourceMenu">
+      <title>Resource menu</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Using_ResourcesTree_ResourceMenu.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
 
     <section>
       <title><guimenuitem>Open/Close</guimenuitem></title>

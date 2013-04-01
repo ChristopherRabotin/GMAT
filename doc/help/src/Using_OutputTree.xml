@@ -19,94 +19,27 @@
   <guilabel>OrbitView</guilabel>,<guilabel> GroundTrackPlot</guilabel>, and
   <guilabel>XYPlots</guilabel> windows.</para>
 
-  <para>The Output tree allows you to display information that the user
-  defines in the Resources tree. You first enable the creation of the
-  information by adding commands to the mission tree. The information is
-  created at execution time and is based on the instructions defined in the
-  mission tree. Once the information is created the user can display the
-  information via the Output tree. Once the information is displayed the user
-  can Select All and Copy file contents to disk.</para>
+  <para>To display the contents of an output file, double-click the name in
+  the Output tree. A simple text display window will appear with the contents
+  of the file.</para>
 
-  <para><xref linkend="OutputTree_Fig1"/> below shows the default GMAT window
-  with Output tree selected:</para>
+  <para>Graphical output is automatically displayed during the mission run,
+  but double-clicking the name of the output window in the Output tree will
+  bring that display to the front. If you close the display window, however,
+  you must rerun the mission to display it again.</para>
 
-  <screenshot xml:id="OutputTree_Fig1">
+  <para>A populated Output tree is shown in the following figure.</para>
+
+  <screenshot>
+    <info>
+      <title/>
+    </info>
+
     <mediaobject>
       <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_1.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
-
-  <para><xref linkend="OutputTree_Fig2"/> shows the Output tree portion of the
-  GMAT window:</para>
-
-  <screenshot xml:id="OutputTree_Fig2">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_2.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
-
-  <para><xref linkend="OutputTree_Fig3"/> below shows the Output tree with
-  <guilabel>OrbitView</guilabel>, <guilabel>GroundTrackPlot</guilabel>, and
-  <guilabel>XYPlot</guilabel> data displayed. Also 2
-  <guilabel>ReportFile</guilabel> outputs and an
-  <guilabel>EphemerisFile</guilabel> report are available for display:</para>
-
-  <screenshot xml:id="OutputTree_Fig3">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_3.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
-
-  <para><xref linkend="OutputTree_Fig_ReportFile"/> shows the Output tree with
-  a <guilabel>ReportFile</guilabel> being displayed:</para>
-
-  <screenshot xml:id="OutputTree_Fig_ReportFile">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_4.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
-
-  <para><xref linkend="OutputTree_Fig_EphemerisFile"/> shows the Output Tree
-  with an <guilabel>EphemerisFile</guilabel> selected :</para>
-
-  <screenshot xml:id="OutputTree_Fig_EphemerisFile">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_5.png"
-                   scalefit="1" width="100%"/>
-      </imageobject>
-    </mediaobject>
-  </screenshot>
-
-  <para><xref linkend="OutputTree_Fig_CopyPaste"/> shows a
-  <guilabel>ReportFile</guilabel> displayed after a mouse right click.
-  Right-clicking on a displayed file brings up the
-  <guimenuitem>Copy</guimenuitem> and <guimenuitem>Select All</guimenuitem>
-  window.</para>
-
-  <screenshot xml:id="OutputTree_Fig_CopyPaste">
-    <mediaobject>
-      <imageobject>
-        <imagedata align="center" contentdepth="100%"
-                   fileref="files/images/Resource_Output_GUI_6.png"
-                   scalefit="1" width="100%"/>
+        <imagedata contentdepth="100%"
+                   fileref="files/images/Using_OutputTree_1.png" scalefit="1"
+                   width="100%"/>
       </imageobject>
     </mediaobject>
   </screenshot>
