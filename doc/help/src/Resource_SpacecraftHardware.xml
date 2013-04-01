@@ -12,7 +12,7 @@
   </indexterm>
 
   <refmeta>
-    <refentrytitle>SpacecraftHardware</refentrytitle>
+    <refentrytitle>Spacecraft Hardware</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,7 +22,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>SpacecraftHardware</refname>
+    <refname>Spacecraft Hardware</refname>
 
     <refpurpose>Add hardware to a spacecraft</refpurpose>
   </refnamediv>

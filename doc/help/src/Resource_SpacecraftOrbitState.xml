@@ -9,11 +9,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>SpacecraftOrbitState</primary>
+    <primary>Spacecraft Orbit State</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>SpacecraftOrbitState</refentrytitle>
+    <refentrytitle>Spacecraft Orbit State</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 

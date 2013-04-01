@@ -12,7 +12,7 @@
   </indexterm>
 
   <refmeta>
-    <refentrytitle>SpacecraftAttitude</refentrytitle>
+    <refentrytitle>Spacecraft Attitude</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,9 +22,9 @@
   </refmeta>
 
   <refnamediv>
-    <refname>SpacecraftAttitude</refname>
+    <refname>Spacecraft Attitude</refname>
 
-    <refpurpose></refpurpose>
+    <refpurpose>The spacecraft attitude model</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -32,13 +32,1927 @@
 
     <para>GMAT models the orientation and rate of rotation of a spacecraft
     using several different mathematical models. Currently, GMAT assumes that
-    a spacecraft is a rigid body. The currently supported attitude models are
-    <guilabel>Spinner</guilabel>, <guilabel>CoordinateSystemFixed</guilabel>,
-    and <guilabel>SpiceAttitude</guilabel>. The Spinner model is a simple,
-    inertially fixed spin axis model. The CoordinateSystemFixed model allows
-    you to use any CoordinateSystem supported by GMAT as the attitude of a
-    spacecraft. The SpiceAttitude model allows you to define the spacecraft
-    attitude based on SPICE attitude kernels.</para>
+    a <guilabel>Spacecraft</guilabel> is a rigid body. The currently supported
+    attitude models are <guilabel>Spinner</guilabel>,
+    <guilabel>CoordinateSystemFixed</guilabel>, and
+    <guilabel>SpiceAttitude</guilabel>. The <guilabel>Spinner</guilabel> model
+    is a simple, inertially fixed spin axis model. The
+    <guilabel>CoordinateSystemFixed</guilabel> model allows you to use any
+    <guilabel>CoordinateSystem</guilabel> supported by GMAT as the attitude of
+    a <guilabel>Spacecraft</guilabel>. The <guilabel>SpiceAttitude</guilabel>
+    model allows you to define the <guilabel>Spacecraft</guilabel> attitude
+    based on SPICE attitude kernels.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Spacecraft"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>AngularVelocityX</guilabel></entry>
+
+            <entry><para>The x-component of <guilabel>Spacecraft</guilabel>
+            body angular velocity expressed in the inertial frame.
+            <guilabel>AngularVelocityX</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real&lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg/sec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AngularVelocityY</guilabel></entry>
+
+            <entry><para>The y-component of <guilabel>Spacecraft</guilabel>
+            body angular velocity expressed in the inertial frame.
+            <guilabel>AngularVelocityY</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real&lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg/sec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AngularVelocityZ</guilabel></entry>
+
+            <entry><para>The z-component of <guilabel>Spacecraft</guilabel>
+            body angular velocity expressed in the inertial frame.
+            <guilabel>AngularVelocityZ</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real&lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg/sec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Attitude</guilabel></entry>
+
+            <entry><para>The attitude mode for the
+            <guilabel>Spacecraft</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>CoordinateSystemFixed</guilabel>,
+                    <guilabel>Spinner</guilabel>,
+                    <guilabel>SpiceAttitude</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>CoordinateSystemFixed</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AttitudeCoordinateSystem</guilabel></entry>
+
+            <entry><para>The <guilabel>CoordinateSystem</guilabel> used in
+            attitude computations. The
+            <guilabel>AttitudeCoordinateSystem</guilabel> field is only used
+            for the following attitude models:
+            <guilabel>CoordinateSystemFixed</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>CoordinateSystem</guilabel>
+                    resource.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>EarthMJ2000Eq</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AttitudeRate-DisplayStateType</guilabel></entry>
+
+            <entry><para>The attitude rate representation to display in the
+            GUI and script file. <guilabel>AttitudeRateDisplayType</guilabel>
+            is used for the following attitude models:
+            <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>AngularVelocity</guilabel>,
+                    <guilabel>EulerAngleRates</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>AngularVelocity</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AttitudeSpiceKernelName</guilabel></entry>
+
+            <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel>
+            attitude. SPK atttitude kernels have extension ".BC".</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Array of attitude kernel files</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>empty array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM11</guilabel></entry>
+
+            <entry><para>Component (1,1) of the Direction Cosine Matrix.
+            <guilabel>DCM11</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM12</guilabel></entry>
+
+            <entry><para>Component (1,2) of the Direction Cosine Matrix.
+            <guilabel>DCM12</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM13</guilabel></entry>
+
+            <entry><para>Component (1,3) of the Direction Cosine Matrix.
+            <guilabel>DCM13</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM21</guilabel></entry>
+
+            <entry><para>Component (2,1) of the Direction Cosine Matrix.
+            <guilabel>DCM21</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM22</guilabel></entry>
+
+            <entry><para>Component (2,2) of the Direction Cosine Matrix.
+            <guilabel>DCM22</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM23</guilabel></entry>
+
+            <entry><para>Component (2,3) of the Direction Cosine Matrix.
+            <guilabel>DCM23</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM31</guilabel></entry>
+
+            <entry><para>Component (3,1) of the Direction Cosine Matrix.
+            <guilabel>DCM31</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM32</guilabel></entry>
+
+            <entry><para>Component (3,2) of the Direction Cosine Matrix.
+            <guilabel>DCM32</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DCM33</guilabel></entry>
+
+            <entry><para>Component (3,3) of the Direction Cosine Matrix.
+            <guilabel>DCM33</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-1 &lt;= Real &lt;=1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngle1</guilabel></entry>
+
+            <entry><para>The value of the first Euler angle.
+            <guilabel>EulerAngle1</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngle2</guilabel></entry>
+
+            <entry><para>The value of the second Euler angle.
+            <guilabel>EulerAngle2</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngle3</guilabel></entry>
+
+            <entry><para>The value of the third Euler angle.
+            <guilabel>EulerAngle3</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngleRate1</guilabel></entry>
+
+            <entry><para>The value of the first Euler angle rate.
+            <guilabel>EulerAngleRate1</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg./sec.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngleRate2</guilabel></entry>
+
+            <entry><para>The value of the second Euler angle rate.
+            <guilabel>EulerAngleRate2</guilabel> is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg./sec.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngleRate3</guilabel></entry>
+
+            <entry><para>The value of the third Euler angle rate.
+            <guilabel>EulerAngleRate3 </guilabel>is used for the following
+            Attitude models: <guilabel>Spinner</guilabel>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg./sec.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FrameSpiceKernelName</guilabel></entry>
+
+            <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel> body
+            frame. SPK Frame kernels have extension ".TF".</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Array of .tf files.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>emtpy array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EulerAngleSequence</guilabel></entry>
+
+            <entry><para>The Euler angle sequence used for Euler angle input
+            and output..</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>123</guilabel>,<guilabel>231</guilabel>,<guilabel>312</guilabel>,<guilabel>132</guilabel>,<guilabel>321</guilabel>,<guilabel>213</guilabel>,<guilabel>121</guilabel>,<guilabel>
+                    232</guilabel>,<guilabel>313</guilabel>,<guilabel>131</guilabel>,<guilabel>323</guilabel>,<guilabel>212</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>321</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MRP1</guilabel></entry>
+
+            <entry><para>The value of the first modified Rodrigues parameter.
+            <guilabel>MRP1</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MRP2</guilabel></entry>
+
+            <entry><para>The value of the second modified Rodrigues parameter.
+            <guilabel>MRP2</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MRP3</guilabel></entry>
+
+            <entry><para>The value of the second modified Rodrigues parameter.
+            <guilabel>MRP2</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Q1</guilabel></entry>
+
+            <entry><para>First component of quaternion. GMAT’s quaternion
+            representation includes the three “vector” components as the first
+            three elements in the quaternion and the “rotation” component as
+            the last element in the quaternion. <guilabel>Q1</guilabel> is
+            used for the following Attitude models:
+            <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Q2</guilabel></entry>
+
+            <entry><para>Second component of quaternion. GMAT’s quaternion
+            representation includes the three “vector” components as the first
+            three elements in the quaternion and the “rotation” component as
+            the last element in the quaternion. <guilabel>Q2</guilabel> is
+            used for the following Attitude models:
+            <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Q3</guilabel></entry>
+
+            <entry><para>Third component of quaternion. GMAT’s quaternion
+            representation includes the three “vector” components as the first
+            three elements in the quaternion and the “rotation” component as
+            the last element in the quaternion. <guilabel>Q3</guilabel> is
+            used for the following Attitude models:
+            <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Q4</guilabel></entry>
+
+            <entry><para>Fourth component of quaternion. GMAT’s quaternion
+            representation includes the three “vector” components as the first
+            three elements in the quaternion and the “rotation” component as
+            the last element in the quaternion. <guilabel>Q4</guilabel> is
+            used for the following Attitude models:
+            <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Quaternion</guilabel></entry>
+
+            <entry><para>The quaternion vector. GMAT’s quaternion
+            representation includes the three “vector” components as the first
+            three elements in the quaternion and the “rotation” component as
+            the last element in the quaternion.
+            <guilabel>Quaternion</guilabel> is used for the following Attitude
+            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real array (length four)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[0 0 0 1];</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SCClockSpiceKernelName</guilabel></entry>
+
+            <entry><para>SPK Kernels for spacecraft clock. SPK clock kernels
+            have extension ".TSC".</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Array of .tsc file names</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>empty array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
@@ -47,33 +1961,37 @@
     <refsection>
       <title>Overview of Availble Attitude Models</title>
 
-      <para>GMAT models the orientation and rate of rotation of a spacecraft
-      using several different mathematical models. Different Attitude models
-      require different information to fully configure the model. For example,
-      when you select the CoordinateSystemFixed model, the attitude and body
-      rates are entirely determined by the CoordinateSystem model and defining
-      Euler angles or angular velocity components are not required and have no
-      effect. The table below describes which interface elements such as the
-      AttitudeCoordinateSystem, attitude representation, attitude rate fields
-      among others are required/supported for a given model. Attitude
-      representations fields include the DCM, EulerAngles, Quaternion, and
-      MRPs (Modified Rodriguez Parameters). Attitude rate fields include the
-      body angular velocity and the Euler angle rates. If a field is marked as
-      inactive for a particular model, fields of that type have no effect for
-      that model. Similarly, fields marked as active do affect the attitude
-      for a particular model.</para>
+      <para>GMAT models the orientation and rate of rotation of a
+      <guilabel>Spacecraft</guilabel> using several different mathematical
+      models. Different attitude models require different information to fully
+      configure the model. For example, when you select the
+      <guilabel>CoordinateSystemFixed</guilabel> model, the attitude and body
+      rates are entirely determined by the
+      <guilabel>CoordinateSystem</guilabel> model and defining Euler angles or
+      angular velocity components are not required and have no effect. The
+      table below describes which interface elements such as the
+      <guilabel>AttitudeCoordinateSystem</guilabel>, attitude representation,
+      attitude rate fields among others are required/supported for a given
+      model. Attitude representations fields include the
+      <guilabel>DCM</guilabel>, <guilabel>EulerAngles</guilabel>,
+      <guilabel>Quaternion</guilabel>, and <guilabel>MRPs</guilabel> (Modified
+      Rodriguez Parameters). Attitude rate fields include the body angular
+      velocity and the Euler angle rates. If a field is marked as inactive for
+      a particular model, fields of that type have no effect for that model.
+      Similarly, fields marked as active do affect the attitude for a
+      particular model.</para>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="5">
-          <colspec colnum="1" colwidth="2*" />
+          <colspec colnum="1" colwidth="2*"/>
 
-          <colspec colnum="2" colwidth="2*" />
+          <colspec colnum="2" colwidth="2*"/>
 
-          <colspec colnum="3" colwidth="3*" />
+          <colspec colnum="3" colwidth="3*"/>
 
-          <colspec colnum="4" colwidth="2*" />
+          <colspec colnum="4" colwidth="2*"/>
 
-          <colspec colnum="5" colwidth="2*" />
+          <colspec colnum="5" colwidth="2*"/>
 
           <thead>
             <row>
@@ -93,37 +2011,37 @@
             <row>
               <entry><guilabel>Spinner</guilabel></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
             </row>
 
             <row>
-              <entry><guilabel>CoordinateSystemFixed</guilabel></entry>
+              <entry><guilabel>Coordinate-SystemFixed</guilabel></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
             </row>
 
             <row>
               <entry><guilabel>SpiceAttitude</guilabel></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Inactive </para></entry>
+              <entry><para>Inactive</para></entry>
 
-              <entry><para> Active </para></entry>
+              <entry><para>Active</para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -165,7 +2083,7 @@ aSpacecraft.Q4 = 0.5        </code>        </programlisting>
         <para>The Direction Cosine Matrix is a 3x3 array that contains cosines
         of the angles between the x, y, and z body axes and the x, y, and z
         inertial axes. The direction cosine matrix must be ortho-normal and
-        you define the DCM element by element. Here is an example the shows
+        you define the DCM element by element. Here is an example that shows
         how to define the attitude using the DCM.</para>
 
         <programlisting><code>aSpacecraft.DCM11 = 1
@@ -202,7 +2120,10 @@ aSpacecraft.EulerAngle3 = 90</code>      </programlisting>
       <refsection>
         <title>Modified Rogriques parameters</title>
 
-        <para>Need text description</para>
+        <para>The modified Rodgriques parameters are a modification of the
+        Euer Axis/Angle representation. Specifically, the MRP vector is equal
+        to nhat* tan(Euler Angle/4) where nhat is the unitized Euler
+        Axis.</para>
 
         <programlisting><code>aSpacecraft.MRP1 = 0.2928932188134525
 aSpacecraft.MRP2 = 0.2928932188134524
@@ -215,7 +2136,7 @@ aSpacecraft.MRP3 = 1.149673585146546e-017</code></programlisting>
         <para>The Euler angle rates are the first time derivative of the Euler
         angles and can be used to define the body rates. Euler angle rates use
         the same sequence as the EulerAngles. The example below shows how to
-        define the EulerAngle rates for a spacecraft.</para>
+        define the Euler angle rates for a spacecraft.</para>
 
         <programlisting><code>aSpacecraft.EulerAngleSequence = '321'
 aSpacecraft.EulerAngleRate1 = -5
@@ -228,8 +2149,8 @@ aSpacecraft.EulerAngleRate3 = 30      </code></programlisting>
 
         <para>The angular velocity is the angular velocity of the spacecraft
         body with respect to the inertial frame, expressed in the inertial
-        frame. The example below shows how to define the AngularVelocity for a
-        spacecraft.</para>
+        frame. The example below shows how to define the angular velocity for
+        a spacecraft.</para>
 
         <programlisting><code>aSpacecraft.AngularVelocityX = 5;
 aSpacecraft.AngularVelocityY = 10;
@@ -240,20 +2161,23 @@ aSpacecraft.AngularVelocityZ = 5;</code></programlisting>
     <refsection>
       <title>Coordinate System Fixed Attitude Model</title>
 
-      <para>The CoordinateSystemFixed model allows you to use any existing
-      CoordinateSystem to define the attitude of a spacecraft. The attitude
-      uses the Axes defined on the CoordinateSystem to compute the body fixed
-      to inertial matrix and attitude rate parameters such as the angular
-      velocity. To configure this attitude mode, select CoordinateSystemFixed,
-      for Attitude. You can define the EulerAngleSequence used when outputting
-      EulerAngles and EulerAngle rates.</para>
+      <para>The <guilabel>CoordinateSystemFixed</guilabel> model allows you to
+      use any existing <guilabel>CoordinateSystem</guilabel> to define the
+      attitude of a <guilabel>Spacecraft</guilabel>. The attitude uses the
+      axes defined on the <guilabel>CoordinateSystem</guilabel> to compute the
+      body fixed to inertial matrix and attitude rate parameters such as the
+      angular velocity. To configure this attitude mode, select<guilabel>
+      CoordinateSystemFixed</guilabel>, for <guilabel>Attitude</guilabel>. You
+      can define the <guilabel>EulerAngleSequence</guilabel> used when
+      outputting <guilabel>EulerAngles</guilabel> and <guilabel>EulerAngle
+      rates</guilabel>.</para>
 
       <warning>
-        <para>Caution: For the CoordinateSystemFixed attitude model, the
-        attitude is completely described by the selected coordinate system. If
-        you are working in the script, setting attitude parameters (Euler
-        Angles, Quaternion etc.) or setting attitude rate parameters such as
-        (Euler Angle Rates etc.) has no effect.</para>
+        <para>For the <guilabel>CoordinateSystemFixed</guilabel> attitude
+        model, the attitude is completely described by the selected coordinate
+        system. If you are working in the script, setting attitude parameters
+        (Euler Angles, Quaternion etc.) or setting attitude rate parameters
+        such as (Euler Angle Rates etc.) has no effect.</para>
       </warning>
 
       <screenshot>
@@ -261,18 +2185,19 @@ aSpacecraft.AngularVelocityZ = 5;</code></programlisting>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_SpacecraftAttitude_GUI_1.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>The script example below shows how to configure a spacecraft to
-      use a spacecraft VNB attitude system.</para>
+      <para>The script example below shows how to configure a
+      <guilabel>Spacecraft</guilabel> to use a spacecraft VNB attitude
+      system.</para>
 
       <programlisting><code>Create Spacecraft aSat
-GMAT aSat.Attitude                 = CoordinateSystemFixed
-GMAT aSat.ModelRotationZ           = -90
-GMAT aSat.AttitudeCoordinateSystem = 'attCoordSys'
+aSat.Attitude                 = CoordinateSystemFixed
+aSat.ModelRotationZ           = -90
+aSat.AttitudeCoordinateSystem = 'attCoordSys'
 
 Create ForceModel Propagator1_ForceModel
 Create Propagator Propagator1
@@ -300,21 +2225,22 @@ Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
     <refsection>
       <title>Spinner Attitude Model</title>
 
-      <para>The Spinner attitude model propagates the attitude assuming the
-      spin axis direction is fixed in inertial space. You define the attitude
-      by providing initial body orientation and rates. GMAT propagates the
-      attitude by computing the angular velocity and then rotates the
-      spacecraft about that angular velocity vector at a constant rate defined
-      by the magnitude of the angular velocity. You can define the initial
-      attitude using Quaternions, EulerAngles, the Direction Cosine Matrix, or
-      the Modified Rodriques Parameters. You can define the attitude rates
-      using Euler angles rates or AngularVelocity. When working with
-      EulerAngles, the rotation sequence is determined by the
-      EulerAngleSequence field.</para>
+      <para>The <guilabel>Spinner</guilabel> attitude model propagates the
+      attitude assuming the spin axis direction is fixed in inertial space.
+      You define the attitude by providing initial body orientation and rates.
+      GMAT propagates the attitude by computing the angular velocity and then
+      rotates the <guilabel>Spacecraft</guilabel> about that angular velocity
+      vector at a constant rate defined by the magnitude of the angular
+      velocity. You can define the initial attitude using quaternions, Euler
+      angles, the DCM, or the modified Rodriques parameters. You can define
+      the attitude rates using Euler angles rates or angular velocity. When
+      working with Euler angles, the rotation sequence is determined by the
+      <guilabel>EulerAngleSequence</guilabel> field.</para>
 
       <warning>
         <para>Caution: If you are working in the script, setting the
-        CoordinateSystem for the Spinner attitude model has no effect.</para>
+        <guilabel>CoordinateSystem</guilabel> for the Spinner attitude model
+        has no effect.</para>
       </warning>
 
       <screenshot>
@@ -322,18 +2248,18 @@ Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_SpacecraftAttitude_GUI_2.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>The example below configures a spacecraft to spin about the
-      inertial z axis.</para>
+      <para>The example below configures a <guilabel>s</guilabel>pacecraft to
+      spin about the inertial z axis.</para>
 
       <programlisting><code>Create Spacecraft aSat;
-GMAT aSat.Attitude         = Spinner
-GMAT aSat.ModelRotationZ   = -90
-GMAT aSat.AngularVelocityZ = 5
+aSat.Attitude         = Spinner
+aSat.ModelRotationZ   = -90
+aSat.AngularVelocityZ = 5
 
 Create ForceModel Propagator1_ForceModel
 Create Propagator Propagator1
@@ -353,7 +2279,7 @@ OrbitView1.Add                = {aSat, Earth}
 OrbitView1.ViewPointReference = Earth
 OrbitView1.ViewPointVector    = [ 30000 0 0 ]
 
-BeginMissionSequence;
+BeginMissionSequence
 
 Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
     </refsection>
@@ -361,16 +2287,19 @@ Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
     <refsection>
       <title>SPK Attitude Model</title>
 
-      <para>The SpiceAttitude model propagates the attitude using attitude
-      SPICE kernels. To configure a spacecraft to use SPICE kernels select
-      SpiceAttitude for the Attitude field as shown below.</para>
+      <para>The <guilabel>SpiceAttitude</guilabel> model propagates the
+      attitude using attitude SPICE kernels. To configure a
+      <guilabel>Spacecraft</guilabel> to use SPICE kernels select
+      <guilabel>SpiceAttitude</guilabel> for the <guilabel>Attitude</guilabel>
+      field as shown below.</para>
 
       <warning>
-        <para>Caution: For the SpiceAttitude model, the attitude is completely
-        described by the spice kernels. When working in the script, setting
-        the CoordinateSystem, attitude parameters (Euler Angles, Quaternion
-        etc.) or attitude rate parameters such as (Euler Angle Rates etc.) has
-        no effect.</para>
+        <para>Caution: For the <guilabel>SpiceAttitude</guilabel> model, the
+        attitude is completely described by the spice kernels. When working in
+        the script, setting the <guilabel>CoordinateSystem</guilabel>,
+        attitude parameters (<guilabel>EulerAngles</guilabel>,
+        <guilabel>Quaternion</guilabel> etc.) or attitude rate parameters such
+        as (<guilabel>EulerAngleRates</guilabel> etc.) has no effect.</para>
       </warning>
 
       <screenshot>
@@ -378,41 +2307,47 @@ Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_SpacecraftAttitude_GUI_3.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>You must provide three SPICE kernel types for the SpiceAttitude
-      model: the attitude kernel (.bc file), the frame kernel (.tf file) and
-      the spacecraft clock kernel (.tsc file). These files are defined on the
-      spacecraft SPICE tab as shown below. In addition to the kernels you must
-      also provide the spacecraft NAIFId and the NAIFIdReferenceFrame. Below
-      is an illustration of the SPICE tab configured for MarsExpress script
-      found later in this section.</para>
+      <para>You must provide three SPICE kernel types for the
+      <guilabel>SpiceAttitude</guilabel> model: the attitude kernel (.bc
+      file), the frame kernel (.tf file) and the spacecraft clock kernel (.tsc
+      file). These files are defined on the <guilabel>Spacecraft</guilabel>
+      SPICE tab as shown below. In addition to the kernels, you must also
+      provide the <guilabel>Spacecraft </guilabel><guilabel>NAIFId</guilabel>
+      and the <guilabel>NAIFIdReferenceFrame</guilabel>. Below is an
+      illustration of the SPICE tab configured for MarsExpress script found
+      later in this section.</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Resource_SpacecraftAttitude_GUI_4.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>The example below configures a spacecraft to use SPK kernels to
-      propagator the attitude for MarsExpress. The SPK kernels are distributed
-      with GMAT.</para>
+      <para>The example below configures a <guilabel>Spacecraft</guilabel> to
+      use SPK kernels to propagator the attitude for Mars Express. The SPK
+      kernels are distributed with GMAT.</para>
 
       <programlisting><code>Create Spacecraft MarsExpress
 MarsExpress.NAIFId = -41
 MarsExpress.NAIFIdReferenceFrame = -41001
 MarsExpress.Attitude = 'SpiceAttitude'
-MarsExpress.OrbitSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_Short.BSP'}
-MarsExpress.AttitudeSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_ATNM_PTR00012_100531_002.BC'}
-MarsExpress.SCClockSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_100921_STEP.TSC'}
-MarsExpress.FrameSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_V10.TF'}
+MarsExpress.OrbitSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_Short.BSP'}
+MarsExpress.AttitudeSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_ATNM_PTR00012_100531_002.BC'}
+MarsExpress.SCClockSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_MEX_100921_STEP.TSC'}
+MarsExpress.FrameSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_MEX_V10.TF'}
 
 Create Propagator spkProp
 spkProp.Type = SPK
@@ -436,19 +2371,5 @@ BeginMissionSequence
 
 Propagate spkProp(MarsExpress) {MarsExpress.ElapsedDays = 0.2}</code></programlisting>
     </refsection>
-  </refsection>
-
-  <refsection>
-    <title>Examples</title>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_SpacecraftAttitude_GUI_5.png"
-                     scalefit="1" width="100%"></imagedata>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
   </refsection>
 </refentry>

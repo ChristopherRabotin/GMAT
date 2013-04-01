@@ -34,6 +34,7 @@
         <xi:include href="Using_OutputTree.xml"/>
         <xi:include href="Using_ScriptEditor.xml"/>
         <xi:include href="Using_CommandSummary.xml"/>
+
     </chapter>
   </part>
 
@@ -104,8 +105,11 @@
       <xi:include href="Resource_ReportFile.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
       <xi:include href="Resource_Spacecraft.xml" />
+	  <xi:include href="Resource_SpacecraftAttitude.xml"/>
 	  <xi:include href="Resource_SpacecraftBallisticMass.xml" />
+	  <xi:include href="Resource_SpacecraftEpoch.xml" />
       <xi:include href="Resource_SpacecraftHardware.xml" />
+	  <xi:include href="Resource_SpacecraftOrbitState.xml"/>
       <xi:include href="Resource_SpacecraftProperties.xml" />
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
       <xi:include href="Resource_String.xml" />
@@ -113,16 +117,7 @@
       <xi:include href="Resource_Variable.xml" />
       <xi:include href="Resource_VF13adOptimizer.xml" />
       <xi:include href="Resource_XYPlot.xml" />
-
-      <xi:include href="ToolbarFeatureSpec.xml" />
-
-      <!--<xi:include href="Resource_SpacecraftOverview.xml"/>-->
-      <xi:include href="Resource_SpacecraftOrbitState.xml"/>
-      <!--<xi:include href="Resource_SpacecraftOrbitEpoch.xml" />-->
-      <xi:include href="Resource_SpacecraftAttitude.xml"/>
-      <!-- 
-        <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
-                -->
+	  <xi:include href="ToolbarFeatureSpec.xml" />
 
     </reference>
 

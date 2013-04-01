@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>SpacecraftVisualizationProperties</primary>
+    <primary>Spacecraft Visualization Properties</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>SpacecraftVisualizationProperties</refentrytitle>
+    <refentrytitle>Spacecraft Visualization Properties</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
