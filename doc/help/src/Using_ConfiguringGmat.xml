@@ -202,10 +202,9 @@
     <section>
       <title><filename>userfunctions</filename></title>
 
-      <para>The <filename>userfunctions</filename> directory contains GMAT and
-      MATLAB functions that are included in the GMAT distribution. You can
-      also store your own custom GMAT and MATLAB functions in these
-      folders.</para>
+      <para>The <filename>userfunctions</filename> directory contains MATLAB
+      functions that are included in the GMAT distribution. You can also store
+      your own custom MATLAB functions in this folders.</para>
     </section>
   </section>
 
@@ -220,6 +219,9 @@
     files are loaded and used during a GMAT session. Below we describe the
     customization features available in the startup file. The order of lines
     in the startup file does not matter.</para>
+
+    <para>For all details, see the <xref linkend="StartupFile"/>
+    reference.</para>
 
     <section>
       <title>Leap Second and EOP files</title>
@@ -260,9 +262,10 @@
       (<filename>bin/gmat_startup_file.txt</filename>) specifying the name and
       location of the plugin file. In order for a plugin to work with GMAT,
       the plugin library must be placed in the folder referenced in the
-      startup file. You specify the path to a plugin file using the "PLUGIN"
-      keyword and specify the file by providing its name without the file
-      extension (.dll on Windows). For example, to load a Windows plugin named
+      startup file. You specify the path to a plugin file using the
+      "<literal>PLUGIN</literal>" keyword and specify the file by providing
+      its name without the file extension (<filename>.dll</filename> on
+      Windows). For example, to load a Windows plugin named
       <filename>libVF13Optimizer.dll</filename> located in the
       <filename>plugins/proprietary</filename> directory, you would add this
       line to your startup file:</para>
@@ -273,28 +276,25 @@
     <section>
       <title>User-defined Function Paths</title>
 
-      <para>If you create custom GMAT or MATLAB functions, you can provide the
-      path to those files and GMAT will locate them at run time. The default
-      startup file is configured so you can place GMAT function files (with a
-      <filename>.gmf</filename> extension) in the
-      <filename>userfunctions/gmat</filename> directory and place MATLAB
-      functions (with a <filename>.m</filename> extension) in the
+      <para>If you create custom MATLAB functions, you can provide the path to
+      those files and GMAT will locate them at run time. The default startup
+      file is configured so you can place MATLAB functions (with a
+      <filename>.m</filename> extension) in the
       <filename>userfunctions/matlab</filename> directory. GMAT automatically
-      searches those locations at run time. You can change the location of the
-      search path to your GMAT or MATLAB functions by changing these lines in
-      your startup file to reflect the location of your files with respect to
-      the GMAT <filename>bin</filename> folder:</para>
+      searches that location at run time. You can change the location of the
+      search path to your MATLAB functions by changing these lines in your
+      startup file to reflect the location of your files with respect to the
+      GMAT <filename>bin</filename> folder:</para>
 
-      <programlisting>GMAT_FUNCTION_PATH = ../userfunctions/gmat
-MATLAB_FUNCTION_PATH = ../userfunctions/matlab</programlisting>
+      <programlisting>MATLAB_FUNCTION_PATH = ../userfunctions/matlab</programlisting>
 
       <para>If you wish to organize your custom functions in multiple folders,
       you can add multiple search paths to the startup file. For
       example,</para>
 
-      <programlisting>GMAT_FUNCTION_PATH = ../MyFunctions/utils
-GMAT_FUNCTION_PATH = ../MyFunctions/StateConversion 
-GMAT_FUNCTION_PATH = ../MyFunctions/TimeConversion</programlisting>
+      <programlisting>MATLAB_FUNCTION_PATH = ../MyFunctions/utils
+MATLAB_FUNCTION_PATH = ../MyFunctions/StateConversion 
+MATLAB_FUNCTION_PATH = ../MyFunctions/TimeConversion</programlisting>
 
       <para>GMAT will search the paths in the order specified in the startup
       file and will use the first function with a matching name.</para>
