@@ -151,6 +151,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    metaDataStop         (-999.999),
    metaDataStartStr     (""),
    metaDataStopStr      (""),
+   lastCommentLength    (0),
    writeMetaDataOption  (0),
    metaDataBegPosition  (0),
    metaDataEndPosition  (0),
@@ -332,6 +333,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    metaDataStop         (ef.metaDataStop),
    metaDataStartStr     (ef.metaDataStartStr),
    metaDataStopStr      (ef.metaDataStopStr),
+   lastCommentLength    (ef.lastCommentLength),
    writeMetaDataOption  (0),
    metaDataBegPosition  (0),
    metaDataEndPosition  (0),
@@ -415,6 +417,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    metaDataStop         = ef.metaDataStop;
    metaDataStartStr     = ef.metaDataStartStr;
    metaDataStopStr      = ef.metaDataStopStr;
+   lastCommentLength    = ef.lastCommentLength;
    writeMetaDataOption  = 0;
    metaDataBegPosition  = 0;
    metaDataEndPosition  = 0;
@@ -640,11 +643,12 @@ bool EphemerisFile::Initialize()
          ("FileFormat \"" + fileFormat + "\" is not valid");
    
    // Initialize data
+   lastCommentLength   = 0;
    writeMetaDataOption = 0;
    metaDataBegPosition = 0;
    metaDataEndPosition = 0;
    lastCommentBegPos   = 0;
-   firstTimeWriting = true;
+   firstTimeWriting  = true;
    firstTimeMetaData = true;
    saveMetaDataStart = true;
    prevPropName = "";
@@ -1385,6 +1389,7 @@ void EphemerisFile::InitializeData()
    if (interpolator != NULL)
       interpolator->Clear();
    
+   lastCommentLength    = 0;
    initialCount         = 0;
    waitCount            = 0;
    afterFinalEpochCount = 0;
@@ -3915,9 +3920,11 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    
    if (isEndOfReceive && isEndOfDataBlock)
    {
+      // Since publisher sends endOfBlock flag more than 1 time, use counter
+      // to avoid writing dummy metadata
       std::string lastEpochWroteStr = ToUtcGregorian(lastEpochWrote);
-      #ifdef DEBUG_EPHEMFILE_FINISH
       std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
+      #ifdef DEBUG_EPHEMFILE_FINISH
       std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
       MessageInterface::ShowMessage
          ("EphemerisFile::Distribute() Calling FinishUpWriting(), isEndOfReceive=%d, "
@@ -3928,42 +3935,61 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       
       FinishUpWriting();
       
+      std::string comment;
       if (!isEndOfRun)
       {
-         std::string comment = "This block begins after ";
          if (runstate == Gmat::SOLVEDPASS)
             comment = "This block begins after final target sequence at ";
+         else
+            comment = "This block begins after ";
          
-         // Convert last epoch in secs to gregorian format
-         comment = comment + lastEpochWroteStr;
+         comment = comment + currEpochStr;
+         lastCommentLength = comment.size();
+         lastCommentBegPos = dstream.tellp();
          
          #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage
             ("=====> Restarting the interpolation at %s\n", lastEpochWroteStr.c_str());
-         #endif
-         
-         lastCommentBegPos = dstream.tellp();
-         #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage
-            ("   lastCommentBegPos=%ld saved\n", (long)lastCommentBegPos);
+            ("   comment='%s'\n   lastCommentLength=%d, lastCommentBegPos=%ld saved\n",
+             comment.c_str(), lastCommentLength, (long)lastCommentBegPos);
          #endif
          
          RestartInterpolation(comment, true);
       }
       else
       {
-         // End of run, blank out the last comment
+         // End of run, blank out the last comment if needed
          #ifdef DEBUG_EPHEMFILE_FINISH
-         MessageInterface::ShowMessage("=====> End of run, Removing the last comment\n");
+         MessageInterface::ShowMessage
+            ("=====> End of run, Removing the last comment, lastCommentLength=%d, "
+             "lastCommentBegPos=%ld, metaDataEndPosition=%ld\n", lastCommentLength,
+             (long)lastCommentBegPos, (long)metaDataEndPosition);
          #endif
-         std::string comment = "                                                  ";
-         dstream.seekp(lastCommentBegPos, std::ios_base::beg);
-         WriteComments(comment, false, false);
+         if (lastCommentBegPos > 0)
+         {
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage("   Blanking out the last commnet\n");
+            #endif
+            
+            // Note: Initial 47 is the length of default block comment, eg.
+            // "This block begins after 2000-01-04T14:53:34.066\n"
+            // Subtracting 9 is for the size of "COMMENT  " which is added
+            // in the WriteCcsdsComments()
+            // "COMMENT  This block begins after 2000-01-04T14:53:34.066\n"
+            std::string::size_type commentLen = 50;
+            if (lastCommentLength > 9)
+               commentLen = lastCommentLength - 9;
+            std::string comment;
+            comment.append(commentLen, ' ');
+            dstream.seekp(lastCommentBegPos, std::ios_base::beg);
+            WriteComments(comment, false, false);
+         }
       }
       
       return true;
    }
-   
+      
    if (len == 0)
       return true;
    
@@ -4205,13 +4231,11 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       }
    }
    
-   // If runstate changed, write any remaining data in the buffer
-   //FinishUpWriting();
-   
    #if DBGLVL_EPHEMFILE_MANEUVER > 1
    MessageInterface::ShowMessage("   restart=%d\n", restart);
    #endif
    
+   // Finish up writing and restart interpolation if restart is needed
    if (restart)
    {
       #if DBGLVL_EPHEMFILE_MANEUVER > 1

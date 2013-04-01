@@ -131,11 +131,12 @@ protected:
    /// for comments
    std::string currComments;
    
-   /// for meta data
+   /// for meta data and block
    Real        metaDataStart;
    Real        metaDataStop;
    std::string metaDataStartStr;
    std::string metaDataStopStr;
+   Integer     lastCommentLength;
    Integer     writeMetaDataOption;
    std::ofstream::pos_type metaDataBegPosition;
    std::ofstream::pos_type metaDataEndPosition;
