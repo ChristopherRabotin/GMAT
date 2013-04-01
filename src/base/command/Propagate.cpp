@@ -5734,7 +5734,8 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
    #endif
 
    // Find any transient force that is active and add it to the force model
-   StringArray satsThatManeuver, formsThatManeuver;
+   StringArray satsThatManeuver, formationSatsThatManeuver, formsThatManeuver;
+   bool flagMultipleBurns = false;
 
    for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
         i != transientForces->end(); ++i)
@@ -5752,7 +5753,12 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
                ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
                 (*i)->GetName().c_str());
             #endif
-            p->AddForce(*i);
+            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
+                  == satsThatManeuver.end())
+               p->AddForce(*i);
+            else
+               flagMultipleBurns = true;
+            satsThatManeuver.push_back(*current);
             if ((*i)->DepletesMass())
             {
                propMan->SetProperty("MassFlow");
@@ -5800,10 +5806,10 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
                         #endif
                         if (find(tfSats.begin(), tfSats.end(), mansats[i]) != tfSats.end())
                         {
-                           if (find(satsThatManeuver.begin(),
-                                 satsThatManeuver.end(),
-                                 mansats[i]) == satsThatManeuver.end())
-                              satsThatManeuver.push_back(mansats[i]);
+                           if (find(formationSatsThatManeuver.begin(),
+                                 formationSatsThatManeuver.end(),
+                                 mansats[i]) == formationSatsThatManeuver.end())
+                              formationSatsThatManeuver.push_back(mansats[i]);
                            if (find(formsThatManeuver.begin(),
                                  formsThatManeuver.end(), obj->GetName()) ==
                                        formsThatManeuver.end())
@@ -5816,27 +5822,65 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
          }
       }
    }
-   if (satsThatManeuver.size() > 0)
+
+   #ifdef DEBUG_TRANSIENT_FORCES
+      MessageInterface::ShowMessage("Found %d sats that maneuver (outside of "
+            "formations):\n", satsThatManeuver.size());
+      for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", satsThatManeuver[i].c_str());
+   #endif
+
+   if (flagMultipleBurns)
+   {
+      StringArray duplicates;
+      for (StringArray::iterator name = satsThatManeuver.begin();
+            name != satsThatManeuver.end(); ++name)
+      {
+         if (find(name+1, satsThatManeuver.end(), *name) !=
+               satsThatManeuver.end())
+         {
+            if (find(duplicates.begin(), duplicates.end(), *name) ==
+                  duplicates.end())
+               duplicates.push_back(*name);
+         }
+      }
+      std::string errmsg = "The Spacecraft [";
+      for (UnsignedInt i = 0; i < duplicates.size(); ++i)
+      {
+         if (i != 0)
+            errmsg += ", ";
+         errmsg += duplicates[i];
+      }
+      if (duplicates.size() == 1)
+         errmsg += "] has ";
+      else
+         errmsg += "] have ";
+      errmsg += "more than one finite burn active, but GMAT only allows one "
+         "finite burn on a given spacecraft.";
+      throw CommandException(errmsg);
+   }
+
+   if (formationSatsThatManeuver.size() > 0)
    {
       std::string whatToSay, formToSay;
-      if (satsThatManeuver.size() == 1)
+      if (formationSatsThatManeuver.size() == 1)
          whatToSay = "a maneuvering Spacecraft named \"" +
-                     satsThatManeuver[0] + "\"";
+                     formationSatsThatManeuver[0] + "\"";
       else
       {
          whatToSay = "maneuvering Spacecraft named ";
-         for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+         for (UnsignedInt i = 0; i < formationSatsThatManeuver.size(); ++i)
          {
             if (i != 0)
             {
-               if (satsThatManeuver.size() > 2)
+               if (formationSatsThatManeuver.size() > 2)
                   whatToSay += ", ";
                else
                   whatToSay += " ";
-               if (i == satsThatManeuver.size()-1)
+               if (i == formationSatsThatManeuver.size()-1)
                   whatToSay += "and ";
             }
-            whatToSay += "\"" + satsThatManeuver[i] + "\"";
+            whatToSay += "\"" + formationSatsThatManeuver[i] + "\"";
          }
       }
 
