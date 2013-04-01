@@ -83,10 +83,20 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>MJ2000Eq, MJ2000Ec, ICRF, ITRF, MODEq, MODEc, TODEq,
-                    TODEc, MOEEq, MOEEc, TOEEq, TOEEc, ObjectReferenced,
-                    Equator, BodyFixed, BodyInertial, GSE, GSM, Topocentric,
-                    BodySpinSun</para>
+                    <para><guilabel>MJ2000Eq</guilabel>,
+                    <guilabel>MJ2000Ec</guilabel>, <guilabel>ICRF</guilabel>,
+                    <guilabel>ITRF</guilabel>, <guilabel>MODEq</guilabel>,
+                    <guilabel>MODEc</guilabel>, <guilabel>TODEq</guilabel>,
+                    <guilabel>TODEc</guilabel>, <guilabel>MOEEq</guilabel>,
+                    <guilabel>MOEEc</guilabel>, <guilabel>TOEEq</guilabel>,
+                    <guilabel>TOEEc</guilabel>,
+                    <guilabel>ObjectReferenced</guilabel>,
+                    <guilabel>Equator</guilabel>,
+                    <guilabel>BodyFixed</guilabel>,
+                    <guilabel>BodyInertial</guilabel>,
+                    <guilabel>GSE</guilabel>,<guilabel> GSM</guilabel>,
+                    <guilabel>Topocentric</guilabel>,
+                    <guilabel>BodySpinSun</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -102,7 +112,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>MJ2000Eq</para>
+                    <para>
+                      <guilabel>MJ2000Eq</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -190,7 +202,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>User defined string</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -198,8 +210,12 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>CelestialBody, Spacecraft, LibrationPoint,
-                    Barycenter, SolarSystemBarycenter, GroundStation</para>
+                    <para><guilabel>CelestialBody</guilabel>,
+                    <guilabel>Spacecraft</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>,
+                    <guilabel>SolarSystemBarycenter</guilabel>,
+                    <guilabel>GroundStation</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -215,7 +231,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
+                    <para>
+                      <guilabel>Earth</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -259,8 +277,12 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>CelestialBody, Spacecraft, LibrationPoint,
-                    Barycenter, SolarSystemBarycenter, GroundStation</para>
+                    <para><guilabel>CelestialBody</guilabel>,
+                    <guilabel>Spacecraft</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>,
+                    <guilabel>SolarSystemBarycenter</guilabel>,
+                    <guilabel>GroundStation</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -276,7 +298,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
+                    <para>
+                      <guilabel>Earth</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -320,8 +344,12 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>CelestialBody, Spacecraft, LibrationPoint,
-                    Barycenter, SolarSystemBarycenter, GroundStation</para>
+                    <para><guilabel>CelestialBody</guilabel>,
+                    <guilabel>Spacecraft</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>,
+                    <guilabel>SolarSystemBarycenter</guilabel>,
+                    <guilabel>GroundStation</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -337,7 +365,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Luna</para>
+                    <para>
+                      <guilabel>Luna</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -381,7 +411,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>R,V, N, -R, -V, -N, or empty</para>
+                    <para><guilabel>R</guilabel>,<guilabel>V</guilabel>,
+                    <guilabel>N</guilabel>, <guilabel>-R</guilabel>,
+                    <guilabel>-V</guilabel>,<guilabel> -N</guilabel>, or
+                    empty</para>
                   </listitem>
                 </varlistentry>
 
@@ -397,7 +430,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>R</para>
+                    <para>
+                      <guilabel>R</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -441,7 +476,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>R,V, N, -R, -V, -N, or empty</para>
+                    <para><guilabel>R</guilabel>,<guilabel>V</guilabel>,
+                    <guilabel>N</guilabel>, <guilabel>-R</guilabel>,
+                    <guilabel>-V</guilabel>,<guilabel>-N</guilabel>, or
+                    empty</para>
                   </listitem>
                 </varlistentry>
 
@@ -501,7 +539,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>R,V, N, -R, -V, -N, or empty</para>
+                    <para><guilabel>R</guilabel>,<guilabel>V</guilabel>,
+                    <guilabel>N</guilabel>, <guilabel>-R</guilabel>,
+                    <guilabel>-V</guilabel>,<guilabel>-N</guilabel>, or
+                    empty</para>
                   </listitem>
                 </varlistentry>
 
@@ -517,7 +558,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>N</para>
+                    <para>
+                      <guilabel>N</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

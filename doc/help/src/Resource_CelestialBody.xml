@@ -193,8 +193,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>A file of the following format: .jpeg, .bmp, .png,
-                    .gif, .tif, .pcx, .pnm, .tga, or .xpm</para>
+                    <para>A file of the following format:</para>
+
+                    <para> .jpeg, .bmp, .png, .gif, .tif, .pcx, .pnm, .tga, or
+                    .xpm</para>
                   </listitem>
                 </varlistentry>
 
@@ -469,7 +471,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Valid list of SPK kernels</para>
+                    <para>valid array of SPK kernels</para>
                   </listitem>
                 </varlistentry>
 
@@ -584,7 +586,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>'SPICE'</para>
+                    <para>
+                      <guilabel>SPICE</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -600,8 +604,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>'DE405' for build in bodies. 'SPICE' for user
-                    defined bodies.</para>
+                    <para><guilabel>DE405</guilabel> for build in bodies.
+                    <guilabel>SPICE</guilabel> for user defined bodies.</para>
                   </listitem>
                 </varlistentry>
 
@@ -681,10 +685,12 @@
           <row>
             <entry><guilabel>RotationDataSource</guilabel></entry>
 
-            <entry><para>For Earth default is 'FK5IAU1980', for Luna default
-            is DE405, for selected built in bodies IAU2000, and for selected
-            built in bodies and all user defined bodies, default is
-            IAUSimplified. </para> <variablelist>
+            <entry><para>For <guilabel>Earth</guilabel> default is
+            <guilabel>FK5IAU1980</guilabel>, for <guilabel>Luna</guilabel>
+            default is <guilabel>DE405</guilabel>, for selected built in
+            bodies <guilabel>IAU2000</guilabel>, and for selected built in
+            bodies and all user defined bodies, default is
+            <guilabel>IAUSimplified</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -697,8 +703,12 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>'IAUSimplified', 'DE405' 'FK5IAU1980',
-                    'IAU2000'</para>
+                    <para><guilabel>IAUSimplified</guilabel>,
+                    <guilabel>DE405</guilabel>,
+                    <guilabel>FK5IAU1980</guilabel>,
+                    <guilabel>IAU2000</guilabel>. See discussion below for
+                    more details as not all options are allowed for all
+                    bodies.</para>
                   </listitem>
                 </varlistentry>
 
@@ -714,10 +724,13 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>For Earth default is 'FK5IAU1980', for Luna default
-                    is DE405, for selected built in bodies IAU2000, and for
-                    selected built in bodies and all user defined bodies,
-                    default is IAUSimplified.</para>
+                    <para>For <guilabel>Earth</guilabel> default is
+                    <guilabel>FK5IAU1980</guilabel>, for
+                    <guilabel>Luna</guilabel> default is
+                    <guilabel>DE405</guilabel>, for selected built in bodies
+                    <guilabel>IAU2000</guilabel>, and for selected built in
+                    bodies and all user defined bodies, default is
+                    <guilabel>IAUSimplified</guilabel>.</para>
                   </listitem>
                 </varlistentry>
 

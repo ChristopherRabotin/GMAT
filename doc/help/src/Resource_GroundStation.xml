@@ -44,7 +44,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -74,8 +74,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <replaceable>value</replaceable> &lt;
-                    ∞</para>
+                    <para>-∞ &lt; Real &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -130,8 +129,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Earth. (Ground stations are currenly only supported
-                    with respect to Earth)</para>
+                    <para><guilabel>Earth</guilabel>. (Ground stations are
+                    currenly only supported with respect to Earth)</para>
                   </listitem>
                 </varlistentry>
 
@@ -147,7 +146,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
+                    <para><guilabel>Earth</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -188,7 +187,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Sphere, Ellipsoid</para>
+                    <para><guilabel>Sphere, Ellipsoid</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -204,7 +203,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Sphere</para>
+                    <para><guilabel>Sphere</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -235,7 +234,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>User defined name</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -252,8 +251,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set, get, or only one (from the Access column of the
-                    Field Spec)</para>
+                    <para>set, </para>
                   </listitem>
                 </varlistentry>
 
@@ -300,8 +298,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-90 &lt; <replaceable>value</replaceable> &lt;
-                    90</para>
+                    <para>-90 &lt; Real &lt; 90</para>
                   </listitem>
                 </varlistentry>
 
@@ -363,9 +360,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <replaceable>value</replaceable> &lt; ∞ for
-                    Cartesian, See Longitude, Latitude, Altitude for
-                    others.</para>
+                    <para>-∞ &lt; Real &lt; ∞ for
+                    <guilabel>Cartesian</guilabel>, See
+                    <guilabel>Longitude</guilabel>,
+                    <guilabel>Latitude</guilabel>,
+                    <guilabel>Altitude</guilabel> for others.</para>
                   </listitem>
                 </varlistentry>
 
@@ -427,9 +426,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <replaceable>value</replaceable> &lt; ∞ for
-                    Cartesian, See Longitude, Latitude, Altitude for
-                    others.</para>
+                    <para>-∞ &lt; Real &lt; ∞ for
+                    <guilabel>Cartesian</guilabel>, See
+                    <guilabel>Longitude</guilabel>,
+                    <guilabel>Latitude</guilabel>,
+                    <guilabel>Altitude</guilabel> for others.</para>
                   </listitem>
                 </varlistentry>
 
@@ -491,9 +492,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <replaceable>value</replaceable> &lt; ∞ for
-                    Cartesian, See Longitude, Latitude, Altitude for
-                    others.</para>
+                    <para>-∞ &lt; Real &lt; ∞ for
+                    <guilabel>Cartesian</guilabel>, See
+                    <guilabel>Longitude</guilabel>,
+                    <guilabel>Latitude</guilabel>,
+                    <guilabel>Altitude</guilabel> for others.</para>
                   </listitem>
                 </varlistentry>
 
@@ -603,7 +606,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Cartesian, Spherical, Ellipsoid</para>
+                    <para><guilabel>Cartesian</guilabel>,
+                    <guilabel>Spherical</guilabel>,
+                    <guilabel>Ellipsoid</guilabel></para>
                   </listitem>
                 </varlistentry>
 

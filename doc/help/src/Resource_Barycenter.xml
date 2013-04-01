@@ -68,7 +68,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String list</para>
+                    <para>String array</para>
                   </listitem>
                 </varlistentry>
 
@@ -76,7 +76,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>List of celestial bodies. You cannot add bodies to
+                    <para>array of celestial bodies. You cannot add bodies to
                     the built-in <guilabel>SolarySystemBarycenter</guilabel>
                     resource. A <guilabel>CelestialBody</guilabel> can only
                     appear once in the <guilabel>BodyNames</guilabel>
@@ -96,7 +96,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth, Luna</para>
+                    <para><guilabel>Earth</guilabel>,
+                    <guilabel>Luna</guilabel></para>
                   </listitem>
                 </varlistentry>
 

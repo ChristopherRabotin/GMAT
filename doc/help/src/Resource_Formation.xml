@@ -61,13 +61,14 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para>Adds a list of spacecraft to the formation. The list
-            cannot be empty. </para><variablelist>
+            <entry><para>Adds a list of <guilabel>Spacecraft</guilabel> to the
+            <guilabel>Formation</guilabel>. The list cannot be empty.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Object array</para>
+                    <para>Resource array</para>
                   </listitem>
                 </varlistentry>
 
@@ -75,7 +76,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>list of spacecraft</para>
+                    <para>array of spacecraft</para>
                   </listitem>
                 </varlistentry>
 

@@ -98,7 +98,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colnum="1" colwidth="1.0*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 
@@ -190,8 +190,7 @@
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><userinput><guilabel>ForceModel</guilabel></userinput>
-                      </para>
+                      <para><guilabel>ForceModel</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -513,7 +512,7 @@
             </row>
 
             <row>
-              <entry><guilabel>StopIfAccuracyIsViolated</guilabel></entry>
+              <entry><guilabel>StopIfAccuracy-IsViolated</guilabel></entry>
 
               <entry><para>Flag to stop propagation if integration error value
               defined by <guilabel>Accuracy</guilabel> is not
@@ -638,7 +637,7 @@
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Object type</para>
+                      <para>Enumeration</para>
                     </listitem>
                   </varlistentry>
 
@@ -1123,7 +1122,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Object type</para>
+                      <para>Resource reference</para>
                     </listitem>
                   </varlistentry>
 
@@ -1131,7 +1130,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>Celestial Body</para>
+                      <para><guilabel>CelestialBody</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1147,7 +1146,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para>Earth</para>
+                      <para><guilabel>Earth</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1254,7 +1253,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>50 &lt;= Draft.F107 &lt;= 400</para>
+                      <para>50 &lt;= <guilabel>Drag.F107</guilabel> &lt;=
+                      400</para>
                     </listitem>
                   </varlistentry>
 
@@ -1311,7 +1311,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>50 &lt;= Drag.F107A &lt;= 400</para>
+                      <para>50 &lt;= <guilabel>Drag.F107A </guilabel>&lt;=
+                      400</para>
                     </listitem>
                   </varlistentry>
 
@@ -1561,7 +1562,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>0&lt;Degree&lt;Max Degree On File</para>
+                      <para>0&lt;<guilabel>Degree</guilabel>&lt;Max Degree On
+                      File</para>
                     </listitem>
                   </varlistentry>
 
@@ -1672,7 +1674,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Gravity file</para>
+                      <para>String</para>
                     </listitem>
                   </varlistentry>
 
@@ -1734,7 +1736,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Model type</para>
+                      <para>String</para>
                     </listitem>
                   </varlistentry>
 
@@ -1742,7 +1744,10 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>JGM-2</guilabel></para>
+                      <para><guilabel>JGM-2</guilabel>,
+                      <guilabel>JGM-3</guilabel>, <guilabel>EGM-96</guilabel>,
+                      <guilabel>Mars-50C</guilabel>,
+                      <guilabel>MGNP-180U</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1750,7 +1755,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Access</term>
 
                     <listitem>
-                      <para>Gravity File Name.</para>
+                      <para>set,get</para>
                     </listitem>
                   </varlistentry>
 
@@ -1758,10 +1763,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para><guilabel>JGM-2</guilabel>,
-                      <guilabel>JGM-3</guilabel>, <guilabel>EGM-96</guilabel>,
-                      <guilabel>Mars-50C</guilabel>,
-                      <guilabel>MGNP-180U</guilabel></para>
+                      <para><guilabel>JGM-2</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1795,7 +1797,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Celestial body list</para>
+                      <para>Resource array</para>
                     </listitem>
                   </varlistentry>
 
@@ -1803,8 +1805,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>Celestial Body not selected as
-                      <guilabel>PrimaryBody</guilabel></para>
+                      <para>array of <guilabel>CelestialBodies</guilabel> not
+                      selected as <guilabel>PrimaryBody</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1855,7 +1857,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Celestial Body</para>
+                      <para>Resource reference</para>
                     </listitem>
                   </varlistentry>
 
@@ -1863,7 +1865,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>Celestial Body</para>
+                      <para><guilabel>CelestialBody</guilabel> not included in
+                      <guilabel>PointMasses</guilabel>.</para>
                     </listitem>
                   </varlistentry>
 
@@ -2594,7 +2597,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Object type</para>
+                      <para>Resource reference</para>
                     </listitem>
                   </varlistentry>
 
@@ -2618,7 +2621,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para>Earth</para>
+                      <para>
+                        <guilabel>Earth</guilabel>
+                      </para>
                     </listitem>
                   </varlistentry>
 
@@ -2649,7 +2654,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>String</para>
+                      <para>Enumeration</para>
                     </listitem>
                   </varlistentry>
 
@@ -2657,9 +2662,16 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>A1ModJulian, TAIModJulian, UTCModJulian,
-                      TTModJulian, TDBModJulian, A1Gregorian, TAIGregorian,
-                      TTGregorian, UTCGregorian, TDBGregorian</para>
+                      <para><guilabel>A1ModJulian</guilabel>,
+                      <guilabel>TAIModJulian</guilabel>,
+                      <guilabel>UTCModJulian</guilabel>,
+                      <guilabel>TTModJulian</guilabel>,
+                      <guilabel>TDBModJulian</guilabel>,
+                      <guilabel>A1Gregorian</guilabel>,
+                      <guilabel>TAIGregorian</guilabel>,
+                      <guilabel>TTGregorian</guilabel>,
+                      <guilabel>UTCGregorian</guilabel>,
+                      <guilabel>TDBGregorian</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -2675,7 +2687,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para>A1ModJulian</para>
+                      <para>
+                        <guilabel>A1ModJulian</guilabel>
+                      </para>
                     </listitem>
                   </varlistentry>
 
@@ -2823,7 +2837,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Object type</para>
+                      <para>Enumeration</para>
                     </listitem>
                   </varlistentry>
 
@@ -2831,9 +2845,13 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>PrinceDormand78, PrinceDormand45,
-                      RungeKutta89,RungeKutta68, RungeKutta56, BulirschStoer,
-                      AdamsBashforthMoulton, SPK</para>
+                      <para><guilabel>PrinceDormand78</guilabel>,
+                      <guilabel>PrinceDormand45</guilabel>,
+                      <guilabel>RungeKutta89</guilabel>,<guilabel>RungeKutta68</guilabel>,
+                      <guilabel>RungeKutta56</guilabel>,
+                      <guilabel>BulirschStoer</guilabel>,
+                      <guilabel>AdamsBashforthMoulton</guilabel>,
+                      <guilabel>SPK</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -2849,7 +2867,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para>RungeKutta89</para>
+                      <para>
+                        <guilabel>RungeKutta89</guilabel>
+                      </para>
                     </listitem>
                   </varlistentry>
 
