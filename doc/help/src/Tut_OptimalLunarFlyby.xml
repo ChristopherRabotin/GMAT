@@ -40,7 +40,9 @@
       <term>Script File</term>
 
       <listitem>
-        <para><filename>ADD FILE NAMES HERE TODO</filename></para>
+        <para><filename>Tut_MultipleShootingTutorial_Step1.script,
+        Tut_MultipleShootingTutorial_Step2.script,...
+        Tut_MultipleShootingTutorial_Step5.script</filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -103,15 +105,15 @@
 
     <orderedlist spacing="compact">
       <listitem>
-        <para>The mission orbit perigee is TODO km</para>
+        <para>The mission orbit perigee is 15 Earth radii.</para>
       </listitem>
 
       <listitem>
-        <para>The mission orbit apogee is TODO km</para>
+        <para>The mission orbit apogee is 60 Earth radii.</para>
       </listitem>
 
       <listitem>
-        <para>The mission orbit inclination is TODO deg.</para>
+        <para>The mission orbit inclination is 10 degrees.</para>
       </listitem>
     </orderedlist>
 
@@ -513,11 +515,15 @@ EarthView.SolverIterations       = All
 EarthView.UpperLeft       = [ 0.4960127591706539 0.00992063492063492 ];
 EarthView.Size            = [ 0.4800637958532695 0.5218253968253969 ];
 EarthView.RelativeZOrder         = 501
-EarthView.Add                    = {satTOI, satFlyBy_Forward, satFlyBy_Backward, satMOI_Backward, Earth, Luna, satMOI_Forward}
+EarthView.Add                    = ...
+{satTOI, satFlyBy_Forward, satFlyBy_Backward,...
+ satMOI_Backward, Earth, Luna, satMOI_Forward}
 EarthView.CoordinateSystem       = EarthMJ2000Eq
 EarthView.DrawObject             = [ true true true true true]
-EarthView.OrbitColor   = [ 255 32768 1743054 16776960 32768 12632256 14268074 ]
-EarthView.TargetColor  = [ 65280 124 4227327 255 12345 9843 16711680 ];
+EarthView.OrbitColor   =  ...
+[ 255 32768 1743054 16776960 32768 12632256 14268074 ]
+EarthView.TargetColor  =  ...
+[ 65280 124 4227327 255 12345 9843 16711680 ];
 EarthView.DataCollectFrequency   = 1
 EarthView.UpdatePlotFrequency    = 50
 EarthView.NumPointsToRedraw      = 300
@@ -664,28 +670,28 @@ EndOptimize
 %  Define initial guesses for optimization variables
 BeginScript 'Initial Guess Values'
 
-   launchEpoch = 27698.1612435
+   toiEpoch = 27698.1612435
    flybyEpoch = 27703.7658714
    moiEpoch = 27723.305398
-   satTOI.X = -6651.70273964
+   satTOI.X = -6659.70273964
    satTOI.Y = -229.327053112
    satTOI.Z = -168.396030559
    satTOI.VX = 0.26826479315
    satTOI.VY = -9.54041067213
    satTOI.VZ = 5.17141415746
    satFlyBy_Forward.X = 869.478955662
-   satFlyBy_Forward.Y = -6284.76679557
+   satFlyBy_Forward.Y = -6287.76679557
    satFlyBy_Forward.Z = -3598.47087228
    satFlyBy_Forward.VX = 1.14619150302
    satFlyBy_Forward.VY = -0.73648611256
    satFlyBy_Forward.VZ = -0.624051812914
-   satMOI_Backward.X = -53541.9703742
+   satMOI_Backward.X = -53544.9703742
    satMOI_Backward.Y = -68231.6310266
    satMOI_Backward.Z = -1272.76362793
    satMOI_Backward.VX = 2.051823425
    satMOI_Backward.VY = -1.91406286218
    satMOI_Backward.VZ = -0.280408526046
-   MOI.Element1 = -0.0687322937282   
+   MOI.Element1 = -0.0687322937282 
 
 EndScript
 </code></programlisting>
@@ -737,9 +743,10 @@ BeginScript 'Constants and Init'
 EndScript
 
 %  The optimization loop
-Optimize 'Optimize Flyby' NLPOpt {SolveMode = Solve, ExitMode = DiscardAndContinue}
+Optimize 'Optimize Flyby' NLPOpt ...
+   {SolveMode = Solve, ExitMode = DiscardAndContinue}
    
-   %   Loop initializatoins
+   %   Loop initializations
    loopIdx = loopIdx + 1
    
 EndOptimize
@@ -779,9 +786,12 @@ EndOptimize
 
       <informalexample>
         <programlisting><code>   %  Vary the epochs 
-   Vary NLPOpt(launchEpoch = launchEpoch, {Perturbation = 0.0001, MaxStep = 0.5})
-   Vary NLPOpt(flybyEpoch  = flybyEpoch, {Perturbation = 0.0001, MaxStep = 0.5})
-   Vary NLPOpt(moiEpoch    = moiEpoch, {Perturbation = 0.0001, MaxStep = 0.5})
+   Vary NLPOpt(launchEpoch = launchEpoch, ...
+               {Perturbation = 0.0001, MaxStep = 0.5})
+   Vary NLPOpt(flybyEpoch  = flybyEpoch, ...
+               {Perturbation = 0.0001, MaxStep = 0.5})
+   Vary NLPOpt(moiEpoch    = moiEpoch, ...
+               {Perturbation = 0.0001, MaxStep = 0.5})
 
    %  Configure epochs and spacecraft
    satTOI.Epoch.TAIModJulian           = launchEpoch
@@ -824,25 +834,44 @@ EndOptimize
 
       <informalexample>
         <programlisting><code>   %  Vary the states and delta V
-   Vary NLPOpt(satTOI.X            = satTOI.X, {Perturbation = 0.00001, MaxStep = 100})
-   Vary NLPOpt(satTOI.Y            = satTOI.Y, {Perturbation = 0.000001, MaxStep = 100})
-   Vary NLPOpt(satTOI.Z            = satTOI.Z, {Perturbation = 0.00001, MaxStep = 100})
-   Vary NLPOpt(satTOI.VX           = satTOI.VX, {Perturbation = 0.00001, MaxStep = 0.05})
-   Vary NLPOpt(satTOI.VY           = satTOI.VY, {Perturbation = 0.000001, MaxStep = 0.05})
-   Vary NLPOpt(satTOI.VZ           = satTOI.VZ, {Perturbation = 0.000001, MaxStep = 0.05})
-   Vary NLPOpt(satFlyBy_Forward.X  = satFlyBy_Forward.MoonMJ2000Eq.X, {Perturbation = 0.00001, MaxStep = 100})
-   Vary NLPOpt(satFlyBy_Forward.Y  = satFlyBy_Forward.MoonMJ2000Eq.Y, {Perturbation = 0.00001, MaxStep = 100})
-   Vary NLPOpt(satFlyBy_Forward.Z  = satFlyBy_Forward.MoonMJ2000Eq.Z, {Perturbation = 0.00001, MaxStep = 100})
-   Vary NLPOpt(satFlyBy_Forward.VX = satFlyBy_Forward.MoonMJ2000Eq.VX, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(satFlyBy_Forward.VY = satFlyBy_Forward.MoonMJ2000Eq.VY, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(satFlyBy_Forward.VZ = satFlyBy_Forward.MoonMJ2000Eq.VZ, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(satMOI_Backward.X   = satMOI_Backward.X, {Perturbation = 0.000001, MaxStep = 40000})
-   Vary NLPOpt(satMOI_Backward.Y   = satMOI_Backward.Y, {Perturbation = 0.000001, MaxStep = 40000})
-   Vary NLPOpt(satMOI_Backward.Z   = satMOI_Backward.Z, {Perturbation = 0.000001, MaxStep = 40000})
-   Vary NLPOpt(satMOI_Backward.VX  = satMOI_Backward.VX, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(satMOI_Backward.VY  = satMOI_Backward.VY, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(satMOI_Backward.VZ  = satMOI_Backward.VZ, {Perturbation = 0.00001, MaxStep = 0.1})
-   Vary NLPOpt(MOI.Element1        = MOI.Element1, {Perturbation = 0.0001, MaxStep = 0.005})
+   Vary NLPOpt(satTOI.X            = satTOI.X, ...
+              {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satTOI.Y            = satTOI.Y, ...
+              {Perturbation = 0.000001, MaxStep = 100})
+   Vary NLPOpt(satTOI.Z            = satTOI.Z, ...
+              {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satTOI.VX           = satTOI.VX, ...
+              {Perturbation = 0.00001, MaxStep = 0.05})
+   Vary NLPOpt(satTOI.VY           = satTOI.VY, ...
+              {Perturbation = 0.000001, MaxStep = 0.05})
+   Vary NLPOpt(satTOI.VZ           = satTOI.VZ, ...
+              {Perturbation = 0.000001, MaxStep = 0.05})
+   Vary NLPOpt(satFlyBy_Forward.X  = satFlyBy_Forward.MoonMJ2000Eq.X, ...
+              {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.Y  = satFlyBy_Forward.MoonMJ2000Eq.Y, ...
+              {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.Z  = satFlyBy_Forward.MoonMJ2000Eq.Z, ...
+              {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.VX = satFlyBy_Forward.MoonMJ2000Eq.VX, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satFlyBy_Forward.VY = satFlyBy_Forward.MoonMJ2000Eq.VY, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satFlyBy_Forward.VZ = satFlyBy_Forward.MoonMJ2000Eq.VZ, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.X   = satMOI_Backward.X, ...
+              {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.Y   = satMOI_Backward.Y, ...
+              {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.Z   = satMOI_Backward.Z, ...
+              {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.VX  = satMOI_Backward.VX, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.VY  = satMOI_Backward.VY, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.VZ  = satMOI_Backward.VZ, ...
+              {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(MOI.Element1        = MOI.Element1, ...
+              {Perturbation = 0.0001, MaxStep = 0.005})
    
    %  Initialize spacecraft and do some reporting
    satFlyBy_Backward = satFlyBy_Forward
@@ -873,7 +902,8 @@ EndOptimize
    errorMOIRadPer = satMOI_Backward.RadPer - conMOIPeriapsis
    
    %  This constraint ensures that satTOI state is at periapsis at injection
-   launchRdotV = (satTOI.X *satTOI.VX + satTOI.Y *satTOI.VY + satTOI.Z *satTOI.VZ)/1000
+   launchRdotV = (satTOI.X *satTOI.VX + satTOI.Y *satTOI.VY + ...
+                 satTOI.Z *satTOI.VZ)/1000
    %NonlinearConstraint NLPOpt(launchRdotV=0)
 </code></programlisting>
       </informalexample>
@@ -923,30 +953,39 @@ PenDown EarthView
       discontinuous changes to time in this complex script.</para>
 
       <informalexample>
-        <programlisting><code>%  Propagate the segments
-   Propagate NearEarthProp(satTOI) {satTOI.TAIModJulian = patchOneEpoch, StopTolerance = 1e-005}
-   PenUp EarthView    %  The next three lines handle epoch discontinuity in plotting
+        <programlisting><code>   %  Propagate the segments
+   Propagate NearEarthProp(satTOI) {satTOI.TAIModJulian = ...
+             patchOneEpoch, StopTolerance = 1e-005}
+   %  The next three lines handle epoch discontinuity in plotting
+   PenUp EarthView    
    Propagate BackProp NearMoonProp(satFlyBy_Backward)
    PenDown EarthView  
-   Propagate BackProp NearMoonProp(satFlyBy_Backward) {satFlyBy_Backward.TAIModJulian = patchOneEpoch, StopTolerance = 1e-005}
+   Propagate BackProp NearMoonProp(satFlyBy_Backward) ...
+   {satFlyBy_Backward.TAIModJulian = patchOneEpoch, StopTolerance = 1e-005}
    
    %  Propagate FlybySat to Apogee and apply apogee constraints
-   PenUp EarthView    %  The next three lines handle epoch discontinuity in plotting
+   %  The next three lines handle epoch discontinuity in plotting
+   PenUp EarthView    
    Propagate NearMoonProp(satFlyBy_Forward)
    PenDown EarthView
-   Propagate NearMoonProp(satFlyBy_Forward) {satFlyBy_Forward.Earth.Apoapsis, StopTolerance = 1e-005}
+   Propagate NearMoonProp(satFlyBy_Forward)...
+  {satFlyBy_Forward.Earth.Apoapsis, StopTolerance = 1e-005}
    Report debugData satFlyBy_Forward.RMAG
  
    %  Propagate FlybSat and satMOI_Backward to patchTwoEpoch
    If satFlyBy_Forward.TAIModJulian &gt; patchTwoEpoch
-      Propagate BackProp NearMoonProp(satFlyBy_Forward) {satFlyBy_Forward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+      Propagate BackProp NearMoonProp(satFlyBy_Forward) ...
+      {satFlyBy_Forward.TAIModJulian = patchTwoEpoch,StopTolerance=1e-005}
    Else
-      Propagate NearMoonProp(satFlyBy_Forward) {satFlyBy_Forward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+      Propagate NearMoonProp(satFlyBy_Forward)...
+     {satFlyBy_Forward.TAIModJulian = patchTwoEpoch,StopTolerance = 1e-005}
    EndIf
-   PenUp EarthView    %  The next three lines handle epoch discontinuity in plotting
+   PenUp EarthView  
+   %  The next three lines handle epoch discontinuity in plotting
    Propagate BackProp NearMoonProp(satMOI_Backward)
    PenDown EarthView
-   Propagate BackProp NearMoonProp(satMOI_Backward) {satMOI_Backward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+   Propagate BackProp NearMoonProp(satMOI_Backward)...
+   {satMOI_Backward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
 </code></programlisting>
       </informalexample>
     </section>
@@ -960,10 +999,18 @@ PenDown EarthView
 
       <informalexample>
         <programlisting><code>   %  Compute constraint errors for plots
-   errorPos1 = sqrt((satTOI.X - satFlyBy_Backward.X)^2 + (satTOI.Y - satFlyBy_Backward.Y)^2 + (satTOI.Z - satFlyBy_Backward.Z)^2)
-   errorVel1 = sqrt((satTOI.VX - satFlyBy_Backward.VX)^2 + (satTOI.VY - satFlyBy_Backward.VY)^2 + (satTOI.VZ - satFlyBy_Backward.VZ)^2)
-   errorPos2 = sqrt((satMOI_Backward.X - satFlyBy_Forward.X)^2 + (satMOI_Backward.Y - satFlyBy_Forward.Y)^2 + (satMOI_Backward.Z - satFlyBy_Forward.Z)^2)
-   errorVel2 = sqrt((satMOI_Backward.VX - satFlyBy_Forward.VX)^2 + (satMOI_Backward.VY - satFlyBy_Forward.VY)^2 + (satMOI_Backward.VZ - satFlyBy_Forward.VZ)^2)
+   errorPos1 = sqrt((satTOI.X - satFlyBy_Backward.X)^2 + ...
+              (satTOI.Y - satFlyBy_Backward.Y)^2 + ...
+              (satTOI.Z - satFlyBy_Backward.Z)^2)
+   errorVel1 = sqrt((satTOI.VX - satFlyBy_Backward.VX)^2 + ...
+              (satTOI.VY - satFlyBy_Backward.VY)^2 +...
+              (satTOI.VZ - satFlyBy_Backward.VZ)^2)
+   errorPos2 = sqrt((satMOI_Backward.X - satFlyBy_Forward.X)^2 + ...
+              (satMOI_Backward.Y - satFlyBy_Forward.Y)^2 + ...
+              (satMOI_Backward.Z - satFlyBy_Forward.Z)^2)
+   errorVel2 = sqrt((satMOI_Backward.VX - satFlyBy_Forward.VX)^2 + ...
+              (satMOI_Backward.VY - satFlyBy_Forward.VY)^2 + ...
+              (satMOI_Backward.VZ - satFlyBy_Forward.VZ)^2)
    </code></programlisting>
       </informalexample>
     </section>
@@ -976,18 +1023,30 @@ PenDown EarthView
 
       <informalexample>
         <programlisting><code>   %  Apply the collocation constraints constraints on final states
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.X=satFlyBy_Backward.EarthMJ2000Eq.X)
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Y=satFlyBy_Backward.EarthMJ2000Eq.Y)
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Z=satFlyBy_Backward.EarthMJ2000Eq.Z)
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VX=satFlyBy_Backward.EarthMJ2000Eq.VX)
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VY=satFlyBy_Backward.EarthMJ2000Eq.VY)
-   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VZ=satFlyBy_Backward.EarthMJ2000Eq.VZ)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.X=satFlyBy_Forward.EarthMJ2000Eq.X)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Y=satFlyBy_Forward.EarthMJ2000Eq.Y)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Z=satFlyBy_Forward.EarthMJ2000Eq.Z)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VX=satFlyBy_Forward.EarthMJ2000Eq.VX)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VY=satFlyBy_Forward.EarthMJ2000Eq.VY)
-   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VZ=satFlyBy_Forward.EarthMJ2000Eq.VZ)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.X= ...
+                       satFlyBy_Backward.EarthMJ2000Eq.X)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Y= ...
+                       satFlyBy_Backward.EarthMJ2000Eq.Y)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Z= ...
+                       satFlyBy_Backward.EarthMJ2000Eq.Z)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VX= ...
+                       satFlyBy_Backward.EarthMJ2000Eq.VX)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VY=...
+                       satFlyBy_Backward.EarthMJ2000Eq.VY)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VZ=...
+                       satFlyBy_Backward.EarthMJ2000Eq.VZ)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.X=...
+                       satFlyBy_Forward.EarthMJ2000Eq.X)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Y=...
+                       satFlyBy_Forward.EarthMJ2000Eq.Y)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Z=...
+                       satFlyBy_Forward.EarthMJ2000Eq.Z)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VX=...
+                       satFlyBy_Forward.EarthMJ2000Eq.VX)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VY=...
+                       satFlyBy_Forward.EarthMJ2000Eq.VY)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VZ=...
+                       satFlyBy_Forward.EarthMJ2000Eq.VZ)
 </code></programlisting>
       </informalexample>
     </section>
@@ -1004,15 +1063,19 @@ PenDown EarthView
       <informalexample>
         <programlisting><code>   %  Apply mission orbit constraints and others on segments after propagation
    errorMOIInclination = satMOI_Forward.INC - conMOIInclination
-   %NonlinearConstraint NLPOpt(satMOI_Forward.EarthMJ2000Eq.INC = conMOIInclination)
+   %NonlinearConstraint NLPOpt(satMOI_Forward.EarthMJ2000Eq.INC...
+   % = conMOIInclination)
       %  Propagate satMOI_Forward to apogee
-   PenUp EarthView    %  The next three lines handle epoch discontinuity in plotting
+   %  The next three lines handle epoch discontinuity in plotting
+   PenUp EarthView    
    Propagate NearEarthProp(satMOI_Forward)
    PenDown EarthView
    If satMOI_Forward.Earth.TA &gt; 180
-      Propagate NearEarthProp(satMOI_Forward) {satMOI_Forward.Earth.Periapsis}
+      Propagate NearEarthProp(satMOI_Forward) ...
+      {satMOI_Forward.Earth.Periapsis}
    Else
-      Propagate BackProp NearEarthProp(satMOI_Forward) {satMOI_Forward.Earth.Periapsis}
+      Propagate BackProp NearEarthProp(satMOI_Forward)...
+      {satMOI_Forward.Earth.Periapsis}
    EndIf
    Maneuver MOI(satMOI_Forward)
    Propagate NearEarthProp(satMOI_Forward) {satMOI_Forward.Earth.Apoapsis}
@@ -1319,7 +1382,7 @@ satMOI_Backward.VZ = -0.284385092038
         </informalexample>
 
         <para>We see in this case the optimization converged and found
-        essentially the same solution of 0.091762 km/s</para>
+        essentially the same solution of -0.0907079 km/s</para>
 
         <figure xml:id="Tut_OptimalFlyby_NewGuess">
           <title>Solution Using New Guess</title>
