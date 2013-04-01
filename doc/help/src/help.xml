@@ -117,7 +117,6 @@
       <xi:include href="Resource_Variable.xml" />
       <xi:include href="Resource_VF13adOptimizer.xml" />
       <xi:include href="Resource_XYPlot.xml" />
-	  <xi:include href="ToolbarFeatureSpec.xml" />
 
     </reference>
 
