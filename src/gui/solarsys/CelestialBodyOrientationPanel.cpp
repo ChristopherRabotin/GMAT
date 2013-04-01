@@ -380,7 +380,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisRARateTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_RA_RATE, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    spinAxisRARateTextCtrl->SetToolTip(pConfig->Read(_T("SpinAxisRARateHint")));
-   spinAxisRARateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/day"),
+   spinAxisRARateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/century"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
 
    spinAxisDECConstantStaticText = new wxStaticText(this, ID_TEXT,wxT("Spin Axis "GUI_ACCEL_KEY"DEC Constant"),
@@ -396,7 +396,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisDECRateTextCtrl       = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_DEC_RATE, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    spinAxisDECRateTextCtrl->SetToolTip(pConfig->Read(_T("SpinAxisDECRateHint")));
-   spinAxisDECRateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/day"),
+   spinAxisDECRateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/century"),
                                     wxDefaultPosition, wxSize(-1,-1), 0);
 
    rotationConstantStaticText    = new wxStaticText(this, ID_TEXT,wxT("R"GUI_ACCEL_KEY"otation Constant"),

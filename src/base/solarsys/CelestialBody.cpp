@@ -739,6 +739,7 @@ void CelestialBody::SetUpBody()
 //------------------------------------------------------------------------------
 const Real CelestialBody::GetFirstStateTime()
 {
+   Real retval = -999.0;
    switch (posVelSrc)
    {
       case Gmat::SPICE :
@@ -759,7 +760,7 @@ const Real CelestialBody::GetFirstStateTime()
                         allKernels.at(ii).c_str());
             #endif
             kernelReader->GetCoverageStartAndEnd(allKernels, naifId, startCov, endCov);
-            return startCov;
+            retval = startCov;
          #else
             std::string errmsg = "Use of SPICE file was disabled";
             throw SolarSystemException(errmsg);
@@ -767,9 +768,11 @@ const Real CelestialBody::GetFirstStateTime()
          break;
       }
       default:
-         return DEFAULT_INITIAL_STATE_TIME;
+         retval = DEFAULT_INITIAL_STATE_TIME;
          break;
    }
+
+   return retval;
 }
 
 
@@ -2456,7 +2459,7 @@ bool CelestialBody::SetUserDefined(bool userDefinedBody)
  *
  * @param  <atTime>   time at which state is requested
  *
- * @result MJ2000eq state for the body at the requested time²
+ * @result MJ2000eq state for the body at the requested timeï¿½
  *
  */
 //------------------------------------------------------------------------------
@@ -2528,7 +2531,7 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
  *
  * @param  <atTime>   time at which position is requested
  *
- * @result MJ2000eq position for the body at the requested time²
+ * @result MJ2000eq position for the body at the requested timeï¿½
  *
  */
 //------------------------------------------------------------------------------
@@ -2547,7 +2550,7 @@ const Rvector3 CelestialBody::GetMJ2000Position(const A1Mjd &atTime)
  *
  * @param  <atTime>   time at which velocity is requested
  *
- * @result MJ2000eq velocity for the body at the requested time²
+ * @result MJ2000eq velocity for the body at the requested timeï¿½
  *
  */
 //------------------------------------------------------------------------------
@@ -2617,7 +2620,16 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
       Real delta = 0;
       Real W     = 0;
       Real Wdot  = 0.0; 
+      #ifdef DEBUG_CB_CARTOGRAPHIC
+         MessageInterface::ShowMessage(
+            "About to call GetJulianDaysFromTDBEpoch for body %s at time %le and orientation epoch %le\n",
+            instanceName.c_str(), forTime.Get(), orientationEpoch.Get());
+      #endif
+
       Real d = GetJulianDaysFromTDBEpoch(forTime); // interval in Julian days
+      if (userDefined)
+         d -= GetJulianDaysFromTDBEpoch(orientationEpoch);
+
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY; // interval in Julian centuries
       
       alpha = orientation[0]  + orientation[1] * T;
@@ -4271,7 +4283,9 @@ bool CelestialBody::IsBlank(char* aLine)
 /**
  * This method computes the Julian days from the TT Epoch.
  *
- * @return number of Julian days since the TT epoch.
+ * @param forTime   the time for which to return the days from TT epoch
+ *
+ * @return number of Julian days since the TT J2000 epoch.
  *
  * @note This method computes the Julian Days from the TT epoch.  The original
  * intent of this method was to compute the Julian days from the TCB epoch.
@@ -4279,13 +4293,12 @@ bool CelestialBody::IsBlank(char* aLine)
 //------------------------------------------------------------------------------
 Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
 {
-   Real jdTime = 0.0;
    Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
                                             TimeConverterUtil::A1MJD,
                                             TimeConverterUtil::TTMJD, 
                                             GmatTimeConstants::JD_JAN_5_1941);
-   jdTime      = mjdTT + GmatTimeConstants::JD_JAN_5_1941; 
-   return (jdTime - GmatTimeConstants::JD_OF_J2000);
+   return (mjdTT + GmatTimeConstants::JD_JAN_5_1941 - 
+           GmatTimeConstants::JD_OF_J2000);
 }
 
 //------------------------------------------------------------------------------
@@ -4294,6 +4307,8 @@ Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
 /**
  * This method computes the Julian days from the TDB Epoch.
  *
+ * @param forTime  the time for which to compute the days from epoch
+ *
  * @return number of Julian days since the TDB epoch.
  *
  * @note This method computes the Julian Days from the TDB epoch.
@@ -4301,16 +4316,21 @@ Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetJulianDaysFromTDBEpoch(const A1Mjd &forTime) const
 {
-   Real jdTime  = 0.0;
+   #ifdef DEBUG_CB_TDB_TIME
+      MessageInterface::ShowMessage(
+         "CB::GetJulianDaysFromTDBEpoch: body =  %s; forTime = %le\n",
+         instanceName.c_str(), forTime.Get());
+   #endif
    Real mjdTDB  = TimeConverterUtil::Convert(forTime.Get(),
                                             TimeConverterUtil::A1MJD,
                                             TimeConverterUtil::TDBMJD,
                                             GmatTimeConstants::JD_JAN_5_1941);
-   jdTime       = mjdTDB + GmatTimeConstants::JD_JAN_5_1941;
    // JD_OF_J2000 (2451545.0) TDB is the reference epoch indicated in
    // Seidelmann et. al. "Report of the IAU/IAGWorking Group on Cartographic
    // Coordinates and Rotational Elements" for use with cartographic data
-   return (jdTime - GmatTimeConstants::JD_OF_J2000);
+   return (mjdTDB + GmatTimeConstants::JD_JAN_5_1941 -
+          GmatTimeConstants::JD_OF_J2000);
+
 }
 
 //------------------------------------------------------------------------------
