@@ -87,7 +87,6 @@
       <xi:include href="Resource_SpacecraftEpoch.xml" />
       <xi:include href="Resource_SpacecraftHardware.xml" />
       <xi:include href="Resource_SpacecraftOrbitState.xml"/>
-      <xi:include href="Resource_SpacecraftProperties.xml" />
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
       <xi:include href="Resource_String.xml" />
       <xi:include href="Resource_Thruster.xml" />

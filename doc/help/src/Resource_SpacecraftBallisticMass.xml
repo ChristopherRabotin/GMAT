@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>Spacecraft Balistic/Mass Properties</primary>
+    <primary>Spacecraft Ballistic/Mass Properties</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>Spacecraft Balistic/Mass Properties</refentrytitle>
+    <refentrytitle>Spacecraft Ballistic/Mass Properties</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,7 +22,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>Spacecraft Balistic/Mass Properties</refname>
+    <refname>Spacecraft Ballistic/Mass Properties</refname>
 
     <refpurpose>The physical properties of the spacecraft</refpurpose>
   </refnamediv>

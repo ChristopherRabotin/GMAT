@@ -89,7 +89,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="2*"/>
 
@@ -213,6 +213,117 @@
           </row>
 
           <row>
+            <entry><guilabel>A1ModJulian</guilabel></entry>
+
+            <entry><para> The <guilabel>Spacecraft</guilabel> orbit epoch in
+            the A.1 system and the Modified Julian format. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>See <guilabel>Epoch</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get (mission sequence only)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>21545.00000039794</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Days</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Epoch.A1ModJulian</guilabel></entry>
+
+            <entry><para> The spacecraft orbit epoch in the A.1 system and the
+            Modified Julian format. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>See <guilabel>Epoch</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>21545.00000039794</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Days</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>none</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>CurrA1MJD</guilabel></entry>
 
             <entry><para><emphasis>This field has been deprecated and should
@@ -259,121 +370,6 @@
 
                   <listitem>
                     <para>script only</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Epoch.<replaceable>format</replaceable></guilabel></entry>
-
-            <entry><para>The <guilabel>Spacecraft</guilabel> orbit epoch in
-            the specified system and format. For example,
-            <guilabel>Epoch.TAIModJulian</guilabel> is the epoch in the TAI
-            system and the Modified Julian format.</para><variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Time</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Gregorian: <userinput>04 Oct 1957
-                    12:00:00.000</userinput> &lt;= <guilabel>Epoch</guilabel>
-                    &lt;= <userinput>28 Feb 2100
-                    00:00:00.000</userinput></para>
-
-                    <para>Modified Julian: <userinput>6116.0</userinput> &lt;=
-                    <guilabel>Epoch</guilabel> &lt;=
-                    <userinput>58127.5</userinput></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>get, set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>converted equivalent of 21545 Modified Julian
-                    (TAI)</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script only</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel><replaceable>format</replaceable></guilabel></entry>
-
-            <entry><para>The <guilabel>Spacecraft</guilabel> orbit epoch in
-            the specified system and format. For example,
-            <guilabel>TAIModJulian</guilabel> is the epoch in the TAI system
-            and the Modified Julian format. These fields can only be used
-            within the mission sequence.</para><variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Time</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Gregorian: <userinput>04 Oct 1957
-                    12:00:00.000</userinput> &lt;= <guilabel>Epoch</guilabel>
-                    &lt;= <userinput>28 Feb 2100
-                    00:00:00.000</userinput></para>
-
-                    <para>Modified Julian: <userinput>6116.0</userinput> &lt;=
-                    <guilabel>Epoch</guilabel> &lt;=
-                    <userinput>58127.5</userinput></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>get, set (mission sequence only)</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>converted equivalent of 21545 Modified Julian
-                    (TAI)</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
