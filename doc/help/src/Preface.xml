@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <preface version="5.0" xml:id="Preface" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -8,82 +8,64 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Preface</title>
 
-  <para>The GMAT <phrase condition="ug">User’s Guide</phrase><phrase
-  condition="tm">Training Manual</phrase> contains material for new and
-  experienced users and is organized into the following sections:</para>
-
-  <itemizedlist spacing="compact">
-    <listitem>
-      <para><xref linkend="UsingGmat" xrefstyle="select:title"/></para>
-    </listitem>
-
-    <listitem>
-      <para><xref linkend="CommonTasks" xrefstyle="select:title"/></para>
-    </listitem>
-
-    <listitem>
-      <para><xref linkend="Tutorials" xrefstyle="select:title"/></para>
-    </listitem>
-
-    <listitem condition="ug">
-      <para><xref linkend="RefGuide" xrefstyle="select:title"/></para>
-    </listitem>
-  </itemizedlist>
+  <para>Welcome, and thank you for using GMAT! This <phrase
+  condition="ug">User Guide</phrase><phrase condition="tm">Training
+  Manual</phrase> contains a wealth of material to introduce you to GMAT and
+  how it works. It also provides an extensive Reference Guide that contains
+  data on every resource, command, and major subcomponent in the
+  system.</para>
 
   <section role="notintoc">
     <title><xref linkend="UsingGmat" xrefstyle="select:title"/></title>
 
-    <para>The <xref linkend="UsingGmat" xrefstyle="select:title"/> section
-    contains two major parts: <xref linkend="IntroductionToGmat"/> and <xref
-    linkend="GettingStarted"/>.</para>
+    <para>The <emphasis><xref linkend="UsingGmat"
+    xrefstyle="select:title"/></emphasis> section provides general information
+    on GMAT and how to use it.</para>
 
-    <para>The <xref linkend="IntroductionToGmat"/> section contains a brief
-    project and software overview and discusses project status, licensing, and
-    contributors.</para>
+    <para>See <emphasis><xref linkend="WelcomeToGmat"
+    xrefstyle="select:title"/></emphasis> for a brief project and software
+    overview, including project status, licensing, and contributors.</para>
 
-    <para>The <xref linkend="GettingStarted"/> section describes how to
-    install and start GMAT, presents an overview of the user interfaces, and
-    provides information on configuring your system.</para>
+    <para>The <emphasis><xref linkend="GettingStarted"
+    xrefstyle="select:title"/></emphasis> section describes how to get and
+    install GMAT, how to run the provided samples, and where to turn for
+    further help.</para>
+
+    <para>The <emphasis><xref linkend="TourOfGmat"
+    xrefstyle="select:title"/></emphasis> is an in-depth guide through some of
+    the key interface features, including the Resources tree, Mission tree,
+    Command Summary, and Script Editor.</para>
 
     <note>
-      <para>We consider the <xref linkend="UserInterfacesOverview"
-      xrefstyle="select:title"/> essential reading. If you read nothing else,
-      at least read this section as it will explain the basic philosophy and
-      rules of GMAT’s user interfaces.</para>
+      <para>We consider the <emphasis><xref linkend="UserInterfaces"
+      xrefstyle="select:title"/></emphasis> section to be essential reading,
+      as it describes some fundamental aspects of how GMAT works.</para>
     </note>
-  </section>
-
-
-  <section role="notintoc">
-    <title><xref linkend="CommonTasks" xrefstyle="select:title"/></title>
-
-    <para>The <xref linkend="CommonTasks" xrefstyle="select:title"/> section
-    contains many short articles that each describe a single area of
-    functionality. The purpose of the how-to documentation is to show you how
-    to use a specific feature in an analysis context, and these articles often
-    start from the default mission that is loaded when you start GMAT. A
-    common task section is designed to take about five minutes to teach you
-    how to perform a specific task.</para>
   </section>
 
   <section role="notintoc">
     <title><xref linkend="Tutorials" xrefstyle="select:title"/></title>
 
-    <para>The <xref linkend="Tutorials" xrefstyle="select:title"/> section
-    describes how to use GMAT for end-to-end analysis. Tutorials are designed
-    to teach you how to use GMAT in the context of performing real-world
-    analysis and are intended to take between 30 minutes and several hours to
-    complete. Each tutorial has a difficulty level and an approximate duration
-    listed with any prerequisites in its introduction.</para>
+    <para>The <emphasis><xref linkend="Tutorials"
+    xrefstyle="select:title"/></emphasis> section contains give in-depth
+    tutorials that show you how to use GMAT for end-to-end analysis. The
+    tutorials are designed to teach you how to use GMAT in the context of
+    performing real-world analysis and are intended to take between 30 minutes
+    and several hours to complete. Each tutorial has a difficulty level and an
+    approximate duration listed with any prerequisites in its introduction,
+    and are arranged in a general order of difficulty.</para>
   </section>
 
   <section condition="ug" role="notintoc">
     <title><xref linkend="RefGuide" xrefstyle="select:title"/></title>
 
-    <para>The <xref linkend="RefGuide" xrefstyle="select:title"/> contains
-    individual topics that describe each of GMAT's resources and commands in
-    detail, including its syntax, options, variable ranges and data types,
-    defaults, and expected behavior.</para>
+    <para>The <emphasis><xref linkend="RefGuide"
+    xrefstyle="select:title"/></emphasis> contains individual topics that
+    describe each of GMAT's resources and commands in detail, including its
+    syntax, options, variable ranges and data types, defaults, and expected
+    behavior. It also includes system-level references that describe the
+    script language syntax, parameter listings, external interfaces, and
+    configuration files.</para>
   </section>
 
   <section role="notintoc">
@@ -93,13 +75,13 @@
 
     <itemizedlist spacing="compact">
       <listitem>
-        <para>Graphical user interface (GUI) elements and resource and command names are presented in
-        <emphasis role="bold">bold</emphasis>.</para>
+        <para>Graphical user interface (GUI) elements and resource and command
+        names are presented in <emphasis role="bold">bold</emphasis>.</para>
       </listitem>
 
       <listitem>
-        <para>Filenames and script examples are
-        presented in <code>monospace</code>.</para>
+        <para>Filenames, script examples, and user input are presented in
+        <code>monospace</code>.</para>
       </listitem>
     </itemizedlist>
   </section>

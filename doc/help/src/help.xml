@@ -14,13 +14,13 @@
       <phrase condition="ug">User Guide</phrase>
       <phrase condition="tm">Training Manual</phrase>
     </subtitle>
-    <edition>R2012a</edition>
+    <edition>R2013a</edition>
     <author>
       <personname>The GMAT Development Team</personname>
     </author>
   </info>
 
-  <!--<xi:include href="Preface.xml"/>-->
+  <xi:include href="Preface.xml"/>
 
   <part xml:id="UsingGmat">
     <title>Using GMAT</title>
