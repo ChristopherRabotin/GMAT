@@ -654,7 +654,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -718,7 +718,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefStringList</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -870,81 +870,82 @@
       Tree.</para>
 
       <para>To configure a Local <guilabel>Coordinate System</guilabel>, you
-      must specify the coordinate system of the input Delta-V vector,
-      Element1-3. If you choose a local <guilabel>Coordinate
-      System</guilabel>, the four choices available, as given by the
-      <guilabel>Axes</guilabel> sub-field, are VNB, LVLH, MJ2000Eq, and
-      SpacecraftBody. VNB or Velocity-Normal-Binormal is a non-inertial
+      must specify the coordinate system of the input Delta-V
+      vector,<guilabel> Element1-3</guilabel>. If you choose a local
+      <guilabel>Coordinate System</guilabel>, the four choices available, as
+      given by the <guilabel>Axes</guilabel> sub-field, are
+      <guilabel>VNB</guilabel>, <guilabel>LVLH</guilabel>,
+      <guilabel>MJ2000Eq</guilabel>, and <guilabel>SpacecraftBody</guilabel>.
+      <guilabel>VNB</guilabel> or Velocity-Normal-Binormal is a non-inertial
       coordinate system based upon the motion of the spacecraft with respect
-      to the Origin sub-field. For example, if the <guilabel>Origin</guilabel>
-      is chosen as Earth, then the X-axis of this coordinate system is the
-      along the velocity of the spacecraft with respect to the Earth, the
-      Y-axis is along the instantaneous orbit normal (with respect to the
-      Earth) of the spacecraft, and the Z-axis points away from the Earth as
-      much as possible while remaining orthogonal to the other two axes,
-      completing the right-handed set.</para>
+      to the <guilabel>Origin</guilabel> sub-field. For example, if the
+      <guilabel>Origin</guilabel> is chosen as Earth, then the X-axis of this
+      coordinate system is the along the velocity of the spacecraft with
+      respect to the Earth, the Y-axis is along the instantaneous orbit normal
+      (with respect to the Earth) of the spacecraft, and the Z-axis points
+      away from the Earth as much as possible while remaining orthogonal to
+      the other two axes, completing the right-handed set.</para>
 
-      <para>Similarly, Local Vertical Local Horizontal or LVLH is a
-      non-inertial coordinate system based upon the motion of the spacecraft
-      with respect to the body specified in the Origin sub-field. If you
-      choose Earth as the origin, then the X-axis of this coordinate system
-      points from the center of the Earth to the spacecraft, the Z-axis is
-      along the instantaneous orbit normal (with respect to the Earth) of the
-      spacecraft, and the Y-axis completes the right-handed set. For typical
-      bound orbits, the Y-axis is approximately aligned with the velocity
-      vector. In the event of a perfectly circular orbit, the Y axis is
-      exactly along the velocity vector.</para>
+      <para>Similarly, Local Vertical Local Horizontal or
+      <guilabel>LVLH</guilabel> is a non-inertial coordinate system based upon
+      the motion of the spacecraft with respect to the body specified in the
+      Origin sub-field. If you choose Earth as the origin, then the X-axis of
+      this coordinate system points from the center of the Earth to the
+      spacecraft, the Z-axis is along the instantaneous orbit normal (with
+      respect to the Earth) of the spacecraft, and the Y-axis completes the
+      right-handed set. For typical bound orbits, the Y-axis is approximately
+      aligned with the velocity vector. In the event of a perfectly circular
+      orbit, the Y axis is exactly along the velocity vector.</para>
 
-      <para>MJ2000Eq is the J2000-based Earth-centered Earth mean equator
-      inertial <guilabel>Coordinate System</guilabel>. Note that the
-      <guilabel>Origin</guilabel> sub-field is not needed to define this
-      coordinate system.</para>
+      <para><guilabel>MJ2000Eq</guilabel> is the J2000-based Earth-centered
+      Earth mean equator inertial <guilabel>Coordinate System</guilabel>. Note
+      that the <guilabel>Origin</guilabel> sub-field is not needed to define
+      this coordinate system.</para>
 
-      <para>SpacecraftBody is the coordinate system used by the spacecraft.
-      Since the thrust is applied in this system, GMAT uses the attitude of
-      the spacecraft, a spacecraft attribute, to determine the inertial thrust
-      direction. Note that the <guilabel>Origin</guilabel> sub-field is not
-      needed to define this coordinate system.</para>
+      <para><guilabel>SpacecraftBody</guilabel> is the coordinate system used
+      by the spacecraft. Since the thrust is applied in this system, GMAT uses
+      the attitude of the spacecraft, a spacecraft attribute, to determine the
+      inertial thrust direction. Note that the <guilabel>Origin</guilabel>
+      sub-field is not needed to define this coordinate system.</para>
     </refsection>
 
     <refsection>
       <title>Deprecated Field Names for an ImpulsiveBurn</title>
 
       <para>Note that the standard method, as shown below, for specifying the
-      components of an ImpulsiveBurn is to use the Element1, Element2, and
-      Element3 field names.</para>
+      components of an ImpulsiveBurn is to use the
+      <guilabel>Element1</guilabel>, <guilabel>Element2</guilabel>, and
+      <guilabel>Element3</guilabel> field names.</para>
 
-      <programlisting>
-        <code>
-Create ImpulsiveBurn DefaultIB
+      <programlisting><code>Create ImpulsiveBurn DefaultIB
 DefaultIB.Element1 = -3
 DefaultIB.Element2 = 7
-DefaultIB.Element3 = -2
-        </code>
-      </programlisting>
+DefaultIB.Element3 = -2</code>    </programlisting>
 
       <para>For this current version of GMAT, you may also use the field names
-      V, N, and B in place of Element1, Element2, and Element3, respectively.
-      The commands below are equivalent to the commands above.</para>
+      <guilabel>V</guilabel>, <guilabel>N</guilabel>, and
+      <guilabel>B</guilabel> in place of <guilabel>Element1</guilabel>,
+      <guilabel>Element2</guilabel>, and <guilabel>Element3</guilabel>,
+      respectively. The commands below are equivalent to the commands
+      above.</para>
 
-      <programlisting>
-        <code>
-Create ImpulsiveBurn DefaultIB
+      <programlisting><code>Create ImpulsiveBurn DefaultIB
 DefaultIB.V = -3
 DefaultIB.N = 7
-DefaultIB.B = -2
-        </code>
-      </programlisting>
+DefaultIB.B = -2</code></programlisting>
 
-      <para>It is important to note that the V, N, B field names do not
+      <para>It is important to note that the <guilabel>V</guilabel>,
+      <guilabel>N</guilabel>, <guilabel>B</guilabel> field names do not
       necessarily correspond to some Velocity, Normal, Binormal coordinate
       system. The coordinate system of any <guilabel>ImpulsiveBurn</guilabel>
       is always specified by the <guilabel>CoordinateSystem</guilabel>,
       <guilabel>Origin</guilabel>, and <guilabel>Axes</guilabel> fields.
-      Because of the confusion that the V, N, B field names can cause, their
-      use will not be allowed in future versions of GMAT. If you use the V, N,
-      B field names in this version of GMAT, you will receive a warning to
-      this affect.</para>
+      Because of the confusion that the <guilabel>V</guilabel>,
+      <guilabel>N</guilabel>, <guilabel>B</guilabel> field names can cause,
+      their use will not be allowed in future versions of GMAT. If you use the
+      <guilabel>V</guilabel>, <guilabel>N</guilabel>, <guilabel>B</guilabel>
+      field names in this version of GMAT, you will receive a warning to this
+      affect.</para>
     </refsection>
 
     <refsection>
@@ -1018,40 +1019,36 @@ DefaultIB.B = -2
       <guilabel>ImpulsiveBurn</guilabel> to the
       <guilabel>Spacecraft</guilabel>.</para>
 
-      <programlisting>
-        <code>
-  %  Create the FuelTank Resource
-  Create FuelTank FuelTank1
-  FuelTank1.AllowNegativeFuelMass = false
-  FuelTank1.FuelMass = 756
-  FuelTank1.Pressure = 1500
-  FuelTank1.Temperature = 20
-  FuelTank1.RefTemperature = 20
-  FuelTank1.Volume = 0.75
-  FuelTank1.FuelDensity = 1260
-  FuelTank1.PressureModel = PressureRegulated
+      <programlisting>%  Create the FuelTank Resource
+Create FuelTank FuelTank1
+FuelTank1.AllowNegativeFuelMass = false
+FuelTank1.FuelMass = 756
+FuelTank1.Pressure = 1500
+FuelTank1.Temperature = 20
+FuelTank1.RefTemperature = 20
+FuelTank1.Volume = 0.75
+FuelTank1.FuelDensity = 1260
+FuelTank1.PressureModel = PressureRegulated
 
-  Create ImpulsiveBurn DefaultIB
-  DefaultIB.CoordinateSystem = Local
-  DefaultIB.Origin = Earth
-  DefaultIB.Axes = VNB
-  DefaultIB.Element1 = 0.001
-  DefaultIB.Element2 = 0
-  DefaultIB.Element3 = 0
-  DefaultIB.DecrementMass = true
-  DefaultIB.Tank = {FuelTank1}
-  DefaultIB.Isp = 300
-  DefaultIB.GravitationalAccel = 9.810000000000001
+Create ImpulsiveBurn DefaultIB
+DefaultIB.CoordinateSystem = Local
+DefaultIB.Origin = Earth
+DefaultIB.Axes = VNB
+DefaultIB.Element1 = 0.001
+DefaultIB.Element2 = 0
+DefaultIB.Element3 = 0
+DefaultIB.DecrementMass = true
+DefaultIB.Tank = {FuelTank1}
+DefaultIB.Isp = 300
+DefaultIB.GravitationalAccel = 9.810000000000001
 
-  %  Add the the FuelTank to a Spacecraft
-  Create Spacecraft DefaultSC
-  DefaultSC.Tanks = {FuelTank1}
+%  Add the the FuelTank to a Spacecraft
+Create Spacecraft DefaultSC
+DefaultSC.Tanks = {FuelTank1}
 
 
-  BeginMissionSequence
-  Maneuver DefaultIB(DefaultSC)
-        </code>
-      </programlisting>
+BeginMissionSequence
+Maneuver DefaultIB(DefaultSC) </programlisting>
     </informalexample>
   </refsection>
 </refentry>
