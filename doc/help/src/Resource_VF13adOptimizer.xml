@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -43,6 +41,8 @@
     <guilabel>Vary</guilabel> command, and define cost and constraints by
     using the <guilabel>Minimize</guilabel> and
     <guilabel>NonlinearConstraint</guilabel> commands respectively.</para>
+
+    <para>This resource cannot be modified in the Mission Sequence.</para>
   </refsection>
 
   <refsection>
@@ -511,9 +511,9 @@
     </refsection>
 
     <refsection>
-      <title>Object and Command Interactions</title>
+      <title>Resource and Command Interactions</title>
 
-      <para>The <guilabel>VF13ad</guilabel> object can only be used in the
+      <para>The <guilabel>VF13ad</guilabel> resource can only be used in the
       context of optimization-type commands. Please see the documentation for
       <guilabel>Optimize</guilabel>, <guilabel>Vary</guilabel>,
       <guilabel>NonlinearConstraint</guilabel>, and
