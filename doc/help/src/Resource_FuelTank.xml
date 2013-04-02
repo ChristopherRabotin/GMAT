@@ -36,6 +36,9 @@
     create the tank, and then attach it to the desired spacecraft and
     associate it with a <guilabel>Thruster</guilabel> as shown in the example
     below.</para>
+
+    <para>See Also <xref linkend="ImpulsiveBurn"/>,<xref
+    linkend="Thruster"/></para>
   </refsection>
 
   <refsection>
