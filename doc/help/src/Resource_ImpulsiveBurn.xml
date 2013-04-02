@@ -1046,7 +1046,6 @@ DefaultIB.GravitationalAccel = 9.810000000000001
 Create Spacecraft DefaultSC
 DefaultSC.Tanks = {FuelTank1}
 
-
 BeginMissionSequence
 Maneuver DefaultIB(DefaultSC) </programlisting>
     </informalexample>

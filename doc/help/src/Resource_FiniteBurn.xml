@@ -85,7 +85,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>StringList</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -173,7 +173,7 @@
     </refsection>
 
     <refsection>
-      <title>FiniteBurn using multiple Thrusters</title>
+      <title>FiniteBurn Using Multiple Thrusters</title>
 
       <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> resource must be
       associated with exactly one <guilabel>Thruster</guilabel>. Future GMAT
@@ -262,48 +262,44 @@
 
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel> and
-      <guilabel>FuelTank</guilabel> Resource, Create a default
+      <guilabel>FuelTank</guilabel> Resource; Create a default
       <guilabel>Thruster</guilabel> that allows for fuel depletion from the
-      default <guilabel>FuelTank</guilabel>, Attach
+      default <guilabel>FuelTank</guilabel>; Attach
       <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> to the
-      <guilabel>Spacecraft</guilabel>, Create default
-      <guilabel>ForceModel</guilabel> and <guilabel>Propagator</guilabel>,
+      <guilabel>Spacecraft</guilabel>; Create default
+      <guilabel>ForceModel</guilabel> and <guilabel>Propagator</guilabel>;
       Create a <guilabel>Finite Burn</guilabel> that uses the default thruster
       and apply a 30 minute finite burn to the spacecraft.</para>
 
-      <programlisting>
-        <code>
-  % Create a default Spacecraft and FuelTank Resource
-  Create Spacecraft DefaultSC
-  Create FuelTank FuelTank1
+      <programlisting>% Create a default Spacecraft and FuelTank Resource
+Create Spacecraft DefaultSC
+Create FuelTank FuelTank1
 
-  % Create a default Thruster.  Allow for fuel depletion from 
-  % the default FuelTank.
-  Create Thruster Thruster1
-  Thruster1.DecrementMass = true
-  Thruster1.Tank = {FuelTank1}
+% Create a default Thruster.  Allow for fuel depletion from 
+% the default FuelTank.
+Create Thruster Thruster1
+Thruster1.DecrementMass = true
+Thruster1.Tank = {FuelTank1}
 
-  %  Attach FuelTank and Thruster to the spacecraft
-  DefaultSC.Thrusters = {Thruster1}
-  DefaultSC.Tanks = {FuelTank1}
+%  Attach FuelTank and Thruster to the spacecraft
+DefaultSC.Thrusters = {Thruster1}
+DefaultSC.Tanks = {FuelTank1}
 
-  %  Create default ForceModel and Propagator
-  Create ForceModel DefaultProp_ForceModel
-  Create Propagator DefaultProp
-  DefaultProp.FM = DefaultProp_ForceModel
+%  Create default ForceModel and Propagator
+Create ForceModel DefaultProp_ForceModel
+Create Propagator DefaultProp
+DefaultProp.FM = DefaultProp_ForceModel
 
-  %  Create a Finite Burn that uses the default thruster
-  Create FiniteBurn FiniteBurn1
-  FiniteBurn1.Thrusters = {Thruster1}
+%  Create a Finite Burn that uses the default thruster
+Create FiniteBurn FiniteBurn1
+FiniteBurn1.Thrusters = {Thruster1}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  %  Implement 30 minute finite burn
-  BeginFiniteBurn FiniteBurn1(DefaultSC)
-  Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800}
-  EndFiniteBurn FiniteBurn1(DefaultSC)
-        </code>
-      </programlisting>
+%  Implement 30 minute finite burn
+BeginFiniteBurn FiniteBurn1(DefaultSC)
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800}
+EndFiniteBurn FiniteBurn1(DefaultSC)  </programlisting>
     </informalexample>
   </refsection>
 </refentry>
