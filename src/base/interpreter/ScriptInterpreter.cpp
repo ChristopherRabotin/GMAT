@@ -412,7 +412,10 @@ bool ScriptInterpreter::CheckEncoding()
 
    // reset the file pointer to the start if the check passed
    if (retval)
+   {
+      inStream->clear();
       inStream->seekg (0, std::ios::beg);
+   }
 
    return retval;
 }
@@ -715,6 +718,10 @@ bool ScriptInterpreter::ReadFirstPass()
          charCounter++;
          inStream->seekg(charCounter, std::ios::beg);
       }
+      #ifdef DEBUG_READ_FIRST_PASS
+         MessageInterface::ShowMessage("ch = %d, charCounter = %d\n", ch,
+               charCounter);
+      #endif
       
       newLine = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
       
@@ -734,7 +741,7 @@ bool ScriptInterpreter::ReadFirstPass()
          #endif
          
          type = newLine;
-         // Grap only control command part from the line
+         // Grab only control command part from the line
          // ex) While var1 == var2, If var1 > 5
          index = newLine.find_first_of(" \t");
          if (index != newLine.npos)

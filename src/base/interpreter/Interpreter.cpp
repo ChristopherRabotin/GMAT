@@ -7982,7 +7982,8 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
    bool elseIsOk = true;
    
    #ifdef DEBUG_CHECK_BRANCH
-   MessageInterface::ShowMessage("   Now start checking\n");
+   MessageInterface::ShowMessage("   Now start checking %d lines\n",
+         lines.size());
    #endif
    
    for (UnsignedInt i=0; i<lines.size(); i++)
@@ -8078,8 +8079,13 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
    {
       if (!controlStack.empty())
       {
+         if (controlStack.top() == "BeginScript")
+            expEndStr = "EndScript";
+         else
+            expEndStr = "End" + controlStack.top();
+
          InterpreterException ex
-            ("Matching \"End" + controlStack.top() + "\" not found for \"" +
+            ("Matching \"" + expEndStr + "\" not found for \"" +
              controlStack.top() + "\"");
          HandleError(ex, false);
          retval = false;
