@@ -123,6 +123,7 @@ protected:
    // methods
    bool ValidateArrayElement(ElementWrapper *lhsWrapper,
                              ElementWrapper *rhsWrapper);
+   void ClearMathTree();
    ElementWrapper* RunMathTree();
    void HandleScPropertyChange(ElementWrapper *lhsWrapper);
 

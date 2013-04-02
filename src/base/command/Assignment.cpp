@@ -106,17 +106,7 @@ Assignment::Assignment  () :
 //------------------------------------------------------------------------------
 Assignment::~Assignment()
 {
-   if (mathTree)
-   {
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (mathTree, mathTree->GetName(), "Assignment::~Assignment()", "deleting mathTree");
-      #endif
-      delete mathTree;
-   }
-   
-   mathTree = NULL;
-   ClearWrappers();
+   ClearMathTree();
 }
 
 
@@ -574,6 +564,9 @@ bool Assignment::InterpretAction()
       }
       else // if not an equation, check for unexpected commas on the right-hand-side
       {
+         // Delete old MathTree and clear mathWrapperMap
+         ClearMathTree();        
+         
          // Check if all brackets are balanced if not enclosed with single quotes
          if (!GmatStringUtil::IsEnclosedWith(rhs, "'"))
          {
@@ -2050,6 +2043,29 @@ bool Assignment::ValidateArrayElement(ElementWrapper *lhsWrapper,
       }
    }
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearMathTree()
+//------------------------------------------------------------------------------
+/**
+ * Deletes math tree and clears wrappers.
+ */
+//------------------------------------------------------------------------------
+void Assignment::ClearMathTree()
+{
+   if (mathTree)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (mathTree, mathTree->GetName(), "Assignment::~Assignment()", "deleting mathTree");
+      #endif
+      delete mathTree;
+   }
+   
+   mathTree = NULL;
+   ClearWrappers();
 }
 
 
