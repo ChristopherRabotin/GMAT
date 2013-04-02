@@ -586,14 +586,20 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
    if (type == Gmat::PARAMETER)
    {
       // X parameter
-      if (mXParamName == oldName)
-         mXParamName = newName;
+      if (mXParamName.find(oldName) != oldName.npos)
+	  {
+	     mXParamName =
+			GmatStringUtil::ReplaceName(mXParamName, oldName, newName);
+      }
       
       // Y parameters
       for (unsigned int i=0; i<mYParamNames.size(); i++)
       {
-         if (mYParamNames[i] == oldName)
-            mYParamNames[i] = newName;
+	      if (mYParamNames[i].find(oldName) != oldName.npos)
+		  {
+			mYParamNames[i] =
+				GmatStringUtil::ReplaceName(mYParamNames[i], oldName, newName);
+		  }
       }
    }
    else

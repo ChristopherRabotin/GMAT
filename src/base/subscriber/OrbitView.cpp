@@ -703,7 +703,7 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
       if (mViewPointRefName == oldName)
          mViewPointRefName = newName;
       if (mViewPointVecName == oldName)
-         mViewPointRefName = newName;
+         mViewPointVecName = newName;
       if (mViewDirectionName == oldName)
          mViewDirectionName = newName;
    }
