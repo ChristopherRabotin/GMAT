@@ -28,7 +28,7 @@
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>FiniteBurn</guilabel> object is used when continuous
+    <para>The <guilabel>FiniteBurn</guilabel> resource is used when continuous
     propulsion is desired. Impulsive burns happen instantaneously through the
     use of the <guilabel>Maneuver</guilabel> command, while finite burns occur
     continuously starting at the <guilabel>BeginFiniteBurn</guilabel> command
@@ -161,27 +161,27 @@
       <title>Configuring a FiniteBurn</title>
 
       <para>To perform a finite burn, the <guilabel>FiniteBurn</guilabel>
-      resource itself and a number of related objects must be properly
-      configured. You must associate a specific <guilabel>Thruster</guilabel>
-      hardware object with a created <guilabel>FiniteBurn</guilabel>. You must
-      associate a specific <guilabel>FuelTank</guilabel> hardware object with
-      the chosen <guilabel>Thruster</guilabel>. Finally, you must attach both
-      the chosen <guilabel>Thruster</guilabel> and
-      <guilabel>FuelTank</guilabel> to the desired
-      <guilabel>Spacecraft</guilabel>. See the example below for additional
-      details.</para>
+      resource itself and a number of related resources and commands must be
+      properly configured. You must associate a specific
+      <guilabel>Thruster</guilabel> hardware resource with a created
+      <guilabel>FiniteBurn</guilabel>. You must associate a specific
+      <guilabel>FuelTank</guilabel> hardware resource with the chosen
+      <guilabel>Thruster</guilabel>. Finally, you must attach both the chosen
+      <guilabel>Thruster</guilabel> and <guilabel>FuelTank</guilabel> to the
+      desired <guilabel>Spacecraft</guilabel>. See the example below for
+      additional details.</para>
     </refsection>
 
     <refsection>
       <title>FiniteBurn using multiple Thrusters</title>
 
-      <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> object must be
+      <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> resource must be
       associated with exactly one <guilabel>Thruster</guilabel>. Future GMAT
       GUI versions will allow multiple thrusters to be attached to a single
-      <guilabel>FiniteBurn</guilabel> object.</para>
+      <guilabel>FiniteBurn</guilabel> resource.</para>
 
       <para>Using the scripting interface, one can currently assign multiple
-      thrusters to a single <guilabel>FiniteBurn</guilabel> object.</para>
+      thrusters to a single <guilabel>FiniteBurn</guilabel> resource.</para>
     </refsection>
   </refsection>
 
@@ -262,7 +262,7 @@
 
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel> and
-      <guilabel>FuelTank</guilabel> Object, Create a default
+      <guilabel>FuelTank</guilabel> Resource, Create a default
       <guilabel>Thruster</guilabel> that allows for fuel depletion from the
       default <guilabel>FuelTank</guilabel>, Attach
       <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> to the
@@ -273,7 +273,7 @@
 
       <programlisting>
         <code>
-  % Create a default Spacecraft and FuelTank Object
+  % Create a default Spacecraft and FuelTank Resource
   Create Spacecraft DefaultSC
   Create FuelTank FuelTank1
 

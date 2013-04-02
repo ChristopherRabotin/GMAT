@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -280,8 +278,8 @@
 
     <para>To actually use the <guilabel>Thruster</guilabel> to apply a finite
     burn to a <guilabel>Spacecraft</guilabel>, additional steps are required.
-    For example, when you create the <guilabel>Thruster</guilabel> object, you
-    have to associate a <guilabel>FuelTank</guilabel> with the
+    For example, when you create the <guilabel>Thruster</guilabel> resource,
+    you have to associate a <guilabel>FuelTank</guilabel> with the
     <guilabel>Thruster</guilabel>. For details on this and related matters,
     see the help for the <guilabel>FuelTank</guilabel>,
     <guilabel>Thruster</guilabel>, and <guilabel>FiniteBurn</guilabel>
@@ -293,12 +291,12 @@
 
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel>. Create
-      <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> objects
-      and attach them to the <guilabel>Spacecraft</guilabel>.</para>
+      <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel>
+      resources and attach them to the <guilabel>Spacecraft</guilabel>.</para>
 
       <programlisting>
         <code>
-  % Create default Spacecraft FuelTank, and Thruster Objects
+  % Create default Spacecraft FuelTank, and Thruster Resources
   Create Spacecraft DefaultSC
   Create FuelTank FuelTank1
   Create Thruster Thruster1

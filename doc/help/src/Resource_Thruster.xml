@@ -2380,7 +2380,7 @@
           <row>
             <entry><guilabel>FuelTank resource</guilabel></entry>
 
-            <entry><para>This object contains the fuel used to power the
+            <entry><para>This resource contains the fuel used to power the
             <guilabel>Thruster</guilabel> specified by the<guilabel>
             FiniteBurn</guilabel> resource.</para></entry>
           </row>
@@ -2496,15 +2496,15 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Use of Thruster Object in Conjunction With Maneuvers</title>
+      <title>Use of Thruster Resource in Conjunction With Maneuvers</title>
 
-      <para>A <guilabel>Thruster</guilabel> object is used only in association
-      with finite maneuvers. To implement a finite maneuver, you must first
-      create both a <guilabel>FuelTank</guilabel> and a
-      <guilabel>FiniteBurn</guilabel> object. You must also associate a
+      <para>A <guilabel>Thruster</guilabel> resource is used only in
+      association with finite maneuvers. To implement a finite maneuver, you
+      must first create both a <guilabel>FuelTank</guilabel> and a
+      <guilabel>FiniteBurn</guilabel> resource. You must also associate a
       <guilabel>FuelTank</guilabel> with the <guilabel>Thruster</guilabel>
-      object and you must associate a <guilabel>Thruster</guilabel> with the
-      <guilabel>FiniteBurn</guilabel> object. The actual finite maneuver is
+      resource and you must associate a <guilabel>Thruster</guilabel> with the
+      <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
       implemented using the
       <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
       commands. See the
@@ -2561,7 +2561,7 @@
       <title>Local Coordinate Systems</title>
 
       <para>Here, a Local coordinate system is defined as one that we
-      configure "locally" using the <guilabel>Thruster</guilabel> object
+      configure "locally" using the <guilabel>Thruster</guilabel> resource
       interface as opposed to defining a coordinate system using the
       <guilabel>Coordinate Systems</guilabel> folder in the
       <guilabel>Resources</guilabel> Tree.</para>
@@ -2646,7 +2646,7 @@
 
       <programlisting>
       <code>
-  %  Create the FuelTank Object
+  %  Create the FuelTank Resource
   Create FuelTank FuelTank1
   FuelTank1.AllowNegativeFuelMass = false
   FuelTank1.FuelMass = 756

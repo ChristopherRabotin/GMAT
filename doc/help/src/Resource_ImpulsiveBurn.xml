@@ -28,11 +28,11 @@
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>ImpulsiveBurn</guilabel> object allows the spacecraft
-    to undergo an instantaneous Delta-V (ΔV), as opposed to a finite burn
-    which is not instantaneous, by specifying the three vector components of
-    the Delta-V. You can configure the burn by defining its coordinate system
-    and vector component values. For
+    <para>The <guilabel>ImpulsiveBurn</guilabel> resource allows the
+    spacecraft to undergo an instantaneous Delta-V (ΔV), as opposed to a
+    finite burn which is not instantaneous, by specifying the three vector
+    components of the Delta-V. You can configure the burn by defining its
+    coordinate system and vector component values. For
     <guilabel>Loca</guilabel><guilabel>l</guilabel> coordinate systems, the
     user can choose the <guilabel>Origin</guilabel> and type of
     <guilabel>Axes</guilabel>. Depending on the mission, it may be simpler to
@@ -826,7 +826,7 @@
 
       <para>Here, a Local <guilabel>Coordinate System</guilabel> is defined as
       one that we configure "locally" using the
-      <guilabel>ImpulsiveBurn</guilabel> object interface as opposed to
+      <guilabel>ImpulsiveBurn</guilabel> resource interface as opposed to
       defining a coordinate system using the <guilabel>Coordinate
       Systems</guilabel> folder in the <guilabel>Resources</guilabel>
       Tree.</para>
@@ -982,7 +982,7 @@ DefaultIB.B = -2
 
       <programlisting>
         <code>
-  %  Create the FuelTank Object
+  %  Create the FuelTank Resource
   Create FuelTank FuelTank1
   FuelTank1.AllowNegativeFuelMass = false
   FuelTank1.FuelMass = 756
