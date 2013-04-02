@@ -96,7 +96,7 @@
       </step>
 
       <step>
-        <para>Run the mission and analyze the results. </para>
+        <para>Run the mission and analyze the results.</para>
       </step>
     </procedure>
   </section>
@@ -263,7 +263,7 @@
       is much larger than the thrust for a typical chemical thruster. The
       Thrust and ISP polynomials used in this tutorial are given below.</para>
 
-      <para>Thrust = 1000 (Newtons) ??</para>
+      <para>Thrust = 1000 (Newtons)</para>
 
       <para>ISO = 300 (seconds)</para>
     </section>
@@ -280,20 +280,8 @@
         <step>
           <para>Select the <guilabel>Tanks</guilabel> tab. In the
           <guilabel>Available Tanks</guilabel> column, select
-          <guilabel>FuelTank1</guilabel>. Then ??click
-          (<subscript><inlinemediaobject>
-              <imageobject>
-                <imagedata align="center" contentdepth="8pt"
-                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
-                           width="1em"/>
-              </imageobject>
-            </inlinemediaobject></subscript>) <inlinemediaobject>
-              <imageobject>
-                <imagedata align="center" contentdepth="10pt"
-                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
-                           width="1em"/>
-              </imageobject>
-            </inlinemediaobject> to add <guilabel>FuelTank1</guilabel> to the
+          <guilabel>FuelTank1</guilabel>. Then click the right arrow button to
+          add <guilabel>FuelTank1</guilabel> to the
           <guilabel>SelectedTanks</guilabel> list. Click
           <guilabel>Apply</guilabel>.</para>
         </step>
@@ -301,19 +289,20 @@
         <step>
           <para>Select the <guilabel>Actuators</guilabel> tab. In the
           <guilabel>Available Thrusters</guilabel> column, select
-          <guilabel>Thrurster1</guilabel>. Then ??click <inlinemediaobject>
+          <guilabel>Thrurster1</guilabel>. Then click the right arrow button
+          to add <guilabel>Thruster1</guilabel> to the
+          <guilabel>SelectedThrusters</guilabel> list. Click
+          <guilabel>OK</guilabel>. <inlinemediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="10pt"
                            fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
                            width="1em"/>
               </imageobject>
-            </inlinemediaobject> to add <guilabel>Thruster1</guilabel> to the
-          <guilabel>SelectedThrusters</guilabel> list. Click
-          <guilabel>OK</guilabel>.</para>
+            </inlinemediaobject></para>
         </step>
       </procedure>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC">
         <title>Attach <guilabel>FuelTank1</guilabel> to
         <guilabel>DefaultSC</guilabel></title>
 
@@ -328,7 +317,7 @@
         </screenshot>
       </figure>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC">
         <title>Attach <guilabel>Thruster1</guilabel> to
         <guilabel>DefaultSC</guilabel></title>
 
@@ -371,7 +360,7 @@
         </step>
       </procedure>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1">
         <title>Creation of <guilabel>FiniteBurn</guilabel> Resource
         <guilabel>FiniteBurn1</guilabel></title>
 
@@ -426,18 +415,8 @@
         <guilabel>Variable Name</guilabel>, input
         <guilabel>BurnDuration</guilabel> and for <guilabel>Variable
         Value</guilabel>, input <literal>0.</literal> Click the
-        <guilabel>Create</guilabel> (?? ) button and then the
+        <guilabel>Create</guilabel> button and then the
         <guilabel>Close</guilabel> button.</para>
-
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_TargetFiniteBurn_Create.png"
-                         scalefit="1" width="100%"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
       </step>
 
       <step>
@@ -447,7 +426,7 @@
       </step>
     </procedure>
 
-    <figure>
+    <figure xml:id="Tut_TargetFiniteBurn_Fig7_Creation_of_Variable_Resource_BurnDuration">
       <title>Creation of <guilabel>Variable</guilabel> Resource,
       <guilabel>BurnDuration</guilabel></title>
 
@@ -492,7 +471,7 @@
         </step>
       </procedure>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig8">
         <title><guilabel>Prop To Perigee </guilabel>Command
         Configuration</title>
 
@@ -512,12 +491,13 @@
       <title>Create the Target Sequence</title>
 
       <para>Now create the commands necessary to perform the
-      <guilabel>Target</guilabel> sequence. Figure 9?? illustrates the
-      configuration of the <guilabel>Mission</guilabel> tree after we have
+      <guilabel>Target</guilabel> sequence. <xref
+      linkend="Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence"/> illustrates
+      the configuration of the <guilabel>Mission</guilabel> tree after we have
       completed the steps in this section. We’ll discuss the
       <guilabel>Target</guilabel> sequence after it has been created.</para>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig9_Final_Mission_Sequence">
         <title>Final Mission Sequence</title>
 
         <screenshot>
@@ -564,11 +544,13 @@
 
         <step>
           <para>Complete the <guilabel>Target</guilabel> sequence by inserting
-          the commands shown in Table 1.</para>
+          the commands shown in <xref
+          linkend="Additional_Target_Sequence_Commands"/>.</para>
         </step>
       </procedure>
 
-      <table colsep="0" frame="topbot" rowsep="0">
+      <table colsep="0" frame="topbot" rowsep="0"
+             xml:id="Additional_Target_Sequence_Commands">
         <title>Additional Target Sequence Commands</title>
 
         <tgroup cols="2">
@@ -697,7 +679,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig11_Vary_Burn_Duration_Command_Configuration">
           <title><guilabel>Vary Burn Duration</guilabel> Command
           Configuration</title>
 
@@ -730,7 +712,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig12_Turn_Thruster_On_Command_Configuration">
           <title><guilabel>Turn Thruster On</guilabel> Command
           Configuration</title>
 
@@ -771,7 +753,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig13_Prop_BurnDuration_Command_Configuration">
           <title><guilabel>Prop BurnDuration</guilabel> Command
           Configuration</title>
 
@@ -804,7 +786,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig14_Turn_Thruster_Off_Command_Configuration">
           <title><guilabel>Turn Thruster Off</guilabel> Command
           Configuration</title>
 
@@ -812,7 +794,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="100%"
-                           fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster%20Off_Command_Configuration.png"
+                           fileref="files/images/Tut_TargetFiniteBurn_Fig14_Turn_Thruster_Off_Command_Configuration.png"
                            scalefit="1" width="100%"/>
               </imageobject>
             </mediaobject>
@@ -840,7 +822,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig15_Prop_To_Apogee_Command_Configuration">
           <title><guilabel>Prop To Apogee</guilabel> Command
           Configuration</title>
 
@@ -881,7 +863,7 @@
           </step>
         </procedure>
 
-        <figure>
+        <figure xml:id="Tut_TargetFiniteBurn_Fig16_Achieve_Apogee_Radius_12000_Command_Configuration">
           <title><guilabel>Achieve Apogee Radius = 12000</guilabel> Command
           Configuration</title>
 
@@ -902,10 +884,10 @@
   <section>
     <title>Run the Mission</title>
 
-    <para>Before running the mission, click <guilabel>Save</guilabel> ( Joel
-    script??) and save the mission to a file of your choice. Now click
-    <guilabel>Run</guilabel> (?? ). As the mission runs, you will see GMAT
-    solve the targeting problem. Each iteration and perturbation is shown in
+    <para>Before running the mission, click <guilabel>Save</guilabel> to save
+    the mission to a file of your choice. Now click <guilabel>Run</guilabel>.
+    As the mission runs, you will see GMAT solve the targeting problem. Each
+    iteration and perturbation is shown in
     <guilabel>DefaultOrbitView</guilabel> window in light blue, and the final
     solution is shown in red. After the mission completes, the 3D view should
     appear as shown in the image shown below. You may want to run the mission
@@ -916,9 +898,9 @@
 
       <para>Inspect the 3D DefaultOrbitView window. Manipulate the window as
       needed to view the orbit "face-on." Visually verify that apogee has
-      indeed been raised. </para>
+      indeed been raised.</para>
 
-      <figure>
+      <figure xml:id="Tut_TargetFiniteBurn_Fig17_3D_View_of_Finite_Burn_to_Raise_Apogee">
         <title>3D View of <guilabel>Finite Burn to Raise
         Apogee</guilabel></title>
 
@@ -937,20 +919,14 @@
       number of iterations it took the
       <guilabel>DifferentialCorrector</guilabel> to converge and the final
       value of the control variable, <guilabel>BurnDuration</guilabel>. Verify
-      that you obtained a similar value for <guilabel>BurnDuration</guilabel>.
-      </para>
+      that you obtained a similar value for
+      <guilabel>BurnDuration</guilabel>.</para>
 
-      <para>Ok to leave blank space?</para>
+      <screen>*** Targeting Completed in 13 iterations
 
-      <para/>
+      Final Variable values:
 
-      <para>How indent? How make lines below closer together?</para>
-
-      <para>*** Targeting Completed in 13 iterations</para>
-
-      <para>Final Variable values:</para>
-
-      <para>BurnDuration = 1213.19316329</para>
+      BurnDuration = 1213.19316329</screen>
     </section>
 
     <section>
