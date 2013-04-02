@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -42,7 +40,9 @@
     Within this sequence, you define optimization variables by using the
     <guilabel>Vary</guilabel> command, and define cost and constraints by
     using the <guilabel>Minimize</guilabel> and
-    <guilabel>NonlinearConstraint</guilabel> commands respectively.</para>
+    <guilabel>NonlinearConstraint</guilabel> commands respectively. </para>
+
+    <para>This resource cannot be modified in the Mission Sequence.</para>
   </refsection>
 
   <refsection>
@@ -649,8 +649,8 @@
     <title>GUI</title>
 
     <para>The <guilabel>FminconOptimizer</guilabel> dialog box allows you to
-    specify properties of a <guilabel>FminconOptimizer</guilabel> object such
-    as maximum iterations, maximum function evaluations, control variable
+    specify properties of a <guilabel>FminconOptimizer</guilabel> resource
+    such as maximum iterations, maximum function evaluations, control variable
     termination tolerance, constraint tolerance, cost function tolerance,
     finite difference algorithm parameters, and choice of reporting
     options.</para>
@@ -685,7 +685,7 @@
       <para>This optimizer is only available if you have access to both MATLAB
       and MATLAB's Optimization toolbox. GMAT contains an interface to the
       fmincon optimizer and it will appear to you that fmincon is a built in
-      optimizer in GMAT. Field names for this object have been copied from
+      optimizer in GMAT. Field names for this resource have been copied from
       those used in MATLAB’S optimset function for consistency with MATLAB in
       contrast with other solvers in GMAT.</para>
     </refsection>
@@ -715,10 +715,10 @@ Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}
     </refsection>
 
     <refsection>
-      <title>Object and Command Interactions</title>
+      <title>Resource and Command Interactions</title>
 
-      <para>The <guilabel>FminconOptimizer</guilabel> object can only be used
-      in the context of optimization-type commands. Please see the
+      <para>The <guilabel>FminconOptimizer</guilabel> resource can only be
+      used in the context of optimization-type commands. Please see the
       documentation for <guilabel>Optimize</guilabel>,
       <guilabel>Vary</guilabel>, <guilabel>NonlinearConstraint</guilabel>, and
       <guilabel>Minimize</guilabel> for more information and worked
