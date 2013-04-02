@@ -583,8 +583,8 @@ Sat.X = 1000</programlisting>
       linkend="GmatRootDirectoryStructure"/>. These directories organize the
       files and data used to run GMAT, including binary libraries, data files,
       texture maps, and 3D models. The only two files in the GMAT root
-      directory are <filename>license.txt</filename>, which contains the text
-      of the NASA Open Source Agreement, and <filename>README.txt</filename>,
+      directory are <filename>License.txt</filename>, which contains the text
+      of the Apache License 2.0, and <filename>README.txt</filename>,
       which contains user information for the current GMAT release. A summary
       of the contents of each subdirectory is provided in the sections
       below.</para>

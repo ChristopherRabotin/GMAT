@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -81,7 +79,8 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Interface Setup</title>
+      <title xml:id="System_MatlabInterface_InterfaceSetup">Interface
+      Setup</title>
 
       <para>The following conditions must be true for GMAT to successfully
       initiate communication with MATLAB. All conditions must be true for the

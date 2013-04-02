@@ -7,7 +7,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>User Interfaces</title>
+  <title>User Interfaces Overview</title>
 
   <para>GMAT offers multiple ways to design and execute your mission. The two
   primary interfaces are the graphical user interface (GUI) and the script
@@ -64,29 +64,19 @@
             <para>On Windows, the <guilabel>File</guilabel> menu contains
             standard <guilabel>Open</guilabel>, <guilabel>Save</guilabel>,
             <guilabel>Save As</guilabel>, and <guilabel>Exit</guilabel>
-            functionality as well as <guilabel>Open Recent</guilabel> and
-            <guilabel>New Mission</guilabel>. The <guilabel>Edit</guilabel>
-            menu contains functionality for script editing when the script
-            editor is active. The <guilabel>Window</guilabel> menu contains
-            tools for organizing graphics windows and the script editor within
-            the GMAT desktop. Examples include the ability to
-            <guilabel>Tile</guilabel> windows, <guilabel>Cascade</guilabel>
-            windows and <guilabel>Close</guilabel> windows. The Help menu
-            contains links to <guilabel>Online Help</guilabel>,
+            functionality as well as <guilabel>Open Recent</guilabel>. The
+            <guilabel>Edit</guilabel> menu contains functionality for script
+            editing when the script editor is active. The
+            <guilabel>Window</guilabel> menu contains tools for organizing
+            graphics windows and the script editor within the GMAT desktop.
+            Examples include the ability to <guilabel>Tile</guilabel> windows,
+            <guilabel>Cascade</guilabel> windows and
+            <guilabel>Close</guilabel> windows. The Help menu contains links
+            to <guilabel>Online Help</guilabel>,
             <guilabel>Tutorials</guilabel>, <guilabel>Forums</guilabel>, and
             the <guilabel>Report An Issue</guilabel> option links to GMAT’s
             defect reporting system, the <guilabel>Welcome Page</guilabel>,
             and a <guilabel>Provide Feedback</guilabel> link.</para>
-
-            <para>On the Mac, menus are nearly the same, with a few
-            differences: the <guilabel>File</guilabel> menu does not contain
-            an <guilabel>Exit</guilabel> option - instead, the <guilabel>Quit
-            GMAT</guilabel> menu option is on the GMAT menu, as discussed
-            before; tiling and cascading windows are not supported, so those
-            options do not appear under the <guilabel>Window</guilabel> menu;
-            currently, email is not supported, so <guilabel>Provide
-            Feedback</guilabel> is nonfunctional under the
-            <guilabel>Help</guilabel> menu.</para>
           </listitem>
         </varlistentry>
 
@@ -161,7 +151,8 @@
             <orderedlist>
               <listitem>
                 <para>Click on the <guilabel>Mission</guilabel> tab to bring
-                the Mission Tree to the foreground.</para>
+                the <guilabel>Mission</guilabel> Tree to the
+                foreground.</para>
               </listitem>
 
               <listitem>
@@ -452,6 +443,9 @@ Sat.X = 1000</programlisting>
 
         <listitem>
           <para>GMAT’s script language is case-sensitive.</para>
+
+          <para>For a more complete discussion of GMAT's script language, see
+          the <xref linkend="ScriptLanguage"/> documentation.</para>
         </listitem>
       </itemizedlist>
     </section>

@@ -22,7 +22,7 @@
     These directories organize the files and data used to run GMAT, including
     binary libraries, data files, texture maps, and 3D models. The only two
     files in the GMAT root directory are <filename>license.txt</filename>,
-    which contains the text of the NASA Open Source Agreement, and
+    which contains the text of the Apache License 2.0, and
     <filename>README.txt</filename>, which contains user information for the
     current GMAT release. A summary of the contents of each subdirectory is
     provided in the sections below.</para>
@@ -139,10 +139,11 @@
       <title><filename>docs</filename></title>
 
       <para>The <filename>docs</filename> directory contains end-user
-      documentation, including PDF versions of the Mathematical Specification,
-      Architectural Specification, and Estimation Specification. The GMAT
-      User’s Guide is available in the <filename>help</filename> directory in
-      PDF and HTML formats, and as a Windows HTML Help file.</para>
+      documentation, including draft PDF versions of the Mathematical
+      Specification, Architectural Specification, and Estimation
+      Specification. The GMAT User’s Guide is available in the
+      <filename>help</filename> directory in PDF and HTML formats, and as a
+      Windows HTML Help file.</para>
     </section>
 
     <section>
@@ -160,10 +161,9 @@
 
       <para>The <filename>matlab</filename> directory contains M-files
       required for GMAT’s MATLAB interfaces, including the interface to the
-      fmincon optimizer and interfaces for driving GMAT from MATLAB. All files
-      in the <filename>matlab</filename> directory and its subdirectories must
-      be included in your MATLAB path for the MATLAB interfaces to function
-      properly.</para>
+      fmincon optimizer. All files in the <filename>matlab</filename>
+      directory and its subdirectories must be included in your MATLAB path
+      for the MATLAB interfaces to function properly.</para>
     </section>
 
     <section>
@@ -189,13 +189,15 @@
     <section>
       <title><filename>samples</filename></title>
 
-      <para>The <filename>samples</filename> directory contains over 30 sample
+      <para>The <filename>samples</filename> directory contains over 45 sample
       missions, ranging from a Hohmann transfer to libration point
-      station-keeping to Mars B-plane targeting. These files are intended to
-      demonstrate GMAT’s capabilities and to provide you with a potential
-      starting point for building common mission types for your application
-      and flight regime. Samples with specific requirements are located in
-      subdirectories such as <filename>NeedMatlab</filename> and
+      station-keeping to Mars B-plane targeting. Example files begin with
+      "Ex_" and files that corresponde to GMAT tutorials begin with "Tut_".
+      These files are intended to demonstrate GMAT’s capabilities and to
+      provide you with a potential starting point for building common mission
+      types for your application and flight regime. Samples with specific
+      requirements are located in subdirectories such as
+      <filename>NeedMatlab</filename> and
       <filename>NeedVF13ad</filename>.</para>
     </section>
 
@@ -262,15 +264,15 @@
       (<filename>bin/gmat_startup_file.txt</filename>) specifying the name and
       location of the plugin file. In order for a plugin to work with GMAT,
       the plugin library must be placed in the folder referenced in the
-      startup file. You specify the path to a plugin file using the
-      "<literal>PLUGIN</literal>" keyword and specify the file by providing
-      its name without the file extension (<filename>.dll</filename> on
-      Windows). For example, to load a Windows plugin named
-      <filename>libVF13Optimizer.dll</filename> located in the
-      <filename>plugins/proprietary</filename> directory, you would add this
-      line to your startup file:</para>
+      startup file. For all details, see the <xref linkend="StartupFile"/>
+      reference.</para>
+    </section>
 
-      <programlisting>PLUGIN = ../plugins/proprietary/libVF13Optimizer</programlisting>
+    <section>
+      <title>Configuring the MATLAB Inteface</title>
+
+      <para>GMAT contains an interface to MATLAB. See the <xref linkend="MatlabInterface"/> reference to configure
+      the MATLAB interface.</para>
     </section>
 
     <section>
