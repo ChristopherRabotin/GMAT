@@ -3423,49 +3423,9 @@ void Propagate::PrepareToPropagate()
    if (hasFired == true)
    {
       // Handle the transient forces
-      for (ObjectArray::iterator sc = sats.begin();
-           sc != sats.end(); ++sc)
-      {
-         if (((SpaceObject*)(*sc))->IsManeuvering())
-         {
-            #ifdef DEBUG_FINITE_MANEUVER
-               MessageInterface::ShowMessage(
-                  "SpaceObject %s is maneuvering\n", (*sc)->GetName().c_str());
-            #endif
-
-            // Add the force
-            for (UnsignedInt index = 0; index < propagators.size(); ++index)
-            {
-               if (propagators[index]->GetPropagator()->UsesODEModel())
-               {
-                  for (std::vector<PhysicalModel*>::iterator
-                        i = transientForces->begin();
-                        i != transientForces->end(); ++i)
-                  {
-                     #ifdef DEBUG_TRANSIENT_FORCES
-                     MessageInterface::ShowMessage
-                        ("Propagate::PrepareToPropagate() Adding "
-                              "transientForce<%p>'%s'\n", *i,
-                              (*i)->GetName().c_str());
-                     #endif
-                     propagators[index]->GetODEModel()->AddForce(*i);
-
-                     // Refresh ODE model mapping, since a new force was added
-                     if (propagators[index]->GetODEModel()->BuildModelFromMap()
-                           == false)
-                        throw CommandException("Unable to assemble the ODE "
-                              "model after adding a finite burn for " +
-                              (*i)->GetName());
-                  }
-               }
-            }
-         }
-         #ifdef DEBUG_FINITE_MANEUVER
-            else
-               MessageInterface::ShowMessage("SpaceObject %s is not "
-                     "maneuvering\n", (*sc)->GetName().c_str());
-         #endif
-      }
+      for (UnsignedInt i = 0; i < p.size(); ++i)
+         if (fm[i] != NULL)
+            AddTransientForce(satName[i], fm[i], psm[i]);
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {

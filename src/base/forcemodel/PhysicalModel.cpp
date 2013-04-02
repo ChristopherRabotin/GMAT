@@ -283,6 +283,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
                   modelState);
          #endif
          delete [] modelState;
+         modelState = NULL;
       }
       modelState = new Real[dimension];
 

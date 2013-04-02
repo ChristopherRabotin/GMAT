@@ -27,7 +27,7 @@
 //#define DEBUG_REGISTRATION
 //#define DEBUG_FINITETHRUST_EXE
 //#define DEBUG_MASS_FLOW
-
+//#define DEBUG_STATE_ALLOCATION
 
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
