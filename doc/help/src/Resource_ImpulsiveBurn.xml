@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -66,8 +64,8 @@
             <entry><guilabel>Axes </guilabel></entry>
 
             <entry><para> The Axes field allows the user to define a
-            spacecraft centered set of axes for the impulsive burn.  </para>
-            <variablelist>
+            spacecraft centered set of axes for the impulsive burn. This field
+            cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -178,7 +176,8 @@
 
             <entry><para> The CoordinateSystem field for an impulsive
             burn determines what coordinate system the orientation parameters,
-            Element1, Element2, and Element3 refer to.  </para> <variablelist>
+            Element1, Element2, and Element3 refer to. This field cannot be
+            modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -234,7 +233,8 @@
             <entry><guilabel>DecrementMass </guilabel></entry>
 
             <entry><para> Flag which determines if the FuelMass is to be
-            decremented as it used.    </para> <variablelist>
+            decremented as it used. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -620,7 +620,8 @@
 
             <entry><para> The Origin field, used in conjunction with the Axes
             field, allows the user to define a spacecraft centered set of axes
-            for the impulsive burn.  </para> <variablelist>
+            for the impulsive burn. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -676,7 +677,8 @@
             <entry><guilabel>Tank</guilabel></entry>
 
             <entry><para> FuelTank from which the Thruster draws propellant
-            from. </para> <variablelist>
+            from. This field cannot be modified in the Mission Sequence.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

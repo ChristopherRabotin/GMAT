@@ -12,8 +12,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -93,8 +91,8 @@
             <entry><guilabel>Axes</guilabel></entry>
 
             <entry><para>Allows the user to define a spacecraft centered set
-            of axes for the <guilabel>Thruster</guilabel>. </para>
-            <variablelist>
+            of axes for the <guilabel>Thruster</guilabel>.This field cannot be
+            modified in the Mission Sequence</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -151,7 +149,8 @@
 
             <entry><para>Determines what coordinate system the orientation
             parameters, ThrustDirection1, ThrustDirection2, and
-            ThrustDirection3 refer to. </para> <variablelist>
+            ThrustDirection3 refer to. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1076,7 +1075,8 @@
             <entry><guilabel>DecrementMass</guilabel></entry>
 
             <entry><para>Flag which determines if the FuelMass is to be
-            decremented as it used.</para> <variablelist>
+            decremented as it used. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2056,8 +2056,9 @@
             spacecraft centered set of axes for the
             <guilabel>Thruster</guilabel>. <guilabel>Origin</guilabel> has no
             affect when a Local coordinate system is used and the
-            <guilabel>Axes</guilabel> are set to MJ2000Eq or
-            SpacecraftBody.</para> <variablelist>
+            <guilabel>Axes</guilabel> are set to MJ2000Eq or SpacecraftBody.
+            This field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2123,8 +2124,8 @@
             {}</literal>, is NOT allowed. Via the script, if you wish to
             indicate that no <guilabel>FuelTank</guilabel> is associated with
             a <guilabel>Thruster</guilabel>, do not include commands such as
-            <literal>Thruster1.Tank = ...</literal> in your script. </para>
-            <variablelist>
+            <literal>Thruster1.Tank = ...</literal> in your script. This field
+            cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

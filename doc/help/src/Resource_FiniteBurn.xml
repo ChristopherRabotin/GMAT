@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -81,8 +79,8 @@
             empty list, e.g., <literal>FiniteBurn1.Thruster={}</literal>, is
             allowed but is of limited utility since the GUI will automatically
             associate a <guilabel>Thruster</guilabel>, if one has been
-            created, with the <guilabel>FiniteBurn</guilabel>. </para>
-            <variablelist>
+            created, with the <guilabel>FiniteBurn</guilabel>. This field
+            cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

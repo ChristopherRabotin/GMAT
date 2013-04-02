@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -64,7 +62,8 @@
 
             <entry><para> This field allows the fuel tank to have negative
             fuel mass which can be useful in optimization and targeting
-            sequences before convergence has occurred. </para> <variablelist>
+            sequences before convergence has occurred. This field cannot be
+            modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -281,7 +280,8 @@
             <entry><guilabel>PressureModel</guilabel></entry>
 
             <entry><para>The pressure model describes how pressure in the tank
-            changes as fuel is depleted.</para> <variablelist>
+            changes as fuel is depleted. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

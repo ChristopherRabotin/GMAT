@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -36,19 +34,21 @@
     solver for solving boundary value problems. The DC in GMAT uses a simple
     shooting method where the derivatives are determined using finite
     differencing. In the mission sequence, you use the
-    <guilabel>DifferentialCorrector</guilabel> object in a
+    <guilabel>DifferentialCorrector</guilabel> resource in a
     <guilabel>Target</guilabel> control sequence to solve the boundary value
     problem. In GMAT, differential correctors are often used to determine the
     maneuver components required to achieve desired orbital conditions, say,
     B-plane conditions at a planetary flyby.</para>
 
     <para>You must create and configure a
-    <guilabel>DifferentialCorrector</guilabel> object for your application by
-    setting numerical properties of the solver such as the maximum number of
-    allowed iterations and choice of derivative method used to calculate the
-    finite differences. You can also select among different output options
+    <guilabel>DifferentialCorrector</guilabel> resource for your application
+    by setting numerical properties of the solver such as the maximum number
+    of allowed iterations and choice of derivative method used to calculate
+    the finite differences. You can also select among different output options
     that show increasing levels of information for each differential corrector
     iteration.</para>
+
+    <para>This resource cannot be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Target"/>, <xref linkend="Vary"/>, <xref
@@ -394,7 +394,7 @@
     as maximum iterations, choice of derivative method used to calculate the
     finite differences, and choice of reporting options.</para>
 
-    <para>To create a <guilabel>DifferentialCorrector</guilabel> object,
+    <para>To create a <guilabel>DifferentialCorrector</guilabel> resource,
     navigate to the <guilabel>Resources</guilabel> tree, expand the
     <guilabel>Solvers</guilabel> folder, right-click on the <guilabel>Boundary
     Value Solvers</guilabel> folder, point to <guilabel>Add</guilabel>, and
@@ -418,7 +418,7 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Object and Command Interactions</title>
+      <title>Resource and Command Interactions</title>
 
       <para>The <guilabel>DifferentialCorrector</guilabel> object can only be
       used in the context of targeting-type commands. Please see the
