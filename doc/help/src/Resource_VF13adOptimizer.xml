@@ -43,6 +43,9 @@
     <guilabel>NonlinearConstraint</guilabel> commands respectively.</para>
 
     <para>This resource cannot be modified in the Mission Sequence.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="FminconOptimizer"/>, <xref linkend="Optimize"/></para>
   </refsection>
 
   <refsection>

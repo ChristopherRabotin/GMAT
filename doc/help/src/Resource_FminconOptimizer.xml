@@ -40,9 +40,12 @@
     Within this sequence, you define optimization variables by using the
     <guilabel>Vary</guilabel> command, and define cost and constraints by
     using the <guilabel>Minimize</guilabel> and
-    <guilabel>NonlinearConstraint</guilabel> commands respectively. </para>
+    <guilabel>NonlinearConstraint</guilabel> commands respectively.</para>
 
     <para>This resource cannot be modified in the Mission Sequence.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="VF13adOptimizer"/>, <xref linkend="Optimize"/></para>
   </refsection>
 
   <refsection>
@@ -50,7 +53,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -244,7 +247,7 @@
             <entry><para>Specifies the maximum allowable number of nominal
             passes through the optimizer.  Note that this is not the same as
             the number of optimizer iterations that is shown for the VF13AD
-            optimzer.    </para> <variablelist>
+            optimzer.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -732,21 +735,17 @@ Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}
     <informalexample>
       <para>Create a FminconOptimizer resource named SQP1.</para>
 
-      <programlisting>
-        <code>
-  Create FminconOptimizer SQP1
-  SQP1.ShowProgress = true
-  SQP1.ReportStyle = Normal
-  SQP1.ReportFile = 'FminconOptimizerSQP1.data'
-  SQP1.MaximumIterations = 25
-  SQP1.DiffMaxChange = '0.1000'
-  SQP1.DiffMinChange = '1.0000e-08'
-  SQP1.MaxFunEvals = '1000'
-  SQP1.TolX = '1.0000e-04'
-  SQP1.TolFun = '1.0000e-04'
-  SQP1.TolCon = '1.0000e-04'
-        </code>
-      </programlisting>
+      <programlisting><code>Create FminconOptimizer SQP1
+SQP1.ShowProgress = true
+SQP1.ReportStyle = Normal
+SQP1.ReportFile = 'FminconOptimizerSQP1.data'
+SQP1.MaximumIterations = 25
+SQP1.DiffMaxChange = '0.1000'
+SQP1.DiffMinChange = '1.0000e-08'
+SQP1.MaxFunEvals = '1000'
+SQP1.TolX = '1.0000e-04'
+SQP1.TolFun = '1.0000e-04'
+SQP1.TolCon = '1.0000e-04'     </code>      </programlisting>
     </informalexample>
 
     <para>For an example of how a <guilabel>FminconOptimizer</guilabel>
