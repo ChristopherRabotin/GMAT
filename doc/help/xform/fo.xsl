@@ -85,6 +85,16 @@
         </xsl:attribute>
     </xsl:attribute-set>
 
+    <!-- Sections -->
+    <xsl:attribute-set name="section.level1.properties" use-attribute-sets="section.properties">
+        <xsl:attribute name="break-after">
+            <xsl:choose>
+                <xsl:when test="ancestor::d:appendix">page</xsl:when>
+                <xsl:otherwise>auto</xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
+    </xsl:attribute-set>
+
     <!-- Auto-numering -->
     <xsl:param name="chapter.autolabel" select="0"></xsl:param>
 
@@ -124,6 +134,7 @@
     <xsl:param name="toc.section.depth">1</xsl:param>
     <xsl:param name="generate.toc">
         /appendix toc,title
+        appendix  toc
         article/appendix  nop
         /article  toc,title
         book      toc,title

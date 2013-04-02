@@ -15,7 +15,7 @@ docbookxsldir = $(contribdir)/docbook-xsl-ns-1.78.1
 fopdir = $(contribdir)/fop-1.1
 
 # tools
-FOP = $(JAVA) -Dfop.home=$(fopdir) $(JAVAFLAGS) -jar $(fopdir)/build/fop.jar -c $(configdir)/fop.xconf
+FOP = $(JAVA) -cp $(contribdir)/offo-hyphenation-binary/fop-hyph.jar -Dfop.home=$(fopdir) $(JAVAFLAGS) -jar $(fopdir)/build/fop.jar -c $(configdir)/fop.xconf
 JAVA = java
 JING = $(JAVA) $(ALL_JAVAFLAGS) -jar $(contribdir)/jing/bin/jing.jar
 XALAN = $(JAVA) -cp $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar:$(docbookxsldir)/extensions/xalan27.jar $(ALL_JAVAFLAGS) org.apache.xalan.xslt.Process
@@ -25,12 +25,16 @@ ALL_JAVAFLAGS = -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache
 ALL_XALANFLAGS = -PARAM use.extensions 1 \
 	  -PARAM fop1.extensions 1 \
 	  -PARAM graphicsize.extension 1 \
+	  -PARAM tablecolumns.extension 1 \
+	  -PARAM appendix.autolabel 0 \
+	  -PARAM part.autolabel 0 \
 	  $(XALANFLAGS)
 
 # source files
 helpsrc = $(srcdir)/help.xml
 srcfiles = $(srcdir)/*.xml
 fostyle = ./xform/fo.xsl
+chmstyle = ./xform/htmlhelp.xsl
 
 # Rules
 all: help training
@@ -187,13 +191,13 @@ html/index.html: help-pre.xml files/style.css
 files/style.css: $(srcdir)/files/style.css
 	svn export --force src/files files
 
-help.chm: help-pre.xml files/style.css
+help.chm: help-pre.xml htmlhelp.titlepage.templates.xsl files/style.css
 	$(XALAN) \
 	    -PARAM base.dir chm/ \
 	    -PARAM manifest.in.base.dir 1 \
 	    -PARAM chunk.quietly 1 \
 	    -PARAM chunk.section.depth 0 \
-	    -PARAM generate.toc "" \
+	    -PARAM mygenerate.toc "" \
 	    -PARAM html.stylesheet files/style.css \
 	    -PARAM htmlhelp.remember.window.position 1 \
 	    -PARAM htmlhelp.hhc.section.depth 1 \
@@ -204,11 +208,17 @@ help.chm: help-pre.xml files/style.css
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
-	    -XSL $(docbookxsldir)/htmlhelp/htmlhelp.xsl \
+	    -XSL $(chmstyle) \
 	    $(ALL_XALANFLAGS)
 	cp -pR files chm/files
 	-hhc chm/htmlhelp.hhp
 	mv chm/htmlhelp.chm $@
+
+htmlhelp.titlepage.templates.xsl: xform/htmlhelp.titlepage.templates.xml
+	$(XALAN) \
+	-IN $< \
+	-XSL $(docbookxsldir)/template/titlepage.xsl \
+	-OUT $@
 
 fo.titlepage.templates.xsl: xform/fo.titlepage.templates.xml
 	$(XALAN) \

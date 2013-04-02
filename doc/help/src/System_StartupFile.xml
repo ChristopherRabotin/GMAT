@@ -170,6 +170,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>System</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>ROOT_PATH=../</literal></term>
 
@@ -184,6 +185,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Plugins</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>PLUGIN</literal></term>
 
@@ -200,6 +202,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Output</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>EPHEM_PATH=<replaceable>OUTPUT_PATH</replaceable>/</literal></term>
 
@@ -255,6 +258,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Data Files</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal><replaceable>CELESTIALBODY</replaceable>_POT_PATH=<replaceable>DATA_PATH</replaceable>/gravity/<replaceable>celestialbody</replaceable>/</literal></term>
 
@@ -439,6 +443,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Application Files</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>CELESTIALBODY_TEXTURE_FILE=<replaceable>TEXTURE_PATH</replaceable>/DefaultTextureFile.jpg</literal></term>
 
@@ -562,12 +567,14 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Program Settings</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>MATLAB_MODE=SHARED</literal></term>
 
           <listitem>
             <para>MATLAB interface connection mode. The available options
             are:<variablelist>
+                <?dbfo list-presentation="blocks"?>
                 <varlistentry>
                   <term><literal>NO_MATLAB</literal></term>
 
@@ -613,6 +620,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
       <title>Debug Settings</title>
 
       <variablelist>
+        <?dbfo list-presentation="blocks"?>
         <varlistentry>
           <term><literal>DEBUG_PARAMETERS=OFF</literal></term>
 
@@ -649,6 +657,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
           <listitem>
             <para>GMAT execution mode. The available options are:<variablelist>
+        <?dbfo list-presentation="blocks"?>
                 <varlistentry>
                   <term><literal>EXIT_AFTER_RUN</literal></term>
 

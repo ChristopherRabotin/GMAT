@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -258,11 +256,11 @@
 
       <informaltable>
         <tgroup cols="4">
-          <colspec colnum="1"/>
+          <colspec colnum="1" colwidth="1.5in"/>
 
-          <colspec colnum="2" colwidth="0.5*"/>
+          <colspec colnum="2" colwidth=".75in"/>
 
-          <colspec colnum="3" colwidth="0.5*"/>
+          <colspec colnum="3" colwidth=".75in"/>
 
           <colspec colnum="4"/>
 
@@ -458,14 +456,6 @@
 
                     <listitem>
                       <para><guilabel>CelestialBody</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Output Range</term>
-
-                    <listitem>
-                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -4049,11 +4039,11 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
 
       <informaltable>
         <tgroup cols="4">
-          <colspec colnum="1"/>
+          <colspec colnum="1" colwidth="1.5in"/>
 
-          <colspec colnum="2" colwidth="0.1*"/>
+          <colspec colnum="2" colwidth=".75in"/>
 
-          <colspec colnum="3" colwidth="0.1*"/>
+          <colspec colnum="3" colwidth="0.75in"/>
 
           <colspec colnum="4"/>
 
@@ -4300,11 +4290,11 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
 
       <informaltable>
         <tgroup cols="4">
-          <colspec colnum="1"/>
+          <colspec colnum="1" colwidth="1.5in"/>
 
-          <colspec colnum="2" colwidth="0.1*"/>
+          <colspec colnum="2" colwidth="0.75in"/>
 
-          <colspec colnum="3" colwidth="0.1*"/>
+          <colspec colnum="3" colwidth="0.75in"/>
 
           <colspec colnum="4"/>
 
@@ -5660,11 +5650,11 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
 
       <informaltable>
         <tgroup cols="4">
-          <colspec colnum="1"/>
+          <colspec colnum="1" colwidth="1.5in"/>
 
-          <colspec colnum="2" colwidth="0.1*"/>
+          <colspec colnum="2" colwidth="0.75in"/>
 
-          <colspec colnum="3" colwidth="0.1*"/>
+          <colspec colnum="3" colwidth="0.75in"/>
 
           <colspec colnum="4"/>
 
