@@ -7,6 +7,10 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Thruster</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>Thruster</refentrytitle>
 
@@ -105,8 +109,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>VNB</guilabel>, LVLH, MJ2000Eq,
-                    SpacecraftBody</para>
+                    <para><guilabel>VNB</guilabel>, <guilabel>LVLH</guilabel>,
+                    <guilabel>MJ2000Eq</guilabel>,
+                    <guilabel>SpacecraftBody</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -148,9 +153,9 @@
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
             <entry><para>Determines what coordinate system the orientation
-            parameters, ThrustDirection1, ThrustDirection2, and
-            ThrustDirection3 refer to. This field cannot be modified in the
-            Mission Sequence. </para> <variablelist>
+            parameters, <guilabel>ThrustDirection1</guilabel>,
+            ThrustDirection2, and ThrustDirection3 refer to. This field cannot
+            be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2644,73 +2649,69 @@
       <guilabel>FuelTank</guilabel> to a
       <guilabel>Spacecraft</guilabel>.</para>
 
-      <programlisting>
-      <code>
-  %  Create the FuelTank Resource
-  Create FuelTank FuelTank1
-  FuelTank1.AllowNegativeFuelMass = false
-  FuelTank1.FuelMass = 756
-  FuelTank1.Pressure = 1500
-  FuelTank1.Temperature = 20
-  FuelTank1.RefTemperature = 20
-  FuelTank1.Volume = 0.75
-  FuelTank1.FuelDensity = 1260
-  FuelTank1.PressureModel = PressureRegulated
+      <programlisting>%  Create the FuelTank Resource
+Create FuelTank FuelTank1
+FuelTank1.AllowNegativeFuelMass = false
+FuelTank1.FuelMass = 756
+FuelTank1.Pressure = 1500
+FuelTank1.Temperature = 20
+FuelTank1.RefTemperature = 20
+FuelTank1.Volume = 0.75
+FuelTank1.FuelDensity = 1260
+FuelTank1.PressureModel = PressureRegulated
 
-  %  Create a Thruster, that allows fuel depletion, and assign it a FuelTank
-  Create Thruster Thruster1
-  Thruster1.CoordinateSystem = Local
-  Thruster1.Origin = Earth
-  Thruster1.Axes = VNB
-  Thruster1.ThrustDirection1 = 1
-  Thruster1.ThrustDirection2 = 0
-  Thruster1.ThrustDirection3 = 0
-  Thruster1.DutyCycle = 1
-  Thruster1.ThrustScaleFactor = 1
-  Thruster1.DecrementMass = true
-  Thruster1.Tank = {FuelTank1}
-  Thruster1.GravitationalAccel = 9.810000000000001
-  Thruster1.C1 = 10
-  Thruster1.C2 = 0
-  Thruster1.C3 = 0
-  Thruster1.C4 = 0
-  Thruster1.C5 = 0
-  Thruster1.C6 = 0
-  Thruster1.C7 = 0
-  Thruster1.C8 = 0
-  Thruster1.C9 = 0
-  Thruster1.C10 = 0
-  Thruster1.C11 = 0
-  Thruster1.C12 = 0
-  Thruster1.C13 = 0
-  Thruster1.C14 = 0
-  Thruster1.C15 = 0
-  Thruster1.C16 = 0
-  Thruster1.K1 = 300
-  Thruster1.K2 = 0
-  Thruster1.K3 = 0
-  Thruster1.K4 = 0
-  Thruster1.K5 = 0
-  Thruster1.K6 = 0
-  Thruster1.K7 = 0
-  Thruster1.K8 = 0
-  Thruster1.K9 = 0
-  Thruster1.K10 = 0
-  Thruster1.K11 = 0
-  Thruster1.K12 = 0
-  Thruster1.K13 = 0
-  Thruster1.K14 = 0
-  Thruster1.K15 = 0
-  Thruster1.K16 = 0
+%  Create a Thruster, that allows fuel depletion, and assign it a FuelTank
+Create Thruster Thruster1
+Thruster1.CoordinateSystem = Local
+Thruster1.Origin = Earth
+Thruster1.Axes = VNB
+Thruster1.ThrustDirection1 = 1
+Thruster1.ThrustDirection2 = 0
+Thruster1.ThrustDirection3 = 0
+Thruster1.DutyCycle = 1
+Thruster1.ThrustScaleFactor = 1
+Thruster1.DecrementMass = true
+Thruster1.Tank = {FuelTank1}
+Thruster1.GravitationalAccel = 9.810000000000001
+Thruster1.C1 = 10
+Thruster1.C2 = 0
+Thruster1.C3 = 0
+Thruster1.C4 = 0
+Thruster1.C5 = 0
+Thruster1.C6 = 0
+Thruster1.C7 = 0
+Thruster1.C8 = 0
+Thruster1.C9 = 0
+Thruster1.C10 = 0
+Thruster1.C11 = 0
+Thruster1.C12 = 0
+Thruster1.C13 = 0
+Thruster1.C14 = 0
+Thruster1.C15 = 0
+Thruster1.C16 = 0
+Thruster1.K1 = 300
+Thruster1.K2 = 0
+Thruster1.K3 = 0
+Thruster1.K4 = 0
+Thruster1.K5 = 0
+Thruster1.K6 = 0
+Thruster1.K7 = 0
+Thruster1.K8 = 0
+Thruster1.K9 = 0
+Thruster1.K10 = 0
+Thruster1.K11 = 0
+Thruster1.K12 = 0
+Thruster1.K13 = 0
+Thruster1.K14 = 0
+Thruster1.K15 = 0
+Thruster1.K16 = 0
 
-  %  Add the Thruster and the FuelTank to a Spacecraft
-  Create Spacecraft DefaultSC
-  DefaultSC.Tanks = {FuelTank1}
-  DefaultSC.Thrusters = {Thruster1}
+%  Add the Thruster and the FuelTank to a Spacecraft
+Create Spacecraft DefaultSC
+DefaultSC.Tanks = {FuelTank1}
+DefaultSC.Thrusters = {Thruster1}
 
-  BeginMissionSequence
-      </code>
-    </programlisting>
+BeginMissionSequence</programlisting>
     </informalexample>
   </refsection>
 </refentry>

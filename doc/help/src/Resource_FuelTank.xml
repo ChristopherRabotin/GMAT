@@ -22,7 +22,7 @@
   <refnamediv>
     <refname>FuelTank</refname>
 
-    <refpurpose> Model of a chemical fuel tank</refpurpose>
+    <refpurpose>Model of a chemical fuel tank</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -59,15 +59,15 @@
           <row>
             <entry><guilabel>AllowNegativeFuelMass </guilabel></entry>
 
-            <entry><para> This field allows the fuel tank to have negative
-            fuel mass which can be useful in optimization and targeting
-            sequences before convergence has occurred. This field cannot be
-            modified in the Mission Sequence. </para> <variablelist>
+            <entry><para>This field allows the fuel tank to have negative fuel
+            mass which can be useful in optimization and targeting sequences
+            before convergence has occurred. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Boolean_Type</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -75,7 +75,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true, false</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -91,7 +92,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>FALSE</para>
+                    <para>
+                      <literal>false</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -145,7 +148,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1260</para>
+                    <para>
+                      <literal>1260</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -199,7 +204,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>756</para>
+                    <para>
+                      <literal>756</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -253,7 +260,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1500</para>
+                    <para>
+                      <literal>1500</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -278,9 +287,10 @@
           <row>
             <entry><guilabel>PressureModel</guilabel></entry>
 
-            <entry><para>The pressure model describes how pressure in the tank
-            changes as fuel is depleted. This field cannot be modified in the
-            Mission Sequence. </para> <variablelist>
+            <entry><para>The pressure model describes how pressure in the
+            <guilabel>FuelTank</guilabel> changes as fuel is depleted. This
+            field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -351,7 +361,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Real &gt; -273.15, |Real| &gt; 0.01</para>
+                    <para>Real &gt; <literal>-273.15</literal> and |Real| &gt;
+                    <literal>0.01</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -407,7 +418,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Real &gt; -273.15</para>
+                    <para>Real &gt; <literal>-273.15</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -423,7 +434,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>20</para>
+                    <para>
+                      <literal>20</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -448,7 +461,7 @@
           <row>
             <entry><guilabel>Volume </guilabel></entry>
 
-            <entry><para> The volume of the tank. GMAT checks to ensure that
+            <entry><para>The volume of the tank. GMAT checks to ensure that
             the input volume of the tank is larger than the calculated volume
             of fuel loaded in the tank and throws an exception in the case
             that the calculated fuel volume is larger than the input tank
@@ -465,8 +478,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Real &gt; 0 such that calculated fuel volume is &lt;
-                    input tank Volume.</para>
+                    <para>Real &gt; <literal>0</literal> such that calculated
+                    fuel volume is &lt; input tank Volume.</para>
                   </listitem>
                 </varlistentry>
 
@@ -482,7 +495,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0.75</para>
+                    <para>
+                      <literal>0.75</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -648,28 +663,24 @@
       <guilabel>Spacecraft</guilabel> and
       <guilabel>Thruster</guilabel>.</para>
 
-      <programlisting>
-        <code>
-  %  Create the Fuel Tank Resource
-  Create FuelTank aTank
-  aTank.AllowNegativeFuelMass = false
-  aTank.FuelMass = 756
-  aTank.Pressure = 1500
-  aTank.Temperature = 20
-  aTank.RefTemperature = 20
-  aTank.Volume = 0.75
-  aTank.FuelDensity = 1260
-  aTank.PressureModel = PressureRegulated
-  %  Create a Thruster and assign it a FuelTank
-  Create Thruster aThruster
-  aThruster.Tank = {aTank}
+      <programlisting>%  Create the FuelTank Resource
+Create FuelTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+aTank.Pressure = 1500
+aTank.Temperature = 20
+aTank.RefTemperature = 20
+aTank.Volume = 0.75
+aTank.FuelDensity = 1260
+aTank.PressureModel = PressureRegulated
+%  Create a Thruster and assign it a FuelTank
+Create Thruster aThruster
+aThruster.Tank = {aTank}
 
-  %  Add the FuelTank and Thruster to a Spacecraft
-  Create Spacecraft aSpacecraft
-  aSpacecraft.Tanks = {aTank}
-  aSpacecraft.Thrusters = {aThruster}
-        </code>
-      </programlisting>
+%  Add the FuelTank and Thruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}    </programlisting>
 
       <para>As exhibited below, there are some subtleties associated with
       setting and getting parent vs. cloned resources. In the example above,
@@ -682,16 +693,12 @@
       <guilabel>FuelMass</guilabel> in the parent resource,
       <literal>aTank</literal>, to 900 kg.</para>
 
-      <programlisting>
-        <code>
-  %  Add the FuelTank and Thruster to a second Spacecraft
-  Create Spacecraft bSpacecraft
-  bSpacecraft.Tanks = {aTank}
-  bSpacecraft.Thrusters = {aThruster}
-  aTank.FuelMass = 900    %Can be performed in both resource and 
-                          %command modes
-        </code>
-      </programlisting>
+      <programlisting>%  Add the FuelTank and Thruster to a second Spacecraft
+Create Spacecraft bSpacecraft
+bSpacecraft.Tanks = {aTank}
+bSpacecraft.Thrusters = {aThruster}
+aTank.FuelMass = 900    %Can be performed in both resource and 
+                        %command modes</programlisting>
 
       <para>Note that, in the example above, setting the value of the parent
       resource, <literal>aTank</literal>, changes the fuel mass value in both
@@ -703,20 +710,17 @@
       resource and command modes.</para>
 
       <para>To change the value of the fuel mass in only the first created
-      spacecraft, <literal>aSpacecraft</literal>, we do the following.</para>
+      spacecraft, <guilabel>aSpacecraft</guilabel>, we do the
+      following.</para>
 
-      <programlisting>
-        <code>
-  %  Create the Fuel Tank Resource
-  aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
-  aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.
-        </code>
-      </programlisting>
+      <programlisting><code>%  Create the Fuel Tank Resource
+aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
+aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.</code>      </programlisting>
 
       <para>As a result of the commands in the previous example, the value of
-      <literal>aSpacecraft.aTank.FuelMass</literal> is 1000 kg and the value
-      of <literal>bSpacecraft.aTank.FuelMass</literal> is 756 kg. We note that
-      the assignment command for the cloned resource,
+      <literal>aSpacecraft.aTank.FuelMass</literal> is <literal>1000</literal>
+      kg and the value of <literal>bSpacecraft.aTank.FuelMass</literal> is 756
+      kg. We note that the assignment command for the cloned resource,
       <literal>aSpacecraft.aTank.FuelMass</literal>, can only be performed in
       command mode.</para>
 
@@ -744,31 +748,27 @@
       <guilabel>Spacecraft</guilabel> and
       <guilabel>Thruster</guilabel>.</para>
 
-      <programlisting>
-        <code>
-  %  Create the Fuel Tank Resource
-  Create FuelTank aTank
-  aTank.AllowNegativeFuelMass = false
-  aTank.FuelMass = 756
-  aTank.Pressure = 1500
-  aTank.Temperature = 20
-  aTank.RefTemperature = 20
-  aTank.Volume = 0.75
-  aTank.FuelDensity = 1260
-  aTank.PressureModel = PressureRegulated
+      <programlisting>%  Create the Fuel Tank Resource
+Create FuelTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+aTank.Pressure = 1500
+aTank.Temperature = 20
+aTank.RefTemperature = 20
+aTank.Volume = 0.75
+aTank.FuelDensity = 1260
+aTank.PressureModel = PressureRegulated
 
-  %  Create a Thruster and assign it a FuelTank
-  Create Thruster aThruster
-  aThruster.Tank = {aTank}
+%  Create a Thruster and assign it a FuelTank
+Create Thruster aThruster
+aThruster.Tank = {aTank}
 
-  %  Add the FuelTank and Thruster to a Spacecraft
-  Create Spacecraft aSpacecraft
-  aSpacecraft.Tanks = {aTank}
-  aSpacecraft.Thrusters = {aThruster}
+%  Add the FuelTank and Thruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}
 
-  BeginMissionSequence
-        </code>
-      </programlisting>
+BeginMissionSequence    </programlisting>
     </informalexample>
   </refsection>
 </refentry>
