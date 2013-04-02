@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -36,7 +34,10 @@
     well as attached hardware, including tanks and thrusters. The
     <guilabel>Spacecraft</guilabel> model also contains the data that
     configures how the <guilabel>Spacecraft</guilabel> 3-D CAD model is used
-    in an <guilabel>OrbitView</guilabel>.</para>
+    in an <guilabel>OrbitView</guilabel>. <guilabel>Spacecraft </guilabel>has
+    certain fields that can be set in the Mission Sequence and some that
+    cannot. See the field tables on the pages below for more
+    information.</para>
 
     <para>GMAT's documentation for <guilabel>Spacecraft</guilabel> is
     extensive and is broken down into the following sections:</para>
@@ -58,18 +59,17 @@
       </listitem>
 
       <listitem>
-        <para><xref
-        linkend="SpacecraftAttitude" xrefstyle="select:title"/></para>
+        <para><xref linkend="SpacecraftAttitude"
+        xrefstyle="select:title"/></para>
       </listitem>
 
       <listitem>
-        <para><xref
-        linkend="SpacecraftHardware" xrefstyle="select:title"/></para>
+        <para><xref linkend="SpacecraftHardware"
+        xrefstyle="select:title"/></para>
       </listitem>
 
       <listitem>
-        <para><xref
-        linkend="SpacecraftVisualizationProperties"
+        <para><xref linkend="SpacecraftVisualizationProperties"
         xrefstyle="select:title"/></para>
       </listitem>
     </itemizedlist>

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -35,7 +33,8 @@
     the models for the orbital motion and orientation. GMAT contains built-in
     models for the Sun, the 8 planets, Earth's moon, and Pluto. You can create
     a custom <guilabel>CelestialBody</guilabel> resource to model a planet,
-    asteroid, comet, or moon.</para>
+    asteroid, comet, or moon. This resource cannot be modified in the Mission
+    Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="SolarSystem"/>, <xref linkend="Barycenter"/>, <xref
@@ -195,7 +194,7 @@
                   <listitem>
                     <para>A file of the following format:</para>
 
-                    <para> .jpeg, .bmp, .png, .gif, .tif, .pcx, .pnm, .tga, or
+                    <para>.jpeg, .bmp, .png, .gif, .tif, .pcx, .pnm, .tga, or
                     .xpm</para>
                   </listitem>
                 </varlistentry>

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -34,7 +32,8 @@
     global properties for the model of the solar system including the
     ephemeris source for built-in celestial bodies and selected settings to
     improve performance when medium fidelity modelling is acceptable for your
-    application.</para>
+    application. This resource cannot be modified in the Mission
+    Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="CelestialBody"/>, <xref linkend="LibrationPoint"/>, <xref
@@ -174,8 +173,8 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
-		    <row>
+
+          <row>
             <entry><guilabel>EphemerisUpdateInterval</guilabel></entry>
 
             <entry><para>The time between time updates for celetial body
@@ -350,8 +349,6 @@
               </variablelist></entry>
           </row>
 
-        
-
           <row>
             <entry><guilabel>UseTTForEphemeris</guilabel></entry>
 
@@ -484,8 +481,7 @@
 
     <itemizedlist>
       <listitem>
-        <para>For more information on the DE files provided by JPL see 
-        <link
+        <para>For more information on the DE files provided by JPL see <link
         xlink:href="http://iau-comm4.jpl.nasa.gov/README">here</link>.</para>
       </listitem>
 

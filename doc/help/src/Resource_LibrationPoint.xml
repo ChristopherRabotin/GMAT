@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -36,7 +34,8 @@
     (CRTBP). There are five libration points, three of which are unstable in
     the CRTBP sense, and two that are stable. See the discussion below for a
     detailed explanation of the different libration points and for examples
-    configuring GMAT for common libration point regimes.</para>
+    configuring GMAT for common libration point regimes. This resource cannot
+    be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Barycenter"/></para>

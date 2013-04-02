@@ -16,15 +16,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Propagator</refname>
 
-    <refpurpose>A propagator models spacecraft motion.</refpurpose>
+    <refpurpose>A propagator models spacecraft motion</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -37,8 +35,11 @@
     suite of numerical integrators implementing Runge-Kutta and predictor
     corrector methods. Numeric <guilabel>Propagators</guilabel> also require a
     <guilabel>ForceModel</guilabel>. Additionally, you can configure a
-    <guilabel>Propagator</guilabel> to use SPICE kernels for
-    propopagation.</para>
+    <guilabel>Propagator</guilabel> to use SPICE kernels for propopagation.
+    This resource cannot be modified in the Mission Sequence. However, you set
+    one <guilabel>Propagator</guilabel> equal to another
+    <guilabel>Propagator</guilabel> in the mission,( i.e.
+    <literal>myPropagator = yourPropagator</literal> ).</para>
 
     <para>GMAT's documentation for <guilabel>Propagator</guilabel> components
     is broken down into three sections:</para>
@@ -83,7 +84,10 @@
       setting on the same dialog box. See the <xref
       linkend="Propagator_Numeric_Remarks" xrefstyle="select:title"/> section
       below for detailed discussion of GMAT’s numerical integrators as well as
-      performance and accuracy comparisons, and usage recommendations.</para>
+      performance and accuracy comparisons, and usage recommendations. This
+      resource cannot be modified in the Mission Sequence. However, you can do
+      whole object assignment in the mission,( i.e. <literal>myPropagator =
+      yourPropagator</literal> ).</para>
 
       <para>When working in the script, you must create a
       <guilabel>ForceModel</guilabel> object separately from the
@@ -1085,7 +1089,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
       configured in the <guilabel>ForceModel</guilabel> object, and may
       include thrust terms in the case of powered flight. See the discussion
       below for detailed information on how to configure force models for your
-      application.</para>
+      application. This resource cannot be modified in the Mission
+      Sequence.</para>
 
       <para><phrase role="ref_seealso">See Also</phrase>: <xref
       linkend="Propagator"/></para>
@@ -2564,7 +2569,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
       and the <guilabel>NAIFId</guilabel> are defined on the
       <guilabel>Spacecraft</guilabel> Resource. You control propagation,
       including stopping conditions, using the <guilabel>Propagate</guilabel>
-      command.</para>
+      command. This resource cannot be modified in the Mission Sequence.
+      However, you can do whole object assignment in the mission,( i.e.
+      <literal>myPropagator = yourPropagator</literal> ).</para>
 
       <para><phrase role="ref_seealso">See Also</phrase>: <xref
       linkend="Spacecraft"/>, <xref linkend="Propagate"/></para>

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -33,7 +31,8 @@
     <para>A <guilabel>GroundStation</guilabel> models a facility fixed to the
     surface of a <guilabel>CelestialBody</guilabel>. There are several state
     representations available for defining the location of a ground station
-    including Cartesian and spherical.</para>
+    including Cartesian and spherical. This resource cannot be modified in the
+    Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="CoordinateSystem"/></para>
@@ -251,7 +250,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set, </para>
+                    <para>set,</para>
                   </listitem>
                 </varlistentry>
 

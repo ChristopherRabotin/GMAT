@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -41,7 +39,8 @@
     <guilabel>ObjectReferenced</guilabel> among others.
     <guilabel>CoordinateSystems</guilabel> are tightly integrated into GMAT to
     enable you to define, report, and visualize data in coordinate systems
-    relevant to your application.</para>
+    relevant to your application. This resource cannot be modified in the
+    Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Spacecraft"/>, <xref linkend="CalculationParameters"/>, <xref

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -34,7 +32,8 @@
     celestial bodies. GMAT contains two barycenter resources: a built-in
     <guilabel>SolarSystemBarycenter</guilabel> resource and the
     <guilabel>Barycenter</guilabel> resource that allows you to build a custom
-    <guilabel>Barycenter</guilabel> such as the Earth-Moon barycenter.</para>
+    <guilabel>Barycenter</guilabel> such as the Earth-Moon barycenter. This
+    resource cannot be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="LibrationPoint"/>, <xref linkend="CoordinateSystem"/>, <xref

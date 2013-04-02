@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -34,7 +32,8 @@
     spacecraft in a “container” object and then GMAT’s propagation subsystem
     will model the collection of spacecraft as a coupled dynamic system. You
     can only propagate <guilabel>Formation</guilabel> resources using
-    numerical-integrator type propagators.</para>
+    numerical-integrator type propagators. This resource cannot be modified in
+    the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Propagate"/></para>

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -423,8 +421,8 @@
             <entry><guilabel>AttitudeSpiceKernelName</guilabel></entry>
 
             <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel>
-            attitude. SPK atttitude kernels have extension ".BC".</para>
-            <variablelist>
+            attitude. SPK atttitude kernels have extension ".BC". This field
+            cannot be set in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -480,7 +478,7 @@
 
             <entry><para>Component (1,1) of the Direction Cosine Matrix.
             <guilabel>DCM11</guilabel> is used for the following Attitude
-            models: <guilabel>Spinner</guilabel>.</para> <variablelist>
+            models: <guilabel>Spinner</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1325,8 +1323,8 @@
             <entry><guilabel>FrameSpiceKernelName</guilabel></entry>
 
             <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel> body
-            frame. SPK Frame kernels have extension ".TF".</para>
-            <variablelist>
+            frame. SPK Frame kernels have extension ".TF". This field cannot
+            be set in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1900,7 +1898,8 @@
             <entry><guilabel>SCClockSpiceKernelName</guilabel></entry>
 
             <entry><para>SPK Kernels for spacecraft clock. SPK clock kernels
-            have extension ".TSC".</para> <variablelist>
+            have extension ".TSC". This field cannot be set in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
