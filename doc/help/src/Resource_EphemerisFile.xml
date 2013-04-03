@@ -75,9 +75,11 @@
             <entry><guilabel>InterpolationOrder</guilabel></entry>
 
             <entry><para>Allows you to set the interpolation order for the
-            available interpolator methods (Lagrange or Hermite) for either
-            CCSDS-OEM or SPK file formats. This field cannot be modified in
-            the Mission Sequence.</para> <variablelist>
+            available interpolator methods (<guilabel>Lagrange</guilabel> or
+            <guilabel>Hermite</guilabel>) for either
+            <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
+            formats. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -209,13 +211,12 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>UTCGregorian</guilabel>,
-                    <guilabel>UTCModJulian</guilabel>,
-                    <guilabel>TAIGregorian</guilabel>,
-                    <guilabel>TAIModJulian</guilabel>,
-                    <guilabel>TTGregorian</guilabel>,
-                    <guilabel>TTModJulian</guilabel>,
-                    <guilabel>A1Gregorian</guilabel>,
+                    <para><guilabel>UTCGregorian</guilabel>,<guilabel>
+                    UTCModJulian</guilabel>,<guilabel>
+                    TAIGregorian</guilabel>,<guilabel>
+                    TAIModJulian</guilabel>,<guilabel>
+                    TTGregorian</guilabel>,<guilabel>
+                    TTModJulian</guilabel>,<guilabel> A1Gregorian</guilabel>,
                     <guilabel>A1ModJulian</guilabel></para>
                   </listitem>
                 </varlistentry>
