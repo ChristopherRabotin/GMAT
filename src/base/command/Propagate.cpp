@@ -1567,7 +1567,8 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
 
    // Propagate needs to know about Spacecraft, Formation, PropSetup, Parameter
    if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION &&
-       type != Gmat::PROP_SETUP && type != Gmat::PARAMETER)
+       type != Gmat::PROP_SETUP && type != Gmat::PARAMETER &&
+       type != Gmat::COORDINATE_SYSTEM)
       return true;
 
    StringArray::iterator pos;
@@ -1709,6 +1710,60 @@ const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
       for (UnsignedInt i = 0; i < stopWhen.size(); i++)
       {
          StringArray refNames = stopWhen[i]->GetRefObjectNameArray(Gmat::PARAMETER);
+         for (UnsignedInt j = 0; j < refNames.size(); j++)
+         {
+            #ifdef DEBUG_PROPAGATE_OBJ
+            MessageInterface::ShowMessage
+               ("      refNames[%d]='%s'\n", j, refNames[j].c_str());
+            #endif
+
+            if (find(refObjectNames.begin(), refObjectNames.end(), refNames[j]) ==
+                refObjectNames.end())
+               refObjectNames.push_back(refNames[j]);
+         }
+      }
+   }
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::COORDINATE_SYSTEM)
+   {
+      #ifdef DEBUG_PROPAGATE_OBJ
+      MessageInterface::ShowMessage
+         ("   The type is CoordinateSystem, stopNames.size()=%d, goalNames.size()=%d, "
+          "stopWhen.size()=%d\n", stopNames.size(), goalNames.size(), stopWhen.size());
+      #endif
+
+//      // Add LHS of stopping condition
+//      for (UnsignedInt i = 0; i < stopNames.size(); i++)
+//      {
+//         #ifdef DEBUG_PROPAGATE_OBJ
+//         MessageInterface::ShowMessage
+//            ("      stopName[%d]='%s'\n", i, stopNames[i].c_str());
+//         #endif
+//
+//         if (!GmatStringUtil::IsNumber(stopNames[i]) &&
+//             find(refObjectNames.begin(), refObjectNames.end(), stopNames[i]) ==
+//             refObjectNames.end())
+//            refObjectNames.push_back(stopNames[i]);
+//      }
+//
+//      // Add RHS of stopping condition
+//      for (UnsignedInt i = 0; i < goalNames.size(); i++)
+//      {
+//         #ifdef DEBUG_PROPAGATE_OBJ
+//         MessageInterface::ShowMessage
+//            ("      goalName[%d]='%s'\n", i, goalNames[i].c_str());
+//         #endif
+//
+//         if (!GmatStringUtil::IsNumber(goalNames[i]) &&
+//             find(refObjectNames.begin(), refObjectNames.end(), goalNames[i]) ==
+//             refObjectNames.end())
+//            refObjectNames.push_back(goalNames[i]);
+//      }
+
+
+      // Add StopCondition coordinate systems
+      for (UnsignedInt i = 0; i < stopWhen.size(); i++)
+      {
+         StringArray refNames = stopWhen[i]->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
          for (UnsignedInt j = 0; j < refNames.size(); j++)
          {
             #ifdef DEBUG_PROPAGATE_OBJ

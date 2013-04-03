@@ -1947,7 +1947,8 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
        rhsWrapper, rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
    #endif
    
-   if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
+   if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER &&
+       type != Gmat::COORDINATE_SYSTEM)
       return true;
    
    // set new StopCondition name
