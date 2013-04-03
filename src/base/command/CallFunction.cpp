@@ -744,6 +744,12 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
             mInputNames[i] = newName;
             break;
          }
+         std::string arrName = GmatStringUtil::GetArrayName(mInputNames[i], "[]");
+         if (arrName == oldName)
+         {
+            mInputNames[i] =
+               GmatStringUtil::Replace(mInputNames[i], oldName, newName);
+         }
       }
 
       for (unsigned int i=0; i<mOutputNames.size(); i++)
@@ -753,11 +759,18 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
             mOutputNames[i] = newName;
             break;
          }
+         std::string arrName = GmatStringUtil::GetArrayName(mOutputNames[i], "[]");
+         if (arrName == oldName)
+         {
+            mOutputNames[i] =
+               GmatStringUtil::Replace(mOutputNames[i], oldName, newName);
+         }
       }
    }
    // Since parameter name is composed of spacecraftName.dep.paramType or
    // burnName.dep.paramType, check the type first
    else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+            type == Gmat::HARDWARE   || type == Gmat::IMPULSIVE_BURN ||
             type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
    {
       

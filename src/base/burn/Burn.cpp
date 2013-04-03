@@ -860,6 +860,11 @@ bool Burn::RenameRefObject(const Gmat::ObjectType type,
       if (satName == oldName)
          satName = newName;
    }
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (coordSystemName == oldName)
+         coordSystemName = newName;
+   }
    
    return true;
 }
