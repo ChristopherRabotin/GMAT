@@ -2365,6 +2365,12 @@ void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
    
    Rmatrix33 cosMat = sat->GetAttitude(time);
    Rvector quat = Attitude::ToQuaternion(cosMat);
+
+   #ifdef DEBUG_ATTITUDE
+   MessageInterface::ShowMessage("Attitude quaternion for %s: [%lf  %lf  %lf  %lf]\n", 
+      sat->GetName().c_str(), quat[0], quat[1], quat[2], quat[3]);
+   #endif
+
    mObjectQuat[attIndex+0] = quat[0];
    mObjectQuat[attIndex+1] = quat[1];
    mObjectQuat[attIndex+2] = quat[2];
