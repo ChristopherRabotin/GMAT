@@ -16,15 +16,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>OrbitView</refname>
 
-    <refpurpose>OrbitView is a user-defined resource that plots 3-Dimensional
+    <refpurpose>A user-defined resource that plots 3-Dimensional
     trajectories</refpurpose>
   </refnamediv>
 
@@ -95,12 +93,13 @@
             message will be displayed in the message window. The following
             warning message is sufficient: The OrbitView named
             "DefaultOrbitView" will be turned off. No SpacePoints were added
-            to plot. </para> <variablelist>
+            to plot. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>StringList</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -108,8 +107,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>SpacecraftName, CelestialBodyName,
-                    LibrationPointName, BarycenterName</para>
+                    <para>Spacecraft, CelestialBody, LibrationPoint,
+                    Barycenter</para>
                   </listitem>
                 </varlistentry>
 
@@ -150,16 +149,16 @@
           <row>
             <entry><guilabel>Axes</guilabel></entry>
 
-            <entry><para>Allows the user
-            to tell GMAT to draw the Cartesian axis system associated with the
-            coordinate system selected under the
-            <guilabel>CoordinateSystem</guilabel> field of an
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <entry><para>Allows the user to tell GMAT to draw the Cartesian
+            axis system associated with the coordinate system selected under
+            the <guilabel>CoordinateSystem</guilabel> field of an
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -208,15 +207,15 @@
           <row>
             <entry><guilabel>EclipticPlane</guilabel></entry>
 
-            <entry><para>Allows
-            the user to tell GMAT to draw a grid representing the
-            <guilabel>Ecliptic Plane</guilabel> in an
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <entry><para>Allows the user to tell GMAT to draw a grid
+            representing the <guilabel>Ecliptic Plane</guilabel> in an
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -265,22 +264,23 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>Allows the user to select
-            which <guilabel>coordinate system</guilabel> to use to draw the
-            plot data. A <guilabel>coordinate system</guilabel> is defined as
-            an <guilabel>origin</guilabel> and an <guilabel>axis
+            <entry><para>Allows the user to select which <guilabel>coordinate
+            system</guilabel> to use to draw the plot data. A
+            <guilabel>coordinate system</guilabel> is defined as an
+            <guilabel>origin</guilabel> and an <guilabel>axis
             system</guilabel>. The <guilabel>CoordinateSystem</guilabel> field
             allows the user to determine the <guilabel>origin</guilabel> and
             <guilabel>axis system</guilabel> of an
             <guilabel>OrbitView</guilabel> plot. See the
             <guilabel>CoordinateSystem</guilabel> object fields for
             information of defining different types of <guilabel>coordinate
-            systems</guilabel>. </para> <variablelist>
+            systems</guilabel>. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -329,14 +329,15 @@
           <row>
             <entry><guilabel>DataCollectFrequency</guilabel></entry>
 
-            <entry><para>Allows the user to define how data is collected for plotting. It
-            is often inefficient to draw every ephemeris point associated with
-            a trajectory. Often, drawing a smaller subset of the data still
-            results in smooth trajectory plots, while executing more quickly.
-            The <guilabel>DataCollectFrequency</guilabel> is an integer that
-            represents how often to collect data and store for plotting. If
-            <guilabel>DataCollectFrequency</guilabel> is set to 10, then data
-            is collected every 10 integration steps. </para> <variablelist>
+            <entry><para>Allows the user to define how data is collected for
+            plotting. It is often inefficient to draw every ephemeris point
+            associated with a trajectory. Often, drawing a smaller subset of
+            the data still results in smooth trajectory plots, while executing
+            more quickly. The <guilabel>DataCollectFrequency</guilabel> is an
+            integer that represents how often to collect data and store for
+            plotting. If <guilabel>DataCollectFrequency</guilabel> is set to
+            10, then data is collected every 10 integration steps. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -393,12 +394,13 @@
             <entry><para> The <guilabel>DrawObject</guilabel> field allows the
             user the option of displaying <guilabel>Spacecraft</guilabel> or
             <guilabel>Celestial</guilabel> objects on the
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean array</para>
                   </listitem>
                 </varlistentry>
 
@@ -447,13 +449,15 @@
           <row>
             <entry><guilabel>EnableConstellations </guilabel></entry>
 
-            <entry><para>Allows the user the option of displaying star constellations on
-            the <guilabel>OrbitView</guilabel> Plot. </para> <variablelist>
+            <entry><para>Allows the user the option of displaying star
+            constellations on the <guilabel>OrbitView</guilabel> Plot. This
+            field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -502,17 +506,17 @@
           <row>
             <entry><guilabel>EnableStars </guilabel></entry>
 
-            <entry><para>Allows
-            the user the option of displaying stars on the
+            <entry><para>Allows the user the option of displaying stars on the
             <guilabel>OrbitView</guilabel> Plot. When the
             <guilabel>EnableStars</guilabel> field is turned off, then
             <guilabel>EnableConstellations</guilabel> field is automatically
-            diabled. </para> <variablelist>
+            diabled. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -561,15 +565,15 @@
           <row>
             <entry><guilabel>Grid </guilabel></entry>
 
-            <entry><para>Allows the user
-            to draw a grid representing the longitude and latitude lines on
-            the celestial bodies added to an <guilabel>OrbitView</guilabel>
-            plot. </para> <variablelist>
+            <entry><para>Allows the user to draw a grid representing the
+            longitude and latitude lines on the celestial bodies added to an
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -618,14 +622,14 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para>Allows the
-            user to maximize the <guilabel>OrbitView</guilabel> plot window.
-            </para> <variablelist>
+            <entry><para>Allows the user to maximize the
+            <guilabel>OrbitView</guilabel> plot window. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -680,7 +684,8 @@
             integer, say 10 for example, only the last 10 collected data
             points are drawn. See <guilabel>DataCollectFrequency</guilabel>
             for explanation of how data is collected for an
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -734,14 +739,14 @@
           <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
-            <entry><para>Allows the
-            user to be able to select colors for both spacecraft and celestial
-            body trajectories. </para> <variablelist>
+            <entry><para>Allows the user to be able to select colors for both
+            spacecraft and celestial body trajectories. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -791,19 +796,19 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para>Allows the
-            user to select which <guilabel>OrbitView</guilabel> window to
-            display first on the screen. The <guilabel>
-            OrbitViewPlot</guilabel> with lowest
+            <entry><para>Allows the user to select which
+            <guilabel>OrbitView</guilabel> window to display first on the
+            screen. The <guilabel> OrbitViewPlot</guilabel> with lowest
             <guilabel>RelativeZOrder</guilabel> value will be displayed last
             while <guilabel>OrbitViewPlot</guilabel> with highest
             <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-            </para> <variablelist>
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -811,7 +816,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any real number</para>
+                    <para>Integer ≥ 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -852,16 +857,16 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para>Allows the
-            user to turn off a plot for a particular run, without deleting the
-            plot object, or removing it from the script. If you select true,
-            then the plot will be shown. If you select false, then the plot
-            will not be shown. </para> <variablelist>
+            <entry><para>Allows the user to turn off a plot for a particular
+            run, without deleting the plot object, or removing it from the
+            script. If you select true, then the plot will be shown. If you
+            select false, then the plot will not be shown. This field cannot
+            be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -910,17 +915,17 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para>Allows the user
-            to control the display size of <guilabel>OrbitViewPlot</guilabel>
-            window. First value in [0 0] matrix controls horizonal size and
-            second value controls vertical size of
-            <guilabel>OrbitViewPlot</guilabel> display window. </para>
+            <entry><para>Allows the user to control the display size of
+            <guilabel>OrbitViewPlot</guilabel> window. First value in [0 0]
+            matrix controls horizonal size and second value controls vertical
+            size of <guilabel>OrbitViewPlot</guilabel> display window. This
+            field cannot be modified in the Mission Sequence. </para>
             <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -969,11 +974,10 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para>This field
-            determines whether or not data associated with perturbed
-            trajectories during a solver (<guilabel>Targeter</guilabel>,
-            <guilabel>Optimize</guilabel>) sequence is plotted to
-            <guilabel>OrbitView</guilabel>. When
+            <entry><para>This field determines whether or not data associated
+            with perturbed trajectories during a solver
+            (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
+            sequence is plotted to <guilabel>OrbitView</guilabel>. When
             <guilabel>SolverIterations</guilabel> is set to
             <guilabel>All</guilabel>, all perturbations/iterations are plotted
             to an <guilabel>OrbitView</guilabel> plot. When
@@ -1037,9 +1041,10 @@
           <row>
             <entry><guilabel>StarCount</guilabel></entry>
 
-            <entry><para>Allows the
-            user to enter the number of stars that need to be displayed in an
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <entry><para>Allows the user to enter the number of stars that
+            need to be displayed in an <guilabel>OrbitView</guilabel> plot.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1093,15 +1098,15 @@
           <row>
             <entry><guilabel>SunLine</guilabel></entry>
 
-            <entry><para>Allows the
-            user to tell GMAT to draw a line that starts at the center of
-            central body and points towards the <guilabel>Sun</guilabel>.
-            </para> <variablelist>
+            <entry><para>Allows the user to tell GMAT to draw a line that
+            starts at the center of central body and points towards the
+            <guilabel>Sun</guilabel>. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -1150,16 +1155,16 @@
           <row>
             <entry><guilabel>TargetColor</guilabel></entry>
 
-            <entry><para>Allows
-            the user to select any available color for perturbing trajectories
-            during iterative processes such as <guilabel>Differential
-            Correction</guilabel> or <guilabel>Optimization</guilabel>.
-            </para> <variablelist>
+            <entry><para>Allows the user to select any available color for
+            perturbing trajectories during iterative processes such as
+            <guilabel>Differential Correction</guilabel> or
+            <guilabel>Optimization</guilabel>. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer array</para>
                   </listitem>
                 </varlistentry>
 
@@ -1220,7 +1225,8 @@
             <guilabel>UpdatePlotFrequency</guilabel> is set to 10 and
             <guilabel>DataCollectFrequency</guilabel> is set to 2, then the
             plot is updated with new data every 20 (10*2) integration steps.
-            </para> <variablelist>
+            This field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1274,16 +1280,17 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para>Allows the
-            user to pan the <guilabel>OrbitView </guilabel>plot window in any
-            direction. First value in [0 0] matrix helps to pan the
-            <guilabel>OrbitView</guilabel> window horizontally and second
-            value helps to pan the window vertically. </para> <variablelist>
+            <entry><para>Allows the user to pan the <guilabel>OrbitView
+            </guilabel>plot window in any direction. First value in [0 0]
+            matrix helps to pan the <guilabel>OrbitView</guilabel> window
+            horizontally and second value helps to pan the window vertically.
+            This field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -1332,10 +1339,10 @@
           <row>
             <entry><guilabel>UseInitialView</guilabel></entry>
 
-            <entry><para>Allows
-            the user to control the view of an <guilabel>OrbitView</guilabel>
-            plot between multiple runs of a mission sequence. The first time a
-            specific <guilabel>OrbitView</guilabel> plot is created, GMAT will
+            <entry><para>Allows the user to control the view of an
+            <guilabel>OrbitView</guilabel> plot between multiple runs of a
+            mission sequence. The first time a specific
+            <guilabel>OrbitView</guilabel> plot is created, GMAT will
             automatically use the view as defined by the fields associated
             with <guilabel>View Definition</guilabel>, <guilabel>View Up
             Direction</guilabel>, and <guilabel>View Option</guilabel>.
@@ -1344,12 +1351,13 @@
             <guilabel>UseInitialView</guilabel> is set to false. If
             <guilabel>UseInitialView</guilabel> is set to true, the view for
             an <guilabel>OrbitView</guilabel> plot will be returned to the
-            view defined by the initial settings. </para> <variablelist>
+            view defined by the initial settings. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -1398,8 +1406,7 @@
           <row>
             <entry><guilabel>ViewDirection</guilabel></entry>
 
-            <entry><para>Allows
-            the user to select the direction of view in an
+            <entry><para>Allows the user to select the direction of view in an
             <guilabel>OrbitView</guilabel> plot. The user can specify the view
             direction by choosing an object to point at such as a
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
@@ -1409,13 +1416,14 @@
             <guilabel>ViewDirection</guilabel>,
             <guilabel>ViewPointReference</guilabel>, and
             <guilabel>ViewPointVector</guilabel> results in a zero vector,
-            GMAT uses [0 0 10000] for <guilabel>ViewDirection</guilabel>.
-            </para> <variablelist>
+            GMAT uses [0 0 10000] for <guilabel>ViewDirection</guilabel>. This
+            field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -1423,9 +1431,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>SpacecraftName, CelestialBodyName,
-                    LibrationPointName, BarycenterName, or a 3-vector of
-                    numerical values</para>
+                    <para>Spacecraft, CelestialBody, LibrationPoint,
+                    Barycenter, or a 3-vector of numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1466,19 +1473,21 @@
           <row>
             <entry><guilabel>ViewPointReference</guilabel></entry>
 
-            <entry><para>This optional field that allows the user to change the reference
-            point from which <guilabel>ViewPointVector</guilabel> is measured.
+            <entry><para>This optional field that allows the user to change
+            the reference point from which
+            <guilabel>ViewPointVector</guilabel> is measured.
             <guilabel>ViewPointReference</guilabel> defaults to the origin of
             the coordinate system for the plot. A
             <guilabel>ViewPointReference</guilabel> can be any
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel>. </para> <variablelist>
+            <guilabel>Barycenter</guilabel>. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -1486,9 +1495,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>SpacecraftName, CelestialBodyName,
-                    LibrationPointName, BarycenterName, or a 3-vector of
-                    numerical values</para>
+                    <para>Spacecraft, CelestialBody, LibrationPoint,
+                    Barycenter, or a 3-vector of numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1541,12 +1549,13 @@
             vector addition of <guilabel>ViewPointReference</guilabel> and the
             vector defined by product of <guilabel>ViewScaleFactor</guilabel>
             and <guilabel>ViewPointVector</guilabel> in the coordinate system
-            chosen by the user. </para> <variablelist>
+            chosen by the user. This field cannot be modified in the Mission
+            Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -1554,9 +1563,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>SpacecraftName, CelestialBodyName,
-                    LibrationPointName, BarycenterName, or a 3-vector of
-                    numerical values</para>
+                    <para>Spacecraft, CelestialBody, LibrationPoint,
+                    Barycenter, or a 3-vector of numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1597,16 +1605,17 @@
           <row>
             <entry><guilabel>ViewScaleFactor</guilabel></entry>
 
-            <entry><para>This field
-            scales <guilabel>ViewPointVector</guilabel> before adding it to
+            <entry><para>This field scales
+            <guilabel>ViewPointVector</guilabel> before adding it to
             <guilabel>ViewPointReference</guilabel>. The
             <guilabel>ViewScaleFactor</guilabel> allows the user to back away
-            from an object to fit in the field of view. </para> <variablelist>
+            from an object to fit in the field of view. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -1655,18 +1664,18 @@
           <row>
             <entry><guilabel>ViewUpAxis</guilabel></entry>
 
-            <entry><para>Allows the
-            user to define which axis of the
+            <entry><para>Allows the user to define which axis of the
             <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as
             the up direction in an <guilabel>OrbitView</guilabel> plot. See
             the comments under <guilabel>ViewUpCoordinateSystem</guilabel> for
             more details of fields used to determine the up direction in an
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -1732,8 +1741,8 @@
             <guilabel>ViewUpCoordinateSystem</guilabel> allows the user to
             select a coordinate system to define the up direction. Most of the
             time this system will be the same as the coordinate system chosen
-            under the <guilabel>CoordinateSystem</guilabel> field. </para>
-            <variablelist>
+            under the <guilabel>CoordinateSystem</guilabel> field. This field
+            cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1791,12 +1800,13 @@
             to <guilabel>On</guilabel>, celestial bodies are drawn using a
             wireframe model. When the <guilabel>WireFrame</guilabel> field is
             set to <guilabel>Off</guilabel>, then celestial bodies are drawn
-            using a full map. </para> <variablelist>
+            using a full map. This field cannot be modified in the Mission
+            Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -1845,16 +1855,16 @@
           <row>
             <entry><guilabel>XYPlane</guilabel></entry>
 
-            <entry><para>Allows the
-            user to tell GMAT to draw a grid representing the
-            <guilabel>XY-plane</guilabel> of the coordinate system selected
-            under the <guilabel>CoordinateSystem</guilabel> field of the
-            <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
+            <entry><para>Allows the user to tell GMAT to draw a grid
+            representing the <guilabel>XY-plane</guilabel> of the coordinate
+            system selected under the <guilabel>CoordinateSystem</guilabel>
+            field of the <guilabel>OrbitView</guilabel> plot. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -1994,7 +2004,7 @@
       trajectory is plotted at each integration step until a <guilabel>Toggle
       Off</guilabel> command is used.</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create OrbitView anOrbitView
@@ -2089,7 +2099,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       trajectories of multiple spacecrafts that use different
       propagators:</para>
 
-<programlisting><code>Create Spacecraft aSat aSat2 aSat3
+      <programlisting><code>Create Spacecraft aSat aSat2 aSat3
 aSat2.INC = 45.0
 aSat3.INC = 90.0
 aSat3.SMA = 9000
@@ -2151,7 +2161,7 @@ Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></p
       off since no SpacePoints were added to the plot. Below is a sample
       script snippet that generates such a warning message:</para>
 
-<programlisting><code>Create Spacecraft aSat aSat2
+      <programlisting><code>Create Spacecraft aSat aSat2
 Create Propagator aProp
 
 Create OrbitView anOrbitView
@@ -2169,7 +2179,7 @@ Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}</code></programlisting>
       <para>Propagate spacecraft for 1 day and plot the orbit at every
       integrator step:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create OrbitView anOrbitView
@@ -2186,7 +2196,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
       <guilabel>All</guilabel>. This means all iterations/perturbations will
       be plotted.</para>
 
-<programlisting>Create Spacecraft aSat
+      <programlisting>Create Spacecraft aSat
 Create Propagator aProp
 
 Create ImpulsiveBurn TOI
@@ -2214,7 +2224,7 @@ EndTarget</programlisting>
       This example shows how to plot a spacecraft’s trajectory around
       Luna:</para>
 
-<programlisting>Create Spacecraft aSat
+      <programlisting>Create Spacecraft aSat
   
 Create CoordinateSystem LunaMJ2000Eq
 LunaMJ2000Eq.Origin = Luna
@@ -2244,14 +2254,15 @@ anOrbitView.ViewDirection = Luna
 
 BeginMissionSequence
 
-Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting></informalexample>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting>
+    </informalexample>
 
     <informalexample>
       <para>Plotting spacecraft’s trajectory around non-default central body.
       This example shows how to plot a spacecraft’s trajectory around
       Mars:</para>
 
-<programlisting>Create Spacecraft aSat
+      <programlisting>Create Spacecraft aSat
 
 Create CoordinateSystem MarsMJ2000Eq
 MarsMJ2000Eq.Origin = Mars
@@ -2281,7 +2292,8 @@ anOrbitView.ViewDirection = Mars
 
 BeginMissionSequence
 
-Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting></informalexample>
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting>
+    </informalexample>
 
     <informalexample>
       <para>Plotting spacecraft’s trajectory around non-default central body.
@@ -2291,7 +2303,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting></informalexample>
       interplanetary trajectory is drawn around Sun in a SunView. Mars Orbit
       around Sun is also shown:</para>
 
-<programlisting>Create Spacecraft aSat
+      <programlisting>Create Spacecraft aSat
 
 aSat.CoordinateSystem = EarthMJ2000Eq
 aSat.DateFormat = UTCGregorian

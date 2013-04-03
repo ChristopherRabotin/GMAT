@@ -24,8 +24,8 @@
   <refnamediv>
     <refname>ClearPlot</refname>
 
-    <refpurpose>The ClearPlot command allows you to clear all data from an
-    XYPlot.</refpurpose>
+    <refpurpose>Allows you to clear all data from an
+    XYPlot</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>

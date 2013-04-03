@@ -16,16 +16,14 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>GroundTrackPlot</refname>
 
-    <refpurpose>GroundTrackPlot is a user-defined resource that draws
-    longitude and latitude time-history of a spacecraft</refpurpose>
+    <refpurpose>A user-defined resource that draws longitude and latitude
+    time-history of a spacecraft</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -71,8 +69,7 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para>Allows the user
-            to pick selected objects such as
+            <entry><para>Allows the user to pick selected objects such as
             <guilabel>Spacecraft(s)</guilabel> or
             <guilabel>GroundStation(s)</guilabel> whose ground track is drawn
             in <guilabel>GroundTrackPlot</guilabel>. To select multiple
@@ -80,7 +77,8 @@
             <guilabel>GroundStations</guilabel>, seperate the list by comma
             and enclose the list in curly brackets. For Example:
             <literal>DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
-            bGroundStation}</literal></para> <variablelist>
+            bGroundStation}.</literal> This field cannot be modified in the
+            Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -135,7 +133,8 @@
           <row>
             <entry><guilabel>CentralBody</guilabel></entry>
 
-            <entry><para> The central body of the Ground track plot </para>
+            <entry><para> The central body of the Ground track plot. This
+            field cannot be modified in the Mission Sequence.</para>
             <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -191,7 +190,8 @@
             <entry><guilabel>DataCollectFrequency</guilabel></entry>
 
             <entry><para> The number of integration steps to skip between plot
-            points</para> <variablelist>
+            points. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -243,11 +243,68 @@
           </row>
 
           <row>
+            <entry><guilabel>Maximized</guilabel></entry>
+
+            <entry><para>Allows the user to maximize the
+            <guilabel>GroundTrackPlot</guilabel> window. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true,false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>NumPointsToRedraw</guilabel></entry>
 
             <entry><para> The number of plot points to retain and redraw
-            during propagation and animation. 0 indicates to redraw all.
-            </para> <variablelist>
+            during propagation and animation. 0 indicates to redraw all. This
+            field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -299,11 +356,72 @@
           </row>
 
           <row>
+            <entry><guilabel>RelativeZOrder</guilabel></entry>
+
+            <entry><para>Allows the user to select which
+            <guilabel>GroundTrackPlot</guilabel> window to display first on
+            the screen. The <guilabel>GroundTrackPlot</guilabel> with lowest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed last
+            while <guilabel>GroundTrackPlot</guilabel> with highest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para>This field specifies
-            whether to show ground track plot during a mission run. </para>
-            <variablelist>
+            <entry><para>This field specifies whether to show ground track
+            plot during a mission run. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -355,11 +473,69 @@
           </row>
 
           <row>
+            <entry><guilabel>Size</guilabel></entry>
+
+            <entry><para>Allows the user to control the display size of
+            <guilabel>GroundTrackPlot</guilabel> window. First value in [0 0]
+            matrix controls horizonal size and second value controls vertical
+            size of <guilabel>GroundTrackPlot</guilabel> display window. This
+            field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para>This field
-            determines whether or not ground track data associated with
-            perturbed trajectories during a solver
+            <entry><para>This field determines whether or not ground track
+            data associated with perturbed trajectories during a solver
             (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
             sequence is displayed in the <guilabel>GroundTrackPlot</guilabel>.
             When <guilabel>SolverIterations</guilabel> is set to
@@ -424,9 +600,9 @@
           <row>
             <entry><guilabel>TextureMap</guilabel></entry>
 
-            <entry><para>Allows you
-            to enter or select any user-defined texture map image for the
-            central body </para> <variablelist>
+            <entry><para>Allows you to enter or select any user-defined
+            texture map image for the central body. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -481,7 +657,8 @@
             <entry><guilabel>UpdatePlotFrequency</guilabel></entry>
 
             <entry><para> The number of plot points to collect before updating
-            a ground track plot. </para> <variablelist>
+            a ground track plot. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -527,6 +704,65 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Upperleft</guilabel></entry>
+
+            <entry><para>Allows the user to pan the
+            <guilabel>GroundTrackPlot</guilabel> display window in any
+            direction. First value in [0 0] matrix helps to pan the
+            <guilabel>GroundTrackPlot</guilabel> window horizontally and
+            second value helps to pan the window vertically. This field cannot
+            be modified in the Mission Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -580,7 +816,7 @@
       <guilabel>GroundTrackPlot</guilabel> is turned off for the first 2 days
       of the propagation:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create GroundTrackPlot aGroundTrackPlot
@@ -663,21 +899,21 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       </warning>
     </refsection>
 
-
     <refsection>
       <title>Behavior When Specifying Empty Brackets in GroundTrackPlot's Add
       Field</title>
 
-      <para>When using <guilabel>GroundTrackPlot.Add</guilabel> field, if brackets
-      are not populated with user-defined spacecrafts, then GMAT turns off
-      <guilabel>GroundTrackPlot</guilabel> resource and no plot is generated. If you
-      run the script with <guilabel>Add</guilabel> field having empty
-      brackets, then GMAT throws in a warning message in the Message Window
-      indicating that <guilabel>GroundTrackPlot</guilabel> resource will be turned
-      off since no SpacePoints were added to the plot. Below is a sample
-      script snippet that generates such a warning message:</para>
+      <para>When using <guilabel>GroundTrackPlot.Add</guilabel> field, if
+      brackets are not populated with user-defined spacecrafts, then GMAT
+      turns off <guilabel>GroundTrackPlot</guilabel> resource and no plot is
+      generated. If you run the script with <guilabel>Add</guilabel> field
+      having empty brackets, then GMAT throws in a warning message in the
+      Message Window indicating that <guilabel>GroundTrackPlot</guilabel>
+      resource will be turned off since no SpacePoints were added to the plot.
+      Below is a sample script snippet that generates such a warning
+      message:</para>
 
-<programlisting><code>Create Spacecraft aSat aSat2
+      <programlisting><code>Create Spacecraft aSat aSat2
 Create Propagator aProp
 Create GroundTrackPlot aGroundTrackPlot
 
@@ -697,7 +933,7 @@ Propagate aProp(aSat, aSat2) {aSat.ElapsedDays = 1}</code></programlisting>
       <guilabel>GroundTrackPlot</guilabel>. Spacecraft’s ground track is
       plotted for one day of propagation:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create GroundStation aGroundStation
@@ -714,7 +950,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
       <para>Propagate a spacecraft for two days around a non-default central
       body. Spacecraft’s ground track is plotted on planet Mars:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 aSat.CoordinateSystem = MarsJ2000Eq
 aSat.SMA = 8000
 aSat.ECC = 0.0003

@@ -16,16 +16,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>ReportFile</refname>
 
-    <refpurpose>A ReportFile is a user-defined file where values of selected
-    objects can be viewed in a report format</refpurpose>
+    <refpurpose>Report data to a text file</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -71,15 +68,16 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para>Allows a user to
-            add any number of user-defined <guilabel>Variables</guilabel>,
-            <guilabel>Arrays</guilabel>, <guilabel>Strings</guilabel> or
-            <guilabel>Object Parameters</guilabel> to a report file. To add
-            multiple user-defined variables or parameters, enclose the
-            reported values with curly brackets. Ex. MyReportName.Add ={Sat.X,
-            Sat.Y, Var1, Array(1,1)}; The GUI's <guilabel>Selected</guilabel>
+            <entry><para>Allows a user to add any number of user-defined
+            <guilabel>Variables</guilabel>, <guilabel>Arrays</guilabel>,
+            <guilabel>Strings</guilabel> or <guilabel>Object
+            Parameters</guilabel> to a report file. To add multiple
+            user-defined variables or parameters, enclose the reported values
+            with curly brackets. Ex. MyReportName.Add ={Sat.X, Sat.Y, Var1,
+            Array(1,1)}; The GUI's <guilabel>Selected</guilabel>
             <guilabel>Value(s</guilabel>) field is the equivalent of the
-            script's <guilabel>Add</guilabel> field. </para> <variablelist>
+            script's <guilabel>Add</guilabel> field. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -135,12 +133,11 @@
           <row>
             <entry><guilabel>ColumnWidth</guilabel></entry>
 
-            <entry><para>This field defines
-            the width of the data columns in a report file. The value for
-            <guilabel>ColumnWidth</guilabel> is applied to all columns of
-            data. For example, if <guilabel>ColumnWidth</guilabel> is set to
-            20, then each data column will be 20 white-spaces wide. </para>
-            <variablelist>
+            <entry><para>This field defines the width of the data columns in a
+            report file. The value for <guilabel>ColumnWidth</guilabel> is
+            applied to all columns of data. For example, if
+            <guilabel>ColumnWidth</guilabel> is set to 20, then each data
+            column will be 20 white-spaces wide. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -194,9 +191,8 @@
           <row>
             <entry><guilabel>Filename</guilabel></entry>
 
-            <entry><para>Allows the
-            user to define the file path and file name for a report
-            file.</para> <variablelist>
+            <entry><para>Allows the user to define the file path and file name
+            for a report file.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -307,11 +303,66 @@
           </row>
 
           <row>
+            <entry><guilabel>Maximized</guilabel></entry>
+
+            <entry><para>Allows the user to maximize the
+            <guilabel>ReportFile</guilabel> window. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true,false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Precision</guilabel></entry>
 
-            <entry><para>Allows the
-            user to set the number of digits of the data written to a report.
-            </para> <variablelist>
+            <entry><para>Allows the user to set the number of digits of the
+            data written to a report. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -363,13 +414,132 @@
           </row>
 
           <row>
+            <entry><guilabel>RelativeZOrder</guilabel></entry>
+
+            <entry><para>Allows the user to select which
+            <guilabel>ReportFile</guilabel> to display first on the screen.
+            The <guilabel>ReportFile</guilabel> with lowest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed last
+            while <guilabel>ReportFile</guilabel> with highest
+            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Size</guilabel></entry>
+
+            <entry><para>Allows the user to control the display size of
+            generated report file. First value in [0 0] matrix controls
+            horizonal size and second value controls vertical size of report
+            file window. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para> This field
-            determines whether or not data associated with perturbed
-            trajectories during a solver (<guilabel>Targeter</guilabel>,
-            <guilabel>Optimize</guilabel>) sequence is written to a report
-            file. When <guilabel>SolverIterations</guilabel> is set to
+            <entry><para> This field determines whether or not data associated
+            with perturbed trajectories during a solver
+            (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
+            sequence is written to a report file. When
+            <guilabel>SolverIterations</guilabel> is set to
             <guilabel>All</guilabel>, all perturbations/iterations are written
             to a report file. When <guilabel>SolverIterations</guilabel> is
             set to <guilabel>Current</guilabel>, only current solution is
@@ -429,11 +599,68 @@
           </row>
 
           <row>
+            <entry><guilabel>Upperleft</guilabel></entry>
+
+            <entry><para>Allows the user to pan the generated report file
+            display window in any direction. First value in [0 0] matrix helps
+            to pan the report file window horizontally and second value helps
+            to pan the window vertically. This field cannot be modified in the
+            Mission Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>WriteHeaders</guilabel></entry>
 
-            <entry><para> This field
-            specifies whether to include headers that describe the variables
-            in a report file.</para> <variablelist>
+            <entry><para> This field specifies whether to include headers that
+            describe the variables in a report file.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -487,9 +714,8 @@
           <row>
             <entry><guilabel>WriteReport</guilabel></entry>
 
-            <entry><para> This field specifies
-            whether to write data to the report <guilabel>FileName</guilabel>.
-            </para> <variablelist>
+            <entry><para> This field specifies whether to write data to the
+            report <guilabel>FileName</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -543,9 +769,8 @@
           <row>
             <entry><guilabel>ZeroFill</guilabel></entry>
 
-            <entry><para>Allows zeros to be
-            placed in data written to a report to match set precision. </para>
-            <variablelist>
+            <entry><para>Allows zeros to be placed in data written to a report
+            to match set precision. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

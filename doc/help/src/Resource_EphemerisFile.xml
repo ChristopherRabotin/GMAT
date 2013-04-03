@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -76,9 +74,10 @@
           <row>
             <entry><guilabel>InterpolationOrder</guilabel></entry>
 
-            <entry><para>Allows you to set the interpolation order for the available
-            interpolator methods (Lagrange or Hermite) for either CCSDS-OEM or
-            SPK file formats. </para> <variablelist>
+            <entry><para>Allows you to set the interpolation order for the
+            available interpolator methods (Lagrange or Hermite) for either
+            CCSDS-OEM or SPK file formats. This field cannot be modified in
+            the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -136,7 +135,8 @@
             that is specified for <guilabel>StepSize</guilabel> field. The
             user can generate ephemeris file at default Integration step size
             (using raw integrator steps) or by defining a Fixed step size
-            provided by user. </para> <variablelist>
+            provided by user. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -191,10 +191,10 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>Allows
-            you to select format of the epoch that the user defines in
-            <guilabel>InitialEpoch</guilabel> and
-            <guilabel>FinalEpoch</guilabel> fields. </para> <variablelist>
+            <entry><para>Allows you to select format of the epoch that the
+            user defines in <guilabel>InitialEpoch</guilabel> and
+            <guilabel>FinalEpoch</guilabel> fields. This field cannot be
+            modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -248,9 +248,9 @@
           <row>
             <entry><guilabel>FileFormat</guilabel></entry>
 
-            <entry><para>Allows the
-            user to generate ephemeris file in two available file formats:
-            CCSDS-OEM or SPK </para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris file in two
+            available file formats: CCSDS-OEM or SPK. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -304,9 +304,9 @@
           <row>
             <entry><guilabel>FileName</guilabel></entry>
 
-            <entry><para>Allows the
-            user to name the generated ephemeris file and save it in
-            user-specified location. </para> <variablelist>
+            <entry><para>Allows the user to name the generated ephemeris file
+            and save it in user-specified location. This field cannot be
+            modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -360,10 +360,10 @@
           <row>
             <entry><guilabel>FinalEpoch</guilabel></entry>
 
-            <entry><para>Allows the
-            user to specify the time span of an ephemeris file. Ephemeris file
-            is generated up to final epoch that is specified in
-            <guilabel>FinalEpoch</guilabel> field. </para> <variablelist>
+            <entry><para>Allows the user to specify the time span of an
+            ephemeris file. Ephemeris file is generated up to final epoch that
+            is specified in <guilabel>FinalEpoch</guilabel> field. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -418,10 +418,10 @@
           <row>
             <entry><guilabel>InitialEpoch</guilabel></entry>
 
-            <entry><para> Allows
-            the user to specify the starting epoch of the ephemeris file.
-            Ephemeris file is generated starting from the epoch that is
-            defined in <guilabel>InitialEpoch</guilabel> field. </para>
+            <entry><para> Allows the user to specify the starting epoch of the
+            ephemeris file. Ephemeris file is generated starting from the
+            epoch that is defined in <guilabel>InitialEpoch</guilabel> field.
+            This field cannot be modified in the Mission Sequence.</para>
             <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -477,11 +477,12 @@
           <row>
             <entry><guilabel>Interpolator</guilabel></entry>
 
-            <entry><para> This field defines
-            the available interpolator method that was used to generate
-            ephemeris file. Available <guilabel>Interpolators</guilabel> are
+            <entry><para> This field defines the available interpolator method
+            that was used to generate ephemeris file. Available
+            <guilabel>Interpolators</guilabel> are
             <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
-            </para> <variablelist>
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -535,9 +536,9 @@
           <row>
             <entry><guilabel>WriteEphemeris</guilabel></entry>
 
-            <entry><para>Allows the
-            user to optionally calculate/write or not calculate/write an
-            ephemeris that has been created and configured. </para>
+            <entry><para>Allows the user to optionally calculate/write or not
+            calculate/write an ephemeris that has been created and configured.
+            This field cannot be modified in the Mission Sequence.</para>
             <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -592,11 +593,12 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>Allows
-            the user to generate ephemeris data in the coordinate system that
-            is selected from <guilabel>CoordinateSystem</guilabel> field. The
-            user can choose to also generate ephemeris data in user-defined
-            coordinate system. </para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris data in the
+            coordinate system that is selected from
+            <guilabel>CoordinateSystem</guilabel> field. The user can choose
+            to also generate ephemeris data in user-defined coordinate system.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -650,9 +652,10 @@
           <row>
             <entry><guilabel>Spacecraft</guilabel></entry>
 
-            <entry><para>Allows the
-            user to generate ephemeris data of spacecraft(s) that are defined
-            in <guilabel>Spacecraft</guilabel> field. </para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris data of
+            spacecraft(s) that are defined in <guilabel>Spacecraft</guilabel>
+            field. This field cannot be modified in the Mission Sequence.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -707,11 +710,11 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para>Allows the
-            user to pan the generated ephemeris file display window in any
-            direction. First value in [0 0] matrix helps to pan the window
-            horizontally and second value helps to pan the window vertically.
-            </para> <variablelist>
+            <entry><para>Allows the user to pan the generated ephemeris file
+            display window in any direction. First value in [0 0] matrix helps
+            to pan the window horizontally and second value helps to pan the
+            window vertically. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -765,11 +768,11 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para>Allows the user
-            to control the display size of generated ephemeris file panel.
-            First value in [0 0] matrix controls horizonal size and second
-            value controls vertical size of ephemeris file display window.
-            </para> <variablelist>
+            <entry><para>Allows the user to control the display size of
+            generated ephemeris file panel. First value in [0 0] matrix
+            controls horizonal size and second value controls vertical size of
+            ephemeris file display window. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -823,14 +826,14 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para>Allows the
-            user to select which generated ephemeris file display window is to
-            displayed first on the screen. The
+            <entry><para>Allows the user to select which generated ephemeris
+            file display window is to displayed first on the screen. The
             <guilabel>EphemerisFile</guilabel> resource with lowest
             <guilabel>RelativeZOrder</guilabel> value will be displayed last
             while <guilabel>EphemerisFile</guilabel> resource with highest
             <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-            </para> <variablelist>
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -884,9 +887,9 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para>Allows the
-            user to maximize the generated ephemeris file window. </para>
-            <variablelist>
+            <entry><para>Allows the user to maximize the generated ephemeris
+            file window. This field cannot be modified in the Mission
+            Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1098,7 +1101,7 @@
       during last four days of propagation is sent to text file called
       ‘EphemerisFile1.eph’:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create EphemerisFile anEphmerisFile
@@ -1125,7 +1128,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       CCSDS file format. Ephemeris data is sent to text file called
       ‘EphemerisFile2.eph’:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create EphemerisFile anEphmerisFile
@@ -1144,7 +1147,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
       discontinuous event like an impulsive burn. Ephemeris data is sent to
       text file called ‘EphemerisFile3.eph’:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create ImpulsiveBurn TOI

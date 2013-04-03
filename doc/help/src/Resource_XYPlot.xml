@@ -15,16 +15,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>XYPlot</refname>
 
-    <refpurpose>XYPlot is a user-defined resource that plots data onto the X
-    and Y axes of a graph</refpurpose>
+    <refpurpose>Plots data onto the X and Y axes of a graph</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -71,9 +68,9 @@
           <row>
             <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para>Allows the
-            user to maximize the <guilabel>XYPlot</guilabel> window. </para>
-            <variablelist>
+            <entry><para>Allows the user to maximize the
+            <guilabel>XYPlot</guilabel> window. This field cannot be modified
+            in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -127,11 +124,12 @@
           <row>
             <entry><guilabel>UpperLeft</guilabel></entry>
 
-            <entry><para>Allows the
-            user to pan the <guilabel>XYPlot</guilabel> display window in any
-            direction. First value in [0 0] matrix helps to pan the
-            <guilabel>XYPlot</guilabel> window horizontally and second value
-            helps to pan the window vertically. </para> <variablelist>
+            <entry><para>Allows the user to pan the
+            <guilabel>XYPlot</guilabel> display window in any direction. First
+            value in [0 0] matrix helps to pan the <guilabel>XYPlot</guilabel>
+            window horizontally and second value helps to pan the window
+            vertically. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -185,13 +183,14 @@
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para>Allows the
-            user to select which <guilabel>XYPlot</guilabel> window to display
-            first on the screen. The <guilabel>XYPlot</guilabel> with lowest
+            <entry><para>Allows the user to select which
+            <guilabel>XYPlot</guilabel> window to display first on the screen.
+            The <guilabel>XYPlot</guilabel> with lowest
             <guilabel>RelativeZOrder</guilabel> value will be displayed last
             while <guilabel>XYPlot</guilabel> with highest
             <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-            </para> <variablelist>
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -248,8 +247,8 @@
             <entry><para> When the <guilabel>ShowGrid</guilabel> field is set
             to <guilabel>True</guilabel>, then a grid is drawn on an xy-plot.
             When the <guilabel>ShowGrid</guilabel> field is set to
-            <guilabel>False</guilabel>, then a grid is not drawn. </para>
-            <variablelist>
+            <guilabel>False</guilabel>, then a grid is not drawn. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -303,12 +302,12 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para>Allows the
-            user to turn off a plot for a particular run, without deleting the
-            plot object, or removing it from the script. If you select
-            <guilabel>True</guilabel>, then the plot will be shown. If you
-            select <guilabel>False</guilabel>, then the plot will not be
-            shown.</para> <variablelist>
+            <entry><para>Allows the user to turn off a plot for a particular
+            run, without deleting the plot object, or removing it from the
+            script. If you select <guilabel>True</guilabel>, then the plot
+            will be shown. If you select <guilabel>False</guilabel>, then the
+            plot will not be shown. This field cannot be modified in the
+            Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -362,11 +361,11 @@
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para>Allows the user
-            to control the display size of <guilabel>XYPlot</guilabel> window.
-            First value in [0 0] matrix controls horizonal size and second
-            value controls vertical size of <guilabel>XYPlot</guilabel>
-            display window.</para> <variablelist>
+            <entry><para>Allows the user to control the display size of
+            <guilabel>XYPlot</guilabel> window. First value in [0 0] matrix
+            controls horizonal size and second value controls vertical size of
+            <guilabel>XYPlot</guilabel> display window. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -420,11 +419,10 @@
           <row>
             <entry><guilabel>SolverIterations</guilabel></entry>
 
-            <entry><para>This field
-            determines whether or not data associated with perturbed
-            trajectories during a solver (<guilabel>Targeter</guilabel>,
-            <guilabel>Optimize</guilabel>) sequence is displayed in the
-            <guilabel>XYPlot</guilabel>. When
+            <entry><para>This field determines whether or not data associated
+            with perturbed trajectories during a solver
+            (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
+            sequence is displayed in the <guilabel>XYPlot</guilabel>. When
             <guilabel>SolverIterations</guilabel> is set to
             <guilabel>All</guilabel>, all perturbations/iterations are plotted
             in the <guilabel>XYPlot</guilabel>. When
@@ -487,14 +485,14 @@
           <row>
             <entry><guilabel>XVariable</guilabel></entry>
 
-            <entry><para>Allows the
-            user to define the independent variable for an
-            <guilabel>XYPlot</guilabel>. Only one variable can be defined as
-            an independent variable. For example, the line
-            <literal>MyXYPlot.XVariable = DefaultSC.A1ModJulian</literal>
-            sets the independent variable to be the epoch of
+            <entry><para>Allows the user to define the independent variable
+            for an <guilabel>XYPlot</guilabel>. Only one variable can be
+            defined as an independent variable. For example, the line
+            <literal>MyXYPlot.XVariable = DefaultSC.A1ModJulian</literal> sets
+            the independent variable to be the epoch of
             <guilabel>DefaultSC</guilabel> in the A1 time system and modified
-            Julian format. </para> <variablelist>
+            Julian format. This field cannot be modified in the Mission
+            Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -549,10 +547,14 @@
           <row>
             <entry><guilabel>YVariable</guilabel></entry>
 
-            <entry><para>Allows the user to add dependent variables to an xy-plot.
-            All dependent variables are plotted on the y-axis vs the independent variable defined by <guilabel>XVariable</guilabel> field.
-            The dependent variable(s) should always be included in curly braces. 
-            For example, <literal>MyXYPlot.YVariables = {DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z}</literal>.</para> <variablelist>
+            <entry><para>Allows the user to add dependent variables to an
+            xy-plot. All dependent variables are plotted on the y-axis vs the
+            independent variable defined by <guilabel>XVariable</guilabel>
+            field. The dependent variable(s) should always be included in
+            curly braces. For example, <literal>MyXYPlot.YVariables =
+            {DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z}</literal>.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -650,7 +652,7 @@
       <guilabel>Spacecraft’s</guilabel> position magnitude and semi-major-axis
       are plotted as a function of time.</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create XYPlot aXYPlot
@@ -691,7 +693,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       throws in an execption reminding you that brackets for
       <guilabel>YVariables</guilabel> field cannot be left empty.</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 Create XYPlot aXYPlot
 
@@ -762,7 +764,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
       <para>Propagate an orbit and plot the spacecraft’s altitude as a
       function of time at every integrator step:</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create XYPlot aXYPlot
@@ -780,7 +782,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       <guilabel>All</guilabel>. This means all iterations/perturbations will
       be plotted.</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
 
 Create ImpulsiveBurn TOI

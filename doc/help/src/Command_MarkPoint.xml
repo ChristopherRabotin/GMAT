@@ -24,8 +24,8 @@
   <refnamediv>
     <refname>MarkPoint</refname>
 
-    <refpurpose>The MarkPoint Command allows you to add a special mark point
-    character on an XYPlot.</refpurpose>
+    <refpurpose>Allows you to add a special mark point
+    character on an XYPlot</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>

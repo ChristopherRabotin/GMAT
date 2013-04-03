@@ -28,7 +28,7 @@
   <refnamediv>
     <refname>PenUpPenDown</refname>
 
-    <refpurpose>The PenUp and PenDown commands allow you to stop or begin
+    <refpurpose>Allows you to stop or begin
     drawing data on a plot</refpurpose>
   </refnamediv>
 
