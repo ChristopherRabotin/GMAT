@@ -163,12 +163,12 @@
             initial guess for the next time this Optimize sequence is run. The
             rest of the mission sequence is then executed. If
             <guilabel>ExitMode</guilabel> is set to
-            <literal>DiscardAndContinue</literal>, then the solution is
+            <guilabel>DiscardAndContinue</guilabel>, then the solution is
             discarded and the initial guess values specified in the
             <guilabel>Vary</guilabel> commands are used for each
             <guilabel>Optimize</guilabel> sequence execution. The rest of the
             mission sequence is then executed. If
-            <guilabel>ExitMode</guilabel> is set to <literal>Stop</literal>,
+            <guilabel>ExitMode</guilabel> is set to <guilabel>Stop</guilabel>,
             the <guilabel>Optimize</guilabel> sequence is executed, the
             solution is discarded, and the rest of the mission sequence is not
             executed. </para> <variablelist>
@@ -184,8 +184,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><literal>DiscardAndContinue</literal>,<literal>SaveAndContinue</literal>,
-                    <literal>Stop</literal></para>
+                    <para><guilabel>DiscardAndContinue</guilabel>,<guilabel>SaveAndContinue</guilabel>,
+                    <guilabel>Stop</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -193,7 +193,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><literal>DiscardAndContinu</literal>e</para>
+                    <para><guilabel>DiscardAndContinu</guilabel>e</para>
                   </listitem>
                 </varlistentry>
 
@@ -220,11 +220,11 @@
 
             <entry><para>Specifies how the optimization loop behaves during
             mission execution. When <guilabel>SolveMode</guilabel> is set to
-            <literal>Solve</literal>, the optimization loop executes and
+            <guilabel>Solve</guilabel>, the optimization loop executes and
             attempts to solve the optimization problem. When
             <guilabel>SolveMode</guilabel> is set to
-            <literal>RunInitialGuess</literal>, the Optimizer does not attempt
-            to solve the optimization problem and the commands in the
+            <guilabel>RunInitialGuess</guilabel>, the Optimizer does not
+            attempt to solve the optimization problem and the commands in the
             <guilabel>Optimize</guilabel> sequence execute using the initial
             guess values defined in the <guilabel>Vary</guilabel> commands.
             </para> <variablelist>
@@ -240,8 +240,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><literal>Solve</literal>,
-                    <literal>RunInitialGuess</literal></para>
+                    <para><guilabel>Solve</guilabel>,
+                    <guilabel>RunInitialGuess</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -250,7 +250,7 @@
 
                   <listitem>
                     <para>
-                      <literal>Solve</literal>
+                      <guilabel>Solve</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -282,7 +282,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Optimizer</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -291,8 +291,7 @@
 
                   <listitem>
                     <para>Any <guilabel>VD13ad</guilabel> or
-                    <guilabel>FminconOptimizer</guilabel> optimizer
-                    object.</para>
+                    <guilabel>FminconOptimizer</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -301,7 +300,7 @@
 
                   <listitem>
                     <para>
-                      <literal>DefaultSQP</literal>
+                      <guilabel>DefaultSQP</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
