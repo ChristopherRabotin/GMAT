@@ -111,15 +111,14 @@
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/NewMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject>) or start a new GMAT session. We will
-    use the default configurations for the spacecraft
-    (<guilabel>DefaultSC</guilabel>) and the propagator
-    (<guilabel>DefaultProp</guilabel>). <guilabel>DefaultSC</guilabel> is
-    configured by default to a near-circular orbit, and
-    <guilabel>DefaultProp</guilabel> is configured to use Earth as the central
-    body with a nonspherical gravity model of degree and order 4. You may want
-    to open the dialog boxes for these objects and inspect them more closely
-    as we will leave them at their default settings.</para>
+      </inlinemediaobject>) or start a new GMAT session. We will use the
+    default configurations for the spacecraft (<guilabel>DefaultSC</guilabel>)
+    and the propagator (<guilabel>DefaultProp</guilabel>).
+    <guilabel>DefaultSC</guilabel> is configured by default to a near-circular
+    orbit, and <guilabel>DefaultProp</guilabel> is configured to use Earth as
+    the central body with a nonspherical gravity model of degree and order 4.
+    You may want to open the dialog boxes for these objects and inspect them
+    more closely as we will leave them at their default settings.</para>
 
     <section>
       <title>Create a Thruster and a Fuel Tank</title>
@@ -265,7 +264,7 @@
 
       <para>Thrust = 1000 (Newtons)</para>
 
-      <para>ISO = 300 (seconds)</para>
+      <para>ISP = 300 (seconds)</para>
     </section>
 
     <section>
@@ -292,13 +291,7 @@
           <guilabel>Thrurster1</guilabel>. Then click the right arrow button
           to add <guilabel>Thruster1</guilabel> to the
           <guilabel>SelectedThrusters</guilabel> list. Click
-          <guilabel>OK</guilabel>. <inlinemediaobject>
-              <imageobject>
-                <imagedata align="center" contentdepth="10pt"
-                           fileref="files/images/Tut_TargetFiniteBurn_SC_GUI_Add_Resource.png"
-                           width="1em"/>
-              </imageobject>
-            </inlinemediaobject></para>
+          <guilabel>OK</guilabel>. </para>
         </step>
       </procedure>
 
