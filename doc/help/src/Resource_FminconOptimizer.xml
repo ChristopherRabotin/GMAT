@@ -45,9 +45,8 @@
     <para>This resource cannot be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="VF13adOptimizer"/>,<xref linkend="Optimize"/>,<xref
-    linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref
-    linkend="Minimize"/></para>
+    linkend="VF13ad"/>,<xref linkend="Optimize"/>,<xref linkend="Vary"/>,
+    <xref linkend="NonlinearConstraint"/>, <xref linkend="Minimize"/></para>
   </refsection>
 
   <refsection>

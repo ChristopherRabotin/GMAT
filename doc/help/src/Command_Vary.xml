@@ -48,7 +48,7 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="DifferentialCorrector"/>, <xref linkend="FminconOptimizer"/>,
-    <xref linkend="VF13adOptimizer"/>, <xref linkend="Target"/>, <xref
+    <xref linkend="VF13ad"/>, <xref linkend="Target"/>, <xref
     linkend="Optimize"/></para>
   </refsection>
 

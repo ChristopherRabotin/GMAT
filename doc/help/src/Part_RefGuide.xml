@@ -76,7 +76,7 @@
       <xi:include href="Resource_String.xml" />
       <xi:include href="Resource_Thruster.xml" />
       <xi:include href="Resource_Variable.xml" />
-      <xi:include href="Resource_VF13adOptimizer.xml" />
+      <xi:include href="Resource_VF13ad.xml" />
       <xi:include href="Resource_XYPlot.xml" />
     </reference>
 

@@ -74,7 +74,7 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref
-    linkend="Minimize"/>, <xref linkend="VF13adOptimizer"/></para>
+    linkend="Minimize"/>, <xref linkend="VF13ad"/></para>
   </refsection>
 
   <refsection>
