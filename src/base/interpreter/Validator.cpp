@@ -1299,7 +1299,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          theObj->SetStringParameter("Add", names[i]);
    }
    
-   // Special case for ReporFile, we need to create a wrapper for each
+   // Special case for ReportFile, we need to create a wrapper for each
    // Parameter that is added to ReportFile,
    // so call Interpreter::ValidateSubscriber() to create wrappers.
    // ReportFile.Add = {Sat1.A1ModJulian, Sat1.EarthMJ2000Eq.X}
@@ -1398,11 +1398,11 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       }
    }
 
-   // By this time, right side wrapper was created succesfully
+   // By this time, right side wrapper was created successfully
    bool retval = true;
    
-   // If left side wrapper is NULL, the error message was alredy pushed
-   // to buffer when an error was encluntered, so set skipErrorMessage to false
+   // If left side wrapper is NULL, the error message was already pushed
+   // to buffer when an error was encountered, so set skipErrorMessage to false
    // to avoid general error message handling.
    //if (leftEw == NULL)
    if (!isLeftValid)
