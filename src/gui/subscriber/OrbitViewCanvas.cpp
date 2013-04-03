@@ -2200,6 +2200,9 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          #ifdef DEBUG_ORBIT_LINES
          MessageInterface::ShowMessage("DrawOrbitLines() leaving, ===> position is zero\n");
          #endif
+
+         // Update the frame index so the attitude will update
+         mObjLastFrame[objId] = i;
          return;
       }
       
@@ -2567,6 +2570,13 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    
    Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
                           mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+
+   #ifdef DEBUG_ATTITUDE_DISPLAY
+      MessageInterface::ShowMessage("Quat[%d - %d]: [%lf  %lf  %lf  %lf]\n", 
+         attIndex, attIndex+3, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+         mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   #endif
+
    Rvector3 EARad = Attitude::ToEulerAngles(quat, 1,2,3);
    
    #ifdef DEBUG_SC_ATTITUDE
@@ -2578,7 +2588,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    float EAng1Deg = float(EARad(0)) * RTD;
    float EAng2Deg = float(EARad(1)) * RTD;
    float EAng3Deg = float(EARad(2)) * RTD;
-   
+
    // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
    float     offset[3];
    float     rotation[3];
@@ -2594,6 +2604,10 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    scModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
    scModel->SetBaseScale(scale, scale, scale);
    
+   #ifdef DEBUG_ATTITUDE_DISPLAY
+      MessageInterface::ShowMessage("Model angles: [%lf  %lf  %lf]\n", 
+         EAng1Deg, EAng2Deg, EAng3Deg);
+   #endif
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
@@ -2684,7 +2698,7 @@ void OrbitViewCanvas::DrawStars()
    // 4x4 column-major matrix
    //-----------------------------------------------------------------
    
-   // Get view to internal coordiante frame rotation matrix
+   // Get view to internal coordinate frame rotation matrix
    int coordIndex = mLastIndex*16;
    mCoordMatrix = Rmatrix(4,4);
    for (int i = 0; i < 4; i++)
@@ -2728,7 +2742,10 @@ void OrbitViewCanvas::RotateBodyUsingAttitude(const wxString &objName, int objId
    
    // Use saved rotation angle and axis
    GetBodyRotationData(objId, angInDeg, eAxis);
-   
+   #if DEBUG_ROTATE_BODY > 0
+      MessageInterface::ShowMessage("Rotate %s %lf deg about axis [%lf %lf %lf]\n", 
+         objName.c_str(), angInDeg, eAxis[0], eAxis[1], eAxis[2]);
+   #endif
    // Now rotate
    if (angInDeg != 0.0)
       glRotated(angInDeg, eAxis[0], eAxis[1], eAxis[2]);
