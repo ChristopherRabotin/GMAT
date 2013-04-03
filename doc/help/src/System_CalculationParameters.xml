@@ -254,7 +254,7 @@
     <refsection>
       <title>Spacecraft</title>
 
-      <informaltable>
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
           <colspec colnum="1" colwidth="1.5in"/>
 
@@ -4037,7 +4037,7 @@ aSat.Tanks = {aTank}</code></programlisting></para>
       dependency:<programlisting><code>Create ReportFile aReport
 aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
 
-      <informaltable>
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
           <colspec colnum="1" colwidth="1.5in"/>
 
@@ -4288,7 +4288,7 @@ aSat.Thrusters = {aThruster}</code></programlisting></para>
       dependency:<programlisting><code>Create ReportFile aReport
 aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
 
-      <informaltable>
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
           <colspec colnum="1" colwidth="1.5in"/>
 
@@ -5648,7 +5648,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
     <refsection>
       <title>ImpulsiveBurn</title>
 
-      <informaltable>
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
           <colspec colnum="1" colwidth="1.5in"/>
 

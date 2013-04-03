@@ -111,12 +111,12 @@
 
     <para>For this tutorial, you’ll need GMAT open, with the default mission
     loaded. To load the default mission, click <guiicon>New Mission</guiicon>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/NewMission.png" width="1em"></imagedata>
         </imageobject>
-      </inlinemediaobject></subscript>) or start a new GMAT session. We will
+      </inlinemediaobject>) or start a new GMAT session. We will
     use the default configurations for the spacecraft
     (<guilabel>DefaultSC</guilabel>), the propagator
     (<guilabel>DefaultProp</guilabel>), and the two maneuvers.
@@ -818,18 +818,18 @@
     <title>Run the Mission</title>
 
     <para>Before running the mission, click <guilabel>Save</guilabel>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/SaveMission.png" width="1em"></imagedata>
         </imageobject>
-      </inlinemediaobject></subscript>) and save the mission to a file of your
-    choice. Now click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+      </inlinemediaobject>) and save the mission to a file of your
+    choice. Now click <guilabel>Run</guilabel> (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/RunMission.png" width="1em"></imagedata>
         </imageobject>
-      </inlinemediaobject></subscript>). As the mission runs, you will see
+      </inlinemediaobject>). As the mission runs, you will see
     GMAT solve the targeting problem. Each iteration and perturbation is shown
     in <guilabel>DefaultOrbitView</guilabel> window in light blue, and the
     final solution is shown in red. After the mission completes, the 3D view

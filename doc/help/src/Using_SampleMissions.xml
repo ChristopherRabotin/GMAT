@@ -37,12 +37,12 @@
     </listitem>
 
     <listitem>
-      <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+      <para>Click <guilabel>Run</guilabel> (<inlinemediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="8pt"
                        fileref="files/images/icons/RunMission.png" width="1em"/>
           </imageobject>
-        </inlinemediaobject></subscript>).</para>
+        </inlinemediaobject>).</para>
     </listitem>
   </orderedlist>
 

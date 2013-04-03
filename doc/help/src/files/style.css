@@ -27,36 +27,52 @@ div.note {
 div.caution, div.warning {
     border: 1px solid black;
     background-color: #fecec7;
-	margin-top: 2em;
+    margin-top: 2em;
 }
 
 div.orderedlist, div.procedure {
-  margin-top: 2em;
+    margin-top: 2em;
 }
 
 .procedure li,.orderedlist li  {
-  margin-top: -1em;
+    margin-top: -1em;
 }
 
-.table table, .informaltable table{    
-     border-collapse:collapse;
-     margin:1em 0;
+/*
+ * Table properties
+ */
+.table table, .informaltable table {
+    border-top: black solid 1px;
+    border-left: none;
+    border-right: none;
+    border-bottom: black solid 1px;
+    border-spacing: 0px;
 }
 
 .table th, .informaltable th, .table td, .informaltable td {
-    text-align:left;
-	padding:0.25em;
-	border:1px solid #fff;
+    padding: 0.25em;
 }
+
 .table th, .informaltable th {
-     background:#4f81bd;
-	 color:#fff;
+    background: #365f91;
+    color:#fff;
+    border: none;
+    text-align: left;
 }
-.table td, .informaltable td{
-     background:#e5f1f4;
+
+.table td, .informaltable td {
+    background:#e5f1f4;
+    border-top: black solid 1px;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    vertical-align: top;
 }
 
+.variablelist table, .variablelist th, .variablelist td {
+    border: none;
+}
 
-
-
-
+.variablelist .term {
+    font-weight: bold;
+}

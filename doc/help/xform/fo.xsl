@@ -31,8 +31,17 @@
     <xsl:param name="title.font.family">Helvetica</xsl:param>
     <xsl:param name="monospace.font.family">Consolas, monospace</xsl:param>
 
-    <!-- Links -->
+    <!--
+         Links
+    -->
+    <!-- show URLs next to external links -->
     <xsl:param name="ulink.show">0</xsl:param>
+    <!-- turn links blue -->
+    <xsl:attribute-set name="xref.properties">
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
 
     <!-- Titles -->
     <xsl:attribute-set name="component.title.properties">
@@ -78,6 +87,18 @@
         </xsl:attribute>
         <xsl:attribute name="color">
             <!--<xsl:value-of select="$gray"/>-->
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
+        <xsl:attribute name="start-indent">
+            <xsl:value-of select="$body.start.indent"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
+    <!-- level 4 sections: blue, indented -->
+    <xsl:attribute-set name="section.title.level4.properties">
+        <xsl:attribute name="font-size">
+            <xsl:value-of select="$body.font.master"/>
+        </xsl:attribute>
+        <xsl:attribute name="color">
             <xsl:value-of select="$blue"/>
         </xsl:attribute>
         <xsl:attribute name="start-indent">
@@ -139,7 +160,7 @@
         /article  toc,title
         book      toc,title
         <!-- /chapter  toc,title -->
-        part      toc,title
+        <!-- part      toc,title -->
         /preface  toc,title
         reference toc,title
         /sect1    toc
@@ -491,9 +512,6 @@
     </xsl:attribute-set>
 
     <!-- Reference pages -->
-    <xsl:param name="refentry.generate.name">0</xsl:param>
-    <xsl:param name="refentry.generate.title">1</xsl:param>
-
     <xsl:template match="d:refname"></xsl:template>
     <xsl:template match="d:refpurpose">
         <xsl:if test="node()">

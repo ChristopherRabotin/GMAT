@@ -14,12 +14,12 @@
   </indexterm>
 
   <para>Installers and application bundles are available on the GMAT
-  SourceForge project page, located
-  at<uri>https://sourceforge.net/projects/gmat</uri>.</para>
+  SourceForge project page, located at
+  <uri>https://sourceforge.net/projects/gmat</uri>.</para>
 
   <para>The following packages are available for the major platforms:</para>
 
-  <informaltable>
+  <informaltable colsep="0" frame="topbot">
     <tgroup cols="4">
       <colspec align="center"/>
 
@@ -107,7 +107,7 @@
 
     <para>Rather than compiling from the source bundle, however, we generally
     recommend checking out a snapshot from the Subversion
-    repository:<literallayout>svn://svn.code.sf.net/p/gmat/code</literallayout></para>
+    repository:<literallayout><uri>svn://svn.code.sf.net/p/gmat/code</uri></literallayout></para>
 
     <para>There are tags available for reach release.</para>
   </simplesect>

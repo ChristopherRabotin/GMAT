@@ -106,12 +106,12 @@
 
     <para>For this tutorial, you’ll need GMAT open, with the default mission
     loaded. To load the default mission, click <guibutton>New
-    Mission</guibutton> (<subscript><inlinemediaobject>
+    Mission</guibutton> (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/NewMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>) or start a new GMAT session. We will
+      </inlinemediaobject>) or start a new GMAT session. We will
     use the default configurations for the spacecraft
     (<guilabel>DefaultSC</guilabel>) and the propagator
     (<guilabel>DefaultProp</guilabel>). <guilabel>DefaultSC</guilabel> is

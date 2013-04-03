@@ -98,12 +98,12 @@
     <classname>Spacecraft</classname>’s initial epoch and classical orbital
     elements. You’ll need GMAT open, with the default mission loaded. To load
     the default mission, click <guibutton>New Mission</guibutton>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/NewMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>) or start a new GMAT session.</para>
+      </inlinemediaobject>) or start a new GMAT session.</para>
 
     <section>
       <title>Rename the Spacecraft</title>
@@ -231,13 +231,13 @@
         </listitem>
 
         <listitem>
-          <para>Click <guilabel>Save</guilabel> (<subscript><inlinemediaobject>
+          <para>Click <guilabel>Save</guilabel> (<inlinemediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="8pt"
                            fileref="files/images/icons/SaveMission.png"
                            width="1em"/>
               </imageobject>
-            </inlinemediaobject></subscript>). If this is the first time you
+            </inlinemediaobject>). If this is the first time you
           have saved the mission, you’ll be prompted to provide a name and
           location for the file.</para>
         </listitem>
@@ -512,13 +512,13 @@
 
       <listitem>
         <para>Click the <guilabel>Run</guilabel>
-        (<subscript><inlinemediaobject>
+        (<inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunMission.png"
                          width="1em"/>
             </imageobject>
-          </inlinemediaobject></subscript>).</para>
+          </inlinemediaobject>).</para>
       </listitem>
     </orderedlist>
 
@@ -560,13 +560,13 @@
 
       <listitem>
         <para>Click <guilabel>Start Animation</guilabel>
-        (<subscript><inlinemediaobject>
+        (<inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunAnimation.png"
                          width="1em"/>
             </imageobject>
-          </inlinemediaobject></subscript>) to animate the mission and watch
+          </inlinemediaobject>) to animate the mission and watch
         the orbit propagate from the initial state to periapsis.</para>
       </listitem>
     </orderedlist>

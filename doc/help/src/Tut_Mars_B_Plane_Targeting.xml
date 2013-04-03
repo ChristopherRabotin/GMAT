@@ -185,12 +185,12 @@
 
     <para>For this tutorial, you’ll need GMAT open, with the default mission
     loaded. To load the default mission, click <guiicon>New Mission</guiicon>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/NewMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>) or start a new GMAT session.
+      </inlinemediaobject>) or start a new GMAT session.
     <guilabel>DefaultSC</guilabel> will be modified to set spacecraft’s
     initial state as an out-going hyperbolic trajectory.</para>
 
@@ -2075,18 +2075,18 @@
     <title>Run the Mission with first Target Sequence</title>
 
     <para>Before running the mission, click <guilabel>Save</guilabel>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/SaveMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>) and save the mission to a file of your
-    choice. Now click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+      </inlinemediaobject>) and save the mission to a file of your
+    choice. Now click <guilabel>Run</guilabel> (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/RunMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>). As the mission runs, you will see
+      </inlinemediaobject>). As the mission runs, you will see
     GMAT solve the targeting problem. Each iteration and perturbation is shown
     in <guilabel>EarthView</guilabel>, <guilabel>SolarSystemView</guilabel>
     and <guilabel>MarsView</guilabel> windows in light blue, and the final
@@ -2721,17 +2721,17 @@
     <title>Run the Mission with first and second Target Sequences</title>
 
     <para>Before running the mission, click <guilabel>Save</guilabel>
-    (<subscript><inlinemediaobject>
+    (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/SaveMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>). This will save the additional changes that we implemented in the <guilabel>Mission</guilabel> tree.  Now click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+      </inlinemediaobject>). This will save the additional changes that we implemented in the <guilabel>Mission</guilabel> tree.  Now click <guilabel>Run</guilabel> (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/RunMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>). The first <guilabel>Target</guilabel> sequence will converge in one-iteration. 
+      </inlinemediaobject>). The first <guilabel>Target</guilabel> sequence will converge in one-iteration. 
       This is because earlier, we stored the solution as the initial conditions. The second <guilabel>Target</guilabel> sequence may converge after 10 to11 iterations.</para>
 
 

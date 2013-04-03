@@ -147,12 +147,12 @@ ISS.RAAN = 244.300
 ISS.AOP = 353.735
 ISS.TA = 199.683</programlisting>
 
-    <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+    <para>Click <guilabel>Run</guilabel> (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
                      fileref="files/images/icons/RunMission.png" width="1em"/>
         </imageobject>
-      </inlinemediaobject></subscript>) and you will see plots like those
+      </inlinemediaobject>) and you will see plots like those
     shown below.</para>
 
     <informalfigure>
@@ -285,13 +285,13 @@ DefaultSC.SRPArea = 12.5</programlisting>
       </step>
 
       <step>
-        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+        <para>Click <guilabel>Run</guilabel> (<inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunMission.png"
                          width="1em"/>
             </imageobject>
-          </inlinemediaobject></subscript>). The spacecraft should now be
+          </inlinemediaobject>). The spacecraft should now be
         inertially pointed in the graphics window.</para>
       </step>
     </procedure>
@@ -405,13 +405,13 @@ DefaultSC.EulerAngle3 = 157</programlisting>
       </step>
 
       <step>
-        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+        <para>Click <guilabel>Run</guilabel> (<inlinemediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunMission.png"
                          width="1em"/>
             </imageobject>
-          </inlinemediaobject></subscript>). In the graphics window, you will
+          </inlinemediaobject>). In the graphics window, you will
         see the spacecraft spinning about the Sun-Earth line.</para>
       </step>
     </procedure>

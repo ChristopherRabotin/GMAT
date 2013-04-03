@@ -57,6 +57,7 @@
 
     <variablelist>
       <?dbfo list-presentation="blocks"?>
+      <?dbhtml list-presentation="blocks"?>
       <varlistentry>
         <term><option>-h</option></term>
 

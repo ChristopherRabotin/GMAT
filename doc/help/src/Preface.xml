@@ -15,7 +15,7 @@
   data on every Resource, Command, and major subcomponent in the system.
   </para>
 
-  <section role="notintoc">
+  <section role="notintoc" xml:id="Preface_UsingGmat">
     <title><xref linkend="UsingGmat" xrefstyle="select:title"/></title>
 
     <para>The <emphasis><xref linkend="UsingGmat"

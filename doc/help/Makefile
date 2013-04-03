@@ -28,6 +28,8 @@ ALL_XALANFLAGS = -PARAM use.extensions 1 \
 	  -PARAM tablecolumns.extension 1 \
 	  -PARAM appendix.autolabel 0 \
 	  -PARAM part.autolabel 0 \
+	  -PARAM refentry.generate.name 0 \
+	  -PARAM refentry.generate.title 1 \
 	  $(XALANFLAGS)
 
 # source files
@@ -40,7 +42,7 @@ chmstyle = ./xform/htmlhelp.xsl
 all: help training
 
 clean:
-	rm -rf *.chm *.fo *.html *.pdf *.xml *.xsl chm files html
+	rm -rf *.chm *.chw *.fo *.html *.pdf *.xml *.xsl chm files html
 
 distclean: clean
 	rm -rf help
@@ -169,6 +171,7 @@ training-a4.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 help.html: help-pre.xml files/style.css
 	$(XALAN) \
 	    -PARAM html.stylesheet files/style.css \
+	    -PARAM make.valid.html 1 \
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
@@ -182,6 +185,7 @@ html/index.html: help-pre.xml files/style.css
 	    -PARAM img.src.path ../ \
 	    -PARAM html.stylesheet ../files/style.css \
 	    -PARAM chunk.quietly 1 \
+	    -PARAM make.valid.html 1 \
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
 	    -IN help-pre.xml \
@@ -197,8 +201,9 @@ help.chm: help-pre.xml htmlhelp.titlepage.templates.xsl files/style.css
 	    -PARAM manifest.in.base.dir 1 \
 	    -PARAM chunk.quietly 1 \
 	    -PARAM chunk.section.depth 0 \
-	    -PARAM mygenerate.toc "" \
-	    -PARAM html.stylesheet files/style.css \
+	    -PARAM generate.toc "" \
+	    -PARAM html.stylesheet "files/style.css files/style-chm.css" \
+	    -PARAM htmlhelp.default.topic Preface.html \
 	    -PARAM htmlhelp.remember.window.position 1 \
 	    -PARAM htmlhelp.hhc.section.depth 1 \
 	    -PARAM htmlhelp.hhc.show.root 0 \
@@ -210,7 +215,8 @@ help.chm: help-pre.xml htmlhelp.titlepage.templates.xsl files/style.css
 	    -IN help-pre.xml \
 	    -XSL $(chmstyle) \
 	    $(ALL_XALANFLAGS)
-	cp -pR files chm/files
+	mkdir -p chm/files
+	cp -pR files/* chm/files
 	-hhc chm/htmlhelp.hhp
 	mv chm/htmlhelp.chm $@
 

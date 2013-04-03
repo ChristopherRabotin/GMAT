@@ -77,7 +77,7 @@
     <edition/>
     <corpauthor/>
     <authorgroup/>
-    <author/>
+    <!--<author/>-->
     <othercredit/>
     <releaseinfo/>
     <copyright/>
@@ -86,7 +86,6 @@
     <revision/>
     <revhistory/>
     <abstract/>
-    <preface/>
   </t:titlepage-content>
 
   <t:titlepage-content t:side="verso">
