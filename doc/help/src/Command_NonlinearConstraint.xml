@@ -16,23 +16,19 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>NonlinearConstraint</refname>
 
-    <refpurpose>Specifies a constraint used during optimization</refpurpose>
+    <refpurpose>Specify a constraint used during optimization</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>NonLinearConstraint</literal> <replaceable>OptimizerName</replaceable> ({logical expression})
-    </synopsis>
+    <synopsis><literal>NonlinearConstraint</literal> <replaceable>OptimizerName</replaceable> ({logical expression})    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -52,7 +48,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -128,7 +124,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Predefined string</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -136,7 +132,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>&gt;=,  &lt;=, =</para>
+                    <para><literal>&gt;=</literal>,  <literal>&lt;=</literal>,
+                    <literal>=</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -144,7 +141,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>=</para>
+                    <para>
+                      <literal>=</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -175,7 +174,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Optimizer</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -183,7 +182,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any vf13ad or fmincon optmizer object.</para>
+                    <para>Any <guilabel>VF13ad</guilabel> or
+                    <guilabel>fminconOptimizer</guilabel> object.</para>
                   </listitem>
                 </varlistentry>
 
@@ -192,7 +192,7 @@
 
                   <listitem>
                     <para>
-                      <literal>DefaultSQP</literal>
+                      <guilabel>DefaultSQP</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -226,7 +226,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>DataType</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -244,9 +244,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>7000</literal>
-                    </para>
+                    <para>7000</para>
                   </listitem>
                 </varlistentry>
 
@@ -308,7 +306,7 @@
     <guilabel>NonlinearConstraint</guilabel> command dialog box above:
     <itemizedlist>
         <listitem>
-          <para>Choice of optimizer.</para>
+          <para>Choice of Optimizer.</para>
         </listitem>
 
         <listitem>
@@ -411,20 +409,16 @@
     <title>Examples</title>
 
     <informalexample>
-      <programlisting>
-        <code>
-  % Constrain SMA of Sat to be 7000 km, using SQP1
-  NonLinearConstraint SQP1( Sat.SMA = 7000 )
+      <programlisting><code>% Constrain SMA of Sat to be 7000 km, using SQP1
+NonlinearConstraint SQP1( Sat.SMA = 7000 )
 
-  % Constrain SMA of Sat to be less than or equal to 7000 km,
-  % using SQP1
-  NonLinearConstraint SQP1( Sat.SMA &lt;= 7000 )
+% Constrain SMA of Sat to be less than or equal to 7000 km,
+% using SQP1
+NonlinearConstraint SQP1( Sat.SMA &lt;= 7000 )
 
-  % Constrain the SMA of Sat to be greater than or equal to 7000 km,
-  % using VF13ad1
-  NonLinearConstraint VF13ad1( Sat.SMA &gt;= 7000 )
-        </code>
-      </programlisting>
+% Constrain the SMA of Sat to be greater than or equal to 7000 km,
+% using VF13ad1
+NonlinearConstraint VF13ad1( Sat.SMA &gt;= 7000 )</code>      </programlisting>
     </informalexample>
 
     <para>As mentioned above, the <guilabel>NonlinearConstraint</guilabel>

@@ -28,8 +28,7 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>)
-    </synopsis>
+    <synopsis><literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>)    </synopsis>
   </refsynopsisdiv>
 
   <refsection>

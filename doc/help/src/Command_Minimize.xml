@@ -16,23 +16,19 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Minimize</refname>
 
-    <refpurpose>Defines the cost function used in optimization</refpurpose>
+    <refpurpose>Define the cost function to minimize</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Minimize</literal> <replaceable>OptimizerName</replaceable> (<replaceable>ObjectiveFunction</replaceable>)
-    </synopsis>
+    <synopsis><literal>Minimize</literal> <replaceable>OptimizerName</replaceable> (<replaceable>ObjectiveFunction</replaceable>)    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -53,7 +49,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -126,8 +122,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>a list of data types from the Data Type column of
-                    the User Interface Spec</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -135,7 +130,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any vf13ad or fmincon optimizer object.</para>
+                    <para>Any <guilabel>VF13ad</guilabel> or
+                    <guilabel>fminconOptimizer</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -144,7 +140,7 @@
 
                   <listitem>
                     <para>
-                      <literal>DefaultSQP</literal>
+                      <guilabel>DefaultSQP</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -255,7 +251,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colnum="1" colwidth="1.0*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 
@@ -283,8 +279,8 @@
               <entry><guilabel>Optimize command</guilabel></entry>
 
               <entry><para> A <guilabel>Minimize</guilabel> command can only
-              occur within an Optimize/EndOptimize command sequence.
-              </para></entry>
+              occur within an <guilabel>Optimize/EndOptimize</guilabel>
+              command sequence. </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -296,18 +292,14 @@
     <title>Examples</title>
 
     <informalexample>
-      <programlisting>
-        <code>
-  % Minimize the eccentricity of Sat, using SQP1
-  Minimize SQP1(Sat.ECC)
+      <programlisting><code>% Minimize the eccentricity of Sat, using SQP1
+Minimize SQP1(Sat.ECC)
 
-  % Minimize the Variable DeltaV, using SQP1
-  Minimize SQP1(DeltaV)
+% Minimize the Variable DeltaV, using SQP1
+Minimize SQP1(DeltaV)
 
-  % Minimize the first component of MyArray, using VF13ad1
-  Minimize VF13ad1(MyArray(1,1))
-        </code>
-      </programlisting>
+% Minimize the first component of MyArray, using VF13ad1
+Minimize VF13ad1(MyArray(1,1))</code>      </programlisting>
     </informalexample>
 
     <para>As mentioned above, the <guilabel>Minimize</guilabel> command only
