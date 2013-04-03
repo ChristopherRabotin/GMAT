@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -31,14 +29,12 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Optimize</literal> SolverName [{[<literal>SolveMode</literal> = <replaceable>value</replaceable>], [<literal>ExitMode</literal> = <replaceable>value</replaceable>]}]
-      <replaceable>  Vary command</replaceable> …
-      <replaceable>  script statement</replaceable> …
-      <replaceable>  NonlinearConstraint command</replaceable> …
-      <replaceable>  Minimize command</replaceable> …
-      <literal>EndOptimize</literal>
-    </synopsis>
+    <synopsis><literal>Optimize</literal> SolverName [{[<literal>SolveMode</literal> = <replaceable>value</replaceable>], [<literal>ExitMode</literal> = <replaceable>value</replaceable>]}]
+      <replaceable>Vary command</replaceable> …
+      <replaceable>script statement</replaceable> …
+      <replaceable>NonlinearConstraint command</replaceable> …
+      <replaceable>Minimize command</replaceable> …
+<literal>EndOptimize</literal>    </synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -49,7 +45,7 @@
     choose from one of two available solvers, the
     <guilabel>FminconOptimizer</guilabel> solver object available to all GMAT
     users with access to the Matlab optimization toolbox and the
-    <guilabel>VF13AD</guilabel> solver object plug-in that you must install
+    <guilabel>VF13ad</guilabel> solver object plug-in that you must install
     yourself.</para>
 
     <para>You use the <guilabel>Optimize</guilabel> and
@@ -78,7 +74,7 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref
-    linkend="Minimize"/></para>
+    linkend="Minimize"/>, <xref linkend="VF13adOptimizer"/></para>
   </refsection>
 
   <refsection>
@@ -86,7 +82,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -180,7 +176,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>PredefinedString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -236,7 +232,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>PredefinedString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -294,7 +290,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any <guilabel>VD13ad1</guilabel> or
+                    <para>Any <guilabel>VD13ad</guilabel> or
                     <guilabel>FminconOptimizer</guilabel> optimizer
                     object.</para>
                   </listitem>
@@ -434,7 +430,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colnum="1" colwidth="1.0*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 
@@ -487,22 +483,18 @@
       <guilabel>FminconOptimizer</guilabel> solver assumes you have access to
       the Matlab optimization toolbox.</para>
 
-      <programlisting>
-        <code>
-  Create FminconOptimizer SQP1
-  SQP1.MaximumIterations = 50
-  Create Variable x y Circle
+      <programlisting><code>Create FminconOptimizer SQP1
+SQP1.MaximumIterations = 50
+Create Variable x y Circle
 
-  BeginMissionSequence
-  Optimize SQP1
-    Vary SQP1(x = 1)
-    Vary SQP1(y = 1)
-    Circle = x*x + y*y
-    NonlinearConstraint SQP1(Circle = 1)
-    Minimize SQP1(y)
-  EndOptimize
-        </code>
-      </programlisting>
+BeginMissionSequence
+Optimize SQP1
+  Vary SQP1(x = 1)
+  Vary SQP1(y = 1)
+  Circle = x*x + y*y
+  NonlinearConstraint SQP1(Circle = 1)
+  Minimize SQP1(y)
+EndOptimize </code></programlisting>
     </informalexample>
 
     <informalexample>
@@ -519,35 +511,31 @@
       perform an apogee raising burn is near perigee (i.e., nearTA = 0). In
       this example, since the force model in use in not perfectly two body
       Keplerian, the optimal TA value obtained is close to but not exactly 0.
-      Note that the use of the <guilabel>VF13AD</guilabel> solver object in
+      Note that the use of the <guilabel>VF13ad</guilabel> solver object in
       this example assumes that you have installed this optional
       plug-in.</para>
 
-      <programlisting>
-        <code>
-  Create Spacecraft aSat
-  Create Propagator aPropagator
-  Create ImpulsiveBurn aBurn
-  Create VF13ad VF13ad1
-  VF13ad1.Tolerance = 1e-008
-  Create OrbitView EarthView
-  EarthView.Add = {Earth, aSat}
-  EarthView.ViewScaleFactor = 5
-  Create Variable ApogeeRadius DVCost
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aPropagator
+Create ImpulsiveBurn aBurn
+Create VF13ad VF13ad1
+VF13ad1.Tolerance = 1e-008
+Create OrbitView EarthView
+EarthView.Add = {Earth, aSat}
+EarthView.ViewScaleFactor = 5
+Create Variable ApogeeRadius DVCost
 
-  BeginMissionSequence
-  Optimize VF13ad1
-    Vary VF13ad1(aSat.TA = 100, {MaxStep = 10})
-    Vary VF13ad1(aBurn.Element1 = 1, {MaxStep = 1})
-    Maneuver aBurn(aSat)
-    Propagate aPropagator(aSat) {aSat.Apoapsis}
-    GMAT ApogeeRadius = aSat.RMAG
-    NonlinearConstraint VF13ad1(ApogeeRadius=42164)
-    GMAT DVCost = aBurn.Element1
-    Minimize VF13ad1(DVCost)
-  EndOptimize
-        </code>
-      </programlisting>
+BeginMissionSequence
+Optimize VF13ad1
+  Vary VF13ad1(aSat.TA = 100, {MaxStep = 10})
+  Vary VF13ad1(aBurn.Element1 = 1, {MaxStep = 1})
+  Maneuver aBurn(aSat)
+  Propagate aPropagator(aSat) {aSat.Apoapsis}
+  GMAT ApogeeRadius = aSat.RMAG
+  NonlinearConstraint VF13ad1(ApogeeRadius=42164)
+  GMAT DVCost = aBurn.Element1
+  Minimize VF13ad1(DVCost)
+EndOptimize</code>      </programlisting>
     </informalexample>
   </refsection>
 </refentry>

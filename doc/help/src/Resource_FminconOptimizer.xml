@@ -22,8 +22,8 @@
   <refnamediv>
     <refname>FminconOptimizer</refname>
 
-    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer, fmincon,
-    used to optimize mission parameters</refpurpose>
+    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer,
+    fmincon</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -45,7 +45,9 @@
     <para>This resource cannot be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="VF13adOptimizer"/>, <xref linkend="Optimize"/></para>
+    linkend="VF13adOptimizer"/>,<xref linkend="Optimize"/>,<xref
+    linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref
+    linkend="Minimize"/></para>
   </refsection>
 
   <refsection>
@@ -246,8 +248,8 @@
 
             <entry><para>Specifies the maximum allowable number of nominal
             passes through the optimizer.  Note that this is not the same as
-            the number of optimizer iterations that is shown for the VF13AD
-            optimzer.</para> <variablelist>
+            the number of optimizer iterations that is shown for the
+            <guilabel>VF13ad</guilabel> optimzer.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -331,7 +333,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>FminconOptimizerSQP1.data</para>
+                    <para>
+                      <literal>FminconOptimizerSQP1.data</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -360,11 +364,11 @@
             message window and to the report specified by field
             <guilabel>ReportFile</guilabel> for each iteration of the solver
             (when <guilabel>ShowProgress</guilabel> is true).  Currently, the
-            <literal>Normal</literal>, <literal>Debug</literal>, and
-            <literal>Concise</literal> options contain the same information:
+            <guilabel>Normal</guilabel>, <guilabel>Debug</guilabel>, and
+            <guilabel>Concise</guilabel> options contain the same information:
             the values for the control variables, the constraints, and the
             objective function.  In addition to this information, the
-            <literal>Verbose</literal> option also contains values of the
+            <guilabel>Verbose</guilabel> option also contains values of the
             optimizer-scaled control variables.  </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -378,9 +382,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      <literal>Normal, Concise, Verbose, Debug</literal>
-                    </para>
+                    <para><guilabel>Normal</guilabel>,
+                    <guilabel>Concise</guilabel>,
+                    <guilabel>Verbose</guilabel>,
+                    <guilabel>Debug</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -396,7 +401,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Normal</para>
+                    <para>
+                      <guilabel>Normal</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -432,7 +439,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -440,7 +447,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true, false</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -456,7 +464,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>TRUE</para>
+                    <para>
+                      <literal>true</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -710,11 +720,7 @@
       <guilabel>myVar</guilabel> should never be more than 2, then do
       this.</para>
 
-      <programlisting>
-        <code>
-Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}
-        </code>
-  </programlisting>
+      <programlisting><code>Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}     </code></programlisting>
     </refsection>
 
     <refsection>
