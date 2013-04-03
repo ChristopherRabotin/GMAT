@@ -36,9 +36,9 @@
     plot and stop plotting data to a XYPlot through the <guilabel>Toggle
     On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section
     below for detailed discussion of the interaction between an
-    <guilabel>XYPlot</guilabel> object and the <guilabel>Toggle</guilabel>
+    <guilabel>XYPlot</guilabel> resource and the <guilabel>Toggle</guilabel>
     command. GMAT’s <guilabel>Spacecraft</guilabel> and
-    <guilabel>XYPlot</guilabel> objects also interact with each other
+    <guilabel>XYPlot</guilabel> resources also interact with each other
     throughout the entire mission duration. Discussion of the interaction
     between <guilabel>Spacecraft</guilabel> and <guilabel>XYPlot</guilabel>
     resources can also be found in the Remarks section.</para>
@@ -75,7 +75,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -134,7 +134,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -195,7 +195,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -203,7 +203,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Real number</para>
+                    <para>Integer ≥ 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -253,7 +253,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -303,7 +303,7 @@
             <entry><guilabel>ShowPlot</guilabel></entry>
 
             <entry><para>Allows the user to turn off a plot for a particular
-            run, without deleting the plot object, or removing it from the
+            run, without deleting the XYPlot resource, or removing it from the
             script. If you select <guilabel>True</guilabel>, then the plot
             will be shown. If you select <guilabel>False</guilabel>, then the
             plot will not be shown. This field cannot be modified in the
@@ -312,7 +312,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -370,7 +370,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -436,7 +436,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -444,7 +444,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Current, All, None</para>
+                    <para><guilabel>All</guilabel>,
+                    <guilabel>Current</guilabel>,
+                    <guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -460,7 +462,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Current</para>
+                    <para>
+                      <guilabel>Current</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -497,7 +501,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Resource reference </para>
                   </listitem>
                 </varlistentry>
 
@@ -505,8 +509,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any user variable, array element, or spacecraft
-                    parameter that evaluates to a real number</para>
+                    <para><guilabel>Variable</guilabel>,
+                    <guilabel>Array</guilabel>, array element,
+                    <guilabel>Spacecraft</guilabel> parameter that evaluates
+                    to a real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -522,7 +528,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC.A1ModJulian</para>
+                    <para>
+                      <guilabel>DefaultSC.A1ModJulian</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -559,7 +567,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference array </para>
                   </listitem>
                 </varlistentry>
 
@@ -584,7 +592,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC.EarthMJ2000Eq.X</para>
+                    <para>
+                      <guilabel>DefaultSC.EarthMJ2000Eq.X</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

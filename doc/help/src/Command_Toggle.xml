@@ -15,16 +15,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Toggle</refname>
 
-    <refpurpose>Allows you to turn data output off or
-    on</refpurpose>
+    <refpurpose>Allows you to turn data output off or on</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -88,7 +85,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Subscriber(s)</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -96,8 +93,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any ReportFile, XYPlot, OrbitView, GroundTrackPlot
-                    or EphemerisFile</para>
+                    <para><guilabel>ReportFile</guilabel>,
+                    <guilabel>XYPlot</guilabel>,
+                    <guilabel>OrbitView</guilabel>,
+                    <guilabel>GroundTrackPlot</guilabel> or
+                    <guilabel>EphemerisFile</guilabel> resources</para>
                   </listitem>
                 </varlistentry>
 
@@ -105,7 +105,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultOrbitView</para>
+                    <para>
+                      <guilabel>DefaultOrbitView</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -137,7 +139,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 

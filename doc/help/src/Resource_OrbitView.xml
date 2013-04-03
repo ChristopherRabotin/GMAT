@@ -32,8 +32,8 @@
     <para>The <guilabel>OrbitView</guilabel> resource allows you to plot
     trajectories of a spacecraft or a celestial body. GMAT also allows you to
     plot trajectories associated with multiple spacecrafts or celestial
-    bodies. You can create multiple <guilabel>OrbitView</guilabel> objects by
-    using either the GUI or script interface of GMAT.
+    bodies. You can create multiple <guilabel>OrbitView</guilabel> resources
+    by using either the GUI or script interface of GMAT.
     <guilabel>OrbitView</guilabel> plots also come with multiple options that
     allow you to customize the view of spacecraft’s trajectories. See the
     Fields section below for detailed discussion on available plotting and
@@ -43,12 +43,12 @@
     spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
     through the <guilabel>Toggle On/Off</guilabel> command. See the Remarks
     section below for detailed discussion of the interaction between an
-    <guilabel>OrbitView</guilabel> object and the <guilabel>Toggle</guilabel>
-    command. GMAT’s <guilabel>Spacecraft</guilabel>,
-    <guilabel>SolarSystem</guilabel> and <guilabel>OrbitView</guilabel>
-    objects also interact with each other throughout the entire mission
-    duration. Discussion of the interaction between these objects is also
-    mentioned in the Remarks section.</para>
+    <guilabel>OrbitView</guilabel> resource and the
+    <guilabel>Toggle</guilabel> command. GMAT’s
+    <guilabel>Spacecraft</guilabel>, <guilabel>SolarSystem</guilabel> and
+    <guilabel>OrbitView</guilabel> resources also interact with each other
+    throughout the entire mission duration. Discussion of the interaction
+    between these resources is also mentioned in the Remarks section.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
@@ -85,10 +85,10 @@
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
             <guilabel>Barycenter</guilabel> to a plot by using the name used
-            to create the object. The GUI's <guilabel>Selected</guilabel>
+            to create the resource. The GUI's <guilabel>Selected</guilabel>
             field is the equivalent of the script's <guilabel>Add</guilabel>
             field. In the event of no <guilabel>Add</guilabel> command or no
-            objects in the <guilabel>Selected</guilabel> field, GMAT should
+            resources in the <guilabel>Selected</guilabel> field, GMAT should
             run without the <guilabel>OrbitView</guilabel> plot and a warning
             message will be displayed in the message window. The following
             warning message is sufficient: The OrbitView named
@@ -107,8 +107,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft, CelestialBody, LibrationPoint,
-                    Barycenter</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -124,7 +126,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC, Earth</para>
+                    <para><guilabel>DefaultSC</guilabel>,
+                    <guilabel>Earth</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -272,7 +275,7 @@
             allows the user to determine the <guilabel>origin</guilabel> and
             <guilabel>axis system</guilabel> of an
             <guilabel>OrbitView</guilabel> plot. See the
-            <guilabel>CoordinateSystem</guilabel> object fields for
+            <guilabel>CoordinateSystem</guilabel> resource fields for
             information of defining different types of <guilabel>coordinate
             systems</guilabel>. This field cannot be modified in the Mission
             Sequence.</para> <variablelist>
@@ -288,7 +291,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any default or user defined coordinate system</para>
+                    <para><guilabel>CoordinateSystem</guilabel>
+                    resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -304,7 +308,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>EarthMJ2000Eq</para>
+                    <para>
+                      <guilabel>EarthMJ2000Eq</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -393,7 +399,7 @@
 
             <entry><para> The <guilabel>DrawObject</guilabel> field allows the
             user the option of displaying <guilabel>Spacecraft</guilabel> or
-            <guilabel>Celestial</guilabel> objects on the
+            <guilabel>Celestial</guilabel> resources on the
             <guilabel>OrbitView</guilabel> plot. This field cannot be modified
             in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
@@ -858,10 +864,10 @@
             <entry><guilabel>ShowPlot</guilabel></entry>
 
             <entry><para>Allows the user to turn off a plot for a particular
-            run, without deleting the plot object, or removing it from the
-            script. If you select true, then the plot will be shown. If you
-            select false, then the plot will not be shown. This field cannot
-            be modified in the Mission Sequence. </para> <variablelist>
+            run, without deleting the plot, or removing it from the script. If
+            you select true, then the plot will be shown. If you select false,
+            then the plot will not be shown. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -992,7 +998,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -1000,7 +1006,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>All, Current, None</para>
+                    <para><guilabel>All</guilabel>,
+                    <guilabel>Current</guilabel>,
+                    <guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -1016,7 +1024,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Current</para>
+                    <para>
+                      <guilabel>Current</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1408,7 +1418,7 @@
 
             <entry><para>Allows the user to select the direction of view in an
             <guilabel>OrbitView</guilabel> plot. The user can specify the view
-            direction by choosing an object to point at such as a
+            direction by choosing a resource to point at such as a
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
             <guilabel>Barycenter</guilabel>. Alternatively, the user can
@@ -1431,8 +1441,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft, CelestialBody, LibrationPoint,
-                    Barycenter, or a 3-vector of numerical values</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>, or a 3-vector of
+                    numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1495,8 +1508,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft, CelestialBody, LibrationPoint,
-                    Barycenter, or a 3-vector of numerical values</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>, or a 3-vector of
+                    numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1542,7 +1558,7 @@
             point location with respect to
             <guilabel>ViewPointReference</guilabel>.
             <guilabel>ViewPointVector</guilabel> can be a vector, or any of
-            the following objects: <guilabel>Spacecraft</guilabel>,
+            the following resources: <guilabel>Spacecraft</guilabel>,
             <guilabel>Celestial body</guilabel>, <guilabel>Libration
             Point</guilabel>, or <guilabel>Barycenter</guilabel>. The location
             of the view point in three-dimensional space is defined as the
@@ -1563,8 +1579,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft, CelestialBody, LibrationPoint,
-                    Barycenter, or a 3-vector of numerical values</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>, or a 3-vector of
+                    numerical values</para>
                   </listitem>
                 </varlistentry>
 
@@ -1683,7 +1702,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>X , -X , Y , -Y , Z , -Z</para>
+                    <para><guilabel>X </guilabel>, <guilabel>-X</guilabel> ,
+                    <guilabel>Y</guilabel> , <guilabel>-Y</guilabel>
+                    ,<guilabel> Z</guilabel> , <guilabel>-Z</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -1699,7 +1720,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Z</para>
+                    <para>
+                      <guilabel>Z</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1755,7 +1778,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any default or user defined coordinate system</para>
+                    <para><guilabel>CoordinateSystem</guilabel>
+                    resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -1771,7 +1795,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>EarthMJ2000Eq</para>
+                    <para>
+                      <guilabel>EarthMJ2000Eq</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

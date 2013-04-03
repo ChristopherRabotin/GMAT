@@ -39,7 +39,7 @@
     <guilabel>GroundTrackPlot</guilabel> through the <guilabel>Toggle
     On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section
     below for detailed discussion of the interaction between
-    <guilabel>GroundTrackPlot</guilabel> object and the
+    <guilabel>GroundTrackPlot</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. <guilabel>GroundTrackPlot</guilabel>
     resource also allows you to display any number of user-defined ground
     stations onto the texture map of the central body.</para>
@@ -69,7 +69,7 @@
           <row>
             <entry><guilabel>Add</guilabel></entry>
 
-            <entry><para>Allows the user to pick selected objects such as
+            <entry><para>Allows the user to pick selected resources such as
             <guilabel>Spacecraft(s)</guilabel> or
             <guilabel>GroundStation(s)</guilabel> whose ground track is drawn
             in <guilabel>GroundTrackPlot</guilabel>. To select multiple
@@ -83,7 +83,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefStringList</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -91,8 +91,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Selected Objects like Spacecraft(s) or
-                    GroundStation(s)</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>GroundStation</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -108,7 +108,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC</para>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -116,7 +118,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -140,7 +142,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -148,7 +150,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Celestial Body</para>
+                    <para>
+                      <guilabel>CelestialBody</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -164,7 +168,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
+                    <para>
+                      <guilabel>Earth</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -172,7 +178,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -228,7 +234,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -252,7 +258,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -284,7 +290,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -341,7 +347,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -370,7 +376,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -378,7 +384,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Real number</para>
+                    <para>Integer ≥ 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -402,7 +408,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -426,7 +432,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -458,7 +464,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -485,7 +491,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -517,7 +523,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -551,7 +557,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -559,7 +565,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>All, Current, None</para>
+                    <para><guilabel>All</guilabel>,
+                    <guilabel>Current</guilabel>,
+                    <guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -575,7 +583,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Current</para>
+                    <para>
+                      <guilabel>Current</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -583,7 +593,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -607,7 +617,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FileName</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -631,7 +641,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>../data/graphics/texture/ModifiedBlueMarble.jpg</para>
+                    <para>
+                      <literal>../data/graphics/texture/ModifiedBlueMarble.jpg</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -639,7 +651,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -695,7 +707,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -722,7 +734,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 

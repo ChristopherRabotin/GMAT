@@ -20,16 +20,14 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>PenUpPenDown</refname>
 
-    <refpurpose>Allows you to stop or begin
-    drawing data on a plot</refpurpose>
+    <refpurpose>Allows you to stop or begin drawing data on a
+    plot</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -97,7 +95,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Subscriber(s)</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -105,7 +103,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any XYPlot, OrbitView or GroundTrackPlot</para>
+                    <para><guilabel>XYPlot</guilabel>,
+                    <guilabel>OrbitView</guilabel> or
+                    <guilabel>GroundTrackPlot</guilabel> resources</para>
                   </listitem>
                 </varlistentry>
 
@@ -113,7 +113,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultOrbitview</para>
+                    <para>
+                      <guilabel>DefaultOrbitview</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -146,7 +148,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Subscriber(s)</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -154,7 +156,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any XYPlot, OrbitView or GroundTrackPlot</para>
+                    <para><guilabel>XYPlot</guilabel>,
+                    <guilabel>OrbitView</guilabel> or
+                    <guilabel>GroundTrackPlot</guilabel> resources</para>
                   </listitem>
                 </varlistentry>
 
@@ -162,7 +166,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultOrbitview</para>
+                    <para>
+                      <guilabel>DefaultOrbitview</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

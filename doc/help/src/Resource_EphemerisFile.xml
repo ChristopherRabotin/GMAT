@@ -134,7 +134,7 @@
             <entry><para> The ephemeris file is generated at the step size
             that is specified for <guilabel>StepSize</guilabel> field. The
             user can generate ephemeris file at default Integration step size
-            (using raw integrator steps) or by defining a Fixed step size
+            (using raw integrator steps) or by defining a fixed step size
             provided by user. This field cannot be modified in the Mission
             Sequence.</para> <variablelist>
                 <varlistentry>
@@ -166,7 +166,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>IntegratorSteps</para>
+                    <para>
+                      <literal>IntegratorSteps</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -199,7 +201,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>type</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -207,7 +209,14 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para><guilabel>UTCGregorian</guilabel>,
+                    <guilabel>UTCModJulian</guilabel>,
+                    <guilabel>TAIGregorian</guilabel>,
+                    <guilabel>TAIModJulian</guilabel>,
+                    <guilabel>TTGregorian</guilabel>,
+                    <guilabel>TTModJulian</guilabel>,
+                    <guilabel>A1Gregorian</guilabel>,
+                    <guilabel>A1ModJulian</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -223,7 +232,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>UTCGregorian</para>
+                    <para>
+                      <guilabel>UTCGregorian</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -255,7 +266,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -263,7 +274,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>CCSDS-OEM, SPK</para>
+                    <para><guilabel>CCSDS-OEM</guilabel>,
+                    <guilabel>SPK</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -279,7 +291,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>CCSDS-OEM</para>
+                    <para>
+                      <guilabel>CCSDS-OEM</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -335,7 +349,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>EphemerisFile1.eph</para>
+                    <para>
+                      <literal>EphemerisFile1.eph</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -376,8 +392,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>user-defined final epoch or
-                    'FinalSpacecraftEpoch'</para>
+                    <para>user-defined final epoch or Default Value</para>
                   </listitem>
                 </varlistentry>
 
@@ -393,7 +408,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>FinalSpacecraftEpoch</para>
+                    <para>
+                      <literal>FinalSpacecraftEpoch</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -435,8 +452,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>user-defined initial epoch or
-                    'InitialSpacecraftEpoch'</para>
+                    <para>user-defined initial epoch or Default Value</para>
                   </listitem>
                 </varlistentry>
 
@@ -452,7 +468,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>InitialSpacecraftEpoch</para>
+                    <para>
+                      <literal>InitialSpacecraftEpoch</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -495,7 +513,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Lagrange for CCSDS file, Hermite for SPK file</para>
+                    <para><guilabel>Lagrange</guilabel> for CCSDS file,
+                    <guilabel>Hermite</guilabel> for SPK file</para>
                   </listitem>
                 </varlistentry>
 
@@ -511,7 +530,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Lagrange</para>
+                    <para>
+                      <guilabel>Lagrange</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -544,7 +565,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -603,7 +624,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>type</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -611,7 +632,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para><guilabel>CoordinateSystem</guilabel>
+                    resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -627,7 +649,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>EarthMJ2000Eq</para>
+                    <para>
+                      <guilabel>EarthMJ2000Eq</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -660,7 +684,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -685,7 +709,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC</para>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -719,7 +745,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -777,7 +803,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -838,7 +864,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -846,7 +872,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Real number</para>
+                    <para>Integer ≥ 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -894,7 +920,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 

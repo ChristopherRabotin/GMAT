@@ -16,16 +16,14 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>MarkPoint</refname>
 
-    <refpurpose>Allows you to add a special mark point
-    character on an XYPlot</refpurpose>
+    <refpurpose>Allows you to add a special mark point character on an
+    XYPlot</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -48,8 +46,8 @@ OutputNames</replaceable>
     <guilabel>XYPlot</guilabel>. <guilabel>MarkPoint</guilabel> command works
     only for <guilabel>XYPlot</guilabel> subscriber. This command also allows
     you to add special mark points on multiple <guilabel>XYPlot</guilabel>
-    objects. <guilabel>MarkPoint</guilabel> command can be used through GMAT’s
-    GUI or the script interface.</para>
+    resources. <guilabel>MarkPoint</guilabel> command can be used through
+    GMAT’s GUI or the script interface.</para>
   </refsection>
 
   <refsection>
@@ -81,7 +79,7 @@ OutputNames</replaceable>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Subscriber(s)</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -89,7 +87,7 @@ OutputNames</replaceable>
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any number of XYPlot objects</para>
+                    <para><guilabel>XYPlot</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -97,7 +95,9 @@ OutputNames</replaceable>
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultXYPlot</para>
+                    <para>
+                      <guilabel>DefaultXYPlot</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

@@ -15,16 +15,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Report</refname>
 
-    <refpurpose>Allows you to write data to a text
-    file</refpurpose>
+    <refpurpose>Allows you to write data to a text file</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -84,7 +81,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>ReportFile</para>
+                    <para>Resource reference </para>
                   </listitem>
                 </varlistentry>
 
@@ -92,7 +89,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any ReportFile resource that is created</para>
+                    <para><guilabel>ReportFile</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -100,7 +97,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultReportFile</para>
+                    <para>
+                      <guilabel>DefaultReportFile</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -134,7 +133,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Any parameter</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -142,8 +141,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft or Impulsive Burn reportable Parameters,
-                    Array, Array Element, Variable, or a String.</para>
+                    <para><guilabel>Spacecraft</guilabel>,
+                    <guilabel>ImpulsiveBurn</guilabel> reportable parameters,
+                    <guilabel>Array</guilabel>, Array Element,
+                    <guilabel>Variable</guilabel>, or a
+                    <guilabel>String</guilabel>.</para>
                   </listitem>
                 </varlistentry>
 
@@ -151,7 +153,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC.A1ModJulian</para>
+                    <para>
+                      <guilabel>DefaultSC.A1ModJulian</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 

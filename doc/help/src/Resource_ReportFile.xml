@@ -40,7 +40,7 @@
     <guilabel>Toggle</guilabel>
     <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks
     section below for detailed discussion of the interaction between
-    <guilabel>ReportFile</guilabel> object and <guilabel>Toggle</guilabel>
+    <guilabel>ReportFile</guilabel> resource and <guilabel>Toggle</guilabel>
     command.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
@@ -73,16 +73,17 @@
             <guilabel>Strings</guilabel> or <guilabel>Object
             Parameters</guilabel> to a report file. To add multiple
             user-defined variables or parameters, enclose the reported values
-            with curly brackets. Ex. MyReportName.Add ={Sat.X, Sat.Y, Var1,
-            Array(1,1)}; The GUI's <guilabel>Selected</guilabel>
-            <guilabel>Value(s</guilabel>) field is the equivalent of the
-            script's <guilabel>Add</guilabel> field. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            with curly brackets. Ex. <literal>MyReportName.Add ={Sat.X, Sat.Y,
+            Var1, Array(1,1)}</literal>; The GUI's
+            <guilabel>Selected</guilabel> <guilabel>Value(s</guilabel>) field
+            is the equivalent of the script's <guilabel>Add</guilabel> field.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefStringList</para>
+                    <para>Reference array</para>
                   </listitem>
                 </varlistentry>
 
@@ -107,8 +108,10 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>{DefaultSC.A1ModJulian,
-                    DefaultSC.EarthMJ2000Eq.X}</para>
+                    <para>
+                      <literal>{DefaultSC.A1ModJulian,
+                      DefaultSC.EarthMJ2000Eq.X}</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -116,7 +119,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -197,7 +200,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FileName</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -221,7 +224,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>ReportFile1.txt</para>
+                    <para>
+                      <literal>ReportFile1.txt</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -229,7 +234,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -256,7 +261,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -288,7 +293,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -312,7 +317,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -344,7 +349,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -428,7 +433,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Integer</para>
                   </listitem>
                 </varlistentry>
 
@@ -436,7 +441,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Real number</para>
+                    <para>Integer ≥ 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -460,7 +465,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -486,7 +491,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -518,7 +523,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -552,7 +557,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -560,7 +565,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>All, Current, None</para>
+                    <para><guilabel>All</guilabel>,
+                    <guilabel>Current</guilabel>,
+                    <guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -576,7 +583,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Current</para>
+                    <para>
+                      <guilabel>Current</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -584,7 +593,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -610,7 +619,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real array</para>
                   </listitem>
                 </varlistentry>
 
@@ -642,7 +651,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -665,7 +674,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -697,7 +706,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -720,7 +729,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -752,7 +761,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -775,7 +784,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -807,7 +816,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 

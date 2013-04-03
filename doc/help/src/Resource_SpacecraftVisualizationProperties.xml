@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -62,9 +60,8 @@
           <row>
             <entry><guilabel>ModelOffsetX</guilabel></entry>
 
-            <entry><para> This field lets you
-            translate a spacecraft in +X or -X axis of central body's
-            coordinate system. </para> <variablelist>
+            <entry><para> This field lets you translate a spacecraft in +X or
+            -X axis of central body's coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -101,7 +98,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -118,9 +115,8 @@
           <row>
             <entry><guilabel>ModelOffsetY</guilabel></entry>
 
-            <entry><para>Allows you to
-            translate a spacecraft in +Y or -Y axis of central body's
-            coordinate system.</para> <variablelist>
+            <entry><para>Allows you to translate a spacecraft in +Y or -Y axis
+            of central body's coordinate system.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -157,7 +153,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -174,9 +170,8 @@
           <row>
             <entry><guilabel>ModelOffsetZ</guilabel></entry>
 
-            <entry><para>Allows you to
-            translate a spacecraft in +Z or -Z axis of central body's
-            coordinate system. </para> <variablelist>
+            <entry><para>Allows you to translate a spacecraft in +Z or -Z axis
+            of central body's coordinate system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -213,7 +208,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -230,9 +225,9 @@
           <row>
             <entry><guilabel>ModelRotationX</guilabel></entry>
 
-            <entry><para>Allows you to
-            perform a fixed rotation of spacecraft's attitude w.r.t X-axis
-            of central body's coordinate system. </para> <variablelist>
+            <entry><para>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t X-axis of central body's coordinate
+            system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -286,9 +281,9 @@
           <row>
             <entry><guilabel>ModelRotationY</guilabel></entry>
 
-            <entry><para>Allows you to
-            perform a fixed rotation of spacecraft's attitude w.r.t Y-axis
-            of central body's coordinate system. </para> <variablelist>
+            <entry><para>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t Y-axis of central body's coordinate
+            system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -342,9 +337,9 @@
           <row>
             <entry><guilabel>ModelRotationZ</guilabel></entry>
 
-            <entry><para>Allows you to
-            perform a fixed rotation of spacecraft's attitude w.r.t Z-axis
-            of central body's coordinate system. </para> <variablelist>
+            <entry><para>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t Z-axis of central body's coordinate
+            system. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -398,9 +393,8 @@
           <row>
             <entry><guilabel>ModelScale</guilabel></entry>
 
-            <entry><para>Allows you to
-            apply a scale factor to the spacecraft model's size.</para>
-            <variablelist>
+            <entry><para>Allows you to apply a scale factor to the spacecraft
+            model's size.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -437,7 +431,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -454,14 +448,13 @@
           <row>
             <entry><guilabel>ModelFile</guilabel></entry>
 
-            <entry><para>Allows you
-            to load spacecraft models that are in .3ds model formats. </para>
-            <variablelist>
+            <entry><para>Allows you to load spacecraft models that are in .3ds
+            model formats. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FileName</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -485,7 +478,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>../data/vehicle/models/aura.3ds</para>
+                    <para>
+                      <literal>../data/vehicle/models/aura.3ds</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -493,7 +488,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -579,7 +574,7 @@
       Visualization Properties</guilabel> resource. All values are non-default
       values.</para>
 
-<programlisting><code>Create Spacecraft aSat
+      <programlisting><code>Create Spacecraft aSat
 aSat.ModelFile = '../data/vehicle/models/aura.3ds'
 aSat.ModelOffsetX = 1.5
 aSat.ModelOffsetY = -2

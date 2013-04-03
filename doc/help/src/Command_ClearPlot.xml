@@ -16,16 +16,13 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>ClearPlot</refname>
 
-    <refpurpose>Allows you to clear all data from an
-    XYPlot</refpurpose>
+    <refpurpose>Allows you to clear all data from an XYPlot</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -45,8 +42,8 @@ OutputNames</replaceable>
     <para>The <guilabel>ClearPlot</guilabel> command allows you to clear all
     data from an <guilabel>XYPlot</guilabel> after it has been plotted. The
     <guilabel>ClearPlot</guilabel> command works only for the
-    <guilabel>XYPlot</guilabel> object and data from multiple
-    <guilabel>XYPlot</guilabel> objects can be cleared.
+    <guilabel>XYPlot</guilabel> resource and data from multiple
+    <guilabel>XYPlot</guilabel> resources can be cleared.
     <guilabel>ClearPlot</guilabel> command can be used through GMAT’s GUI or
     the script interface.</para>
   </refsection>
@@ -80,7 +77,7 @@ OutputNames</replaceable>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Subscriber(s)</para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 
@@ -88,7 +85,7 @@ OutputNames</replaceable>
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any number of XYPlot objects</para>
+                    <para><guilabel>XYPlot</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -96,7 +93,9 @@ OutputNames</replaceable>
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultXYPlot</para>
+                    <para>
+                      <guilabel>DefaultXYPlot</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
