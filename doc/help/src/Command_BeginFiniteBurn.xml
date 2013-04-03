@@ -16,28 +16,21 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>BeginFiniteBurn</refname>
 
-    <refpurpose>Model finite thrust maneuvers in the mission
-    sequence</refpurpose>
+    <refpurpose>Model finite thrust maneuvers</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>BeginFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)
-    </synopsis>
+    <synopsis><literal>BeginFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)</synopsis>
 
-    <synopsis>
-      <literal>EndFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)
-    </synopsis>
+    <synopsis><literal>EndFiniteBurn</literal> <replaceable>aFiniteBurn</replaceable>(<replaceable>aSpacecraft</replaceable>)</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -74,7 +67,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -90,17 +83,14 @@
           <row>
             <entry><guilabel>BeginFiniteBurn - Burn</guilabel></entry>
 
-            <entry><para> The Burn field defines the
-            <guilabel>FiniteBurn</guilabel> object activated by the
-            <guilabel>BeginFiniteBurn</guilabel> command. </para>
-            <variablelist>
+            <entry><para>Specifies the <guilabel>FiniteBurn</guilabel> object
+            activated by the <guilabel>BeginFiniteBurn</guilabel> command.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>FiniteBurn</guilabel>
-                    </para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -108,7 +98,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>FiniteBurn Object</para>
+                    <para><guilabel>FiniteBurn</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -116,7 +106,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultFB</para>
+                    <para>
+                      <guilabel>DefaultFB</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -142,20 +134,19 @@
             <entry><guilabel>BeginFiniteBurn -
             SpacecraftList</guilabel></entry>
 
-            <entry><para> The Spacecraft list field defines the spacecraft
-            (currently only a single spacecraft can be in this list) acted
-            upon by the <guilabel>BeginFiniteBurn</guilabel> command. The
-            Spacecraft listed in SpacecraftList will have thrusters activated
-            according to the configuration of the
-            <guilabel>FiniteBurn</guilabel> object defined by the Burn field.
-            </para> <variablelist>
+            <entry><para>Specifies the <guilabel>Spacecraft</guilabel>
+            (currently only a single <guilabel>Spacecraft</guilabel> can be in
+            this list) acted upon by the <guilabel>BeginFiniteBurn</guilabel>
+            command. The <guilabel>Spacecraft</guilabel> listed in
+            SpacecraftList will have thrusters activated according to the
+            configuration of the <guilabel>FiniteBurn</guilabel> object
+            defined by the <guilabel>Burn</guilabel> field. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>Spacecraft</guilabel>
-                    </para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -163,7 +154,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft Objects</para>
+                    <para><guilabel>Spacecraf</guilabel>t Objects</para>
                   </listitem>
                 </varlistentry>
 
@@ -171,7 +162,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC</para>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -196,16 +189,14 @@
           <row>
             <entry><guilabel>EndFiniteBurn - Burn</guilabel></entry>
 
-            <entry><para> The Burn field defines the
-            <guilabel>FiniteBurn</guilabel> object de-activated by the
-            <guilabel>EndFiniteBurn</guilabel> command. </para> <variablelist>
+            <entry><para>Specifies the <guilabel>FiniteBurn</guilabel> object
+            de-activated by the <guilabel>EndFiniteBurn</guilabel> command.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>FiniteBurn</guilabel>
-                    </para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -213,7 +204,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>FiniteBurn Object</para>
+                    <para><guilabel>FiniteBurn</guilabel> Object</para>
                   </listitem>
                 </varlistentry>
 
@@ -221,7 +212,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultFB</para>
+                    <para>
+                      <guilabel>DefaultFB</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -246,13 +239,13 @@
           <row>
             <entry><guilabel>EndFiniteBurn - SpacecraftList</guilabel></entry>
 
-            <entry><para> The Spacecraft list field defines the spacecraft
-            (currently only a single spacecraft can be in this list) acted
-            upon by the <guilabel>EndFiniteBurn</guilabel> command. Spacecraft
-            listed in SpacecraftList will have thrusters de-activated
-            according to the configuration of the
-            <guilabel>FiniteBurn</guilabel> object defined by the Burn field.
-            </para> <variablelist>
+            <entry><para>Specifies the <guilabel>Spacecraft</guilabel>
+            (currently only a single <guilabel>Spacecraft</guilabel> can be in
+            this list) acted upon by the <guilabel>EndFiniteBurn</guilabel>
+            command. Spacecraft listed in SpacecraftList will have thrusters
+            de-activated according to the configuration of the
+            <guilabel>FiniteBurn</guilabel> object defined by the
+            <guilabel>Burn</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -267,7 +260,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft Objects</para>
+                    <para><guilabel>Spacecraft</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -275,7 +268,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC</para>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -341,11 +336,12 @@
     <para>If you add a <guilabel>BeginFiniteBurn</guilabel> command or
     <guilabel>EndFiniteBurn</guilabel> command to the mission sequence,
     without first creating a <guilabel>FiniteBurn</guilabel> object, GMAT will
-    create a default <guilabel>FiniteBurn</guilabel> object called DefaultFB.
-    However, you will need to configure the required
-    <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> objects
-    required for a <guilabel>FiniteBurn</guilabel> object before you can run
-    the mission. See the Remarks section for detailed instructions.</para>
+    create a default <guilabel>FiniteBurn</guilabel> object called
+    <guilabel>DefaultFB</guilabel>. However, you will need to configure the
+    required <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel>
+    objects required for a <guilabel>FiniteBurn</guilabel> object before you
+    can run the mission. See the Remarks section for detailed
+    instructions.</para>
   </refsection>
 
   <refsection>
@@ -411,7 +407,8 @@
         MassFlow is not a known propagation parameter on DefaultSC”, then you
         have not configured all of the required models to perform a finite
         burn. See detailed instructions above and examples to configure models
-        required by the EndFiniteBurn/BeginFiniteBurn commands.</para>
+        required by the <guilabel>EndFiniteBurn/BeginFiniteBurn</guilabel>
+        commands.</para>
       </warning>
     </refsection>
 
@@ -433,13 +430,9 @@
       without its inverse is the same as applying it once. In other words, if
       you do this:</para>
 
-      <programlisting>
-        <code>
-  BeginFiniteBurn aFiniteBurn(aSat)
-  BeginFiniteBurn aFiniteBurn(aSat)
-  BeginFiniteBurn aFiniteBurn(aSat)
-        </code>
-      </programlisting>
+      <programlisting><code>BeginFiniteBurn aFiniteBurn(aSat)
+BeginFiniteBurn aFiniteBurn(aSat)
+BeginFiniteBurn aFiniteBurn(aSat)</code></programlisting>
 
       <para>The effect is the same as only applying the
       <guilabel>BeginFiniteBurn</guilabel> command one time. The same holds
@@ -454,67 +447,59 @@
       <para>Perform a finite burn while the spacecraft is between true anomaly
       of 300 degrees and 60 degrees.</para>
 
-      <programlisting>
-        <code>
-  %  Create objects
-  Create Spacecraft aSat
-  Create Thruster aThruster
-  Create FuelTank aTank
-  Create FiniteBurn aFiniteBurn
-  Create Propagator aPropagator
+      <programlisting><code>%  Create objects
+Create Spacecraft aSat
+Create Thruster aThruster
+Create FuelTank aTank
+Create FiniteBurn aFiniteBurn
+Create Propagator aPropagator
 
-  %  Configure the physical objects
-  aSat.Thrusters        = {aThruster}
-  aThruster.Tank        = {aTank}
-  aSat.Tanks            = {aTank}
-  aFiniteBurn.Thrusters = {aThruster}
+%  Configure the physical objects
+aSat.Thrusters        = {aThruster}
+aThruster.Tank        = {aTank}
+aSat.Tanks            = {aTank}
+aFiniteBurn.Thrusters = {aThruster}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  %  Prop to TA = 300 then maneuver until TA = 60
-  Propagate aPropagator(aSat, {aSat.TA = 300})
-  BeginFiniteBurn aFiniteBurn(aSat)
-  Propagate aPropagator(aSat, {aSat.TA = 60})
-  EndFiniteBurn aFiniteBurn(aSat)
-        </code>
-      </programlisting>
+%  Prop to TA = 300 then maneuver until TA = 60
+Propagate aPropagator(aSat, {aSat.TA = 300})
+BeginFiniteBurn aFiniteBurn(aSat)
+Propagate aPropagator(aSat, {aSat.TA = 60})
+EndFiniteBurn aFiniteBurn(aSat)</code>   </programlisting>
     </informalexample>
 
     <informalexample>
       <para>Perform a velocity direction maneuver firing the thruster for 2
       minutes.</para>
 
-      <programlisting>
-        <code>
-  %  Create objects
-  Create Spacecraft aSat
-  Create Thruster aThruster
-  Create FuelTank aTank
-  Create FiniteBurn aFiniteBurn
-  Create Propagator aPropagator
+      <programlisting><code>%  Create objects
+Create Spacecraft aSat
+Create Thruster aThruster
+Create FuelTank aTank
+Create FiniteBurn aFiniteBurn
+Create Propagator aPropagator
 
-  %  Configure the physical objects
-  aThruster.CoordinateSystem = Local
-  aThruster.Origin = Earth
-  aThruster.Axes   = VNB
-  aThruster.ThrustDirection1 = 1
-  aThruster.ThrustDirection2 = 0
-  aThruster.ThrustDirection3 = 0
+%  Configure the physical objects
+aThruster.CoordinateSystem = Local
+aThruster.Origin = Earth
+aThruster.Axes   = VNB
+aThruster.ThrustDirection1 = 1
+aThruster.ThrustDirection2 = 0
+aThruster.ThrustDirection3 = 0
 
-  %  Configure the physical objects
-  aSat.Thrusters    	 = {aThruster}
-  aThruster.Tank    	 = {aTank}
-  aSat.Tanks        	 = {aTank}
-  aFiniteBurn.Thrusters = {aThruster}
+%  Configure the physical objects
+aSat.Thrusters    = {aThruster}
+aThruster.Tank    = {aTank}
+aSat.Tanks        = {aTank}
+aFiniteBurn.Thrusters = {aThruster}
 
-  BeginMissionSequence
+BeginMissionSequence
 
-  %  Fire thruster for 2 minutes
-  BeginFiniteBurn aFiniteBurn(aSat)
-  Propagate aPropagator(aSat, {aSat.ElapsedSecs = 120})
-  EndFiniteBurn aFiniteBurn(aSat)
-        </code>
-      </programlisting>
+%  Fire thruster for 2 minutes
+BeginFiniteBurn aFiniteBurn(aSat)
+Propagate aPropagator(aSat, {aSat.ElapsedSecs = 120})
+EndFiniteBurn aFiniteBurn(aSat)</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

@@ -78,7 +78,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -95,13 +95,13 @@
             <entry><guilabel>Axes</guilabel></entry>
 
             <entry><para>Allows the user to define a spacecraft centered set
-            of axes for the <guilabel>Thruster</guilabel>.This field cannot be
-            modified in the Mission Sequence</para> <variablelist>
+            of axes for the <guilabel>Thruster</guilabel>. This field cannot
+            be modified in the Mission Sequence</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -127,7 +127,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>VNB</para>
+                    <para>
+                      <guilabel>VNB</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -154,13 +156,14 @@
 
             <entry><para>Determines what coordinate system the orientation
             parameters, <guilabel>ThrustDirection1</guilabel>,
-            ThrustDirection2, and ThrustDirection3 refer to. This field cannot
+            <guilabel>ThrustDirection2</guilabel>, and
+            <guilabel>ThrustDirection3</guilabel> refer to. This field cannot
             be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -168,7 +171,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><literal>Local</literal>,
+                    <para><guilabel>Local</guilabel>,
                     <guilabel>EarthMJ2000Eq</guilabel>,
                     <guilabel>EarthMJ2000Ec</guilabel>,
                     <guilabel>EarthFixed</guilabel>, or any user defined
@@ -189,7 +192,7 @@
 
                   <listitem>
                     <para>
-                      <literal>Local</literal>
+                      <guilabel>Local</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -244,7 +247,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>10</para>
+                    <para>
+                      <literal>10</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -298,7 +303,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -352,7 +359,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -406,7 +415,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -460,7 +471,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -514,7 +527,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -568,7 +583,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -622,7 +639,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -676,7 +695,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -730,7 +751,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -784,7 +807,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -838,7 +863,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -892,7 +919,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -946,7 +975,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1000,7 +1031,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1054,7 +1087,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1079,9 +1114,10 @@
           <row>
             <entry><guilabel>DecrementMass</guilabel></entry>
 
-            <entry><para>Flag which determines if the FuelMass is to be
-            decremented as it used. This field cannot be modified in the
-            Mission Sequence. </para> <variablelist>
+            <entry><para>Flag which determines if the
+            <guilabel>FuelMass</guilabel> is to be decremented as it used.
+            This field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1167,7 +1203,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1</para>
+                    <para>
+                      <literal>1</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1221,7 +1259,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>300</para>
+                    <para>
+                      <literal>300</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1275,7 +1315,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1329,7 +1371,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1383,7 +1427,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1437,7 +1483,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1491,7 +1539,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1545,7 +1595,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1599,7 +1651,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1653,7 +1707,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1707,7 +1763,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1761,7 +1819,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1815,7 +1875,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1869,7 +1931,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1923,7 +1987,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -1977,7 +2043,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2031,7 +2099,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2068,7 +2138,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -2098,7 +2168,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Earth</para>
+                    <para>
+                      <guilabel>Earth</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2135,7 +2207,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -2215,7 +2287,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1</para>
+                    <para>
+                      <literal>1</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2270,7 +2344,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2328,7 +2404,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1</para>
+                    <para>
+                      <literal>1</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -2359,7 +2437,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth="1*"/>
+        <colspec colnum="1" colwidth="1.2*"/>
 
         <colspec colnum="2" colwidth="4*"/>
 
@@ -2609,7 +2687,7 @@
     </refsection>
 
     <refsection>
-      <title>Caution when setting the FuelTank Temperature and Reference
+      <title>Caution When Setting the FuelTank Temperature and Reference
       Temperature</title>
 
       <para>Note that both the thrust and ISP polynomials have terms that

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -30,8 +28,7 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>)
+    <synopsis><literal>Maneuver</literal> <replaceable>BurnName</replaceable> (<replaceable>SpacecraftName</replaceable>)
     </synopsis>
   </refsynopsisdiv>
 
@@ -59,7 +56,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -83,7 +80,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -100,7 +97,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultIB</para>
+                    <para>
+                      <guilabel>DefaultIB</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -133,7 +132,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -141,7 +140,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft Objects</para>
+                    <para><guilabel>Spacecraft</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -149,7 +148,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC</para>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -276,42 +277,38 @@
       Perform a 100 m/s impulsive maneuver in the Earth VNB-V
       direction.</para>
 
-      <programlisting>
-        <code>
-  %  Create default Spacecraft and FuelTank and attach the FuelTank 
-  %  to the Spacecraft.
-  Create Spacecraft DefaultSC
-  Create FuelTank FuelTank1
-  DefaultSC.Tanks = {FuelTank1}
+      <programlisting>%  Create default Spacecraft and FuelTank and attach the FuelTank 
+%  to the Spacecraft.
+Create Spacecraft DefaultSC
+Create FuelTank FuelTank1
+DefaultSC.Tanks = {FuelTank1}
 
-  %  Set FuelTank1 parameters to default values
-  FuelTank1.AllowNegativeFuelMass = false
-  FuelTank1.FuelMass = 756
-  FuelTank1.Pressure = 1500
-  FuelTank1.Temperature = 20
-  FuelTank1.RefTemperature = 20
-  FuelTank1.Volume = 0.75
-  FuelTank1.FuelDensity = 1260
-  FuelTank1.PressureModel = PressureRegulated
+%  Set FuelTank1 parameters to default values
+FuelTank1.AllowNegativeFuelMass = false
+FuelTank1.FuelMass = 756
+FuelTank1.Pressure = 1500
+FuelTank1.Temperature = 20
+FuelTank1.RefTemperature = 20
+FuelTank1.Volume = 0.75
+FuelTank1.FuelDensity = 1260
+FuelTank1.PressureModel = PressureRegulated
 
-  %  Create ImpulsiveBurn associated with the created FuelTank
-  Create ImpulsiveBurn IB
-  IB.CoordinateSystem = Local
-  IB.Origin = Earth
-  IB.Axes = VNB
-  IB.Element1 = 0.1
-  IB.Element2 = 0
-  IB.Element3 = 0
-  IB.DecrementMass = true
-  IB.Tank = {FuelTank1}
-  IB.Isp = 300
-  IB.GravitationalAccel = 9.810000000000001
+%  Create ImpulsiveBurn associated with the created FuelTank
+Create ImpulsiveBurn IB
+IB.CoordinateSystem = Local
+IB.Origin = Earth
+IB.Axes = VNB
+IB.Element1 = 0.1
+IB.Element2 = 0
+IB.Element3 = 0
+IB.DecrementMass = true
+IB.Tank = {FuelTank1}
+IB.Isp = 300
+IB.GravitationalAccel = 9.810000000000001
 
-  BeginMissionSequence
-  %  Apply impulsive maneuver to DefaultSC
-  Maneuver IB(DefaultSC)
-        </code>
-      </programlisting>
+BeginMissionSequence
+%  Apply impulsive maneuver to DefaultSC
+Maneuver IB(DefaultSC)</programlisting>
     </informalexample>
   </refsection>
 </refentry>
