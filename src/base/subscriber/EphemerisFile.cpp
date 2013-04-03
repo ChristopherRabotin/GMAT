@@ -2212,7 +2212,7 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
             MessageInterface::ShowMessage
                ("===> FinishUpWriting() checking for not enough data points\n"
                 "   metaDataStartStr='%s', currEpochInSecs='%s'\n", metaDataStartStr.c_str(),
-                ToUtcGregorian(currEpochInSecs));
+                ToUtcGregorian(currEpochInSecs).c_str());
             #endif
             // First check for not enough data points for interpolation
             if (canFinalize && interpolatorStatus == -1)
@@ -2355,7 +2355,7 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
             if (a1MjdArray.size() > 0)
             {
                throw SubscriberException
-                  ("*** INTERNANL ERROR *** SPK Writer is NULL in "
+                  ("*** INTERNAL ERROR *** SPK Writer is NULL in "
                    "EphemerisFile::FinishUpWriting()\n");
             }
             #endif
