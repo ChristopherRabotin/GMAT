@@ -19,8 +19,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -34,12 +32,11 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Target</literal> <replaceable>SolverName</replaceable> [<literal>{</literal>[<literal>SolveMode =</literal> <replaceable>value</replaceable>], [<literal>ExitMode =</literal> <replaceable>value</replaceable>]<literal>}</literal>]
+    <synopsis><literal>Target</literal> <replaceable>SolverName</replaceable> [<literal>{</literal>[<literal>SolveMode =</literal> <replaceable>value</replaceable>], [<literal>ExitMode =</literal> <replaceable>value</replaceable>]<literal>}</literal>]
       <replaceable>Vary command</replaceable> …
       <replaceable>script statement</replaceable> …
       <replaceable>Achieve command</replaceable> …
-      <literal>EndTarget</literal>
+<literal>EndTarget</literal>
     </synopsis>
 
     <note>
@@ -70,10 +67,11 @@
     define the problems constraints using <guilabel>Achieve</guilabel>
     commands. The <guilabel>Target/EndTarget </guilabel> sequence is an
     advanced command. The examples later in this section give additional
-    details. </para>
+    details.</para>
 
-    <para>See also: <xref linkend="DifferentialCorrector"/>, <xref
-    linkend="Optimize"/></para>
+    <para>See also: <xref linkend="DifferentialCorrector"/>,<xref
+    linkend="Vary"/>,<xref linkend="Achieve"/>,<xref linkend="Optimize"/>,
+    </para>
   </refsection>
 
   <refsection>
@@ -81,7 +79,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -174,7 +172,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>PredefinedString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -235,7 +233,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>PredefinedString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -279,7 +277,7 @@
           <row>
             <entry><guilabel>SolverName</guilabel></entry>
 
-            <entry><para> Identifies the
+            <entry><para>Identifies the
             <guilabel>DifferentialCorrector</guilabel> used for a
             <guilabel>Target</guilabel> sequence. </para> <variablelist>
                 <varlistentry>
@@ -305,7 +303,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultDC</para>
+                    <para>
+                      <guilabel>DefaultDC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -339,7 +339,7 @@
     problem, you need to create a so-called <guilabel>Target</guilabel>
     sequence which we now define. When you add a <guilabel>Target</guilabel>
     command to the mission sequence, an <guilabel>EndTarget</guilabel> command
-    is automatically added as shown below. </para>
+    is automatically added as shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -372,7 +372,7 @@
     Mode</guilabel>, and <guilabel>Exit Mode</guilabel>. As described in the
     Remarks section, the <guilabel>Target</guilabel> command dialog box also
     allows you to apply corrections to your <guilabel>Target</guilabel>
-    command sequence. </para>
+    command sequence.</para>
 
     <screenshot>
       <mediaobject>
@@ -389,7 +389,7 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Content of a Target/EndTarget sequence</title>
+      <title>Content of a Target/EndTarget Sequence</title>
 
       <para>A <guilabel>Target/EndTarget</guilabel> sequence must contain at
       least one <guilabel>Vary</guilabel> command and at least one
@@ -403,11 +403,11 @@
       optional. You can omit the entire list and the curly braces and the
       default values will be used for <guilabel>Target</guilabel>
       configuration fields such as <guilabel>SolveMode</guilabel> and
-      <guilabel>ExitMode</guilabel>. </para>
+      <guilabel>ExitMode</guilabel>.</para>
     </refsection>
 
     <refsection>
-      <title>Use of a Target/EndTarget sequence</title>
+      <title>Use of a Target/EndTarget Sequence</title>
 
       <para>GMAT <guilabel>Target</guilabel> sequences can solve square
       problems (the number of Control Variables equals the number of
@@ -423,7 +423,7 @@
       more goals (i.e., constraints) than variables may not have a solution.
       If your problem is under-determined, consider using an
       <guilabel>Optimize</guilabel> sequence to find an optimal solution in
-      the space of feasible solutions. </para>
+      the space of feasible solutions.</para>
 
       <caution>
         <para>If you configure a <guilabel>Target</guilabel> sequence and get
@@ -450,7 +450,7 @@
       applied. If the <guilabel>Target</guilabel> sequence did not converge,
       the last calculated values are applied. Note that the <guilabel>Apply
       Corrections</guilabel> feature is only currently available through the
-      GUI interface. </para>
+      GUI interface.</para>
 
       <para>There is one situation where the action specified above, where the
       initial guess values specified in the <guilabel>Vary</guilabel> commands
@@ -458,20 +458,16 @@
       example below, when the initial guess value specified in the
       <guilabel>Vary</guilabel> command is given by a variable. In this
       situation, the <guilabel>Apply Corrections</guilabel> button has no
-      affect since GMAT does not allow variables to be overwritten. </para>
+      affect since GMAT does not allow variables to be overwritten.</para>
 
-      <programlisting>
-        <code>
-  Create Variable InitialGuess_BurnDuration BurnDuration
-  Create DifferentialCorrector aDC
-  BeginMissionSequence
-  Target aDC
-  Vary aDC(BurnDuration = InitialGuess_BurnDuration)
-  Achieve aDC(BurnDuration = 10) % atypical Achieve command for
-                                 % illustrative purposes only
-  EndTarget
-        </code>
-      </programlisting>
+      <programlisting><code>Create Variable InitialGuess_BurnDuration BurnDuration
+Create DifferentialCorrector aDC
+BeginMissionSequence
+Target aDC
+Vary aDC(BurnDuration = InitialGuess_BurnDuration)
+Achieve aDC(BurnDuration = 10) % atypical Achieve command for
+                               % illustrative purposes only
+EndTarget</code>     </programlisting>
     </refsection>
 
     <refsection>
@@ -519,7 +515,7 @@
       x that satisfies the Constraint y = 0, where y :=3*x^3 + 2*x^2 - 4*x +
       8. After executing this example you can look in the message window to
       see the solution for the variable x. You can easily check that the value
-      obtained does indeed satisfy the constraint. </para>
+      obtained does indeed satisfy the constraint.</para>
 
       <programlisting><code>Create Variable x y
 Create DifferentialCorrector aDC
@@ -537,7 +533,7 @@ EndTarget</code></programlisting>
       <para>Use a <guilabel>Target</guilabel> sequence to raise orbit apogee.
       Here the control variable is the velocity component of an
       <guilabel>ImpulsiveBurn</guilabel> object. The Constraint is that the
-      position vector magnitude at orbit apogee is 42164. </para>
+      position vector magnitude at orbit apogee is 42164.</para>
 
       <programlisting><code>Create Spacecraft aSat
 Create Propagator aPropagator
@@ -566,7 +562,7 @@ EndTarget</code></programlisting>
       duration of the Velocity component of a <guilabel>FiniteBurn</guilabel>
       object. The Constraint is that the position vector magnitude at orbit
       apogee is 12000. Additional detail on the example below can be found in
-      the Target Finite Burn to Raise Apogee tutorial. </para>
+      the Target Finite Burn to Raise Apogee tutorial.</para>
 
       <programlisting><code>Create Spacecraft DefaultSC
 Create Propagator DefaultProp

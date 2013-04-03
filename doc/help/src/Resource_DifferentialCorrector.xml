@@ -22,23 +22,22 @@
   <refnamediv>
     <refname>DifferentialCorrector</refname>
 
-    <refpurpose>A differential corrector used to refine a set of variable
-    parameters in order to meet a set of goals defined for the modeled
-    mission</refpurpose>
+    <refpurpose>A numerical solver</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
     <para>A <guilabel>DifferentialCorrector</guilabel> (DC) is a numerical
-    solver for solving boundary value problems. The DC in GMAT uses a simple
-    shooting method where the derivatives are determined using finite
-    differencing. In the mission sequence, you use the
-    <guilabel>DifferentialCorrector</guilabel> resource in a
-    <guilabel>Target</guilabel> control sequence to solve the boundary value
-    problem. In GMAT, differential correctors are often used to determine the
-    maneuver components required to achieve desired orbital conditions, say,
-    B-plane conditions at a planetary flyby.</para>
+    solver for solving boundary value problems. It is used to refine a set of
+    variable parameters in order to meet a set of goals defined for the
+    modeled mission. The DC in GMAT uses a simple shooting method where the
+    derivatives are determined using finite differencing. In the mission
+    sequence, you use the <guilabel>DifferentialCorrector</guilabel> resource
+    in a <guilabel>Target</guilabel> control sequence to solve the boundary
+    value problem. In GMAT, differential correctors are often used to
+    determine the maneuver components required to achieve desired orbital
+    conditions, say, B-plane conditions at a planetary flyby.</para>
 
     <para>You must create and configure a
     <guilabel>DifferentialCorrector</guilabel> resource for your application
@@ -60,7 +59,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -154,7 +153,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Integer &gt;= 1</para>
+                    <para>Integer &gt;= <literal>1</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -170,7 +169,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>25</para>
+                    <para>
+                      <literal>25</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -195,7 +196,7 @@
           <row>
             <entry><guilabel>ReportFile</guilabel></entry>
 
-            <entry><para> Specifies the path and file name for the
+            <entry><para>Specifies the path and file name for the
             <guilabel>DifferentialCorrector</guilabel> report.  The report is
             only generated if <guilabel>ShowProgress</guilabel> is set to
             true.  </para> <variablelist>
@@ -203,7 +204,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FileName</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -297,7 +298,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Normal</para>
+                    <para>
+                      <guilabel>Normal</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -344,7 +347,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true, false</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -360,7 +364,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>true</para>
+                    <para>
+                      <literal>true</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -434,18 +440,14 @@
     <informalexample>
       <para>Create a <guilabel>DifferentialCorrector</guilabel> object.</para>
 
-      <programlisting>
-        <code>
-  Create DifferentialCorrector DC1
-  DC1.ShowProgress = true
-  DC1.ReportStyle = Normal
-  DC1.ReportFile = 'DifferentialCorrectorDC1.data'
-  DC1.MaximumIterations = 25
-  DC1.DerivativeMethod = ForwardDifference
+      <programlisting><code>Create DifferentialCorrector DC1
+DC1.ShowProgress = true
+DC1.ReportStyle = Normal
+DC1.ReportFile = 'DifferentialCorrectorDC1.data'
+DC1.MaximumIterations = 25
+DC1.DerivativeMethod = ForwardDifference
 
-  BeginMissionSequence
-        </code>
-      </programlisting>
+BeginMissionSequence</code>    </programlisting>
     </informalexample>
 
     <para>To see how the <guilabel>DifferentialCorrector</guilabel> object is
