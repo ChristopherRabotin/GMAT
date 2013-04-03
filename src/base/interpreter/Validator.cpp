@@ -558,7 +558,8 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
                   return false;
                else
                {
-                  theErrorMsg = " Undefined function or object \"" + *i + "\" found ";
+                  theErrorMsg = " Undefined function, object, or disallowed "
+                     "object field \"" + *i + "\" found";
                   return HandleError();
                }
             }
@@ -2827,7 +2828,22 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
          // Return NULL wrapper
          #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage
-            ("Validator::CreatePropertyWrapper() returning <%p>\n", ew);
+            ("Validator::CreatePropertyWrapper() returning <%p>, more than 1 field found\n", ew);
+         #endif
+         
+         return ew;
+      }
+
+      // Allow object properties only appear in the Assignment command
+      // GMT-3687 (Turn Off Field references commands except Assignment LHS)
+      if (!theCommand->IsOfType("Assignment"))
+      {
+         // Return NULL wrapper
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("Validator::CreatePropertyWrapper() returning <%p>, object "
+             "field %s.%s is disallowed except in Assignment\n", ew,
+             obj->GetTypeName().c_str(), type.c_str());
          #endif
          
          return ew;
