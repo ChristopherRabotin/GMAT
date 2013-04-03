@@ -9,108 +9,232 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title xml:id="Welcome">Welcome to GMAT</title>
 
-  <para>GMAT is an open source trajectory design and optimization system
-  developed by a team of NASA, private industry, public, and private
-  contributors and is used for real-world engineering studies, as a tool for
-  education and public engagement. GMAT is designed to model and optimize
-  spacecraft trajectories in flight regimes ranging from low Earth orbit to
-  lunar, interplanetary, and other deep space missions. The system supports
-  constrained and unconstrained trajectory optimization and built-in features
-  make defining cost and constraint functions trivial. GMAT also contains
-  initial value solvers (propagators) and boundary value solvers and
-  efficiently propagates spacecraft either singly or as coupled sets. GMAT’s
-  propagators naturally synchronize the epochs of multiple vehicles and avoid
-  fixed step integration and interpolation when doing so. It is developed in
-  an open source process to maximize technology transfer, to permit anyone to
-  develop and validate new algorithms, and to enable those new algorithms to
-  quickly transition into the high fidelity core.</para>
+  <para>Do you want to go Mars but don't know when to leave or how much to
+  bring? Do you want to study Earth protection by planning a mission to a
+  near-Earth asteroid? The General Mission Analysis Tool (GMAT) is an
+  open-source space mission design tool to answer just those types of
+  questions. GMAT is designed to model and optimize spacecraft trajectories in
+  flight regimes ranging from low Earth orbit to lunar, libration point , and
+  deep space missions. GMAT is developed by a team of NASA, private industry,
+  public, and private contributors and is used for real-world engineering
+  studies, as a tool for education and public engagement, and starting in
+  Sept. 2013 to fly operational spacecraft.</para>
 
-  <para>Users can interact with GMAT using either a graphical user interface
-  (GUI) or a custom scripting language modeled after the syntax used in The
-  MathWorks’ MATLAB® system. All of the system elements can be expressed
-  through either interface, and users can convert between the two in either
-  direction.</para>
+  <section>
+    <title>Features Overview</title>
 
-  <para>Analysts model space missions in GMAT by first creating and
-  configuring resources such as spacecraft, propagators, optimizers, and data
-  files. These resources are then used in a mission sequence to model the
-  trajectory of the spacecraft and simulate mission events. The mission
-  sequence supports commands such as nonlinear constraints, minimization,
-  propagatation, GMAT and MATLAB functions, inline equations, and script
-  events.</para>
+    <para>GMAT is a feature rich system containing high fidelity space system
+    models, optimization and targeting, built in scripting and programming
+    infrastructure, and customizable plots, reports and data products, to
+    enable flexible analysis and solutions for custom and unique applications.
+    GMAT can be driven from a fully featured, interactive GUI or from a custom
+    script language. Here are some of GMAT’s key features broken down by
+    feature group.</para>
 
-  <para>GMAT can display trajectories in a realistic three-dimensional view,
-  plot parameters against one another, and save parameters to files for later
-  processing. The graphics capabilities are fully interactive, plotting data
-  as a mission is run and allowing users to zoom into regions of interest.
-  Trajectories and data can be viewed in any coordinate system defined in
-  GMAT, and GMAT allows users to rotate the view and set the focus to any
-  object in the display. The trajectory view can be animated so users can
-  watch the evolution of the trajectory over time.</para>
+    <section>
+      <title>Dynamics and Environment Modelling</title>
 
-  <simplesect>
+      <itemizedlist>
+        <listitem>
+          <para>High fidelity dynamics models including harmonic gravity,
+          drag, tides, and relativistic corrections</para>
+        </listitem>
+
+        <listitem>
+          <para>High fidelity spacecraft modeling</para>
+        </listitem>
+
+        <listitem>
+          <para>Formations and constellations</para>
+        </listitem>
+
+        <listitem>
+          <para>Impulsive and finite maneuver modeling and optimization</para>
+        </listitem>
+
+        <listitem>
+          <para>Propulsion system modeling including tanks and
+          thrusters</para>
+        </listitem>
+
+        <listitem>
+          <para>Solar System modeling including high fidelity ephemerides,
+          custom celestial bodies, libration points, and barycenters</para>
+        </listitem>
+
+        <listitem>
+          <para>Rich set of coordinate system including J2000, ICRF, fixed,
+          rotating, topocentric, and many others</para>
+        </listitem>
+
+        <listitem>
+          <para>SPICE kernel propagation</para>
+        </listitem>
+
+        <listitem>
+          <para>Propagators that naturally synchronize epochs of multiple
+          vehicles and avoid fixed step integration and interpolation</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Plotting, Reporting and Product Generation</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Interactive 3-D graphics</para>
+        </listitem>
+
+        <listitem>
+          <para>Customizable data plots and reports</para>
+        </listitem>
+
+        <listitem>
+          <para>Post computation animation</para>
+        </listitem>
+
+        <listitem>
+          <para>CCSDS and SPK ephemeris generation</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Optimization and Targeting</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Boundary value targeters</para>
+        </listitem>
+
+        <listitem>
+          <para>Nonlinear, constrained optimization</para>
+        </listitem>
+
+        <listitem>
+          <para>Custom, scriptable cost functions</para>
+        </listitem>
+
+        <listitem>
+          <para>Custom, scriptable nonlinear equality and inequality
+          constraint functions</para>
+        </listitem>
+
+        <listitem>
+          <para>Custom targeter controls and constraints</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Programming Infrastructure</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>User defined variables, arrays, and strings</para>
+        </listitem>
+
+        <listitem>
+          <para>User defined equations using MATLAB syntax. (i.e. overloaded
+          array operation)</para>
+        </listitem>
+
+        <listitem>
+          <para>Control flow such as If, For, and While loops for custom
+          applications</para>
+        </listitem>
+
+        <listitem>
+          <para>Matlab interface</para>
+        </listitem>
+
+        <listitem>
+          <para>Built in parameters and calculations in multiple coordinate
+          systems</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Interfaces</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Fully featured, interactive GUI that makes simple analysis
+          quick and easy</para>
+        </listitem>
+
+        <listitem>
+          <para>Custom scripting language that makes complex, custom analysis
+          possible</para>
+        </listitem>
+
+        <listitem>
+          <para>Matlab interface for custom external simulations and
+          calculations</para>
+        </listitem>
+
+        <listitem>
+          <para>Command line interface for batch analysis</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
     <title>Licensing</title>
 
-    <para>GMAT is licensed under the Apache License 2.0. The license text is
-    contained in the file <filename>License.txt</filename> in root directory
-    of the GMAT distribution.</para>
-  </simplesect>
+    <para>GMAT is licensed under the Apache License 2.0.</para>
+  </section>
 
-  <simplesect>
+  <section>
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
-    perform nightly regression tests running over 10000 test cases for the
-    script engine and over 4000 test cases for the GUI. While the system
-    engine is routinely built on Mac and Linux, we consider the software to be
-    in alpha form on those plaforms. GMAT uses the wxWidgets cross-platform
-    user interface toolkit and can be built using either Microsoft Visual
-    Studio or the GNU Compiler Collection (GCC). GMAT is written in ANSI
-    standard C++ (approximately 380,000 non-comment source lines of code)
-    using an object-oriented methodology, with a rich class structure designed
-    to make new features simple to incorporate.</para>
-  </simplesect>
+    perform nightly regression tests running almost 11,000 test cases for the
+    script engine and over 4000 test cases for the GUI interface.</para>
 
-  <simplesect>
-    <title>User Interfaces</title>
+    <para>While the system is routinely built on Mac and Linux, we consider
+    the software to be in alpha form on those plaforms. For release R2013a, we
+    have only addressed issues on Mac and Linux that also occur on the Windows
+    7 platform. Part of our planning effort for the next release will be to
+    access the future of GMAT on Mac and Linux.</para>
+  </section>
 
-    <para>GMAT has several user interfaces. The interactive graphical user
-    interface is introduced in more detail in later sections. The script
-    interface is textual and also allows the user to configure and execute all
-    aspects of GMAT. There is a secondary MATLAB interface that allows for
-    running the system via calls from MATLAB to GMAT and allows GMAT to call
-    MATLAB functions from within the GMAT command sequence. A low-level C API
-    is also currently under development.</para>
-  </simplesect>
+  <section>
+    <title>Development Status and Usage</title>
 
-  <simplesect>
-    <title>Development Status</title>
+    <para>R2013a is a major maintenance release with completely updated
+    documentation and greatly improved quality. GMAT is no longer Beta
+    software. Historically, solutions from GMAT have been verified in other
+    operational systems. However, with release R2013a, the GMAT team will
+    perform final operational certifications testing of the system be
+    completed in the summer of 2013. After completion of operarational
+    certification, GMAT will be used for operational support of flight
+    projects.</para>
 
-    <para>GMAT has undergone extensive testing and is mature software. The
-    system has been used to optimize maneuvers for flight projects such as
-    NASA’s LCROSS and ARTEMIS missions, and the Lunar Reconnaissance Orbiter,
-    and for optimization and analysis for the OSIRIS-REx and MMS missions.
-    Historically, solutions from GMAT have been verified in other operational
-    systems. However, with release R2013a, the GMAT team will perform final
-    operational certifications testing of the system be completed in Aug.
-    2013. After completion of operaration certification, GMAT will be ready
-    for operational support of flight projects.</para>
-  </simplesect>
+    <para>GMAT has been used to optimize maneuvers for flight projects such as
+    NASA’s LCROSS and ARTEMIS missions, and the Lunar Reconnaissance Orbiter
+    (LRO). ARTEMIS and LRO flew trajectories optimized in GMAT and verified in
+    the operational ground system. GMAT has been used extensively for launch
+    window verification for OSIRIS-REx. The MMS project has used GMAT for
+    formation maneuver planning and Monte Carlo analysis. GMAT has been used
+    on numerous concept studies from Earth-Sun libration point missions, LEO
+    missions, lunar missions, and interplanetary missions to Venus, Mars,
+    Jupiter, and near-Earth and Trojan asteroids.</para>
+  </section>
 
-  <simplesect>
+  <section>
     <title>Contributors</title>
 
     <para>The Navigation and Mission Design Branch at NASA’s Goddard Space
     Flight Center performs project management activities and is involved in
     most phases of the development process including requirements, algorithms,
     design, and testing. The Ground Software Systems Branch performs design,
-    implementation, and integration testing. The Flight Software Branch
-    contributes to design and implementation. GMAT contributors include
-    volunteers and those paid for services they provide. We welcome new
-    contributors to the project, either as users providing feedback about the
-    features of the system, or as developers interested in contributing to the
-    implementation of the system. Current and past contributors
-    include:</para>
+    implementation, and integration testing. Commecial particpants contribute
+    to design, implementation, testing and documentation. Commercial
+    participants for R2013a include:</para>
 
     <itemizedlist>
       <listitem>
@@ -119,11 +243,15 @@
       </listitem>
 
       <listitem>
-        <para>Air Force Research Lab (all aspects of development)</para>
-      </listitem>
-
-      <listitem>
         <para>a.i. solutions (testing)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Past commercial and external contributors to GMAT include:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Air Force Research Lab (all aspects of development)</para>
       </listitem>
 
       <listitem>
@@ -148,5 +276,5 @@
     Space Agency’s (ESA) Advanced Concepts team has developed optimizer
     plug-ins for the Non-Linear Programming (NLP) solvers SNOPT (Sparse
     Nonlinear OPTimizer) and IPOPT (Interior Point OPTimizer).</para>
-  </simplesect>
+  </section>
 </chapter>
