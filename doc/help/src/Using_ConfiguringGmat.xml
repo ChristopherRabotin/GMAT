@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="ConfiguringGmat"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -15,7 +16,7 @@
   are organized and the controls provided to customize them.</para>
 
   <section>
-    <title>File Structure</title>
+    <title xml:id="ConfiguringGmat_FileStructure">File Structure</title>
 
     <para>The default directory structure for GMAT is broken into eight main
     subdirectories, as shown in <xref linkend="GmatRootDirectoryStructure"/>.
@@ -211,7 +212,7 @@
   </section>
 
   <section>
-    <title>Configuring Data Files</title>
+    <title xml:id="ConfiguringGmat_DataFiles">Configuring Data Files</title>
 
     <para>You can configure the data files GMAT loads at run time by editing
     the <filename>gmat_startup_file.txt</filename> file located in the
@@ -271,8 +272,9 @@
     <section>
       <title>Configuring the MATLAB Inteface</title>
 
-      <para>GMAT contains an interface to MATLAB. See the <xref linkend="MatlabInterface"/> reference to configure
-      the MATLAB interface.</para>
+      <para>GMAT contains an interface to MATLAB. See the <xref
+      linkend="MatlabInterface"/> reference to configure the MATLAB
+      interface.</para>
     </section>
 
     <section>
