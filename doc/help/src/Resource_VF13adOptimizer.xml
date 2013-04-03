@@ -22,8 +22,8 @@
   <refnamediv>
     <refname>VF13adOptimizer</refname>
 
-    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer, VF13ad,
-    used to optimize mission parameters</refpurpose>
+    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer,
+    VF13ad</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -45,7 +45,9 @@
     <para>This resource cannot be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="FminconOptimizer"/>, <xref linkend="Optimize"/></para>
+    linkend="FminconOptimizer"/>,<xref linkend="Optimize"/>,<xref
+    linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref
+    linkend="Minimize"/></para>
   </refsection>
 
   <refsection>
@@ -53,7 +55,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.1*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -185,7 +187,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>FileName</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -209,7 +211,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>VF13adVF13ad1.data</para>
+                    <para>
+                      <literal>VF13adVF13ad1.data</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -238,11 +242,11 @@
             message window and to the report specified by field
             <guilabel>ReportFile</guilabel> for each iteration of the solver
             (When <guilabel>ShowProgress</guilabel> is true).  Currently, the
-            <literal>Normal</literal>, <literal>Debug</literal>, and
-            <literal>Concise</literal> options contain the same information:
+            <guilabel>Normal</guilabel>, <guilabel>Debug</guilabel>, and
+            <guilabel>Concise</guilabel> options contain the same information:
             the values for the control variables, the constraints, and the
             objective function.  In addition to this information, the
-            <literal>Verbose</literal> option also contains values of the
+            <guilabel>Verbose</guilabel> option also contains values of the
             optimizer-scaled control variables.  </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -256,9 +260,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      <literal>Normal, Concise, Verbose, Debug</literal>
-                    </para>
+                    <para><guilabel>Normal</guilabel>,
+                    <guilabel>Concise</guilabel>,
+                    <guilabel>Verbose</guilabel>,
+                    <guilabel>Debug</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -274,7 +279,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultValue</para>
+                    <para>
+                      <guilabel>Normal</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -282,7 +289,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>Normal</para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -310,7 +317,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -318,7 +325,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true, false</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -334,7 +342,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>TRUE</para>
+                    <para>
+                      <literal>true</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -361,8 +371,8 @@
 
             <entry><para>Specifies the measure the optimizer will use to
             determine when an optimal solution has been found based on the
-            value of the goal set in a Minimize command.  </para>
-            <variablelist>
+            value of the goal set in a <guilabel>Minimize</guilabel> command. 
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -424,7 +434,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>DataType</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -432,7 +442,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true, false</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -448,7 +459,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>false</para>
+                    <para>
+                      <literal>false</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -487,7 +500,7 @@
     <guilabel>Resources</guilabel> tree, expand the
     <guilabel>Solvers</guilabel> folder, highlight and then right-click on the
     <guilabel>Optimizers</guilabel> sub-folder, point to <guilabel>Add
-    </guilabel>and then select <guilabel>VF13AD</guilabel>. This will create a
+    </guilabel>and then select <guilabel>VF13</guilabel>ad. This will create a
     new <guilabel>VF13ad</guilabel> resource, VF13ad1. Double-click on VF13ad1
     to bring up the <guilabel>VF13ad</guilabel> dialog box shown below.</para>
 
@@ -529,24 +542,21 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a VF13AD resource named VF13ad1.</para>
+      <para>Create a <guilabel>VF13ad</guilabel> resource named
+      VF13ad1.</para>
 
-      <programlisting>
-        <code>
-  Create VF13ad VF13ad1
-  VF13ad1.ShowProgress = true
-  VF13ad1.ReportStyle = Normal
-  VF13ad1.ReportFile = 'VF13adVF13ad1.data'
-  VF13ad1.MaximumIterations = 200
-  VF13ad1.Tolerance = 1e-005
-  VF13ad1.UseCentralDifferences = false
-  VF13ad1.FeasibilityTolerance = 1e-003
-        </code>
-      </programlisting>
+      <programlisting><code>Create VF13ad VF13ad1
+VF13ad1.ShowProgress = true
+VF13ad1.ReportStyle = Normal
+VF13ad1.ReportFile = 'VF13adVF13ad1.data'
+VF13ad1.MaximumIterations = 200
+VF13ad1.Tolerance = 1e-005
+VF13ad1.UseCentralDifferences = false
+VF13ad1.FeasibilityTolerance = 1e-003</code>      </programlisting>
     </informalexample>
 
-    <para>For an example of how a <guilabel>VF13ADOptimizer</guilabel>
-    resource can be used within an Optimization sequence, see the
+    <para>For an example of how a <guilabel>VF13ad</guilabel> resource can be
+    used within an Optimization sequence, see the
     <guilabel>Optimize</guilabel> command examples.</para>
   </refsection>
 </refentry>

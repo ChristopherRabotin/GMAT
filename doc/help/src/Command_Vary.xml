@@ -15,27 +15,22 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Vary</refname>
 
-    <refpurpose>Specifies the variables used by a solver to solve for user
-    specified condition(s)</refpurpose>
+    <refpurpose>Specifies variables used by a solver</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-  <literal>Vary</literal> SolverName(&lt;UserSelectedControl&gt;=<replaceable>InitialGuess</replaceable>,
-  [{[<literal>Perturbation</literal>=<replaceable>Arg1</replaceable>], [<literal>MaxStep</literal>=<replaceable>Arg2</replaceable>],
-  [<literal>Lower</literal>=<replaceable>Arg3</replaceable>], [<literal>Upper</literal>=<replaceable>Arg4</replaceable>], 
-  [<literal>AdditiveScalefactor</literal>=<replaceable>Arg5</replaceable>], [<literal>MultiplicativeScalefactor</literal>=<replaceable>Arg6</replaceable>]}])
-    </synopsis>
+    <synopsis><literal>Vary</literal> SolverName(&lt;UserSelectedControl&gt;=<replaceable>InitialGuess</replaceable>,
+[{[<literal>Perturbation</literal>=<replaceable>Arg1</replaceable>], [<literal>MaxStep</literal>=<replaceable>Arg2</replaceable>],
+[<literal>Lower</literal>=<replaceable>Arg3</replaceable>], [<literal>Upper</literal>=<replaceable>Arg4</replaceable>], 
+[<literal>AdditiveScalefactor</literal>=<replaceable>Arg5</replaceable>], [<literal>MultiplicativeScalefactor</literal>=<replaceable>Arg6</replaceable>]}])  </synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -109,7 +104,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -160,7 +157,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0.5</para>
+                    <para>
+                      <literal>0.5</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -212,7 +211,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>
+                      <literal>0</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -247,7 +248,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; 0</para>
+                    defined parameter &gt; <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -256,7 +257,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; 0</para>
+                    defined parameter &gt; <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -312,7 +313,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; 0</para>
+                    defined parameter &gt; <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -320,7 +321,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1</para>
+                    <para>
+                      <literal>1</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -364,7 +367,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter != 0</para>
+                    defined parameter != <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -372,7 +375,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0.0001</para>
+                    <para>
+                      <literal>0.0001</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -480,7 +485,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>3.14159</para>
+                    <para>
+                      <literal>3.14159</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -510,17 +517,18 @@
             <literal>DefaultIB.V</literal>,<literal> DefaultIB.N</literal>,
             <literal>DefaultIB.Element1</literal>,
             <literal>DefaultSC.TA</literal>, <literal>Array(1,1)</literal>,
-            and <literal>variable</literal> are all valid values. The three
+            and <guilabel>Variable</guilabel> are all valid values. The three
             element burn vector or multidimensional Arrays are not valid
             values. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Parameter, Array element, Variable, or
-                    any other single element user-defined parameter, excluding
-                    numbers.  Note that the variable chosen must be settable
-                    in the <guilabel>Mission</guilabel> tree. </para>
+                    <para>Parameter, Array element,
+                    <guilabel>Variable</guilabel>, or any other single element
+                    user-defined parameter, excluding numbers.  Note that the
+                    variable chosen must be settable in the
+                    <guilabel>Mission</guilabel> tree. </para>
                   </listitem>
                 </varlistentry>
 
@@ -528,9 +536,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft parameter, Array element, Variable, or
-                    any other single element user-defined parameter, excluding
-                    numbers</para>
+                    <para>Spacecraft parameter, Array element,
+                    <guilabel>Variable</guilabel>, or any other single element
+                    user-defined parameter, excluding numbers</para>
                   </listitem>
                 </varlistentry>
 
@@ -588,57 +596,63 @@
     <para>The <guilabel>Vary</guilabel> command dialog box allows you to
     specify <itemizedlist>
         <listitem>
-          <para>Choice of Solver (a differential corrector if using a Target
-          sequence or an optimizer if using an Optimize sequence).</para>
+          <para>Choice of <guilabel>Solver</guilabel> (a differential
+          corrector if using a <guilabel>Target</guilabel> sequence or an
+          optimizer if using an <guilabel>Optimize</guilabel>
+          sequence).</para>
         </listitem>
 
         <listitem>
-          <para>Control Variable object. To define the control variable used
-          in the Vary command, click the Edit button to bring up the
-          ParameterSelectDialog as shown below. Use the arrow to select the
-          desired object and then click OK.</para>
+          <para>Control <guilabel>Variable</guilabel> object. To define the
+          control <guilabel>Variable</guilabel> used in the
+          <guilabel>Vary</guilabel> command, click the
+          <guilabel>Edit</guilabel> button to bring up the
+          <guilabel>ParameterSelectDialog</guilabel> as shown below. Use the
+          arrow to select the desired object and then click
+          <guilabel>OK</guilabel>.</para>
         </listitem>
 
         <listitem>
-          <para>Initial value for the control variable object.</para>
-        </listitem>
-
-        <listitem>
-          <para>Perturbation Step size used as part of the finite differencing
-          algorithm. As noted in the Remarks section, this field is only used
-          if the solver chosen is a differential corrector or a VF13AD
-          optimizer.</para>
-        </listitem>
-
-        <listitem>
-          <para>Lower allowed limit for the converged control variable object.
-          As noted in the Remarks section, this field is only used if the
-          solver chosen is a differential corrector or a fmincon
-          optimizer.</para>
-        </listitem>
-
-        <listitem>
-          <para>Upper allowed limit for the converged control variable object.
-          As noted in the Remarks section, this field is only used if the
-          solver chosen is a differential corrector or a fmincon
-          optimizer.</para>
-        </listitem>
-
-        <listitem>
-          <para>Maximum Step size, per iteration, for the control variable
-          object. As noted in the Remarks section, this field is only used if
-          the solver chosen is a differential corrector or a VF13AD
-          optimizer.</para>
-        </listitem>
-
-        <listitem>
-          <para>Additive scale factor used to scale the control variable
+          <para><guilabel>Initial Value</guilabel> for the control variable
           object.</para>
         </listitem>
 
         <listitem>
-          <para>Multiplicative scale factor used to scale the control variable
-          object.</para>
+          <para><guilabel>Perturbation</guilabel> Step size used as part of
+          the finite differencing algorithm. As noted in the Remarks section,
+          this field is only used if the solver chosen is a differential
+          corrector or a VF13AD optimizer.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Lower</guilabel> allowed limit for the converged
+          control variable object. As noted in the Remarks section, this field
+          is only used if the solver chosen is a differential corrector or a
+          fmincon optimizer.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Upper</guilabel> allowed limit for the converged
+          control variable object. As noted in the Remarks section, this field
+          is only used if the solver chosen is a differential corrector or a
+          fmincon optimizer.</para>
+        </listitem>
+
+        <listitem>
+          <para>Maximum step size (<guilabel>Max Step</guilabel>), per
+          iteration, for the control variable object. As noted in the Remarks
+          section, this field is only used if the solver chosen is a
+          differential corrector or a VF13AD optimizer.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Additive Scale Factor</guilabel> used to scale the
+          control variable object.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Multiplicative Scale Factor</guilabel> used to scale
+          the control variable object.</para>
         </listitem>
       </itemizedlist></para>
   </refsection>
@@ -650,7 +664,7 @@
       <title>Vary Command Options</title>
 
       <para>The <guilabel>Vary</guilabel> command is designed to work with all
-      three of the GMAT Targeters and Optimizers (Differential Corrector,
+      three of the GMAT targeters and optimizers (Differential Corrector,
       fmincon, and VF13AD). The solvers, which are developed by different
       parties, all work slightly differently and thus have different needs.
       The table below shows which command options are available for a given
@@ -777,17 +791,13 @@
       information.</para>
 
       <refsection>
-        <title>Vary command accepts repeated parameters</title>
+        <title>Vary Command Accepts Repeated Parameters</title>
 
         <para>As shown in the example below, the <guilabel>Vary</guilabel>
         command accepts repeated parameters.</para>
 
-        <programlisting>
-          <code>
-  Vary DefaultDC(ImpulsiveBurn1.Element1 = 2, ...
-  {Perturbation = 1e99, Perturbation = .001})
-          </code>
-        </programlisting>
+        <programlisting><code>Vary DefaultDC(ImpulsiveBurn1.Element1 = 2, ...
+{Perturbation = 1e99, Perturbation = .001})</code>        </programlisting>
 
         <para>The accepted best practice is not to repeat parameters in any
         given command. However, for the <guilabel>Vary</guilabel> command, if
@@ -797,7 +807,7 @@
       </refsection>
 
       <refsection>
-        <title>Use of Thruster parameters in a Vary command</title>
+        <title>Use of Thruster Parameters in a Vary Command</title>
 
         <para>If you wish to use thruster parameters, such as thrust
         direction, in a <guilabel>Vary</guilabel> command, then you must
@@ -805,17 +815,13 @@
         first show syntax, using the parent object that does not work. We then
         show the correct syntax using the cloned (child) object.</para>
 
-        <programlisting>
-          <code>
-  %Referencing the parent object, thruster1, does not work.
-  Vary DC1(thruster1.ThrustDirection1 = 0.4)
-  Vary DC1(thruster1.ThrustDirection2 = 0.5)
+        <programlisting><code>%Referencing the parent object, thruster1, does not work.
+Vary DC1(thruster1.ThrustDirection1 = 0.4)
+Vary DC1(thruster1.ThrustDirection2 = 0.5)
 
-  %Referencing the cloned (child) object, Sc.thruster1, does work.
-  Vary DC1(Sc.thruster1.ThrustDirection1 = 0.4)
-  Vary DC1(Sc.thruster1.ThrustDirection2 = 0.5)
-          </code>
-        </programlisting>
+%Referencing the cloned (child) object, Sc.thruster1, does work.
+Vary DC1(Sc.thruster1.ThrustDirection1 = 0.4)
+Vary DC1(Sc.thruster1.ThrustDirection2 = 0.5)</code>        </programlisting>
       </refsection>
 
       <refsection>
