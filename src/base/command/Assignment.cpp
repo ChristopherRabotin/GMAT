@@ -688,9 +688,23 @@ bool Assignment::Validate()
                      retval = false;
                   #ifdef DEBUG_VALIDATION
                   else
-                     MessageInterface::ShowMessage("Assuming object = string "
+                     MessageInterface::ShowMessage("Assuming object array = string "
                            "okay for now\n");
                   #endif
+                  // Check to see if we are allowed to set a string on this
+                  // object property
+                  bool canAssignString = true;
+                  GmatBase *lhsObj = lhsWrapper->GetRefObject();
+                  Integer  lhsID   = -1;
+                  if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
+                     lhsID = ((ObjectPropertyWrapper*)(lhsWrapper))->GetPropertyId();
+                  if ((lhsObj != NULL) && (lhsID >= 0))
+                     canAssignString = lhsObj->CanAssignStringToObjectProperty(lhsID);
+                  if (!canAssignString && ((rhsDataType == Gmat::STRING_TYPE) ||
+                        (rhsDataType == Gmat::STRINGARRAY_TYPE)))
+                  {
+                     retval = false;
+                  }
                }
                else if (lhsDataType == Gmat::STRING_TYPE)
                {
@@ -701,7 +715,7 @@ bool Assignment::Validate()
                   else if (rhsDataType == Gmat::REAL_TYPE)
                   {
                      retval = true;
-                     // Check if left is ParameterWapper and it is a time parameter returing
+                     // Check if left is ParameterWrapper and it is a time parameter returning
                      // string, such as Gregorian time, then it is not allowed
                      // (GMT-2543 fix)
                      if (lhsWrapper->GetWrapperType() ==  Gmat::PARAMETER_WT)

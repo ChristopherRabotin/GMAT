@@ -181,6 +181,7 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
+   virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
    
    virtual bool         Validate();
    virtual bool         Initialize();

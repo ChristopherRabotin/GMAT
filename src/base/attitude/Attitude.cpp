@@ -2222,6 +2222,50 @@ std::string Attitude::GetParameterTypeString(const Integer id) const
 }
 
 //---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType Attitude::GetPropertyObjectType(const Integer id) const
+{
+   switch (id)
+   {
+   case REFERENCE_COORDINATE_SYSTEM:
+      return Gmat::COORDINATE_SYSTEM;
+   default:
+      return GmatBase::GetPropertyObjectType(id);
+   }
+}
+
+//---------------------------------------------------------------------------
+// bool CanAssignStringToObjectProperty(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a string can be assigned to the
+ * specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a string can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool Attitude::CanAssignStringToObjectProperty(const Integer id) const
+{
+   if (id == REFERENCE_COORDINATE_SYSTEM)
+      return false;
+
+   return GmatBase::CanAssignStringToObjectProperty(id);
+}
+
+
+
+//---------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const Integer id) const
 //---------------------------------------------------------------------------
 /**

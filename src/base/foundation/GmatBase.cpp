@@ -1619,6 +1619,24 @@ const StringArray& GmatBase::GetPropertyEnumStrings(const std::string &label) co
 
 
 //---------------------------------------------------------------------------
+// bool CanAssignStringToObjectProperty(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a string can be assigned to the
+ * specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a string can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::CanAssignStringToObjectProperty(const Integer id) const
+{
+   return true;    // default
+}
+
+
+//---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**

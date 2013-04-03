@@ -1057,6 +1057,9 @@ bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
       }
    }
    
+   if (attitude)
+      attitude->RenameRefObject(type, oldName, newName);
+
    return true;
 }
 
@@ -1345,7 +1348,7 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       if (type == Gmat::ATTITUDE)
       {
-         fullList.push_back(attitude->GetRefObjectName(type));
+         fullList.push_back(attitude->GetRefObjectName(type)); // makes no sense
          return fullList;
       }
 
@@ -3841,6 +3844,17 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
 //---------------------------------------------------------------------------
 Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
 {
+   if (id >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to Get property object type for id =  %d\n", id);
+         #endif
+         return attitude->GetPropertyObjectType(id - ATTITUDE_ID_OFFSET);
+      }
+   }
    switch (id)
    {
    case COORD_SYS_ID:
@@ -3853,6 +3867,42 @@ Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
       return SpaceObject::GetPropertyObjectType(id);
    }
 }
+
+//---------------------------------------------------------------------------
+// bool CanAssignStringToObjectProperty(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a string can be assigned to the
+ * specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a string can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::CanAssignStringToObjectProperty(const Integer id) const
+{
+   if (id >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to check string assignment for id =  %d\n", id);
+         #endif
+         return attitude->CanAssignStringToObjectProperty(id - ATTITUDE_ID_OFFSET);
+      }
+   }
+
+//   if ((id == COORD_SYS_ID) || (id == FUEL_TANK_ID) || (id == THRUSTER_ID))
+   if (id == COORD_SYS_ID)
+      return false;
+
+
+   return SpaceObject::CanAssignStringToObjectProperty(id);
+
+}
+
 
 //------------------------------------------------------------------------------
 // bool Validate()
