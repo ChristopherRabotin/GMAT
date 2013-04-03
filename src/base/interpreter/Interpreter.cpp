@@ -2235,6 +2235,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
+         ("   => Caught exception: '%s'\n", e.GetFullMessage().c_str());
+      MessageInterface::ShowMessage
          ("CreateCommand() leaving creating '%s', cmd=<%p>, retFlag=%d\n", type1.c_str(),
           cmd, retFlag);
       #endif
@@ -5336,6 +5338,10 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
       }
    }
    
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   retval=%d, ignoreError=%d\n", retval, ignoreError);
+   #endif
    if (retval == false && !ignoreError)
    {
       if (errorMsg1 == "")
@@ -7559,6 +7565,9 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       }
       catch (BaseException &e)
       {
+         #ifdef DEBUG_SET_SOLAR_SYS
+         MessageInterface::ShowMessage("SolarSystemException thrown: %s\n", e.GetFullMessage().c_str());
+         #endif
          HandleError(e);
       }
    }

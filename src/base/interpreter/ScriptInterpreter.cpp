@@ -169,8 +169,9 @@ bool ScriptInterpreter::Interpret()
    if (retval0)
    {
       retval1 = ReadScript();
-      retval2 = FinalPass();
-
+      if (retval1)
+         retval2 = FinalPass();
+      
       #if DBGLVL_SCRIPT_READING
          MessageInterface::ShowMessage("In ScriptInterpreter::Interpret(), "
                "retvals are rv1 = %s and rv2 = %s; numErrors = %d\n",

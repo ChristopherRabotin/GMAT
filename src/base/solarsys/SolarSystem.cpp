@@ -2818,15 +2818,16 @@ bool SolarSystem::SetStringParameter(const Integer id,
           (sourceindex == Gmat::DE421)||
           (sourceindex == Gmat::DE424)))
 	  {
-         // remove old DE file object, create new DE file object
-		 // and assign it to theDefaultDeFile
-         CreateDeFile(sourceindex, thePlanetarySourceNames[sourceindex]);
-
-         // set source file
-         SetSourceFile(theDefaultDeFile);
+        // remove old DE file object, create new DE file object
+        // and assign it to theDefaultDeFile
+        if (CreateDeFile(sourceindex, thePlanetarySourceNames[sourceindex]))
+           // set source file
+           SetSourceFile(theDefaultDeFile);
+        else
+           return false;
 	  }
-
-      return true;
+     
+     return true;
    }
    if (id == DE_FILE_NAME)
    {
@@ -2843,11 +2844,15 @@ bool SolarSystem::SetStringParameter(const Integer id,
 	  // the source file to the new DE file.
 	  if (value != thePlanetarySourceNames[sourceindex])
 	  {
-         CreateDeFile(sourceindex, value);
-         thePlanetarySourceNames[sourceindex] = value;
-         SetSourceFile(theDefaultDeFile);
+        if (CreateDeFile(sourceindex, value))
+        {
+           thePlanetarySourceNames[sourceindex] = value;
+           SetSourceFile(theDefaultDeFile);
+        }
+        else
+           return false;
 	  }
-      return true;
+     return true;
    }
    if (id == SPK_FILE_NAME)
    {
@@ -3498,12 +3503,15 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       deFileType = Gmat::DE_DE424;
       break;
    default:
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "SolarSystem::CreateDeFile() unsupported DE file type");
-      return false;
+      // MessageInterface::PopupMessage
+      //    (Gmat::WARNING_,
+      //     "SolarSystem::CreateDeFile() unsupported DE file type");
+      // return false;
+      SolarSystemException sse;
+      sse.SetDetails("%d is unsupported DE file type", id);
+      throw sse;
    }
-
+   
    #ifdef DEBUG_SS_PLANETARY_FILE
    MessageInterface::ShowMessage
       ("SolarSystem::CreateDeFile() creating DeFile. type=%d,\n   "
@@ -3514,10 +3522,13 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    FILE *defile = fopen(fileName.c_str(), "rb");
    if (defile == NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "Error opening the DE file named: %s.\n"
-          "Please check the path and file name.\n", fileName.c_str());
+      // MessageInterface::PopupMessage
+      //    (Gmat::WARNING_,
+      //     "Error opening the DE file named: %s.\n"
+      //     "Please check the path and file name.\n", fileName.c_str());
+      SolarSystemException sse;
+      sse.SetDetails("Error opening the DE file \"%s\"", fileName.c_str());
+      throw sse;
    }
    else
    {
@@ -3538,9 +3549,13 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       }
       catch (...)
       {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "*** Warning *** The following DE file is invalid and will not be used: %s.", fileName.c_str());
+         // MessageInterface::PopupMessage
+         //    (Gmat::WARNING_,
+         //     "*** Warning *** The following DE file is invalid and will not be used: %s.",
+         //     fileName.c_str());
+         SolarSystemException sse;
+         sse.SetDetails("\"%s\" is invalid DE file and will not be used", fileName.c_str());
+         throw sse;
       }
    }
    return status;
