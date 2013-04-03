@@ -1260,6 +1260,10 @@ Gmat::ObjectType Thruster::GetPropertyObjectType(const Integer id) const
    {
    case TANK:
       return Gmat::FUEL_TANK;
+   case COORDINATE_SYSTEM:
+      return Gmat::COORDINATE_SYSTEM;
+   case ORIGIN:
+      return Gmat::CELESTIAL_BODY;
    default:
       return Hardware::GetPropertyObjectType(id);
    }
