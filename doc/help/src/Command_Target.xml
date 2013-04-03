@@ -36,8 +36,7 @@
       <replaceable>Vary command</replaceable> …
       <replaceable>script statement</replaceable> …
       <replaceable>Achieve command</replaceable> …
-<literal>EndTarget</literal>
-    </synopsis>
+<literal>EndTarget</literal>    </synopsis>
 
     <note>
       <para xlink:href="Target_Remarks">See <xref linkend="Target_Remarks"/>

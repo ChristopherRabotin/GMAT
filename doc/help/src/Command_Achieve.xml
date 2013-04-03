@@ -15,8 +15,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -30,9 +28,7 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>
-      <literal>Achieve</literal> <replaceable>SolverName</replaceable> (<replaceable>Goal</replaceable> = Arg1, [{<replaceable>Tolerance</replaceable> = Arg2}]);
-    </synopsis>
+    <synopsis><literal>Achieve</literal> <replaceable>SolverName</replaceable> (<replaceable>Goal</replaceable> = Arg1, [{<replaceable>Tolerance</replaceable> = Arg2}])   </synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -60,7 +56,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".6*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -100,7 +96,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>42165</para>
+                    <para>
+                      <literal>42165</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -133,7 +131,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any
-                    user-defined parameter &gt; 0</para>
+                    user-defined parameter &gt; <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -142,7 +140,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any
-                    user-defined parameter &gt; 0</para>
+                    user-defined parameter &gt; <literal>0</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -150,7 +148,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0.1</para>
+                    <para>
+                      <literal>0.1</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -190,9 +190,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Spacecraft parameter, Array element, Variable, or
-                    any other single element user defined parameter, excluding
-                    numbers</para>
+                    <para><guilabel>Spacecraft</guilabel> parameter,
+                    <guilabel>Array</guilabel> element,
+                    <guilabel>Variable</guilabel>, or any other single element
+                    user defined parameter, excluding numbers</para>
                   </listitem>
                 </varlistentry>
 
@@ -200,7 +201,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultSC.Earth.RMAG</para>
+                    <para>
+                      <literal>DefaultSC.Earth.RMAG</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -232,7 +235,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Targeter</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -240,7 +243,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any user defined targeter</para>
+                    <para>Any user defined
+                    <guilabel>DifferentialCorrector</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -248,7 +252,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DefaultDC</para>
+                    <para>
+                      <guilabel>DefaultDC</guilabel>
+                    </para>
                   </listitem>
                 </varlistentry>
 
