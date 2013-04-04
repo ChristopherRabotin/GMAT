@@ -69,6 +69,7 @@ TrackingSystem::TrackingSystem(const std::string &type,
    GmatBase          (Gmat::TRACKING_SYSTEM, type, name)
 {
    objectTypes.push_back(Gmat::TRACKING_SYSTEM);
+   objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingSystem");
 
    parameterCount = TrackingSystemParamCount;

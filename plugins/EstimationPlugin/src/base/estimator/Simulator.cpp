@@ -977,7 +977,8 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
+          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
          measManager.AddMeasurement((MeasurementModel *)obj);
          return true;
