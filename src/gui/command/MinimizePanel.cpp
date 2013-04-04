@@ -176,8 +176,7 @@ void MinimizePanel::SaveData()
    {
       std::string varName = variableName.c_str();
       
-	  canClose = CheckVariable(varName, Gmat::SPACECRAFT, "Variable to be Minimized", "Variable, Array element, Spacecraft parameter");
-      mVarNameChanged = !canClose;
+	  canClose = CheckVariable(varName, Gmat::SPACECRAFT, "Variable to be Minimized", "Variable, Array element, Spacecraft parameter", false);
    }
    
    if (!canClose)
@@ -197,6 +196,7 @@ void MinimizePanel::SaveData()
           std::string(variableName.c_str()));
           
       theGuiInterpreter->ValidateCommand(mMinimizeCommand);
+      mVarNameChanged = !canClose;
    }
    catch (BaseException &e)
    {
