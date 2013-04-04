@@ -2459,7 +2459,7 @@ bool CelestialBody::SetUserDefined(bool userDefinedBody)
  *
  * @param  <atTime>   time at which state is requested
  *
- * @result MJ2000eq state for the body at the requested time�
+ * @result MJ2000eq state for the body at the requested time
  *
  */
 //------------------------------------------------------------------------------
@@ -2531,7 +2531,7 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
  *
  * @param  <atTime>   time at which position is requested
  *
- * @result MJ2000eq position for the body at the requested time�
+ * @result MJ2000eq position for the body at the requested time
  *
  */
 //------------------------------------------------------------------------------
@@ -2550,7 +2550,7 @@ const Rvector3 CelestialBody::GetMJ2000Position(const A1Mjd &atTime)
  *
  * @param  <atTime>   time at which velocity is requested
  *
- * @result MJ2000eq velocity for the body at the requested time�
+ * @result MJ2000eq velocity for the body at the requested time
  *
  */
 //------------------------------------------------------------------------------
@@ -2966,7 +2966,21 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
    {
       if (id == ORIENTATION_EPOCH)
       {
-         orientationEpoch    = value;
+         if ((value >= DateUtil::EARLIEST_VALID_MJD_VALUE) &&
+             (value <= DateUtil::LATEST_VALID_MJD_VALUE))
+            orientationEpoch    = value;
+         else
+         {
+            std::stringstream errmsg;
+            errmsg << "*** Error *** The value of " << value 
+                   << " for field " << GetParameterText(id)
+                   << " on object \"" << instanceName 
+                   <<  "\" is not an allowed value.\n"
+                   << "The allowed values are: [Real number between " 
+                   << DateUtil::EARLIEST_VALID_MJD_VALUE
+                   << " and " << DateUtil::LATEST_VALID_MJD_VALUE << "]";
+            throw SolarSystemException(errmsg.str());
+         }
          return true;
       }
       if (id == SPIN_AXIS_RA_CONSTANT)
