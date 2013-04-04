@@ -2375,7 +2375,7 @@
 
         <thead>
           <row>
-            <entry>Command or Resource</entry>
+            <entry align="left">Command or Resource</entry>
 
             <entry>Description</entry>
           </row>
