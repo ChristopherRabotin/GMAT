@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -33,7 +31,8 @@
     <synopsis><replaceable>MatlabFunction</replaceable><literal>()</literal>
 <replaceable>MatlabFunction</replaceable><literal>(</literal><replaceable>input_argument</replaceable>[<literal>,</literal> <replaceable>input_argument</replaceable>]...<literal>)</literal>
 <literal>[</literal><replaceable>output_argument</replaceable>[<literal>,</literal> <replaceable>output_argument</replaceable>]...<literal>]</literal> <literal>=</literal> <replaceable>MatlabFunction</replaceable>
-<literal>[</literal><replaceable>output_argument</replaceable>[<literal>,</literal> <replaceable>output_argument</replaceable>]...<literal>]</literal> <literal>=</literal> <replaceable>MatlabFunction</replaceable><literal>(</literal><replaceable>input_argument</replaceable>[<literal>,</literal> <replaceable>input_argument</replaceable>]...<literal>)</literal></synopsis>
+<literal>[</literal><replaceable>output_argument</replaceable>[<literal>,</literal> <replaceable>output_argument</replaceable>]...<literal>]</literal> <literal>=</literal> <replaceable>...
+    MatlabFunction</replaceable><literal>(</literal><replaceable>input_argument</replaceable>[<literal>,</literal> <replaceable>input_argument</replaceable>]...<literal>)</literal></synopsis>
   </refsynopsisdiv>
 
   <refsection>

@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -51,7 +49,7 @@
       <para>GMAT uses a non-standard offset, as shown in the following
       table.</para>
 
-      <informaltable>
+      <informaltable colsep="0" frame="topbot">
         <tgroup cols="3">
           <tbody>
             <row>
