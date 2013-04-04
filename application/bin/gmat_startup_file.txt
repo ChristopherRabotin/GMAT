@@ -117,7 +117,7 @@ ICON_PATH              = DATA_PATH/graphics/icons/
 MAIN_ICON_FILE         = ICON_PATH/GMATWin32.ico
 #-----------------------------------------------------------
 SPLASH_PATH            = DATA_PATH/graphics/splash/
-SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.tif
+SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.png
 #-----------------------------------------------------------
 TEXTURE_PATH           = DATA_PATH/graphics/texture/
 SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
