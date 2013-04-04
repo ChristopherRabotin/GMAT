@@ -221,7 +221,8 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
    {
       wxString prefix = "Scripting for ";
       objLink = GetName().c_str();
-      objLink = objLink.Mid(prefix.size());
+	  if (objLink.Find(prefix) != wxNOT_FOUND)
+		objLink = objLink.Mid(prefix.size());
       GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objLink.c_str());
       if (obj != NULL)
          objLink = obj->GetTypeName().c_str();
