@@ -758,9 +758,14 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 //---------------------------------------------------------------------------
 Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
 {
+   // The change below breaks sample missions, so I'm backing it out.  A
+   // different change committed today fixes the issue.
+//   if (id == MEASUREMENTS)
+////      return Gmat::MEASUREMENT_MODEL;			// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+//      return Gmat::TRACKING_SYSTEM;				// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+
    if (id == MEASUREMENTS)
-//      return Gmat::MEASUREMENT_MODEL;			// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
-      return Gmat::TRACKING_SYSTEM;				// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
 
    if (id == PROPAGATOR)
       return Gmat::PROP_SETUP;
