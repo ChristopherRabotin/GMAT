@@ -243,39 +243,45 @@ bool GmatApp::OnInit()
             wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
             {
-			   std::string ext = GmatFileUtil::ParseFileExtension(splashFile.c_str());
-			   std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
-			   wxBitmap *bitmap = NULL;
-			   if ((ext == "TIF") || (ext == "TIFF"))
-			   {
-					wxImage::AddHandler(new wxTIFFHandler);
-					bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
-			   }
-			   else if ((ext == "JPG") || (ext == "JPEG"))
-			   {
-					wxImage::AddHandler(new wxJPEGHandler);
-					bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_JPEG);
-			   }
-			   else if (ext == "PNG")
-			   {
-					wxImage::AddHandler(new wxPNGHandler);
-					bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_PNG);
-			   }
-			   else
-			   {
-				   MessageInterface::ShowMessage
-					  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
-			   }
-               // Changed to time out in 4 sec (LOJ: 2009.10.07)
-			   if (bitmap != NULL)
-			   {
-				 wxRegion region(*bitmap, *wxGREEN);
-				 wxSplashScreen *splash = new wxSplashScreen(*bitmap,
-                                  wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-                                  4000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
-                                  wxSIMPLE_BORDER|wxSTAY_ON_TOP|wxFRAME_SHAPED);
-				 splash->SetShape(region);
-			   }
+               std::string ext = GmatFileUtil::ParseFileExtension(splashFile.c_str());
+               std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
+               wxBitmap *bitmap = NULL;
+               if ((ext == "TIF") || (ext == "TIFF"))
+               {
+                  wxImage::AddHandler(new wxTIFFHandler);
+                  bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
+               }
+               else if ((ext == "JPG") || (ext == "JPEG"))
+               {
+                  wxImage::AddHandler(new wxJPEGHandler);
+                  bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_JPEG);
+               }
+               else if (ext == "PNG")
+               {
+                  wxImage::AddHandler(new wxPNGHandler);
+                  bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_PNG);
+               }
+               else
+               {
+                  MessageInterface::ShowMessage
+                    ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+               }
+                  // Changed to time out in 4 sec (LOJ: 2009.10.07)
+               if (bitmap != NULL)
+               {
+                  long splashStyle;
+                  #ifdef __WXMAC__
+                     splashStyle = wxSIMPLE_BORDER|wxSTAY_ON_TOP;
+                  #else
+                     splashStyle = wxSIMPLE_BORDER|wxSTAY_ON_TOP|wxFRAME_SHAPED;
+                  #endif
+                   wxRegion region(*bitmap, *wxGREEN);
+                   wxSplashScreen *splash = new wxSplashScreen(*bitmap,
+                                        wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+                                        4000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
+                                        splashStyle);
+                   splash->SetShape(region);
+               }
             }
             else
             {
