@@ -136,11 +136,9 @@ protected:
    Real        metaDataStop;
    std::string metaDataStartStr;
    std::string metaDataStopStr;
-   Integer     lastCommentLength;
    Integer     writeMetaDataOption;
    std::ofstream::pos_type metaDataBegPosition;
    std::ofstream::pos_type metaDataEndPosition;
-   std::ofstream::pos_type lastCommentBegPos;
    
    Integer     interpolationOrder;
    Integer     interpolatorStatus;
