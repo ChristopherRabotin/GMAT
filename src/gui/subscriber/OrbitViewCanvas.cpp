@@ -2608,6 +2608,26 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
       MessageInterface::ShowMessage("Model angles: [%lf  %lf  %lf]\n", 
          EAng1Deg, EAng2Deg, EAng3Deg);
    #endif
+
+   //-----------------------------------------------------------------
+   // glMultMatrixd(const GLdouble *m)
+   // Multiplies the current matrix with the one specified using m, and
+   // replaces the current matrix with the product.
+   // m Points to 16 consecutive values that are used as the elements of a        
+   // 4x4 column-major matrix
+   //-----------------------------------------------------------------
+   
+   // Get view to internal coordinate frame rotation matrix
+   int coordIndex = mLastIndex*16;
+   mCoordMatrix = Rmatrix(4,4);
+   for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 4; j++)
+         mCoordMatrix.SetElement(i, j, mRotMatViewToInternal[coordIndex + i*4 + j]);
+   
+   // Multiply rotation matrix to current matrix
+   glMultMatrixd(mCoordMatrix.GetDataVector());
+   
+      
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
