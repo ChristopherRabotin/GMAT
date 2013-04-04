@@ -2203,7 +2203,7 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       MessageInterface::ShowMessage
          ("   It is not finalized yet, so trying to write the remainder of data\n");
       #endif
-      
+
       if (fileType == CCSDS_OEM || fileType == CCSDS_AEM)
       {
          if (interpolator != NULL)
@@ -2224,14 +2224,14 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
                   ("There is not enough data available to generate spacecraft "
                    "ephemeris data at the requested interpolation order. "
                    "There should be at least one data point more than interpolation order.");
-               
+
                // Throw an exception
                std::stringstream ss("");
                ss << "There is not enough data to generate ephmeris data to "
                   "EphemerisFile: \"" << fileName << "\". Number of required points is "
                   << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
                ss << ".  There should be at least one data point more than interpolation order.";
-               
+
                SubscriberException se;
                se.SetDetails(ss.str());
                throw se;
@@ -2345,19 +2345,30 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       }
       else if (fileType == SPK_ORBIT)
       {
-         if (spkWriter != NULL)
+         try 
          {
-            WriteSpkOrbitDataSegment();
-         }
-         else
-         {
-            #ifdef __USE_SPICE__
-            if (a1MjdArray.size() > 0)
+            if (spkWriter != NULL)
             {
-               throw SubscriberException
-                  ("*** INTERNAL ERROR *** SPK Writer is NULL in "
-                   "EphemerisFile::FinishUpWriting()\n");
+               WriteSpkOrbitDataSegment();
             }
+            else
+            {
+               #ifdef __USE_SPICE__
+               if (a1MjdArray.size() > 0)
+               {
+                  throw SubscriberException
+                     ("*** INTERNAL ERROR *** SPK Writer is NULL in "
+                      "EphemerisFile::FinishUpWriting()\n");
+               }
+               #endif
+            }
+         }
+         catch (BaseException &ex)
+         {
+            // Catch and ignore exceptions thrown from util, since we manage them later
+            #ifdef DEBUG_EPHEMFILE_WRITE
+               MessageInterface::ShowMessage("Caught the exception %s\n", 
+                  ex.GetFullMessage().c_str());
             #endif
          }
       }
