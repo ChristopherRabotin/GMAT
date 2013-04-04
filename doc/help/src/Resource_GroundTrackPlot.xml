@@ -37,7 +37,8 @@
     the GUI or script interface of GMAT. GMAT also provides the option of when
     to plot and stop plotting ground track of a spacecraft to a
     <guilabel>GroundTrackPlot</guilabel> through the <guilabel>Toggle
-    On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section
+    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref linkend="GroundTrackPlot_Remarks"
+    xrefstyle="select:title"/> section
     below for detailed discussion of the interaction between
     <guilabel>GroundTrackPlot</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. <guilabel>GroundTrackPlot</guilabel>
@@ -801,7 +802,7 @@
     </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="GroundTrackPlot_Remarks">
     <title>Remarks</title>
 
     <refsection>

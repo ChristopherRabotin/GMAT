@@ -41,14 +41,16 @@
 
     <para>GMAT also provides the option of when to start and stop plotting
     spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
-    through the <guilabel>Toggle On/Off</guilabel> command. See the Remarks
+    through the <guilabel>Toggle On/Off</guilabel> command. See the <xref
+      linkend="Orbitview_Remarks" xrefstyle="select:title"/>
     section below for detailed discussion of the interaction between an
     <guilabel>OrbitView</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. GMAT’s
     <guilabel>Spacecraft</guilabel>, <guilabel>SolarSystem</guilabel> and
     <guilabel>OrbitView</guilabel> resources also interact with each other
     throughout the entire mission duration. Discussion of the interaction
-    between these resources is also mentioned in the Remarks section.</para>
+    between these resources is also mentioned in the <xref
+      linkend="Orbitview_Remarks" xrefstyle="select:title"/> section.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
@@ -2010,7 +2012,7 @@
     </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="Orbitview_Remarks">
     <title>Remarks</title>
 
     <refsection>

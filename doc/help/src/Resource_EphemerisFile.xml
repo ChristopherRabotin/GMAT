@@ -32,7 +32,8 @@
     generates spacecraft’s ephemeris data in a report format. You can generate
     spacecraft’s ephemeris data in any of the user-defined coordinate frames.
     GMAT allows you to output ephemeris data in either CCSDS or SPK file
-    formats. See the Remarks section for more details.
+    formats. See the <xref linkend="EphemerisFile_Remarks"
+    xrefstyle="select:title"/> section for more details.
     <guilabel>EphemerisFile</guilabel> resource can be configured to generate
     ephemeris data at default integration steps or by entering user-selected
     step sizes.</para>
@@ -44,8 +45,9 @@
     the GUI or script interface. GMAT also provides the option of when to
     write and stop writing ephemeris data to a text file through the
     <guilabel>Toggle</guilabel>
-    <guilabel>On</guilabel>/<guilabel>Off</guilabel> commands. See the Remarks
-    section below for detailed discussion of the interaction between
+    <guilabel>On</guilabel>/<guilabel>Off</guilabel> commands. See the <xref
+    linkend="EphemerisFile_Remarks" xrefstyle="select:title"/> section below
+    for detailed discussion of the interaction between
     <guilabel>EphemerisFile</guilabel> resource and
     <guilabel>Toggle</guilabel> command.</para>
 
@@ -1013,7 +1015,7 @@
     </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="EphemerisFile_Remarks">
     <title>Remarks</title>
 
     <refsection>
@@ -1050,10 +1052,11 @@
       maneuvers, changes in dynamics models or when using assignment commands.
       Furthermore, when a mission sequence employs iterative processes such as
       differential correction or optimization, GMAT only writes the ephemeris
-      for the final solution from the iterative processes. See the Examples
-      section below to see how an ephemeris file is generated during a
-      discontinuous event such as an impulsive burn and iterative process like
-      differential correction.</para>
+      for the final solution from the iterative processes. See the <xref
+      linkend="EphemerisFile_Examples" xrefstyle="select:title"/> section
+      below to see how an ephemeris file is generated during a discontinuous
+      event such as an impulsive burn and iterative process like differential
+      correction.</para>
 
       <para>Version 1 of CCSDS Orbit Data Messages (ODMs) document used to
       require that the ephemeris be generated in increasing time order and
@@ -1126,7 +1129,7 @@
       <guilabel>EphemerisFile</guilabel> resource. No ephemeris data is sent
       for first two days of propagation and only the data that is collected
       during last four days of propagation is sent to text file called
-      ‘EphemerisFile1.eph’:</para>
+      ‘<literal>EphemerisFile1.eph</literal>’:</para>
 
       <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
@@ -1145,7 +1148,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
     </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="EphemerisFile_Examples">
     <title>Examples</title>
 
     <informalexample>
@@ -1153,7 +1156,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       Ephemeris file is generated for two days of propagation. At default
       settings, ephemeris file is generated at each integrator step and in
       CCSDS file format. Ephemeris data is sent to text file called
-      ‘EphemerisFile2.eph’:</para>
+      ‘<literal>EphemerisFile2.eph</literal>’:</para>
 
       <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp
@@ -1172,7 +1175,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></programlisting>
       <para>This example shows how an ephemeris file is generated during an
       iterative process like differential correction that includes a
       discontinuous event like an impulsive burn. Ephemeris data is sent to
-      text file called ‘EphemerisFile3.eph’:</para>
+      text file called ‘<literal>EphemerisFile3.eph</literal>’:</para>
 
       <programlisting><code>Create Spacecraft aSat
 Create Propagator aProp

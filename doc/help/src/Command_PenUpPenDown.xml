@@ -237,12 +237,13 @@
     Similarly, when a <guilabel>PenDown</guilabel> command is issued for any
     of the three <guilabel>subscribers</guilabel>, then data is drawn for each
     integration step until a <guilabel>PenUp</guilabel> command is issued for
-    that specific subscriber. Refer to the Examples section below to see how
+    that specific subscriber. Refer to the <xref linkend="PenUpPenDown_Examples"
+    xrefstyle="select:title"/> section below to see how
     <guilabel>PenUp</guilabel> and <guilabel>PenDown</guilabel> commands can
     be used in the <guilabel>Mission</guilabel> tree.</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="PenUpPenDown_Examples" >
     <title>Examples</title>
 
     <informalexample>

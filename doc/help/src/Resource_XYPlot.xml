@@ -34,14 +34,16 @@
     You can create multiple <guilabel>XYPlots</guilabel> by using either the
     GUI or script interface of GMAT. GMAT also provides the option of when to
     plot and stop plotting data to a XYPlot through the <guilabel>Toggle
-    On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks section
+    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref linkend="XYPlot_Remarks"
+    xrefstyle="select:title"/> section
     below for detailed discussion of the interaction between an
     <guilabel>XYPlot</guilabel> resource and the <guilabel>Toggle</guilabel>
     command. GMAT’s <guilabel>Spacecraft</guilabel> and
     <guilabel>XYPlot</guilabel> resources also interact with each other
     throughout the entire mission duration. Discussion of the interaction
     between <guilabel>Spacecraft</guilabel> and <guilabel>XYPlot</guilabel>
-    resources can also be found in the Remarks section.</para>
+    resources can also be found in the <xref linkend="XYPlot_Remarks"
+    xrefstyle="select:title"/> section.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/></para>
@@ -637,7 +639,7 @@
     </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="XYPlot_Remarks">
     <title>Remarks</title>
 
     <refsection>

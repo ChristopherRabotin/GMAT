@@ -149,11 +149,12 @@ OutputNames</replaceable>
     report data to an <guilabel>XYPlot</guilabel> at specific points in your
     mission, then a <guilabel>ClearPlot</guilabel> command can be inserted
     into the mission sequence to control when a subscriber plots data. Refer
-    to the Examples section below to see how <guilabel>ClearPlot</guilabel>
+    to the <xref linkend="ClearPlot_Examples"
+    xrefstyle="select:title"/> section below to see how <guilabel>ClearPlot</guilabel>
     command can be used in the <guilabel>Mission</guilabel> tree.</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="ClearPlot_Examples">
     <title>Examples</title>
 
     <informalexample>

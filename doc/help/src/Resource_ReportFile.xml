@@ -38,7 +38,8 @@
     either the GUI or script interface. GMAT also provides the option of when
     to write and stop writing data to a text file through the
     <guilabel>Toggle</guilabel>
-    <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the Remarks
+    <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the <xref
+      linkend="ReportFile_Remarks" xrefstyle="select:title"/>
     section below for detailed discussion of the interaction between
     <guilabel>ReportFile</guilabel> resource and <guilabel>Toggle</guilabel>
     command.</para>
@@ -851,7 +852,7 @@
     </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="ReportFile_Remarks">
     <title>Remarks</title>
 
     <refsection>

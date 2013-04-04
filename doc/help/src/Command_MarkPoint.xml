@@ -151,12 +151,13 @@ OutputNames</replaceable>
     want to place mark points on an <guilabel>XYPlot</guilabel> at specific
     points, then a <guilabel>MarkPoint</guilabel> command can be inserted into
     the mission sequence to control when mark points are placed onto an
-    <guilabel>XYPlot</guilabel>. Refer to the Examples section below to see
+    <guilabel>XYPlot</guilabel>. Refer to the <xref linkend="MarkPoint_Examples"
+    xrefstyle="select:title"/> section below to see
     how <guilabel>MarkPoint</guilabel> command can be used in the
     <guilabel>Mission</guilabel> tree.</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="MarkPoint_Examples">
     <title>Examples</title>
 
     <informalexample>

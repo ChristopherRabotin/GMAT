@@ -541,15 +541,14 @@
 
   <refsection>
     <title>Remarks</title>
-
+	
     <refsection>
       <title>Configuring Spacecraft Visualization Properties</title>
 
       <para>GMAT lets you define any spacecraft model but currently GMAT
-      supports only .3ds model format. The following two websites list many
-      .3ds spacecraft model formats:
-      http://www.nasa.gov/multimedia/3d_resources/models.html &amp;
-      http://www.celestiamotherlode.net/. Most of these models are in .3ds
+      supports only .3ds model format. Several .3ds spacecraft model formats are available <link
+        xlink:href="http://www.nasa.gov/multimedia/3d_resources/models.html">here.</link> You can also download more .3ds models by clicking <link
+        xlink:href="http://www.celestiamotherlode.net/">here.</link> Most of these models are in .3ds
       format, which can be read by most 3D programs.</para>
 
       <para>GMAT lets you apply fixed rotation to the attitude orientation of
