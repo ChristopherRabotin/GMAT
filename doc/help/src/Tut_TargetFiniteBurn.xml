@@ -59,7 +59,7 @@
     spacecraft in low Earth orbit.  The goal of this finite burn is to achieve
     a certain desired apogee radius.  Since the most efficient orbital
     location to affect apoapsis is at periapsis, the first step in this
-    tutorial is to propagate the spacecraft to perigee.  </para>
+    tutorial is to propagate the spacecraft to perigee.</para>
 
     <para>To calculate the duration of the perigee burn needed to achieve a
     desired apogee radius of 12000 km, we must create the appropriate
@@ -68,10 +68,12 @@
     direction maneuver, followed by a command to propagate the spacecraft to
     orbit apogee.</para>
 
+    <para>The basic steps of this tutorial are:</para>
+
     <procedure>
       <step>
-        <para>Create and configure the spacecraft hardware and
-        <guilabel>FiniteBurn</guilabel> resources</para>
+        <para>Create and configure the <guilabel>Spacecraft</guilabel>
+        hardware and <guilabel>FiniteBurn</guilabel> resources</para>
       </step>
 
       <step>
@@ -104,7 +106,7 @@
   <section>
     <title>Create and Configure Spacecraft Hardware and Finite Burn</title>
 
-    <para>For this tutorial, you’ll need GMAT open, with the default mission
+    <para>For this tutorial, you’ll need GMAT open with the default mission
     loaded. To load the default mission, click <guibutton>New
     Mission</guibutton> (<inlinemediaobject>
         <imageobject>
@@ -214,7 +216,7 @@
       Thruster Coef.</guilabel> button and to view the ISP coefficients which
       determine fuel use, click the <guilabel>Edit Impulse Coef.</guilabel>
       button. For this tutorial, we will use the default ISP polynomial
-      coefficient values but we will change the <guilabel>Thruster</guilabel>
+      coefficient values but we will change the <guilabel>Thruster1</guilabel>
       polynomial coefficients as follows.</para>
     </section>
 
@@ -260,7 +262,7 @@
       coefficients. We simply changed the constant term in the Thrust
       polynomial from <literal>10</literal> to <literal>1000</literal> which
       is much larger than the thrust for a typical chemical thruster. The
-      Thrust and ISP polynomials used in this tutorial are given below.</para>
+      Thrust and ISP polynomials used in this tutorial are shown below.</para>
 
       <para>Thrust = 1000 (Newtons)</para>
 
@@ -288,10 +290,10 @@
         <step>
           <para>Select the <guilabel>Actuators</guilabel> tab. In the
           <guilabel>Available Thrusters</guilabel> column, select
-          <guilabel>Thrurster1</guilabel>. Then click the right arrow button
-          to add <guilabel>Thruster1</guilabel> to the
+          <guilabel>Thruster1</guilabel>. Then click the right arrow button to
+          add <guilabel>Thruster1</guilabel> to the
           <guilabel>SelectedThrusters</guilabel> list. Click
-          <guilabel>OK</guilabel>. </para>
+          <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>
 
@@ -908,8 +910,8 @@
         </screenshot>
       </figure>
 
-      <para>As shown below, we view the output message window to determine the
-      number of iterations it took the
+      <para>As shown below, we inspect the output message window to determine
+      the number of iterations it took the
       <guilabel>DifferentialCorrector</guilabel> to converge and the final
       value of the control variable, <guilabel>BurnDuration</guilabel>. Verify
       that you obtained a similar value for
