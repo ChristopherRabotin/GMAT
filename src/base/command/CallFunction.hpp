@@ -43,7 +43,11 @@ public:
    std::string          FormEvalString();
    bool                 AddInputParameter(const std::string &paramName, Integer index);
    bool                 AddOutputParameter(const std::string &paramName, Integer index);
-   
+
+   /// Override this method so that references can be checked
+   /// for Remove/Delete of objects
+   virtual bool         HasOtherReferenceToObject(const std::string &withName);
+
    // override GmatCommand methods
    virtual bool         Initialize();
    virtual bool         Execute();

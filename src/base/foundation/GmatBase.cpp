@@ -861,6 +861,7 @@ bool GmatBase::HasOtherReferenceToObject(const std::string &withName)
    for (Integer ii = 0; ii < sz; ii++)
    {
       byDots  = GmatStringUtil::SeparateDots(wrapNames.at(ii));
+      // Check the first part of the name for the object we're looking for
       objName = GmatStringUtil::Trim(GmatStringUtil::GetArrayName(byDots.at(0)));
       #ifdef DEBUG_WRAPPER_REF
          MessageInterface::ShowMessage("for object %s, wrapper name %d is: %s\n",
@@ -868,6 +869,18 @@ bool GmatBase::HasOtherReferenceToObject(const std::string &withName)
          MessageInterface::ShowMessage("... and extracted name is: %s\n", objName.c_str());
       #endif
       if (objName == withName) return true;
+      // If there are more than two parts when separated by dots, then there is
+      // a dependency, so we need to check it for the object
+      if (byDots.size() > 2)
+      {
+         objName = GmatStringUtil::Trim(GmatStringUtil::GetArrayName(byDots.at(1)));
+         #ifdef DEBUG_WRAPPER_REF
+            MessageInterface::ShowMessage("for object %s, wrapper name %d is: %s\n",
+                  instanceName.c_str(), ii, wrapNames.at(ii).c_str());
+            MessageInterface::ShowMessage("... and 2nd extracted name is: %s\n", objName.c_str());
+         #endif
+         if (objName == withName) return true;
+      }
    }
 
    return false;

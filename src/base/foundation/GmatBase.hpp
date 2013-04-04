@@ -527,7 +527,7 @@ protected:
    std::string         errorMessageFormatUnnamed;
    std::string         deprecatedMessageFormat;
    
-   /// flag used to deterine if the current write is in Matlab mode
+   /// flag used to determine if the current write is in Matlab mode
    bool                inMatlabMode;
 
    /// Integer array used to hold the parameter write order

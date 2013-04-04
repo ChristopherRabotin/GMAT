@@ -41,6 +41,7 @@
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_GLOBAL_OBJECT_MAP
 //#define DEBUG_RUN_COMPLETE
+//#define DEBUG_OBJECT_REF
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -268,6 +269,59 @@ bool CallFunction::AddOutputParameter(const std::string &paramName, Integer inde
       mOutputList.push_back(NULL);
       fm.AddOutput(paramName);      
       return true;
+   }
+
+   return false;
+}
+
+//---------------------------------------------------------------------------
+// bool HasOtherReferenceToObject(const std::string &withName)
+//---------------------------------------------------------------------------
+/*
+ * Determines whether or not this object has a hidden or indirect
+ * reference to the input object.  This could be the case when a command has
+ * wrappers and one of those wrappers has the named object as a reference.
+ *
+ * @param  withName   the name of the object we're looking for
+ *
+ * @return  true if it has a reference to the named object
+ */
+//---------------------------------------------------------------------------
+bool CallFunction::HasOtherReferenceToObject(const std::string &withName)
+{
+   #ifdef DEBUG_OBJECT_REF
+      MessageInterface::ShowMessage(
+            "Entering HasOtherReferenceToObject for item \"%s\" of type \"%s\" and withName \"%s\"\n",
+            instanceName.c_str(), typeName.c_str(), withName.c_str());
+   #endif
+   // Right now, for this class, we look at the parameters
+   StringArray paramNames  = GetRefObjectNameArray(Gmat::PARAMETER);
+   Integer     sz         = (Integer) paramNames.size();
+   std::string objName    = "";
+   StringArray byDots;
+   for (Integer ii = 0; ii < sz; ii++)
+   {
+      byDots  = GmatStringUtil::SeparateDots(paramNames.at(ii));
+      // Check the first part of the name for the object we're looking for
+      objName = GmatStringUtil::Trim(GmatStringUtil::GetArrayName(byDots.at(0)));
+      #ifdef DEBUG_OBJECT_REF
+         MessageInterface::ShowMessage("for object %s, param name %d is: %s\n",
+               instanceName.c_str(), ii, paramNames.at(ii).c_str());
+         MessageInterface::ShowMessage("... and extracted name is: %s\n", objName.c_str());
+      #endif
+      if (objName == withName) return true;
+      // If there are more than two parts when separated by dots, then there is
+      // a dependency, so we need to check it for the object
+      if (byDots.size() > 2)
+      {
+         objName = GmatStringUtil::Trim(GmatStringUtil::GetArrayName(byDots.at(1)));
+         #ifdef DEBUG_OBJECT_REF
+            MessageInterface::ShowMessage("for object %s, param name %d is: %s\n",
+                  instanceName.c_str(), ii, paramNames.at(ii).c_str());
+            MessageInterface::ShowMessage("... and 2nd extracted name is: %s\n", objName.c_str());
+         #endif
+         if (objName == withName) return true;
+      }
    }
 
    return false;
@@ -700,15 +754,13 @@ const StringArray& CallFunction::GetRefObjectNameArray(const Gmat::ObjectType ty
 {
    refObjectNames.clear();
    
-   switch (type) {
-      case Gmat::PARAMETER:         // Input/Output
-         for (unsigned int i=0; i<mInputNames.size(); i++)
-            refObjectNames.push_back(mInputNames[i]);
-         for (unsigned int i=0; i<mOutputNames.size(); i++)
-            refObjectNames.push_back(mOutputNames[i]);
-         return refObjectNames;
-      default:
-         break;
+   if (type == Gmat::PARAMETER)
+   {
+      for (unsigned int i=0; i<mInputNames.size(); i++)
+         refObjectNames.push_back(mInputNames[i]);
+      for (unsigned int i=0; i<mOutputNames.size(); i++)
+         refObjectNames.push_back(mOutputNames[i]);
+      return refObjectNames;
    }
    
    return refObjectNames;

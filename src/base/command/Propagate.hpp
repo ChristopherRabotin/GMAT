@@ -194,9 +194,9 @@ protected:
    StringArray                  stopNames;
    /// String used in the stopping goals
    StringArray                  goalNames;
-   /// ElementWraper pointers of stoping conditions
+   /// ElementWraper pointers of stopping conditions
    std::vector<ElementWrapper*> stopWrappers;
-   /// ElementWraper pointers of stoping goals
+   /// ElementWraper pointers of stopping goals
    std::vector<ElementWrapper*> goalWrappers;
    
    /// The spacecraft used by the stopping conditions

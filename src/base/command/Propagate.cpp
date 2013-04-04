@@ -1595,12 +1595,78 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
 
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("Propagate::RenameRefObject() Rename StopCondtion Object\n");
+         ("Propagate::RenameRefObject() Rename StopCondition Object\n");
       #endif
 
       // rename stop condition parameter
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
          stopWhen[i]->RenameRefObject(type, oldName, newName);
+
+      // Rename the wrappers and goal/stopNames as well
+      unsigned int sz = goalNames.size();
+      for (unsigned int ii = 0; ii < sz; ii++)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("Propagate::RenameRefObject() goalNames[%d] = %s\n",
+             (Integer) ii, goalNames.at(ii).c_str());
+         #endif
+         if (goalWrappers.at(ii))
+         {
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("Propagate::RenameRefObject() there is a goalWrapper at %d\n", (Integer) ii);
+            #endif
+            goalWrappers.at(ii)->RenameObject(oldName, newName);
+            if (goalNames.at(ii).find(oldName) != goalNames.at(ii).npos)
+            {
+               #ifdef DEBUG_RENAME
+               MessageInterface::ShowMessage
+                  ("   old name '%s' found in goalNames.at(ii): '%s', so replacing with '%s'\n",
+                   oldName.c_str(), goalNames.at(ii).c_str(), newName.c_str());
+               #endif
+
+               goalNames.at(ii) = GmatStringUtil::ReplaceName(goalNames.at(ii), oldName, newName);
+            }
+         }
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("Propagate::RenameRefObject() UPDATED goalNames[%d] = %s\n",
+             (Integer) ii, goalNames.at(ii).c_str());
+         #endif
+      }
+      sz = stopNames.size();
+      for (unsigned int ii = 0; ii < sz; ii++)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("Propagate::RenameRefObject() stopNames[%d] = %s\n",
+             (Integer) ii, stopNames.at(ii).c_str());
+         #endif
+         if (stopWrappers.at(ii))
+         {
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("Propagate::RenameRefObject() there is a stopWrapper at %d\n", (Integer) ii);
+            #endif
+            stopWrappers.at(ii)->RenameObject(oldName, newName);
+            if (stopNames.at(ii).find(oldName) != stopNames.at(ii).npos)
+            {
+               #ifdef DEBUG_RENAME
+               MessageInterface::ShowMessage
+                  ("   old name '%s' found in stopNames.at(ii): '%s', so replacing with '%s'\n",
+                   oldName.c_str(), stopNames.at(ii).c_str(), newName.c_str());
+               #endif
+
+               stopNames.at(ii) = GmatStringUtil::ReplaceName(stopNames.at(ii), oldName, newName);
+            }
+         }
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("Propagate::RenameRefObject() UPDATED stopNames[%d] = %s\n",
+             (Integer) ii, stopNames.at(ii).c_str());
+         #endif
+      }
    }
 
    return true;
