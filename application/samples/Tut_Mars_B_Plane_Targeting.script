@@ -11,12 +11,12 @@ GMAT MAVEN.DateFormat = UTCGregorian;
 GMAT MAVEN.Epoch = '18 Nov 2013 20:26:24.315';
 GMAT MAVEN.CoordinateSystem = EarthMJ2000Eq;
 GMAT MAVEN.DisplayStateType = Keplerian;
-GMAT MAVEN.SMA = -32593.21599272781;
+GMAT MAVEN.SMA = -32593.21599272777;
 GMAT MAVEN.ECC = 1.202872548116186;
 GMAT MAVEN.INC = 28.80241266404144;
 GMAT MAVEN.RAAN = 173.9693759331483;
 GMAT MAVEN.AOP = 240.9696529532762;
-GMAT MAVEN.TA = 359.9465533778274;
+GMAT MAVEN.TA = 359.9465533778342;
 GMAT MAVEN.DryMass = 850;
 GMAT MAVEN.Cd = 2.2;
 GMAT MAVEN.Cr = 1.8;
@@ -37,7 +37,8 @@ GMAT MAVEN.ModelRotationZ = 0;
 GMAT MAVEN.ModelScale = 3;
 GMAT MAVEN.AttitudeDisplayStateType = 'Quaternion';
 GMAT MAVEN.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT MAVEN.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT MAVEN.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT MAVEN.EulerAngleSequence = '321';
 
 
 %----------------------------------------
@@ -53,6 +54,7 @@ GMAT MainTank.RefTemperature = 20;
 GMAT MainTank.Volume = 2;
 GMAT MainTank.FuelDensity = 1000;
 GMAT MainTank.PressureModel = PressureRegulated;
+
 
 
 
@@ -193,9 +195,9 @@ GMAT DefaultDC.DerivativeMethod = ForwardDifference;
 
 Create OrbitView EarthView;
 GMAT EarthView.SolverIterations = Current;
-GMAT EarthView.UpperLeft = [ 0.003529411764705883 0.03225806451612903 ];
-GMAT EarthView.Size = [ 0.3047058823529412 0.9096774193548387 ];
-GMAT EarthView.RelativeZOrder = 224;
+GMAT EarthView.UpperLeft = [ 0.002941176470588235 0.03195876288659794 ];
+GMAT EarthView.Size = [ 0.3047058823529412 0.9092783505154639 ];
+GMAT EarthView.RelativeZOrder = 56;
 GMAT EarthView.Maximized = false;
 GMAT EarthView.Add = {MAVEN, Earth};
 GMAT EarthView.CoordinateSystem = EarthMJ2000Eq;
@@ -225,9 +227,9 @@ GMAT EarthView.EnableConstellations = On;
 
 Create OrbitView SolarSystemView;
 GMAT SolarSystemView.SolverIterations = Current;
-GMAT SolarSystemView.UpperLeft = [ 0.3194117647058823 -0.003870967741935484 ];
-GMAT SolarSystemView.Size = [ 0.33 0.9019354838709678 ];
-GMAT SolarSystemView.RelativeZOrder = 228;
+GMAT SolarSystemView.UpperLeft = [ 0.3088235294117647 0.03298969072164949 ];
+GMAT SolarSystemView.Size = [ 0.3135294117647059 0.9061855670103093 ];
+GMAT SolarSystemView.RelativeZOrder = 75;
 GMAT SolarSystemView.Maximized = false;
 GMAT SolarSystemView.Add = {MAVEN, Earth, Mars, Sun};
 GMAT SolarSystemView.CoordinateSystem = SunEcliptic;
@@ -257,9 +259,9 @@ GMAT SolarSystemView.EnableConstellations = On;
 
 Create OrbitView MarsView;
 GMAT MarsView.SolverIterations = Current;
-GMAT MarsView.UpperLeft = [ 0.6335294117647059 0.03741935483870968 ];
-GMAT MarsView.Size = [ 0.3594117647058824 0.9561290322580646 ];
-GMAT MarsView.RelativeZOrder = 378;
+GMAT MarsView.UpperLeft = [ 0.6241176470588236 0.03195876288659794 ];
+GMAT MarsView.Size = [ 0.3541176470588235 0.9010309278350516 ];
+GMAT MarsView.RelativeZOrder = 73;
 GMAT MarsView.Maximized = false;
 GMAT MarsView.Add = {MAVEN, Mars, Earth};
 GMAT MarsView.CoordinateSystem = MarsInertial;
@@ -306,11 +308,12 @@ Target 'Target desired B-plane coordinates' DefaultDC {SolveMode = Solve, ExitMo
    Achieve 'Achieve BdotR' DefaultDC(MAVEN.MarsInertial.BdotR = -7000, {Tolerance = 0.00001});
 EndTarget;  % For targeter DefaultDC
 Target 'Mars Capture' DefaultDC {SolveMode = Solve, ExitMode = SaveAndContinue};
-    Vary 'Vary MOI.V' DefaultDC(MOI.Element1 = -1.603439847094663, {Perturbation = 0.00001, Lower = -10e300, Upper = 10e300, MaxStep = 0.1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
-    Maneuver 'Apply MOI' MOI(MAVEN);
-    Propagate 'Prop to Mars Apoapsis' NearMars(MAVEN) {MAVEN.Mars.Apoapsis};
-    Achieve 'Achieve RMAG' DefaultDC(MAVEN.Mars.RMAG = 12000, {Tolerance = 0.1});
- EndTarget;  % For targeter DefaultDC
- Propagate 'Prop for 1 day' NearMars(MAVEN) {MAVEN.ElapsedDays = 1};
+   Vary 'Vary MOI.V' DefaultDC(MOI.Element1 = -1.603439847094663, {Perturbation = 0.00001, Lower = -10e300, Upper = 10e300, MaxStep = 0.1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply MOI' MOI(MAVEN);
+   Propagate 'Prop to Mars Apoapsis' NearMars(MAVEN) {MAVEN.Mars.Apoapsis};
+   Achieve 'Achieve RMAG' DefaultDC(MAVEN.Mars.RMAG = 12000, {Tolerance = 0.1});
+EndTarget;  % For targeter DefaultDC
+Propagate 'Prop for 1 day' NearMars(MAVEN) {MAVEN.ElapsedDays = 1};
+
 
 
