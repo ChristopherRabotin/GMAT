@@ -153,9 +153,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -189,7 +187,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>UserDefString</para>
+                    <para>Reference Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -333,9 +331,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -390,9 +386,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -447,9 +441,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -504,9 +496,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>9.81</literal>
-                    </para>
+                    <para>9.81</para>
                   </listitem>
                 </varlistentry>
 
@@ -561,9 +551,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>300</literal>
-                    </para>
+                    <para>300</para>
                   </listitem>
                 </varlistentry>
 
@@ -618,9 +606,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -798,9 +784,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 

@@ -104,9 +104,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -157,9 +155,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0.5</literal>
-                    </para>
+                    <para>0.5</para>
                   </listitem>
                 </varlistentry>
 
@@ -211,9 +207,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0</literal>
-                    </para>
+                    <para>0</para>
                   </listitem>
                 </varlistentry>
 
@@ -240,15 +234,15 @@
 
             <entry><para>The <guilabel>MaxStep</guilabel> option (only used
             for the <guilabel>DifferentialCorrector</guilabel> and
-            <guilabel>VF13adOptimizer</guilabel> solvers) is the maximum
-            allowed change in the control variable during a single iteration
-            of the solver. </para> <variablelist>
+            <guilabel>VF13ad</guilabel> solvers) is the maximum allowed change
+            in the control variable during a single iteration of the solver.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; <literal>0</literal></para>
+                    defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -257,7 +251,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; <literal>0</literal></para>
+                    defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -313,7 +307,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter &gt; <literal>0</literal></para>
+                    defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -321,9 +315,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>1</literal>
-                    </para>
+                    <para>1</para>
                   </listitem>
                 </varlistentry>
 
@@ -350,9 +342,9 @@
 
             <entry><para>The <guilabel>Perturbation</guilabel> option (only
             used for the <guilabel>DifferentialCorrector</guilabel> and
-            <guilabel>VF13adOptimizer</guilabel> solvers) is the perturbation
-            step sized used to calculate the finite difference derivative
-            </para> <variablelist>
+            <guilabel>VF13ad</guilabel> solvers) is the perturbation step
+            sized used to calculate the finite difference derivative </para>
+            <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -367,7 +359,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any user
-                    defined parameter != <literal>0</literal></para>
+                    defined parameter != 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -375,9 +367,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0.0001</literal>
-                    </para>
+                    <para>0.0001</para>
                   </listitem>
                 </varlistentry>
 
@@ -408,7 +398,7 @@
             <guilabel>DifferentialCorrector</guilabel> object. In the context
             of an <guilabel>Optimize</guilabel> sequence, you will choose
             either a <guilabel>FminconOptimizer</guilabel> or
-            <guilabel>VF13adOptimizer</guilabel> object. </para> <variablelist>
+            <guilabel>VF13ad</guilabel> object. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -485,9 +475,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>3.14159</literal>
-                    </para>
+                    <para>3.14159</para>
                   </listitem>
                 </varlistentry>
 

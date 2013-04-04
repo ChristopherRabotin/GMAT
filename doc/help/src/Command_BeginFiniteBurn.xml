@@ -138,10 +138,10 @@
             (currently only a single <guilabel>Spacecraft</guilabel> can be in
             this list) acted upon by the <guilabel>BeginFiniteBurn</guilabel>
             command. The <guilabel>Spacecraft</guilabel> listed in
-            SpacecraftList will have thrusters activated according to the
-            configuration of the <guilabel>FiniteBurn</guilabel> object
-            defined by the <guilabel>Burn</guilabel> field. </para>
-            <variablelist>
+            <guilabel>SpacecraftList</guilabel> will have thrusters activated
+            according to the configuration of the
+            <guilabel>FiniteBurn</guilabel> object defined by the
+            <guilabel>Burn</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -242,7 +242,8 @@
             <entry><para>Specifies the <guilabel>Spacecraft</guilabel>
             (currently only a single <guilabel>Spacecraft</guilabel> can be in
             this list) acted upon by the <guilabel>EndFiniteBurn</guilabel>
-            command. Spacecraft listed in SpacecraftList will have thrusters
+            command. <guilabel>Spacecraft</guilabel> listed in
+            <guilabel>SpacecraftList</guilabel> will have thrusters
             de-activated according to the configuration of the
             <guilabel>FiniteBurn</guilabel> object defined by the
             <guilabel>Burn</guilabel> field. </para> <variablelist>
@@ -326,12 +327,13 @@
       </mediaobject>
     </screenshot>
 
-    <para>Use the Burn menu to select the <guilabel>FiniteBurn
-    </guilabel>model for the maneuver. Use the <guilabel>Spacecraft</guilabel>
-    text box to select the spacecraft for the finite burn. You can either type
-    the spacecraft name in the Spacecraft text box or click the
-    <guibutton>Edit</guibutton> button and select the spacecraft using the
-    <guilabel>ParameterSelectDialog</guilabel> box.</para>
+    <para>Use the <guilabel>Burn</guilabel> menu to select the
+    <guilabel>FiniteBurn </guilabel>model for the maneuver. Use the
+    <guilabel>Spacecraft</guilabel> text box to select the spacecraft for the
+    finite burn. You can either type the spacecraft name in the Spacecraft
+    text box or click the <guibutton>Edit</guibutton> button and select the
+    spacecraft using the <guilabel>ParameterSelectDialog</guilabel>
+    box.</para>
 
     <para>If you add a <guilabel>BeginFiniteBurn</guilabel> command or
     <guilabel>EndFiniteBurn</guilabel> command to the mission sequence,

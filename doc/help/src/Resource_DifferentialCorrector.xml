@@ -169,9 +169,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>25</literal>
-                    </para>
+                    <para>25</para>
                   </listitem>
                 </varlistentry>
 
@@ -228,8 +226,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>DifferentialCorrectorDCName.data, where DCname is
-                    the name of the
+                    <para><literal>DifferentialCorrectorDCName.data</literal>,
+                    where <literal>DCname</literal> is the name of the
                     <guilabel>DifferentialCorrector</guilabel></para>
                   </listitem>
                 </varlistentry>

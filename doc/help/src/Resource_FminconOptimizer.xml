@@ -738,7 +738,8 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a FminconOptimizer resource named SQP1.</para>
+      <para>Create a <guilabel>FminconOptimizer</guilabel> resource named
+      SQP1.</para>
 
       <programlisting><code>Create FminconOptimizer SQP1
 SQP1.ShowProgress = true

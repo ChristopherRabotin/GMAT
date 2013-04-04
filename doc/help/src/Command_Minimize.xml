@@ -36,8 +36,8 @@
 
     <para>The <guilabel>Minimize</guilabel> command is used within an
     <guilabel>Optimize</guilabel>/<guilabel>EndOptimize</guilabel>
-    Optimization sequence to define the objective function that the user
-    wishes to minimize.</para>
+    Optimization sequence to define the objective function that you want to
+    minimize.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Vary"/>, <xref linkend="NonlinearConstraint"/>, <xref

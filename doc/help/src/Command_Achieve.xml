@@ -96,9 +96,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>42165</literal>
-                    </para>
+                    <para>42165</para>
                   </listitem>
                 </varlistentry>
 
@@ -131,7 +129,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any
-                    user-defined parameter &gt; <literal>0</literal></para>
+                    user-defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -140,7 +138,7 @@
 
                   <listitem>
                     <para>Real Number, Array element, Variable, or any
-                    user-defined parameter &gt; <literal>0</literal></para>
+                    user-defined parameter &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -148,9 +146,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>0.1</literal>
-                    </para>
+                    <para>0.1</para>
                   </listitem>
                 </varlistentry>
 

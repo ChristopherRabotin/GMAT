@@ -22,7 +22,7 @@
   <refnamediv>
     <refname>Maneuver</refname>
 
-    <refpurpose>Performs an impulsive (instantaneous) maneuver</refpurpose>
+    <refpurpose>Perform an impulsive (instantaneous) maneuver</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -231,7 +231,7 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colnum="1" colwidth="1.0*"/>
 
           <colspec colnum="2" colwidth="3*"/>
 

@@ -180,8 +180,8 @@
       GUI versions will allow multiple thrusters to be attached to a single
       <guilabel>FiniteBurn</guilabel> resource.</para>
 
-      <para>Using the scripting interface, one can currently assign multiple
-      thrusters to a single <guilabel>FiniteBurn</guilabel> resource.</para>
+      <para>Using the scripting interface, one can assign multiple thrusters
+      to a single <guilabel>FiniteBurn</guilabel> resource.</para>
     </refsection>
   </refsection>
 
