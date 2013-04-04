@@ -211,8 +211,9 @@ bool Minimize::RenameRefObject(const Gmat::ObjectType type,
    }
    else if (type == Gmat::PARAMETER)
    {
-      if (objectiveName == oldName)
-         objectiveName = newName;
+      if (objectiveName.find(oldName) != objectiveName.npos)
+	     objectiveName =
+			GmatStringUtil::ReplaceName(objectiveName, oldName, newName);
    }
    // make sure the wrapper(s) know to rename any objects they may be using
    if (objective)
