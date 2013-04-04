@@ -11,13 +11,12 @@
 
   <para>The General Mission Analysis Tool (GMAT) version R2013a was released
   in April, 2013. This is the first public release since May 23, 2012, and is
-  the 6th public release for the project. R2013a is a major maintenance
-  release transitioning GMAT from Beta to production quality. In this
-  release:</para>
+  the 6th public release for the project. R2013a is a major release
+  transitioning GMAT from beta to production status. In this release:</para>
 
   <itemizedlist spacing="compact">
     <listitem>
-      <para>End user documentation was rewritten and greatly expanded.</para>
+      <para>End-user documentation was rewritten and greatly expanded.</para>
     </listitem>
 
     <listitem>
@@ -25,7 +24,7 @@
     </listitem>
 
     <listitem>
-      <para>5000 GUI-based regression tests run weekly.</para>
+      <para>5,000 GUI-based regression tests run weekly.</para>
     </listitem>
 
     <listitem>
@@ -37,37 +36,44 @@
   <section>
     <title>Licensing</title>
 
-    <para>GMAT is now licensed using Apache License 2.0. According to the
-    <link xlink:href="http://opensource.org/proliferation-report">Open Source
-    Proliferation Report</link>, Apache License 2.0 is one of the most widely
-    used open source licenses thereby making GMAT compatible with more
+    <para>GMAT is now licensed under <link
+    xlink:href="http://www.apache.org/licenses/LICENSE-2.0">Apache License,
+    Version 2.0</link>. According to the <link
+    xlink:href="http://opensource.org/proliferation-report">Open Source
+    Proliferation Report</link>, the Apache License 2.0 is one of the most
+    widely-used open source licenses, thereby making GMAT compatible with more
     existing software and projects.</para>
   </section>
 
   <section>
     <title>Major Improvements</title>
 
-    <para>Release R2013a is a major maintenance release of GMAT. Most of our
-    efforts have been devoted to improving the quality of the software and its
-    documentation. This year we made a complete sweep through the system
-    starting by updating engineering specifications for all features,
-    identifying test gaps, writing new tests, addressing known and newly found
-    bugs, and completing user documentation. Here is more detail on what we’ve
-    been up to for this release.</para>
+    <section>
+      <title>Production Status</title>
+
+      <para>Release R2013a is a major release of GMAT that transitions from
+      beta to production status. Most of our efforts have been devoted to
+      improving the quality of the software and its documentation. This year
+      we made a complete sweep through the system, starting by updating
+      engineering specifications for all features, identifying test gaps,
+      writing new tests, addressing known and newly found bugs, and completing
+      user documentation.</para>
+    </section>
 
     <section>
       <title>Tutorials</title>
 
-      <para>The GMAT user guide now contains 5 in-depth tutorials that show
-      you how to use GMAT for end-to-end analysis. The tutorials are designed
-      to teach you how to use GMAT in the context of performing real-world
+      <para>The GMAT User Guide now contains 5 in-depth tutorials that show
+      how to use GMAT for end-to-end analysis. The tutorials are designed to
+      teach you how to use GMAT in the context of performing real-world
       analysis and are intended to take between 30 minutes and several hours
       to complete. Each tutorial has a difficulty level and an approximate
       duration listed with any prerequisites in its introduction, and is
-      arranged in a general order of difficulty. The simplest tutorial show
-      shows you how to enter orbital initial conditions and propagate to orbit
-      perigee, more advanced tutorials show how to perform finite maneuver
-      targeting, Mars B-Plane targeting, and lunar flyby optimization.</para>
+      arranged in a general order of difficulty. The simplest tutorial shows
+      you how to enter orbital initial conditions and propagate to orbit
+      perigee, while more advanced tutorials show how to perform
+      finite-maneuver targeting, Mars B-plane targeting, and lunar flyby
+      optimization.</para>
     </section>
 
     <section>
@@ -75,8 +81,12 @@
 
       <para>We have written a complete reference manual for GMAT for R2013a.
       The reference manual contains detailed information on all GMAT
-      components. When you need detailed information on syntax or
-      application-specific examples, go here.</para>
+      components. Whether you need detailed information on syntax or
+      application-specific examples, go here. For each GMAT resource (e.g.
+      <guilabel>Spacecraft</guilabel>, <guilabel>Thruster</guilabel>,
+      <guilabel>XYPlot</guilabel>) and command (e.g.
+      <guilabel>Optimize</guilabel>, <guilabel>Propagate</guilabel>), the
+      following information is documented:</para>
 
       <itemizedlist spacing="compact">
         <listitem>
@@ -97,13 +107,12 @@
         </listitem>
 
         <listitem>
-          <para>Copy-and-paste ready examples</para>
+          <para>Copy-and-paste-ready examples</para>
         </listitem>
       </itemizedlist>
 
-      <para>In the new GMAT reference manual, for each GMAT Resource (e.g.
-      Spacecraft, Thruster, XYPlot) and Command (e.g. Optimize, Propagate),
-      the following information is documented:</para>
+      <para>The guide also contains general reference material about the
+      system, such as:</para>
 
       <itemizedlist spacing="compact">
         <listitem>
@@ -133,12 +142,12 @@
 
       <para>We have spent much of our time preparing for R2013a on testing.
       Our script and GUI-based regression test systems doubled in size in the
-      last year.</para>
+      last year. They now contain:</para>
 
       <itemizedlist spacing="compact">
         <listitem>
-          <para>Over 6000 new system, validation, and end-to-end script-based
-          tests.</para>
+          <para>Over 6,000 new system, validation, and end-to-end script-based
+          tests</para>
         </listitem>
 
         <listitem>
@@ -146,14 +155,14 @@
         </listitem>
 
         <listitem>
-          <para>3000 new GUI system tests</para>
+          <para>3,000 new GUI system tests</para>
         </listitem>
       </itemizedlist>
 
-      <para>GUI test are performed using SMARTBEAR’s Test Complete software.
-      Script tests are performed using a custom MATLAB-based test system. A
-      complete execution of the regression test system now takes almost four
-      days of computer time.</para>
+      <para>GUI test are performed using SmartBear’s TestComplete software.
+      Script tests are performed using a custom MATLAB-based automated test
+      system. A complete execution of the regression test system now takes
+      almost four days of computer time.</para>
     </section>
   </section>
 
@@ -163,46 +172,55 @@
     <para>While most of our effort has been focused on quality for this
     release, we have included some new features.</para>
 
-    <para>ICRF is now supported for input and output of orbit state
-    data</para>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/ReleaseNotes_R2013a_1.png"
-                     scalefit="1" width="70%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-
-    <para>Improved Earth texture map</para>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/ReleaseNotes_R2013a_2.png"
-                     scalefit="1" width="70%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-
-    <para>CCSDS ephemeris files are now accessible in the output tab</para>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/ReleaseNotes_R2013a_3.png"
-                     scalefit="1" width="70%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-
-    <itemizedlist spacing="compact">
+    <itemizedlist>
       <listitem>
-        <para>Improved mouse controls for interactive 3-D graphics.</para>
+        <para>ICRF is now supported for input and output of orbit state
+        data:</para>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/ReleaseNotes_R2013a_1.png"
+                         scalefit="1" width="70%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </listitem>
+
+      <listitem>
+        <para>The Earth texture map is improved:</para>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/ReleaseNotes_R2013a_2.png"
+                         scalefit="1" width="70%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </listitem>
+
+      <listitem>
+        <para>CCSDS ephemeris files are now accessible in the output
+        tab:</para>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/ReleaseNotes_R2013a_3.png"
+                         scalefit="1" width="70%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </listitem>
+
+      <listitem>
+        <para>Improved mouse controls for interactive 3-D graphics. See the
+        <xref linkend="OrbitView" xrefstyle="select:title"/> reference for
+        details.</para>
       </listitem>
 
       <listitem>
@@ -210,11 +228,12 @@
       </listitem>
 
       <listitem>
-        <para>Improved error messages</para>
+        <para>Improved error messages system-wide</para>
       </listitem>
 
       <listitem>
-        <para>New axis system for asteroid surveys</para>
+        <para>New <guilabel>BodySpinSun</guilabel> axis system for asteroid
+        survey missions</para>
       </listitem>
 
       <listitem>
@@ -235,31 +254,35 @@
 
     <itemizedlist spacing="compact">
       <listitem>
-        <para>Poorly named fields and/or parameters</para>
+        <para>Fixed many poorly-named fields and/or parameters (i.e.
+        <guilabel>OrbitView</guilabel>.<guilabel>CelestialPlane</guilabel> →
+        <guilabel>OrbitView</guilabel>.<guilabel>EclipticPlane</guilabel>)</para>
       </listitem>
 
       <listitem>
-        <para>Missed or invalid user data validation checking</para>
+        <para>Corrected missed or invalid data validation checking</para>
       </listitem>
 
       <listitem>
-        <para>Partially implemented functionality</para>
+        <para>Removed partially-implemented functionality from previous
+        releases</para>
       </listitem>
 
       <listitem>
-        <para>Improperly exposed internal fields and functions</para>
+        <para>Removed improperly-exposed internal fields and functions</para>
       </listitem>
 
       <listitem>
-        <para>Configuration of some Resources in command mode</para>
+        <para>Disabled configuration of some resources in the mission
+        sequence</para>
       </listitem>
     </itemizedlist>
 
     <para>In all cases, we modified GMAT to work correctly as specified in the
     documentation, but did not always maintain backwards compatibility with
-    previous Beta versions. This was a one-time, “pull of the Band-Aid”
-    approach and future releases will maintain backwards compatibility with
-    R2013a or provide deprecation notifications of features that are no longer
+    previous versions. This was a one-time, “pull-of-the-Band-Aid” approach,
+    and future releases will maintain backwards compatibility with R2013a or
+    provide deprecation notifications of features that are no longer
     supported.</para>
 
     <para>In addition, there were some features that did not meet quality
@@ -269,24 +292,25 @@
 
     <itemizedlist spacing="compact">
       <listitem>
-        <para>Orbit designer ( cannot be turned on )</para>
+        <para>Orbit Designer (disabled)</para>
       </listitem>
 
       <listitem>
-        <para>GMAT functions</para>
+        <para>GMAT functions (<filename>libGmatFunctions</filename>)</para>
       </listitem>
 
       <listitem>
-        <para>Save command</para>
+        <para>Save command (<filename>libSaveCommand</filename>)</para>
       </listitem>
 
       <listitem>
-        <para>Bulirsh-Stoer integrator</para>
+        <para>Bulirsh-Stoer integrator
+        (<filename>libExtraPropagators</filename>)</para>
       </listitem>
     </itemizedlist>
 
-    <para>To turn on these features, see the documentation for the GMAT
-    startup file.</para>
+    <para>To turn on these features, see the <xref linkend="StartupFile"
+    xrefstyle="select:title"/> reference.</para>
   </section>
 
   <section>
@@ -302,7 +326,7 @@
 
     <para>All known issues that affect this version of GMAT can be seen in
     <link
-    xlink:href="http://li64-187.members.linode.com:8080/secure/IssueNavigator.jspa?mode=hide&amp;requestId=11104">the
-    "Known issues in R2012a" report</link> in JIRA.</para>
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11806">the
+    "Known issues in R2013a" report</link> in JIRA.</para>
   </section>
 </section>
