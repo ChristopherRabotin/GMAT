@@ -59,15 +59,6 @@ GMAT ACE.ModelScale = 3;
 GMAT ACE.AttitudeDisplayStateType = 'Quaternion';
 GMAT ACE.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT ACE.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT ACE.Q1 = 0;
-GMAT ACE.Q2 = 0;
-GMAT ACE.Q3 = 0;
-GMAT ACE.Q4 = 1;
-GMAT ACE.EulerAngleSequence = '321';
-GMAT ACE.AngularVelocityX = 0;
-GMAT ACE.AngularVelocityY = 0;
-GMAT ACE.AngularVelocityZ = 0;
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -187,7 +178,7 @@ GMAT L1View.ViewDirection = ESL1;
 GMAT L1View.ViewScaleFactor = 18;
 GMAT L1View.ViewUpCoordinateSystem = EarthSunL1CS;
 GMAT L1View.ViewUpAxis = Z;
-GMAT L1View.CelestialPlane = Off;
+GMAT L1View.EclipticPlane = Off;
 GMAT L1View.XYPlane = On;
 GMAT L1View.WireFrame = Off;
 GMAT L1View.Axes = On;
@@ -218,7 +209,7 @@ GMAT EarthSunRotView.ViewDirection = Earth;
 GMAT EarthSunRotView.ViewScaleFactor = 100;
 GMAT EarthSunRotView.ViewUpCoordinateSystem = EarthSunRotCS;
 GMAT EarthSunRotView.ViewUpAxis = Z;
-GMAT EarthSunRotView.CelestialPlane = Off;
+GMAT EarthSunRotView.EclipticPlane = Off;
 GMAT EarthSunRotView.XYPlane = On;
 GMAT EarthSunRotView.WireFrame = Off;
 GMAT EarthSunRotView.Axes = On;
@@ -243,7 +234,7 @@ For 'For I = 1:7' I = 1:1:7;
    Target 'Target Loop' DefaultDC {SolveMode = Solve, ExitMode = DiscardAndContinue};
       Vary 'Vary MCC.V' DefaultDC(MCC.Element1 = MCC.Element1, {Perturbation = 1e-5, Lower = -0.1, Upper = 0.1, MaxStep = 0.001});
       Maneuver 'Apply MCC' MCC(ACE);
-      Propagate 'Prop to Y = 0' EarthSunMoon(ACE) {ACE.EarthSunL1CS.Y = 0};
+      Propagate 'Prop to Y = 0' EarthSunMoon(ACE) {ACE.EarthSunL1CS.Y = 0, StopTolerance = 1e-005};
       Achieve 'Achieve VX = 0' DefaultDC(ACE.EarthSunL1CS.VX = 0, {Tolerance = 1e-005});
    EndTarget;  % For targeter DefaultDC
 EndFor;

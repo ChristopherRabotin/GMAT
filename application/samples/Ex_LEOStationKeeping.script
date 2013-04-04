@@ -37,16 +37,6 @@ GMAT LEOsat.ModelScale = 3;
 GMAT LEOsat.AttitudeDisplayStateType = 'Quaternion';
 GMAT LEOsat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LEOsat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LEOsat.Q1 = 0;
-GMAT LEOsat.Q2 = 0;
-GMAT LEOsat.Q3 = 0;
-GMAT LEOsat.Q4 = 1;
-GMAT LEOsat.EulerAngleSequence = '321';
-GMAT LEOsat.AngularVelocityX = 0;
-GMAT LEOsat.AngularVelocityY = 0;
-GMAT LEOsat.AngularVelocityZ = 0;
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -149,7 +139,7 @@ GMAT DefaultOrbitView.ViewDirection = Earth;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultOrbitView.ViewUpAxis = Z;
-GMAT DefaultOrbitView.CelestialPlane = Off;
+GMAT DefaultOrbitView.EclipticPlane = Off;
 GMAT DefaultOrbitView.XYPlane = On;
 GMAT DefaultOrbitView.WireFrame = Off;
 GMAT DefaultOrbitView.Axes = On;

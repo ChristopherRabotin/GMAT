@@ -51,14 +51,6 @@ GMAT MMSRef.ModelScale = 3;
 GMAT MMSRef.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMSRef.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMSRef.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMSRef.Q1 = 0;
-GMAT MMSRef.Q2 = 0;
-GMAT MMSRef.Q3 = 0;
-GMAT MMSRef.Q4 = 1;
-GMAT MMSRef.EulerAngleSequence = '321';
-GMAT MMSRef.AngularVelocityX = 0;
-GMAT MMSRef.AngularVelocityY = 0;
-GMAT MMSRef.AngularVelocityZ = 0;
 
 %----------------------------------------
 %---------- ForceModels
@@ -240,7 +232,7 @@ GMAT EarthInertialView.ViewDirection = Earth;
 GMAT EarthInertialView.ViewScaleFactor = 40;
 GMAT EarthInertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthInertialView.ViewUpAxis = X;
-GMAT EarthInertialView.CelestialPlane = Off;
+GMAT EarthInertialView.EclipticPlane = Off;
 GMAT EarthInertialView.XYPlane = On;
 GMAT EarthInertialView.WireFrame = Off;
 GMAT EarthInertialView.Axes = On;
@@ -271,7 +263,7 @@ GMAT MoonInertialView.ViewDirection = Luna;
 GMAT MoonInertialView.ViewScaleFactor = 35;
 GMAT MoonInertialView.ViewUpCoordinateSystem = MoonMJ2000Eq;
 GMAT MoonInertialView.ViewUpAxis = X;
-GMAT MoonInertialView.CelestialPlane = Off;
+GMAT MoonInertialView.EclipticPlane = Off;
 GMAT MoonInertialView.XYPlane = On;
 GMAT MoonInertialView.WireFrame = Off;
 GMAT MoonInertialView.Axes = On;

@@ -38,12 +38,6 @@ GMAT DefaultSC.AttitudeDisplayStateType = 'EulerAngles';
 GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT DefaultSC.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 GMAT DefaultSC.EulerAngleSequence = '321';
-GMAT DefaultSC.EulerAngle1 = 123;
-GMAT DefaultSC.EulerAngle2 = 45;
-GMAT DefaultSC.EulerAngle3 = 157;
-GMAT DefaultSC.AngularVelocityX = 0;
-GMAT DefaultSC.AngularVelocityY = 0;
-GMAT DefaultSC.AngularVelocityZ = 0;
 
 
 %----------------------------------------
@@ -115,7 +109,7 @@ GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 1.8;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.ViewUpAxis = Z;
-GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.EclipticPlane = Off;
 GMAT EarthView.XYPlane = Off;
 GMAT EarthView.WireFrame = Off;
 GMAT EarthView.Axes = Off;

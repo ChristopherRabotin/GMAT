@@ -37,19 +37,6 @@ GMAT geoSat.ModelScale = 3;
 GMAT geoSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT geoSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT geoSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT geoSat.Q1 = 0;
-GMAT geoSat.Q2 = 0;
-GMAT geoSat.Q3 = 0;
-GMAT geoSat.Q4 = 1;
-GMAT geoSat.EulerAngleSequence = '321';
-GMAT geoSat.AngularVelocityX = 0;
-GMAT geoSat.AngularVelocityY = 0;
-GMAT geoSat.AngularVelocityZ = 0;
-
-
-
-
-
 
 
 %----------------------------------------
@@ -172,7 +159,7 @@ GMAT inertialView.ViewDirection = Earth;
 GMAT inertialView.ViewScaleFactor = 1;
 GMAT inertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT inertialView.ViewUpAxis = Z;
-GMAT inertialView.CelestialPlane = Off;
+GMAT inertialView.EclipticPlane = Off;
 GMAT inertialView.XYPlane = Off;
 GMAT inertialView.WireFrame = Off;
 GMAT inertialView.Axes = On;
@@ -203,7 +190,7 @@ GMAT fixedView.ViewDirection = Earth;
 GMAT fixedView.ViewScaleFactor = 1.2;
 GMAT fixedView.ViewUpCoordinateSystem = EarthFixed;
 GMAT fixedView.ViewUpAxis = Z;
-GMAT fixedView.CelestialPlane = Off;
+GMAT fixedView.EclipticPlane = Off;
 GMAT fixedView.XYPlane = Off;
 GMAT fixedView.WireFrame = Off;
 GMAT fixedView.Axes = On;

@@ -50,14 +50,6 @@ GMAT MMSRef.ModelScale = 3;
 GMAT MMSRef.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMSRef.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMSRef.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMSRef.Q1 = 0;
-GMAT MMSRef.Q2 = 0;
-GMAT MMSRef.Q3 = 0;
-GMAT MMSRef.Q4 = 1;
-GMAT MMSRef.EulerAngleSequence = '321';
-GMAT MMSRef.AngularVelocityX = 0;
-GMAT MMSRef.AngularVelocityY = 0;
-GMAT MMSRef.AngularVelocityZ = 0;
 
 Create Spacecraft Spacecraft1;
 GMAT Spacecraft1.DateFormat = TAIModJulian;
@@ -90,16 +82,6 @@ GMAT Spacecraft1.ModelScale = 3;
 GMAT Spacecraft1.AttitudeDisplayStateType = 'Quaternion';
 GMAT Spacecraft1.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Spacecraft1.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Spacecraft1.Q1 = 0;
-GMAT Spacecraft1.Q2 = 0;
-GMAT Spacecraft1.Q3 = 0;
-GMAT Spacecraft1.Q4 = 1;
-GMAT Spacecraft1.EulerAngleSequence = '321';
-GMAT Spacecraft1.AngularVelocityX = 0;
-GMAT Spacecraft1.AngularVelocityY = 0;
-GMAT Spacecraft1.AngularVelocityZ = 0;
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -112,9 +94,6 @@ GMAT Spacecraft1.AngularVelocityZ = 0;
 
 Create ForceModel LunarSB_ForceModel;
 GMAT LunarSB_ForceModel.CentralBody = Earth;
-%GMAT LunarSB_ForceModel.PrimaryBodies = {Earth}
-%GMAT LunarSB_ForceModel.Gravity.Earth.Order = 2;
-%GMAT LunarSB_ForceModel.Gravity.Earth.Degree = 2;
 GMAT LunarSB_ForceModel.PointMasses = {Earth, Sun, Luna};
 GMAT LunarSB_ForceModel.Drag = None;
 GMAT LunarSB_ForceModel.SRP = Off;
@@ -192,9 +171,6 @@ GMAT LunarPhasedV.GravitationalAccel = 9.810000000000001;
 %----------------------------------------
 Create Variable I;
 
-
-
-
 %----------------------------------------
 %---------- Coordinate Systems
 %----------------------------------------
@@ -255,7 +231,7 @@ GMAT EarthDistance.SolverIterations = None;
 GMAT EarthDistance.UpperLeft = [ 0.3037735849056604 0.03022670025188917 ];
 GMAT EarthDistance.Size = [ 0.3396226415094339 0.4508816120906801 ];
 GMAT EarthDistance.RelativeZOrder = 678;
-GMAT EarthDistance.XVariable = MMSRef.CurrA1MJD;
+GMAT EarthDistance.XVariable = MMSRef.A1ModJulian;
 GMAT EarthDistance.YVariables = {MMSRef.Earth.RMAG};
 GMAT EarthDistance.ShowGrid = true;
 GMAT EarthDistance.ShowPlot = true;
@@ -280,7 +256,7 @@ GMAT OGL_EarthMJ2K.ViewDirection = Earth;
 GMAT OGL_EarthMJ2K.ViewScaleFactor = 38;
 GMAT OGL_EarthMJ2K.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT OGL_EarthMJ2K.ViewUpAxis = X;
-GMAT OGL_EarthMJ2K.CelestialPlane = Off;
+GMAT OGL_EarthMJ2K.EclipticPlane = Off;
 GMAT OGL_EarthMJ2K.XYPlane = On;
 GMAT OGL_EarthMJ2K.WireFrame = Off;
 GMAT OGL_EarthMJ2K.Axes = On;
@@ -311,7 +287,7 @@ GMAT OGL_EarthMoonRot.ViewDirection = Luna;
 GMAT OGL_EarthMoonRot.ViewScaleFactor = 10;
 GMAT OGL_EarthMoonRot.ViewUpCoordinateSystem = EarthMoonRot;
 GMAT OGL_EarthMoonRot.ViewUpAxis = X;
-GMAT OGL_EarthMoonRot.CelestialPlane = Off;
+GMAT OGL_EarthMoonRot.EclipticPlane = Off;
 GMAT OGL_EarthMoonRot.XYPlane = On;
 GMAT OGL_EarthMoonRot.WireFrame = Off;
 GMAT OGL_EarthMoonRot.Axes = On;
@@ -342,7 +318,7 @@ GMAT OGL_EarthGSE.ViewDirection = Earth;
 GMAT OGL_EarthGSE.ViewScaleFactor = 65;
 GMAT OGL_EarthGSE.ViewUpCoordinateSystem = GSE;
 GMAT OGL_EarthGSE.ViewUpAxis = X;
-GMAT OGL_EarthGSE.CelestialPlane = Off;
+GMAT OGL_EarthGSE.EclipticPlane = Off;
 GMAT OGL_EarthGSE.XYPlane = On;
 GMAT OGL_EarthGSE.WireFrame = Off;
 GMAT OGL_EarthGSE.Axes = On;

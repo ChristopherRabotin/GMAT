@@ -49,14 +49,6 @@ GMAT Sat.ModelScale = 3;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
-GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
 
 %----------------------------------------
 %---------- ForceModels
@@ -96,7 +88,6 @@ GMAT MoonAllForces.ErrorControl = RSSStep;
 GMAT MoonAllForces.GravityField.Luna.Degree = 20;
 GMAT MoonAllForces.GravityField.Luna.Order = 20;
 GMAT MoonAllForces.GravityField.Luna.PotentialFile = 'LP165P.cof';
-GMAT MoonAllForces.GravityField.Luna.EarthTideModel = 'None';
 GMAT MoonAllForces.SRP.Flux = 1367;
 GMAT MoonAllForces.SRP.Nominal_Sun = 149597870.691;
 
@@ -225,7 +216,7 @@ GMAT EarthInertialView.ViewDirection = Earth;
 GMAT EarthInertialView.ViewScaleFactor = 30;
 GMAT EarthInertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthInertialView.ViewUpAxis = Z;
-GMAT EarthInertialView.CelestialPlane = Off;
+GMAT EarthInertialView.EclipticPlane = Off;
 GMAT EarthInertialView.XYPlane = On;
 GMAT EarthInertialView.WireFrame = Off;
 GMAT EarthInertialView.Axes = On;
@@ -256,7 +247,7 @@ GMAT MoonInertialView.ViewDirection = Luna;
 GMAT MoonInertialView.ViewScaleFactor = 1;
 GMAT MoonInertialView.ViewUpCoordinateSystem = MoonMJ2000Eq;
 GMAT MoonInertialView.ViewUpAxis = X;
-GMAT MoonInertialView.CelestialPlane = Off;
+GMAT MoonInertialView.EclipticPlane = Off;
 GMAT MoonInertialView.XYPlane = On;
 GMAT MoonInertialView.WireFrame = Off;
 GMAT MoonInertialView.Axes = On;
@@ -272,7 +263,7 @@ GMAT RadApoPlot.SolverIterations = None;
 GMAT RadApoPlot.UpperLeft = [ 0.6311320754716981 0.1506493506493506 ];
 GMAT RadApoPlot.Size = [ 0.3584905660377358 0.4532467532467532 ];
 GMAT RadApoPlot.RelativeZOrder = 1129;
-GMAT RadApoPlot.XVariable = Sat.CurrA1MJD;
+GMAT RadApoPlot.XVariable = Sat.A1ModJulian;
 GMAT RadApoPlot.YVariables = {Sat.RMAG};
 GMAT RadApoPlot.ShowGrid = true;
 GMAT RadApoPlot.ShowPlot = true;
@@ -300,8 +291,8 @@ Target 'Target B-Plane' DC1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
    
    Maneuver 'Apply TOI' TOI(Sat);
    
-   Propagate 'Prop to Moon SOI' EarthFull(Sat) {Sat.Earth.RMAG = 325000};
-   Propagate 'Prop to Periselene' MoonFull(Sat) {Sat.Luna.Periapsis};
+   Propagate 'Prop to Moon SOI' EarthFull(Sat) {Sat.Earth.RMAG = 325000, StopTolerance = 1e-5};
+   Propagate 'Prop to Periselene' MoonFull(Sat) {Sat.Luna.Periapsis, StopTolerance = 1e-5};
    
    Achieve 'Achieve BdotR' DC1(Sat.MoonMJ2000Eq.BdotT = 15000.4401777, {Tolerance = 3});
    Achieve 'Achieve BdotT' DC1(Sat.MoonMJ2000Eq.BdotR = 4000.59308992, {Tolerance = 3});

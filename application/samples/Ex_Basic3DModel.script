@@ -42,14 +42,8 @@ GMAT Sat.ModelScale = 3.624564647674561;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
 GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
+
 
 
 %----------------------------------------
@@ -111,7 +105,7 @@ GMAT Enhanced3DView1.ViewDirection = Earth;
 GMAT Enhanced3DView1.ViewScaleFactor = 1;
 GMAT Enhanced3DView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.ViewUpAxis = Z;
-GMAT Enhanced3DView1.CelestialPlane = Off;
+GMAT Enhanced3DView1.EclipticPlane = Off;
 GMAT Enhanced3DView1.XYPlane = On;
 GMAT Enhanced3DView1.WireFrame = Off;
 GMAT Enhanced3DView1.Axes = On;
@@ -132,5 +126,7 @@ GMAT Enhanced3DView1.EnableConstellations = On;
 %----------------------------------------
 
 BeginMissionSequence;
+
+ Sat.CoordinateSystem = 'EarthMJ2000Eq'
 Propagate 'Prop 40000 s' DefaultProp(Sat) {Sat.ElapsedSecs = 40000};
 Propagate 'Prop 40000 s' DefaultProp(Sat) {Sat.ElapsedSecs = 40000};

@@ -45,14 +45,6 @@ GMAT Sat.ModelScale = 3;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
-GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
 
 %----------------------------------------
 %---------- ForceModels
@@ -114,7 +106,7 @@ GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 2.5;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.ViewUpAxis = X;
-GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.EclipticPlane = Off;
 GMAT EarthView.XYPlane = On;
 GMAT EarthView.WireFrame = Off;
 GMAT EarthView.Axes = On;

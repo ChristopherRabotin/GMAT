@@ -1,0 +1,317 @@
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft MoonSat InitSat;
+GMAT MoonSat.DateFormat = UTCGregorian;
+GMAT MoonSat.Epoch = '15 Jul 2022 01:07:06.978';
+GMAT MoonSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT MoonSat.DisplayStateType = Keplerian;
+GMAT MoonSat.SMA = 6563.000000000004;
+GMAT MoonSat.ECC = 0.0010000000000005;
+GMAT MoonSat.INC = 28.7;
+GMAT MoonSat.RAAN = 263;
+GMAT MoonSat.AOP = 360;
+GMAT MoonSat.TA = 8.537736462515939e-007;
+GMAT MoonSat.DryMass = 850;
+GMAT MoonSat.Cd = 2.2;
+GMAT MoonSat.Cr = 1.8;
+GMAT MoonSat.DragArea = 15;
+GMAT MoonSat.SRPArea = 20;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel NearMoonProp_ForceModel;
+GMAT NearMoonProp_ForceModel.CentralBody = Luna;
+GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth, Jupiter, Luna};
+GMAT NearMoonProp_ForceModel.Drag = None;
+GMAT NearMoonProp_ForceModel.SRP = On;
+GMAT NearMoonProp_ForceModel.RelativisticCorrection = Off;
+GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
+GMAT NearMoonProp_ForceModel.SRP.Flux = 1367;
+GMAT NearMoonProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+Create ForceModel NearEarthProp_ForceModel;
+GMAT NearEarthProp_ForceModel.CentralBody = Earth;
+GMAT NearEarthProp_ForceModel.PointMasses = {Earth, Sun, Luna};
+GMAT NearEarthProp_ForceModel.Drag = None;
+GMAT NearEarthProp_ForceModel.SRP = On;
+GMAT NearEarthProp_ForceModel.RelativisticCorrection = Off;
+GMAT NearEarthProp_ForceModel.ErrorControl = RSSStep;
+GMAT NearEarthProp_ForceModel.SRP.Flux = 1367;
+GMAT NearEarthProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+Create ForceModel EarthPointMass_ForceModel;
+GMAT EarthPointMass_ForceModel.CentralBody = Earth;
+GMAT EarthPointMass_ForceModel.PointMasses = {Earth};
+GMAT EarthPointMass_ForceModel.Drag = None;
+GMAT EarthPointMass_ForceModel.SRP = Off;
+GMAT EarthPointMass_ForceModel.RelativisticCorrection = Off;
+GMAT EarthPointMass_ForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator NearMoonProp;
+GMAT NearMoonProp.FM = NearMoonProp_ForceModel;
+GMAT NearMoonProp.Type = RungeKutta89;
+GMAT NearMoonProp.InitialStepSize = 60;
+GMAT NearMoonProp.Accuracy = 9.999999999999999e-012;
+GMAT NearMoonProp.MinStep = 0.001;
+GMAT NearMoonProp.MaxStep = 86400;
+GMAT NearMoonProp.MaxStepAttempts = 50;
+GMAT NearMoonProp.StopIfAccuracyIsViolated = true;
+
+Create Propagator NearEarthProp;
+GMAT NearEarthProp.FM = NearEarthProp_ForceModel;
+GMAT NearEarthProp.Type = RungeKutta89;
+GMAT NearEarthProp.InitialStepSize = 60;
+GMAT NearEarthProp.Accuracy = 9.999999999999999e-012;
+GMAT NearEarthProp.MinStep = 0.001;
+GMAT NearEarthProp.MaxStep = 160000;
+GMAT NearEarthProp.MaxStepAttempts = 50;
+GMAT NearEarthProp.StopIfAccuracyIsViolated = true;
+
+Create Propagator EarthPointMass;
+GMAT EarthPointMass.FM = EarthPointMass_ForceModel;
+GMAT EarthPointMass.Type = RungeKutta89;
+GMAT EarthPointMass.InitialStepSize = 60;
+GMAT EarthPointMass.Accuracy = 9.999999999999999e-012;
+GMAT EarthPointMass.MinStep = 0.001;
+GMAT EarthPointMass.MaxStep = 2700;
+GMAT EarthPointMass.MaxStepAttempts = 50;
+GMAT EarthPointMass.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn TOI;
+GMAT TOI.CoordinateSystem = Local;
+GMAT TOI.Origin = Earth;
+GMAT TOI.Axes = VNB;
+GMAT TOI.Element1 = 3.14;
+GMAT TOI.Element2 = 0;
+GMAT TOI.Element3 = 0;
+GMAT TOI.DecrementMass = false;
+GMAT TOI.Isp = 300;
+GMAT TOI.GravitationalAccel = 9.810000000000001;
+
+Create ImpulsiveBurn LOI;
+GMAT LOI.CoordinateSystem = Local;
+GMAT LOI.Origin = Luna;
+GMAT LOI.Axes = VNB;
+GMAT LOI.Element1 = -0.5;
+GMAT LOI.Element2 = 0;
+GMAT LOI.Element3 = 0;
+GMAT LOI.DecrementMass = false;
+GMAT LOI.Isp = 300;
+GMAT LOI.GravitationalAccel = 9.810000000000001;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem EarthMoonRot;
+GMAT EarthMoonRot.Origin = Earth;
+GMAT EarthMoonRot.Axes = ObjectReferenced;
+GMAT EarthMoonRot.XAxis = R;
+GMAT EarthMoonRot.ZAxis = N;
+GMAT EarthMoonRot.Primary = Earth;
+GMAT EarthMoonRot.Secondary = Luna;
+
+Create CoordinateSystem MoonInertial;
+GMAT MoonInertial.Origin = Luna;
+GMAT MoonInertial.Axes = BodyInertial;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create DifferentialCorrector DC1;
+GMAT DC1.ShowProgress = true;
+GMAT DC1.ReportStyle = Normal;
+GMAT DC1.ReportFile = 'DifferentialCorrectorDC1.data';
+GMAT DC1.MaximumIterations = 150;
+GMAT DC1.DerivativeMethod = ForwardDifference;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView EarthMoonRotView;
+GMAT EarthMoonRotView.SolverIterations = Current;
+GMAT EarthMoonRotView.UpperLeft = [ 0.00411764705882353 0.01692865779927449 ];
+GMAT EarthMoonRotView.Size = [ 0.2988235294117647 0.8633615477629988 ];
+GMAT EarthMoonRotView.RelativeZOrder = 183;
+GMAT EarthMoonRotView.Add = {MoonSat, Earth, Luna};
+GMAT EarthMoonRotView.CoordinateSystem = EarthMoonRot;
+GMAT EarthMoonRotView.DrawObject = [ true true true ];
+GMAT EarthMoonRotView.OrbitColor = [ 255 32768 12632256 ];
+GMAT EarthMoonRotView.TargetColor = [ 8421440 0 0 ];
+GMAT EarthMoonRotView.DataCollectFrequency = 1;
+GMAT EarthMoonRotView.UpdatePlotFrequency = 50;
+GMAT EarthMoonRotView.NumPointsToRedraw = 0;
+GMAT EarthMoonRotView.ShowPlot = true;
+GMAT EarthMoonRotView.ViewPointReference = Earth;
+GMAT EarthMoonRotView.ViewPointVector = [ 10000 0 30000 ];
+GMAT EarthMoonRotView.ViewDirection = Earth;
+GMAT EarthMoonRotView.ViewScaleFactor = 40;
+GMAT EarthMoonRotView.ViewUpCoordinateSystem = EarthMoonRot;
+GMAT EarthMoonRotView.ViewUpAxis = -X;
+GMAT EarthMoonRotView.EclipticPlane = Off;
+GMAT EarthMoonRotView.XYPlane = Off;
+GMAT EarthMoonRotView.WireFrame = Off;
+GMAT EarthMoonRotView.Axes = Off;
+GMAT EarthMoonRotView.Grid = Off;
+GMAT EarthMoonRotView.SunLine = Off;
+GMAT EarthMoonRotView.UseInitialView = On;
+GMAT EarthMoonRotView.StarCount = 7000;
+GMAT EarthMoonRotView.EnableStars = On;
+GMAT EarthMoonRotView.EnableConstellations = On;
+
+Create OrbitView MoonInertialView;
+GMAT MoonInertialView.SolverIterations = Current;
+GMAT MoonInertialView.UpperLeft = [ 0.6411764705882354 0.07859733978234583 ];
+GMAT MoonInertialView.Size = [ 0.3141176470588236 0.7303506650544136 ];
+GMAT MoonInertialView.RelativeZOrder = 163;
+GMAT MoonInertialView.Add = {MoonSat, Luna, Earth};
+GMAT MoonInertialView.CoordinateSystem = MoonInertial;
+GMAT MoonInertialView.DrawObject = [ true true true ];
+GMAT MoonInertialView.OrbitColor = [ 255 12632256 32768 ];
+GMAT MoonInertialView.TargetColor = [ 8421440 0 0 ];
+GMAT MoonInertialView.DataCollectFrequency = 1;
+GMAT MoonInertialView.UpdatePlotFrequency = 50;
+GMAT MoonInertialView.NumPointsToRedraw = 150;
+GMAT MoonInertialView.ShowPlot = true;
+GMAT MoonInertialView.ViewPointReference = Luna;
+GMAT MoonInertialView.ViewPointVector = [ 20000 20000 20000 ];
+GMAT MoonInertialView.ViewDirection = Luna;
+GMAT MoonInertialView.ViewScaleFactor = 1.5;
+GMAT MoonInertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT MoonInertialView.ViewUpAxis = Z;
+GMAT MoonInertialView.EclipticPlane = Off;
+GMAT MoonInertialView.XYPlane = On;
+GMAT MoonInertialView.WireFrame = Off;
+GMAT MoonInertialView.Axes = On;
+GMAT MoonInertialView.Grid = Off;
+GMAT MoonInertialView.SunLine = Off;
+GMAT MoonInertialView.UseInitialView = On;
+GMAT MoonInertialView.StarCount = 7000;
+GMAT MoonInertialView.EnableStars = On;
+GMAT MoonInertialView.EnableConstellations = On;
+
+Create OrbitView EarthInertialView;
+GMAT EarthInertialView.SolverIterations = Current;
+GMAT EarthInertialView.UpperLeft = [ 0.3076470588235294 0.01088270858524788 ];
+GMAT EarthInertialView.Size = [ 0.3211764705882353 0.8875453446191052 ];
+GMAT EarthInertialView.RelativeZOrder = 141;
+GMAT EarthInertialView.Add = {MoonSat, Earth, Luna};
+GMAT EarthInertialView.CoordinateSystem = EarthMJ2000Eq;
+GMAT EarthInertialView.DrawObject = [ true true true ];
+GMAT EarthInertialView.OrbitColor = [ 255 32768 12632256 ];
+GMAT EarthInertialView.TargetColor = [ 8421440 0 0 ];
+GMAT EarthInertialView.DataCollectFrequency = 1;
+GMAT EarthInertialView.UpdatePlotFrequency = 50;
+GMAT EarthInertialView.NumPointsToRedraw = 0;
+GMAT EarthInertialView.ShowPlot = true;
+GMAT EarthInertialView.ViewPointReference = Earth;
+GMAT EarthInertialView.ViewPointVector = [ 0 0 30000 ];
+GMAT EarthInertialView.ViewDirection = Earth;
+GMAT EarthInertialView.ViewScaleFactor = 45;
+GMAT EarthInertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT EarthInertialView.ViewUpAxis = Z;
+GMAT EarthInertialView.EclipticPlane = Off;
+GMAT EarthInertialView.XYPlane = On;
+GMAT EarthInertialView.WireFrame = Off;
+GMAT EarthInertialView.Axes = On;
+GMAT EarthInertialView.Grid = Off;
+GMAT EarthInertialView.SunLine = Off;
+GMAT EarthInertialView.UseInitialView = On;
+GMAT EarthInertialView.StarCount = 7000;
+GMAT EarthInertialView.EnableStars = On;
+GMAT EarthInertialView.EnableConstellations = On;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable RAAN AOP;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+
+%---------------------------------------------------------
+%  First Target RAAN and AOP to get close to the moon
+%--------------------------------------------------------- 
+
+%  Set spacecraft required for reinizializatoin after coarse targeting.
+GMAT InitSat = MoonSat;
+Toggle 'Turn Off Selected Plots' MoonInertialView EarthInertialView Off;
+
+%  This target loop varies the injection orbit RAAN and AOP to align the line of apsides with the moon. 
+%  This is a course target loop that ensurues the s/c is in the vicinity of the Moon at orbit apogee.  
+%  The RA and DEC contraints are applied in and Earth Moon rotating frame.  The x-axis points from Earth to Moon and
+%  the z-axis is normal to the plane of the lunar orbit about Earth.  In this frame, we RA = 0 and DEC = 0;
+Target 'Coarse Lunar Target' DC1 {SolveMode = Solve, ExitMode = SaveAndContinue};
+   
+   %  Vary parking orbit orientation
+   Vary 'Vary RAAN' DC1(MoonSat.RAAN = 45.1, {Perturbation = .00001, MaxStep = 5});
+   Vary 'Vary AOP' DC1(MoonSat.AOP = 2.5, {Perturbation = .00001, MaxStep = 5, AdditiveScaleFactor = 0.0});
+   
+   %  Apply TOI
+   Maneuver 'Apply TOI' TOI(MoonSat);
+   
+   %  Save variables for use in fine targeting loop
+   GMAT 'Save RAAN' RAAN = MoonSat.RAAN;
+   GMAT 'Save AOP' AOP = MoonSat.AOP;
+   
+   
+   %  Propagate to Apoapsis using point mass earth to avoid potential issues by impacting moon for now.
+   Propagate 'Prop To Moon' EarthPointMass(MoonSat) {MoonSat.Earth.Apoapsis, MoonSat.ElapsedDays = 4.5};
+   
+   %  Define the constraints that the line of apsides is aligned with moon
+   Achieve 'RA = 0' DC1(MoonSat.EarthMoonRot.RA = 0, {Tolerance = 1});
+   Achieve 'DEC = 0' DC1(MoonSat.EarthMoonRot.DEC = 0, {Tolerance = 1});
+   
+EndTarget;  % For targeter DC1
+
+%---------------------------------------------------------
+%  Next Target RAAN,,AOP, and Transfer orbit Maneveur to 
+%  achieve desired B-plane 
+%---------------------------------------------------------  
+
+GMAT MoonSat = InitSat;
+Toggle MoonInertialView EarthInertialView On;
+%  This loop determines the precise values of RAAN, AOP, and TOI to acheive desired lunar orbit conditions;
+Target 'Fine Lunar Target' DC1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
+   
+   %  Vary parking orbit geometry using intial guess from coarse targeting
+   Vary 'Vary RAAN' DC1(MoonSat.RAAN = RAAN, {Perturbation = .000001, MaxStep = 2});
+   Vary 'Varry AOP' DC1(MoonSat.AOP = AOP, {Perturbation = .000001,MaxStep = 2});
+   Vary 'Vary TOI' DC1(TOI.Element1 = TOI.Element1, {Perturbation = .0000001,MaxStep = .01});
+   
+   %  Apply TOI
+   Maneuver 'Apply TOI' TOI(MoonSat);
+   
+   
+   %  Propagate to the Moon
+   Propagate 'Prop To Moon' NearEarthProp(MoonSat) {MoonSat.Luna.Periapsis, MoonSat.ElapsedDays = 6, MoonSat.Luna.RMAG = 1000};
+   
+   %  Define required final orbit parameters
+   Achieve 'Achieve RadPer' DC1(MoonSat.Luna.RMAG = 15000, {Tolerance = 0.1});
+   Achieve 'Achieve BvectorAngle' DC1(MoonSat.MoonInertial.BVectorAngle = 75, {Tolerance = 0.1});
+   
+   Vary 'Vary LOI' DC1(LOI.Element1 = -0.6, {Perturbation = .00001, MaxStep = .3});
+   Maneuver 'Apply LOI' LOI(MoonSat);
+   
+   Achieve 'Achieve ECC' DC1(MoonSat.Luna.ECC = 0.01, {Tolerance = 0.1});
+     
+EndTarget;  % For targeter DC1
+
+Propagate 'Prop .5 days' NearMoonProp(MoonSat) {MoonSat.ElapsedDays = 4};

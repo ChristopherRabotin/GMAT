@@ -37,14 +37,7 @@ GMAT MoonSat.ModelScale = 0.6879999999999999;
 GMAT MoonSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT MoonSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MoonSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MoonSat.Q1 = 0;
-GMAT MoonSat.Q2 = 0;
-GMAT MoonSat.Q3 = 0;
-GMAT MoonSat.Q4 = 1;
-GMAT MoonSat.EulerAngleSequence = '321';
-GMAT MoonSat.AngularVelocityX = 0;
-GMAT MoonSat.AngularVelocityY = 0;
-GMAT MoonSat.AngularVelocityZ = 0;
+
 
 Create ForceModel MoonProp_ForceModel;
 GMAT MoonProp_ForceModel.CentralBody = Luna;

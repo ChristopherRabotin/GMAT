@@ -2,72 +2,10 @@
 %
 %  This script demonstrates how to use an Optimize sequence
 
-
-%----------------------------------------
-%---------- Spacecraft
-%----------------------------------------
-
-%-----------------------------------------------------------------
-%---------------------- Create Spacecraft ------------------------
-%-----------------------------------------------------------------
-Create Spacecraft Sat;
-GMAT Sat.DateFormat = TAIModJulian;
-GMAT Sat.Epoch = '21545';
-GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
-GMAT Sat.DisplayStateType = Cartesian;
-GMAT Sat.X = 7100;
-GMAT Sat.Y = 0;
-GMAT Sat.Z = 1300;
-GMAT Sat.VX = 0;
-GMAT Sat.VY = 7.35;
-GMAT Sat.VZ = 1;
-GMAT Sat.DryMass = 850;
-GMAT Sat.Cd = 2.2;
-GMAT Sat.Cr = 1.8;
-GMAT Sat.DragArea = 15;
-GMAT Sat.SRPArea = 1;
-GMAT Sat.NAIFId = -123456789;
-GMAT Sat.NAIFIdReferenceFrame = -123456789;
-GMAT Sat.Id = 'SatId';
-GMAT Sat.Attitude = CoordinateSystemFixed;
-GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 0;
-GMAT Sat.ModelOffsetY = 0;
-GMAT Sat.ModelOffsetZ = 0;
-GMAT Sat.ModelRotationX = 0;
-GMAT Sat.ModelRotationY = 0;
-GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 3;
-GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
-GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
-GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
-
-%----------------------------------------
-%---------- Arrays, Variables, Strings
-%----------------------------------------
-
-
-%-----------------------------------------------------------------
-%-----------------Create Variable and Arrays ---------------------
-%-----------------------------------------------------------------
-Create Variable X1 X2 J G;
-
-
-%----------------------------------------
-%---------- Solvers
-%----------------------------------------
-
 %-----------------------------------------------------------------
 %-----------------Create and Setup the Optimizer------------------
 %-----------------------------------------------------------------
+
 Create VF13ad SQPfmincon;
 GMAT SQPfmincon.ShowProgress = true;
 GMAT SQPfmincon.ReportStyle = Normal;
@@ -75,11 +13,7 @@ GMAT SQPfmincon.ReportFile = 'VF13adSQPfmincon.data';
 GMAT SQPfmincon.MaximumIterations = 200;
 GMAT SQPfmincon.Tolerance = 1e-005;
 GMAT SQPfmincon.UseCentralDifferences = false;
-GMAT SQPfmincon.FeasibilityTolerance = 1;
-
-%----------------------------------------
-%---------- Subscribers
-%----------------------------------------
+GMAT SQPfmincon.FeasibilityTolerance = .0001;
 
 %-----------------------------------------------------------------
 %------------------------------OutPut-----------------------------
@@ -90,30 +24,31 @@ GMAT Data.SolverIterations = Current;
 GMAT Data.UpperLeft = [ 0 0 ];
 GMAT Data.Size = [ 0 0 ];
 GMAT Data.RelativeZOrder = 0;
+GMAT Data.Maximized = false;
 GMAT Data.Filename = 'Ex_AlgebraicOptimization.report';
 GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
+GMAT Data.WriteHeaders = false;
 GMAT Data.LeftJustify = On;
 GMAT Data.ZeroFill = Off;
 GMAT Data.ColumnWidth = 20;
 GMAT Data.WriteReport = true;
 
 %----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable X1 X2 J G;
+
+%----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%-----------------------------------------------------------------
-%----------------- Run the Optimization Loop ---------------------
-%-----------------------------------------------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 BeginMissionSequence;
+
 Optimize SQPfmincon {SolveMode = Solve, ExitMode = DiscardAndContinue};
    
    %  Vary the independent variables
-   Vary 'Vary X1' SQPfmincon(X1 = 0, {Perturbation = 0.001, MaxStep = 9.999999e300, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
-   Vary 'Vary X2' SQPfmincon(X2 = 0, {Perturbation = 0.001, MaxStep = 9.999999e300, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Vary 'Vary X1' SQPfmincon(X1 = 0, {Perturbation = 0.0000001, MaxStep = 9.999999e300, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Vary 'Vary X2' SQPfmincon(X2 = 0, {Perturbation = 0.0000001, MaxStep = 9.999999e300, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
    
    %  The cost function and Minimize command
    GMAT 'Compute Cost (J)' J = ( X1 - 2 )^2 + ( X2 - 2 )^2;
@@ -125,9 +60,11 @@ Optimize SQPfmincon {SolveMode = Solve, ExitMode = DiscardAndContinue};
    %  The constraint is to require the solution to lie above the line defined by X2 = -X1 + 6
    %  or X2 >= -X1 + 6;
    GMAT 'Compute Constraint (G)' G = X2 + X1;
-   NonlinearConstraint 'G = 8' SQPfmincon(G=8);
+   NonlinearConstraint 'G = 8' SQPfmincon(G<=8);
 
 EndOptimize;  % For optimizer SQPfmincon
 
 Report 'Report Solution' Data X1 X2 J G;
+
+
 

@@ -37,16 +37,6 @@ GMAT LunaSat.ModelScale = 0.5;
 GMAT LunaSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT LunaSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LunaSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LunaSat.Q1 = 0;
-GMAT LunaSat.Q2 = 0;
-GMAT LunaSat.Q3 = 0;
-GMAT LunaSat.Q4 = 1;
-GMAT LunaSat.EulerAngleSequence = '321';
-GMAT LunaSat.AngularVelocityX = 0;
-GMAT LunaSat.AngularVelocityY = 0;
-GMAT LunaSat.AngularVelocityZ = 0;
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -150,7 +140,7 @@ GMAT DefaultOrbitView.CoordinateSystem = MoonInertial;
 GMAT DefaultOrbitView.DrawObject = [ true true ];
 GMAT DefaultOrbitView.OrbitColor = [ 16777471 1743054 ];
 GMAT DefaultOrbitView.TargetColor = [ 92307520 8421440 ];
-GMAT DefaultOrbitView.DataCollectFrequency = 1;
+GMAT DefaultOrbitView.DataCollectFrequency = 3;
 GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
 GMAT DefaultOrbitView.NumPointsToRedraw = 300;
 GMAT DefaultOrbitView.ShowPlot = true;
@@ -160,7 +150,7 @@ GMAT DefaultOrbitView.ViewDirection = Luna;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = MoonInertial;
 GMAT DefaultOrbitView.ViewUpAxis = Z;
-GMAT DefaultOrbitView.CelestialPlane = Off;
+GMAT DefaultOrbitView.EclipticPlane = Off;
 GMAT DefaultOrbitView.XYPlane = Off;
 GMAT DefaultOrbitView.WireFrame = Off;
 GMAT DefaultOrbitView.Axes = On;

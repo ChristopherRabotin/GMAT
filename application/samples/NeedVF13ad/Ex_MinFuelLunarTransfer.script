@@ -49,14 +49,7 @@ GMAT MMSRef.ModelScale = 0.5;
 GMAT MMSRef.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMSRef.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMSRef.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMSRef.Q1 = 0;
-GMAT MMSRef.Q2 = 0;
-GMAT MMSRef.Q3 = 0;
-GMAT MMSRef.Q4 = 1;
-GMAT MMSRef.EulerAngleSequence = '312';
-GMAT MMSRef.AngularVelocityX = 0;
-GMAT MMSRef.AngularVelocityY = 0;
-GMAT MMSRef.AngularVelocityZ = 0;
+
 
 
 
@@ -231,7 +224,7 @@ GMAT OGL_EarthMJ2K.ViewDirection = Earth;
 GMAT OGL_EarthMJ2K.ViewScaleFactor = 1;
 GMAT OGL_EarthMJ2K.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT OGL_EarthMJ2K.ViewUpAxis = Z;
-GMAT OGL_EarthMJ2K.CelestialPlane = Off;
+GMAT OGL_EarthMJ2K.EclipticPlane = Off;
 GMAT OGL_EarthMJ2K.XYPlane = Off;
 GMAT OGL_EarthMJ2K.WireFrame = Off;
 GMAT OGL_EarthMJ2K.Axes = On;
@@ -262,7 +255,7 @@ GMAT OGL_MoonMJ2K.ViewDirection = Luna;
 GMAT OGL_MoonMJ2K.ViewScaleFactor = 1;
 GMAT OGL_MoonMJ2K.ViewUpCoordinateSystem = MoonMJ2000Eq;
 GMAT OGL_MoonMJ2K.ViewUpAxis = X;
-GMAT OGL_MoonMJ2K.CelestialPlane = Off;
+GMAT OGL_MoonMJ2K.EclipticPlane = Off;
 GMAT OGL_MoonMJ2K.XYPlane = Off;
 GMAT OGL_MoonMJ2K.WireFrame = Off;
 GMAT OGL_MoonMJ2K.Axes = On;
@@ -293,7 +286,7 @@ GMAT OGL_EarthMoonRot.ViewDirection = Luna;
 GMAT OGL_EarthMoonRot.ViewScaleFactor = 1;
 GMAT OGL_EarthMoonRot.ViewUpCoordinateSystem = EarthMoonRot;
 GMAT OGL_EarthMoonRot.ViewUpAxis = X;
-GMAT OGL_EarthMoonRot.CelestialPlane = Off;
+GMAT OGL_EarthMoonRot.EclipticPlane = Off;
 GMAT OGL_EarthMoonRot.XYPlane = Off;
 GMAT OGL_EarthMoonRot.WireFrame = Off;
 GMAT OGL_EarthMoonRot.Axes = On;
@@ -309,7 +302,7 @@ GMAT RadApoPlot.SolverIterations = None;
 GMAT RadApoPlot.UpperLeft = [ 0.6377649325626205 0.04061624649859944 ];
 GMAT RadApoPlot.Size = [ 0.3554913294797688 0.453781512605042 ];
 GMAT RadApoPlot.RelativeZOrder = 1785;
-GMAT RadApoPlot.XVariable = MMSRef.CurrA1MJD;
+GMAT RadApoPlot.XVariable = MMSRef.A1ModJulian;
 GMAT RadApoPlot.YVariables = {MMSRef.RMAG};
 GMAT RadApoPlot.ShowGrid = true;
 GMAT RadApoPlot.ShowPlot = true;
@@ -336,7 +329,7 @@ Optimize 'Optimal Transfer' SQP1 {SolveMode = Solve, ExitMode = DiscardAndContin
    
    Maneuver 'Apply LOI' LOI(MMSRef);
    Propagate 'Prop to Periselene' MoonCentered(MMSRef) {MMSRef.Luna.Periapsis};
-   GMAT 'Compute Total delta V' Cost = sqrt(TOI.V^2 +TOI.N^2 + TOI.B^2) + TOI.V;
+   GMAT 'Compute Total delta V' Cost = sqrt(TOI.Element1^2 +TOI.Element2^2 + TOI.Element3^2) + TOI.Element1;
    
    NonlinearConstraint 'SMA = 2300' SQP1(MMSRef.Luna.SMA=2300);
    NonlinearConstraint 'Inc = 65' SQP1(MMSRef.MoonMJ2000Eq.INC=65);

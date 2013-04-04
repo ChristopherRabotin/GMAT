@@ -20,6 +20,19 @@ ODSat.Cr = 1.8;
 ODSat.DragArea = 15;
 ODSat.SRPArea = 1;
 ODSat.Id = 'ODSat01';
+ODSat.Transponders = {Transponder1};
+
+
+Create Transponder Transponder1;
+GMAT Transponder1.SensorID = 'theId';
+GMAT Transponder1.HardwareDelay = 0.0001;
+GMAT Transponder1.PrimaryAntenna = No Antennas Available;
+GMAT Transponder1.InputFrequencyModel = 'CenterAndBandwidth';
+GMAT Transponder1.InputCenterFrequency = 0;
+GMAT Transponder1.InputBandwidth = 0;
+GMAT Transponder1.OutputFrequencyModel = 'TurnAroundRatio';
+GMAT Transponder1.TurnAroundRatio = '240/221';
+
 
 %----------------------------------------
 %---------- GroundStations

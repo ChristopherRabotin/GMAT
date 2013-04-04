@@ -38,15 +38,6 @@ GMAT MAVEN.ModelScale = 3;
 GMAT MAVEN.AttitudeDisplayStateType = 'Quaternion';
 GMAT MAVEN.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MAVEN.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MAVEN.Q1 = 0;
-GMAT MAVEN.Q2 = 0;
-GMAT MAVEN.Q3 = 0;
-GMAT MAVEN.Q4 = 1;
-GMAT MAVEN.EulerAngleSequence = '321';
-GMAT MAVEN.AngularVelocityX = 0;
-GMAT MAVEN.AngularVelocityY = 0;
-GMAT MAVEN.AngularVelocityZ = 0;
-
 
 %----------------------------------------
 %---------- Hardware Components
@@ -232,7 +223,7 @@ GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 1;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.ViewUpAxis = Z;
-GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.EclipticPlane = Off;
 GMAT EarthView.XYPlane = On;
 GMAT EarthView.WireFrame = Off;
 GMAT EarthView.Axes = On;
@@ -263,7 +254,7 @@ GMAT MarsView.ViewDirection = Mars;
 GMAT MarsView.ViewScaleFactor = 1.5;
 GMAT MarsView.ViewUpCoordinateSystem = MarsFK5;
 GMAT MarsView.ViewUpAxis = Z;
-GMAT MarsView.CelestialPlane = Off;
+GMAT MarsView.EclipticPlane = Off;
 GMAT MarsView.XYPlane = Off;
 GMAT MarsView.WireFrame = Off;
 GMAT MarsView.Axes = On;
@@ -294,7 +285,7 @@ GMAT SolarSystemView.ViewDirection = Sun;
 GMAT SolarSystemView.ViewScaleFactor = 1;
 GMAT SolarSystemView.ViewUpCoordinateSystem = SunEcliptic;
 GMAT SolarSystemView.ViewUpAxis = X;
-GMAT SolarSystemView.CelestialPlane = Off;
+GMAT SolarSystemView.EclipticPlane = Off;
 GMAT SolarSystemView.XYPlane = On;
 GMAT SolarSystemView.WireFrame = Off;
 GMAT SolarSystemView.Axes = On;

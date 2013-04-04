@@ -37,14 +37,7 @@ GMAT DefaultSC.ModelScale = 3;
 GMAT DefaultSC.AttitudeDisplayStateType = 'Quaternion';
 GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT DefaultSC.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT DefaultSC.Q1 = 0;
-GMAT DefaultSC.Q2 = 0;
-GMAT DefaultSC.Q3 = 0;
-GMAT DefaultSC.Q4 = 1;
-GMAT DefaultSC.EulerAngleSequence = '321';
-GMAT DefaultSC.AngularVelocityX = 0;
-GMAT DefaultSC.AngularVelocityY = 0;
-GMAT DefaultSC.AngularVelocityZ = 0;
+
 
 %----------------------------------------
 %---------- ForceModels
@@ -137,7 +130,7 @@ GMAT DefaultOrbitView.ViewDirection = Earth;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultOrbitView.ViewUpAxis = X;
-GMAT DefaultOrbitView.CelestialPlane = Off;
+GMAT DefaultOrbitView.EclipticPlane = Off;
 GMAT DefaultOrbitView.XYPlane = On;
 GMAT DefaultOrbitView.WireFrame = Off;
 GMAT DefaultOrbitView.Axes = On;

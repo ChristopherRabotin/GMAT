@@ -36,14 +36,8 @@ GMAT Sat.ModelScale = 4;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'ObjRef';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
 GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
+
 
 %----------------------------------------
 %---------- ForceModels
@@ -95,8 +89,6 @@ GMAT DefaultIB.GravitationalAccel = 9.81;
 Create CoordinateSystem ObjRef;
 GMAT ObjRef.Origin = Sat;
 GMAT ObjRef.Axes = ObjectReferenced;
-GMAT ObjRef.UpdateInterval = 0;
-GMAT ObjRef.OverrideOriginInterval = false;
 GMAT ObjRef.XAxis = N;
 GMAT ObjRef.ZAxis = -R;
 GMAT ObjRef.Primary = Earth;
@@ -118,7 +110,7 @@ GMAT Enhanced3DView1.ViewDirection = Earth;
 GMAT Enhanced3DView1.ViewScaleFactor = 1;
 GMAT Enhanced3DView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.ViewUpAxis = Z;
-GMAT Enhanced3DView1.CelestialPlane = Off;
+GMAT Enhanced3DView1.EclipticPlane = Off;
 GMAT Enhanced3DView1.XYPlane = Off;
 GMAT Enhanced3DView1.WireFrame = Off;
 GMAT Enhanced3DView1.Axes = On;

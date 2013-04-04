@@ -51,15 +51,6 @@ GMAT Sat.ModelScale = 3;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
-GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -186,7 +177,7 @@ GMAT ViewEarthMoonRot.ViewDirection = EarthMoonL2;
 GMAT ViewEarthMoonRot.ViewScaleFactor = 10;
 GMAT ViewEarthMoonRot.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT ViewEarthMoonRot.ViewUpAxis = Z;
-GMAT ViewEarthMoonRot.CelestialPlane = Off;
+GMAT ViewEarthMoonRot.EclipticPlane = Off;
 GMAT ViewEarthMoonRot.XYPlane = On;
 GMAT ViewEarthMoonRot.WireFrame = Off;
 GMAT ViewEarthMoonRot.Axes = On;
@@ -217,7 +208,7 @@ GMAT EarthMJ2K.ViewDirection = Earth;
 GMAT EarthMJ2K.ViewScaleFactor = 45;
 GMAT EarthMJ2K.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthMJ2K.ViewUpAxis = X;
-GMAT EarthMJ2K.CelestialPlane = Off;
+GMAT EarthMJ2K.EclipticPlane = Off;
 GMAT EarthMJ2K.XYPlane = On;
 GMAT EarthMJ2K.WireFrame = Off;
 GMAT EarthMJ2K.Axes = On;
@@ -238,7 +229,7 @@ GMAT EarthMJ2K.EnableConstellations = On;
 BeginMissionSequence;
 
 
-Propagate 'Prop to Y Crossing' EarthMoonL2Prop(Sat) {Sat.CSEarthMoonRot.Y = 0};
+Propagate 'Prop to Y Crossing' EarthMoonL2Prop(Sat) {Sat.CSEarthMoonRot.Y = 0,StopTolerance = 1e-005};
 
 For 'J = 1:2' J = 1:1:2;
    

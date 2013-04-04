@@ -5,10 +5,15 @@
 %
 
 
-Create Spacecraft Sat11
-GMAT Sat11.Epoch = 21545;
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft Sat11;
+GMAT Sat11.DateFormat = TAIModJulian;
+GMAT Sat11.Epoch = '21545';
+GMAT Sat11.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat11.DisplayStateType = Cartesian;
-GMAT Sat11.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat11.X = 688.5272682812904;
 GMAT Sat11.Y = -688.5272682812873;
 GMAT Sat11.Z = 6928.410542950397;
@@ -16,16 +21,32 @@ GMAT Sat11.VX = -5.338534050664235;
 GMAT Sat11.VY = -5.338534050664234;
 GMAT Sat11.VZ = 2.287982201885771e-015;
 GMAT Sat11.DryMass = 850;
-GMAT Sat11.DateFormat = TAIModJulian;
 GMAT Sat11.Cd = 2.2;
+GMAT Sat11.Cr = 1.8;
 GMAT Sat11.DragArea = 15;
 GMAT Sat11.SRPArea = 1;
-GMAT Sat11.Cr = 1.8;
+GMAT Sat11.NAIFId = -123456789;
+GMAT Sat11.NAIFIdReferenceFrame = -123456789;
+GMAT Sat11.Id = 'SatId';
+GMAT Sat11.Attitude = CoordinateSystemFixed;
+GMAT Sat11.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat11.ModelOffsetX = 0;
+GMAT Sat11.ModelOffsetY = 0;
+GMAT Sat11.ModelOffsetZ = 0;
+GMAT Sat11.ModelRotationX = 0;
+GMAT Sat11.ModelRotationY = 0;
+GMAT Sat11.ModelRotationZ = 0;
+GMAT Sat11.ModelScale = 3;
+GMAT Sat11.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat11.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat11.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat11.EulerAngleSequence = '321';
 
-Create Spacecraft Sat12
-GMAT Sat12.Epoch = 21545;
+Create Spacecraft Sat12;
+GMAT Sat12.DateFormat = TAIModJulian;
+GMAT Sat12.Epoch = '21545';
+GMAT Sat12.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat12.DisplayStateType = Cartesian;
-GMAT Sat12.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat12.X = -4862.607377560832;
 GMAT Sat12.Y = -5035.377343525906;
 GMAT Sat12.Z = 8.488817860573396e-013;
@@ -33,16 +54,32 @@ GMAT Sat12.VX = -0.7580772104932414;
 GMAT Sat12.VY = 0.726821527686825;
 GMAT Sat12.VZ = -7.472616549480826;
 GMAT Sat12.DryMass = 850;
-GMAT Sat12.DateFormat = TAIModJulian;
 GMAT Sat12.Cd = 2.2;
+GMAT Sat12.Cr = 1.8;
 GMAT Sat12.DragArea = 15;
 GMAT Sat12.SRPArea = 1;
-GMAT Sat12.Cr = 1.8;
+GMAT Sat12.NAIFId = -123456789;
+GMAT Sat12.NAIFIdReferenceFrame = -123456789;
+GMAT Sat12.Id = 'SatId';
+GMAT Sat12.Attitude = CoordinateSystemFixed;
+GMAT Sat12.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat12.ModelOffsetX = 0;
+GMAT Sat12.ModelOffsetY = 0;
+GMAT Sat12.ModelOffsetZ = 0;
+GMAT Sat12.ModelRotationX = 0;
+GMAT Sat12.ModelRotationY = 0;
+GMAT Sat12.ModelRotationZ = 0;
+GMAT Sat12.ModelScale = 3;
+GMAT Sat12.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat12.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat12.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat12.EulerAngleSequence = '321';
 
-Create Spacecraft Sat13
-GMAT Sat13.Epoch = 21545;
+Create Spacecraft Sat13;
+GMAT Sat13.DateFormat = TAIModJulian;
+GMAT Sat13.Epoch = '21545';
+GMAT Sat13.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat13.DisplayStateType = Cartesian;
-GMAT Sat13.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat13.X = -712.8495845396725;
 GMAT Sat13.Y = 664.7429917302072;
 GMAT Sat13.Z = -6935.342419431587;
@@ -50,16 +87,32 @@ GMAT Sat13.VX = 5.143823411855427;
 GMAT Sat13.VY = 5.516075276766165;
 GMAT Sat13.VZ = -1.372423280583216e-015;
 GMAT Sat13.DryMass = 850;
-GMAT Sat13.DateFormat = TAIModJulian;
 GMAT Sat13.Cd = 2.2;
+GMAT Sat13.Cr = 1.8;
 GMAT Sat13.DragArea = 15;
 GMAT Sat13.SRPArea = 1;
-GMAT Sat13.Cr = 1.8;
+GMAT Sat13.NAIFId = -123456789;
+GMAT Sat13.NAIFIdReferenceFrame = -123456789;
+GMAT Sat13.Id = 'SatId';
+GMAT Sat13.Attitude = CoordinateSystemFixed;
+GMAT Sat13.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat13.ModelOffsetX = 0;
+GMAT Sat13.ModelOffsetY = 0;
+GMAT Sat13.ModelOffsetZ = 0;
+GMAT Sat13.ModelRotationX = 0;
+GMAT Sat13.ModelRotationY = 0;
+GMAT Sat13.ModelRotationZ = 0;
+GMAT Sat13.ModelScale = 3;
+GMAT Sat13.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat13.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat13.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat13.EulerAngleSequence = '321';
 
-Create Spacecraft Sat14
-GMAT Sat14.Epoch = 21545;
+Create Spacecraft Sat14;
+GMAT Sat14.DateFormat = TAIModJulian;
+GMAT Sat14.Epoch = '21545';
+GMAT Sat14.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat14.DisplayStateType = Cartesian;
-GMAT Sat14.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat14.X = 4683.913073533447;
 GMAT Sat14.Y = 5202.012477838315;
 GMAT Sat14.Z = -1.697763572114679e-012;
@@ -67,16 +120,32 @@ GMAT Sat14.VX = 0.7779318200050955;
 GMAT Sat14.VY = -0.7055300656965543;
 GMAT Sat14.VZ = 7.472616549480826;
 GMAT Sat14.DryMass = 850;
-GMAT Sat14.DateFormat = TAIModJulian;
 GMAT Sat14.Cd = 2.2;
+GMAT Sat14.Cr = 1.8;
 GMAT Sat14.DragArea = 15;
 GMAT Sat14.SRPArea = 1;
-GMAT Sat14.Cr = 1.8;
+GMAT Sat14.NAIFId = -123456789;
+GMAT Sat14.NAIFIdReferenceFrame = -123456789;
+GMAT Sat14.Id = 'SatId';
+GMAT Sat14.Attitude = CoordinateSystemFixed;
+GMAT Sat14.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat14.ModelOffsetX = 0;
+GMAT Sat14.ModelOffsetY = 0;
+GMAT Sat14.ModelOffsetZ = 0;
+GMAT Sat14.ModelRotationX = 0;
+GMAT Sat14.ModelRotationY = 0;
+GMAT Sat14.ModelRotationZ = 0;
+GMAT Sat14.ModelScale = 3;
+GMAT Sat14.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat14.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat14.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat14.EulerAngleSequence = '321';
 
-Create Spacecraft Sat21
-GMAT Sat21.Epoch = 21545;
+Create Spacecraft Sat21;
+GMAT Sat21.DateFormat = TAIModJulian;
+GMAT Sat21.Epoch = '21545';
+GMAT Sat21.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat21.DisplayStateType = Cartesian;
-GMAT Sat21.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat21.X = 973.7246008670973;
 GMAT Sat21.Y = 2.082368121974815e-012;
 GMAT Sat21.Z = 6928.410542950397;
@@ -84,16 +153,32 @@ GMAT Sat21.VX = -1.407233930611204e-016;
 GMAT Sat21.VY = -7.549827257639936;
 GMAT Sat21.VZ = 2.287982201885771e-015;
 GMAT Sat21.DryMass = 850;
-GMAT Sat21.DateFormat = TAIModJulian;
 GMAT Sat21.Cd = 2.2;
+GMAT Sat21.Cr = 1.8;
 GMAT Sat21.DragArea = 15;
 GMAT Sat21.SRPArea = 1;
-GMAT Sat21.Cr = 1.8;
+GMAT Sat21.NAIFId = -123456789;
+GMAT Sat21.NAIFIdReferenceFrame = -123456789;
+GMAT Sat21.Id = 'SatId';
+GMAT Sat21.Attitude = CoordinateSystemFixed;
+GMAT Sat21.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat21.ModelOffsetX = 0;
+GMAT Sat21.ModelOffsetY = 0;
+GMAT Sat21.ModelOffsetZ = 0;
+GMAT Sat21.ModelRotationX = 0;
+GMAT Sat21.ModelRotationY = 0;
+GMAT Sat21.ModelRotationZ = 0;
+GMAT Sat21.ModelScale = 3;
+GMAT Sat21.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat21.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat21.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat21.EulerAngleSequence = '321';
 
-Create Spacecraft Sat22
-GMAT Sat22.Epoch = 21545;
+Create Spacecraft Sat22;
+GMAT Sat22.DateFormat = TAIModJulian;
+GMAT Sat22.Epoch = '21545';
+GMAT Sat22.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat22.DisplayStateType = Cartesian;
-GMAT Sat22.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat22.X = 122.1668145192732;
 GMAT Sat22.Y = -6998.932116361272;
 GMAT Sat22.Z = 8.488817860573396e-013;
@@ -101,16 +186,32 @@ GMAT Sat22.VX = -1.049981967142473;
 GMAT Sat22.VY = -0.02210110526303279;
 GMAT Sat22.VZ = -7.472616549480826;
 GMAT Sat22.DryMass = 850;
-GMAT Sat22.DateFormat = TAIModJulian;
 GMAT Sat22.Cd = 2.2;
+GMAT Sat22.Cr = 1.8;
 GMAT Sat22.DragArea = 15;
 GMAT Sat22.SRPArea = 1;
-GMAT Sat22.Cr = 1.8;
+GMAT Sat22.NAIFId = -123456789;
+GMAT Sat22.NAIFIdReferenceFrame = -123456789;
+GMAT Sat22.Id = 'SatId';
+GMAT Sat22.Attitude = CoordinateSystemFixed;
+GMAT Sat22.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat22.ModelOffsetX = 0;
+GMAT Sat22.ModelOffsetY = 0;
+GMAT Sat22.ModelOffsetZ = 0;
+GMAT Sat22.ModelRotationX = 0;
+GMAT Sat22.ModelRotationY = 0;
+GMAT Sat22.ModelRotationZ = 0;
+GMAT Sat22.ModelScale = 3;
+GMAT Sat22.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat22.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat22.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat22.EulerAngleSequence = '321';
 
-Create Spacecraft Sat23
+Create Spacecraft Sat23;
+GMAT Sat23.DateFormat = TAIModJulian;
+GMAT Sat23.Epoch = '21545';
+GMAT Sat23.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat23.DisplayStateType = Cartesian;
-GMAT Sat23.CoordinateSystem = EarthMJ2000Eq
-GMAT Sat23.Epoch = 21545;
 GMAT Sat23.X = -974.1050523926782;
 GMAT Sat23.Y = -34.01649799535283;
 GMAT Sat23.Z = -6935.342419431587;
@@ -118,16 +219,32 @@ GMAT Sat23.VX = -0.2632218179877218;
 GMAT Sat23.VY = 7.537686649485913;
 GMAT Sat23.VZ = -1.372423280583216e-015;
 GMAT Sat23.DryMass = 850;
-GMAT Sat23.DateFormat = TAIModJulian;
 GMAT Sat23.Cd = 2.2;
+GMAT Sat23.Cr = 1.8;
 GMAT Sat23.DragArea = 15;
 GMAT Sat23.SRPArea = 1;
-GMAT Sat23.Cr = 1.8;
+GMAT Sat23.NAIFId = -123456789;
+GMAT Sat23.NAIFIdReferenceFrame = -123456789;
+GMAT Sat23.Id = 'SatId';
+GMAT Sat23.Attitude = CoordinateSystemFixed;
+GMAT Sat23.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat23.ModelOffsetX = 0;
+GMAT Sat23.ModelOffsetY = 0;
+GMAT Sat23.ModelOffsetZ = 0;
+GMAT Sat23.ModelRotationX = 0;
+GMAT Sat23.ModelRotationY = 0;
+GMAT Sat23.ModelRotationZ = 0;
+GMAT Sat23.ModelScale = 3;
+GMAT Sat23.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat23.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat23.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat23.EulerAngleSequence = '321';
 
-Create Spacecraft Sat24
-GMAT Sat24.Epoch = 21545;
+Create Spacecraft Sat24;
+GMAT Sat24.DateFormat = TAIModJulian;
+GMAT Sat24.Epoch = '21545';
+GMAT Sat24.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat24.DisplayStateType = Cartesian;
-GMAT Sat24.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat24.X = -366.3516021126837;
 GMAT Sat24.Y = 6990.404995680331;
 GMAT Sat24.Z = -1.697763572114679e-012;
@@ -135,16 +252,32 @@ GMAT Sat24.VX = 1.04896595901142;
 GMAT Sat24.VY = 0.05119577144137196;
 GMAT Sat24.VZ = 7.472616549480826;
 GMAT Sat24.DryMass = 850;
-GMAT Sat24.DateFormat = TAIModJulian;
 GMAT Sat24.Cd = 2.2;
+GMAT Sat24.Cr = 1.8;
 GMAT Sat24.DragArea = 15;
 GMAT Sat24.SRPArea = 1;
-GMAT Sat24.Cr = 1.8;
+GMAT Sat24.NAIFId = -123456789;
+GMAT Sat24.NAIFIdReferenceFrame = -123456789;
+GMAT Sat24.Id = 'SatId';
+GMAT Sat24.Attitude = CoordinateSystemFixed;
+GMAT Sat24.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat24.ModelOffsetX = 0;
+GMAT Sat24.ModelOffsetY = 0;
+GMAT Sat24.ModelOffsetZ = 0;
+GMAT Sat24.ModelRotationX = 0;
+GMAT Sat24.ModelRotationY = 0;
+GMAT Sat24.ModelRotationZ = 0;
+GMAT Sat24.ModelScale = 3;
+GMAT Sat24.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat24.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat24.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat24.EulerAngleSequence = '321';
 
-Create Spacecraft Sat31
-GMAT Sat31.Epoch = 21545;
+Create Spacecraft Sat31;
+GMAT Sat31.DateFormat = TAIModJulian;
+GMAT Sat31.Epoch = '21545';
+GMAT Sat31.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat31.DisplayStateType = Cartesian;
-GMAT Sat31.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat31.X = 688.5272682812873;
 GMAT Sat31.Y = 688.5272682812904;
 GMAT Sat31.Z = 6928.410542950397;
@@ -152,16 +285,32 @@ GMAT Sat31.VX = 5.338534050664234;
 GMAT Sat31.VY = -5.338534050664235;
 GMAT Sat31.VZ = 2.287982201885771e-015;
 GMAT Sat31.DryMass = 850;
-GMAT Sat31.DateFormat = TAIModJulian;
 GMAT Sat31.Cd = 2.2;
+GMAT Sat31.Cr = 1.8;
 GMAT Sat31.DragArea = 15;
 GMAT Sat31.SRPArea = 1;
-GMAT Sat31.Cr = 1.8;
+GMAT Sat31.NAIFId = -123456789;
+GMAT Sat31.NAIFIdReferenceFrame = -123456789;
+GMAT Sat31.Id = 'SatId';
+GMAT Sat31.Attitude = CoordinateSystemFixed;
+GMAT Sat31.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat31.ModelOffsetX = 0;
+GMAT Sat31.ModelOffsetY = 0;
+GMAT Sat31.ModelOffsetZ = 0;
+GMAT Sat31.ModelRotationX = 0;
+GMAT Sat31.ModelRotationY = 0;
+GMAT Sat31.ModelRotationZ = 0;
+GMAT Sat31.ModelScale = 3;
+GMAT Sat31.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat31.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat31.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat31.EulerAngleSequence = '321';
 
-Create Spacecraft Sat32
-GMAT Sat32.Epoch = 21545;
+Create Spacecraft Sat32;
+GMAT Sat32.DateFormat = TAIModJulian;
+GMAT Sat32.Epoch = '21545';
+GMAT Sat32.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat32.DisplayStateType = Cartesian;
-GMAT Sat32.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat32.X = 5035.377343525907;
 GMAT Sat32.Y = -4862.607377560831;
 GMAT Sat32.Z = 8.488817860573396e-013;
@@ -169,16 +318,32 @@ GMAT Sat32.VX = -0.7268215276868248;
 GMAT Sat32.VY = -0.7580772104932415;
 GMAT Sat32.VZ = -7.472616549480826;
 GMAT Sat32.DryMass = 850;
-GMAT Sat32.DateFormat = TAIModJulian;
 GMAT Sat32.Cd = 2.2;
+GMAT Sat32.Cr = 1.8;
 GMAT Sat32.DragArea = 15;
 GMAT Sat32.SRPArea = 1;
-GMAT Sat32.Cr = 1.8;
+GMAT Sat32.NAIFId = -123456789;
+GMAT Sat32.NAIFIdReferenceFrame = -123456789;
+GMAT Sat32.Id = 'SatId';
+GMAT Sat32.Attitude = CoordinateSystemFixed;
+GMAT Sat32.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat32.ModelOffsetX = 0;
+GMAT Sat32.ModelOffsetY = 0;
+GMAT Sat32.ModelOffsetZ = 0;
+GMAT Sat32.ModelRotationX = 0;
+GMAT Sat32.ModelRotationY = 0;
+GMAT Sat32.ModelRotationZ = 0;
+GMAT Sat32.ModelScale = 3;
+GMAT Sat32.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat32.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat32.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat32.EulerAngleSequence = '321';
 
-Create Spacecraft Sat33
-GMAT Sat33.Epoch = 21545;
+Create Spacecraft Sat33;
+GMAT Sat33.DateFormat = TAIModJulian;
+GMAT Sat33.Epoch = '21545';
+GMAT Sat33.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat33.DisplayStateType = Cartesian;
-GMAT Sat33.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat33.X = -664.7429917302073;
 GMAT Sat33.Y = -712.8495845396725;
 GMAT Sat33.Z = -6935.342419431587;
@@ -186,16 +351,32 @@ GMAT Sat33.VX = -5.516075276766165;
 GMAT Sat33.VY = 5.143823411855427;
 GMAT Sat33.VZ = -1.372423280583216e-015;
 GMAT Sat33.DryMass = 850;
-GMAT Sat33.DateFormat = TAIModJulian;
 GMAT Sat33.Cd = 2.2;
+GMAT Sat33.Cr = 1.8;
 GMAT Sat33.DragArea = 15;
 GMAT Sat33.SRPArea = 1;
-GMAT Sat33.Cr = 1.8;
+GMAT Sat33.NAIFId = -123456789;
+GMAT Sat33.NAIFIdReferenceFrame = -123456789;
+GMAT Sat33.Id = 'SatId';
+GMAT Sat33.Attitude = CoordinateSystemFixed;
+GMAT Sat33.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat33.ModelOffsetX = 0;
+GMAT Sat33.ModelOffsetY = 0;
+GMAT Sat33.ModelOffsetZ = 0;
+GMAT Sat33.ModelRotationX = 0;
+GMAT Sat33.ModelRotationY = 0;
+GMAT Sat33.ModelRotationZ = 0;
+GMAT Sat33.ModelScale = 3;
+GMAT Sat33.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat33.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat33.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat33.EulerAngleSequence = '321';
 
-Create Spacecraft Sat34
-GMAT Sat34.Epoch = 21545;
+Create Spacecraft Sat34;
+GMAT Sat34.DateFormat = TAIModJulian;
+GMAT Sat34.Epoch = '21545';
+GMAT Sat34.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat34.DisplayStateType = Cartesian;
-GMAT Sat34.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat34.X = -5202.012477838313;
 GMAT Sat34.Y = 4683.913073533448;
 GMAT Sat34.Z = -1.697763572114679e-012;
@@ -203,16 +384,32 @@ GMAT Sat34.VX = 0.7055300656965544;
 GMAT Sat34.VY = 0.7779318200050953;
 GMAT Sat34.VZ = 7.472616549480826;
 GMAT Sat34.DryMass = 850;
-GMAT Sat34.DateFormat = TAIModJulian;
 GMAT Sat34.Cd = 2.2;
+GMAT Sat34.Cr = 1.8;
 GMAT Sat34.DragArea = 15;
 GMAT Sat34.SRPArea = 1;
-GMAT Sat34.Cr = 1.8;
+GMAT Sat34.NAIFId = -123456789;
+GMAT Sat34.NAIFIdReferenceFrame = -123456789;
+GMAT Sat34.Id = 'SatId';
+GMAT Sat34.Attitude = CoordinateSystemFixed;
+GMAT Sat34.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat34.ModelOffsetX = 0;
+GMAT Sat34.ModelOffsetY = 0;
+GMAT Sat34.ModelOffsetZ = 0;
+GMAT Sat34.ModelRotationX = 0;
+GMAT Sat34.ModelRotationY = 0;
+GMAT Sat34.ModelRotationZ = 0;
+GMAT Sat34.ModelScale = 3;
+GMAT Sat34.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat34.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat34.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat34.EulerAngleSequence = '321';
 
-Create Spacecraft Sat41
-GMAT Sat41.Epoch = 21545;
+Create Spacecraft Sat41;
+GMAT Sat41.DateFormat = TAIModJulian;
+GMAT Sat41.Epoch = '21545';
+GMAT Sat41.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat41.DisplayStateType = Cartesian;
-GMAT Sat41.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat41.X = -2.022746655320065e-012;
 GMAT Sat41.Y = 973.7246008670973;
 GMAT Sat41.Z = 6928.410542950397;
@@ -220,16 +417,32 @@ GMAT Sat41.VX = 7.549827257639936;
 GMAT Sat41.VY = -6.030017145594824e-016;
 GMAT Sat41.VZ = 2.287982201885771e-015;
 GMAT Sat41.DryMass = 850;
-GMAT Sat41.DateFormat = TAIModJulian;
 GMAT Sat41.Cd = 2.2;
+GMAT Sat41.Cr = 1.8;
 GMAT Sat41.DragArea = 15;
 GMAT Sat41.SRPArea = 1;
-GMAT Sat41.Cr = 1.8;
+GMAT Sat41.NAIFId = -123456789;
+GMAT Sat41.NAIFIdReferenceFrame = -123456789;
+GMAT Sat41.Id = 'SatId';
+GMAT Sat41.Attitude = CoordinateSystemFixed;
+GMAT Sat41.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat41.ModelOffsetX = 0;
+GMAT Sat41.ModelOffsetY = 0;
+GMAT Sat41.ModelOffsetZ = 0;
+GMAT Sat41.ModelRotationX = 0;
+GMAT Sat41.ModelRotationY = 0;
+GMAT Sat41.ModelRotationZ = 0;
+GMAT Sat41.ModelScale = 3;
+GMAT Sat41.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat41.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat41.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat41.EulerAngleSequence = '321';
 
-Create Spacecraft Sat42
-GMAT Sat42.Epoch = 21545;
+Create Spacecraft Sat42;
+GMAT Sat42.DateFormat = TAIModJulian;
+GMAT Sat42.Epoch = '21545';
+GMAT Sat42.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat42.DisplayStateType = Cartesian;
-GMAT Sat42.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat42.X = 6998.932116361272;
 GMAT Sat42.Y = 122.1668145192743;
 GMAT Sat42.Z = 8.488817860573396e-013;
@@ -237,16 +450,32 @@ GMAT Sat42.VX = 0.02210110526303296;
 GMAT Sat42.VY = -1.049981967142473;
 GMAT Sat42.VZ = -7.472616549480826;
 GMAT Sat42.DryMass = 850;
-GMAT Sat42.DateFormat = TAIModJulian;
 GMAT Sat42.Cd = 2.2;
+GMAT Sat42.Cr = 1.8;
 GMAT Sat42.DragArea = 15;
 GMAT Sat42.SRPArea = 1;
-GMAT Sat42.Cr = 1.8;
+GMAT Sat42.NAIFId = -123456789;
+GMAT Sat42.NAIFIdReferenceFrame = -123456789;
+GMAT Sat42.Id = 'SatId';
+GMAT Sat42.Attitude = CoordinateSystemFixed;
+GMAT Sat42.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat42.ModelOffsetX = 0;
+GMAT Sat42.ModelOffsetY = 0;
+GMAT Sat42.ModelOffsetZ = 0;
+GMAT Sat42.ModelRotationX = 0;
+GMAT Sat42.ModelRotationY = 0;
+GMAT Sat42.ModelRotationZ = 0;
+GMAT Sat42.ModelScale = 3;
+GMAT Sat42.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat42.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat42.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat42.EulerAngleSequence = '321';
 
-Create Spacecraft Sat43
-GMAT Sat43.Epoch = 21545;
+Create Spacecraft Sat43;
+GMAT Sat43.DateFormat = TAIModJulian;
+GMAT Sat43.Epoch = '21545';
+GMAT Sat43.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat43.DisplayStateType = Cartesian;
-GMAT Sat43.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat43.X = 34.01649799535277;
 GMAT Sat43.Y = -974.1050523926782;
 GMAT Sat43.Z = -6935.342419431587;
@@ -254,16 +483,32 @@ GMAT Sat43.VX = -7.537686649485913;
 GMAT Sat43.VY = -0.2632218179877214;
 GMAT Sat43.VZ = -1.372423280583216e-015;
 GMAT Sat43.DryMass = 850;
-GMAT Sat43.DateFormat = TAIModJulian;
 GMAT Sat43.Cd = 2.2;
+GMAT Sat43.Cr = 1.8;
 GMAT Sat43.DragArea = 15;
 GMAT Sat43.SRPArea = 1;
-GMAT Sat43.Cr = 1.8;
+GMAT Sat43.NAIFId = -123456789;
+GMAT Sat43.NAIFIdReferenceFrame = -123456789;
+GMAT Sat43.Id = 'SatId';
+GMAT Sat43.Attitude = CoordinateSystemFixed;
+GMAT Sat43.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat43.ModelOffsetX = 0;
+GMAT Sat43.ModelOffsetY = 0;
+GMAT Sat43.ModelOffsetZ = 0;
+GMAT Sat43.ModelRotationX = 0;
+GMAT Sat43.ModelRotationY = 0;
+GMAT Sat43.ModelRotationZ = 0;
+GMAT Sat43.ModelScale = 3;
+GMAT Sat43.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat43.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat43.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat43.EulerAngleSequence = '321';
 
-Create Spacecraft Sat44
-GMAT Sat44.Epoch = 21545;
+Create Spacecraft Sat44;
+GMAT Sat44.DateFormat = TAIModJulian;
+GMAT Sat44.Epoch = '21545';
+GMAT Sat44.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat44.DisplayStateType = Cartesian;
-GMAT Sat44.CoordinateSystem = EarthMJ2000Eq
 GMAT Sat44.X = -6990.404995680331;
 GMAT Sat44.Y = -366.3516021126818;
 GMAT Sat44.Z = -1.697763572114679e-012;
@@ -271,59 +516,105 @@ GMAT Sat44.VX = -0.05119577144137168;
 GMAT Sat44.VY = 1.04896595901142;
 GMAT Sat44.VZ = 7.472616549480826;
 GMAT Sat44.DryMass = 850;
-GMAT Sat44.DateFormat = TAIModJulian;
 GMAT Sat44.Cd = 2.2;
+GMAT Sat44.Cr = 1.8;
 GMAT Sat44.DragArea = 15;
 GMAT Sat44.SRPArea = 1;
-GMAT Sat44.Cr = 1.8;
+GMAT Sat44.NAIFId = -123456789;
+GMAT Sat44.NAIFIdReferenceFrame = -123456789;
+GMAT Sat44.Id = 'SatId';
+GMAT Sat44.Attitude = CoordinateSystemFixed;
+GMAT Sat44.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat44.ModelOffsetX = 0;
+GMAT Sat44.ModelOffsetY = 0;
+GMAT Sat44.ModelOffsetZ = 0;
+GMAT Sat44.ModelRotationX = 0;
+GMAT Sat44.ModelRotationY = 0;
+GMAT Sat44.ModelRotationZ = 0;
+GMAT Sat44.ModelScale = 3;
+GMAT Sat44.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat44.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat44.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sat44.EulerAngleSequence = '321';
 
-Create ForceModel fm
+%----------------------------------------
+%---------- Formation
+%----------------------------------------
+
+Create Formation form;
+GMAT form.Add = {Sat11, Sat12, Sat13, Sat14, Sat21, Sat22, Sat23, Sat24, Sat31, Sat32, Sat33, Sat34, Sat41, Sat42, Sat43, Sat44};
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel fm;
+GMAT fm.CentralBody = Earth;
 GMAT fm.PointMasses = {Earth, Sun, Luna};
+GMAT fm.Drag = None;
 %GMAT fm.Drag = Off;
 GMAT fm.SRP = Off;
+GMAT fm.RelativisticCorrection = Off;
+GMAT fm.ErrorControl = RSSStep;
 
-Create Propagator prop
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator prop;
 GMAT prop.FM = fm;
 GMAT prop.Type = RungeKutta89;
+GMAT prop.InitialStepSize = 60;
+GMAT prop.Accuracy = 9.999999999999999e-012;
+GMAT prop.MinStep = 0.001;
+GMAT prop.MaxStep = 2700;
+GMAT prop.MaxStepAttempts = 50;
+GMAT prop.StopIfAccuracyIsViolated = true;
 
-Create Formation form
-GMAT form.Add = Sat11;
-GMAT form.Add = Sat12;
-GMAT form.Add = Sat13;
-GMAT form.Add = Sat14;
-GMAT form.Add = Sat21;
-GMAT form.Add = Sat22;
-GMAT form.Add = Sat23;
-GMAT form.Add = Sat24;
-GMAT form.Add = Sat31;
-GMAT form.Add = Sat32;
-GMAT form.Add = Sat33;
-GMAT form.Add = Sat34;
-GMAT form.Add = Sat41;
-GMAT form.Add = Sat42;
-GMAT form.Add = Sat43;
-GMAT form.Add = Sat44;
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
 
-Create OpenGLPlot a3Dplot
-GMAT a3Dplot.Add = {Sat11 , Earth };
+Create OrbitView a3Dplot;
+GMAT a3Dplot.SolverIterations = Current;
+GMAT a3Dplot.UpperLeft = [ 0.16 0.07058823529411765 ];
+GMAT a3Dplot.Size = [ 0.6105882352941177 0.8482352941176471 ];
+GMAT a3Dplot.RelativeZOrder = 130;
+GMAT a3Dplot.Maximized = false;
+GMAT a3Dplot.Add = {Sat11, Earth, Sat21, Sat31, Sat41, Sat12, Sat22, Sat32, Sat42, Sat13, Sat23, Sat33, Sat43, Sat14, Sat24, Sat34, Sat44};
+GMAT a3Dplot.CoordinateSystem = EarthMJ2000Eq;
+GMAT a3Dplot.DrawObject = [ true true true true true true true true true true true true true true true true true ];
+GMAT a3Dplot.OrbitColor = [ 255 32768 65280 65535 16776960 14268074 14399335 14737632 16711680 16711935 11924221 255 65280 65535 255 255 255 ];
+GMAT a3Dplot.TargetColor = [ 8421440 0 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 8421440 ];
+GMAT a3Dplot.DataCollectFrequency = 1;
+GMAT a3Dplot.UpdatePlotFrequency = 50;
+GMAT a3Dplot.NumPointsToRedraw = 0;
+GMAT a3Dplot.ShowPlot = true;
+GMAT a3Dplot.ViewPointReference = Earth;
 GMAT a3Dplot.ViewPointVector = [ 30000 -20000 0 ];
-GMAT a3Dplot.Add = Sat21;
-GMAT a3Dplot.Add = Sat31;
-GMAT a3Dplot.Add = Sat41;
-GMAT a3Dplot.Add = Sat12;
-GMAT a3Dplot.Add = Sat22;
-GMAT a3Dplot.Add = Sat32;
-GMAT a3Dplot.Add = Sat42;
-GMAT a3Dplot.Add = Sat13;
-GMAT a3Dplot.Add = Sat23;
-GMAT a3Dplot.Add = Sat33;
-GMAT a3Dplot.Add = Sat43;
-GMAT a3Dplot.Add = Sat14;
-GMAT a3Dplot.Add = Sat24;
-GMAT a3Dplot.Add = Sat34;
-GMAT a3Dplot.Add = Sat44;
+GMAT a3Dplot.ViewDirection = Earth;
+GMAT a3Dplot.ViewScaleFactor = 1;
+GMAT a3Dplot.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT a3Dplot.ViewUpAxis = Z;
+GMAT a3Dplot.EclipticPlane = Off;
+GMAT a3Dplot.XYPlane = On;
+GMAT a3Dplot.WireFrame = Off;
+GMAT a3Dplot.Axes = On;
+GMAT a3Dplot.Grid = Off;
+GMAT a3Dplot.SunLine = Off;
+GMAT a3Dplot.UseInitialView = On;
+GMAT a3Dplot.StarCount = 7000;
+GMAT a3Dplot.EnableStars = On;
+GMAT a3Dplot.EnableConstellations = On;
 
-BeginMissionSequence
 
-Propagate 'Prop 1 Day' prop(form, {Sat11.ElapsedSecs = 86400.0});
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+BeginMissionSequence;
+
+Propagate 'Prop 1 Day' prop(form) {Sat11.ElapsedSecs = 86400.0};
+
 

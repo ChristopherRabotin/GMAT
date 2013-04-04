@@ -42,12 +42,6 @@ GMAT DMSP.AttitudeDisplayStateType = 'EulerAngles';
 GMAT DMSP.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT DMSP.AttitudeCoordinateSystem = 'LVLH';
 GMAT DMSP.EulerAngleSequence = '321';
-GMAT DMSP.EulerAngle1 = 0;
-GMAT DMSP.EulerAngle2 = 0;
-GMAT DMSP.EulerAngle3 = 0;
-GMAT DMSP.AngularVelocityX = 0;
-GMAT DMSP.AngularVelocityY = 0;
-GMAT DMSP.AngularVelocityZ = 0;
 
 
 
@@ -136,7 +130,7 @@ GMAT Enhanced3DView1.ViewDirection = Earth;
 GMAT Enhanced3DView1.ViewScaleFactor = 1;
 GMAT Enhanced3DView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.ViewUpAxis = Z;
-GMAT Enhanced3DView1.CelestialPlane = Off;
+GMAT Enhanced3DView1.EclipticPlane = Off;
 GMAT Enhanced3DView1.XYPlane = Off;
 GMAT Enhanced3DView1.WireFrame = Off;
 GMAT Enhanced3DView1.Axes = On;

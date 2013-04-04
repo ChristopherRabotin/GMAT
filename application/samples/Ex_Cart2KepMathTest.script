@@ -47,18 +47,6 @@ GMAT Sat.ModelScale = 3;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
-GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
-
-
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -100,11 +88,6 @@ Create Array rv[3,1] vv[3,1] hv[3,1] ev[3,1] nv[3,1];
 Create Variable SMA ECC INC AOP RAAN TA h r v n;
 Create Variable Energy rdotv mu ndote edotr x y z vx vy;
 Create Variable vz pi2 d2r SMAError ECCError INCError RAANError AOPError TAError;
-
-
-
-
-
 
 %----------------------------------------
 %---------- Subscribers

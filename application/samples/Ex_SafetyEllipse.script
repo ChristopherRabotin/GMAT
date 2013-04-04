@@ -37,14 +37,6 @@ GMAT Leader.ModelScale = 1;
 GMAT Leader.AttitudeDisplayStateType = 'Quaternion';
 GMAT Leader.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Leader.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Leader.Q1 = 0;
-GMAT Leader.Q2 = 0;
-GMAT Leader.Q3 = 0;
-GMAT Leader.Q4 = 1;
-GMAT Leader.EulerAngleSequence = '312';
-GMAT Leader.AngularVelocityX = 0;
-GMAT Leader.AngularVelocityY = 0;
-GMAT Leader.AngularVelocityZ = 0;
 
 Create Spacecraft Follower;
 GMAT Follower.DateFormat = TAIModJulian;
@@ -73,19 +65,11 @@ GMAT Follower.ModelOffsetZ = 0;
 GMAT Follower.ModelRotationX = 0;
 GMAT Follower.ModelRotationY = 0;
 GMAT Follower.ModelRotationZ = 0;
-GMAT Follower.ModelScale = 1;
+GMAT Follower.ModelScale = .2;
 GMAT Follower.AttitudeDisplayStateType = 'EulerAngles';
 GMAT Follower.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Follower.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 GMAT Follower.EulerAngleSequence = '321';
-GMAT Follower.EulerAngle1 = 0;
-GMAT Follower.EulerAngle2 = 0;
-GMAT Follower.EulerAngle3 = 180;
-GMAT Follower.AngularVelocityX = 0;
-GMAT Follower.AngularVelocityY = 0;
-GMAT Follower.AngularVelocityZ = 0;
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -195,7 +179,7 @@ GMAT VbarView.ViewDirection = Leader;
 GMAT VbarView.ViewScaleFactor = 5;
 GMAT VbarView.ViewUpCoordinateSystem = LeaderVNB;
 GMAT VbarView.ViewUpAxis = Z;
-GMAT VbarView.CelestialPlane = Off;
+GMAT VbarView.EclipticPlane = Off;
 GMAT VbarView.XYPlane = Off;
 GMAT VbarView.WireFrame = Off;
 GMAT VbarView.Axes = On;
@@ -231,7 +215,7 @@ GMAT ViewFromAbove.ViewDirection = Leader;
 GMAT ViewFromAbove.ViewScaleFactor = 1;
 GMAT ViewFromAbove.ViewUpCoordinateSystem = LeaderVNB;
 GMAT ViewFromAbove.ViewUpAxis = X;
-GMAT ViewFromAbove.CelestialPlane = Off;
+GMAT ViewFromAbove.EclipticPlane = Off;
 GMAT ViewFromAbove.XYPlane = Off;
 GMAT ViewFromAbove.WireFrame = Off;
 GMAT ViewFromAbove.Axes = On;
@@ -262,7 +246,7 @@ GMAT InertialView.ViewDirection = Earth;
 GMAT InertialView.ViewScaleFactor = 0.5;
 GMAT InertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT InertialView.ViewUpAxis = Z;
-GMAT InertialView.CelestialPlane = Off;
+GMAT InertialView.EclipticPlane = Off;
 GMAT InertialView.XYPlane = Off;
 GMAT InertialView.WireFrame = Off;
 GMAT InertialView.Axes = Off;
@@ -297,7 +281,7 @@ GMAT SideView.ViewDirection = Leader;
 GMAT SideView.ViewScaleFactor = 1;
 GMAT SideView.ViewUpCoordinateSystem = LeaderVNB;
 GMAT SideView.ViewUpAxis = Z;
-GMAT SideView.CelestialPlane = Off;
+GMAT SideView.EclipticPlane = Off;
 GMAT SideView.XYPlane = Off;
 GMAT SideView.WireFrame = Off;
 GMAT SideView.Axes = On;
@@ -315,7 +299,7 @@ GMAT SideView.EnableConstellations = On;
 BeginMissionSequence;
 
 %   Propagate to until circling the leader
-Propagate 'Prop 1 Day' DefaultProp(Leader, Follower) {Follower.ElapsedDays = 1};
+Propagate 'Prop 1 Day' DefaultProp(Leader, Follower) {Follower.ElapsedDays = .18};
 
 
 

@@ -1,0 +1,150 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2010-09-28 08:16:24
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft MarsExpress;
+GMAT MarsExpress.DateFormat = UTCGregorian;
+GMAT MarsExpress.Epoch = '01 Jun 2010 16:00:00.000';
+GMAT MarsExpress.CoordinateSystem = EarthMJ2000Eq;
+GMAT MarsExpress.DisplayStateType = Cartesian;
+GMAT MarsExpress.X = 7100;
+GMAT MarsExpress.Y = 0;
+GMAT MarsExpress.Z = 1300;
+GMAT MarsExpress.VX = 0;
+GMAT MarsExpress.VY = 7.35;
+GMAT MarsExpress.VZ = 1;
+GMAT MarsExpress.DryMass = 850;
+GMAT MarsExpress.Cd = 2.2;
+GMAT MarsExpress.Cr = 1.8;
+GMAT MarsExpress.DragArea = 15;
+GMAT MarsExpress.SRPArea = 1;
+GMAT MarsExpress.NAIFId = -41;
+GMAT MarsExpress.NAIFIdReferenceFrame = -41001;
+GMAT MarsExpress.OrbitSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_Short.BSP'};
+GMAT MarsExpress.AttitudeSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_ATNM_PTR00012_100531_002.BC'};
+GMAT MarsExpress.SCClockSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_100921_STEP.TSC'};
+GMAT MarsExpress.FrameSpiceKernelName = {'../data/vehicle/ephem/spk/MarsExpress_MEX_V10.TF'};
+GMAT MarsExpress.Id = 'SatId';
+GMAT MarsExpress.Attitude = 'SpiceAttitude';
+GMAT MarsExpress.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT MarsExpress.ModelOffsetX = 1;
+GMAT MarsExpress.ModelOffsetY = 0;
+GMAT MarsExpress.ModelOffsetZ = 0;
+GMAT MarsExpress.ModelRotationX = 0;
+GMAT MarsExpress.ModelRotationY = 0;
+GMAT MarsExpress.ModelRotationZ = 0;
+GMAT MarsExpress.ModelScale = 4;
+GMAT MarsExpress.AttitudeDisplayStateType = 'Quaternion';
+GMAT MarsExpress.AttitudeRateDisplayStateType = 'AngularVelocity';
+
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create Propagator numProp
+numProp.FM = DefaultProp_ForceModel;
+numProp.InitialStepSize = 60;
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = None;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT DefaultProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+
+Create Propagator spkProp;
+GMAT spkProp.Type = SPK;
+GMAT spkProp.StepSize = 5;
+GMAT spkProp.CentralBody = Mars;
+GMAT spkProp.EpochFormat = 'UTCGregorian';
+GMAT spkProp.StartEpoch = '01 Jun 2010 16:00:00.000';
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.CoordinateSystem = Local;
+GMAT DefaultIB.Origin = Earth;
+GMAT DefaultIB.Axes = VNB;
+GMAT DefaultIB.Element1 = 0;
+GMAT DefaultIB.Element2 = 0;
+GMAT DefaultIB.Element3 = 0;
+GMAT DefaultIB.DecrementMass = false;
+GMAT DefaultIB.Isp = 300;
+GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem MarsMJ2000Eq;
+GMAT MarsMJ2000Eq.Origin = Mars;
+GMAT MarsMJ2000Eq.Axes = MJ2000Eq;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView Enhanced3DView1;
+GMAT Enhanced3DView1.SolverIterations = Current;
+GMAT Enhanced3DView1.UpperLeft = [ 0.003128911138923655 0 ];
+GMAT Enhanced3DView1.Size = [ 0.7997496871088861 0.8495024875621891 ];
+GMAT Enhanced3DView1.RelativeZOrder = 638;
+GMAT Enhanced3DView1.Maximized = true;
+GMAT Enhanced3DView1.Add = {MarsExpress, Mars};
+GMAT Enhanced3DView1.CoordinateSystem = MarsMJ2000Eq;
+GMAT Enhanced3DView1.DrawObject = [ true true ];
+GMAT Enhanced3DView1.OrbitColor = [ 2147483647 2147483647 ];
+GMAT Enhanced3DView1.TargetColor = [ 8421440 8421440 ];
+GMAT Enhanced3DView1.DataCollectFrequency = 1;
+GMAT Enhanced3DView1.UpdatePlotFrequency = 50;
+GMAT Enhanced3DView1.NumPointsToRedraw = 0;
+GMAT Enhanced3DView1.ShowPlot = true;
+GMAT Enhanced3DView1.ViewPointReference = Mars;
+GMAT Enhanced3DView1.ViewPointVector = [ 15528.68341064453   -10312.5699694008   -6051.2031445503];
+GMAT Enhanced3DView1.ViewDirection = Mars;
+GMAT Enhanced3DView1.ViewScaleFactor = 1.5;
+GMAT Enhanced3DView1.ViewUpCoordinateSystem = MarsMJ2000Eq;
+GMAT Enhanced3DView1.ViewUpAxis = Z;
+GMAT Enhanced3DView1.EclipticPlane = Off;
+GMAT Enhanced3DView1.XYPlane = Off;
+GMAT Enhanced3DView1.WireFrame = Off;
+GMAT Enhanced3DView1.Axes = On;
+GMAT Enhanced3DView1.Grid = Off;
+GMAT Enhanced3DView1.SunLine = Off;
+GMAT Enhanced3DView1.UseInitialView = On;
+GMAT Enhanced3DView1.StarCount = 7000;
+GMAT Enhanced3DView1.EnableStars = On;
+GMAT Enhanced3DView1.EnableConstellations = On;
+
+
+Create Variable i
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+For i = 1:10
+   Propagate spkProp(MarsExpress){MarsExpress.ElapsedDays = 0.1}
+EndFor
+
+

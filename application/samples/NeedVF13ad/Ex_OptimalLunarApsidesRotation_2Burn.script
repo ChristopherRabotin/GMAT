@@ -37,14 +37,6 @@ GMAT LRO.ModelScale = 3;
 GMAT LRO.AttitudeDisplayStateType = 'Quaternion';
 GMAT LRO.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LRO.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LRO.Q1 = 0;
-GMAT LRO.Q2 = 0;
-GMAT LRO.Q3 = 0;
-GMAT LRO.Q4 = 1;
-GMAT LRO.EulerAngleSequence = '312';
-GMAT LRO.AngularVelocityX = 0;
-GMAT LRO.AngularVelocityY = 0;
-GMAT LRO.AngularVelocityZ = 0;
 
 
 %----------------------------------------
@@ -168,7 +160,7 @@ GMAT DefaultOpenGL.OrbitColor = [ 2147483647 2147483647 ];
 GMAT DefaultOpenGL.TargetColor = [ 2147483647 8421440 ];
 GMAT DefaultOpenGL.DataCollectFrequency = 1;
 GMAT DefaultOpenGL.UpdatePlotFrequency = 50;
-GMAT DefaultOpenGL.NumPointsToRedraw = 0;
+GMAT DefaultOpenGL.NumPointsToRedraw = 200;
 GMAT DefaultOpenGL.ShowPlot = true;
 GMAT DefaultOpenGL.ViewPointReference = Luna;
 GMAT DefaultOpenGL.ViewPointVector = [ 7000 7000 7000 ];
@@ -176,7 +168,7 @@ GMAT DefaultOpenGL.ViewDirection = Luna;
 GMAT DefaultOpenGL.ViewScaleFactor = 1;
 GMAT DefaultOpenGL.ViewUpCoordinateSystem = MoonCenterEarthEq;
 GMAT DefaultOpenGL.ViewUpAxis = Z;
-GMAT DefaultOpenGL.CelestialPlane = Off;
+GMAT DefaultOpenGL.EclipticPlane = Off;
 GMAT DefaultOpenGL.XYPlane = Off;
 GMAT DefaultOpenGL.WireFrame = Off;
 GMAT DefaultOpenGL.Axes = On;
@@ -188,7 +180,7 @@ GMAT DefaultOpenGL.EnableStars = On;
 GMAT DefaultOpenGL.EnableConstellations = On;
 
 Create XYPlot ApoPerIterations;
-GMAT ApoPerIterations.SolverIterations = Current;
+GMAT ApoPerIterations.SolverIterations  = All;
 GMAT ApoPerIterations.UpperLeft = [ 0.3198458574181118 0.469187675070028 ];
 GMAT ApoPerIterations.Size = [ 0.325626204238921 0.453781512605042 ];
 GMAT ApoPerIterations.RelativeZOrder = 1987;
@@ -198,7 +190,7 @@ GMAT ApoPerIterations.ShowGrid = true;
 GMAT ApoPerIterations.ShowPlot = true;
 
 Create XYPlot dVIterations;
-GMAT dVIterations.SolverIterations = Current;
+GMAT dVIterations.SolverIterations  = All;
 GMAT dVIterations.UpperLeft = [ 0.002890173410404624 0.4719887955182073 ];
 GMAT dVIterations.Size = [ 0.3198458574181118 0.4481792717086835 ];
 GMAT dVIterations.RelativeZOrder = 1983;
@@ -208,7 +200,7 @@ GMAT dVIterations.ShowGrid = true;
 GMAT dVIterations.ShowPlot = true;
 
 Create XYPlot AOPPerIteration;
-GMAT AOPPerIteration.SolverIterations = Current;
+GMAT AOPPerIteration.SolverIterations  = All;
 GMAT AOPPerIteration.UpperLeft = [ 0.6454720616570328 0.4677871148459384 ];
 GMAT AOPPerIteration.Size = [ 0.3391136801541426 0.4453781512605042 ];
 GMAT AOPPerIteration.RelativeZOrder = 1989;
@@ -218,7 +210,7 @@ GMAT AOPPerIteration.ShowGrid = true;
 GMAT AOPPerIteration.ShowPlot = true;
 
 Create XYPlot ManeuverLocations;
-GMAT ManeuverLocations.SolverIterations = Current;
+GMAT ManeuverLocations.SolverIterations  = All;
 GMAT ManeuverLocations.UpperLeft = [ 0.6319845857418112 0.00700280112044818 ];
 GMAT ManeuverLocations.Size = [ 0.3535645472061657 0.4509803921568628 ];
 GMAT ManeuverLocations.RelativeZOrder = 1975;
@@ -239,7 +231,6 @@ GMAT Data.LeftJustify = On;
 GMAT Data.ZeroFill = Off;
 GMAT Data.ColumnWidth = 23;
 GMAT Data.WriteReport = true;
-
 
 %----------------------------------------
 %---------- Mission Sequence

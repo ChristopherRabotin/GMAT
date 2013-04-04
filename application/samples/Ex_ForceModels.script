@@ -1,14 +1,3 @@
-%  Script Mission - Force Model Examples  
-%
-%  This script demonstrates how to set up different force models in the
-%  propagator setup
-%
-
-
-%----------------------------------------
-%---------- Spacecraft
-%----------------------------------------
-
 
 % -------------------------------------------------------------------------
 % --------------------------- Create Objects ------------------------------
@@ -46,22 +35,12 @@ GMAT Sat.ModelRotationZ = 0;
 GMAT Sat.ModelScale = 3;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT Sat.Q1 = 0;
-GMAT Sat.Q2 = 0;
-GMAT Sat.Q3 = 0;
-GMAT Sat.Q4 = 1;
+GMAT Sat.AttitudeCoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.EulerAngleSequence = '321';
-GMAT Sat.AngularVelocityX = 0;
-GMAT Sat.AngularVelocityY = 0;
-GMAT Sat.AngularVelocityZ = 0;
 
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
-
-
-%----------------------------Create ForceModels----------------------
 
 %  Define Force Model with point mass only
 Create ForceModel PointMass;
@@ -75,7 +54,6 @@ GMAT PointMass.GravityField.Earth.Degree = 0;
 GMAT PointMass.GravityField.Earth.Order = 0;
 GMAT PointMass.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT PointMass.GravityField.Earth.EarthTideModel = 'None';
-
 
 %  Define Force Model with third bodies 
 Create ForceModel ThirdBodies;
@@ -91,7 +69,6 @@ GMAT ThirdBodies.GravityField.Earth.Order = 0;
 GMAT ThirdBodies.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT ThirdBodies.GravityField.Earth.EarthTideModel = 'None';
 
-
 %  Define Force Model with 12x12 gravity
 Create ForceModel NonSpherical12;
 GMAT NonSpherical12.CentralBody = Earth;
@@ -104,7 +81,6 @@ GMAT NonSpherical12.GravityField.Earth.Degree = 12;
 GMAT NonSpherical12.GravityField.Earth.Order = 12;
 GMAT NonSpherical12.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT NonSpherical12.GravityField.Earth.EarthTideModel = 'None';
-
 
 %  Define Force Model with MSISE90 Drag 
 Create ForceModel MSISE90Drag;
@@ -122,7 +98,6 @@ GMAT MSISE90Drag.Drag.F107 = 175;
 GMAT MSISE90Drag.Drag.F107A = 175;
 GMAT MSISE90Drag.Drag.MagneticIndex = 4;
 
-
 %  Define Force Model with Jacchia Roberts Drag 
 Create ForceModel JRDrag;
 GMAT JRDrag.CentralBody = Earth;
@@ -139,7 +114,6 @@ GMAT JRDrag.Drag.F107 = 150;
 GMAT JRDrag.Drag.F107A = 150;
 GMAT JRDrag.Drag.MagneticIndex = 3;
 
-
 %  Define Force Model with SRP
 Create ForceModel SRP;
 GMAT SRP.CentralBody = Earth;
@@ -154,7 +128,6 @@ GMAT SRP.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT SRP.GravityField.Earth.EarthTideModel = 'None';
 GMAT SRP.SRP.Flux = 1367;
 GMAT SRP.SRP.Nominal_Sun = 149597870.691;
-
 
 %  Define Force Model with SRP
 Create ForceModel AllForces;
@@ -178,7 +151,6 @@ GMAT AllForces.Drag.MagneticIndex = 3;
 %---------- Propagators
 %----------------------------------------
 
-%----------------------------Create Propagators----------------------
 % Create propgator with point mass only
 Create Propagator EarthPointMass;
 GMAT EarthPointMass.FM = PointMass;
@@ -259,13 +231,12 @@ GMAT EarthFull.StopIfAccuracyIsViolated = false;
 %---------- Subscribers
 %----------------------------------------
 
-%----------------------------Create Plots/Reports----------------------
-
 Create OrbitView GLPlot;
 GMAT GLPlot.SolverIterations = Current;
-GMAT GLPlot.UpperLeft = [ 0 0 ];
-GMAT GLPlot.Size = [ 0 0 ];
-GMAT GLPlot.RelativeZOrder = 0;
+GMAT GLPlot.UpperLeft = [ 0.004549590536851683 0 ];
+GMAT GLPlot.Size = [ 0.7998180163785259 0.8502202643171806 ];
+GMAT GLPlot.RelativeZOrder = 95;
+GMAT GLPlot.Maximized = true;
 GMAT GLPlot.Add = {Sat, Earth};
 GMAT GLPlot.CoordinateSystem = EarthMJ2000Eq;
 GMAT GLPlot.DrawObject = [ true true ];
@@ -281,7 +252,7 @@ GMAT GLPlot.ViewDirection = Earth;
 GMAT GLPlot.ViewScaleFactor = 1.4;
 GMAT GLPlot.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT GLPlot.ViewUpAxis = Z;
-GMAT GLPlot.CelestialPlane = Off;
+GMAT GLPlot.EclipticPlane = Off;
 GMAT GLPlot.XYPlane = On;
 GMAT GLPlot.WireFrame = Off;
 GMAT GLPlot.Axes = On;

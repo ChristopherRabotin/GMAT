@@ -142,7 +142,6 @@ GMAT EDUSdv_J2000.Element3 = 0;
 Create ImpulsiveBurn LCM1;
 GMAT LCM1.Origin = Earth;
 GMAT LCM1.Axes = VNB;
-GMAT LCM1.VectorFormat = Cartesian;
 GMAT LCM1.Element1 = 0;
 GMAT LCM1.Element2 = 0;
 GMAT LCM1.Element3 = 0;
@@ -150,7 +149,6 @@ GMAT LCM1.Element3 = 0;
 Create ImpulsiveBurn LCM2;
 GMAT LCM2.Origin = Earth;
 GMAT LCM2.Axes = VNB;
-GMAT LCM2.VectorFormat = Cartesian;
 GMAT LCM2.Element1 = 0;
 GMAT LCM2.Element2 = 0;
 GMAT LCM2.Element3 = 0;
@@ -158,7 +156,6 @@ GMAT LCM2.Element3 = 0;
 Create ImpulsiveBurn dVatMoon;
 GMAT dVatMoon.Origin = Luna;
 GMAT dVatMoon.Axes = MJ2000Eq;
-GMAT dVatMoon.VectorFormat = Cartesian;
 GMAT dVatMoon.Element1 = 0;
 GMAT dVatMoon.Element2 = 0;
 GMAT dVatMoon.Element3 = 0;
@@ -196,29 +193,6 @@ ImpactData =   '------ Impact Data -------'
 ImpactSatData = '---------- Impact Sat Data --------------'
 
 
-%----------------------------------------
-%---------- Coordinate Systems
-%----------------------------------------
-
-Create CoordinateSystem EarthMJ2000Eq;
-GMAT EarthMJ2000Eq.Origin = Earth;
-GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
-GMAT EarthMJ2000Eq.UpdateInterval = 60;
-GMAT EarthMJ2000Eq.OverrideOriginInterval = false;
-
-Create CoordinateSystem EarthMJ2000Ec;
-GMAT EarthMJ2000Ec.Origin = Earth;
-GMAT EarthMJ2000Ec.Axes = MJ2000Ec;
-GMAT EarthMJ2000Ec.UpdateInterval = 60;
-GMAT EarthMJ2000Ec.OverrideOriginInterval = false;
-
-Create CoordinateSystem EarthFixed;
-GMAT EarthFixed.Origin = Earth;
-GMAT EarthFixed.Axes = BodyFixed;
-GMAT EarthFixed.UpdateInterval = 60;
-GMAT EarthFixed.OverrideOriginInterval = false;
-
-
 %%------------------------------------------------------------
 %%------------------- Create Coordinate Systems -------------
 %%------------------------------------------------------------
@@ -226,20 +200,14 @@ GMAT EarthFixed.OverrideOriginInterval = false;
 Create CoordinateSystem MoonFixed;
 GMAT MoonFixed.Origin = Luna;
 GMAT MoonFixed.Axes = BodyFixed;
-GMAT MoonFixed.UpdateInterval = 60;
-GMAT MoonFixed.OverrideOriginInterval = false;
 
 Create CoordinateSystem MoonFK5;
 GMAT MoonFK5.Origin = Luna;
 GMAT MoonFK5.Axes = MJ2000Eq;
-GMAT MoonFK5.UpdateInterval = 60;
-GMAT MoonFK5.OverrideOriginInterval = false;
 
 Create CoordinateSystem MoonEarthRot;
 GMAT MoonEarthRot.Origin = Luna;
 GMAT MoonEarthRot.Axes = ObjectReferenced;
-GMAT MoonEarthRot.UpdateInterval = 60;
-GMAT MoonEarthRot.OverrideOriginInterval = false;
 GMAT MoonEarthRot.XAxis = R;
 GMAT MoonEarthRot.ZAxis = N;
 GMAT MoonEarthRot.Primary = Earth;
@@ -248,8 +216,6 @@ GMAT MoonEarthRot.Secondary = Luna;
 Create CoordinateSystem EarthMoonRot;
 GMAT EarthMoonRot.Origin = Earth;
 GMAT EarthMoonRot.Axes = ObjectReferenced;
-GMAT EarthMoonRot.UpdateInterval = 60;
-GMAT EarthMoonRot.OverrideOriginInterval = false;
 GMAT EarthMoonRot.XAxis = R;
 GMAT EarthMoonRot.ZAxis = N;
 GMAT EarthMoonRot.Primary = Earth;
@@ -258,8 +224,6 @@ GMAT EarthMoonRot.Secondary = Luna;
 Create CoordinateSystem LunaFixed;
 GMAT LunaFixed.Origin = Luna;
 GMAT LunaFixed.Axes = BodyFixed;
-GMAT LunaFixed.UpdateInterval = 60;
-GMAT LunaFixed.OverrideOriginInterval = false;
 
 Create CoordinateSystem MoonInertial
 MoonInertial.Origin = Luna;
@@ -299,7 +263,7 @@ GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 25;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.ViewUpAxis = Z;
-GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.EclipticPlane = Off;
 GMAT EarthView.XYPlane = Off;
 GMAT EarthView.WireFrame = Off;
 GMAT EarthView.Axes = Off;
@@ -323,7 +287,7 @@ GMAT MoonView.ViewPointVector = [ 20000 20000 20000 ];
 GMAT MoonView.ViewScaleFactor = .6;
 GMAT MoonView.ViewUpCoordinateSystem = MoonInertial;
 GMAT MoonView.ViewUpAxis = Z;
-GMAT MoonView.CelestialPlane = Off;
+GMAT MoonView.EclipticPlane = Off;
 GMAT MoonView.XYPlane = Off;
 GMAT MoonView.WireFrame = Off;
 GMAT MoonView.Axes = On;
@@ -493,7 +457,7 @@ Maneuver LROLOI(LRO);
 GMAT PropEpoch = RefEpoch + ET_LCM2;
 Propagate NearMoonProp(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
 Maneuver LCM2(LCROSS);
-Propagate NearMoonProp(LCROSS,LRO) {LCROSS.Luna.RMAG = 1700};
+Propagate NearMoonProp(LCROSS,LRO) {LCROSS.Luna.RMAG = 1700,StopTolerance = 1e-005};
 
 
  

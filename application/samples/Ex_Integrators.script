@@ -78,15 +78,6 @@ GMAT  EarthPointMass_PD78.MinStep  = 1e-5;
 GMAT  EarthPointMass_PD78.MaxStep  = 1000;
 GMAT  EarthPointMass_PD78.FM       =  PointMass;
 
-% Create a Bulirsch Stoer Propagator
-Create Propagator EarthPointMass_BS;
-GMAT  EarthPointMass_BS.Type     = BulirschStoer;
-GMAT  EarthPointMass_BS.InitialStepSize = 30;;
-GMAT  EarthPointMass_BS.Accuracy = 1e-12;
-GMAT  EarthPointMass_BS.MinStep  = 1e-5;
-GMAT  EarthPointMass_BS.MaxStep  = 200;
-GMAT  EarthPointMass_BS.FM       =  PointMass;
-
 % Create a Adams Bashforth Moulton Propagator
 Create Propagator EarthPointMass_ABM;
 GMAT  EarthPointMass_ABM.Type     = AdamsBashforthMoulton;
@@ -121,5 +112,4 @@ Propagate  'Prop w/ RK68' EarthPointMass_RK68(Sat, {Sat.ElapsedDays = 0.1});
 Propagate  'Prop w/ RKV89' EarthPointMass_RKV89(Sat, {Sat.ElapsedDays = 0.1});
 Propagate  'Prop w/ PD45' EarthPointMass_PD45(Sat, {Sat.ElapsedDays = 0.1});
 Propagate  'Prop w/ RK78' EarthPointMass_PD78(Sat, {Sat.ElapsedDays = 0.1});
-Propagate  'Prop w/ BulStoer' EarthPointMass_BS(Sat, {Sat.ElapsedDays = 0.1});
 Propagate  'Prop w/ ABM' EarthPointMass_ABM(Sat, {Sat.ElapsedDays = 0.1});

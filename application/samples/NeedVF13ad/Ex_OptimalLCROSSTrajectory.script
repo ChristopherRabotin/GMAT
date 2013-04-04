@@ -39,14 +39,6 @@ GMAT LRO.ModelScale = 3;
 GMAT LRO.AttitudeDisplayStateType = 'Quaternion';
 GMAT LRO.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LRO.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LRO.Q1 = 0;
-GMAT LRO.Q2 = 0;
-GMAT LRO.Q3 = 0;
-GMAT LRO.Q4 = 1;
-GMAT LRO.EulerAngleSequence = '321';
-GMAT LRO.AngularVelocityX = 0;
-GMAT LRO.AngularVelocityY = 0;
-GMAT LRO.AngularVelocityZ = 0;
 
 Create Spacecraft ImpactSat;
 GMAT ImpactSat.DateFormat = UTCGregorian;
@@ -79,14 +71,6 @@ GMAT ImpactSat.ModelScale = 3;
 GMAT ImpactSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT ImpactSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT ImpactSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT ImpactSat.Q1 = 0;
-GMAT ImpactSat.Q2 = 0;
-GMAT ImpactSat.Q3 = 0;
-GMAT ImpactSat.Q4 = 1;
-GMAT ImpactSat.EulerAngleSequence = '321';
-GMAT ImpactSat.AngularVelocityX = 0;
-GMAT ImpactSat.AngularVelocityY = 0;
-GMAT ImpactSat.AngularVelocityZ = 0;
 
 Create Spacecraft ImpactSatInit;
 GMAT ImpactSatInit.DateFormat = TAIModJulian;
@@ -119,14 +103,6 @@ GMAT ImpactSatInit.ModelScale = 3;
 GMAT ImpactSatInit.AttitudeDisplayStateType = 'Quaternion';
 GMAT ImpactSatInit.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT ImpactSatInit.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT ImpactSatInit.Q1 = 0;
-GMAT ImpactSatInit.Q2 = 0;
-GMAT ImpactSatInit.Q3 = 0;
-GMAT ImpactSatInit.Q4 = 1;
-GMAT ImpactSatInit.EulerAngleSequence = '321';
-GMAT ImpactSatInit.AngularVelocityX = 0;
-GMAT ImpactSatInit.AngularVelocityY = 0;
-GMAT ImpactSatInit.AngularVelocityZ = 0;
 
 Create Spacecraft CanonImpactSat;
 GMAT CanonImpactSat.DateFormat = TAIModJulian;
@@ -159,14 +135,6 @@ GMAT CanonImpactSat.ModelScale = 3;
 GMAT CanonImpactSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT CanonImpactSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT CanonImpactSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT CanonImpactSat.Q1 = 0;
-GMAT CanonImpactSat.Q2 = 0;
-GMAT CanonImpactSat.Q3 = 0;
-GMAT CanonImpactSat.Q4 = 1;
-GMAT CanonImpactSat.EulerAngleSequence = '321';
-GMAT CanonImpactSat.AngularVelocityX = 0;
-GMAT CanonImpactSat.AngularVelocityY = 0;
-GMAT CanonImpactSat.AngularVelocityZ = 0;
 
 Create Spacecraft ImpactSat_MoonFixed;
 GMAT ImpactSat_MoonFixed.DateFormat = UTCGregorian;
@@ -199,14 +167,6 @@ GMAT ImpactSat_MoonFixed.ModelScale = 3;
 GMAT ImpactSat_MoonFixed.AttitudeDisplayStateType = 'Quaternion';
 GMAT ImpactSat_MoonFixed.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT ImpactSat_MoonFixed.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT ImpactSat_MoonFixed.Q1 = 0;
-GMAT ImpactSat_MoonFixed.Q2 = 0;
-GMAT ImpactSat_MoonFixed.Q3 = 0;
-GMAT ImpactSat_MoonFixed.Q4 = 1;
-GMAT ImpactSat_MoonFixed.EulerAngleSequence = '321';
-GMAT ImpactSat_MoonFixed.AngularVelocityX = 0;
-GMAT ImpactSat_MoonFixed.AngularVelocityY = 0;
-GMAT ImpactSat_MoonFixed.AngularVelocityZ = 0;
 
 %%-----------------------------------------------------------
 %%------------------- Define Spacecraft --------------------
@@ -242,14 +202,6 @@ GMAT LCROSS.ModelScale = 3;
 GMAT LCROSS.AttitudeDisplayStateType = 'Quaternion';
 GMAT LCROSS.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LCROSS.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LCROSS.Q1 = 0;
-GMAT LCROSS.Q2 = 0;
-GMAT LCROSS.Q3 = 0;
-GMAT LCROSS.Q4 = 1;
-GMAT LCROSS.EulerAngleSequence = '321';
-GMAT LCROSS.AngularVelocityX = 0;
-GMAT LCROSS.AngularVelocityY = 0;
-GMAT LCROSS.AngularVelocityZ = 0;
 
 %%-----------------------------------------------------------
 %%------------------- Define Spacecraft --------------------
@@ -285,15 +237,6 @@ GMAT LCROSSInit.ModelScale = 3;
 GMAT LCROSSInit.AttitudeDisplayStateType = 'Quaternion';
 GMAT LCROSSInit.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LCROSSInit.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT LCROSSInit.Q1 = 0;
-GMAT LCROSSInit.Q2 = 0;
-GMAT LCROSSInit.Q3 = 0;
-GMAT LCROSSInit.Q4 = 1;
-GMAT LCROSSInit.EulerAngleSequence = '321';
-GMAT LCROSSInit.AngularVelocityX = 0;
-GMAT LCROSSInit.AngularVelocityY = 0;
-GMAT LCROSSInit.AngularVelocityZ = 0;
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -587,7 +530,7 @@ GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 35;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.ViewUpAxis = Z;
-GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.EclipticPlane = Off;
 GMAT EarthView.XYPlane = Off;
 GMAT EarthView.WireFrame = Off;
 GMAT EarthView.Axes = Off;
@@ -618,7 +561,7 @@ GMAT MoonView.ViewDirection = Luna;
 GMAT MoonView.ViewScaleFactor = 1;
 GMAT MoonView.ViewUpCoordinateSystem = MoonEarthRot;
 GMAT MoonView.ViewUpAxis = Z;
-GMAT MoonView.CelestialPlane = Off;
+GMAT MoonView.EclipticPlane = Off;
 GMAT MoonView.XYPlane = Off;
 GMAT MoonView.WireFrame = Off;
 GMAT MoonView.Axes = On;
@@ -630,7 +573,7 @@ GMAT MoonView.EnableStars = On;
 GMAT MoonView.EnableConstellations = On;
 
 Create XYPlot PositionErrorPlot;
-GMAT PositionErrorPlot.SolverIterations = Current;
+GMAT PositionErrorPlot.SolverIterations = All;
 GMAT PositionErrorPlot.UpperLeft = [ 0 0 ];
 GMAT PositionErrorPlot.Size = [ 0 0 ];
 GMAT PositionErrorPlot.RelativeZOrder = 0;
@@ -640,7 +583,7 @@ GMAT PositionErrorPlot.ShowGrid = true;
 GMAT PositionErrorPlot.ShowPlot = false;
 
 Create XYPlot VelocityErrorPlot;
-GMAT VelocityErrorPlot.SolverIterations = Current;
+GMAT VelocityErrorPlot.SolverIterations = All;
 GMAT VelocityErrorPlot.UpperLeft = [ 0 0 ];
 GMAT VelocityErrorPlot.Size = [ 0 0 ];
 GMAT VelocityErrorPlot.RelativeZOrder = 0;
@@ -650,7 +593,7 @@ GMAT VelocityErrorPlot.ShowGrid = true;
 GMAT VelocityErrorPlot.ShowPlot = false;
 
 Create XYPlot CostPlot;
-GMAT CostPlot.SolverIterations = Current;
+GMAT CostPlot.SolverIterations = All;
 GMAT CostPlot.UpperLeft = [ 0 0 ];
 GMAT CostPlot.Size = [ 0 0 ];
 GMAT CostPlot.RelativeZOrder = 0;
@@ -660,7 +603,7 @@ GMAT CostPlot.ShowGrid = true;
 GMAT CostPlot.ShowPlot = false;
 
 Create XYPlot PositionErrorPlot2;
-GMAT PositionErrorPlot2.SolverIterations = Current;
+GMAT PositionErrorPlot2.SolverIterations = All;
 GMAT PositionErrorPlot2.UpperLeft = [ 0.2702980472764646 0.4593373493975904 ];
 GMAT PositionErrorPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
 GMAT PositionErrorPlot2.RelativeZOrder = 1905;
@@ -670,7 +613,7 @@ GMAT PositionErrorPlot2.ShowGrid = true;
 GMAT PositionErrorPlot2.ShowPlot = true;
 
 Create XYPlot VelocityErrorPlot2;
-GMAT VelocityErrorPlot2.SolverIterations = Current;
+GMAT VelocityErrorPlot2.SolverIterations = All;
 GMAT VelocityErrorPlot2.UpperLeft = [ 0.6423432682425488 0.4593373493975904 ];
 GMAT VelocityErrorPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
 GMAT VelocityErrorPlot2.RelativeZOrder = 1900;
@@ -680,7 +623,7 @@ GMAT VelocityErrorPlot2.ShowGrid = true;
 GMAT VelocityErrorPlot2.ShowPlot = true;
 
 Create XYPlot CostPlot2;
-GMAT CostPlot2.SolverIterations = Current;
+GMAT CostPlot2.SolverIterations = All;
 GMAT CostPlot2.UpperLeft = [ 0.6392600205549845 0.003012048192771085 ];
 GMAT CostPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
 GMAT CostPlot2.RelativeZOrder = 1910;
@@ -690,7 +633,7 @@ GMAT CostPlot2.ShowGrid = true;
 GMAT CostPlot2.ShowPlot = true;
 
 Create XYPlot Distances;
-GMAT Distances.SolverIterations = Current;
+GMAT Distances.SolverIterations = All;
 GMAT Distances.UpperLeft = [ 0 0 ];
 GMAT Distances.Size = [ 0 0 ];
 GMAT Distances.RelativeZOrder = 0;
@@ -700,7 +643,7 @@ GMAT Distances.ShowGrid = true;
 GMAT Distances.ShowPlot = false;
 
 Create ReportFile IterateData;
-GMAT IterateData.SolverIterations = Current;
+GMAT IterateData.SolverIterations = All;
 GMAT IterateData.UpperLeft = [ 0 0 ];
 GMAT IterateData.Size = [ 0 0 ];
 GMAT IterateData.RelativeZOrder = 0;
@@ -1041,11 +984,11 @@ Target DC_central {SolveMode = Solve, ExitMode = DiscardAndContinue}; %RunInitia
    Achieve DC_central(LCROSS.Earth.SMA = DesiredSMA, {Tolerance = 100});
    %Achieve DC_central(LCROSS.EarthMoonRot.AOP = DesiredAOP, {Tolerance = 1}); 
    
-   Achieve DC_central(LCROSS.Earth.AOP = AOP_J2000, {Tolerance = 1});
+   Achieve DC_central(LCROSS.AOP = AOP_J2000, {Tolerance = 1});
    
    Report Data DesiredSMA LCROSS.Earth.SMA LCROSS.EarthMoonRot.AOP;
    Report IterateData DesiredSMA LCROSS.Earth.SMA LCROSS.EarthMoonRot.AOP;
-   Report IterateData DesiredSMA LCROSS.Earth.SMA LCROSS.Earth.AOP;
+   Report IterateData DesiredSMA LCROSS.Earth.SMA LCROSS.AOP;
    
 EndTarget;  % For targeter DC_central
 
@@ -1366,9 +1309,9 @@ GMAT dVatMoon.Element3 = -0.0484465124964;
 Optimize VF13ad1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
    
    %---- Initializations
-   PenUp VelocityErrorPlot2;
-   PenUp PositionErrorPlot2;
-   PenUp CostPlot2;
+   %PenUp VelocityErrorPlot2;
+   %PenUp PositionErrorPlot2;
+   %PenUp CostPlot2;
    
    GMAT LoopCounter2 = LoopCounter2 + 1;
    Report IterateData NewIterate;
@@ -1495,9 +1438,9 @@ Optimize VF13ad1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
    NonlinearConstraint VF13ad1(dVy=0);
    NonlinearConstraint VF13ad1(dVz=0);
    %NonlinearConstraint VF13ad1(LCM2Mag = 0); 
-   PenDown VelocityErrorPlot2;
-   PenDown PositionErrorPlot2;
-   PenDown CostPlot2;
+   %PenDown VelocityErrorPlot2;
+   %PenDown PositionErrorPlot2;
+   %PenDown CostPlot2;
    Propagate NearMoonProp(LCROSS);
 
 EndOptimize;  % For targeter DC_central 

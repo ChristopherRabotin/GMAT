@@ -38,11 +38,4 @@ Report rf maxVec;
 GMAT [floorValue] = floor(maxVec);
 Report rf floorValue;
 
-GMAT [isAField] = isfield(DefaultSC,fieldName)
-Report rf isAField
-
-fieldName = 'X'
-GMAT [fieldValue] = getfield(DefaultSC,fieldName)
-Report rf fieldValue
-
 

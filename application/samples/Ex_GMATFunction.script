@@ -42,14 +42,7 @@ GMAT MMS_E_SC1.ModelScale = 0.2;
 GMAT MMS_E_SC1.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMS_E_SC1.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMS_E_SC1.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMS_E_SC1.Q1 = 0;
-GMAT MMS_E_SC1.Q2 = 0;
-GMAT MMS_E_SC1.Q3 = 0;
-GMAT MMS_E_SC1.Q4 = 1;
-GMAT MMS_E_SC1.EulerAngleSequence = '312';
-GMAT MMS_E_SC1.AngularVelocityX = 0;
-GMAT MMS_E_SC1.AngularVelocityY = 0;
-GMAT MMS_E_SC1.AngularVelocityZ = 0;
+
 
 Create Spacecraft MMS_E_SC2;
 GMAT MMS_E_SC2.DateFormat = TAIModJulian;
@@ -82,14 +75,6 @@ GMAT MMS_E_SC2.ModelScale = 0.2;
 GMAT MMS_E_SC2.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMS_E_SC2.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMS_E_SC2.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMS_E_SC2.Q1 = 0;
-GMAT MMS_E_SC2.Q2 = 0;
-GMAT MMS_E_SC2.Q3 = 0;
-GMAT MMS_E_SC2.Q4 = 1;
-GMAT MMS_E_SC2.EulerAngleSequence = '312';
-GMAT MMS_E_SC2.AngularVelocityX = 0;
-GMAT MMS_E_SC2.AngularVelocityY = 0;
-GMAT MMS_E_SC2.AngularVelocityZ = 0;
 
 Create Spacecraft MMS_E_SC3;
 GMAT MMS_E_SC3.DateFormat = TAIModJulian;
@@ -122,14 +107,6 @@ GMAT MMS_E_SC3.ModelScale = 0.2;
 GMAT MMS_E_SC3.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMS_E_SC3.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMS_E_SC3.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMS_E_SC3.Q1 = 0;
-GMAT MMS_E_SC3.Q2 = 0;
-GMAT MMS_E_SC3.Q3 = 0;
-GMAT MMS_E_SC3.Q4 = 1;
-GMAT MMS_E_SC3.EulerAngleSequence = '312';
-GMAT MMS_E_SC3.AngularVelocityX = 0;
-GMAT MMS_E_SC3.AngularVelocityY = 0;
-GMAT MMS_E_SC3.AngularVelocityZ = 0;
 
 Create Spacecraft MMS_E_SC4;
 GMAT MMS_E_SC4.DateFormat = TAIModJulian;
@@ -162,17 +139,6 @@ GMAT MMS_E_SC4.ModelScale = 0.2;
 GMAT MMS_E_SC4.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMS_E_SC4.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMS_E_SC4.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT MMS_E_SC4.Q1 = 0;
-GMAT MMS_E_SC4.Q2 = 0;
-GMAT MMS_E_SC4.Q3 = 0;
-GMAT MMS_E_SC4.Q4 = 1;
-GMAT MMS_E_SC4.EulerAngleSequence = '312';
-GMAT MMS_E_SC4.AngularVelocityX = 0;
-GMAT MMS_E_SC4.AngularVelocityY = 0;
-GMAT MMS_E_SC4.AngularVelocityZ = 0;
-
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -306,7 +272,7 @@ GMAT OpenGLPlot1.ViewDirection = MMS_E_SC1;
 GMAT OpenGLPlot1.ViewScaleFactor = 1;
 GMAT OpenGLPlot1.ViewUpCoordinateSystem = MMS1VNB;
 GMAT OpenGLPlot1.ViewUpAxis = Z;
-GMAT OpenGLPlot1.CelestialPlane = Off;
+GMAT OpenGLPlot1.EclipticPlane = Off;
 GMAT OpenGLPlot1.XYPlane = Off;
 GMAT OpenGLPlot1.WireFrame = Off;
 GMAT OpenGLPlot1.Axes = On;
@@ -337,7 +303,7 @@ GMAT OpenGLPlot2.ViewDirection = Earth;
 GMAT OpenGLPlot2.ViewScaleFactor = 3;
 GMAT OpenGLPlot2.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT OpenGLPlot2.ViewUpAxis = Z;
-GMAT OpenGLPlot2.CelestialPlane = Off;
+GMAT OpenGLPlot2.EclipticPlane = Off;
 GMAT OpenGLPlot2.XYPlane = Off;
 GMAT OpenGLPlot2.WireFrame = Off;
 GMAT OpenGLPlot2.Axes = On;

@@ -38,16 +38,6 @@ GMAT DefaultSC.ModelScale = 3;
 GMAT DefaultSC.AttitudeDisplayStateType = 'Quaternion';
 GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT DefaultSC.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT DefaultSC.Q1 = 0;
-GMAT DefaultSC.Q2 = 0;
-GMAT DefaultSC.Q3 = 0;
-GMAT DefaultSC.Q4 = 1;
-GMAT DefaultSC.EulerAngleSequence = '321';
-GMAT DefaultSC.AngularVelocityX = 0;
-GMAT DefaultSC.AngularVelocityY = 0;
-GMAT DefaultSC.AngularVelocityZ = 0;
-
-
 
 %----------------------------------------
 %---------- ForceModels and Propagators
@@ -136,7 +126,7 @@ GMAT OpenGLPlot1.ViewDirection = Earth;
 GMAT OpenGLPlot1.ViewScaleFactor = 4;
 GMAT OpenGLPlot1.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT OpenGLPlot1.ViewUpAxis = X;
-GMAT OpenGLPlot1.CelestialPlane = Off;
+GMAT OpenGLPlot1.EclipticPlane = Off;
 GMAT OpenGLPlot1.XYPlane = On;
 GMAT OpenGLPlot1.WireFrame = Off;
 GMAT OpenGLPlot1.Axes = On;
