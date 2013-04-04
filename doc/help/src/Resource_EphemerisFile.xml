@@ -153,8 +153,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Real Number &gt; 0.0 or equals
-                    'IntegratorSteps'</para>
+                    <para>Real Number &gt; 0.0 or equals Default Value</para>
                   </listitem>
                 </varlistentry>
 
