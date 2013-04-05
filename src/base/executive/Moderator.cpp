@@ -873,8 +873,32 @@ void Moderator::LoadAPlugin(std::string pluginName)
       }
    }
    else
-      MessageInterface::PutMessage(
-         "*** Unable to load the dynamic library \"" + pluginName + "\"\n");
+   {
+      if (pluginName.find("libFminconOptimizer") != pluginName.npos)
+      {
+         MessageInterface::PutMessage(
+               "*** Error loading \"libFminconOptimizer\": "
+               "Either libMatlabInterface could not load or is disabled, "
+               "or the MATLAB Optimization Toolbox is not available.  "
+               "Disable the appropriate PLUGIN line in "
+               "bin/gmat_startup_file.txt to remove this error.\n");
+      }
+      else if (pluginName.find("libMatlabInterface") != pluginName.npos)
+      {
+         MessageInterface::PutMessage(
+               "*** Error loading \"libMatlabInterface\": "
+               "GMAT could not load the MATLAB interface. "
+               "Please check that MATLAB is installed and configured "
+               "correctly.  See the User Guide for instructions, or "
+               "disable the appropriate PLUGIN line in "
+               "bin/gmat_startup_file.txt to remove this error.\n");
+      }
+      else
+      {
+         MessageInterface::PutMessage(
+            "*** Unable to load the dynamic library \"" + pluginName + "\"\n");
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
