@@ -1,15 +1,22 @@
-; GMAT NSIS installer script. This file is run by makesetup.sh, the
-; top-level installer build script.
+; GMAT NSIS installer script. This file is run by the main Makefile.
 
 ; Includes
 !include FileFunc.nsh
 !include LogicLib.nsh
 !include MUI2.nsh
 
+; Defaults
+!ifndef VERSION
+    !define VERSION dev
+!endif
+
 ; General configuration
-!define VERSION "R2012a"
 Name "GMAT ${VERSION}"
-OutFile "gmat-winInstaller-i586-${VERSION}-Beta.exe"
+!ifdef PUBLIC
+    OutFile "gmat-winInstaller-i586-${VERSION}.exe"
+!else
+    OutFile "gmat-internal-winInstaller-i586-${VERSION}.exe"
+!endif
 SetCompressor /SOLID lzma
 
 ; Multi-user configuration
@@ -20,15 +27,22 @@ SetCompressor /SOLID lzma
 !include MultiUser.nsh
 
 ; User interface configuration
-!define MUI_ICON "gmat\data\graphics\icons\GMAT.ico"
-!define MUI_UNICON "gmat\data\graphics\icons\GMAT.ico"
+!ifdef PUBLIC
+    !define MUI_ICON "gmat-public\GMAT\data\graphics\icons\GMAT.ico"
+    !define MUI_UNICON "gmat-public\GMAT\data\graphics\icons\GMAT.ico"
+!else
+    !define MUI_ICON "gmat-internal\GMAT\data\graphics\icons\GMAT.ico"
+    !define MUI_UNICON "gmat-internal\GMAT\data\graphics\icons\GMAT.ico"
+!endif
 !define MUI_DIRECTORYPAGE_VERIFYONLEAVE
+!define MUI_WELCOMEFINISHPAGE_BITMAP "WelcomeImage.bmp"
 
 ; User interface pages
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE InstDirCheck
 !insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_WELCOME
@@ -44,15 +58,28 @@ SetCompressor /SOLID lzma
 ; Make not show UAC on Win7
 RequestExecutionLevel user
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Sections
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ; Installer
-Section "GMAT"
+Section "!GMAT" SecGmat
+    SectionIn 1 RO
+
     SetOutPath "$INSTDIR"
-    File /r "gmat\*.*"
+    !ifdef PUBLIC
+        File /r "gmat-public\GMAT\*.*"
+    !else
+        File /r "gmat-internal\GMAT\*.*"
+    !endif
     
     ; Start Menu shortcut
     SetOutPath "$INSTDIR\bin"
-    CreateDirectory "$SMPROGRAMS\GMAT"
-    CreateShortCut "$SMPROGRAMS\GMAT\GMAT ${VERSION}.lnk" "$INSTDIR\bin\GMAT.exe" "" "$INSTDIR\bin\GMAT.exe" 0
+    !define SMDIR "$SMPROGRAMS\GMAT\GMAT ${VERSION}"
+    CreateDirectory "${SMDIR}"
+    CreateShortCut "${SMDIR}\GMAT ${VERSION}.lnk" "$INSTDIR\bin\GMAT.exe" "" "$INSTDIR\bin\GMAT.exe" 0
+    CreateShortCut "${SMDIR}\Help.lnk" "$INSTDIR\docs\help\help.chm"
+    CreateShortCut "${SMDIR}\Open GMAT folder.lnk" "$INSTDIR"
     
     ; Uninstaller and Add/Remove Programs registry key
     WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -64,9 +91,9 @@ Section "GMAT"
     WriteRegStr SHCTX "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
     WriteRegStr SHCTX "${UNINST_KEY}" "Publisher" "GMAT Development Team"
     WriteRegStr SHCTX "${UNINST_KEY}" "Version" "${VERSION}"
-    WriteRegStr SHCTX "${UNINST_KEY}" "HelpLink" "http://gmat.ed-pages.com/wiki/Contacts"
+    WriteRegStr SHCTX "${UNINST_KEY}" "HelpLink" "http://gmat.gsfc.nasa.gov"
     WriteRegStr SHCTX "${UNINST_KEY}" "InstallLocation" "$\"$INSTDIR$\""
-    WriteRegStr SHCTX "${UNINST_KEY}" "URLInfoAbout" "http://gmat.gsfc.nasa.gov/"
+    WriteRegStr SHCTX "${UNINST_KEY}" "URLInfoAbout" "http://gmat.gsfc.nasa.gov"
     WriteRegStr SHCTX "${UNINST_KEY}" "URLUpdateInfo" "http://sourceforge.net/projects/gmat/"
     WriteRegStr SHCTX "${UNINST_KEY}" "Comments" "General Mission Analysis Tool (GMAT)"
     WriteRegDWORD SHCTX "${UNINST_KEY}" "Language" "1033"
@@ -82,8 +109,29 @@ Section "GMAT"
     
 SectionEnd
 
+; Optional file type associations
+Section /o "Associate file types" SecFileAssoc
+    ; Register application
+    ; (This uses the Applications subkey instead of the App Paths subkey
+    ; for compatibility with Windows XP. We can switch it when XP is no
+    ; longer supported.)
+    ;!define APP_KEY "Software\Classes\Applications\GMAT.exe"
+    ;WriteRegStr SHCTX "${APP_KEY}" "FriendlyAppName" "GMAT"
+    ;WriteRegStr SHCTX "${APP_KEY}\SupportedTypes" ".script" ""
+    !define GENERIC_PROGID_KEY "Software\Classes\GMAT.Script"
+    WriteRegStr SHCTX "${GENERIC_PROGID_KEY}" "" "GMAT"
+    WriteRegStr SHCTX "${GENERIC_PROGID_KEY}\CurVer" "" "GMAT.Script.R2013a"
+    !define PROGID_KEY "Software\Classes\GMAT.Script.R2013a"
+    WriteRegStr SHCTX "${PROGID_KEY}" "" "GMAT R2013a"
+    WriteRegStr SHCTX "${PROGID_KEY}\shell\open\command" "" '"$INSTDIR\bin\GMAT.exe" "%1"'
+    !define FILETYPE_KEY "Software\Classes\.script"
+    WriteRegStr SHCTX "${FILETYPE_KEY}" "" "GMAT.Script"
+    WriteRegStr SHCTX "${FILETYPE_KEY}" "Content Type" "text/plain"
+    WriteRegStr SHCTX "${FILETYPE_KEY}\OpenWithProgIds" "GMAT.Script" ""
+SectionEnd
+
 ; Uninstaller
-Section "Uninstall"
+Section "Uninstall" SecUninstall
     ; Uninstaller itself
     Delete "$INSTDIR\Uninstall.exe"
     DeleteRegKey SHCTX "${UNINST_KEY}"
@@ -96,9 +144,29 @@ Section "Uninstall"
         RMDir "$INSTDIR\..\..\GMAT"
     
     ; Start Menu shortcut
-    Delete "$SMPROGRAMS\GMAT\GMAT ${VERSION}.lnk"
-    RMDir "$SMPROGRAMS\GMAT"
+    Delete "${SMDIR}\GMAT ${VERSION}.lnk"
+    Delete "${SMDIR}\Help.lnk"
+    Delete "${SMDIR}\Open GMAT folder.lnk"
+    RMDir "${SMDIR}"
+    
+    ; Registry keys
+    ; don't remove ${APP_KEY} because user might have multiple GMAT versions
+    ; installed
+    DeleteRegKey SHCTX "${PROGID_KEY}"
 SectionEnd
+
+; Set descriptions
+LangString DESC_SecGmat ${LANG_ENGLISH} "Core GMAT files"
+LangString DESC_SecFileAssoc ${LANG_ENGLISH} "Associate *.script files with GMAT."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecGmat} $(DESC_SecGmat)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecFileAssoc} $(DESC_SecFileAssoc)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Function InstDirCheck
     GetInstDirError $0

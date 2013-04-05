@@ -1,6 +1,6 @@
 This file lists all the files that need to be packaged for release and where
 they reside in the GMAT repositories. The list below was created in preparation
-for the R2012a beta release, and should be updated prior to every future
+for the R2013a release, and should be updated prior to every future
 release.
 
 This file layout represents the layout of the system once installed by the user.
@@ -71,12 +71,8 @@ extras/                                 source: <sf>/trunk/application/
     *
 
 matlab/
-    gmat_command/                       source: <sf>/trunk/application/
     gmat_fmincon/                       source: <sf>/trunk/application/
     gmat_keyword/                       source: <sf>/trunk/application/
-    libCInterface/
-        interfacewrapper.m              source: <network>\Builds\windows\VS2010_build\<date>
-        *                               source: <sf>/trunk/application/
     *                                   source: <sf>/trunk/application/
 
 output/                                 source: <sf>/trunk/application/
@@ -85,11 +81,14 @@ output/                                 source: <sf>/trunk/application/
 plugins/ (Windows)
     libEphemPropagator.dll              source: <network>\Builds\windows\VS2010_build\<date>
     libEventLocator.dll                 source: <network>\Builds\windows\VS2010_build\<date>
+    libExtraPropagators.dll             source: <network>\Builds\windows\VS2010_build\<date>
     libFminconOptimizer.dll             source: <network>\Builds\windows\VS2010_build\<date>
+    libFormation.dll                    source: <network>\Builds\windows\VS2010_build\<date>
     libGmatEstimation.dll               source: <network>\Builds\windows\VS2010_build\<date>
+    libGmatFunction.dll                 source: <network>\Builds\windows\VS2010_build\<date>
     libMatlabInterface.dll              source: <network>\Builds\windows\VS2010_build\<date>
-    libMsise86.dll                      source: <network>\Builds\windows\VS2010_build\<date>
-    libNRLMsise00.dll                   source: <network>\Builds\windows\VS2010_build\<date>
+    libSaveCommand.dll                  source: <network>\Builds\windows\VS2010_build\<date>
+    libStation.dll                      source: <network>\Builds\windows\VS2010_build\<date>
     proprietary/
         <empty>
 

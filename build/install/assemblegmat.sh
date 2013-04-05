@@ -14,6 +14,8 @@
 #   -t type       Assemble a particular type of distribution:
 #                 full: everything included (default)
 #                 public: publicly-releasable version
+#                 full-release: full excluding pre-release items
+#                 public-release: public excluding pre-release items
 #   -u user       Use repository username user (default: prompt)
 #
 # Prerequisites:
@@ -39,6 +41,8 @@ Options:
   -t type       Assemble a particular type of distribution:
                 full: everything included (default)
                 public: publicly-releasable version
+                full-release: full excluding pre-release items
+                public-release: public excluding pre-release items
   -u user       Use repository username user (default: prompt)
 END
 }
@@ -107,9 +111,12 @@ then
     find "$dest" -iname thumbs.db -delete
     
     # Remove proprietary plugins if necessary
-    if [ $TYPE = 'public' ]
+    if [ $TYPE = 'public' -o $TYPE = 'public-release' ]
     then
         rm -rf "$dest"/plugins/proprietary/*
+        cat "$dest"/bin/gmat_startup_file.txt \
+            | sed '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+            > "$dest"/bin/gmat_startup_file.txt
     fi
 
 elif $LINUX
@@ -140,5 +147,8 @@ then
 fi
 
 # libCInterface MATLAB files
-cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
-svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
+if [ $TYPE = 'full' ]
+then
+    cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
+    svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
+fi
