@@ -540,7 +540,7 @@
     <para>Many bugs were closed in this release, but a comprehensive list is
     difficult to create because of the move from Bugzilla to JIRA. See the
     <link
-    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11804">"Bugs
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11103">"Bugs
     closed in R2012a" report</link> in for a partial list.</para>
 
     <para>All known issues that affect this version of GMAT can be seen in
