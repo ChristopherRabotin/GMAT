@@ -120,9 +120,9 @@ Section /o "Associate file types" SecFileAssoc
     ;WriteRegStr SHCTX "${APP_KEY}\SupportedTypes" ".script" ""
     !define GENERIC_PROGID_KEY "Software\Classes\GMAT.Script"
     WriteRegStr SHCTX "${GENERIC_PROGID_KEY}" "" "GMAT"
-    WriteRegStr SHCTX "${GENERIC_PROGID_KEY}\CurVer" "" "GMAT.Script.R2013a"
-    !define PROGID_KEY "Software\Classes\GMAT.Script.R2013a"
-    WriteRegStr SHCTX "${PROGID_KEY}" "" "GMAT R2013a"
+    WriteRegStr SHCTX "${GENERIC_PROGID_KEY}\CurVer" "" "GMAT.Script.${VERSION}"
+    !define PROGID_KEY "Software\Classes\GMAT.Script.${VERSION}"
+    WriteRegStr SHCTX "${PROGID_KEY}" "" "GMAT ${VERSION}"
     WriteRegStr SHCTX "${PROGID_KEY}\shell\open\command" "" '"$INSTDIR\bin\GMAT.exe" "%1"'
     !define FILETYPE_KEY "Software\Classes\.script"
     WriteRegStr SHCTX "${FILETYPE_KEY}" "" "GMAT.Script"
