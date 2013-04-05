@@ -14,7 +14,7 @@ Copyright (c) 2002 - 2011 United States Government as represented by
 the Administrator of the National Aeronautics and Space Administration.
 All Other Rights Reserved.
 
-GMAT is licensed under the NASA Open Source Agreement version 1.3 found
+GMAT is licensed under the Apache License, Version 2.0 found
 in the License.txt file contained in this distribution.
 
 -----------------------------------------------------------------------
@@ -24,19 +24,18 @@ in the License.txt file contained in this distribution.
 The GMAT Windows distribution contains an installer that will
 install and configure GMAT for you automatically. The installer
 does not require administrative privileges, and will install by
-default to your personal AppData\Local folder. This can be customized
+default to your personal %LOCALAPPDATA% folder. This can be customized
 during installation.
 
 GMAT is distributed in source form as well, and can be compiled on the
-Mac and on Linux. It has not been rigorously tested on these platforms,
-though.
+Mac and on Linux. It has not, however, been rigorously tested on these platforms.
 
 -----------------------------------------------------------------------
                            Running GMAT
 -----------------------------------------------------------------------
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-and then click GMAT R2012a. If you are using the zip-file bundle, start
-the bin\GMAT.exe application.
+GMAT R2013a, and then click GMAT R2013a. If you are using the zip-file bundle,
+double-click the bin\GMAT.exe application.
 
 -----------------------------------------------------------------------
                            Documentation
@@ -49,7 +48,7 @@ use) or online at http://gmat.sf.net/docs.
             HOW TO RUN THE DEMOS INCLUDED IN THIS DISTRIBUTION
 -----------------------------------------------------------------------
 
-We've included nearly 40 sample missions in the distribution.
+We've included over 50 sample missions in the distribution.
 The sample missions show how to apply GMAT to problems ranging from
 the Hohmann transfer to Libration point stationkeeping to trajectory
 optimization.
@@ -83,7 +82,6 @@ release are of alpha quality, and are included here as a preview only.
 GMAT uses:
 - wxWidgets 2.8.12 (http://www.wxwidgets.org/) 
 - TSPlot (http://sourceforge.net/projects/tsplot/)
-- PCRE (http://www.pcre.org/)
 - SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
 - SOFA (http://www.iausofa.org/)
 
@@ -116,12 +114,25 @@ Please see the release notes, located online at http://gmat.sf.net/docs.
 For a list of known issues, please visit
 http://li64-187.members.linode.com:8080 or email gmat@gsfc.nasa.gov. 
 
-GMAT R2012a is released as beta software.
-
 The following plugins are included and have the listed status:
-libEphemPropagator: beta
-libFminconOptimizer: beta
-libMatlabInterface: beta
-libCInterface: alpha
-libEventLocator: alpha
-libGmatEstimation: alpha
+
+Official plugins:
+libEphemPropagator
+libFormation
+libStation
+libMatlabInterface
+libFminconOptimizer
+
+Alpha plugins (disabled by default):
+libCInterface
+libEventLocator
+libExtraPropagators
+libGmatEstimation
+libGmatFunction
+libSaveCommand
+
+Internal-only plugins:
+libVF13Optimizer
+libNRLMsise00
+libMsise86
+libMarsGRAM (alpha)
