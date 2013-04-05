@@ -145,6 +145,7 @@ private:
    bool            continueOnError;
    bool            skipErrorMessage;
    bool            isFinalError;
+   bool            allowObjectProperty;
    StringArray     validatorErrorList;
    std::string     theErrorMsg;
    

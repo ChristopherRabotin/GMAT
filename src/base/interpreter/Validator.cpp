@@ -452,6 +452,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    continueOnError = contOnError;
    skipErrorMessage = false;
    isFinalError = false;
+   allowObjectProperty = false;
    lhsParamType = Gmat::UNKNOWN_PARAMETER_TYPE;
    std::string typeName = cmd->GetTypeName();
    
@@ -503,8 +504,11 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
       cmd->SetCurrentFunction(theFunction);
    
    // Handle Assignment command (LHS = RHS) separately
-   if (cmd->GetTypeName() == "GMAT")
+   if (cmd->IsOfType("Assignment"))
    {
+      // First set allowObjectProperty to true, and then it will be turned off
+      // when assignmet RHS wrapper is created (GMT-3687)
+      allowObjectProperty = true;
       if (!CreateAssignmentWrappers(cmd, manage))
       {
          // Handle error if function (LOJ: 2009.03.17)
@@ -523,7 +527,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
                return false;
             else
             {
-               theErrorMsg = "Undefined function or object \"" + theDescription +
+               theErrorMsg = "Undefined function, object, or disallowed object field \"" + theDescription +
                   "\" found";
                return HandleError();
             }
@@ -538,6 +542,10 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
       if (cmd->IsOfType("ConditionalBranch") ||
           cmd->GetTypeName() == "Report" || cmd->GetTypeName() == "Propagate")
           paramFirst = true;
+      
+      // Only SolverCommand allows object properites (GMT-3687)
+      if (theCommand->IsOfType("SolverCommand"))
+         allowObjectProperty = true;
       
       for (StringArray::const_iterator i = wrapperNames.begin();
            i != wrapperNames.end(); ++i)
@@ -1124,6 +1132,9 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    
    ElementWrapper *rightEw = NULL;
    createDefaultStringWrapper = true;
+   // We don't want to allow ObjectPropertyWrapper on RHS, so check it (GMT-3687)
+   allowObjectProperty = false;
+   
    // Actually we want to check for return data type not the wrapper type here.
    // (This will fix bug 2196)
    //if (leftEw->GetWrapperType() == Gmat::VARIABLE_WT ||
@@ -1242,7 +1253,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
                strToUse = origVal;
             
             if (rightEw)
-            {
+            {               
                #if DBGLVL_WRAPPERS > 1
                MessageInterface::ShowMessage
                   ("   Calling cmd->SetElementWrapper(<%p>, '%s')\n", rightEw, strToUse.c_str());
@@ -2792,8 +2803,9 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
       ("Validator::CreatePropertyWrapper() entered, obj=<%p><%s><%s>, type='%s', "
-       "manage=%d, checkSubProp=%d\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
-       obj ? obj->GetName().c_str() : "NULL", type.c_str(), manage, checkSubProp);
+       "manage=%d, checkSubProp=%d, allowObjectProperty=%d\n", obj,
+       obj ? obj->GetTypeName().c_str() : "NULL", obj ? obj->GetName().c_str() : "NULL",
+       type.c_str(), manage, checkSubProp, allowObjectProperty);
    #endif
    
    if (obj == NULL)
@@ -2833,10 +2845,11 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
          
          return ew;
       }
-
+      
       // Allow object properties only appear in the Assignment command
-      // GMT-3687 (Turn Off Field references commands except Assignment LHS)
-      if (!theCommand->IsOfType("Assignment"))
+      // GMT-3687 (Turn Off Field references commands except Assignment and
+      // Solver command, such as Vary and Achieve
+      if (!allowObjectProperty)
       {
          // Return NULL wrapper
          #if DBGLVL_WRAPPERS > 1
