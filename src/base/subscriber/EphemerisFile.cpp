@@ -188,6 +188,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    processingLargeStep  (false),
    spkWriteFailed       (true),
    writeCommentAfterData (true),
+   justManeuvered       (false),
    prevRunState         (Gmat::IDLE)
 {
    #ifdef DEBUG_EPHEMFILE
@@ -365,6 +366,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    finalEpochReached    (ef.finalEpochReached),
    handleFinalEpoch     (ef.handleFinalEpoch),
    writeDataInDataCS    (ef.writeDataInDataCS),
+   justManeuvered       (ef.justManeuvered),
    processingLargeStep  (ef.processingLargeStep),
    spkWriteFailed       (ef.spkWriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
@@ -450,6 +452,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    processingLargeStep  = ef.processingLargeStep;
    spkWriteFailed       = ef.spkWriteFailed;
    writeCommentAfterData = ef.writeCommentAfterData;
+   justManeuvered       = ef.justManeuvered;
    prevRunState         = ef.prevRunState;
    coordConverter       = ef.coordConverter;
    
@@ -1787,7 +1790,7 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData)
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleSpkOrbitData() entered, writeData=%d\n", writeData);
+      ("EphemerisFile::HandleSpkOrbitData() entered, writeData=%d, currEpochInDays = %.13lf\n", writeData, currEpochInDays);
    #endif
    
    if (writeData)
@@ -1825,6 +1828,9 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData)
 void EphemerisFile::RestartInterpolation(const std::string &comments, bool writeAfterData,
                                          bool canFinalize, bool ignoreBlankComments)
 {
+   #ifdef DEBUG_MANEUVER
+      MessageInterface::ShowMessage("Restarting Interpolation\n");
+   #endif
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s'\n   "
@@ -2178,6 +2184,9 @@ void EphemerisFile::WriteAttitude()
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWriting(bool canFinalize)
 {
+   #ifdef DEBUG_MANEUVER
+      MessageInterface::ShowMessage("Finishing up writing\n");
+   #endif
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
       ("EphemerisFile::FinishUpWriting() '%s' entered, canFinalize=%d, isFinalized=%d, "
@@ -4075,14 +4084,23 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    currState[4] = dat[idVy];
    currState[5] = dat[idVz];
    
+   #ifdef DEBUG_MANEUVER
+      MessageInterface::ShowMessage("   Distribute dat[0]=%.15f, dat[1]=%.15f, "
+            "dat[4]=%.15f\n", dat[0], dat[1], dat[4]);
+   #endif
+
    // Internally all epochs are in seconds to avoid epoch drifting.
    // For long run epochs to process drifts behind the actual.
    prevEpochInSecs = currEpochInSecs;
    currEpochInSecs = currEpochInDays * GmatTimeConstants::SECS_PER_DAY;
    
    // Ignore duplicate data
-   if (currEpochInSecs == prevEpochInSecs)
+   if ((currEpochInSecs == prevEpochInSecs) && justManeuvered == false)
+
    {
+      #ifdef DEBUG_MANEUVER
+         MessageInterface::ShowMessage("Ignoring dupe\n");
+      #endif
       #if DBGLVL_EPHEMFILE_DATA
       MessageInterface::ShowMessage
          ("EphemerisFile::Distribute() Just returning true, currEpochInSecs (%.15f) "
@@ -4090,6 +4108,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #endif
       return true;
    }
+   justManeuvered == false;
    
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
@@ -4125,7 +4144,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
           ToUtcGregorian(currEpochInSecs).c_str(), writeOrbit, writeAttitude);
       #endif
       
-      // For now we only writes Orbit data
+      // For now we only write Orbit data
       if (fileType == SPK_ORBIT)
          HandleSpkOrbitData(processData);
       else
@@ -4154,6 +4173,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
                                       Real epoch, const StringArray &satNames,
                                       const std::string &desc)
 {
+   #ifdef DEBUG_MANEUVER
+      MessageInterface::ShowMessage("Maneuvering\n");
+   #endif
    #if DBGLVL_EPHEMFILE_MANEUVER > 1
    MessageInterface::ShowMessage
       ("EphemerisFile::HandleManeuvering() '%s' entered, originator=<%p><%s>, maneuver %s, "
@@ -4201,7 +4223,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
    {
       #if DBGLVL_EPHEMFILE_MANEUVER > 1
       MessageInterface::ShowMessage
-         ("   ==> Checking if runstate is SOLVEDPASS and Maneuver alrady handled\n");
+         ("   ==> Checking if runstate is SOLVEDPASS and Maneuver already handled\n");
       #endif
       bool doNext = true;
       if (prevRunState == runstate && runstate == Gmat::SOLVEDPASS)
@@ -4287,6 +4309,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       }
       
       RestartInterpolation(comment, true);
+      justManeuvered = true;
    }
    
    prevRunState = runstate;

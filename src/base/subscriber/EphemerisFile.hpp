@@ -178,6 +178,9 @@ protected:
    bool        processingLargeStep;
    bool        spkWriteFailed;
    bool        writeCommentAfterData;
+
+   // Flag set when a maneuver was set, and cleared on the next write
+   bool        justManeuvered;
    
    Gmat::RunState prevRunState;
    
