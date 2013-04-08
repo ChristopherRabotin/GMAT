@@ -231,15 +231,15 @@ BeginMissionSequence;
 
 Propagate 'Prop to Y Crossing' EarthMoonL2Prop(Sat) {Sat.CSEarthMoonRot.Y = 0,StopTolerance = 1e-005};
 
-For 'J = 1:2' J = 1:1:2;
+For 'J = 1:2' J = 1:1:4;
    
    Target 'Target Plane Crossing' DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
       
       
-      Vary 'Vary dV.V' DC(dV.Element1 = 5e-005, {Perturbation = 1e-6, Lower = -0.04, Upper = 0.0297, MaxStep = 0.0005});
+      Vary 'Vary dV.V' DC(dV.Element1 = -5e-005, {Perturbation = 1e-6, Lower = -0.04, Upper = 0.0297, MaxStep = 0.0005});
       Maneuver 'Apply dV' dV(Sat);
       
-      For 'I = 1:2' I = 1:1:2;
+      For 'I = 1:2' I = 1:1:1;
          Propagate 'Prop to Y Crossing' EarthMoonL2Prop(Sat) {Sat.L2Centered.Y = 0, StopTolerance = 1e-005};
       EndFor;
       
