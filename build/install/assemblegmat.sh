@@ -110,15 +110,6 @@ then
     # Remove Windows hidden files
     find "$dest" -iname thumbs.db -delete
     
-    # Remove proprietary plugins if necessary
-    if [ $TYPE = 'public' -o $TYPE = 'public-release' ]
-    then
-        rm -rf "$dest"/plugins/proprietary/*
-        cat "$dest"/bin/gmat_startup_file.txt \
-            | sed '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
-            > "$dest"/bin/gmat_startup_file.txt
-    fi
-
 elif $LINUX
 then
     echo 'Linux-specific files not implemented'
@@ -152,3 +143,13 @@ then
     cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
     svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
 fi
+
+# Remove proprietary plugins if necessary
+if [ $TYPE = 'public' -o $TYPE = 'public-release' ]
+then
+    rm -rf "$dest"/plugins/proprietary/*
+    sed -i '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+        "$dest"/bin/gmat_startup_file.txt
+    unix2dos "$dest"/bin/gmat_startup_file.txt
+fi
+
