@@ -116,8 +116,8 @@ Create MeasurementModel RangeMeasurement;
 GMAT RangeMeasurement.ObservationData = {MauiMeasData};
 GMAT RangeMeasurement.Type = GeometricRange;
 GMAT RangeMeasurement.Participants = {Maui, ODSat};
-GMAT RangeMeasurement.Bias = 0;
-GMAT RangeMeasurement.NoiseSigma = 1e-05;
+GMAT RangeMeasurement.Bias = [0];
+GMAT RangeMeasurement.NoiseSigma = [1e-05];
 GMAT RangeMeasurement.TimeConstant = 6000;
 RangeMeasurement.Covariance.Bias = [1000000];
 
@@ -163,6 +163,5 @@ GMAT XYPlot1.ShowPlot = true;
 
 %----- Run the estimator
 BeginMissionSequence
-Save BatchEst;
 
 RunEstimator BatchEst;

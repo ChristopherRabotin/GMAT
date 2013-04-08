@@ -20,18 +20,18 @@ ODSat.Cr = 1.8;
 ODSat.DragArea = 15;
 ODSat.SRPArea = 1;
 ODSat.Id = 'ODSat01';
-ODSat.Transponders = {Transponder1};
+%ODSat.Transponders = {Transponder1};
 
 
-Create Transponder Transponder1;
-GMAT Transponder1.SensorID = 'theId';
-GMAT Transponder1.HardwareDelay = 0.0001;
-GMAT Transponder1.PrimaryAntenna = No Antennas Available;
-GMAT Transponder1.InputFrequencyModel = 'CenterAndBandwidth';
-GMAT Transponder1.InputCenterFrequency = 0;
-GMAT Transponder1.InputBandwidth = 0;
-GMAT Transponder1.OutputFrequencyModel = 'TurnAroundRatio';
-GMAT Transponder1.TurnAroundRatio = '240/221';
+%Create Transponder Transponder1;
+%GMAT Transponder1.SensorID = 'theId';
+%GMAT Transponder1.HardwareDelay = 0.0001;
+%GMAT Transponder1.PrimaryAntenna = No Antennas Available;
+%GMAT Transponder1.InputFrequencyModel = 'CenterAndBandwidth';
+%GMAT Transponder1.InputCenterFrequency = 0;
+%GMAT Transponder1.InputBandwidth = 0;
+%GMAT Transponder1.OutputFrequencyModel = 'TurnAroundRatio';
+%GMAT Transponder1.TurnAroundRatio = '240/221';
 
 
 %----------------------------------------
@@ -94,8 +94,8 @@ Create MeasurementModel RangeMeasurement;
 RangeMeasurement.ObservationData = {MauiMeasData};
 RangeMeasurement.Type = USNTwoWayRange;
 RangeMeasurement.Participants = {Maui, ODSat};
-RangeMeasurement.Bias = 0;
-RangeMeasurement.NoiseSigma = 1e-05;
+RangeMeasurement.Bias = [0];
+RangeMeasurement.NoiseSigma = [1e-05];
 RangeMeasurement.TimeConstant = 6000;
 RangeMeasurement.Covariance.Bias = [1000000];
 
