@@ -109,7 +109,14 @@ Section "!GMAT" SecGmat
     
 SectionEnd
 
-; Optional file type associations
+; Optional MATLAB interface (disabled by default)
+Section /o "Enable MATLAB interface" SecEnableMatlab
+    Delete "$INSTDIR\bin\gmat_startup_file.txt"
+    Rename "$INSTDIR\bin\gmat_startup_file.wmatlab.txt" \
+        "$INSTDIR\bin\gmat_startup_file.txt"
+SectionEnd
+
+; Optional file type associations (disabled by default)
 Section /o "Associate file types" SecFileAssoc
     ; Register application
     ; (This uses the Applications subkey instead of the App Paths subkey
@@ -158,10 +165,12 @@ SectionEnd
 ; Set descriptions
 LangString DESC_SecGmat ${LANG_ENGLISH} "Core GMAT files"
 LangString DESC_SecFileAssoc ${LANG_ENGLISH} "Associate *.script files with GMAT."
+LangString DESC_SecEnableMatlab ${LANG_ENGLISH} "Enable the MATLAB interface and fmincon plugins. This can be enabled later by editing gmat_startup_file.txt."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGmat} $(DESC_SecGmat)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecFileAssoc} $(DESC_SecFileAssoc)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecEnableMatlab} $(DESC_SecEnableMatlab)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -187,11 +196,18 @@ Function InstDirCheck
     ${EndSwitch}
 FunctionEnd
 
-; Required by MultiUser.nsh
+; Callbacks
 Function .onInit
-  !insertmacro MULTIUSER_INIT
+    ; Required by MultiUser.nsh
+    !insertmacro MULTIUSER_INIT
+FunctionEnd
+
+Function .onInstSuccess
+    ; Clean up alternate startup file
+    Delete "$INSTDIR\bin\gmat_startup_file.wmatlab.txt"
 FunctionEnd
 
 Function un.onInit
-  !insertmacro MULTIUSER_UNINIT
+    ; Required by MultiUser.nsh
+    !insertmacro MULTIUSER_UNINIT
 FunctionEnd

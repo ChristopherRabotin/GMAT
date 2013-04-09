@@ -3,7 +3,7 @@ SHELL = /bin/sh
 .SUFFIXES:
 
 # Customization
-VERSION = R2013a
+VERSION = dev
 
 #
 # Standard targets
@@ -34,11 +34,31 @@ installer: installer-internal installer-public
 
 installer-internal: gmat.nsi assemble-internal
 	./genfilelists.sh gmat-internal/GMAT
+	cp -p gmat-internal/GMAT/bin/gmat_startup_file.txt \
+	    gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt
+	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
+	    gmat-internal/GMAT/bin/gmat_startup_file.txt \
+	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
+	    | unix2dos \
+	    > gmat-internal/GMAT/bin/gmat_startup_file.txt
 	cmd /c "makensis /DVERSION=$(VERSION) $<"
+	rm -f gmat-internal/GMAT/bin/gmat_startup_file.txt
+	mv gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt \
+	    gmat-internal/GMAT/bin/gmat_startup_file.txt
 
 installer-public: gmat.nsi assemble-public
 	./genfilelists.sh gmat-public/GMAT
+	cp -p gmat-public/GMAT/bin/gmat_startup_file.txt \
+	    gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt
+	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
+	    gmat-public/GMAT/bin/gmat_startup_file.txt \
+	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
+	    | unix2dos \
+	    > gmat-public/GMAT/bin/gmat_startup_file.txt
 	cmd /c "makensis /DVERSION=$(VERSION) /DPUBLIC $<"
+	rm -f gmat-public/GMAT/bin/gmat_startup_file.txt
+	mv gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt \
+	    gmat-public/GMAT/bin/gmat_startup_file.txt
 
 zip: zip-internal zip-public
 
