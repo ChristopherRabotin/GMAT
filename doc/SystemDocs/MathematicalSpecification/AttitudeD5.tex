@@ -160,43 +160,20 @@ calculates the attitude state in the Coordinate System Fixed attitude mode
 
 \subsubsection{Coordinate System Fixed Mode}
 
-In the CSFixed attitude mode, the user supplies two pieces of information.  They
-first specify a coordinate system $\mathcal{F}_i$ in which to fix the attitude.
+In the CSFixed attitude mode, the user specifies a coordinate system $\mathcal{F}_i$ in which to fix the attitude.
 $\mathcal{F}_i$ can be any of the default coordinate systems or any user defined
-coordinate system.  Secondly, the user specifies how the body axis system,
-$\mathcal{F}_B$ is oriented with respect to $\mathcal{F}_i$ by defining
-$\mathbf{A}_{Bi}$ or an equivalent parameterization.  GMAT's GUI and script
-interfaces will allow the user to define their preferred attitude
-parameterization as either body with respect to intermediate (\emph{iB}) or
-intermediate with respect to body (\emph{Bi}) as well as provide an input
-parameter which specifies the direction of this rotation.  GMAT will then
-calculate $\mathbf{A}_{Bi}$ which it will use internally.  Specifying the
-direction of the rotation follows the CCSDS standard.  The CCSDS standard uses
-an ASCII text variable \texttt{Q\_DIR} to specify the direction of a quaternion
-rotation.  GMAT uses \texttt{DIR} so that the user can associate it with any of
-the available attitude parameterizations.  With $\mathcal{F}_i$ and
-$\mathbf{A}_{Bi}$ specified, GMAT calculates the rotation from the inertial to
-the body axes and the angular velocity of the body with respect to the inertial
-frame, expressed in the body frame, $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$.
-
-GMAT calculates the attitude matrix of $\mathcal{F}_i$ with respect to
-$\mathcal{F}_B$, $\mathbf{A}_{Bi}$, from the initial conditions provided by the
-user.  For CSFixed mode, $\mathbf{A}_{Bi}$ is constant and is stored for use in
-the equations below.  Knowing $\mathbf{A}_{Bi}$, we can calculate the attitude
-matrix from the inertial frame to the body frame, $\mathbf{A}_{BI}$, using the
+coordinate system. GMAT calculates the attitude matrix of $\mathcal{F}_i$ using the
 following equation.
 %
 \begin{equation}
-    \mathbf{A}_{BI} = \mathbf{A}_{Bi}\mathbf{R}_{iI}
+    \mathbf{A}_{BI} = \mathbf{R}_{iI}
     \label{Eq:CSFixedRotationMatrix}
 \end{equation}
 %
 $\mathbf{R}_{iI}$ is the DCM matrix relating $\mathcal{F}_I$ to $\mathcal{F}_i$
 and GMAT knows how to calculate this matrix for all allowable $\mathcal{F}_i$.
 For details on the calculation of this matrix for all coordinate systems in GMAT
-see Ch.~\ref{Ch:CoordinateSystems}.
-
-To calculate $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$, we start from Euler's
+see Ch.~\ref{Ch:CoordinateSystems}. To calculate $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$, we start from Euler's
 equation:
 %
 \begin{equation}
@@ -234,86 +211,77 @@ we obtain
     \label{Eq:CSFixedKinematics2}
 \end{equation}
 %
-Taking the derivative of Equation \ref{Eq:CSFixedRotationMatrix} with respect to
-time yields
+where 
 %
 \begin{equation}
-    {\mathbf{\dot A}_{BI}} = \mathbf{A}_{Bi}{\mathbf{\dot R}_{iI}}
-    \label{Eq:CSFixedTimeDerivative}
+     \dot{\mathbf{A}}_{BI} = \dot{\mathbf{R}}_{iI}
+    \label{Eq:CSFixedKinematics2}
 \end{equation}
-%
-because by definition, for the CSFixed mode,
-$ \mathbf{\dot A}_{Bi} = \mathbf{0}$.
-Substituting Eq. \ref{Eq:CSFixedTimeDerivative} into
-Eq. \ref{Eq:CSFixedKinematics2} we obtain
-%
-\begin{equation}
-    \{\mathbf{\boldsymbol\omega^\times}_{IB}\}_B =  -\mathbf{A}_{Bi}{\mathbf{\dot R}_{iI}} \mathbf{A}_{BI}^{T}
-    \label{Eq:CSFixedKinematics3}
-\end{equation}
-%
-where $\mathbf{A}_{Bi}$ is known from user input, and $\mathbf{A}_{BI}$ is known
-from Eq. \ref{Eq:CSFixedRotationMatrix}.  GMAT knows how to calculate
-$\mathbf{\dot{R}}_{iI}$ for all allowable $\mathcal{F}_i$ and details are contained
-in Ch.~\ref{Ch:CoordinateSystems}.  Next we would like to get the angular
-velocity vector $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$ in terms of the
-components of the 3$\times$3 cross product matrix in the middle of
-Eq. \ref{Eq:OmegaCrossMatrix}.  This matrix, in symbol notation also shows up on
-the left hand side of Eq. \ref{Eq:CSFixedKinematics3}.
-%
-% Note - Dunn discovered, through trial and error, that you can't add white lines
-% between matrix components in the equation below to enhance readability.  LaTeX
-% actually crashes.  But you can add a % comment to create spacing.
-\begin{equation}
-	\{\boldsymbol \omega_{IB}\}_{B} =
-        %
-        \begin{bmatrix}
-            \omega_{1} \\
-            \omega_{2} \\
-            \omega_{3}
-        \end{bmatrix} = \hspace{0.082cm}
-        %
-        \begin{bmatrix}
-            \Omega_{32} \\
-            \Omega_{13} \\
-            \Omega_{21}
-        \end{bmatrix}
-        %
-    \label{Eq:OmegaComponents}
-\end{equation}
-%
-Each of the three components of the angular velocity vector, measured in the
-spacecraft body frame, can be found in the cross product matrix defined in
-Eq. \ref{Eq:OmegaCrossMatrix}.  The subscripts on the right hand side of
-Eq. \ref{Eq:OmegaComponents} tell us where to find these components after
-multiplying the three 3$\times$3 matrices on the right hand side of
-Eq. \ref{Eq:CSFixedKinematics3}.
+%Taking the derivative of Equation \ref{Eq:CSFixedRotationMatrix} with respect to
+%time yields
+%%
+%\begin{equation}
+%    {\mathbf{\dot A}_{BI}} = \mathbf{A}_{Bi}{\mathbf{\dot R}_{iI}}
+%    \label{Eq:CSFixedTimeDerivative}
+%\end{equation}
+%%
+%because by definition, for the CSFixed mode,
+%$ \mathbf{\dot A}_{Bi} = \mathbf{0}$.
+%Substituting Eq. \ref{Eq:CSFixedTimeDerivative} into
+%Eq. \ref{Eq:CSFixedKinematics2} we obtain
+%%
+%\begin{equation}
+%    \{\mathbf{\boldsymbol\omega^\times}_{IB}\}_B =  -\mathbf{A}_{Bi}{\mathbf{\dot R}_{iI}} \mathbf{A}_{BI}^{T}
+%    \label{Eq:CSFixedKinematics3}
+%\end{equation}
+%%
+%where $\mathbf{A}_{Bi}$ is known from user input, and $\mathbf{A}_{BI}$ is known
+%from Eq. \ref{Eq:CSFixedRotationMatrix}.  GMAT knows how to calculate
+%$\mathbf{\dot{R}}_{iI}$ for all allowable $\mathcal{F}_i$ and details are contained
+%in Ch.~\ref{Ch:CoordinateSystems}.  Next we would like to get the angular
+%velocity vector $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$ in terms of the
+%components of the 3$\times$3 cross product matrix in the middle of
+%Eq. \ref{Eq:OmegaCrossMatrix}.  This matrix, in symbol notation also shows up on
+%the left hand side of Eq. \ref{Eq:CSFixedKinematics3}.
+%%
+%% Note - Dunn discovered, through trial and error, that you can't add white lines
+%% between matrix components in the equation below to enhance readability.  LaTeX
+%% actually crashes.  But you can add a % comment to create spacing.
+%\begin{equation}
+%	\{\boldsymbol \omega_{IB}\}_{B} =
+%        %
+%        \begin{bmatrix}
+%            \omega_{1} \\
+%            \omega_{2} \\
+%            \omega_{3}
+%        \end{bmatrix} = \hspace{0.082cm}
+%        %
+%        \begin{bmatrix}
+%            \Omega_{32} \\
+%            \Omega_{13} \\
+%            \Omega_{21}
+%        \end{bmatrix}
+%        %
+%    \label{Eq:OmegaComponents}
+%\end{equation}
+%%
+%Each of the three components of the angular velocity vector, measured in the
+%spacecraft body frame, can be found in the cross product matrix defined in
+%Eq. \ref{Eq:OmegaCrossMatrix}.  The subscripts on the right hand side of
+%Eq. \ref{Eq:OmegaComponents} tell us where to find these components after
+%multiplying the three 3$\times$3 matrices on the right hand side of
+%Eq. \ref{Eq:CSFixedKinematics3}.
 
-In summary, in CSFixed mode, Eq. \ref{Eq:CSFixedRotationMatrix} is used to
-calculate $\mathbf{A}_{BI}$, and Equations \ref{Eq:CSFixedKinematics3} and
-\ref{Eq:OmegaComponents} are used to calculate
-$\{\mathbf{\boldsymbol\omega}_{IB}\}_B$.  If another attitude parameterization
-is required, GMAT uses the algorithms in Sec.~\ref{Sec:AttitudeParameterizations}
-to transform from $\mathbf{A}_{BI}$ and $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$
-to the required parameterization.  Now let's look at the spinning spacecraft
-mode.
 
 \subsubsection{Spinning Spacecraft Mode}
 
 In spinning spacecraft mode, GMAT propagates the attitude by assuming the spin
 axis direction is fixed in inertial space.  The spacecraft attitude at some time,
-$t$, is kinematically propgated from the attitude initial conditions.  
-
-The user provides three pieces of information in the spinning mode. 
-They first choose a coordinate system, $\mathcal{F}_i$, in which to define the
-initial conditions.  $\mathcal{F}_i$ must be an inertial coordinate system. 
-Secondly, they define the initial attitude with respect
-to $\mathcal{F}_i$ by providing $\mathbf{A}_{BI}(t_o)$ or an equivalent
+$t$, is kinematically propagated from the attitude initial conditions.
+The user defines the initial attitude with respect to $\mathcal{F}_i$ by providing $\mathbf{A}_{BI}(t_o)$ or an equivalent
 parameterization that is then converted to the Attitude matrix.  The user also
 provides the angular velocity of the body axes with respect to the inertial axes
-expressed in $\mathcal{F}_i$, $\{\boldsymbol\omega_{IB}\}_i$.  If it is more
-convenient for the user to provide angular velocity expressed in the spacecraft
-body frame, GMAT will accept this input as well.
+expressed in $\mathcal{F}_i$, $\{\boldsymbol\omega_{IB}\}_i$.  
 
 To calculate $\mathbf{A}_{BI}(t)$ where $t$ is an arbitrary epoch,
 we begin by calculating $\mathbf{A}_{B_{o}I}$, understanding that
