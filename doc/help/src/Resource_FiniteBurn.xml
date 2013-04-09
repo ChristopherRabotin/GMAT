@@ -50,7 +50,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.0*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -138,7 +138,7 @@
             <entry><para>Deprecated. Allows you to define the format of the
             finite burn thrust direction. This field has no affect. The finite
             burn thrust direction, as specified in the
-            <guilabel>Thruster</guilabel> object, is always given in
+            <guilabel>Thruster</guilabel> resource, is always given in
             <literal>Cartesian</literal> format. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
