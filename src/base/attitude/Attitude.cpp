@@ -2005,17 +2005,14 @@ bool Attitude::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-   bool success = false;
    if (type == Gmat::COORDINATE_SYSTEM)
    {
       if (refCSName == oldName)
       {
          refCSName = newName;
-         success = true;
       }
    }
-   if (success) return true;
-   return GmatBase::RenameRefObject(type, oldName, newName);
+   return true;
 }
                                
 //------------------------------------------------------------------------------
