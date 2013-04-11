@@ -353,7 +353,7 @@ BeginScript 'Initializations'
    ImpactSat_MoonFixed.Z = -1730.522; 
 
    %---- Define the initial conditions for ImpactSat
-   GMAT ImpactSat.Epoch = ImpactSat_MoonFixed.Epoch;
+   GMAT ImpactSat.Epoch = ImpactSat_MoonFixed.Epoch.UTCGregorian
    GMAT ImpactSat.X = ImpactSat_MoonFixed.EarthMJ2000Eq.X;
    GMAT ImpactSat.Y = ImpactSat_MoonFixed.EarthMJ2000Eq.Y;
    GMAT ImpactSat.Z = ImpactSat_MoonFixed.EarthMJ2000Eq.Z;
@@ -419,7 +419,7 @@ EndScript
 %----- Propagate LCROSS to EDUS Maneuver and Perform Maneuver
 Propagate EarthFull(LRO) {LRO.A1ModJulian = LCROSS.A1ModJulian};
 GMAT PropEpoch = RefEpoch + ET_EDUSdV;
-LRO.Epoch = LCROSS.Epoch;
+LRO.Epoch = LCROSS.Epoch.UTCGregorian
 Propagate EarthFull(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
 
 %---- Perform the maneuver
