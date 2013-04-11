@@ -501,7 +501,7 @@ GTDS Mathematical Theory \cite{GTDS}.
 
 \noindent Find: $\mathbf{r}$ and $\mathbf{v}$
 
-We begin by using the mean longitude, $\lambda$, to find the true
+We begin by using the mean longitude, $\lambda$, to find the eccentric
 longitude $F$.  The equation relating the two is transcendental:
 \begin{equation}
      \lambda = F + h\cos{F} - k \sin{F}
@@ -523,7 +523,7 @@ where
     f'(F) &=& 1 - h \sin(F) - k \cos(F)
 \end{eqnarray}
 
-Once the true longitude is calculated, we continue with
+Once the eccentric longitude is calculated, we continue with
 %
 \begin{equation}
    \beta = \frac{1}{1 + \sqrt{1 - h^2 - k^2}} \label{Eq:Beta}
@@ -534,7 +534,7 @@ Once the true longitude is calculated, we continue with
 \end{equation}
 %
 \begin{equation}
-   r = a(1 - k\cos{F} - h\sin{f})
+   r = a(1 - k\cos{F} - h\sin{F})
 \end{equation}
 
 The cartesian components expressed in the equinoctial coordinate
@@ -613,7 +613,7 @@ GTDS Mathematical Theory \cite{GTDS}.
 
 \noindent Given:  $\mathbf{r}$, $\mathbf{v}$, and $\mu$
 
-\noindent Fine:  $a$, $h$, $k$, $p$, $q$, $\lambda$, and $\mu$
+\noindent Find:  $a$, $h$, $k$, $p$, $q$, $\lambda$, and $\mu$
 
 The orbit eccentricity and energy are calculated using
 %
