@@ -46,6 +46,11 @@ public:
    
    int OnExit(void);
    int FilterEvent(wxEvent& event);
+
+#ifndef INCLUDE_WX_DEBUG
+   void OnAssertFailure(const wxChar *file, int line, const wxChar *func, 
+         const wxChar *cond, const wxChar *msg);
+#endif
    
 protected:
    

@@ -106,7 +106,7 @@ bool GmatApp::OnInit()
    {
       GmatAppData *gmatAppData = GmatAppData::Instance();
       FileManager *fm = FileManager::Instance();
-      wxString startupFile = fm->GetFullStartupFilePath().c_str();
+      std::string startupFile = fm->GetFullStartupFilePath();
       
       // continue work on this (loj: 2008.12.04)
       //@todo: add all files contains gmat_startup_file in
@@ -143,7 +143,7 @@ bool GmatApp::OnInit()
       theModerator = Moderator::Instance();
       
       // initialize the moderator
-      if (theModerator->Initialize(startupFile.c_str(), true))
+      if (theModerator->Initialize(startupFile, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
          theModerator->SetUiInterpreter(guiInterp);
@@ -456,6 +456,34 @@ int GmatApp::FilterEvent(wxEvent& event)
    
    return -1;
 }
+
+
+#ifndef INCLUDE_WX_DEBUG
+//------------------------------------------------------------------------------
+// void OnAssertFailure(const wxChar *file, int line, const wxChar *func, 
+//         const wxChar *cond, const wxChar *msg)
+//------------------------------------------------------------------------------
+/**
+ * Overrides the wxApp::OnAssertFailure method, hiding wxWidgets assertion 
+ * failures.  
+ *
+ * To see the wx assertions, define the macro INCLUDE_WX_DEBUG in the 
+ * preprocessor.
+ *
+ * @param  file The name of the source file where the assert occurred
+ * @param  line The line number in this file where the assert occurred
+ * @param  func The name of the function where the assert occurred, may be 
+ *              empty if the compiler doesn't support C99 __FUNCTION__
+ * @param  cond The condition of the failed assert in text form
+ * @param  msg  The message specified as argument to wxASSERT_MSG or 
+ *              wxFAIL_MSG, will be NULL if just wxASSERT or wxFAIL was used
+ */
+//------------------------------------------------------------------------------
+void GmatApp::OnAssertFailure(const wxChar *file, int line, const wxChar *func, 
+         const wxChar *cond, const wxChar *msg)
+{
+}
+#endif
 
 
 //------------------------------------------------------------------------------
