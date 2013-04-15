@@ -3919,7 +3919,11 @@ bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
          {
             currCh = str2[currIndex];
             prevCh = str2[currIndex-1];
-            nextCh = str2[currIndex+1];
+            // If currIndex == size-1, set currCh to null terminator
+            if (currIndex == size-1)
+               nextCh = '\0';
+            else
+               nextCh = str2[currIndex+1];
             if (currCh == 'E' || currCh == 'e')
             {
                #ifdef DEBUG_SCI_NOTATION
