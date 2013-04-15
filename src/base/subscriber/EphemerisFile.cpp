@@ -4108,7 +4108,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #endif
       return true;
    }
-   justManeuvered == false;
+   justManeuvered = false;
    
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
