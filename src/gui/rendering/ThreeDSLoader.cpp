@@ -855,35 +855,37 @@ bool ThreeDSLoader::LoadFaceList()
    if (faceCount <= MAX_POLYGONS)
    {
       polygon_type *polygon = theModel->GetPolygonArray();
+      unsigned short index;
 
       // Loop through file and extract all of the face information
       for (Integer i = polygonStart; i < totalFaceCount; i++)
       {
-         fread(&polygon[i].a, sizeof(unsigned short), 1, theFile);
+         fread(&index, sizeof(unsigned short), 1, theFile);
          #ifdef DEBUG_LOADING
             if (i == polygonStart)
                MessageInterface::ShowMessage("***====> vertexStart: %d, index "
-                     "for [a, b, c] : [%d ", vertexStart, polygon[i].a);
+                     "for [a, b, c] : [%d ", vertexStart, index);
          #endif
-         polygon[i].a += vertexStart;
-         fread(&polygon[i].b, sizeof(unsigned short), 1, theFile);
+         polygon[i].a = index + vertexStart;
+         fread(&index, sizeof(unsigned short), 1, theFile);
          #ifdef DEBUG_LOADING
             if (i == polygonStart)
-               MessageInterface::ShowMessage("%d ", polygon[i].b);
+               MessageInterface::ShowMessage("%d ", index);
          #endif
-         polygon[i].b += vertexStart;
-         fread(&polygon[i].c, sizeof(unsigned short), 1, theFile);
+         polygon[i].b = index + vertexStart;
+         fread(&index, sizeof(unsigned short), 1, theFile);
          #ifdef DEBUG_LOADING
             if (i == polygonStart)
-               MessageInterface::ShowMessage("%d] --> [", polygon[i].c);
+               MessageInterface::ShowMessage("%d] --> [", index);
          #endif
-         polygon[i].c += vertexStart;
+         polygon[i].c = index + vertexStart;
          #ifdef DEBUG_LOADING
             if (i == polygonStart)
                MessageInterface::ShowMessage("%d %d %d]\n", polygon[i].a,
                      polygon[i].b, polygon[i].c);
          #endif
-         fread(&faceFlag, sizeof(unsigned short), 1, theFile);
+         fread(&index, sizeof(unsigned short), 1, theFile);
+         faceFlag = index;
 
          #ifdef DUMP_DATA
             MessageInterface::ShowMessage("Polygon point %4d: "
