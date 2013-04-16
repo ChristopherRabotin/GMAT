@@ -123,7 +123,7 @@ If you have a disk containing Visual Studio Express, follow these steps:
 
 \subsection{64-bit Compilers (Optional)}
 
-If you plan to build the 64-bit version of GMAT, you'll need to install the Windows 7 SDK version 7.1.  You'll also need to be running on a 64-bit version of Windows so you can test the resulting build.
+If you plan to build the 64-bit version of GMAT{\footnote{The GMAT development team does not maintain the 64-bit builds of the system.  Project settings and source code files for 64-bit builds are not guaranteed to work without some user interaction to correct changes that may not have been checked in 64-bit compilations.}, you'll need to install the Windows 7 SDK version 7.1.  You'll also need to be running on a 64-bit version of Windows so you can test the resulting build.
 
 The SDK can be downloaded from (all on one line)
 \begin{quote}
@@ -170,11 +170,15 @@ Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root
 \section{Downloading GMAT}
 
 GMAT's source code is located in a Subversion repository at SourceForge.  In addition to the source code, the repository at SourceForge contains the build files we'll need to proceed, including wxWidgets project files configured for Visual Studio 2010.  Because of this, you need to begin by downloading the GMAT development code using a Subversion client.  I am using SmartSVN on Windows, but any client should work.  Set up your client to access code at the following URL:
-
 \begin{quote}
-https://gmat.svn.sourceforge.net/svnroot/gmat/trunk
+https://svn.code.sf.net/p/gmat/code/trunk
 \end{quote}
 \noindent Check out the entire source tree from that location into the GmatDevelopment folder you created earlier.  When you check out the tree, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT.
+
+Alternatively, if you can access Subversion from a command prompt, you can download the code directly by setting to your current diractory to the root folder containing the GmatDevelopment and Gmat3rdParty folders and then entering the command
+\begin{quote}
+svn checkout svn://svn.code.sf.net/p/gmat/code/trunk GmatDevelopment
+\end{quote}
 
 \section{Building wxWidgets}
 
@@ -246,9 +250,18 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 
 \noindent Copy these into your GmatDevelopment\textbackslash application\textbackslash bin folder.
 
-\section{Preparing SPICE (Optional)}
+\subsection{(Optional) Preparing for Debug Builds}
 
-GMAT can be built to include readers and writers for data in the SPICE kernel format supplied by the Jet Propulsion Laboratory (JPL).  If you want to build GMAT with these extensions, follow these steps:
+The GMAT solution file can be used to build a debug version of GMAT.  In order to use that version, you will need to build a set of wxWidgets debug libraries.  The procedure is the same as for the release build as described above, with the following changes:
+
+\begin{itemize}
+\item On the Visual C++ toolbar select ``DLL Debug'' rather than ``DLL Release'' as the solution configuration.
+\item After building the libraries, the debug versions will all have the letter ``d'' added to the library name: wxbase28d\_net\_vc\_custom.dll, wxbase28d\_odbc\_vc\_custom.dll, etc.  Copy these files into your GmatDevelopment\textbackslash application\textbackslash debug folder.
+\end{itemize}
+
+\section{Preparing SPICE}
+
+GMAT includes readers and writers for data in the SPICE kernel format supplied by the Jet Propulsion Laboratory (JPL).  In order to build GMAT, you'll need to add the SPICE libraries to your system.  To do this, follow these steps:
 
 \begin{enumerate}
 \item Download the SPICE toolkit for Visual C.  The 32-bit edition is available from
@@ -263,18 +276,7 @@ http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_64bit.html
 \item Unpack the archive into your Gmat3rdParty\textbackslash cspice (or cspice64 for 64-bit) folder.  You should unpack the files so that you have, for example, a Gmat3rdParty\textbackslash cspice\textbackslash include folder that contains the cspice header (.h) files.
 \end{enumerate}
 
-\noindent Note that cspice includes the Fortran to C library code; if you build with SPICE, you do not need to manage f2c separately when working with the GMAT base library code.
-
-\section{Preparing f2c (Optional)}
-
-GMAT uses the Fortran to C compiler, f2c, for certain dynamics models and solvers.  The SPICE libraries from JPL include the f2c library code as part of their library.  If you plan to work exclusively with GMAT's source code using a build that includes the SPICE extensions and do not have Fortran code that you need to convert to C, you can skip this step.  Otherwise, you need to follow these steps to configure the f2c system:
-
-\begin{enumerate}
-\item The GmatDevelopment\textbackslash build\textbackslash windows-VS2010 folder contains a minimal f2c build in the archive f2c.zip.  Locate this file.
-\item Unpack the file into your Gmat3rdParty\textbackslash f2c folder.  You should have three directories as a result: Gmat3rdParty\textbackslash f2c\textbackslash bin, Gmat3rdParty\textbackslash f2c\textbackslash lib, and Gmat3rdParty\textbackslash f2c\textbackslash include, along with a file containing the copyright notice of the owners of the f2c system.
-\end{enumerate}
-
-This completes installation of f2c.  The full source for the system can be downloaded and built from http://www.netlib.org/f2c/.
+\noindent Note that cspice includes Fortran to C (f2c) library code, so you do not need to manage f2c separately when working with the GMAT base library code.
 
 \section{Building GMAT}
 
@@ -284,17 +286,9 @@ At this point, GMAT should build without further configuration.  Follow these st
 \item Select ``File | Open | Project/Solution...'' from the menu bar
 \item Browse to the GmatDevelopment\textbackslash build\textbackslash windows-VS2010 folder
 \item Select the GmatVS2010.sln solution file and click the Open button.  The GMAT solution will open and show projects to build GMAT and several plugin libraries.
-\item The solution has several configurations, depending on how you want to proceed: Debug, ReleaseWithoutF2C, Release, and ReleaseWithSPICE.  Here's what you need to know about them:
-\begin{itemize}
-\item \textbf{Debug}:  A build with full debug enabled.  This build runs quite slowly, and is not recommended for general use, but may be helpful when debugging the system.  It does not use either SPICE or the MSISE90 model.
-\item \textbf{ReleaseWithoutF2C}: This configuration builds a working GMAT, but the MSISE90 code is turned off.  You might want to build it first, to test your setup.
-\item \textbf{Release}: Includes an f2c'd version of MSISE90 enabled; you'll need f2c installed in the locations described above to use this configuration.
-\item \textbf{ReleaseWithSPICE}: This is the ``Guaranteed to work'' configuration of GMAT that includes all of the base components, and includes the plugin libraries for MATLAB and the fmincon optimizer.  Note that the MATLAB extensions require additional configuration, described below.
-\end{itemize}
-\item Set the configuration to ReleaseWithoutF2C, Release, or ReleaseWithSPICE, depending on the elements installed in previous sections.
-\item Right click on the GMAT\_wxGui project, and select Rebuild to completely build GMAT.  This process takes a few minutes.
-\item Open Windows Explorer and browse to your GmatDevelopment\textbackslash application\textbackslash bin folder.  You should see GMAT.exe there, along with libGmatBase.dll and your wxWidgets libraries.
-\item Set up the GMAT data files and other files needed to run GMAT (See Appendix A).
+\item The solution has two configurations, depending on how you want to proceed: Debug and Release.  Select the configuration that you would like to build.
+\item Right click on the top node in the Solution Explorer, and select Rebuild to completely build GMAT including all of the plugins, but excluding the console application.  This process takes a few minutes.
+\item Open Windows Explorer and browse to your GmatDevelopment\textbackslash application\textbackslash bin or your GmatDevelopment\textbackslash application\textbackslash debug folder based on the configuration you selected.  You should see GMAT.exe there, along with libGmatBase.dll and your wxWidgets libraries.
 \item Double click on the GMAT.exe file to run GMAT.  Press the Run button to run the default mission.  Rejoice.
 \end{enumerate}
 
