@@ -706,6 +706,7 @@ void GmatMdiChildFrame::SetTitle(wxString newTitle)
    childTitle = newTitle;
    // Need to set the actual window name so that Rename/Delete work properly
    SetName(newTitle);
+   mChildName = newTitle;  // but is this correct?
 }
 
 
