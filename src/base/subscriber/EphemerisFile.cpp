@@ -55,7 +55,6 @@
 //#define DEBUG_EPHEMFILE_COMMENTS
 //#define DEBUG_EPHEMFILE_HEADER
 //#define DEBUG_EPHEMFILE_METADATA
-//#define DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
 //#define DEBUG_EPHEMFILE_TEXT
 //#define DEBUG_EPHEMFILE_SOLVER_DATA
 //#define DEBUG_INTERPOLATOR_TRACE
@@ -63,6 +62,7 @@
 //#define DBGLVL_EPHEMFILE_DATA_LABELS 1
 //#define DBGLVL_EPHEMFILE_MANEUVER 2
 //#define DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE 1
+//#define DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE 1
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -188,7 +188,6 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    processingLargeStep  (false),
    spkWriteFailed       (true),
    writeCommentAfterData (true),
-   justManeuvered       (false),
    prevRunState         (Gmat::IDLE)
 {
    #ifdef DEBUG_EPHEMFILE
@@ -366,7 +365,6 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    finalEpochReached    (ef.finalEpochReached),
    handleFinalEpoch     (ef.handleFinalEpoch),
    writeDataInDataCS    (ef.writeDataInDataCS),
-   justManeuvered       (ef.justManeuvered),
    processingLargeStep  (ef.processingLargeStep),
    spkWriteFailed       (ef.spkWriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
@@ -452,7 +450,6 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    processingLargeStep  = ef.processingLargeStep;
    spkWriteFailed       = ef.spkWriteFailed;
    writeCommentAfterData = ef.writeCommentAfterData;
-   justManeuvered       = ef.justManeuvered;
    prevRunState         = ef.prevRunState;
    coordConverter       = ef.coordConverter;
    
@@ -1790,7 +1787,9 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData)
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleSpkOrbitData() entered, writeData=%d, currEpochInDays = %.13lf\n", writeData, currEpochInDays);
+      ("EphemerisFile::HandleSpkOrbitData() entered, writeData=%d, currEpochInDays = %.13lf, \n"
+       "firstTimeWriting=%d, writingNewSegment=%d\n", writeData, currEpochInDays, firstTimeWriting,
+       writingNewSegment);
    #endif
    
    if (writeData)
@@ -1809,10 +1808,19 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData)
          DebugWriteOrbit("In HandleSpkOrbitData:", currEpochInDays, currState, true, true);
          #endif
       }
+      
+      // Set flags (GMT-3745 SPK writing fix)
+      if (firstTimeWriting)
+         firstTimeWriting = false;
+      
+      if (writingNewSegment)
+         writingNewSegment = false;
    }
    
    #ifdef DEBUG_EPHEMFILE_SPICE
-   MessageInterface::ShowMessage("EphemerisFile::HandleSpkOrbitData() leaving\n");
+   MessageInterface::ShowMessage
+      ("EphemerisFile::HandleSpkOrbitData() leaving, firstTimeWriting=%d, writingNewSegment=%d\n",
+       firstTimeWriting, writingNewSegment);
    #endif
 }
 
@@ -4095,8 +4103,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    currEpochInSecs = currEpochInDays * GmatTimeConstants::SECS_PER_DAY;
    
    // Ignore duplicate data
-   if ((currEpochInSecs == prevEpochInSecs) && justManeuvered == false)
-
+   if (currEpochInSecs == prevEpochInSecs)
    {
       #ifdef DEBUG_MANEUVER
          MessageInterface::ShowMessage("Ignoring dupe\n");
@@ -4108,8 +4115,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #endif
       return true;
    }
-   justManeuvered = false;
-   
+  
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
    //------------------------------------------------------------
@@ -4290,7 +4296,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       // Convert current epoch to gregorian format
       std::string epochStr = ToUtcGregorian(epoch, true, 2);
       
-      #ifdef DBGLVL_EPHEMFILE_RESTART
+      #ifdef DEBUG_EPHEMFILE_RESTART
       MessageInterface::ShowMessage
             ("=====> Burn event, Restarting the interpolation at %s\n", epochStr.c_str());
       #endif
@@ -4309,7 +4315,6 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       }
       
       RestartInterpolation(comment, true);
-      justManeuvered = true;
    }
    
    prevRunState = runstate;
@@ -4364,6 +4369,14 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
                      
                      if (prevPropName != "")
                      {
+                        #ifdef DEBUG_EPHEMFILE_RESTART
+                        MessageInterface::ShowMessage
+                           ("EphemerisFile::HandlePropagatorChange() Calling FinishUpWriting()\n");
+                        #endif
+                        
+                        // Write any data in the buffer (fixes missing lines for GMT-3745)
+                        FinishUpWriting();
+                        
                         #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE
                         MessageInterface::ShowMessage
                            ("=====> Propagator change, Restarting the interpolation\n");
@@ -4420,7 +4433,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
                                            const std::string &satName,
                                            const std::string &desc)
 {
-   #ifdef DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
+   #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
    MessageInterface::ShowMessage
       ("EphemerisFile::HandleScPropertyChange() entered, originator=<%p>, "
        "epoch=%.15f, satName='%s', desc='%s'\n", originator, epoch, satName.c_str(),
@@ -4438,7 +4451,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    
    if (spacecraftName == satName)
    {
-      #ifdef DBGLVL_EPHEMFIL_RESTART
+      #ifdef DEBUG_EPHEMFILE_RESTART
       MessageInterface::ShowMessage
          ("EphemerisFile::HandleScPropertyChange() Calling FinishUpWriting()\n");
       #endif
@@ -4453,7 +4466,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
       RestartInterpolation(comment, true);
    }
    
-   #ifdef DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
+   #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
    MessageInterface::ShowMessage("EphemerisFile::HandleScPropertyChange() leaving\n");
    #endif
 }
