@@ -1,4 +1,4 @@
-function [cart] = equinoctial2cart(equinoct,mu)
+function [cart] = Equinoctial2Cart(equinoct,mu)
 
 %%  If mu in not provided, use the mu for Earth
 if nargin < 2
@@ -20,7 +20,7 @@ meanLon = equinoct(6,1);
 p2 = p*p; h2 = h*h; k2 = k*k; q2 = q*q;
 j = 1;  
 
-%%  Iterate to find true longitude, F
+%%  Iterate to find eccentric longitude, F
 F = meanLon;
 diff = 1e12;
 while diff > 1e-13

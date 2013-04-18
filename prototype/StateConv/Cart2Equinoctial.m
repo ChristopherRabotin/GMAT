@@ -36,10 +36,10 @@ hv    = cross(rv,vv);
 hvhat = hv/norm(hv);
 hx    = hvhat(1,1); hy = hvhat(2,1); hz = hvhat(3,1);
 
-denom = (1 + hz^j);
+denom = (1 + hz*j);
 fx = 1 - hx^2/denom;
 fy = -hx*hy/denom;
-fz = -hx^j;
+fz = -hx*j;
 fvhat = [fx fy fz]';
 gv = cross(hvhat,fvhat);
 

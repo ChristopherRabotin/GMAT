@@ -1,13 +1,14 @@
 function stateOut = stateconv(stateIn,inputType,outPutType,mu)
 
 % Defintion of Types
-% Type = 1;  Cartesian            [X Y Z VX VY BZ]';
-% Type = 2;  Classical Keplerian  [SMA ECC INC AOP RAAN TA]';
-% Type = 3;  Modified keplerian   [RadPer RadApo INC AOP RAAN TA]';
-% Type = 4;  SphericalAzFPA       [RMAG RA DEC VMAG AZI FPA]';
-% Type = 5;  SphericalRaDec       [RMAG RA DEC VMAG RAV DECV]';
-% Type = 6;  Equinoctial          [SMA H K P Q MLONG]'
-% Type = 7;  Modified Equinoctial [P F G H K L]'
+% Type = 1;  Cartesian             [X Y Z VX VY BZ]';
+% Type = 2;  Classical Keplerian   [SMA ECC INC AOP RAAN TA]';
+% Type = 3;  Modified keplerian    [RadPer RadApo INC AOP RAAN TA]';
+% Type = 4;  SphericalAzFPA        [RMAG RA DEC VMAG AZI FPA]';
+% Type = 5;  SphericalRaDec        [RMAG RA DEC VMAG RAV DECV]';
+% Type = 6;  Equinoctial           [SMA H K P Q MLONG]'
+% Type = 7;  Modified Equinoctial  [P F G H K L]'
+% Type = 8;  Nonsingular Keplerian [SMA E1 E2 E3 E4 E5]'
 
 % Validate the input
 if max(size(stateIn)) ~=6 || min(size(stateIn)) ~=1
@@ -38,7 +39,7 @@ end
 switch outPutType
    case {1}
        stateOut = cart;
-   case {2,3,4,5,6,7}
+   case {2,3,4,5,6,7,8}
        stateOut = FromCartesian(cart,outPutType,mu);
 end
 

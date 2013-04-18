@@ -1,13 +1,14 @@
 function [state] = FromCartesian(cart,outPutType,mu)
 
 % Defintion of Types
-% Type = 1;  Cartesian            [X Y Z VX VY BZ]';
-% Type = 2;  Classical Keplerian  [SMA ECC INC RAAN AOP TA]';
-% Type = 3;  Modified keplerian   [RadPer RadApo INC RAAN AOP TA]';
-% Type = 4;  SphericalAzFPA       [RMAG RA DEC VMAG AZI FPA]';
-% Type = 5;  SphericalRaDec       [RMAG RA DEC VMAG RAV DECV]';
-% Type = 6;  Equinoctial          [SMA H K P Q MLONG]'
-% Type = 7;  Modified Equinoctial [P F G H K L]'
+% Type = 1;  Cartesian             [X Y Z VX VY BZ]';
+% Type = 2;  Classical Keplerian   [SMA ECC INC RAAN AOP TA]';
+% Type = 3;  Modified keplerian    [RadPer RadApo INC RAAN AOP TA]';
+% Type = 4;  SphericalAzFPA        [RMAG RA DEC VMAG AZI FPA]';
+% Type = 5;  SphericalRaDec        [RMAG RA DEC VMAG RAV DECV]';
+% Type = 6;  Equinoctial           [SMA H K P Q MLONG]'
+% Type = 7;  Modified Equinoctial  [P F G H K L]'
+% Type = 8;  Nonsingular Keplerian [SMA E1 E2 E3 E4 E5]'
 
 %  Validate the input
 if size(cart,1) ~=6 || size(cart,2) ~=1
@@ -33,6 +34,9 @@ elseif outPutType == 6
     state = Cart2Equinoctial(cart,mu);  % The Equinoctial state
 elseif outPutType == 7
     state = Cart2Mee(cart,mu);      % The Modified Equinoctial state
+elseif outPutType == 8
+    eq = Cart2Equinoctial(cart,mu); % The Nonsingular Keplerian state
+    state = Equinoctial2Nonsingular(eq,mu);
 else
 	state = [];
 	disp('Error in ToCartesian:  input state type is not supported')
