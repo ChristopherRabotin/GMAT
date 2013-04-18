@@ -1855,6 +1855,11 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                // Linux needs this; it may make animation flaky (see GMT-2022)
                childDeleted = true;
             #endif
+            #ifdef __WXMAC__
+               // Mac appears to need this too (see GMT-3141);
+               // It may make animation flaky? (see GMT-2022)
+               childDeleted = true;
+            #endif
          }
       }
       
