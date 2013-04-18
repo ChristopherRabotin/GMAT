@@ -1,0 +1,20 @@
+function [cart] = sphAzFPA2cart(state)
+
+cosRA = cos(state(2,1); 
+sinRA = sin(state(2,1));
+cosDEC = cos(state(3,1); 
+sinDEC = sin(state(3,1));
+cosAz = cos(state(5,1); 
+sinAz = sin(state(5,1));
+cosFPA = cos(state(6,1); 
+sinFPA = sin(state(6,1));
+
+rv = r*[cosDEC*cosRA cosDEC*sinRA sinDEC]';
+
+vv = v[cos? cosDEC cos ??sin ?(sin ?f sin ?
++cos ?f sin ? cos ?)]
+(4.81)
+vy = v[cos? cosDEC sin ?+sin ?(sin ?f cos ?
+?cos ?f sin ? sin ?)]
+(4.82)
+vz = v[cos? sin ? + sin ? cos ?f cosDEC]
