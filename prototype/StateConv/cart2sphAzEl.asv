@@ -1,4 +1,0 @@
-function [state] = cart2sphAzEl(cart)
-
-rMag = norm(cart(1:3,1));
-vMag = norm(cart(4:6,1));
