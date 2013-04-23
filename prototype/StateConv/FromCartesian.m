@@ -35,8 +35,8 @@ elseif outPutType == 6
 elseif outPutType == 7
     state = Cart2Mee(cart,mu);      % The Modified Equinoctial state
 elseif outPutType == 8
-    eq = Cart2Equinoctial(cart,mu); % The Nonsingular Keplerian state
-    state = Equinoctial2Nonsingular(eq,mu);
+    kep = Cart2Kep(cart,mu); % The Nonsingular Keplerian state
+    state = KEP2NSK(kep);
 else
 	state = [];
 	disp('Error in ToCartesian:  input state type is not supported')
