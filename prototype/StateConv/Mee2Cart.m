@@ -30,7 +30,7 @@ end
 
 if ( abs(p) < 1e-7 )
 %     Cart = [];
-    disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
+%     disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
 %     return
 end
 

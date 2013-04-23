@@ -26,7 +26,7 @@ evec = cross(veci,hvec)/mu - r_hat;
 
 if ( abs(h_hat(3) - (-1)) < 1e-7 )
 %     Mee = [];
-    disp('Error: Singularity occurs during calculate Modified Equinoctial element h and k.')
+%     disp('Error: Singularity occurs during calculate Modified Equinoctial element h and k.')
 %     return
 end
 
@@ -35,13 +35,13 @@ p_mee = hmag^2/mu;
 
 if ( abs( 1- norm(evec) ) < 1e-7)
 %     Mee = [];
-    disp('Error: A nearly parabolci orbit is undefiend with Modified Equinoctial Elements')
+%     disp('Error: A nearly parabolci orbit is undefiend with Modified Equinoctial Elements')
 %     return
 end
 
 if ( abs(p_mee) < 1e-7 )
 %     Mee = [];
-    disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
+%     disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
 %     return
 end
 
