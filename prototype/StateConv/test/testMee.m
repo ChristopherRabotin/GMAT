@@ -7,7 +7,7 @@ end
 
 function ret = setup()                                      %#ok<*DEFNU>
 addpath('..');
-tol = 1e-13;
+tol = 1e-6;
 mu = 398600.4418;
 ret = {tol, mu};
 end

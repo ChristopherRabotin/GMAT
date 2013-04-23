@@ -1,4 +1,4 @@
-function test_suite = testNonKep()                  %#ok<STOUT>
+function test_suite = testNonKep()                          %#ok<STOUT>
 %TESTNONKEP Unit tests for Nonsingular Keplerian state representation
 
 initTestSuite();
@@ -7,217 +7,179 @@ end
 
 function ret = setup()                                      %#ok<*DEFNU>
 addpath('..');
-ret.tol = 1e-13;
+ret.tol = 1e-6;
 ret.mu = 398600.4418;
 end
 
 %% Circular EqPro
 function testCart2NonKepCircularEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Circular_EqPro.truth', inp);
 end
 
 function testNonKep2CartCircularEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Circular_EqPro.truth', inp);
 end
 
 %% Circular IncPro
 function testCart2NonKepCircularIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Circular_IncPro.truth', inp);
 end
 
 function testNonKep2CartCircularIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Circular_IncPro.truth', inp);
 end
 
 %% Circular Polar
 function testCart2NonKepCircularPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Circular_Polar.truth', inp);
 end
 
 function testNonKep2CartCircularPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Circular_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Circular_Polar.truth', inp);
+end
+
+%% Circular IncRetro
+function testCart2NonKepCircularIncRetro(inp)
+cart2nk('Circular_IncRetro.truth', inp);
+end
+
+function testNonKep2CartCircularIncRetro(inp)
+nk2cart('Circular_IncRetro.truth', inp);
+end
+
+%% Circular EqRetro
+function testCart2NonKepCircularEqRetro(inp)
+cart2nk('Circular_EqRetro.truth', inp);
+end
+
+function testNonKep2CartCircularEqRetro(inp)
+nk2cart('Circular_EqRetro.truth', inp);
 end
 
 %% Elliptic EqPro
 function testCart2NonKepEllipticEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Elliptic_EqPro.truth', inp);
 end
 
 function testNonKep2CartEllipticEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Elliptic_EqPro.truth', inp);
 end
 
 %% Elliptic IncPro
 function testCart2NonKepEllipticIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Elliptic_IncPro.truth', inp);
 end
 
 function testNonKep2CartEllipticIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Elliptic_IncPro.truth', inp);
 end
 
 %% Elliptic Polar
 function testCart2NonKepEllipticPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Elliptic_Polar.truth', inp);
 end
 
 function testNonKep2CartEllipticPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Elliptic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Elliptic_Polar.truth', inp);
+end
+
+%% Elliptic IncRetro
+function testCart2NonKepEllipticIncRetro(inp)
+cart2nk('Elliptic_IncRetro.truth', inp);
+end
+
+function testNonKep2CartEllipticIncRetro(inp)
+nk2cart('Elliptic_IncRetro.truth', inp);
+end
+
+%% Elliptic EqRetro
+function testCart2NonKepEllipticEqRetro(inp)
+cart2nk('Elliptic_Polar.truth', inp);
+end
+
+function testNonKep2CartEllipticEqRetro(inp)
+nk2cart('Elliptic_Polar.truth', inp);
 end
 
 %% Hyperbolic EqPro
 function testCart2NonKepHyperbolicEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Hyperbolic_EqPro.truth', inp);
 end
 
 function testNonKep2CartHyperbolicEqPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Hyperbolic_EqPro.truth', inp);
 end
 
 %% Hyperbolic IncPro
 function testCart2NonKepHyperbolicIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Hyperbolic_IncPro.truth', inp);
 end
 
 function testNonKep2CartHyperbolicIncPro(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Hyperbolic_IncPro.truth', inp);
 end
 
 %% Hyperbolic Polar
 function testCart2NonKepHyperbolicPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, inp.mu), nkFF{1}, ...
-    'relative', inp.tol);
+cart2nk('Hyperbolic_Polar.truth', inp);
 end
 
 function testNonKep2CartHyperbolicPolar(inp)
-truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
-    'Hyperbolic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, inp.mu), cartFF{1}, ...
-    'relative', inp.tol);
+nk2cart('Hyperbolic_Polar.truth', inp);
+end
+
+%% Hyperbolic IncRetro
+function testCart2NonKepHyperbolicIncRetro(inp)
+cart2nk('Hyperbolic_IncRetro.truth', inp);
+end
+
+function testNonKep2CartHyperbolicIncRetro(inp)
+nk2cart('Hyperbolic_IncRetro.truth', inp);
+end
+
+%% Hyperbolic EqRetro
+function testCart2NonKepHyperbolicEqRetro(inp)
+cart2nk('Hyperbolic_EqRetro.truth', inp);
+end
+
+function testNonKep2CartHyperbolicEqRetro(inp)
+nk2cart('Hyperbolic_EqRetro.truth', inp);
+end
+
+%% Null Orbit
+function testCart2NonKepNull(inp)
+cart2nk('Null.truth', inp);
+end
+
+function testNonKep2CartNull(inp)
+nk2cart('Null.truth', inp);
 end
 
 function teardown(~)
 rmpath('..');
+end
+
+%% Common Functions
+function cart2nk(tfilename, params)
+truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
+    tfilename);
+fid = fopen(truthFile);
+cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
+nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
+fclose(fid);
+nkFF{1}(6) = nkFF{1}(6) * pi()/180;
+assertElementsAlmostEqual(stateconv(cartFF{1}, 1, 8, params.mu), ...
+    nkFF{1}, 'relative', params.tol);
+end
+
+function nk2cart(tfilename, params)
+truthFile = fullfile('truth', 'NonsingularKeplerian', 'FF', ...
+    tfilename);
+fid = fopen(truthFile);
+cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
+nkFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
+fclose(fid);
+nkFF{1}(6) = nkFF{1}(6) * pi()/180;
+assertElementsAlmostEqual(stateconv(nkFF{1}, 8, 1, params.mu), ...
+    cartFF{1}, 'relative', params.tol);
 end
