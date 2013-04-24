@@ -946,7 +946,7 @@
               <entry><para>An inertial coordinate system. The x-axis points
               along the line formed by the intersection of the Earth’s mean
               equator and the mean ecliptic plane at the J2000 epoch. The
-              z-axis is normal to the mean equatorial plane at the J2000 Epoch
+              z-axis is normal to the mean ecliptic plane at the J2000 Epoch
               and the y-axis completes the right-handed set. This system is
               computed using IAU-1976/FK5 theory with 1980 update for
               nutation. </para></entry>
