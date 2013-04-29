@@ -1,6 +1,19 @@
-GMAT Build System README
----
+Overview
+--------
+GMAT has two parallel build systems:
 
+* Primary: VS2010 on Windows, GCC on Mac/Linux
+* Alpha: CMake on all platforms
+
+
+Primary Build System
+--------------------
+Details on the primary build system are available on the GMAT wiki:
+http://li394-117.members.linode.com:8090/display/GW/Compiling
+
+
+Alpha Build System
+------------------
 This readme file provides instructions for Building Gmat.
 
 
