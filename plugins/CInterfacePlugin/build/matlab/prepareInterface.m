@@ -4,13 +4,20 @@ disp('trunk/application/matlab/libCInterface.');
 
 thisdir = fileparts(mfilename('fullpath'));
 appdir = fullfile(thisdir, '..', '..', '..', '..', 'application');
-libdir = fullfile(appdir, 'bin', 'libCInterface');
-hdir = fullfile(thisdir, '..', '..', 'src', 'plugin', ...
+libfile = fullfile(appdir, 'bin', 'libCInterface');
+hfile = fullfile(thisdir, '..', '..', 'src', 'plugin', ...
     'CInterfaceFunctions');
 incdir = fullfile(thisdir, '..', '..', 'src', 'include');
 matlabdir = fullfile(appdir, 'matlab', 'libCInterface');
 
-[notfound, warnings] = loadlibrary(libdir, hdir, ...
-    'mfilename','interfacewrapper', 'includepath', incdir);
+[notfound, warnings] = loadlibrary(libfile, hfile, ...
+    'mfilename', 'interfacewrapper', 'includepath', incdir);
 
+% interfacewrapper.m
 movefile('interfacewrapper.m', matlabdir);
+
+% thunk library
+d = dir(['libCInterface_thunk_' computer() '*']);
+for i = 1:length(d)
+    movefile(d(1).name, matlabdir);
+end
