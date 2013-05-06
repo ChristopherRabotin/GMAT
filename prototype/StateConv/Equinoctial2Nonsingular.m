@@ -47,7 +47,7 @@ e4 = q*c;
 e5 = meanLon;
 
 % Output
-Nonsingular = real([SMA e1 e2 e3 e4 e5]);     
+Nonsingular = real([SMA e1 e2 e3 e4 e5]');     
 
 
 

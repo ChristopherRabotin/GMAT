@@ -47,7 +47,7 @@ q   = e4/c;
 meanLon = e5;
 
 % Output
-equinoct = real([sma h k p q meanLon]); 
+equinoct = real([sma h k p q meanLon]'); 
 
 
 
