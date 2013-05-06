@@ -385,6 +385,22 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesSecondary() const
 }
 
 //---------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesReferenceObject() const
+//---------------------------------------------------------------------------
+/**
+ * Returns enum value indicating whether or not this axis system uses a
+ * reference object.
+ *
+ * @return enum value indicating whether or not this axis system uses a
+ *         reference object
+ */
+//---------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage AxisSystem::UsesReferenceObject() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+//---------------------------------------------------------------------------
 //  GmatCoordinate::ParameterUsage UsesXAxis() const
 //---------------------------------------------------------------------------
 /**
@@ -458,6 +474,9 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesNutationUpdateInterval() const
  *
  * @return flag indicating whether or not this axis system uses the
  *         spacecraft as origin, primary, or secondary
+ *
+ * @note Child classes using a Reference Object will check in their
+ * implementation of this method.
  */
 //---------------------------------------------------------------------------
 bool AxisSystem::UsesSpacecraft(const std::string &withName) const
@@ -482,6 +501,8 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
          if ((withName == "") || (s->GetName() == withName))   return true;
       }
    }
+   // Child classes using a Reference Object will check in their
+   // implementation of this method.
    return false;
 }
 
@@ -541,7 +562,7 @@ void AxisSystem::SetPrimaryObject(SpacePoint *prim)
 }
 
 //---------------------------------------------------------------------------
-//  void SetPrimaryObject(SpacePoint *second)
+//  void SetSecondaryObject(SpacePoint *second)
 //---------------------------------------------------------------------------
 /**
  * Sets the secondary object to the input SpacePoint
@@ -554,6 +575,22 @@ void AxisSystem::SetSecondaryObject(SpacePoint *second)
 {
    // default behavior is to ignore this
 }
+
+//---------------------------------------------------------------------------
+//  void SetReferenceObject(SpacePoint *refObj)
+//---------------------------------------------------------------------------
+/**
+ * Sets the reference object to the input SpacePoint
+ *
+ * @param <second> secondary SpacePoint object
+ *
+ */
+//---------------------------------------------------------------------------
+void AxisSystem::SetReferenceObject(SpacePoint *refObj)
+{
+   // default behavior is to ignore this
+}
+
 
 
 //---------------------------------------------------------------------------
@@ -686,6 +723,23 @@ SpacePoint* AxisSystem::GetSecondaryObject() const
 {
    return NULL;
 }
+
+//------------------------------------------------------------------------------
+//  SpacePoint* GetReferenceObject() const
+//------------------------------------------------------------------------------
+/**
+ * Returns a pointer to the reference SpacePoint object.
+ *
+ * @return  a pointer to the reference SpacePoint object
+ *
+ */
+//------------------------------------------------------------------------------
+SpacePoint* AxisSystem::GetReferenceObject() const
+{
+   return NULL;
+}
+
+
 
 //---------------------------------------------------------------------------
 //  A1Mjd GetEpoch() const
@@ -916,7 +970,8 @@ bool AxisSystem::Initialize()
    stDerivData = STderiv.GetDataVector();
    pmData      = PM.GetDataVector();
    
-   InitializeOrigin();
+   // Make sure to initialize the origin, if necessary
+   InitializeReference(origin);
    return true;
 }
 
@@ -1238,10 +1293,15 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
  */
 //------------------------------------------------------------------------------
 bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
-                                    const Real *inState,
-                                    Real *outState,
-                                    bool forceComputation)
+                                      const Real *inState,
+                                      Real *outState,
+                                      bool forceComputation)
 {
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem (*) on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+
    CalculateRotationMatrix(epoch, forceComputation);
    
    Real pos[3] = {inState[0], inState[1], inState[2]};   
@@ -1591,6 +1651,24 @@ bool AxisSystem::SetBooleanParameter(const std::string &label,
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& AxisSystem::GetRefObjectTypeArray()
+{
+   // Default is none
+   refObjectTypes.clear();
+   return refObjectTypes;
+}
+
 
 //------------------------------------------------------------------------------
 // void InitializeFK5()
@@ -2428,23 +2506,23 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
 }
 
 //---------------------------------------------------------------------------
-//  void InitializeOrigin()
+//  void InitializeReference(SpacePoint *refObj)
 //---------------------------------------------------------------------------
 /**
- * Initialization of the origin for the AxisSystem.
+ * Initialization of the origin or other reference object for the AxisSystem.
  *
- * @note  This is necessary for the BodyFixedPoint origins because they
- *        require local coordinate systems that must be created/handled.
+ * @note  This is necessary for the BodyFixedPoint origins/references because
+ *        they require local coordinate systems that must be created/handled.
  *
  */
 //---------------------------------------------------------------------------
-void AxisSystem::InitializeOrigin()
+void AxisSystem::InitializeReference(SpacePoint *refObj)
 {
-   // if the origin is a BodyFixedPoint it needs to be initialized
-   if (origin->IsOfType("BodyFixedPoint"))
+   // if the origin/reference is a BodyFixedPoint it needs to be initialized
+   if (refObj->IsOfType("BodyFixedPoint"))
    {
-      origin->SetSolarSystem(solar);
-      origin->Initialize();
+      refObj->SetSolarSystem(solar);
+      refObj->Initialize();
    }
    // otherwise do nothing (for now, anyway)
 }

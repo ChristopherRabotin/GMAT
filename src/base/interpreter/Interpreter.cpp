@@ -8473,33 +8473,99 @@ bool Interpreter::FinalPass()
       MessageInterface::ShowMessage("Initializing CoordinateSystem '%s'\n",
                                     i->c_str());
       #endif
-      refNameList = cs->GetRefObjectNameArray(Gmat::SPACE_POINT);
-      for (UnsignedInt j = 0; j < refNameList.size(); j++)
+      bool setCSObj = false;
+      ObjectTypeArray csTypes = cs->GetRefObjectTypeArray();
+      #if DBGLVL_FINAL_PASS > 1
+         MessageInterface::ShowMessage("In Interpreter, cs = %s\n", cs->GetName().c_str());
+         for (unsigned int jj = 0; jj < csTypes.size(); jj++)
+            MessageInterface::ShowMessage("   ref type %d = %d\n", (Integer) jj,
+                                         (Integer) csTypes[jj]);
+      #endif
+      for (UnsignedInt ii = 0; ii < csTypes.size(); ii++)
       {
          #if DBGLVL_FINAL_PASS > 1
-         MessageInterface::ShowMessage
-            ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+            MessageInterface::ShowMessage(
+                  "In Interpreter, getting ref object names for type %d\n",
+                  (Integer) csTypes.at(ii));
          #endif
-         
-         refObj = FindObject(refNameList[j]);
-         if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
+         refNameList.clear();
+         refNameList = cs->GetRefObjectNameArray(csTypes.at(ii));
+         for (UnsignedInt j = 0; j < refNameList.size(); j++)
          {
-            // Checking for undefined ref objects already done for CoordinateSystem
-            // so commented out to avoid duplicated message (LOJ: 2009.12.17)
-            // UNCOMMENTED for GMT-3462 Error message just says error occurred and 
-			// no other detail provided (TGG: 2013-01-25)
-            InterpreterException ex
-               ("Nonexistent SpacePoint \"" + refNameList[j] +
-                "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
-            HandleError(ex, false);
-            retval = false;
-         }
-         else
-         {
-            cs->SetRefObject(refObj, Gmat::SPACE_POINT, refObj->GetName());
-            cs->Initialize();
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage
+               ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+            #endif
+
+            refObj = FindObject(refNameList[j]);
+            if ((refObj == NULL) || !(refObj->IsOfType(csTypes.at(ii))))
+            {
+               InterpreterException ex;
+               // Checking for undefined ref objects already done for CoordinateSystem
+               // so commented out to avoid duplicated message (LOJ: 2009.12.17)
+               // UNCOMMENTED for GMT-3462 Error message just says error occurred and
+               // no other detail provided (TGG: 2013-01-25)
+               if (csTypes.at(ii) == Gmat::SPACE_POINT)
+               {
+                  ex.SetDetails
+                     ("Nonexistent SpacePoint \"" + refNameList[j] +
+                      "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
+               }
+               else
+               {
+                  ex.SetDetails
+                     ("Nonexistent Reference Object \"" + refNameList[j] +
+                      "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
+               }
+               HandleError(ex, false);
+               retval = false;
+            }
+            else
+            {
+               #if DBGLVL_FINAL_PASS > 1
+               MessageInterface::ShowMessage
+                  ("   setting %s on CS %s\n", refNameList[j].c_str(), cs->GetName().c_str());
+               #endif
+               cs->SetRefObject(refObj, csTypes.at(ii), refObj->GetName());
+//               cs->Initialize();
+               setCSObj = true;
+            }
          }
       }
+      if (setCSObj)
+         cs->Initialize();
+
+//      refNameList = cs->GetRefObjectNameArray(Gmat::SPACE_POINT);
+//      for (UnsignedInt j = 0; j < refNameList.size(); j++)
+//      {
+//         #if DBGLVL_FINAL_PASS > 1
+//         MessageInterface::ShowMessage
+//            ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+//         #endif
+//
+//         refObj = FindObject(refNameList[j]);
+//         if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
+//         {
+//            // Checking for undefined ref objects already done for CoordinateSystem
+//            // so commented out to avoid duplicated message (LOJ: 2009.12.17)
+//            // UNCOMMENTED for GMT-3462 Error message just says error occurred and
+//			// no other detail provided (TGG: 2013-01-25)
+//            InterpreterException ex
+//               ("Nonexistent SpacePoint \"" + refNameList[j] +
+//                "\" referenced in the CoordinateSystem \"" + cs->GetName() + "\"");
+//            HandleError(ex, false);
+//            retval = false;
+//         }
+//         else
+//         {
+//            #if DBGLVL_FINAL_PASS > 1
+//            MessageInterface::ShowMessage
+//               ("   setting %s on CS %s\n", refNameList[j].c_str(), cs->GetName().c_str());
+//            #endif
+//            cs->SetRefObject(refObj, Gmat::SPACE_POINT, refObj->GetName());
+//            cs->Initialize();
+//         }
+//      }
    }
 
    //-------------------------------------------------------------------

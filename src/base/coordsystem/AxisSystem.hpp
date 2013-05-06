@@ -51,6 +51,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
    virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
+   virtual GmatCoordinate::ParameterUsage UsesReferenceObject() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
@@ -62,6 +63,7 @@ public:
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
    virtual void                  SetSecondaryObject(SpacePoint *second);
+   virtual void                  SetReferenceObject(SpacePoint *reObj);
    virtual void                  SetEpoch(const A1Mjd &toEpoch);
    virtual void                  SetXAxis(const std::string &toValue);
    virtual void                  SetYAxis(const std::string &toValue);
@@ -73,6 +75,7 @@ public:
    virtual void                  SetEpochFormat(const std::string &fmt);  // for GUI
    virtual SpacePoint*           GetPrimaryObject() const;
    virtual SpacePoint*           GetSecondaryObject() const;
+   virtual SpacePoint*           GetReferenceObject() const;
    virtual A1Mjd                 GetEpoch() const;
    virtual std::string           GetXAxis() const;
    virtual std::string           GetYAxis() const;
@@ -129,6 +132,10 @@ public:
                                                const bool value); 
    virtual bool            SetBooleanParameter(const std::string &label,
                                                const bool value);
+
+   virtual const ObjectTypeArray&
+                           GetRefObjectTypeArray();
+
 
    // currently, no access to RotMatrix and RotDotMatrix allowed
 
@@ -266,6 +273,6 @@ protected:
    virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
                                             bool forceComputation = false);
 
-   virtual void InitializeOrigin();
+   virtual void InitializeReference(SpacePoint *refObj);
 };
 #endif // AxisSystem_hpp

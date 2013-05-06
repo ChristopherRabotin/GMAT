@@ -241,6 +241,7 @@ OBJECTS = \
     coordsystem/ITRFAxes.o \
     coordsystem/InertialAxes.o \
     coordsystem/ItrfCoefficientsFile.o \
+    coordsystem/LocalAlignedConstrainedAxes.o \
     coordsystem/MeanOfDateAxes.o \
     coordsystem/MJ2000EcAxes.o \
     coordsystem/MJ2000EqAxes.o \

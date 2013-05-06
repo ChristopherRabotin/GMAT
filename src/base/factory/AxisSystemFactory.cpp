@@ -41,6 +41,7 @@
 #include "GeocentricSolarEclipticAxes.hpp"
 #include "GeocentricSolarMagneticAxes.hpp"
 #include "TopocentricAxes.hpp"
+#include "LocalAlignedConstrainedAxes.hpp"
 
 //#include "ITRFAxes.hpp"
 #include "ICRFAxes.hpp"
@@ -153,6 +154,10 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new TopocentricAxes(withName);
    }
+   else if (ofType == "LocalAlignedConstrained")
+   {
+      withAxes = new LocalAlignedConstrainedAxes(withName);
+   }
 //   else if (ofType == "ITRF")
 //   {
 //      withAxes = new ITRFAxes(withName);
@@ -202,6 +207,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("GSE");
       creatables.push_back("GSM");
       creatables.push_back("Topocentric");
+      creatables.push_back("LocalAlignedConstrained");
 
 //	  creatables.push_back("ITRF");
 	  creatables.push_back("ICRF");

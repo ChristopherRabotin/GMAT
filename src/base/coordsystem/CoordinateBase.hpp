@@ -76,6 +76,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const   = 0;
    virtual GmatCoordinate::ParameterUsage UsesSecondary() const = 0;
+   virtual GmatCoordinate::ParameterUsage UsesReferenceObject() const = 0;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const     = 0;

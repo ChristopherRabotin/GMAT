@@ -49,6 +49,8 @@
 //#define DEBUG_CS_CREATE
 //#define DEBUG_CS_SET_AXIS
 //#define DEBUG_CS_SET
+//#define DEBUG_REFERENCE_SETTING
+//#define DEBUG_CS_REF_OBJECT 3
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -330,6 +332,22 @@ GmatCoordinate::ParameterUsage CoordinateSystem::UsesSecondary() const
 }
 
 //---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesReferenceObject() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of a reference object is required,
+ * optional, or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a secondary body
+ */
+//---------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesReferenceObject() const
+{
+   if (axes) return axes->UsesReferenceObject();
+   return GmatCoordinate::NOT_USED;
+}
+
+//---------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesXAxis() const
 //---------------------------------------------------------------------------
 /**
@@ -493,6 +511,33 @@ void CoordinateSystem::SetSecondaryObject(SpacePoint *second)
    if (allowModify)
    {
       if (axes) axes->SetSecondaryObject(second);
+   }
+   else
+   {
+      std::string errmsg = "Modifications to built-in coordinate system ";
+      errmsg += instanceName + " are not allowed.\n";
+      throw CoordinateSystemException(errmsg);
+   }
+}
+
+//---------------------------------------------------------------------------
+// void SetReferenceObject(SpacePoint *refObj)
+//---------------------------------------------------------------------------
+/**
+ * Sets the reference object for a coordinate system that needs it.
+ *
+ * @param <refObj> reference object
+ *
+ */
+//---------------------------------------------------------------------------
+void CoordinateSystem::SetReferenceObject(SpacePoint *refObj)
+{
+   #ifdef DEBUG_CS_SET
+      MessageInterface::ShowMessage("Entering SetReferenceObject for %s\n", instanceName.c_str());
+   #endif
+   if (allowModify)
+   {
+      if (axes) axes->SetReferenceObject(refObj);
    }
    else
    {
@@ -669,6 +714,22 @@ SpacePoint* CoordinateSystem::GetPrimaryObject() const
 SpacePoint* CoordinateSystem::GetSecondaryObject() const
 {
    if (axes) return axes->GetSecondaryObject();
+   return NULL;
+}
+
+//---------------------------------------------------------------------------
+// SpacePoint* GetReferenceObject() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the reference object.
+ *
+ * @return pointer to the reference object
+ *
+ */
+//---------------------------------------------------------------------------
+SpacePoint* CoordinateSystem::GetReferenceObject() const
+{
+   if (axes) return axes->GetReferenceObject();
    return NULL;
 }
 
@@ -1768,7 +1829,26 @@ bool CoordinateSystem::HasRefObjectTypeArray()
 const ObjectTypeArray& CoordinateSystem::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
+   refObjectTypes = CoordinateBase::GetRefObjectTypeArray();
    refObjectTypes.push_back(Gmat::SPACE_POINT);
+
+   if (axes)
+   {
+      static ObjectTypeArray axisRefTypes;
+      axisRefTypes.clear();
+
+      axisRefTypes = axes->GetRefObjectTypeArray();
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("In CS, axes = %s\n", axes->GetTypeName().c_str());
+         for (unsigned int jj = 0; jj < axisRefTypes.size(); jj++)
+            MessageInterface::ShowMessage("   ref type %d = %d\n", (Integer) jj,
+                                         (Integer) axisRefTypes[jj]);
+      #endif
+
+      for (ObjectTypeArray::iterator i = axisRefTypes.begin(); i != axisRefTypes.end(); ++i)
+         if (find(refObjectTypes.begin(), refObjectTypes.end(), *i) == refObjectTypes.end())
+            refObjectTypes.push_back(*i);
+   }
    return refObjectTypes;
 }
 
@@ -1795,8 +1875,8 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
        GetObjectTypeString(type).c_str());
    #endif
    
-   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
-   {
+//   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
+//   {
       // Here we want the names of all named reference objects used in this
       // coordinate system.  (The axis system is not named, so we do not return
       // anything for it.)
@@ -1833,7 +1913,7 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
                }
       }
       return refs;
-   }
+//   }
    
    // Not handled here -- invoke the next higher GetRefObject call
    return CoordinateBase::GetRefObjectNameArray(type);
