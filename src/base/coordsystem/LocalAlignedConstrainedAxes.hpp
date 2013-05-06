@@ -99,12 +99,12 @@ protected:
    enum
    {
       REFERENCE_OBJECT = DynamicAxesParamCount,
-      ALIGNMENT_AXIS_X,
-      ALIGNMENT_AXIS_Y,
-      ALIGNMENT_AXIS_Z,
-      CONSTRAINT_AXIS_X,
-      CONSTRAINT_AXIS_Y,
-      CONSTRAINT_AXIS_Z,
+      ALIGNMENT_VECTOR_X,
+      ALIGNMENT_VECTOR_Y,
+      ALIGNMENT_VECTOR_Z,
+      CONSTRAINT_VECTOR_X,
+      CONSTRAINT_VECTOR_Y,
+      CONSTRAINT_VECTOR_Z,
       CONSTRAINT_COORDSYS,
       CONSTRAINT_REF_VECTOR_X,
       CONSTRAINT_REF_VECTOR_Y,
@@ -126,8 +126,8 @@ protected:
    std::string       constraintCSName;
    CoordinateSystem  *constraintCS;
 
-   Rvector3          alignmentAxis;
-   Rvector3          constraintAxis;
+   Rvector3          alignmentVector;
+   Rvector3          constraintVector;
    Rvector3          constraintRefVector;
 
    /// methods to compute the rotation matrix (and its derivative) to transform

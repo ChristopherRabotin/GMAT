@@ -55,12 +55,12 @@ LocalAlignedConstrainedAxes::PARAMETER_TEXT[
                              DynamicAxesParamCount] =
 {
    "ReferenceObject",
-   "AlignmentAxisX",
-   "AlignmentAxisY",
-   "AlignmentAxisZ",
-   "ConstraintAxisX",
-   "ConstraintAxisY",
-   "ConstraintAxisZ",
+   "AlignmentVectorX",
+   "AlignmentVectorY",
+   "AlignmentVectorZ",
+   "ConstraintVectorX",
+   "ConstraintVectorY",
+   "ConstraintVectorZ",
    "ConstraintCoordinateSystem",
    "ConstraintReferenceVectorX",
    "ConstraintReferenceVectorY",
@@ -87,7 +87,7 @@ LocalAlignedConstrainedAxes::PARAMETER_TYPE[
 
 
 const Real LocalAlignedConstrainedAxes::MAGNITUDE_TOL   = 1.0e-9;
-const Real LocalAlignedConstrainedAxes::ORTHONORMAL_TOL = 1.0e-14;
+const Real LocalAlignedConstrainedAxes::ORTHONORMAL_TOL = 1.0e-9;
 
 
 //------------------------------------------------------------------------------
@@ -116,8 +116,8 @@ LocalAlignedConstrainedAxes::LocalAlignedConstrainedAxes(const std::string &itsN
    parameterCount = LocalAlignedConstrainedAxesParamCount;
 
    // default values for the vectors
-   alignmentAxis.Set(1.0, 0.0, 0.0);
-   constraintAxis.Set(0.0, 0.0, 1.0);
+   alignmentVector.Set(1.0, 0.0, 0.0);
+   constraintVector.Set(0.0, 0.0, 1.0);
    constraintRefVector.Set(0.0, 0.0, 1.0);
 }
 
@@ -144,6 +144,11 @@ LocalAlignedConstrainedAxes::LocalAlignedConstrainedAxes(
 {
    objectTypeNames.push_back("LocalAlignedConstrainedAxes");
    parameterCount = LocalAlignedConstrainedAxesParamCount;
+
+   // default values for the vectors
+   alignmentVector.Set(1.0, 0.0, 0.0);
+   constraintVector.Set(0.0, 0.0, 1.0);
+   constraintRefVector.Set(0.0, 0.0, 1.0);
 }
 
 //---------------------------------------------------------------------------
@@ -163,8 +168,8 @@ LocalAlignedConstrainedAxes::LocalAlignedConstrainedAxes(
    referenceObject     (NULL),
    constraintCSName    (copy.constraintCSName),
    constraintCS        (NULL),
-   alignmentAxis       (copy.alignmentAxis),
-   constraintAxis      (copy.constraintAxis),
+   alignmentVector     (copy.alignmentVector),
+   constraintVector    (copy.constraintVector),
    constraintRefVector (copy.constraintRefVector)
 {
    parameterCount = LocalAlignedConstrainedAxesParamCount;
@@ -192,8 +197,8 @@ const LocalAlignedConstrainedAxes& LocalAlignedConstrainedAxes::operator=(
    referenceObject     = copy.referenceObject;
    constraintCSName    = copy.constraintCSName;
    constraintCS        = copy.constraintCS;
-   alignmentAxis       = copy.alignmentAxis;
-   constraintAxis      = copy.constraintAxis;
+   alignmentVector     = copy.alignmentVector;
+   constraintVector    = copy.constraintVector;
    constraintRefVector = copy.constraintRefVector;
    return *this;
 }
@@ -307,7 +312,7 @@ SpacePoint* LocalAlignedConstrainedAxes::GetReferenceObject() const
 //---------------------------------------------------------------------------
 void LocalAlignedConstrainedAxes::SetReferenceObject(SpacePoint *refObj)
 {
-   referenceObject = refObj;
+   referenceObject  = refObj;
    referenceObjName = refObj->GetName();
 }
 
@@ -437,13 +442,13 @@ std::string LocalAlignedConstrainedAxes::GetParameterTypeString(
 //------------------------------------------------------------------------------
 Real LocalAlignedConstrainedAxes::GetRealParameter(const Integer id) const
 {
-   if (id == ALIGNMENT_AXIS_X)         return alignmentAxis[0];
-   if (id == ALIGNMENT_AXIS_Y)         return alignmentAxis[1];
-   if (id == ALIGNMENT_AXIS_Z)         return alignmentAxis[2];
+   if (id == ALIGNMENT_VECTOR_X)       return alignmentVector[0];
+   if (id == ALIGNMENT_VECTOR_Y)       return alignmentVector[1];
+   if (id == ALIGNMENT_VECTOR_Z)       return alignmentVector[2];
 
-   if (id == CONSTRAINT_AXIS_X)        return constraintAxis[0];
-   if (id == CONSTRAINT_AXIS_Y)        return constraintAxis[1];
-   if (id == CONSTRAINT_AXIS_Z)        return constraintAxis[2];
+   if (id == CONSTRAINT_VECTOR_X)      return constraintVector[0];
+   if (id == CONSTRAINT_VECTOR_Y)      return constraintVector[1];
+   if (id == CONSTRAINT_VECTOR_Z)      return constraintVector[2];
 
    if (id == CONSTRAINT_REF_VECTOR_X)  return constraintRefVector[0];
    if (id == CONSTRAINT_REF_VECTOR_Y)  return constraintRefVector[1];
@@ -486,35 +491,35 @@ Real LocalAlignedConstrainedAxes::GetRealParameter(const std::string &label) con
 Real LocalAlignedConstrainedAxes::SetRealParameter(const Integer id,
                                                    const Real value)
 {
-   if (id == ALIGNMENT_AXIS_X)
+   if (id == ALIGNMENT_VECTOR_X)
    {
-      alignmentAxis[0] = value;
+      alignmentVector[0] = value;
       return true;
    }
-   if (id == ALIGNMENT_AXIS_Y)
+   if (id == ALIGNMENT_VECTOR_Y)
    {
-      alignmentAxis[1] = value;
+      alignmentVector[1] = value;
       return true;
    }
-   if (id == ALIGNMENT_AXIS_Z)
+   if (id == ALIGNMENT_VECTOR_Z)
    {
-      alignmentAxis[2] = value;
+      alignmentVector[2] = value;
       return true;
    }
 
-   if (id == CONSTRAINT_AXIS_X)
+   if (id == CONSTRAINT_VECTOR_X)
    {
-      constraintAxis[0] = value;
+      constraintVector[0] = value;
       return true;
    }
-   if (id == CONSTRAINT_AXIS_Y)
+   if (id == CONSTRAINT_VECTOR_Y)
    {
-      constraintAxis[1] = value;
+      constraintVector[1] = value;
       return true;
    }
-   if (id == CONSTRAINT_AXIS_Z)
+   if (id == CONSTRAINT_VECTOR_Z)
    {
-      constraintAxis[2] = value;
+      constraintVector[2] = value;
       return true;
    }
 
@@ -874,9 +879,9 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
             constraintCSName +
          "\" is not yet set in local aligned constrained coordinate system!");
 
-   // alignment and constraint axes are user-input
-   // alignmentAxis                           // av_B
-   // constraintAxis                          // cv_B
+   // alignment and constraint vectors are user-input
+   // alignmentVector                           // av_B
+   // constraintVector                          // cv_B
    // The dot vectors are both zero vectors
    Rvector3 avdot_B(0.0,0.0,0.0);
    Rvector3 cvdot_B(0.0,0.0,0.0);
@@ -884,8 +889,8 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
    // Compute the state of the reference body with respect to the origin
    Rvector6 originState = origin->GetMJ2000State(atEpoch);
    Rvector6 refObjState = referenceObject->GetMJ2000State(atEpoch);
-   Rvector3 av_I        = -(originState.GetR() - refObjState.GetR());
-   Rvector3 avdot_I     = -(originState.GetV() - refObjState.GetV());
+   Rvector3 av_I        = refObjState.GetR() - originState.GetR();
+   Rvector3 avdot_I     = refObjState.GetV() - originState.GetV();
 
    Rvector6 constraint_B(constraintRefVector[0], constraintRefVector[1],
                          constraintRefVector[2], 0.0, 0.0, 0.0);
@@ -898,7 +903,7 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
    #ifdef DEBUG_ROT_MATRIX
       MessageInterface::ShowMessage(
             "   av_B = %s\n"
-            "   cv_B = %s\n",  alignmentAxis.ToString().c_str(), constraintAxis.ToString().c_str());
+            "   cv_B = %s\n",  alignmentVector.ToString().c_str(), constraintVector.ToString().c_str());
       MessageInterface::ShowMessage(
             "   avdot_B = %s\n"
             "   cvdot_B = %s\n",  avdot_B.ToString().c_str(), cvdot_B.ToString().c_str());
@@ -911,9 +916,9 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
    #endif
 
    // Use triad algorithm to compute R and Rdot
-   Real a_B = alignmentAxis.GetMagnitude();
+   Real a_B = alignmentVector.GetMagnitude();
    Real a_I = av_I.GetMagnitude();
-   Real c_B = constraintAxis.GetMagnitude();
+   Real c_B = constraintVector.GetMagnitude();
    Real c_I = cv_I.GetMagnitude();
    #ifdef DEBUG_ROT_MATRIX
       MessageInterface::ShowMessage(
@@ -940,10 +945,10 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
 
    // Compute unit vectors and cross products
    Rvector3 avhat_I     = av_I/av_I.GetMagnitude();
-   Rvector3 avhat_B     = alignmentAxis/alignmentAxis.GetMagnitude();
+   Rvector3 avhat_B     = alignmentVector/alignmentVector.GetMagnitude();
    Rvector3 nv_I        = Cross(av_I,cv_I);
    Real     n_I         = nv_I.GetMagnitude();
-   Rvector3 nv_B        = Cross(alignmentAxis,constraintAxis);
+   Rvector3 nv_B        = Cross(alignmentVector,constraintVector);
    Real     n_B         = nv_B.GetMagnitude();
    // check for divide-by-zero
    if ((GmatMathUtil::IsZero(n_I, MAGNITUDE_TOL)) || (GmatMathUtil::IsZero(n_B, MAGNITUDE_TOL)))
@@ -993,7 +998,7 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
    Rvector3 avhatdot_I   = avdot_I/a_I - (avhat_I/a_I)*(avhat_I*avdot_I); // (avhat_I'*avdot_I);
    Rvector3 avhatdot_B   = avdot_B/a_B - (avhat_B/a_B)*(avhat_B*avdot_B); // (avhat_B'*avdot_B)
    Rvector3 mvdimdot_I   = Cross(avdot_I,cv_I) + Cross(av_I,cvdot_I);
-   Rvector3 mvdimdot_B   = Cross(avdot_B,constraintAxis) + Cross(alignmentAxis,cvdot_B);
+   Rvector3 mvdimdot_B   = Cross(avdot_B,constraintVector) + Cross(alignmentVector,cvdot_B);
    Rvector3 mvdot_I      = mvdimdot_I/n_I - (nvhat_I/n_I)*(nvhat_I*mvdimdot_I); // (nvhat_I'*mvdimdot_I)
    Rvector3 mvdot_B      = mvdimdot_B/n_B - (nvhat_B/n_B)*(nvhat_B*mvdimdot_B); // (nvhat_B'*mvdimdot_B)
    Rvector3 ddtsvdotmv_I = Cross(avhatdot_I,nvhat_I) + Cross(avhat_I,mvdot_I);
