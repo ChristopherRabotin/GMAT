@@ -1272,6 +1272,9 @@
     <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp">
       <Filter>Source Files\asset</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2500,6 +2503,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp">
       <Filter>Source Files\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp">
+      <Filter>Source Files\coordsystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -241,6 +241,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.cpp" />
@@ -638,6 +639,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.hpp" />
