@@ -107,13 +107,18 @@ const Real LocalAlignedConstrainedAxes::ORTHONORMAL_TOL = 1.0e-14;
 //------------------------------------------------------------------------------
 LocalAlignedConstrainedAxes::LocalAlignedConstrainedAxes(const std::string &itsName) :
    DynamicAxes("LocalAlignedConstrained",itsName),
-   referenceObjName    (""),
+   referenceObjName    ("Luna"),
    referenceObject     (NULL),
-   constraintCSName    (""),    // should I have a default here?
+   constraintCSName    ("EarthMJ2000Eq"),
    constraintCS        (NULL)
 {
    objectTypeNames.push_back("LocalAlignedConstrainedAxes");
    parameterCount = LocalAlignedConstrainedAxesParamCount;
+
+   // default values for the vectors
+   alignmentAxis.Set(1.0, 0.0, 0.0);
+   constraintAxis.Set(0.0, 0.0, 1.0);
+   constraintRefVector.Set(0.0, 0.0, 1.0);
 }
 
 //---------------------------------------------------------------------------
