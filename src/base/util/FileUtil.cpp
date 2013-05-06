@@ -168,14 +168,13 @@ std::string GmatFileUtil::GetApplicationPath()
    
    return appPath;
    
-#elif __LINUX__
+#elif __linux__
 
-   //@todo Test this on Linux
    std::string appPath;
    char buffer[GmatFile::MAX_PATH_LEN];
    char szTmp[32];
    sprintf(szTmp, "/proc/%d/exe", getpid());
-   int bytes = MIN(readlink(szTmp, buffer, GmatFile::MAX_PATH_LEN),
+   int bytes = std::min(readlink(szTmp, buffer, GmatFile::MAX_PATH_LEN),
                    GmatFile::MAX_PATH_LEN - 1);
    if(bytes >= 0)
    {
