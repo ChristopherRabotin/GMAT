@@ -599,7 +599,7 @@ and
 \noindent j = 1 for direct orbits ( $0\leq i \leq 90^{\circ}$ )\\
  j = -1 for retrograde orbits ( $90 < i \leq 180^{\circ}$ )\\
 
-Now let's look at how to calculate the cartesian state given the
+Currently GMAT sets $j=1$ for all input states. Now let's look at how to calculate the cartesian state given the
 equinoctial elements.
 
 \subsection{Cartesian State to Equinoctial Elements}  \index{Equinoctial elements!from cartesian}
@@ -672,7 +672,7 @@ be calculated using
    f_z = -\hat{h}_x j
 \end{equation}
 %
-where $j = 1$ if $ \hat{h}_z > 0 $  and $j = -1$ otherwise. \\
+where $j = 1$ if $ \hat{h}_z > 0 $  and $j = -1$ otherwise. Currently GMAT always assumes $j=1$. \\
 %
 \begin{equation}
     \hat{\mathbf{g}} = \hat{\mathbf{h}} \times \hat{\mathbf{f}}
