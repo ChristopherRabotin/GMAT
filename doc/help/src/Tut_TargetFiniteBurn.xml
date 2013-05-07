@@ -409,8 +409,8 @@
         <guilabel>Variable Name</guilabel>, input
         <guilabel>BurnDuration</guilabel> and for <guilabel>Variable
         Value</guilabel>, input <literal>0.</literal> Click the
-        <guilabel>Create</guilabel> button and then the
-        <guilabel>Close</guilabel> button.</para>
+        <guibutton>=&gt;</guibutton> button to create the variable, then click
+        <guibutton>Close</guibutton>.</para>
       </step>
 
       <step>
