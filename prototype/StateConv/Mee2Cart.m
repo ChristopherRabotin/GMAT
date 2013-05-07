@@ -88,8 +88,14 @@ r = p/(1 + f*cos(L) + g*sin(L));
 
 X1 = r * cos(L);
 Y1 = r * sin(L);
-dotX1 = -sqrt(mu/p) * (g + sin(L));
-dotY1 = sqrt(mu/p) * (f + cos(L));
+
+if p == 0
+    dotX1 = 0;
+    dotY1 = 0;
+else
+    dotX1 = -sqrt(mu/p) * (g + sin(L));
+    dotY1 = sqrt(mu/p) * (f + cos(L));
+end
 
 alpha2 = h^2 - k^2;
 s2 = 1 + h^2 + k^2;

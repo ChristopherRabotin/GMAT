@@ -7,7 +7,7 @@ end
 
 function ret = setup()                                      %#ok<*DEFNU>
 addpath('..');
-tol = 1e-6;
+tol = 1e-7;
 mu = 398600.4418;
 ret = {tol, mu};
 end
@@ -483,30 +483,6 @@ assertElementsAlmostEqual( ...
     cartFF{1}, 'relative', inp{1});
 end
 
-function testCart2MeeParabolicEqPro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Cart2Mee(cartFF{1}, inp{2}), meeFF{1}, ...
-    'relative', inp{1});
-end
-
-function testMee2CartParabolicEqPro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_EqPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Mee2Cart(meeFF{1}, inp{2}), cartFF{1}, ...
-    'relative', inp{1});
-end
-
 %% Parabolic IncPro
 function testParabolicIncPro(inp)
 truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
@@ -519,57 +495,9 @@ assertElementsAlmostEqual( ...
     cartFF{1}, 'relative', inp{1});
 end
 
-function testCart2MeeParabolicIncPro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Cart2Mee(cartFF{1}, inp{2}), meeFF{1}, ...
-    'relative', inp{1});
-end
-
-function testMee2CartParabolicIncPro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_IncPro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Mee2Cart(meeFF{1}, inp{2}), cartFF{1}, ...
-    'relative', inp{1});
-end
-
 %% Parabolic Polar
 function testParabolicPolar(inp)
 roundtrip('Parabolic_Polar.truth', inp, 1);
-end
-
-function testCart2MeeParabolicPolar(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Cart2Mee(cartFF{1}, inp{2}), meeFF{1}, ...
-    'relative', inp{1});
-end
-
-function testMee2CartParabolicPolar(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_Polar.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Mee2Cart(meeFF{1}, inp{2}), cartFF{1}, ...
-    'relative', inp{1});
 end
 
 %% Parabolic IncRetro
@@ -579,30 +507,6 @@ end
 
 function testParabolicIncRetroRetro(inp)
 roundtrip('Parabolic_IncRetro.truth', inp, -1);
-end
-
-function testCart2MeeParabolicIncRetro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_IncRetro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Cart2Mee(cartFF{1}, inp{2}), meeFF{1}, ...
-    'relative', inp{1});
-end
-
-function testMee2CartParabolicIncRetro(inp)
-truthFile = fullfile('truth', 'ModifiedEquinoctial', 'FF', ...
-    'Parabolic_IncRetro.truth');
-fid = fopen(truthFile);
-cartFF = textscan(fid, '%f', 6, 'HeaderLines', 3);
-meeFF = textscan(fid, '%f', 6, 'HeaderLines', 4);
-fclose(fid);
-meeFF{1}(6) = meeFF{1}(6) * pi()/180;
-assertElementsAlmostEqual(Mee2Cart(meeFF{1}, inp{2}), cartFF{1}, ...
-    'relative', inp{1});
 end
 
 %% Parabolic EqRetro

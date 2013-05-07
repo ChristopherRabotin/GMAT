@@ -20,8 +20,18 @@ end
 reci(1:3,1) = Cart(1:3); veci(1:3,1) = Cart(4:6);
 rmag = norm(reci); vmag = norm(veci);
 hvec = cross(reci,veci); hmag = norm(hvec);
-r_hat = reci/rmag; h_hat = hvec/hmag;
-v_hat = (rmag * veci - dot(reci,veci)/rmag*reci)/hmag;
+if rmag == 0
+    r_hat = [0;0;0];
+else
+    r_hat = reci/rmag;
+end
+if hmag == 0
+    h_hat = [0;0;0];
+    v_hat = [0;0;0];
+else
+    h_hat = hvec/hmag;
+    v_hat = (rmag * veci - dot(reci,veci)/rmag*reci)/hmag;
+end
 evec = cross(veci,hvec)/mu - r_hat;
 
 if ( abs(h_hat(3) - (-1)) < 1e-7 )
