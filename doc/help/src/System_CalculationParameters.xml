@@ -355,7 +355,7 @@
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>AOP</guilabel></link></para><variablelist>
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AOP</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -398,7 +398,7 @@
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>AZI</guilabel></link></para><variablelist>
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AZI</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -1674,6 +1674,146 @@
             </row>
 
             <row>
+              <entry><guilabel>EquinoctialH</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>EquinoctialH</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EquinoctialK</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>EquinoctialK</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EquinoctialP</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>EquinoctialP</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EquinoctialQ</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>EquinoctialQ</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>EulerAngle1</guilabel></entry>
 
               <entry>Y</entry>
@@ -2379,6 +2519,49 @@
 
                     <listitem>
                       <para>0° ≤ <guilabel>MHA</guilabel> &lt; 360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>MLONG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>MLONG</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>MLONG</guilabel> &lt; 360°</para>
                     </listitem>
                   </varlistentry>
 
