@@ -40,6 +40,8 @@
     a <guilabel>Spacecraft</guilabel>. The <guilabel>SpiceAttitude</guilabel>
     model allows you to define the <guilabel>Spacecraft</guilabel> attitude
     based on SPICE attitude kernels.</para>
+	
+
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Spacecraft"/></para>
@@ -1979,6 +1981,8 @@
       a particular model, fields of that type have no effect for that model.
       Similarly, fields marked as active do affect the attitude for a
       particular model.</para>
+	  
+	  	<note><para> GMAT attitude parameterizations such as the DCM rotate from inertial to body. </para></note>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="5">
