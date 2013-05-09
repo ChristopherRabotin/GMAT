@@ -74,5 +74,7 @@ bool FileReader::SetStream(std::ifstream* aStream)
 
 bool FileReader::ReadLine(std::string& theLine)
 {
+   if (theStream->eof())
+      return false;
    return GmatFileUtil::GetLine(theStream, theLine);
 }

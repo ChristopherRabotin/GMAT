@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "TcopsVHFAscii.hpp"
+#include "MessageInterface.hpp"
 
 TcopsVHFAscii::TcopsVHFAscii(const std::string& theName) :
    TcopsVHFData         ("TVHF_ASCII", theName)
@@ -63,7 +64,23 @@ bool TcopsVHFAscii::ReadData()
       stringData.clear();
    }
 
-retval = true;
+   if (theStream)
+   {
+      std::string theLine;
+      Integer count = 0;
+      bool finished = false;
+      while (!finished)
+      {
+         if (ReadLine(theLine))
+         {
+            ++count;
+            MessageInterface::ShowMessage("%d: \"%s\"\n", count, theLine.c_str());
+         }
+         else
+            finished = true;
+      }
+      retval = true;
+   }
 
    return retval;
 }
