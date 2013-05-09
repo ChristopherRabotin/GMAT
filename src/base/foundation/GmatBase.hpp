@@ -475,9 +475,9 @@ protected:
       GmatBaseParamCount,
    };
 
-   /// Spacecraft parameter types
+   /// GmatBase parameter types
    static const Gmat::ParameterType PARAMETER_TYPE[GmatBaseParamCount];
-   /// Spacecraft parameter labels
+   /// GmatBase parameter labels
    static const std::string PARAMETER_LABEL[GmatBaseParamCount];
 
 
