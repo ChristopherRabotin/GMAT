@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                         DataInterfaceFactory
+//                         ReaderFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -13,50 +13,47 @@
 //
 /**
  * Implementation of a factory used in a GMAT plugin
- *
- * Replace code in the indicated places for your Factory
  */
 //------------------------------------------------------------------------------
 
 
-#include "DataInterfaceFactory.hpp"
+#include "ReaderFactory.hpp"
+#include "MessageInterface.hpp"
 
-#include "FileInterface.hpp"
+// Supported subtypes
+#include "TcopsVHFAscii.hpp"
 
 //------------------------------------------------------------------------------
-// DataInterfaceFactory()
+// ReaderFactory()
 //------------------------------------------------------------------------------
 /**
  * Constructor
- *
- * Replace the type Gmat::COMMAND in the base class call with the factory type 
- * you need.
  */
 //------------------------------------------------------------------------------
-DataInterfaceFactory::DataInterfaceFactory() :
+ReaderFactory::ReaderFactory() :
    Factory           (Gmat::INTERFACE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("FileInterface");
+      creatables.push_back("TVHF_ASCII");
    }
 }
 
 
 //------------------------------------------------------------------------------
-// ~DataInterfaceFactory()
+// ~ReaderFactory()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-DataInterfaceFactory::~DataInterfaceFactory()
+ReaderFactory::~ReaderFactory()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// DataInterfaceFactory(const DataInterfaceFactory& elf)
+// ReaderFactory(const ReaderFactory& elf)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -64,18 +61,18 @@ DataInterfaceFactory::~DataInterfaceFactory()
  * @param elf The factory copied here
  */
 //------------------------------------------------------------------------------
-DataInterfaceFactory::DataInterfaceFactory(const DataInterfaceFactory& elf) :
+ReaderFactory::ReaderFactory(const ReaderFactory& elf) :
    Factory           (elf)
 {
    if (creatables.empty())
    {
-      creatables.push_back("FileInterface");
+      creatables.push_back("TVHF_ASCII");
    }
 }
 
 
 //------------------------------------------------------------------------------
-// DataInterfaceFactory& operator=(const DataInterfaceFactory& elf)
+// ReaderFactory& operator=(const ReaderFactory& elf)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
@@ -85,8 +82,8 @@ DataInterfaceFactory::DataInterfaceFactory(const DataInterfaceFactory& elf) :
  * @return this instance, set to match elf
  */
 //------------------------------------------------------------------------------
-DataInterfaceFactory& DataInterfaceFactory::operator=(
-      const DataInterfaceFactory& elf)
+ReaderFactory& ReaderFactory::operator=(
+      const ReaderFactory& elf)
 {
    if (this != &elf)
    {
@@ -94,23 +91,13 @@ DataInterfaceFactory& DataInterfaceFactory::operator=(
 
       if (creatables.empty())
       {
-         creatables.push_back("FileInterface");
+         creatables.push_back("TVHF_ASCII");
       }
    }
 
    return *this;
 }
 
-Interface* DataInterfaceFactory::CreateInterface(const std::string& ofType,
-      const std::string& withName)
-{
-   Interface *retval = NULL;
-
-   if (ofType == "FileInterface")
-      return new FileInterface(withName);
-
-   return retval;
-}
 
 //------------------------------------------------------------------------------
 //GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
@@ -127,9 +114,22 @@ Interface* DataInterfaceFactory::CreateInterface(const std::string& ofType,
  * objects of the requested type.
  */
 //------------------------------------------------------------------------------
-GmatBase* DataInterfaceFactory::CreateObject(const std::string &ofType,
+GmatBase* ReaderFactory::CreateObject(const std::string &ofType,
                                 const std::string &withName)
 {
-   return CreateInterface(ofType, withName);
+   GmatBase *retval = NULL;
+
+   if (ofType == "TVHF_ASCII")
+      retval = new TcopsVHFAscii(withName);
+
+   if (retval->IsOfType("DataReader") == false)
+   {
+      delete retval;
+      retval = NULL;
+      MessageInterface::ShowMessage("The Reader Factory can only create "
+            "DataReader subobjects; %s is not a DataReader\n", ofType.c_str());
+   }
+
+   return retval;
 }
 

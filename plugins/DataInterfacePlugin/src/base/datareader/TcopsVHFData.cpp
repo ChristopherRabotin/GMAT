@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "TcopsVHFData.hpp"
-
+#include "FileUtil.hpp"
 
 //const std::string
 //TcopsVHFData::PARAMETER_LABEL[TVHFDataParamCount - FileReaderParamCount] =

@@ -32,20 +32,26 @@ public:
    FileReader(const FileReader& fr);
    FileReader& operator=(const FileReader& fr);
 
+   virtual bool SetStream(std::ifstream* aStream);
+
 protected:
+   std::ifstream *theStream;
 
 
+   bool ReadLine(std::string &theLine);
+
+   /// TBD: Go we need the GmatBase parameters in this internal object?
    /// Parameter IDs
-   enum
-   {
-      FILENAME = DataReaderParamCount,
-      FileReaderParamCount,
-   };
-
-   /// Spacecraft parameter types
-   static const Gmat::ParameterType PARAMETER_TYPE[FileReaderParamCount - DataReaderParamCount];
-   /// Spacecraft parameter labels
-   static const std::string PARAMETER_LABEL[FileReaderParamCount - DataReaderParamCount];
+//   enum
+//   {
+//      FILENAME = DataReaderParamCount,
+//      FileReaderParamCount,
+//   };
+//
+//   /// Spacecraft parameter types
+//   static const Gmat::ParameterType PARAMETER_TYPE[FileReaderParamCount - DataReaderParamCount];
+//   /// Spacecraft parameter labels
+//   static const std::string PARAMETER_LABEL[FileReaderParamCount - DataReaderParamCount];
 };
 
 #endif /* FileReader_hpp */

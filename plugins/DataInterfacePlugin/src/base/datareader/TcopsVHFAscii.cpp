@@ -20,8 +20,8 @@
 
 #include "TcopsVHFAscii.hpp"
 
-TcopsVHFAscii::TcopsVHFAscii(const std::string& theTypeName, const std::string& theName) :
-   TcopsVHFData         (theTypeName, theName)
+TcopsVHFAscii::TcopsVHFAscii(const std::string& theName) :
+   TcopsVHFData         ("TVHF_ASCII", theName)
 {
    // Set up the engine accessor fields
    objectTypeNames.push_back("TVHF_ASCII");
@@ -50,4 +50,20 @@ TcopsVHFAscii& TcopsVHFAscii::operator=(const TcopsVHFAscii& vhf)
 GmatBase* TcopsVHFAscii::Clone() const
 {
    return new TcopsVHFAscii(*this);
+}
+
+bool TcopsVHFAscii::ReadData()
+{
+   bool retval = false;
+
+   if (clearOnRead)
+   {
+      realData.clear();
+      rvector6Data.clear();
+      stringData.clear();
+   }
+
+retval = true;
+
+   return retval;
 }

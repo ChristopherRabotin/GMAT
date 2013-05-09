@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                          DataInterfaceFactory
+//                             ReaderFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -13,14 +13,13 @@
 //
 //
 /**
- * Definition of the factory used to create message writing commands in this
- * plugin
+ * Definition of the factory used to create DataReaders
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef DataInterfaceFactory_hpp
-#define DataInterfaceFactory_hpp
+#ifndef ReaderFactory_hpp
+#define ReaderFactory_hpp
 
 #include "DataInterfaceDefs.hpp"
 #include "Factory.hpp"
@@ -31,22 +30,17 @@
  *
  * Rename this class from SaveCommandFactory( to something more descriptive of your 
  * plugin object(s).
- *
- * @note: The "SAMPLE_API" descriptor needs to match the definition in your 
- * ...Defs.hpp file
  */
-class DATAINTERFACE_API DataInterfaceFactory : public Factory
+class DATAINTERFACE_API ReaderFactory : public Factory
 {
 public:
-   DataInterfaceFactory();
-   virtual ~DataInterfaceFactory();
-   DataInterfaceFactory(const DataInterfaceFactory& elf);
-   DataInterfaceFactory& operator=(const DataInterfaceFactory& elf);
+   ReaderFactory();
+   virtual ~ReaderFactory();
+   ReaderFactory(const ReaderFactory& elf);
+   ReaderFactory& operator=(const ReaderFactory& elf);
 
-   virtual Interface* CreateInterface(const std::string &ofType,
-                                      const std::string &withName);
    virtual GmatBase* CreateObject(const std::string &ofType,
                                   const std::string &withName);
 };
 
-#endif /* DataInterfaceFactory_hpp */
+#endif /* ReaderFactory_hpp */

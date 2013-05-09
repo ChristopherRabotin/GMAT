@@ -20,23 +20,26 @@
 
 #include "DataReader.hpp"
 
-const std::string
-DataReader::PARAMETER_LABEL[DataReaderParamCount - GmatBaseParamCount] =
-{
-      "SelectedFieldNames",
-      "SupportedFieldNames",
-};
 
-const Gmat::ParameterType
-DataReader::PARAMETER_TYPE[DataReaderParamCount - GmatBaseParamCount] =
-{
-      Gmat::STRINGARRAY_TYPE,
-      Gmat::STRINGARRAY_TYPE,
-};
+//const std::string
+//DataReader::PARAMETER_LABEL[DataReaderParamCount - GmatBaseParamCount] =
+//{
+//      "SelectedFieldNames",
+//      "SupportedFieldNames",
+//};
+//
+//const Gmat::ParameterType
+//DataReader::PARAMETER_TYPE[DataReaderParamCount - GmatBaseParamCount] =
+//{
+//      Gmat::STRINGARRAY_TYPE,
+//      Gmat::STRINGARRAY_TYPE,
+//};
 
 
 DataReader::DataReader(const std::string& theTypeName, const std::string& theName) :
-   GmatBase          (Gmat::DATAINTERFACE_SOURCE, theTypeName, theName)
+   GmatBase          (Gmat::DATAINTERFACE_SOURCE, theTypeName, theName),
+   dataReady         (false),
+   clearOnRead       (true)
 {
    // Engine required fields
    objectTypes.push_back(Gmat::DATAINTERFACE_SOURCE);
@@ -50,7 +53,9 @@ DataReader::~DataReader()
 DataReader::DataReader(const DataReader& dr) :
    GmatBase          (dr),
    selectedFields    (dr.selectedFields),
-   supportedFields   (dr.supportedFields)
+   supportedFields   (dr.supportedFields),
+   dataReady         (false),
+   clearOnRead       (dr.clearOnRead)
 {
 }
 
@@ -60,6 +65,8 @@ DataReader& DataReader::operator=(const DataReader& dr)
    {
       selectedFields  = dr.selectedFields;
       supportedFields = dr.supportedFields;
+      dataReady       = false;
+      clearOnRead     = dr.clearOnRead;
    }
 
    return *this;
@@ -70,8 +77,89 @@ const StringArray& DataReader::GetSelectedFieldNames()
    return selectedFields;
 }
 
+void DataReader::SetSelectedFieldNames(const StringArray& selections)
+{
+   selectedFields = selections;
+}
+
 const StringArray& DataReader::GetSupportedFieldNames()
 {
    // Leaf classes fill in the field identifiers; we just return that list here
    return supportedFields;
+}
+
+void DataReader::ClearData()
+{
+   dataReady = false;
+}
+
+Real DataReader::GetRealValue(const std::string& forField)
+{
+   Real retval = -999999.999999;
+
+   if (dataReady)
+   {
+      retval = GetRData(forField);
+   }
+
+   return retval;
+}
+
+Rvector6 DataReader::GetReal6Vector(const std::string& forField)
+{
+   Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   if (dataReady)
+   {
+      retval = GetRVectorData(forField);
+   }
+
+   return retval;
+}
+
+std::string DataReader::GetStringValue(const std::string& forField)
+{
+   std::string retval = "No data";
+
+   if (dataReady)
+   {
+      retval = GetSData(forField);
+   }
+
+   return retval;
+}
+
+Real DataReader::GetRData(const std::string& forField)
+{
+   Real retval = -999999.999999;
+
+   if (realData.find(forField) != realData.end())
+      retval = realData[forField];
+
+   return retval;
+}
+
+Rvector6 DataReader::GetRVectorData(const std::string& forField)
+{
+   Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   if (rvector6Data.find(forField) != rvector6Data.end())
+      retval = rvector6Data[forField];
+
+   return retval;
+}
+
+bool DataReader::SetStream(std::ifstream* aStream)
+{
+   return false;
+}
+
+std::string DataReader::GetSData(const std::string& forField)
+{
+   std::string retval = "No data";
+
+   if (stringData.find(forField) != stringData.end())
+      retval = stringData[forField];
+
+   return retval;
 }

@@ -24,6 +24,7 @@
 #define Set_hpp
 
 #include "DataInterfaceDefs.hpp"
+#include "DataInterface.hpp"
 #include "GmatCommand.hpp"
 #include <fstream>
 
@@ -39,6 +40,7 @@ public:
    Set&                operator=(const Set&);
    
    // inherited from GmatCommand
+   virtual bool         InterpretAction();
    virtual bool         Execute();
    virtual void         RunComplete();
    
@@ -50,27 +52,29 @@ public:
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
+
    virtual bool         Initialize();
    
    virtual GmatBase*    Clone() const;
    
-   // Parameter accessors
-   virtual std::string  GetParameterText(const Integer id) const;
-   virtual Integer      GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType
-                        GetParameterType(const Integer id) const;
-   virtual std::string  GetParameterTypeString(const Integer id) const;
-   
-   virtual bool         SetStringParameter(const Integer id, 
-                                           const std::string &value);
-   virtual bool         SetStringParameter(const std::string &label, 
-                                           const std::string &value);
-   virtual std::string  GetStringParameter(const Integer id,
-                                           const Integer index) const;
-   virtual std::string  GetStringParameter(const std::string &label,
-                                           const Integer index) const;
-   virtual const StringArray& 
-                        GetStringArrayParameter(const Integer id) const;
+//   // Parameter accessors
+//   virtual std::string  GetParameterText(const Integer id) const;
+//   virtual Integer      GetParameterID(const std::string &str) const;
+//   virtual Gmat::ParameterType
+//                        GetParameterType(const Integer id) const;
+//   virtual std::string  GetParameterTypeString(const Integer id) const;
+//
+//   virtual bool         SetStringParameter(const Integer id,
+//                                           const std::string &value);
+//   virtual bool         SetStringParameter(const std::string &label,
+//                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const Integer id,
+//                                           const Integer index) const;
+//   virtual std::string  GetStringParameter(const std::string &label,
+//                                           const Integer index) const;
+//   virtual const StringArray&
+//                        GetStringArrayParameter(const Integer id) const;
+
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,
@@ -83,32 +87,31 @@ public:
    DEFAULT_TO_NO_CLONES
 
 protected:
-   // Parameter IDs
-   enum  
-   {
-      OBJECT_NAMES = GmatCommandParamCount,
-      SetParamCount
-   };
+   /// Name of the object that receives the data
+   std::string          targetName;
+   /// The target object
+   GmatBase*            target;
+   /// Name of the interface object that accesses the data
+   std::string          interfaceName;
+   /// The DataInterface that grabs the data for the target
+   DataInterface*       theInterface;
+   /// Flag indicating if all (applicable) data should be read
+   bool                 loadAll;
+   /// The list of data elements requested, used if loadAll is false
+   StringArray          selections;
    
-   /// Name of the set file -- for now, it is objectName.objectType
-   StringArray          fileNameArray;
-   /// Toggle to allow multiple writes
-   bool                 appendData;
-   /// Toggle to tell if file was written this run
-   bool                 wasWritten;
-   /// Name of the objects that are written
-   StringArray          objNameArray;
-   /// Pointer to the objects
-   ObjectArray          objArray;
-   /// Toggle to show or hide emply fields
-   bool                 writeVerbose;
-   /// File streams used for the output
-   std::ofstream        *fileArray;
-   
-   static const std::string
-      PARAMETER_TEXT[SetParamCount - GmatCommandParamCount];
-   static const Gmat::ParameterType
-      PARAMETER_TYPE[SetParamCount - GmatCommandParamCount];
+
+//   // Parameter IDs
+//   enum
+//   {
+//      OBJECT_NAMES = GmatCommandParamCount,
+//      SetParamCount
+//   };
+//
+//   static const std::string
+//      PARAMETER_TEXT[SetParamCount - GmatCommandParamCount];
+//   static const Gmat::ParameterType
+//      PARAMETER_TYPE[SetParamCount - GmatCommandParamCount];
 };
 
 #endif // Set_hpp

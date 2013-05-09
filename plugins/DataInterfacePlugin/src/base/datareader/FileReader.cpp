@@ -19,23 +19,27 @@
 //------------------------------------------------------------------------------
 
 #include "FileReader.hpp"
+#include "FileUtil.hpp"
 
-const std::string
-FileReader::PARAMETER_LABEL[FileReaderParamCount - DataReaderParamCount] =
-{
-      "Filename",
-};
 
-const Gmat::ParameterType
-FileReader::PARAMETER_TYPE[FileReaderParamCount - DataReaderParamCount] =
-{
-      Gmat::FILENAME_TYPE,
-};
+
+//const std::string
+//FileReader::PARAMETER_LABEL[FileReaderParamCount - DataReaderParamCount] =
+//{
+//      "Filename",
+//};
+//
+//const Gmat::ParameterType
+//FileReader::PARAMETER_TYPE[FileReaderParamCount - DataReaderParamCount] =
+//{
+//      Gmat::FILENAME_TYPE,
+//};
 
 
 
 FileReader::FileReader(const std::string& theTypeName, const std::string& theName) :
-   DataReader           (theTypeName, theName)
+   DataReader           (theTypeName, theName),
+   theStream            (NULL)
 {
    objectTypeNames.push_back("FileReader");
 }
@@ -46,7 +50,8 @@ FileReader::~FileReader()
 }
 
 FileReader::FileReader(const FileReader& fr) :
-   DataReader           (fr)
+   DataReader           (fr),
+   theStream            (NULL)
 {
 
 }
@@ -55,8 +60,19 @@ FileReader& FileReader::operator=(const FileReader& fr)
 {
    if (this != &fr)
    {
-
+      theStream = NULL;
    }
 
    return *this;
+}
+
+bool FileReader::SetStream(std::ifstream* aStream)
+{
+   theStream = aStream;
+   return true;
+}
+
+bool FileReader::ReadLine(std::string& theLine)
+{
+   return GmatFileUtil::GetLine(theStream, theLine);
 }

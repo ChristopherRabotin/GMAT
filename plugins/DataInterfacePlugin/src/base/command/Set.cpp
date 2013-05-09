@@ -24,24 +24,25 @@
 #include "MessageInterface.hpp"
 #include "GmatGlobal.hpp"       // for GetDataPrecision()
 
-//#define DEBUG_SET_INIT
+#define DEBUG_INITIALIZATION
 //#define DEBUG_SET_EXEC
 //#define DEBUG_SET_OUTPUT
+#define DEBUG_PARSING
 
-//---------------------------------
-//  static data
-//---------------------------------
-const std::string
-Set::PARAMETER_TEXT[SetParamCount - GmatCommandParamCount] =
-{
-   "ObjectNames",
-};
-
-const Gmat::ParameterType
-Set::PARAMETER_TYPE[SetParamCount - GmatCommandParamCount] =
-{
-   Gmat::STRINGARRAY_TYPE,   // "ObjectNames",
-};
+////---------------------------------
+////  static data
+////---------------------------------
+//const std::string
+//Set::PARAMETER_TEXT[SetParamCount - GmatCommandParamCount] =
+//{
+//   "ObjectNames",
+//};
+//
+//const Gmat::ParameterType
+//Set::PARAMETER_TYPE[SetParamCount - GmatCommandParamCount] =
+//{
+//   Gmat::STRINGARRAY_TYPE,   // "ObjectNames",
+//};
 
 
 //------------------------------------------------------------------------------
@@ -52,12 +53,13 @@ Set::PARAMETER_TYPE[SetParamCount - GmatCommandParamCount] =
  */
 //------------------------------------------------------------------------------
 Set::Set() :
-   GmatCommand   ("Set"),
-   appendData    (false),
-   wasWritten    (false),
-   writeVerbose  (false)
+   GmatCommand       ("Set"),
+   targetName        (""),
+   target            (NULL),
+   interfaceName     (""),
+   theInterface      (NULL),
+   loadAll           (true)
 {
-   fileArray = NULL;
 }
 
 
@@ -70,8 +72,6 @@ Set::Set() :
 //------------------------------------------------------------------------------
 Set::~Set()
 {
-   if (fileArray)
-      delete [] fileArray;
 }
 
 
@@ -85,14 +85,14 @@ Set::~Set()
  */
 //------------------------------------------------------------------------------
 Set::Set(const Set& sv) :
-   GmatCommand   (sv),
-   fileNameArray (sv.fileNameArray),
-   appendData    (sv.appendData),     // should be false...
-   wasWritten    (sv.wasWritten),
-   objNameArray  (sv.objNameArray),
-   writeVerbose  (sv.writeVerbose)
+   GmatCommand       (sv),
+   targetName        (sv.targetName),
+   target            (NULL),
+   interfaceName     (sv.interfaceName),
+   theInterface      (NULL),
+   loadAll           (sv.loadAll),
+   selections        (sv.selections)
 {
-   objArray.clear();
 }
 
 
@@ -111,192 +111,197 @@ Set& Set::operator=(const Set& sv)
 {
    if (this != &sv)
    {
-
+      targetName    = sv.targetName;
+      target        = NULL;
+      interfaceName = sv.interfaceName;
+      theInterface  = NULL;
+      loadAll       = sv.loadAll;
+      selections    = sv.selections;
    }
    
    return *this;
 }
 
 
-//------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Set::GetParameterText(const Integer id) const
-{
-   if (id >= GmatCommandParamCount && id < SetParamCount)
-      return PARAMETER_TEXT[id - GmatCommandParamCount];
-   else
-      return GmatCommand::GetParameterText(id);
-}
-
-
-//------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-Integer Set::GetParameterID(const std::string &str) const
-{
-   for (int i=GmatCommandParamCount; i<SetParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
-         return i;
-   }
-   
-   return GmatCommand::GetParameterID(str);
-}
-
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType Set::GetParameterType(const Integer id) const
-{
-   if (id >= GmatCommandParamCount && id < SetParamCount)
-      return PARAMETER_TYPE[id - GmatCommandParamCount];
-   else
-      return GmatCommand::GetParameterType(id);
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Set::GetParameterTypeString(const Integer id) const
-{
-   if (id >= GmatCommandParamCount && id < SetParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-   else
-      return GmatCommand::GetParameterTypeString(id);
-}
-
-
-//------------------------------------------------------------------------------
-//  bool  SetStringParameter(const Integer id, const std::string value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the string parameter value, given the input
- * parameter ID.
- *
- * @param <id> ID for the requested parameter.
- * @param <value> string value for the requested parameter.
- *
- * @exception <CommandException> thrown if value is already in the list.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-bool Set::SetStringParameter(const Integer id, const std::string &value)
-{
-   if (id == OBJECT_NAMES)
-   {
-      Integer sz = objNameArray.size();
-      for (Integer ii = 0; ii < sz; ii++)
-      {
-         if (objNameArray[ii] == value)
-         {
-            std::string ex = "Attempting to add """;
-            ex += value + """ more than once to list of objects.\n";
-            throw CommandException(ex);
-         }
-      }
-      
-      objNameArray.push_back(value);
-      return true;
-   }
-   
-   return GmatCommand::SetStringParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-//  bool SetStringParameter(const std::string &label, const std::string &value)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a std::string parameter.
- *
- * @param <label> The (string) label for the parameter.
- * @param <value> New value for the parameter.
- *
- * @return The string stored for this parameter.
- */
-//------------------------------------------------------------------------------
-bool Set::SetStringParameter(const std::string &label, const std::string &value)
-{
-   return SetStringParameter(GetParameterID(label), value);
-}
-
-
-//------------------------------------------------------------------------------
-//  std::string  GetStringParameter(const Integer id, const Integer index)
-//------------------------------------------------------------------------------
-/**
- * This method returns the string parameter value, given the input
- * parameter ID and the index into the array.
- *
- * @param <id> ID for the requested parameter.
- * @param <index> index into the StringArray parameter.
- *
- * @exception <CommandException> thrown if value is out of range
- *
- * @return  string value at index 'index'.
- *
- */
-//------------------------------------------------------------------------------
-std::string Set::GetStringParameter(const Integer id,
-                                     const Integer index) const
-{
-   if (id == OBJECT_NAMES)
-   {
-      if ((index < 0) || (index >= ((Integer) objNameArray.size())))
-         throw CommandException
-            ("Index out of bounds when attempting to return object name\n");
-      return objNameArray.at(index);
-   }
-   
-   return GmatCommand::GetStringParameter(id, index);
-}
-
-
-//------------------------------------------------------------------------------
-//  std::string GetStringParameter(const std::string &label,
-//                                 const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieve a string parameter.
- *
- * @param <label> The (string) label for the parameter.
- * @param <index> array index for the parameter.
- *
- * @return The string stored for this parameter.
- */
-//------------------------------------------------------------------------------
-std::string Set::GetStringParameter(const std::string &label,
-                                     const Integer index) const
-{
-   return GetStringParameter(GetParameterID(label), index);
-}
-
-
-//------------------------------------------------------------------------------
-//  const StringArray&  GetStringArrayParameter(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * This method returns the string array value, given the input
- * parameter ID .
- *
- * @param <id> ID for the requested parameter.
- *
-  * @return  string array.
- *
- */
-//------------------------------------------------------------------------------
-const StringArray& Set::GetStringArrayParameter(const Integer id) const
-{
-   if (id == OBJECT_NAMES)
-      return objNameArray;
-   
-   return GmatCommand::GetStringArrayParameter(id);
-}
+////------------------------------------------------------------------------------
+//// std::string GetParameterText(const Integer id) const
+////------------------------------------------------------------------------------
+//std::string Set::GetParameterText(const Integer id) const
+//{
+//   if (id >= GmatCommandParamCount && id < SetParamCount)
+//      return PARAMETER_TEXT[id - GmatCommandParamCount];
+//   else
+//      return GmatCommand::GetParameterText(id);
+//}
+//
+//
+////------------------------------------------------------------------------------
+//// Integer GetParameterID(const std::string &str) const
+////------------------------------------------------------------------------------
+//Integer Set::GetParameterID(const std::string &str) const
+//{
+//   for (int i=GmatCommandParamCount; i<SetParamCount; i++)
+//   {
+//      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+//         return i;
+//   }
+//
+//   return GmatCommand::GetParameterID(str);
+//}
+//
+//
+////------------------------------------------------------------------------------
+//// Gmat::ParameterType GetParameterType(const Integer id) const
+////------------------------------------------------------------------------------
+//Gmat::ParameterType Set::GetParameterType(const Integer id) const
+//{
+//   if (id >= GmatCommandParamCount && id < SetParamCount)
+//      return PARAMETER_TYPE[id - GmatCommandParamCount];
+//   else
+//      return GmatCommand::GetParameterType(id);
+//}
+//
+//
+////------------------------------------------------------------------------------
+//// std::string GetParameterTypeString(const Integer id) const
+////------------------------------------------------------------------------------
+//std::string Set::GetParameterTypeString(const Integer id) const
+//{
+//   if (id >= GmatCommandParamCount && id < SetParamCount)
+//      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+//   else
+//      return GmatCommand::GetParameterTypeString(id);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  bool  SetStringParameter(const Integer id, const std::string value)
+////------------------------------------------------------------------------------
+///**
+// * This method sets the string parameter value, given the input
+// * parameter ID.
+// *
+// * @param <id> ID for the requested parameter.
+// * @param <value> string value for the requested parameter.
+// *
+// * @exception <CommandException> thrown if value is already in the list.
+// *
+// * @return  success flag.
+// *
+// */
+////------------------------------------------------------------------------------
+//bool Set::SetStringParameter(const Integer id, const std::string &value)
+//{
+//   if (id == OBJECT_NAMES)
+//   {
+//      Integer sz = objNameArray.size();
+//      for (Integer ii = 0; ii < sz; ii++)
+//      {
+//         if (objNameArray[ii] == value)
+//         {
+//            std::string ex = "Attempting to add """;
+//            ex += value + """ more than once to list of objects.\n";
+//            throw CommandException(ex);
+//         }
+//      }
+//
+//      objNameArray.push_back(value);
+//      return true;
+//   }
+//
+//   return GmatCommand::SetStringParameter(id, value);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  bool SetStringParameter(const std::string &label, const std::string &value)
+////------------------------------------------------------------------------------
+///**
+// * Sets the value for a std::string parameter.
+// *
+// * @param <label> The (string) label for the parameter.
+// * @param <value> New value for the parameter.
+// *
+// * @return The string stored for this parameter.
+// */
+////------------------------------------------------------------------------------
+//bool Set::SetStringParameter(const std::string &label, const std::string &value)
+//{
+//   return SetStringParameter(GetParameterID(label), value);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  std::string  GetStringParameter(const Integer id, const Integer index)
+////------------------------------------------------------------------------------
+///**
+// * This method returns the string parameter value, given the input
+// * parameter ID and the index into the array.
+// *
+// * @param <id> ID for the requested parameter.
+// * @param <index> index into the StringArray parameter.
+// *
+// * @exception <CommandException> thrown if value is out of range
+// *
+// * @return  string value at index 'index'.
+// *
+// */
+////------------------------------------------------------------------------------
+//std::string Set::GetStringParameter(const Integer id,
+//                                     const Integer index) const
+//{
+//   if (id == OBJECT_NAMES)
+//   {
+//      if ((index < 0) || (index >= ((Integer) objNameArray.size())))
+//         throw CommandException
+//            ("Index out of bounds when attempting to return object name\n");
+//      return objNameArray.at(index);
+//   }
+//
+//   return GmatCommand::GetStringParameter(id, index);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  std::string GetStringParameter(const std::string &label,
+////                                 const Integer index) const
+////------------------------------------------------------------------------------
+///**
+// * Retrieve a string parameter.
+// *
+// * @param <label> The (string) label for the parameter.
+// * @param <index> array index for the parameter.
+// *
+// * @return The string stored for this parameter.
+// */
+////------------------------------------------------------------------------------
+//std::string Set::GetStringParameter(const std::string &label,
+//                                     const Integer index) const
+//{
+//   return GetStringParameter(GetParameterID(label), index);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  const StringArray&  GetStringArrayParameter(const Integer id)
+////------------------------------------------------------------------------------
+///**
+// * This method returns the string array value, given the input
+// * parameter ID .
+// *
+// * @param <id> ID for the requested parameter.
+// *
+//  * @return  string array.
+// *
+// */
+////------------------------------------------------------------------------------
+//const StringArray& Set::GetStringArrayParameter(const Integer id) const
+//{
+//   if (id == OBJECT_NAMES)
+//      return objNameArray;
+//
+//   return GmatCommand::GetStringArrayParameter(id);
+//}
 
 
 //------------------------------------------------------------------------------
@@ -312,10 +317,10 @@ const StringArray& Set::GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Set::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   if (objNameArray.size() == 0)
-      return "";
-   else
-      return objNameArray[0];
+   if (type == Gmat::INTERFACE)
+      return interfaceName;
+
+   return targetName;
 }
 
 
@@ -332,8 +337,13 @@ std::string Set::GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 const StringArray& Set::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   refObjectNames.clear();
+   refObjectNames.push_back(interfaceName);
+   if (type != Gmat::INTERFACE)
+      refObjectNames.push_back(targetName);
+
    // it can be any object, so ignore object type
-   return objNameArray;
+   return refObjectNames;
 }
 
 
@@ -352,11 +362,68 @@ const StringArray& Set::GetRefObjectNameArray(const Gmat::ObjectType type)
 bool Set::SetRefObjectName(const Gmat::ObjectType type,
                             const std::string &name)
 {
-   if (name == "")
-      return false;
-      
-   // Set works for all types, so we don't check the type parameter
-   objNameArray.push_back(name);
+//   if (name == "")
+//      return false;
+//
+//   // Set works for all types, so we don't check the type parameter
+//   objNameArray.push_back(name);
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool InterpretAction()
+//------------------------------------------------------------------------------
+/**
+ * Parses the scripting for the Set command
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool Set::InterpretAction()
+{
+   #ifdef DEBUG_SET_ASSEMBLE
+      MessageInterface::ShowMessage
+         ("%s::InterpretAction() genString = \"%s\"\n", typeName.c_str(),
+          generatingString.c_str());
+   #endif
+
+   StringArray blocks = parser.DecomposeBlock(generatingString);
+
+   StringArray chunks = parser.SeparateBrackets(blocks[0], "{}", " ", false);
+
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("Chunks from \"%s\":\n",
+            blocks[0].c_str());
+      for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+   #endif
+
+   if (chunks.size() < 3)
+      throw CommandException(typeName + "::InterpretAction() cannot identify "
+            "either the target or the data source -- is one missing? -- in "
+            "line\n" + generatingString);
+
+   if (chunks.size() > 4)
+      throw CommandException(typeName +
+            "::InterpretAction() found too many components to parse in the "
+            "line\n" + generatingString);
+
+   if (chunks[0] != typeName)
+      throw CommandException(typeName + "::InterpretAction() does not identify "
+            "the correct command type in line\n" + generatingString);
+
+   targetName = chunks[1];
+   interfaceName = chunks[2];
+
+//   if (chunks.size() == 3)
+//      CheckForOptions(chunks[2]);
+
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("%s::InterpretAction for \"%s\", type = %s\n",
+            typeName.c_str(), generatingString.c_str(), typeName.c_str());
+   #endif
+
    return true;
 }
 
@@ -374,6 +441,15 @@ bool Set::Initialize()
 {
    bool retval = GmatCommand::Initialize();
    
+   target = FindObject(targetName);
+
+   GmatBase *obj = FindObject(interfaceName);
+   if (obj->IsOfType("DataInterface"))
+      theInterface = (DataInterface*)obj;
+
+   if ((theInterface == NULL) || (target == NULL))
+      throw CommandException("The Set command could not find objects "
+            "needed to initialize");
    
    return retval;
 }
@@ -397,7 +473,16 @@ bool Set::Execute()
    
    bool retval = false;
    
-   
+   if (theInterface->Open() == 0)
+   {
+      if (theInterface->LoadData())
+         retval = true;
+
+      if (theInterface->Close() != 0)
+      {
+         MessageInterface::ShowMessage("The interface failed to close\n");
+      }
+   }
    
    return retval;
 }
@@ -454,9 +539,10 @@ const std::string& Set::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    // Build the local string
-   generatingString = prefix + "Set";
-//   for (StringArray::iterator i = objNameArray.begin(); i != objNameArray.end(); ++i)
-//      generatingString += " " + *i;
+   generatingString = prefix + "Set " + targetName + " " + interfaceName;
+
+   /// @todo Add selections
+
    generatingString += ";";
 
    // Then call the base class method
@@ -487,7 +573,7 @@ bool Set::TakeAction(const std::string &action, const std::string &actionData)
    
    if (action == "Clear")
    {
-      objNameArray.clear();
+      selections.clear();
       return true;
    }
 
@@ -513,11 +599,10 @@ bool Set::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   for (Integer index = 0; index < (Integer)objNameArray.size(); ++index)
-   {
-      if (objNameArray[index] == oldName)
-         objNameArray[index] = newName;
-   }
+   if (targetName == oldName)
+      targetName = newName;
+   if (interfaceName == oldName)
+      interfaceName = newName;
    
    return true;
 }

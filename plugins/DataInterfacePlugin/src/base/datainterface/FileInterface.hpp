@@ -23,7 +23,12 @@
 
 #include "DataInterfaceDefs.hpp"
 #include "DataInterface.hpp"
+#include <fstream>
 
+
+/**
+ * Data interface for data contained in a file
+ */
 class DATAINTERFACE_API FileInterface: public DataInterface
 {
 public:
@@ -75,7 +80,12 @@ public:
 protected:
    /// Name of the file
    std::string filename;
-
+   /// Stream containing the file data
+   std::ifstream theStream;
+   /// Flag indicating if the stream is binary or text (ASCII only for now)
+   bool streamIsBinary;
+   /// The reader used to load the requested data
+   DataReader *theReader;
 
    /// Parameter IDs
    enum

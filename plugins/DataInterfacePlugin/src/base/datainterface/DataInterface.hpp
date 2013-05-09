@@ -75,9 +75,9 @@ public:
 
    const StringArray& GetSupportedFieldNames() const;
 
-   virtual Integer      Open(const std::string &name);
+   virtual Integer      Open(const std::string &name = "");
    virtual bool         LoadData() = 0;
-   virtual Integer      Close(const std::string &name);
+   virtual Integer      Close(const std::string &name = "");
 
 protected:
    /// Format identifier for the Reader this interface uses

@@ -47,6 +47,7 @@ OBJECTS = \
           datareader/TcopsVHFAscii.o \
           factory/DataInterfaceCommandFactory.o \
           factory/DataInterfaceFactory.o \
+          factory/ReaderFactory.o \
           plugin/GmatPluginFunctions.o
 
 INCLUDES = \

@@ -26,12 +26,15 @@
 class TcopsVHFAscii: public TcopsVHFData
 {
 public:
-   TcopsVHFAscii(const std::string& theTypeName, const std::string& theName = "");
+   TcopsVHFAscii(const std::string& theName = "");
    virtual ~TcopsVHFAscii();
    TcopsVHFAscii(const TcopsVHFAscii& vhf);
    TcopsVHFAscii& operator=(const TcopsVHFAscii& vhf);
 
    virtual GmatBase* Clone() const;
+
+   virtual bool ReadData();
+
 
    // Temporary to get things building
    DEFAULT_TO_NO_CLONES
