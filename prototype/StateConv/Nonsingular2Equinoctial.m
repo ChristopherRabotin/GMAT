@@ -31,17 +31,17 @@ end
 % Using the relationship between classical and equnoctial elements
 INC = 2*asin(sqrt(e3^2+e4^2));
 
-    if(INC == pi)
-    disp('Warning: Conversion results is near singularity that occurs when INC = 180(deg).');
-     return
-    end
-    
-    c = cos(INC/2);
+if(INC == pi)
+disp('Warning: Conversion results is near singularity that occurs when INC = 180(deg).');
+ return
+end
+
+c = cos(INC/2);
         
 % Find the equnoctial elements
 sma = SMA;
-h   = e1;
-k   = e2;
+h   = e2;
+k   = e1;
 p   = e3/c;
 q   = e4/c;
 meanLon = e5;
