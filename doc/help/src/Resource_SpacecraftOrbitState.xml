@@ -366,7 +366,8 @@
             <guilabel>EquinoctialK</guilabel> together govern how elliptic an
             orbit is and where the periapsis is located.
             <guilabel>EquinotialH</guilabel> = <guilabel>ECC</guilabel> *
-            sin(<guilabel>AOP</guilabel>) .</para> <variablelist>
+            sin(<guilabel>AOP</guilabel> + <guilabel>RAAN</guilabel>) .</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -427,7 +428,8 @@
             <guilabel>EquinoctialK</guilabel> together govern how elliptic an
             orbit is and where the periapsis is located.
             <guilabel>EquinotialK</guilabel> = <guilabel>ECC</guilabel> *
-            cos(<guilabel>AOP</guilabel>) </para> <variablelist>
+            cos(<guilabel>AOP</guilabel> + <guilabel>RAAN</guilabel>) .</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
