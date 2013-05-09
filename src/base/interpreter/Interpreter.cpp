@@ -441,6 +441,13 @@ void Interpreter::BuildCreatableObjectMaps()
    for (UnsignedInt i = 0; i < eventLocatorList.size(); i++)
       objectTypeMap.insert(std::make_pair(eventLocatorList[i], Gmat::EVENT_LOCATOR));
 
+   interfaceList.clear();
+   StringArray itf = theModerator->GetListOfFactoryItems(Gmat::INTERFACE);
+   copy(itf.begin(), itf.end(), back_inserter(interfaceList));
+   copy(itf.begin(), itf.end(), back_inserter(allObjectTypeList));
+   for (UnsignedInt i = 0; i < interfaceList.size(); i++)
+      objectTypeMap.insert(std::make_pair(interfaceList[i], Gmat::INTERFACE));
+
    #ifdef DEBUG_OBJECT_LIST
       std::vector<std::string>::iterator pos;
       
@@ -527,6 +534,10 @@ void Interpreter::BuildCreatableObjectMaps()
       for (pos = tsl.begin(); pos != tsl.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
       
+      MessageInterface::ShowMessage("\nInterfaces:\n   ");
+      for (pos = itf.begin(); pos != itf.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+
       MessageInterface::ShowMessage("\nOther SpacePoints:\n   ");
       for (pos = spl.begin(); pos != spl.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
@@ -657,6 +668,11 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
          clist = trackingSystemList;
          break;
          
+      case Gmat::INTERFACE:
+         MessageInterface::ShowMessage("Interface code goes here\n");
+         clist = interfaceList;
+         break;
+
       // These are all intentional fall-throughs:
       case Gmat::SPACECRAFT:
       case Gmat::FORMATION:
@@ -1230,6 +1246,11 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(trackingSystemList.begin(), trackingSystemList.end(), type) !=
                trackingSystemList.end())
          obj = (GmatBase*)theModerator->CreateTrackingSystem(type, name);
+
+      // Handle Interfaces
+      else if (find(interfaceList.begin(), interfaceList.end(), type) !=
+               interfaceList.end())
+         obj = theModerator->CreateOtherObject(Gmat::INTERFACE, type, name);
    }
    
    //@note

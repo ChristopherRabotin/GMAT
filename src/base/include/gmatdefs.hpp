@@ -184,6 +184,7 @@ namespace Gmat
       BODY_FIXED_POINT,
       EVENT,
       EVENT_LOCATOR,
+      DATAINTERFACE_SOURCE,
 
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
@@ -195,7 +196,7 @@ namespace Gmat
       DATA_FILE,           // For DataFile objects
       OBTYPE,              // For the specific observation types
       
-      INTERFACE,           // MatlabInterface
+      INTERFACE,           // MatlabInterface and other Interfaces
       MEDIA_CORRECTION,    // For media correction model
       SENSOR,              // For RFHardwares and Antennas
       RF_HARDWARE,

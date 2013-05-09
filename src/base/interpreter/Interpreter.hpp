@@ -370,6 +370,7 @@ private:
    StringArray   spacePointList;
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
+   StringArray   interfaceList;
    
    StringArray   matlabFunctionNames;
    
