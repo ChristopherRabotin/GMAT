@@ -1275,6 +1275,9 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp">
       <Filter>Source Files\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2506,6 +2509,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp">
       <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
