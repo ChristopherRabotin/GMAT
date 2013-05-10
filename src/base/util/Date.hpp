@@ -41,31 +41,36 @@ public:
     Integer GetYear() const;
     Integer GetMonth() const;
     Integer GetDay() const;
-    Real GetSecondsOfDay() const;
-
+    Real    GetSecondsOfDay() const;
+    
     Integer GetHour() const;
     Integer GetMinute() const;
-    Real GetSecond() const;
-
+    Real    GetSecond() const;
+    
     GmatTimeConstants::DayName GetDayName() const;
     Integer GetDaysPerMonth() const;
     GmatTimeConstants::MonthName GetMonthName() const;
-
-    Real ToPackedCalendarReal() const;
-    std::string& ToPackedCalendarString();  // "YYYYMMDD.hhmmssnnn"
+    
+    Real ToPackedCalendarReal() const;      // YYYYMMDD.HHMMSSmmm
+    Real ToPackedYYYMMDD() const;           // YYYMMDD.0
+    Real ToDayOfYear() const;               // Day count of year
+    std::string& ToPackedCalendarString();  // "YYYYMMDD.HHMMSSmmm"
+    
     
     void ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear, Integer& hour, 
                              Integer& minute, Real& second) const;
-    void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
-                                Integer& hour, Integer& minute, Real& second) const;
-    void ToYearMonDayHourMinSec(Real& ymd, Real& hms) const;
-
+    void ToYearMonthDayHourMinSec(Integer& year, Integer& month, Integer& day, 
+                                  Integer& hour, Integer& minute, Real& second) const;
+    void ToYearMonthDayHourMinSec(Real& year, Real& month, Real& day, 
+                                  Real& hour, Real& minute, Real& second) const;
+    void ToYearMonthDayHourMinSec(Real& ymd, Real& hms) const;
+    
     bool IsValid() const;
-
+    
     Integer GetNumData() const;
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
-
+    
 protected:
    
     Date();
@@ -75,10 +80,10 @@ protected:
              Real second);
     Date(Integer year, Integer month, Integer day, Real secondsOfDay);
     Date(const GmatTimeUtil::CalDate &date);
-    Date(const std::string &time); // "YYYYMMDD.hhmmssnnn"
+    Date(const std::string &time); // "YYYYMMDD.HHMMSSmmm"
     Date(const Date &date);
     ~Date();
-
+    
     bool  operator>  (const Date &date) const;
     bool  operator<  (const Date &date) const;
     
@@ -86,7 +91,7 @@ protected:
     Integer  monthD;
     Integer  dayD;
     Real     secondsOfDayD;
-
+    
     std::string mPackedString;
     
     static const Integer NUM_DATA = 6;

@@ -153,7 +153,7 @@ GmatTimeConstants::MonthName Date::GetMonthName() const
 //  Real ToPackedCalendarReal() const
 //------------------------------------------------------------------------------
 /*
- * @return time in Real in the format of yyyymmdd.hhmmssnnn
+ * @return time in Real in the format of YYYYMMDD.HHMMSSmmm
  */
 //------------------------------------------------------------------------------
 Real Date::ToPackedCalendarReal() const
@@ -161,11 +161,39 @@ Real Date::ToPackedCalendarReal() const
    Real ymd;
    Real hms;
 
-   ToYearMonDayHourMinSec(ymd, hms);
-
-//    return ymd + (hms * 1e-9);
+   ToYearMonthDayHourMinSec(ymd, hms);
+   
    return ymd + hms;
 }
+
+//------------------------------------------------------------------------------
+//  Real ToPackedYYYMMDD() const
+//------------------------------------------------------------------------------
+/*
+ * Converts time to YYYY(year - 1900) MM (month) and DD (day).
+ *
+ * @return time in Real in the format of YYYMMDD.0
+ */
+//------------------------------------------------------------------------------
+Real Date::ToPackedYYYMMDD() const
+{
+   Real ymd;
+   Real hms;
+   
+   ToYearMonthDayHourMinSec(ymd, hms);
+   return ymd - 19000000.0;
+}
+
+
+//------------------------------------------------------------------------------
+// Real ToDayOfYear() const
+//------------------------------------------------------------------------------
+Real Date::ToDayOfYear() const
+{
+   Real dayOfYear = ToDOYFromYearMonthDay(yearD, monthD, dayD);
+   return dayOfYear;
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string& ToPackedCalendarString()
@@ -179,7 +207,7 @@ std::string& Date::ToPackedCalendarString()
    Real ymd;
    Real hms;
 
-   ToYearMonDayHourMinSec(ymd, hms);
+   ToYearMonthDayHourMinSec(ymd, hms);
 
    // Get date in YMD
    ss << ymd;
@@ -212,10 +240,10 @@ void Date::ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear,
 }
 
 //------------------------------------------------------------------------------
-//  void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day,
+//  void ToYearMonthDayHourMinSec(Integer& year, Integer& month, Integer& day,
 //                              Integer& hour, Integer& minute, Real& second) const
 //------------------------------------------------------------------------------
-void Date::ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day,
+void Date::ToYearMonthDayHourMinSec(Integer& year, Integer& month, Integer& day,
                                   Integer& hour, Integer& minute, Real& second) const
 {
    year = yearD;
@@ -225,9 +253,30 @@ void Date::ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day,
 }
 
 //------------------------------------------------------------------------------
-//  void ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
+//  void ToYearMonthDayHourMinSec(Real& year, Real& month, Real& day,
+//                              Real& hour, Real& minute, Real& second) const
 //------------------------------------------------------------------------------
-void Date::ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
+void Date::ToYearMonthDayHourMinSec(Real& year, Real& month, Real& day,
+                                  Real& hour, Real& minute, Real& second) const
+{
+   Integer iyear, imonth, iday, ihour, iminute;
+   
+   ToYearMonthDayHourMinSec(iyear, imonth, iday, ihour, iminute, second);
+   year = (Real)iyear;
+   month = (Real)imonth;
+   day = (Real)iday;
+   hour = (Real)ihour;
+   minute = (Real)iminute;
+}
+
+//------------------------------------------------------------------------------
+//  void ToYearMonthDayHourMinSec(Real& ymd, Real& hms) const
+//------------------------------------------------------------------------------
+/**
+ * Returns time in YYYYMMDD.0 and HHMMSS.mmm format
+ */
+//------------------------------------------------------------------------------
+void Date::ToYearMonthDayHourMinSec(Real& ymd, Real& hms) const
 {
    Integer h;
    Integer m;

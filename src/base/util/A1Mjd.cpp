@@ -20,12 +20,13 @@
  * 12 noon on January 5th, 1941.
  */
 //------------------------------------------------------------------------------
-#include <sstream>           // for stringstream
+#include <sstream>                 // for stringstream
 #include "A1Mjd.hpp"
 #include "UtcDate.hpp"
 #include "A1Date.hpp"
-#include "TimeTypes.hpp"     // for TimeConst::, UtcMjd
-#include "RealUtilities.hpp" // for Round(), IsEqual(), Floor()
+#include "TimeTypes.hpp"           // for TimeConst::, UtcMjd
+#include "RealUtilities.hpp"       // for Round(), IsEqual(), Floor()
+#include "MessageInterface.hpp"
 
 using namespace GmatTimeUtil;
 using namespace GmatTimeConstants;
@@ -392,8 +393,13 @@ UtcDate A1Mjd::ToUtcDate()
 A1Date A1Mjd::ToA1Date()
 {
    CalDate calDate;
-   calDate = UtcMjdToCalDate(mMjd);
-   return A1Date(calDate);   
+   calDate = UtcMjdToCalDate(mMjd); // No leap seconds applied
+   #ifdef DEBUG_TOA1DATE
+   MessageInterface::ShowMessage
+      ("year=%d, month=%d, day=%d, hour=%d, minute=%d, second=%f\n", calDate.year,
+       calDate.month, calDate.day, calDate.hour, calDate.minute, calDate.second);
+   #endif
+   return A1Date(calDate);
 }
 
 //------------------------------------------------------------------------------
@@ -650,7 +656,7 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
    
    // divide minutes out of remaining seconds
    timeArray[4] = Floor(seconds / SECS_PER_MINUTE);
-   
+
    // subtract out minutes to leave seconds
    seconds -= timeArray[4] * SECS_PER_MINUTE;
    
