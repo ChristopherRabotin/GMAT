@@ -287,6 +287,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.cpp" />
@@ -544,6 +545,7 @@
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -923,6 +925,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.hpp" />
@@ -1191,6 +1194,7 @@
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />

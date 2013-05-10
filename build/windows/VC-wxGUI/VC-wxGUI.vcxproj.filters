@@ -2124,6 +2124,12 @@
     <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
       <Filter>Source Files\gui\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4093,6 +4099,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
       <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
