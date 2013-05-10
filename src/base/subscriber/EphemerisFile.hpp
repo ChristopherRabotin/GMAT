@@ -28,6 +28,7 @@
 #include <fstream>
 
 class SpiceOrbitKernelWriter;
+class Code500EphemerisFile;
 
 class GMAT_API EphemerisFile : public Subscriber
 {
@@ -93,19 +94,21 @@ public:
    
 protected:
 
-   const static UnsignedInt MAX_SEGMENT_SIZE = 1000;
-   
    enum FileType
    {
-      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE,
+      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM,
    };
+   
+   // Maximum segment size used for bufferring data
+   UnsignedInt            maxSegmentSize;
    
    Spacecraft             *spacecraft;
    CoordinateSystem       *outCoordSystem;
-   Interpolator           *interpolator; // owned object
-   SpiceOrbitKernelWriter *spkWriter;    // owned object
+   Interpolator           *interpolator;     // owned object
+   SpiceOrbitKernelWriter *spkWriter;        // owned object
+   Code500EphemerisFile   *code500EphemFile; // owned object
    
-   // for buffering ephemeris data for SPK file
+   // for buffering ephemeris data
    EpochArray  a1MjdArray;
    StateArray  stateArray;
    
@@ -177,6 +180,7 @@ protected:
    bool        writeDataInDataCS;
    bool        processingLargeStep;
    bool        spkWriteFailed;
+   bool        code500WriteFailed;
    bool        writeCommentAfterData;
    
    Gmat::RunState prevRunState;
@@ -212,12 +216,14 @@ protected:
    void         InitializeData();
    void         CreateInterpolator();
    void         CreateSpiceKernelWriter();
-   bool         OpenEphemerisFile();
+   void         CreateCode500EphemerisFile();
+   bool         OpenTextEphemerisFile();
    
    // Time and data
    bool         CheckInitialAndFinalEpoch();
    void         HandleCcsdsOrbitData(bool writeData);
    void         HandleSpkOrbitData(bool writeData);
+   void         HandleCode500OrbitData(bool writeDatda);
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
@@ -230,6 +236,10 @@ protected:
    void         GetAttitude();
    void         WriteAttitude();
    void         FinishUpWriting(bool canFinalize = true);
+   void         FinishUpWritingCCSDS(bool canFinalize = true);
+   void         FinishUpWritingSPK(bool canFinalize = true);
+   void         FinishUpWritingCode500(bool canFinalize = true);
+   
    void         ProcessEpochsOnWaiting(bool checkFinalEpoch = false,
                                        bool checkEventEpoch = false);
    bool         SetEpoch(Integer id, const std::string &value,
@@ -278,6 +288,10 @@ protected:
    void         WriteSpkOrbitMetaData();
    void         WriteSpkComments(const std::string &comments);
    void         FinalizeSpkFile();
+   
+   // Code500 file writing
+   void         WriteCode500OrbitDataSegment(bool canFinalize = false);
+   void         FinalizeCode500Ephemeris();
    
    // Epoch handling
    RealArray::iterator
