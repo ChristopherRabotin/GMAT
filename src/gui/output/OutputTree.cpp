@@ -130,7 +130,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
 		}
 		switch (type)
 		{
-			case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+         case GmatTree::OUTPUT_CCSDS_OEM_FILE:
 				parentId = mEphemFileItem;
 				break;
 			case GmatTree::OUTPUT_REPORT:
@@ -139,6 +139,13 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
 			case GmatTree::OUTPUT_EVENT_REPORT:
 				parentId = mEventsItem;
 				break;
+         default:
+            // It will never get here but default is handled to remove compiler warning
+            #if DEBUG_OUTPUT_TREE
+            MessageInterface::ShowMessage
+               ("*** OutputTree::RemoveItem() just returning, no matching type found\n");
+            #endif
+            return;
 		}
 		break;
 	}
