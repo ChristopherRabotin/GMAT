@@ -9,6 +9,7 @@ function stateOut = stateconv(stateIn,inputType,outPutType,mu)
 % Type = 6;  Equinoctial           [SMA H K P Q MLONG]'
 % Type = 7;  Modified Equinoctial  [P F G H K L]'
 % Type = 8;  Nonsingular Keplerian [SMA E1 E2 E3 E4 E5]'
+% Type = 9;  Delaunay              [L G H l g h ]';
 
 % Validate the input
 if max(size(stateIn)) ~=6 || min(size(stateIn)) ~=1
@@ -39,7 +40,7 @@ end
 switch outPutType
    case {1}
        stateOut = cart;
-   case {2,3,4,5,6,7,8}
+   case {2,3,4,5,6,7,8,9}
        stateOut = FromCartesian(cart,outPutType,mu);
 end
 

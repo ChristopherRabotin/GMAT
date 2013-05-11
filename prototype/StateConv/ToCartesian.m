@@ -9,6 +9,7 @@ function [cart] = ToCartesian(stateIn,inputType,mu)
 % Type = 6;  Equinoctial           [SMA H K P Q MLONG]'
 % Type = 7;  Modified Equinoctial  [P F G H K L]'
 % Type = 8;  Nonsingular Keplerian [SMA E1 E2 E3 E4 E5]'
+% Type = 9;  Delaunay              [L G H MA AOP RAAN]'
 
 %  Use earth's mu if not provided 
 if nargin < 3
@@ -36,6 +37,8 @@ elseif inputType == 8
 %     cart = Kep2Cart(kep,mu);
     eq = Nonsingular2Equinoctial(stateIn, mu);
     cart = Equinoctial2Cart(eq, mu);
+elseif inputType == 9                 % Delaunay state
+    cart = Dela2Cart(stateIn,mu);
 else
 	cart = [];
 	disp('Error in ToCartesian:  input state type is not supported')

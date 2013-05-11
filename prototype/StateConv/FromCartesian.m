@@ -9,6 +9,7 @@ function [state] = FromCartesian(cart,outPutType,mu)
 % Type = 6;  Equinoctial           [SMA H K P Q MLONG]'
 % Type = 7;  Modified Equinoctial  [P F G H K L]'
 % Type = 8;  Nonsingular Keplerian [SMA E1 E2 E3 E4 E5]'
+% Type = 9;  Delaunay              [L G H MA AOP RAAN]'
 
 %  Validate the input
 if size(cart,1) ~=6 || size(cart,2) ~=1
@@ -40,6 +41,8 @@ elseif outPutType == 8
     eq = Cart2Equinoctial(cart, mu);
     state = Equinoctial2Nonsingular(eq, mu);
 %     state = Cart2Nonsingular(cart, mu);
+elseif outPutType == 9
+    state = Cart2Dela(cart,mu);
 else
 	state = [];
 	disp('Error in ToCartesian:  input state type is not supported')
