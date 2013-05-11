@@ -4,13 +4,12 @@
 function [ Cart ] = Mee2Cart(ModEquinoct,mu,j)
 
 % % If mu is not provided, use the mu for Earth
-if ( nargin == 1 )
+if ( nargin < 2 )
     mu = 398600.4415;
-    j = 1; % j = 1 for direct orbits, j = -1 for retrograde orbits
 end
 
-if ( nargin == 2 )
-    j = 1;
+if ( nargin < 3 )
+    j = 1; % j = 1 for direct orbits, j = -1 for retrograde orbits
 end
 
 % % Initializations
@@ -26,12 +25,6 @@ if ( length(ModEquinoct) ~= 6 )
     Cart = [];
     disp('Error: Modified Equinoctial Elements have six elements')
     return
-end
-
-if ( abs(p) < 1e-7 )
-%     Cart = [];
-%     disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
-%     return
 end
 
 if ( p < 0 )

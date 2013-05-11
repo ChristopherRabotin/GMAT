@@ -1,12 +1,11 @@
 function [ Mee ] = Cart2Mee(Cart,mu,j)
 
 % % If mu is not provided, use the mu for Earth
-if ( nargin == 1 )
+if ( nargin < 2 )
     mu = 398600.4415;
-    j = 1;
 end
 
-if ( nargin == 2 )
+if ( nargin < 3 )
    j = 1; % j = 1 for direct orbits, j = -1 for retrograde orbits
 end
 
@@ -34,26 +33,8 @@ else
 end
 evec = cross(veci,hvec)/mu - r_hat;
 
-if ( abs(h_hat(3) - (-1)) < 1e-7 )
-%     Mee = [];
-%     disp('Error: Singularity occurs during calculate Modified Equinoctial element h and k.')
-%     return
-end
-
 % Energy = vmag^2/2 - mu/rmag; SMA = -mu/2/Energy;
 p_mee = hmag^2/mu;
-
-if ( abs( 1- norm(evec) ) < 1e-7)
-%     Mee = [];
-%     disp('Error: A nearly parabolci orbit is undefiend with Modified Equinoctial Elements')
-%     return
-end
-
-if ( abs(p_mee) < 1e-7 )
-%     Mee = [];
-%     disp('Error: A nearly parabolic orbit is undefined with Modified Equinoctial Elements')
-%     return
-end
 
 if ( p_mee < 0 )
     Mee = [];
@@ -63,6 +44,15 @@ end
 
 % % Reffered to 'GMAT math spec' (p.52-53)
 denom = ( 1 + h_hat(3)*j );
+
+if ( abs(denom) < 1e-7 )
+    disp('Warning: Singularity may occur during calculate Modified Equinoctial element h and k')
+elseif ( abs(denom) < 2*eps )
+    Mee = [];
+    disp('Error: Singularity occurs during calculate Modified Equinoctial element h and k.')
+    return
+end
+
 fx = 1 - h_hat(1)^2/denom; fy = -h_hat(1)*h_hat(2)/denom;
 fz = -h_hat(1)*j; f_hat = [fx fy fz]';
 g_hat = cross(h_hat,f_hat);
