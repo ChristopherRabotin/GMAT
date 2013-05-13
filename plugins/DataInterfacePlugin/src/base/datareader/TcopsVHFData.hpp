@@ -30,7 +30,7 @@
  * the TcopsVHFAscii class so that is GMAT support for binary TVHFs is needed,
  * the data elements won't need to be refactorored into an intermediary.
  */
-class TcopsVHFData: public FileReader
+class DATAINTERFACE_API TcopsVHFData: public FileReader
 {
 public:
    TcopsVHFData(const std::string& theTypeName, const std::string& theName);

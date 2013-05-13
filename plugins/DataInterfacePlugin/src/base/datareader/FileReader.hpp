@@ -24,6 +24,9 @@
 #include "DataInterfaceDefs.hpp"
 #include "DataReader.hpp"
 
+/**
+ *
+ */
 class DATAINTERFACE_API FileReader: public DataReader
 {
 public:
@@ -32,13 +35,22 @@ public:
    FileReader(const FileReader& fr);
    FileReader& operator=(const FileReader& fr);
 
-   virtual bool SetStream(std::ifstream* aStream);
+   virtual bool SetStream(std::ifstream* aStream, const std::string &fname="");
 
 protected:
+   /// Name of the file, used for error reporting
+   std::string filename;
+   /// The file stream used to access the data
    std::ifstream *theStream;
-
+   /// Buffer of lines read
+   StringArray dataBuffer;
 
    bool ReadLine(std::string &theLine);
+   virtual bool ParseRealValue(const Integer i, const std::string& theField);
+   virtual bool ParseRvector6Value(const Integer i, const std::string& theField,
+                                   const StringArray& fieldIdentifiers);
+   virtual bool ParseStringValue(const Integer i, const std::string& theField);
+
 
    /// TBD: Go we need the GmatBase parameters in this internal object?
    /// Parameter IDs

@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 3, 2013
 /**
- * 
+ * Definition of the TCOPS Vector Hold File ASCII reader
  */
 //------------------------------------------------------------------------------
 
@@ -23,7 +23,14 @@
 
 #include "TcopsVHFData.hpp"
 
-class TcopsVHFAscii: public TcopsVHFData
+/**
+ * The file reader for a TCOPS Vector Hold File in ASCII format
+ *
+ * This class reads and collects data from an ASCII dump of a TCOPS Vector Hold
+ * File.  The code handles either the unedited dump file, or the Code 9
+ * formatted file.
+ */
+class DATAINTERFACE_API TcopsVHFAscii: public TcopsVHFData
 {
 public:
    TcopsVHFAscii(const std::string& theName = "");
@@ -41,8 +48,18 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 private:
+   /// Flag indicating if the file is a dump file or a Task 9 file
+   bool isDumpFile;
+   /// The Task 9 formatted file has an opening vector, buffered here
+   Real startVector[7];
+   /// The UTC epoch data as found on the file
+   GmatEpoch utcEpoch;
 
-
+   bool CheckForHeader(const std::string& theLine);
+   bool CheckForBlockBoundary(const std::string& theLine);
+   void ManageStartData();
+   bool ParseDataBlock();
+   void ParseTime(std::string& theField);
 };
 
 #endif /* TcopsVHFAscii_hpp */

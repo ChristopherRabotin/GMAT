@@ -197,14 +197,23 @@ bool FileInterface::SetStringParameter(const std::string& label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Sets up the reader that the interface uses and prepares for reading
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::Initialize()
 {
    bool retval = false;
 
-
+   #ifdef DEBUG_READER_CREATION
       MessageInterface::ShowMessage("Initializing the %s file interface\n",
             instanceName.c_str());
-
+   #endif
 
    // Verify that the file exists
    if (GmatFileUtil::DoesFileExist(filename))
@@ -222,6 +231,9 @@ bool FileInterface::Initialize()
          #endif
          retval = true;
       }
+      else
+         throw InterfaceException("The FileInterface \"" + instanceName +
+               "\" was unable to create a reader for the data.");
    }
    else
       throw InterfaceException("The FileInterface \"" + instanceName +
@@ -231,8 +243,24 @@ bool FileInterface::Initialize()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Integer Open(const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Opens the file stream so data can be read
+ *
+ * @param name Name for the interface (unused for FoleInterface objects)
+ *
+ * @return 0 on success, or an error code
+ */
+//------------------------------------------------------------------------------
 Integer FileInterface::Open(const std::string& name)
 {
+   #ifdef DEBUG_READER_CREATION
+      MessageInterface::ShowMessage("FileInterface::Open() called\n"
+            "   theReader = <%p>\n", theReader);
+   #endif
+
    Integer retval = -1;
 
    if (theReader)
@@ -241,17 +269,33 @@ Integer FileInterface::Open(const std::string& name)
          throw InterfaceException("The FileInterface \"" + instanceName +
             "\" attempted to open the file \"" + filename +
             "\", but the file is already open.");
+
       theStream.open(filename.c_str());
-      theReader->SetStream(&theStream);
+      theReader->SetStream(&theStream, filename);
 
       retval = 0;
    }
+   else
+      throw InterfaceException("Cannot open the file interface");
 
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data into the interface
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::LoadData()
 {
+   #ifdef DEBUG_READER_CREATION
+      MessageInterface::ShowMessage("FileInterface::LoadData() called\n");
+   #endif
+
    bool retval = false;
 
    if (theReader && theStream.is_open())
@@ -262,8 +306,23 @@ bool FileInterface::LoadData()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Integer Close(const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Closes the FileInterface
+ *
+ * @param name Name for the interface (unused for FoleInterface objects)
+ *
+ * @return 0 on success, or an error code
+ */
+//------------------------------------------------------------------------------
 Integer FileInterface::Close(const std::string& name)
 {
+   #ifdef DEBUG_READER_CREATION
+      MessageInterface::ShowMessage("FileInterface::Close() called\n");
+   #endif
+
    Integer retval = -1;
 
    if (theReader)

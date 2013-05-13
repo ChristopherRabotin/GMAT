@@ -36,7 +36,7 @@ public:
    DataReader& operator=(const DataReader& dr);
 
    // File interfaces, override for FileReaders
-   virtual bool SetStream(std::ifstream* aStream);
+   virtual bool SetStream(std::ifstream* aStream, const std::string &fname="");
 
    virtual const StringArray& GetSelectedFieldNames();
    virtual void SetSelectedFieldNames(const StringArray& selections);
@@ -53,14 +53,36 @@ public:
 
 
 protected:
+   enum readerDataType
+   {
+      READER_REAL = 30000,
+      READER_RVECTOR6,
+      READER_STRING,
+      READER_TIMESTRING,         // A string that needs special treatment
+      READER_SUBTYPE
+   };
+
    /// Array of the data fields the user has selected
    StringArray selectedFields;
    /// List of field names that the data reader supports
    StringArray supportedFields;
+   /// Flag indicating is everything should be read (the default)
+   bool readAllSupportedFields;
    /// Flag indicating if the data is available
    bool dataReady;
    /// Flag indicating is a new read clears previous data or overwrites it
    bool clearOnRead;
+
+   /// Map of the user strings to the keys to find in the data source
+   std::map<std::string, std::string> fileStringMap;
+   /// Map of the user strings to the GMAT object field names
+   std::map<std::string, std::string> objectStringMap;
+   /// Map of the user strings to the GMAT object field names
+   std::map<std::string, Integer> objectIDMap;
+   /// Map of the user string to the data type for the data
+   std::map<std::string, readerDataType> dataType;
+
+
    /// Mapping for the Real data
    std::map <std::string, Real> realData;
    /// Mapping for the Rvector6 data
@@ -70,6 +92,10 @@ protected:
 
    // Methods that subclasses may need to override.  Put any additional
    // processing in these methods
+   virtual bool ParseRealValue(const Integer i, const std::string& theField) = 0;
+   virtual bool ParseRvector6Value(const Integer i, const std::string& theField,
+         const StringArray& fieldIdentifiers) = 0;
+   virtual bool ParseStringValue(const Integer i, const std::string& theField) = 0;
    virtual Real GetRData(const std::string &forField);
    virtual Rvector6 GetRVectorData(const std::string &forField);
    virtual std::string GetSData(const std::string &forField);

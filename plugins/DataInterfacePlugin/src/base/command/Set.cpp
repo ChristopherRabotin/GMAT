@@ -25,8 +25,8 @@
 #include "GmatGlobal.hpp"       // for GetDataPrecision()
 
 #define DEBUG_INITIALIZATION
-//#define DEBUG_SET_EXEC
-//#define DEBUG_SET_OUTPUT
+#define DEBUG_SET_EXEC
+#define DEBUG_SET_OUTPUT
 #define DEBUG_PARSING
 
 ////---------------------------------
@@ -468,7 +468,7 @@ bool Set::Initialize()
 bool Set::Execute()
 {
    #ifdef DEBUG_SET_EXEC
-   MessageInterface::ShowMessage("Set::Execute() entered\n");
+      MessageInterface::ShowMessage("Set::Execute() entered\n");
    #endif
    
    bool retval = false;
@@ -477,12 +477,23 @@ bool Set::Execute()
    {
       if (theInterface->LoadData())
          retval = true;
+      #ifdef DEBUG_SET_EXEC
+         else
+            MessageInterface::ShowMessage("Set::Execute() LoadData returned "
+                  "false\n");
+      #endif
 
       if (theInterface->Close() != 0)
       {
          MessageInterface::ShowMessage("The interface failed to close\n");
       }
    }
+   #ifdef DEBUG_SET_EXEC
+      else
+         MessageInterface::ShowMessage("Set::Execute(): The interface did not "
+               "open\n");
+   #endif
+
    
    return retval;
 }

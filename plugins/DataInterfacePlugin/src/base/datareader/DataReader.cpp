@@ -37,9 +37,10 @@
 
 
 DataReader::DataReader(const std::string& theTypeName, const std::string& theName) :
-   GmatBase          (Gmat::DATAINTERFACE_SOURCE, theTypeName, theName),
-   dataReady         (false),
-   clearOnRead       (true)
+   GmatBase                (Gmat::DATAINTERFACE_SOURCE, theTypeName, theName),
+   readAllSupportedFields  (true),
+   dataReady               (false),
+   clearOnRead             (true)
 {
    // Engine required fields
    objectTypes.push_back(Gmat::DATAINTERFACE_SOURCE);
@@ -51,11 +52,16 @@ DataReader::~DataReader()
 }
 
 DataReader::DataReader(const DataReader& dr) :
-   GmatBase          (dr),
-   selectedFields    (dr.selectedFields),
-   supportedFields   (dr.supportedFields),
-   dataReady         (false),
-   clearOnRead       (dr.clearOnRead)
+   GmatBase                (dr),
+   selectedFields          (dr.selectedFields),
+   supportedFields         (dr.supportedFields),
+   readAllSupportedFields  (dr.readAllSupportedFields),
+   dataReady               (false),
+   clearOnRead             (dr.clearOnRead),
+   fileStringMap           (dr.fileStringMap),
+   objectStringMap         (dr.objectStringMap),
+   objectIDMap             (dr.objectIDMap),
+   dataType                (dr.dataType)
 {
 }
 
@@ -63,10 +69,15 @@ DataReader& DataReader::operator=(const DataReader& dr)
 {
    if (this != &dr)
    {
-      selectedFields  = dr.selectedFields;
-      supportedFields = dr.supportedFields;
-      dataReady       = false;
-      clearOnRead     = dr.clearOnRead;
+      selectedFields         = dr.selectedFields;
+      supportedFields        = dr.supportedFields;
+      readAllSupportedFields = dr.readAllSupportedFields;
+      dataReady              = false;
+      clearOnRead            = dr.clearOnRead;
+      fileStringMap          = dr.fileStringMap;
+      objectStringMap        = dr.objectStringMap;
+      objectIDMap            = dr.objectIDMap;
+      dataType               = dr.dataType;
    }
 
    return *this;
@@ -149,7 +160,7 @@ Rvector6 DataReader::GetRVectorData(const std::string& forField)
    return retval;
 }
 
-bool DataReader::SetStream(std::ifstream* aStream)
+bool DataReader::SetStream(std::ifstream* aStream, const std::string &fname)
 {
    return false;
 }
