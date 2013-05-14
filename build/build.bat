@@ -19,10 +19,9 @@ set arch=x86
 set target=release
 set version=10.0
 set wx_output_x86_folder=..\application\bin\
-set wx_lib_x86_folder=..\depends\wxWidgets\wxWidgets-2.8.12\lib\vc_dll\
+set wx_lib_x86_folder=..\depends\wxWidgets\wxMSW-2.8.12\lib\vc_dll\
 set wx_output_amd64_folder=..\application\bin\
-set wx_lib_amd64_folder=..\depends\wxWidgets\wxWidgets-2.8.12\lib\vc_amd64_dll\
-set cmake="C:\Program Files\CMake 2.8\bin\"
+set wx_lib_amd64_folder=..\depends\wxWidgets\wxMSW-2.8.12\lib\vc_amd64_dll\
 
 :: ***********************************
 :: Input Args
@@ -31,7 +30,6 @@ set cmake="C:\Program Files\CMake 2.8\bin\"
 if "%1"=="-arch" goto arch
 if "%1"=="-target" goto target
 if "%1"=="-version" goto version
-if "%1"=="-cmake" goto cmake
 if "%1"=="" goto main
 goto error
 
@@ -43,11 +41,6 @@ goto lreturn
 :target
 shift
 set target=%1
-goto lreturn
-
-:cmake
-shift
-set cmake=%1
 goto lreturn
 
 :lreturn
@@ -64,17 +57,6 @@ echo %0 Arguments are Invalid. See usage documentation.
 goto end
 
 :main
-
-::Validate cmake path
-IF NOT EXIST %cmake% (
-	ECHO ...............................................
-	ECHO Can not find cmake. Please install cmake and
-	ECHO try again.
-	ECHO ...............................................
-	ECHO.
-	GOTO end
-)
-
 
 :: Copy wxWidget libs to /application/bin depending on user -arch type
 IF %arch% == x86 (

@@ -193,6 +193,7 @@ SET(BASE_SRCS
     coordsystem/GeocentricSolarMagneticAxes.cpp
     coordsystem/InertialAxes.cpp
     coordsystem/ItrfCoefficientsFile.cpp
+    coordsystem/LocalAlignedConstrainedAxes.cpp
     coordsystem/MeanOfDateAxes.cpp
     coordsystem/MJ2000EcAxes.cpp
     coordsystem/MJ2000EqAxes.cpp
@@ -459,6 +460,7 @@ SET(BASE_SRCS
     util/BaseException.cpp
     util/BodyFixedStateConverter.cpp
 	util/CalculationUtilities.cpp
+	util/Code500EphemerisFile.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp
