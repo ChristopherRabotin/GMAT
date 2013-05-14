@@ -40,7 +40,23 @@ public:
 
    const StringArray& GetSupportedFieldNames();
 
+   virtual bool         UsesCoordinateSystem(const std::string& forField);
+   virtual std::string  GetCoordinateSystemName(const std::string& forField);
+   virtual bool         UsesOrigin(const std::string& forField);
+   virtual std::string  GetOriginName(const std::string& forField);
+   virtual bool         UsesTimeSystem(const std::string& forField);
+   virtual std::string  GetTimeSystemName(const std::string& forField);
+
 protected:
+   /// Name of the coordinate system origin
+   std::string          origin;
+   /// Name of the coordinate system (without origin)
+   std::string          csSuffix;
+   /// Name of the ModJulian time system used
+   std::string          timeSystem;
+
+   void BuildOriginName();
+   void BuildCSName();
 
    /// TBD: Go we need the GmatBase parameters in this internal object?
    /// Parameter IDs

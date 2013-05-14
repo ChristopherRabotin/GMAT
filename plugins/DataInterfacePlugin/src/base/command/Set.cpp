@@ -24,6 +24,12 @@
 #include "MessageInterface.hpp"
 #include "GmatGlobal.hpp"       // for GetDataPrecision()
 
+// Conversion system code used to convert CS and epoch data
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
+#include "TimeSystemConverter.hpp"
+#include "SpaceObject.hpp"
+
 #define DEBUG_INITIALIZATION
 #define DEBUG_SET_EXEC
 #define DEBUG_SET_OUTPUT
@@ -503,8 +509,9 @@ bool Set::Execute()
          }
       }
       #ifdef DEBUG_SET_EXEC
-         MessageInterface::ShowMessage("Set::Execute() LoadData returned "
-               "false\n");
+         else
+            MessageInterface::ShowMessage("Set::Execute() LoadData returned "
+                  "false\n");
       #endif
    }
    #ifdef DEBUG_SET_EXEC
@@ -684,10 +691,24 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
          case DataReader::READER_RVECTOR6:
             {
                Rvector6 values = theInterface->GetReal6Vector(forField);
+
                #ifdef DEBUG_SET_EXEC
                   MessageInterface::ShowMessage("Setting %s on %s\n",
                         theParmString.c_str(), targetName.c_str());
                #endif
+               if (theInterface->UsesCoordinateSystem(forField))
+               {
+                  std::string csName =
+                        theInterface->GetCoordinateSystemName(forField);
+
+                  values = ConvertToTargetCoordinateSystem(csName, values);
+
+                  #ifdef DEBUG_SET_EXEC
+                     MessageInterface::ShowMessage("   6-vector C.S. is %s\n",
+                           csName.c_str());
+                  #endif
+               }
+
                for (UnsignedInt i = 0; i < 6; ++i)
                {
                   if (target->GetParameterType(id + i) != Gmat::REAL_TYPE)
@@ -703,6 +724,31 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
             break;
 
          case DataReader::READER_TIMESTRING:
+            {
+               if (target->IsOfType("SpaceObject"))
+               {
+                  std::string epochSystem =
+                        theInterface->GetTimeSystemName(forField);
+
+                  if (epochSystem != "")
+                  {
+                     GmatEpoch fileEpoch = theInterface->GetRealValue(forField);
+                     Real newEpoch = ConvertToSystemTime(epochSystem, fileEpoch);
+
+                        MessageInterface::ShowMessage("Setting time data %.12lf "
+                              "to %.12lf\n", fileEpoch, newEpoch);
+
+                     ((SpaceObject*)target)->SetEpoch(newEpoch);
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("Epoch data can only be set on "
+                        "Spacecraft objects and Formations ; ignoring the %s "
+                        "setting for %s\n", forField.c_str(),
+                        target->GetName().c_str());
+               }
+            }
             break;
 
          default:
@@ -717,4 +763,66 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
    }
 
    return retval;
+}
+
+Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
+      Rvector6& fromState)
+{
+   Rvector6 newRep;
+   SpacePoint *origin = NULL, *j2000body = solarSys->GetBody("Earth");
+
+   std::string axisType = "", originName = "";
+   if (from.find("MJ2000Eq") != std::string::npos)
+   {
+      axisType = "MJ2000Eq";
+      originName = from.substr(0, from.find("MJ2000Eq"));
+      origin = solarSys->GetBody(originName);
+   }
+
+   if (target->IsOfType("SpaceObject") && (origin != NULL))
+   {
+         MessageInterface::ShowMessage("Creating local CS with axes %s and "
+               "origin at %s\n", axisType.c_str(), originName.c_str());
+
+      CoordinateSystem *fromCS = CoordinateSystem::CreateLocalCoordinateSystem(
+            from, axisType, origin, NULL, NULL, j2000body, solarSys);
+      CoordinateSystem *toCS =
+            (CoordinateSystem*)target->GetRefObject(Gmat::COORDINATE_SYSTEM,"");
+
+      GmatEpoch epoch = ConvertToSystemTime(
+            theInterface->GetTimeSystemName("Epoch"),
+            theInterface->GetRealValue("Epoch"));
+
+
+      if ((fromCS != NULL) && (toCS != NULL))
+      {
+         CoordinateConverter converter;
+         converter.Convert(epoch, fromState, fromCS, newRep, toCS);
+      }
+      else
+      {
+         MessageInterface::ShowMessage("Unable to create the reference "
+               "coordinate system %s\n", from.c_str());
+         newRep = fromState;
+      }
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Unable to convert from %s into the "
+            "target's coordinate system for the object %s; is it a "
+            "Spacecraft?\n", from.c_str(), target->GetName().c_str());
+      newRep = fromState;
+   }
+
+   return newRep;
+}
+
+GmatEpoch Set::ConvertToSystemTime(const std::string& from, GmatEpoch fromTime)
+{
+   std::string outStr;
+   GmatEpoch newEpoch;
+   TimeConverterUtil::Convert(from, fromTime, "",
+         "A1ModJulian", newEpoch, outStr);
+
+   return newEpoch;
 }

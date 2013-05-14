@@ -103,6 +103,10 @@ protected:
    bool                 SetTargetParameterData(
                                              DataReader::readerDataType theType,
                                              const std::string &forField);
+   Rvector6             ConvertToTargetCoordinateSystem(const std::string& from,
+                                             Rvector6& fromState);
+   GmatEpoch            ConvertToSystemTime(const std::string& from,
+                                             GmatEpoch fromTime);
 
 //   // Parameter IDs
 //   enum

@@ -61,6 +61,13 @@ public:
    Rvector6 GetReal6Vector(const std::string& forField);
    std::string GetStringValue(const std::string& forField);
 
+   virtual bool         UsesCoordinateSystem(const std::string& forField);
+   virtual std::string  GetCoordinateSystemName(const std::string& forField);
+   virtual bool         UsesOrigin(const std::string& forField);
+   virtual std::string  GetOriginName(const std::string& forField);
+   virtual bool         UsesTimeSystem(const std::string& forField);
+   virtual std::string  GetTimeSystemName(const std::string& forField);
+
    const std::string    GetObjectParameterName(const std::string& forField);
    const readerDataType GetReaderDataType(const std::string& forField);
 

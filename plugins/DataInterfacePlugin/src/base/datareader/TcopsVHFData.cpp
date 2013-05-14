@@ -20,6 +20,7 @@
 
 #include "TcopsVHFData.hpp"
 #include "FileUtil.hpp"
+#include "InterfaceException.hpp"
 
 //const std::string
 //TcopsVHFData::PARAMETER_LABEL[TVHFDataParamCount - FileReaderParamCount] =
@@ -37,7 +38,10 @@
 
 TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
       const std::string& theName) :
-   FileReader        (theTypeName, theName)
+   FileReader        (theTypeName, theName),
+   origin            ("Earth"),
+   csSuffix          ("MJ2000Eq"),
+   timeSystem        ("UTCModJulian")
 {
    // Set up the engine accessor fields
    objectTypeNames.push_back("TcopsVHFData");
@@ -63,6 +67,7 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    objectIDMap["Cr"]     = -1;
    dataType["Cr"]        = READER_REAL;
 
+   // Subtypes map the parameter names for individual elements of a 6-vector
    supportedFields.push_back("X ");
    fileStringMap["X "]   = "X ";
    objectStringMap["X "] = "X";
@@ -98,6 +103,20 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    objectStringMap["ZDOT"] = "VZ";
    objectIDMap["ZDOT"]     = -1;
    dataType["ZDOT"]        = READER_SUBTYPE;
+
+   // Data needed to build the coordinate system name
+   supportedFields.push_back("CoordinateSystem");
+   fileStringMap["CoordinateSystem"]   = "REFERENCE COORDINATE SYSTEM:";
+   // Empty string here implies no direct mapping
+   objectStringMap["CoordinateSystem"] = "";
+   objectIDMap["CoordinateSystem"]     = -1;
+   dataType["CoordinateSystem"]        = READER_STRING;
+
+   supportedFields.push_back("CentralBody");
+   fileStringMap["CentralBody"]   = "CENTRAL BODY:";
+   objectStringMap["CentralBody"] = "";
+   objectIDMap["CentralBody"]     = -1;
+   dataType["CentralBody"]        = READER_STRING;
 }
 
 TcopsVHFData::~TcopsVHFData()
@@ -123,4 +142,118 @@ TcopsVHFData& TcopsVHFData::operator=(const TcopsVHFData& vhf)
 const StringArray& TcopsVHFData::GetSupportedFieldNames()
 {
    return supportedFields;
+}
+
+bool TcopsVHFData::UsesCoordinateSystem(const std::string& forField)
+{
+   if (forField == "CartesianState")
+      return true;
+   return false;
+}
+
+std::string TcopsVHFData::GetCoordinateSystemName(const std::string& forField)
+{
+   std::string retval = "";
+   if (forField == "CartesianState")
+      retval = origin + csSuffix;
+   return retval;
+}
+
+bool TcopsVHFData::UsesOrigin(const std::string& forField)
+{
+   // Uncomment if needed; CartesianState needs full CS, I think
+//   if (forField == "CartesianState")
+//      return true;
+   return false;
+}
+
+std::string TcopsVHFData::GetOriginName(const std::string& forField)
+{
+   std::string retval = "";
+   if (forField == "CartesianState")
+      retval = origin;
+   return retval;
+}
+
+bool TcopsVHFData::UsesTimeSystem(const std::string& forField)
+{
+   if (forField == "Epoch")
+      return true;
+   return false;
+}
+
+std::string TcopsVHFData::GetTimeSystemName(const std::string& forField)
+{
+   std::string retval = "";
+   if (forField == "Epoch")
+      retval = "UTCModJulian";
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// void BuildOriginName()
+//------------------------------------------------------------------------------
+/**
+ * Translation table between origins in the TVHF and the names GMAT recognizes
+ */
+//------------------------------------------------------------------------------
+void TcopsVHFData::BuildOriginName()
+{
+   if (stringData.find("CentralBody") != stringData.end())
+   {
+      std::string body = stringData["CentralBody"];
+
+      origin = "";
+
+      if (body == "SUN")
+         origin = "Sun";
+      if (body == "MERCURY")
+         origin = "Mercury";
+      if (body == "VENUS")
+         origin = "Venus";
+      if (body == "EARTH")
+         origin = "Earth";
+      if (body == "MOON")
+         origin = "Luna";
+      if (body == "MARS")
+         origin = "Mars";
+      if (body == "JUPITER")
+         origin = "Jupiter";
+      if (body == "SATURN")
+         origin = "Saturn";
+      if (body == "URANUS")
+         origin = "Uranus";
+      if (body == "NEPTUNE")
+         origin = "Neptune";
+      if (body == "PLUTO")
+         origin = "Pluto";
+
+      if (origin == "")
+         throw InterfaceException("The TVHF state data is set with the "
+               "origin \"" + body + "\", which is not recognized in GMAT's "
+               "TVHF reader");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void BuildCSName()
+//------------------------------------------------------------------------------
+/**
+ * Translation table between CSs in the TVHF and the names GMAT recognizes
+ */
+//------------------------------------------------------------------------------
+void TcopsVHFData::BuildCSName()
+{
+   if (stringData.find("CoordinateSystem") != stringData.end())
+   {
+      std::string cs = stringData["CoordinateSystem"];
+
+      if (cs == "J2000")
+         csSuffix = "MJ2000Eq";
+      if (cs == "TOD")
+         csSuffix = "TODEq";
+      if (cs == "1950")
+         throw InterfaceException("The TVHF state data is set in the Mean "
+               "Equator and Equinox of 1950, which is not supported in GMAT");
+   }
 }

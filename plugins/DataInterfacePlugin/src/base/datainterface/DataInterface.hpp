@@ -88,6 +88,15 @@ public:
    Rvector6 GetReal6Vector(const std::string& forField);
    std::string GetStringValue(const std::string& forField);
 
+   // Methods for fields that have associated items: coordinate systems,
+   // time systems, etc
+   bool                 UsesCoordinateSystem(const std::string& forField);
+   std::string          GetCoordinateSystemName(const std::string& forField);
+   bool                 UsesOrigin(const std::string& forField);
+   std::string          GetOriginName(const std::string& forField);
+   bool                 UsesTimeSystem(const std::string& forField);
+   std::string          GetTimeSystemName(const std::string& forField);
+
 protected:
    /// Format identifier for the Reader this interface uses
    std::string readerFormat;

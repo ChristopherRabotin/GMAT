@@ -207,6 +207,10 @@ bool TcopsVHFAscii::ReadData()
 
       // Now that the file has been read, parse the data for the desired fields
       retval = ParseDataBlock();
+
+      BuildOriginName();
+      BuildCSName();
+
       dataReady = retval;
    }
    #ifdef DEBUG_FILEREAD
@@ -436,6 +440,7 @@ void TcopsVHFAscii::ParseTime(std::string& theField)
          year += 1900;
 
       utcEpoch = ModifiedJulianDate(year,month,day,hour,minute,second);
+      realData[theField] = utcEpoch;
 
       #ifdef DEBUG_FILEREAD
          MessageInterface::ShowMessage("   %s is at [%d %d %d %d %d %lf] = "

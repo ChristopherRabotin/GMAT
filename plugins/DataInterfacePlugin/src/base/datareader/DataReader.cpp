@@ -140,45 +140,34 @@ std::string DataReader::GetStringValue(const std::string& forField)
    return retval;
 }
 
-Real DataReader::GetRData(const std::string& forField)
+bool DataReader::UsesCoordinateSystem(const std::string& forField)
 {
-   Real retval = -999999.999999;
-
-   if (realData.find(forField) != realData.end())
-      retval = realData[forField];
-
-   return retval;
+   return false;
 }
 
-Rvector6 DataReader::GetRVectorData(const std::string& forField)
+std::string DataReader::GetCoordinateSystemName(const std::string& forField)
 {
-   Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-   if (rvector6Data.find(forField) != rvector6Data.end())
-      retval = rvector6Data[forField];
-
-   return retval;
+   return "";
 }
 
-//------------------------------------------------------------------------------
-// std::string GetSData(const std::string& forField)
-//------------------------------------------------------------------------------
-/**
- * Retrieves string data
- *
- * @param forField The field that references teh string
- *
- * @return The string
- */
-//------------------------------------------------------------------------------
-std::string DataReader::GetSData(const std::string& forField)
+bool DataReader::UsesOrigin(const std::string& forField)
 {
-   std::string retval = "No data";
+   return false;
+}
 
-   if (stringData.find(forField) != stringData.end())
-      retval = stringData[forField];
+std::string DataReader::GetOriginName(const std::string& forField)
+{
+   return "";
+}
 
-   return retval;
+bool DataReader::UsesTimeSystem(const std::string& forField)
+{
+   return false;
+}
+
+std::string DataReader::GetTimeSystemName(const std::string& forField)
+{
+   return "";
 }
 
 bool DataReader::SetStream(std::ifstream* aStream, const std::string &fname)
@@ -226,4 +215,45 @@ const DataReader::readerDataType DataReader::GetReaderDataType(
       theType = dataType[forField];
 
    return theType;
+}
+
+Real DataReader::GetRData(const std::string& forField)
+{
+   Real retval = -999999.999999;
+
+   if (realData.find(forField) != realData.end())
+      retval = realData[forField];
+
+   return retval;
+}
+
+Rvector6 DataReader::GetRVectorData(const std::string& forField)
+{
+   Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   if (rvector6Data.find(forField) != rvector6Data.end())
+      retval = rvector6Data[forField];
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetSData(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves string data
+ *
+ * @param forField The field that references teh string
+ *
+ * @return The string
+ */
+//------------------------------------------------------------------------------
+std::string DataReader::GetSData(const std::string& forField)
+{
+   std::string retval = "No data";
+
+   if (stringData.find(forField) != stringData.end())
+      retval = stringData[forField];
+
+   return retval;
 }

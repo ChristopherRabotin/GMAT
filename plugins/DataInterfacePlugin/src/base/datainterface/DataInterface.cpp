@@ -374,3 +374,51 @@ std::string DataInterface::GetStringValue(const std::string& forField)
       throw InterfaceException("The data reader has not been set");
    return theReader->GetStringValue(forField);
 }
+
+bool DataInterface::UsesCoordinateSystem(const std::string& forField)
+{
+   bool retval = false;
+   if (theReader)
+      retval = theReader->UsesCoordinateSystem(forField);
+   return retval;
+}
+
+std::string DataInterface::GetCoordinateSystemName(const std::string& forField)
+{
+   std::string retval = "";
+   if (theReader)
+      retval = theReader->GetCoordinateSystemName(forField);
+   return retval;
+}
+
+bool DataInterface::UsesOrigin(const std::string& forField)
+{
+   bool retval = false;
+   if (theReader)
+      retval = theReader->UsesOrigin(forField);
+   return retval;
+}
+
+std::string DataInterface::GetOriginName(const std::string& forField)
+{
+   std::string retval = "";
+   if (theReader)
+      retval = theReader->GetOriginName(forField);
+   return retval;
+}
+
+bool DataInterface::UsesTimeSystem(const std::string& forField)
+{
+   bool retval = false;
+   if (theReader)
+      retval = theReader->UsesTimeSystem(forField);
+   return retval;
+}
+
+std::string DataInterface::GetTimeSystemName(const std::string& forField)
+{
+   std::string retval = "";
+   if (theReader)
+      retval = theReader->GetTimeSystemName(forField);
+   return retval;
+}
