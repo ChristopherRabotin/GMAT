@@ -23,8 +23,7 @@ PROJECT(GMAT)
 cmake_minimum_required(VERSION 2.6)
 
 # Set Input Options
-SET(GMAT_VERSION "2012" CACHE STRING "The version of the build")
-SET(F2C_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../depends/f2c" CACHE STRING "F2C Root Directory")
+SET(GMAT_VERSION "R2013a" CACHE STRING "The version of the build")
 SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../depends/cspice" CACHE STRING "CSpice Root Directory")
 SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../depends/wxWidgets/wxWidgets-2.8.12" CACHE STRING "wxWidget Root Directory")
 OPTION(VERBOSE_MAKE "VerboseMake" OFF)
@@ -43,15 +42,6 @@ OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plguin" OFF)
 
 # Optional Jazz Plugin Inputs
 
-
-# Check if provided f2c directories exists
-if( (IS_DIRECTORY ${F2C_PATH}) AND (EXISTS ${F2C_PATH}) )
-	MESSAGE(STATUS "F2C FOUND")
-	MESSAGE("-- F2C_PATH=" ${F2C_PATH})
-else()
-	MESSAGE(STATUS "** F2C NOT FOUND in directory " ${F2C_PATH})
-	SET(DEPENDS_FAIL ON)
-endif()
 
 # Check if provided cspice directories exists
 if( (IS_DIRECTORY ${CSPICE_DIR}) AND (EXISTS ${CSPICE_DIR}) )

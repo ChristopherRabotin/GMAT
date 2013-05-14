@@ -276,11 +276,10 @@ SET(GUI_SRCS
     rendering/GLStars.cpp
     rendering/GmatOpenGLSupport.cpp
     rendering/Light.cpp
-    rendering/Load3ds.cpp
-    rendering/LoadPOV.cpp
     rendering/ModelManager.cpp
     rendering/ModelObject.cpp
     rendering/Rendering.cpp
+    rendering/ThreeDSLoader.cpp
     solarsys/BarycenterPanel.cpp
     solarsys/CelesBodySelectDialog.cpp
     solarsys/CelestialBodyOrbitPanel.cpp

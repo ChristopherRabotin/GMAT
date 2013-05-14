@@ -1,0 +1,7 @@
+open naif.jpl.nasa.gov
+anonymous
+gmat@gsfc.nasa.gov
+cd pub/naif/toolkit/C/PC_Windows_VisualC_64bit/packages
+binary
+get cspice.zip
+quit

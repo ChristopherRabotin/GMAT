@@ -117,7 +117,7 @@ INCLUDE_DIRECTORIES("./event")
 SET(BASE_SRCS
     asset/AssetException.cpp
     asset/BodyFixedPoint.cpp
-    asset/GroundStation.cpp
+    asset/GroundstationInterface.cpp
     attitude/Attitude.cpp
     attitude/AttitudeException.cpp
     attitude/CSFixed.cpp
@@ -139,7 +139,6 @@ SET(BASE_SRCS
     command/BeginScript.cpp
     command/BranchCommand.cpp
     command/CallFunction.cpp
-    command/CallGmatFunction.cpp
     command/CommandException.cpp
     command/GmatCommand.cpp
     command/CommandUtil.cpp
@@ -156,7 +155,6 @@ SET(BASE_SRCS
     command/EndTarget.cpp
     command/EndWhile.cpp
     command/For.cpp
-    command/Global.cpp
     command/If.cpp
     command/ManageObject.cpp
     command/Maneuver.cpp
@@ -173,7 +171,6 @@ SET(BASE_SRCS
 	command/SolverSequenceCommand.cpp
     command/Report.cpp
     command/RunSolver.cpp
-    command/Save.cpp
     command/SaveMission.cpp
     command/SolverBranchCommand.cpp
     command/Stop.cpp
@@ -230,7 +227,6 @@ SET(BASE_SRCS
     executive/SandboxException.cpp
     executive/Sandbox.cpp
     factory/AtmosphereFactory.cpp
-    factory/AssetFactory.cpp
     factory/AttitudeFactory.cpp
     factory/AxisSystemFactory.cpp
     factory/BurnFactory.cpp
@@ -441,7 +437,7 @@ SET(BASE_SRCS
     solver/Gradient.cpp
     solver/Jacobian.cpp
     solver/LineSearch.cpp
-    spacecraft/Formation.cpp
+    spacecraft/FormationInterface.cpp
     spacecraft/Spacecraft.cpp
     spacecraft/SpaceObject.cpp
     spacecraft/TextTrajectoryFile.cpp
