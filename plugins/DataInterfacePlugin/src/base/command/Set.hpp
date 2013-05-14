@@ -100,6 +100,9 @@ protected:
    /// The list of data elements requested, used if loadAll is false
    StringArray          selections;
    
+   bool                 SetTargetParameterData(
+                                             DataReader::readerDataType theType,
+                                             const std::string &forField);
 
 //   // Parameter IDs
 //   enum

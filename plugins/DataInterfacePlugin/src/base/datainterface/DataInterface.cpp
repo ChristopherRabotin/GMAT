@@ -26,12 +26,16 @@ const std::string
 DataInterface::PARAMETER_LABEL[DataInterfaceParamCount - InterfaceParamCount] =
 {
       "Format",
+      "SelectedFields",
+      "SupportedFields"
 };
 
 const Gmat::ParameterType
 DataInterface::PARAMETER_TYPE[DataInterfaceParamCount - InterfaceParamCount] =
 {
       Gmat::STRING_TYPE,
+      Gmat::STRINGARRAY_TYPE,
+      Gmat::STRINGARRAY_TYPE
 };
 
 
@@ -57,7 +61,7 @@ DataInterface::DataInterface(const DataInterface& di) :
 {
 }
 
-DataInterface& DataInterface::operator =(const DataInterface& di)
+DataInterface& DataInterface::operator=(const DataInterface& di)
 {
    if (this != &di)
    {
@@ -277,15 +281,96 @@ const StringArray& DataInterface::GetSupportedFieldNames() const
 Integer DataInterface::Open(const std::string& name)
 {
    Integer retval = -1;
-
-
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// const std::string GetObjectParameterName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the parameter string for the target object
+ *
+ * @param forField The interface identifier for the parameter.  This is likely
+ *                 to be the parameter name in many cases
+ *
+ * @return The parameter name
+ */
+//------------------------------------------------------------------------------
+const std::string DataInterface::GetObjectParameterName(
+      const std::string& forField)
+{
+   return theReader->GetObjectParameterName(forField);
+}
+
+//------------------------------------------------------------------------------
+// const DataReader::readerDataType GetReaderParameterType(
+//       const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Returns the data type as seen in the DataReader object.
+ *
+ * @param forField The interface identifier for the parameter.
+ *
+ * @return The readerDataType for the field.
+ */
+//------------------------------------------------------------------------------
+const DataReader::readerDataType DataInterface::GetReaderParameterType(
+      const std::string& forField)
+{
+   DataReader::readerDataType theType = DataReader::READER_UNKNOWN;
+
+   if (theReader)
+      theType = theReader->GetReaderDataType(forField);
+
+   return theType;
+}
+
+//------------------------------------------------------------------------------
+// Integer Close(const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Closes the reader
+ *
+ * @param name Name of the reader to close.  This parameter is ignored for
+ *             DataReader objects
+ *
+ * @return 0 in success, or an error code
+ */
+//------------------------------------------------------------------------------
 Integer DataInterface::Close(const std::string& name)
 {
    Integer retval = -1;
-
-
    return retval;
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealValue(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function to access a read Real number
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The number
+ */
+//------------------------------------------------------------------------------
+Real DataInterface::GetRealValue(const std::string& forField)
+{
+   if (!theReader)
+      throw InterfaceException("The data reader has not been set");
+   return theReader->GetRealValue(forField);
+}
+
+Rvector6 DataInterface::GetReal6Vector(const std::string& forField)
+{
+   if (!theReader)
+      throw InterfaceException("The data reader has not been set");
+   return theReader->GetReal6Vector(forField);
+}
+
+std::string DataInterface::GetStringValue(const std::string& forField)
+{
+   if (!theReader)
+      throw InterfaceException("The data reader has not been set");
+   return theReader->GetStringValue(forField);
 }

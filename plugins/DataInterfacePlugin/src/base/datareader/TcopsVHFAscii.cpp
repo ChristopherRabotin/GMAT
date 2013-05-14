@@ -207,6 +207,7 @@ bool TcopsVHFAscii::ReadData()
 
       // Now that the file has been read, parse the data for the desired fields
       retval = ParseDataBlock();
+      dataReady = retval;
    }
    #ifdef DEBUG_FILEREAD
       else

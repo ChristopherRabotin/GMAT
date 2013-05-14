@@ -46,8 +46,7 @@ FileInterface::PARAMETER_TYPE[FileInterfaceParamCount - DataInterfaceParamCount]
 FileInterface::FileInterface(const std::string &name) :
    DataInterface           ("FileInterface", name),
    filename                (""),
-   streamIsBinary          (false),
-   theReader               (NULL)
+   streamIsBinary          (false)
 {
    objectTypeNames.push_back("FileInterface");
 }
@@ -61,8 +60,7 @@ FileInterface::~FileInterface()
 FileInterface::FileInterface(const FileInterface& fi) :
    DataInterface           (fi),
    filename                (fi.filename),
-   streamIsBinary          (fi.streamIsBinary),
-   theReader               (NULL)
+   streamIsBinary          (fi.streamIsBinary)
 {
 }
 
@@ -70,14 +68,10 @@ FileInterface FileInterface::operator=(const FileInterface& fi)
 {
    if (this != &fi)
    {
+      DataInterface::operator =(fi);
+
       filename = fi.filename;
       streamIsBinary = fi.streamIsBinary;
-      if (theReader != NULL)
-      {
-         delete theReader;
-         theReader = NULL;
-      }
-
    }
    return *this;
 }

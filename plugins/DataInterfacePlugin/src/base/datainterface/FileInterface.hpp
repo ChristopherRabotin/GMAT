@@ -84,8 +84,6 @@ protected:
    std::ifstream theStream;
    /// Flag indicating if the stream is binary or text (ASCII only for now)
    bool streamIsBinary;
-   /// The reader used to load the requested data
-   DataReader *theReader;
 
    /// Parameter IDs
    enum

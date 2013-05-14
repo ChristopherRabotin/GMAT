@@ -471,22 +471,41 @@ bool Set::Execute()
       MessageInterface::ShowMessage("Set::Execute() entered\n");
    #endif
    
-   bool retval = false;
+   bool retval = false, valueSet = false;
    
    if (theInterface->Open() == 0)
    {
-      if (theInterface->LoadData())
-         retval = true;
-      #ifdef DEBUG_SET_EXEC
-         else
-            MessageInterface::ShowMessage("Set::Execute() LoadData returned "
-                  "false\n");
-      #endif
-
+      retval = theInterface->LoadData();
       if (theInterface->Close() != 0)
       {
          MessageInterface::ShowMessage("The interface failed to close\n");
       }
+
+      if (retval)
+      {
+         UnsignedInt parmCount = 0;
+         StringArray allItems =
+               theInterface->GetStringArrayParameter("SupportedFields");
+         std::string theItem, theParmString;
+
+         if (loadAll)
+            parmCount = allItems.size();
+         else
+            parmCount = selections.size();
+
+         for (UnsignedInt i = 0; i < parmCount; ++i)
+         {
+            theItem = (loadAll ? allItems[i] : selections[i]);
+            DataReader::readerDataType fieldType =
+                     theInterface->GetReaderParameterType(theItem);
+            if (SetTargetParameterData(fieldType,theItem))
+               valueSet = true;
+         }
+      }
+      #ifdef DEBUG_SET_EXEC
+         MessageInterface::ShowMessage("Set::Execute() LoadData returned "
+               "false\n");
+      #endif
    }
    #ifdef DEBUG_SET_EXEC
       else
@@ -494,8 +513,9 @@ bool Set::Execute()
                "open\n");
    #endif
 
-   
-   return retval;
+   BuildCommandSummary();
+
+   return retval && valueSet;
 }
 
 
@@ -616,4 +636,85 @@ bool Set::RenameRefObject(const Gmat::ObjectType type,
       interfaceName = newName;
    
    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetTargetParameterData(DataReader::readerDataType theType,
+//                             const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Sets a parameter value on the target
+ *
+ * @param theType The data type as understtod in the Reader
+ * @param forField The reader identifier for the parameter
+ *
+ * @return true is data was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool Set::SetTargetParameterData(DataReader::readerDataType theType,
+      const std::string& forField)
+{
+   bool retval = false;
+   try
+   {
+      std::string theParmString =
+            theInterface->GetObjectParameterName(forField);
+      if (theParmString != "")
+      {
+         Integer id = target->GetParameterID(theParmString);
+         Integer type = target->GetParameterType(id);
+         switch (theType)
+         {
+         case DataReader::READER_REAL:
+            {
+               Real value = theInterface->GetRealValue(forField);
+               #ifdef DEBUG_SET_EXEC
+                  MessageInterface::ShowMessage("Setting %s on %s to "
+                        "%.12lf\n", theParmString.c_str(),
+                        targetName.c_str(), value);
+               #endif
+               if (type != Gmat::REAL_TYPE)
+                  throw CommandException("The data interface parameter " +
+                        forField + " has the wrong data type");
+               target->SetRealParameter(id, value);
+               retval = true;
+            }
+            break;
+
+         case DataReader::READER_RVECTOR6:
+            {
+               Rvector6 values = theInterface->GetReal6Vector(forField);
+               #ifdef DEBUG_SET_EXEC
+                  MessageInterface::ShowMessage("Setting %s on %s\n",
+                        theParmString.c_str(), targetName.c_str());
+               #endif
+               for (UnsignedInt i = 0; i < 6; ++i)
+               {
+                  if (target->GetParameterType(id + i) != Gmat::REAL_TYPE)
+                     throw CommandException("The data interface parameter " +
+                           forField + " has the wrong data type");
+                  target->SetRealParameter(id + i, values[i]);
+               }
+               retval = true;
+            }
+            break;
+
+         case DataReader::READER_STRING:
+            break;
+
+         case DataReader::READER_TIMESTRING:
+            break;
+
+         default:
+            break;
+         }
+      }
+   }
+   catch (BaseException &/*ex*/)
+   {
+      // Ignore exceptions here because they just indicate that the
+      // field is not in the object
+   }
+
+   return retval;
 }

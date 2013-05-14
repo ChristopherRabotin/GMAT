@@ -73,11 +73,20 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
-   const StringArray& GetSupportedFieldNames() const;
+   const StringArray&   GetSupportedFieldNames() const;
+   const std::string    GetObjectParameterName(const std::string& forField);
+   const DataReader::readerDataType
+                        GetReaderParameterType(const std::string& forField);
 
    virtual Integer      Open(const std::string &name = "");
    virtual bool         LoadData() = 0;
    virtual Integer      Close(const std::string &name = "");
+
+   // Accessors; these are intentionally NOT virtual, and call virtual protected
+   // methods intended for subclass overrides that actually access the data
+   Real GetRealValue(const std::string& forField);
+   Rvector6 GetReal6Vector(const std::string& forField);
+   std::string GetStringValue(const std::string& forField);
 
 protected:
    /// Format identifier for the Reader this interface uses

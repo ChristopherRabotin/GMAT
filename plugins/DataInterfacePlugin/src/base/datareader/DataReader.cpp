@@ -160,11 +160,17 @@ Rvector6 DataReader::GetRVectorData(const std::string& forField)
    return retval;
 }
 
-bool DataReader::SetStream(std::ifstream* aStream, const std::string &fname)
-{
-   return false;
-}
-
+//------------------------------------------------------------------------------
+// std::string GetSData(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves string data
+ *
+ * @param forField The field that references teh string
+ *
+ * @return The string
+ */
+//------------------------------------------------------------------------------
 std::string DataReader::GetSData(const std::string& forField)
 {
    std::string retval = "No data";
@@ -173,4 +179,51 @@ std::string DataReader::GetSData(const std::string& forField)
       retval = stringData[forField];
 
    return retval;
+}
+
+bool DataReader::SetStream(std::ifstream* aStream, const std::string &fname)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// const std::string GetObjectParameterName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Gets the object parameter name for a data field
+ *
+ * @param forField The field name
+ *
+ * @return The scripted parameter name
+ */
+//------------------------------------------------------------------------------
+const std::string DataReader::GetObjectParameterName(
+      const std::string& forField)
+{
+   if (objectStringMap.find(forField) != objectStringMap.end())
+      return objectStringMap[forField];
+   return "";
+}
+
+//------------------------------------------------------------------------------
+// const DataReader::readerDataType GetReaderDataType(
+//       const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Returns the data type as seen in the DataReader object.
+ *
+ * @param forField The interface identifier for the parameter.
+ *
+ * @return The readerDataType for the field.
+ */
+//------------------------------------------------------------------------------
+const DataReader::readerDataType DataReader::GetReaderDataType(
+      const std::string& forField)
+{
+   readerDataType theType = DataReader::READER_UNKNOWN;
+
+   if (dataType.find(forField) != dataType.end())
+      theType = dataType[forField];
+
+   return theType;
 }

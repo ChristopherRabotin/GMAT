@@ -27,9 +27,19 @@
 
 
 
-class DATAINTERFACE_API DataReader: public GmatBase
+class DATAINTERFACE_API DataReader : public GmatBase
 {
 public:
+   enum readerDataType
+   {
+      READER_REAL = 30000,
+      READER_RVECTOR6,
+      READER_STRING,
+      READER_TIMESTRING,         // A string that needs special treatment
+      READER_SUBTYPE,
+      READER_UNKNOWN
+   };
+
    DataReader(const std::string& theTypeName, const std::string& theName);
    virtual ~DataReader();
    DataReader(const DataReader& dr);
@@ -51,17 +61,10 @@ public:
    Rvector6 GetReal6Vector(const std::string& forField);
    std::string GetStringValue(const std::string& forField);
 
+   const std::string    GetObjectParameterName(const std::string& forField);
+   const readerDataType GetReaderDataType(const std::string& forField);
 
 protected:
-   enum readerDataType
-   {
-      READER_REAL = 30000,
-      READER_RVECTOR6,
-      READER_STRING,
-      READER_TIMESTRING,         // A string that needs special treatment
-      READER_SUBTYPE
-   };
-
    /// Array of the data fields the user has selected
    StringArray selectedFields;
    /// List of field names that the data reader supports

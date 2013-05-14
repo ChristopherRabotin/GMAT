@@ -40,6 +40,16 @@
 
 
 
+//------------------------------------------------------------------------------
+// FileReader(const std::string& theTypeName, const std::string& theName) :
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param theTypeName Sctipted type for the reader
+ * @param theName Name of the reader
+ */
+//------------------------------------------------------------------------------
 FileReader::FileReader(const std::string& theTypeName, const std::string& theName) :
    DataReader           (theTypeName, theName),
    filename             ("Not set"),
@@ -48,11 +58,27 @@ FileReader::FileReader(const std::string& theTypeName, const std::string& theNam
    objectTypeNames.push_back("FileReader");
 }
 
+//------------------------------------------------------------------------------
+// ~FileReader()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 FileReader::~FileReader()
 {
    // TODO Auto-generated destructor stub
 }
 
+//------------------------------------------------------------------------------
+// FileReader(const FileReader& fr)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param fr The object copied to the new one
+ */
+//------------------------------------------------------------------------------
 FileReader::FileReader(const FileReader& fr) :
    DataReader           (fr),
    filename             (fr.filename),
@@ -61,6 +87,17 @@ FileReader::FileReader(const FileReader& fr) :
 
 }
 
+//------------------------------------------------------------------------------
+// FileReader& operator=(const FileReader& fr)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param fr The object copied to this one
+ *
+ * @return This reader, set to look like fr
+ */
+//------------------------------------------------------------------------------
 FileReader& FileReader::operator=(const FileReader& fr)
 {
    if (this != &fr)
