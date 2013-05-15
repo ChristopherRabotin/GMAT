@@ -21,6 +21,7 @@ all:
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
 	cd StationPlugin; make all;
+	cd DataInterfacePlugin; make all;
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild;
@@ -32,6 +33,7 @@ rebuild:
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
 	cd StationPlugin; make rebuild;
+	cd DataInterfacePlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
@@ -43,6 +45,7 @@ clean:
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
 	cd StationPlugin; make clean;
+	cd DataInterfacePlugin; make clean;
 
 else
 
@@ -60,6 +63,7 @@ all:
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
 	cd StationPlugin; make all;
+	cd DataInterfacePlugin; make all;
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild;
@@ -73,6 +77,7 @@ rebuild:
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
 	cd StationPlugin; make rebuild;
+	cd DataInterfacePlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
@@ -86,6 +91,7 @@ clean:
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
 	cd StationPlugin; make clean;
+	cd DataInterfacePlugin; make clean;
 
 else
 
@@ -100,6 +106,7 @@ all:
 	cd FormationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd DataInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -112,6 +119,7 @@ rebuild:
 	cd FormationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd DataInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 
 clean:
 	cd CInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
@@ -124,6 +132,7 @@ clean:
 	cd FormationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd DataInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 
 endif
 
