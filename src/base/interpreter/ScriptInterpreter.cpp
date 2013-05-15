@@ -1473,6 +1473,16 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       WriteObjects(objs, "DataFiles", mode);
 
    //---------------------------------------------
+   // DataInterface Objects
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::INTERFACE);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d DataInterfaces\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "DataInterfaces", mode);
+
+   //---------------------------------------------
    // Measurement Models and Tracking Data/Systems
    //---------------------------------------------
    objs = theModerator->GetListOfObjects(Gmat::MEASUREMENT_MODEL);

@@ -49,6 +49,7 @@ FileInterface::FileInterface(const std::string &name) :
    streamIsBinary          (false)
 {
    objectTypeNames.push_back("FileInterface");
+   parameterCount = FileInterfaceParamCount;
 }
 
 FileInterface::~FileInterface()

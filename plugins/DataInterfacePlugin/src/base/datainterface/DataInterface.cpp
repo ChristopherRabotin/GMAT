@@ -122,7 +122,7 @@ std::string DataInterface::GetParameterTypeString(const Integer id) const
 
 bool DataInterface::IsParameterReadOnly(const Integer id) const
 {
-   if (id == SUPPORTED_FIELD_NAMES)
+   if ((id == SUPPORTED_FIELD_NAMES) || (id == SELECTED_FIELD_NAMES))
       return true;
    return Interface::IsParameterReadOnly(id);
 }
