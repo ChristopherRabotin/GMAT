@@ -1,7 +1,7 @@
 # $Id$
-# Mac OS X environment settings for a GMAT plugin
-GMAT_CODE_LOCATION = /Users/djc/gsfccode/GmatDevelopment/src
-GMAT_BIN_LOCATION  = /Users/djc/gsfccode/GmatDevelopment/application/bin
+# Sample Mac OS X environment settings for a GMAT plugin
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION  = ../../../../application/bin
 
 DEBUG_BUILD = 0
 
