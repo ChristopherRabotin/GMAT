@@ -1,6 +1,5 @@
 function test_suite = testDela()                          %#ok<STOUT>
 %TESTDELA Unit tests for Delaunay state representation
-clear all; clc;
 
 initTestSuite();
 
@@ -48,15 +47,6 @@ function testDela2CartCircularIncRetro(inp)
 dela2cart('CircularIncRetro.txt', inp);
 end
 
-%% Circular EqRetro
-function testCart2DelaCircularEqRetro(inp)
-cart2dela('CircularEqRetro.txt', inp);
-end
-
-function testDela2CartCircularEqRetro(inp)
-dela2cart('CircularEqRetro.txt', inp);
-end
-
 %% Elliptic EqPro
 function testCart2DelaEllipticEqPro(inp)
 cart2dela('EllipticEqPro.txt', inp);
@@ -91,60 +81,6 @@ end
 
 function testDela2CartEllipticIncRetro(inp)
 dela2cart('EllipticIncRetro.txt', inp);
-end
-
-%% Elliptic EqRetro
-function testCart2DelaEllipticEqRetro(inp)
-cart2dela('EllipticPolar.txt', inp);
-end
-
-function testDela2CartEllipticEqRetro(inp)
-dela2cart('EllipticPolar.txt', inp);
-end
-
-%% Hyperbolic EqPro
-function testCart2DelaHyperbolicEqPro(inp)
-cart2dela('HyperbolicEqPro.txt', inp);
-end
-
-function testDela2CartHyperbolicEqPro(inp)
-dela2cart('HyperbolicEqPro.txt', inp);
-end
-
-%% Hyperbolic IncPro
-function testCart2DelaHyperbolicIncPro(inp)
-cart2dela('HyperbolicIncPro.txt', inp);
-end
-
-function testDela2CartHyperbolicIncPro(inp)
-dela2cart('HyperbolicIncPro.txt', inp);
-end
-
-%% Hyperbolic Polar
-function testCart2DelaHyperbolicPolar(inp)
-cart2dela('HyperbolicPolar.txt', inp);
-end
-
-function testDela2CartHyperbolicPolar(inp)
-dela2cart('HyperbolicPolar.txt', inp);
-end
-
-%% Hyperbolic IncRetro
-function testCart2DelaHyperbolicIncRetro(inp)
-cart2dela('HyperbolicIncRetro.txt', inp);
-end
-
-function testDela2CartHyperbolicIncRetro(inp)
-dela2cart('HyperbolicIncRetro.txt', inp);
-end
-
-%% Hyperbolic EqRetro
-function testCart2DelaHyperbolicEqRetro(inp)
-cart2dela('HyperbolicEqRetro.txt', inp);
-end
-
-function testDela2CartHyperbolicEqRetro(inp)
-dela2cart('HyperbolicEqRetro.txt', inp);
 end
 
 %% Null Orbit
