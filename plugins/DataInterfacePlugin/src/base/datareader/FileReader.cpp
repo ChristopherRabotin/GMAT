@@ -196,7 +196,7 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
       do
       {
          ++end;
-      } while ((theLine[end] != ' ') && (end < theLine.length()));
+      } while ((end < theLine.length()) && (theLine[end] != ' '));
 
       std::string theData = theLine.substr(start, end - start);
 

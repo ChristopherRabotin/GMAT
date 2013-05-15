@@ -466,14 +466,17 @@ bool Set::Initialize()
    bool retval = GmatCommand::Initialize();
    
    target = FindObject(targetName);
+   if (target == NULL)
+      throw CommandException("The Set command could not find the target "
+            "object \"" + targetName + "\" needed to initialize");
 
    GmatBase *obj = FindObject(interfaceName);
+   if (obj == NULL)
+      throw CommandException("The Set command could not find the interface "
+            "object \"" + interfaceName + "\" needed to initialize");
+
    if (obj->IsOfType("DataInterface"))
       theInterface = (DataInterface*)obj;
-
-   if ((theInterface == NULL) || (target == NULL))
-      throw CommandException("The Set command could not find objects "
-            "needed to initialize");
 
    // If specific data elements are requested, warn if not in the reader
    if (!loadAll)
