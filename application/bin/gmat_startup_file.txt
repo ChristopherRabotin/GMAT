@@ -47,6 +47,7 @@ PLUGIN                 = ../plugins/libFormation
 PLUGIN                 = ../plugins/libStation
 PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
+PLUGIN                 = ../plugins/libDataInterface
 
 # Alpha plugins
 #PLUGIN                = ./libCInterface

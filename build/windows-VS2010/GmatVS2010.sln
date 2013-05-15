@@ -62,6 +62,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libStation", "..\..\plugins
 		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libDataInterface", "..\..\plugins\DataInterfacePlugin\build\VS2010\libDataInterface.vcxproj", "{030C5159-3113-47EC-A060-E1E7D1E7AA61}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -168,6 +173,12 @@ Global
 		{2145C3F0-4C8C-4FD4-958A-C904954DBAEA}.Release|Win32.Build.0 = Release|Win32
 		{2145C3F0-4C8C-4FD4-958A-C904954DBAEA}.Release|x64.ActiveCfg = Release|x64
 		{2145C3F0-4C8C-4FD4-958A-C904954DBAEA}.Release|x64.Build.0 = Release|x64
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Debug|Win32.ActiveCfg = Debug|Win32
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Debug|Win32.Build.0 = Debug|Win32
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Debug|x64.ActiveCfg = Debug|Win32
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|Win32.ActiveCfg = Release|Win32
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|Win32.Build.0 = Release|Win32
+		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

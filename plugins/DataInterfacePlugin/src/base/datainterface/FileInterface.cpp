@@ -27,7 +27,7 @@
 
 
 //#define DEBUG_FILEINTERFACE_PARAM
-#define DEBUG_READER_CREATION
+//#define DEBUG_READER_CREATION
 
 
 const std::string

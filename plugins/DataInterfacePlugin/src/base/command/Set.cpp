@@ -30,10 +30,10 @@
 #include "TimeSystemConverter.hpp"
 #include "SpaceObject.hpp"
 
-#define DEBUG_INITIALIZATION
-#define DEBUG_SET_EXEC
-#define DEBUG_SET_OUTPUT
-#define DEBUG_PARSING
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_SET_EXEC
+//#define DEBUG_SET_OUTPUT
+//#define DEBUG_PARSING
 
 ////---------------------------------
 ////  static data
@@ -735,8 +735,10 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
                      GmatEpoch fileEpoch = theInterface->GetRealValue(forField);
                      Real newEpoch = ConvertToSystemTime(epochSystem, fileEpoch);
 
+                     #ifdef DEBUG_SET_EXEC
                         MessageInterface::ShowMessage("Setting time data %.12lf "
                               "to %.12lf\n", fileEpoch, newEpoch);
+                     #endif
 
                      ((SpaceObject*)target)->SetEpoch(newEpoch);
                   }
@@ -781,9 +783,10 @@ Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
 
    if (target->IsOfType("SpaceObject") && (origin != NULL))
    {
+      #ifdef DEBUG_SET_EXEC
          MessageInterface::ShowMessage("Creating local CS with axes %s and "
                "origin at %s\n", axisType.c_str(), originName.c_str());
-
+      #endif
       CoordinateSystem *fromCS = CoordinateSystem::CreateLocalCoordinateSystem(
             from, axisType, origin, NULL, NULL, j2000body, solarSys);
       CoordinateSystem *toCS =
