@@ -388,46 +388,64 @@ bool Set::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Set::InterpretAction()
 {
-   #ifdef DEBUG_SET_ASSEMBLE
-      MessageInterface::ShowMessage
-         ("%s::InterpretAction() genString = \"%s\"\n", typeName.c_str(),
-          generatingString.c_str());
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("%s::InterpretAction for \"%s\" entered, "
+         "type = %s\n", typeName.c_str(), generatingString.c_str(), 
+         typeName.c_str());
    #endif
 
    StringArray blocks = parser.DecomposeBlock(generatingString);
 
-   StringArray chunks = parser.SeparateBrackets(blocks[0], "{}", " ", false);
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("Top level blocks from \"%s\":\n",
+            generatingString.c_str());
+      for (StringArray::iterator i = blocks.begin(); i != blocks.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+   #endif
+
+   // StringArray chunks = parser.SeparateBrackets(blocks[0], "()", "", false);
+   StringArray chunks = parser.SeparateBy(blocks[0], "()");
 
    #ifdef DEBUG_PARSING
-      MessageInterface::ShowMessage("Chunks from \"%s\":\n",
+      MessageInterface::ShowMessage("Chunks from block \"%s\":\n",
             blocks[0].c_str());
       for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
    #endif
 
-   if (chunks.size() < 3)
+   StringArray subchunks = parser.SeparateBy(chunks[0], " ");
+   if (subchunks.size() < 3)
       throw CommandException(typeName + "::InterpretAction() cannot identify "
             "either the target or the data source -- is one missing? -- in "
             "line\n" + generatingString);
+   if (subchunks.size() > 3)
+      throw CommandException(typeName + "::InterpretAction() has too many "
+               "component strings in the line\n" + generatingString);
 
-   if (chunks.size() > 4)
+   // Parse the main part of the command
+   if (subchunks[0] != typeName)
+      throw CommandException(typeName + "::InterpretAction() does not identify "
+            "the correct command type in line\n" + generatingString);
+   targetName = subchunks[1];
+   interfaceName = subchunks[2];
+
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("Identified the target \"%s\" and the "
+         "data source \"%s\"\n", targetName.c_str(), interfaceName.c_str());
+   #endif
+
+   if (chunks.size() > 2)
       throw CommandException(typeName +
             "::InterpretAction() found too many components to parse in the "
             "line\n" + generatingString);
 
-   if (chunks[0] != typeName)
-      throw CommandException(typeName + "::InterpretAction() does not identify "
-            "the correct command type in line\n" + generatingString);
-
-   targetName = chunks[1];
-   interfaceName = chunks[2];
-
-//   if (chunks.size() == 3)
-//      CheckForOptions(chunks[2]);
+   // Parse the command options
+   if (chunks.size() == 2)
+      CheckForOptions(chunks[1]);
 
    #ifdef DEBUG_PARSING
-      MessageInterface::ShowMessage("%s::InterpretAction for \"%s\", type = %s\n",
-            typeName.c_str(), generatingString.c_str(), typeName.c_str());
+      MessageInterface::ShowMessage("%s::InterpretAction succeeded\n", 
+         typeName.c_str());
    #endif
 
    return true;
@@ -456,6 +474,20 @@ bool Set::Initialize()
    if ((theInterface == NULL) || (target == NULL))
       throw CommandException("The Set command could not find objects "
             "needed to initialize");
+
+   // If specific data elements are requested, warn if not in the reader
+   if (!loadAll)
+   {
+      StringArray allKeywords = 
+         theInterface->GetStringArrayParameter("SupportedFields");
+      for (UnsignedInt i = 0; i < selections.size(); ++i)
+         if (find(allKeywords.begin(), allKeywords.end(), selections[i]) ==
+               allKeywords.end())
+            MessageInterface::ShowMessage("*** Warning ***: The data keyword "
+                  "\"%s\" is not a recognized keyword in the data reader "
+                  "\"tvhf\" on the line:\n%s\n", selections[i].c_str(), 
+                  generatingString.c_str());
+   }
    
    return retval;
 }
@@ -579,7 +611,18 @@ const std::string& Set::GetGeneratingString(Gmat::WriteMode mode,
    // Build the local string
    generatingString = prefix + "Set " + targetName + " " + interfaceName;
 
-   /// @todo Add selections
+   // Add selections
+   if ((loadAll == false) && (selections.size() > 0))
+   {
+      generatingString += " (Data = {";
+      for (UnsignedInt i = 0; i < selections.size(); ++i)
+      {
+         if (i > 0)
+            generatingString += ", ";
+         generatingString += "'" + selections[i] + "'";
+      }
+      generatingString += "})";
+   }
 
    generatingString += ";";
 
@@ -767,6 +810,23 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
    return retval;
 }
 
+//-----------------------------------------------------------------------------
+//Rvector6 ConvertToTargetCoordinateSystem(const std::string& from,
+//      Rvector6& fromState)
+//-----------------------------------------------------------------------------
+/**
+ * Performs coordinate system conversion on an Rvector6
+ *
+ * This method converts an input coordinate system based 6 element vector from
+ * a coordinate system identified with the reader into the coordinate system 
+ * applied to a SpaceObject, so that the data can be passed into the object.
+ *
+ * @param from A string identifying the reader coordinate system
+ * @param fromState The 6-vector that needs to be converted
+ *
+ * @return The converted vector
+ */
+//-----------------------------------------------------------------------------
 Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
       Rvector6& fromState)
 {
@@ -828,4 +888,88 @@ GmatEpoch Set::ConvertToSystemTime(const std::string& from, GmatEpoch fromTime)
          "A1ModJulian", newEpoch, outStr);
 
    return newEpoch;
+}
+
+//-----------------------------------------------------------------------------
+// void CheckForOptions(const std::string options)
+//-----------------------------------------------------------------------------
+/**
+ * Fills in the options for the set command
+ *
+ * param options The string containing the options
+ */
+//-----------------------------------------------------------------------------
+void Set::CheckForOptions(const std::string options)
+{
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("Set::CheckForOptions(\"%s\") called\n", 
+         options.c_str());
+   #endif
+
+   // Remove the parentheses if they are still in the string
+   UnsignedInt start = options.find_first_of("(");
+   if (start == std::string::npos)
+      start = 0;
+   else
+      ++start;
+   UnsignedInt end = options.find_last_of(")");
+   std::string data = options.substr(start, end-start); 
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("Data string: \"%s\"\n", 
+         data.c_str());
+   #endif
+
+   StringArray chunks = parser.SeparateBy(data, "={}");
+
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("String chunks as\n");
+      for (UnsignedInt i = 0; i < chunks.size(); ++i)
+         MessageInterface::ShowMessage("   %2d: \"%s\"\n", i, 
+            chunks[i].c_str());
+   #endif
+
+   UnsignedInt index = 0;
+   while (index < chunks.size())
+   {
+      if (chunks[index] == "Data")
+      {
+         selections.clear();
+         ++index;
+         if (index < chunks.size())
+         {
+            if (chunks[index] == "")
+               ++index;
+
+            #ifdef DEBUG_PARSING
+               MessageInterface::ShowMessage("Parsing the Data option \"%s\"\n", 
+                  chunks[index].c_str());
+            #endif
+            StringArray parts = parser.SeparateBy(chunks[index], "', ");
+            for (UnsignedInt i = 0; i < parts.size(); ++i)
+               selections.push_back(parts[i]);
+
+            #ifdef DEBUG_PARSING
+               MessageInterface::ShowMessage("Data selections are\n");
+               for (UnsignedInt i = 0; i < selections.size(); ++i)
+                  MessageInterface::ShowMessage("   %2d: \"%s\"\n", i, 
+                     selections[i].c_str());
+            #endif
+         }
+         else 
+            MessageInterface::ShowMessage("*** Warning ***: The Set command "
+                  "specifies a \"Data\" option, but no data is specified in "
+                  "the line\n%s\nAll data will be loaded\n", 
+                  generatingString.c_str());
+
+         if (selections.size() > 0)
+            loadAll = false;
+      }
+      else
+         throw CommandException("The Set command option " + 
+                                chunks[index] + " is not a known option");
+      ++index;
+   }
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("CheckForOptions() finished\n");
+   #endif
 }

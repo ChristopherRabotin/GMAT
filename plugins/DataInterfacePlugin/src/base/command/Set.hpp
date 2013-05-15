@@ -107,6 +107,7 @@ protected:
                                              Rvector6& fromState);
    GmatEpoch            ConvertToSystemTime(const std::string& from,
                                              GmatEpoch fromTime);
+   void                 CheckForOptions(const std::string options);
 
 //   // Parameter IDs
 //   enum
