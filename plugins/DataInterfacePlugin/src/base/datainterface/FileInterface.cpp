@@ -39,7 +39,7 @@ FileInterface::PARAMETER_LABEL[FileInterfaceParamCount - DataInterfaceParamCount
 const Gmat::ParameterType
 FileInterface::PARAMETER_TYPE[FileInterfaceParamCount - DataInterfaceParamCount] =
 {
-      Gmat::STRING_TYPE,
+   Gmat::FILENAME_TYPE,
 };
 
 
@@ -210,9 +210,19 @@ bool FileInterface::Initialize()
             instanceName.c_str());
    #endif
 
+   if (filename == "")
+      throw InterfaceException("The FileInterface \"" + instanceName +
+            "\" does not identify the file that it needs to read.  Please set "
+            "the \"Filename\" field on the object.");
+
    // Verify that the file exists
    if (GmatFileUtil::DoesFileExist(filename))
    {
+      if (readerFormat == "")
+         throw InterfaceException("The FileInterface \"" + instanceName +
+               "\" does not identify the file format that it needs to read.  "
+               "Please set the \"Format\" field on the object.");
+
       ReaderFactory rf;
 
       if (theReader != NULL)
@@ -228,7 +238,8 @@ bool FileInterface::Initialize()
       }
       else
          throw InterfaceException("The FileInterface \"" + instanceName +
-               "\" was unable to create a reader for the data.");
+               "\" was unable to create a \"" + readerFormat + 
+               "\" reader for the data.");
    }
    else
       throw InterfaceException("The FileInterface \"" + instanceName +
