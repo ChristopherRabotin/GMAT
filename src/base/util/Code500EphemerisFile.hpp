@@ -65,6 +65,7 @@ protected:
    static const double SEC_TO_DUT;
    static const double DAY_TO_DUT;
    static const double DUT_TO_DAY;
+   static const double DUT_TO_SEC;
    
 #pragma pack(push, 1)
    struct GMAT_API EphemHeader1
@@ -187,7 +188,9 @@ protected:
    EphemHeader1   mEphemHeader1;
    EphemHeader2   mEphemHeader2;
    EphemData      mEphemData;
-   int            mDataRecCounter;
+   int            mDataRecWriteCounter;
+   int            mLastDataRecRead;
+   int            mLastStateIndexRead;
    
    // Ephemeris input/output streams
    std::ifstream  mEphemFileIn;
@@ -221,14 +224,20 @@ protected:
    
    // Data record
    void InitializeDataRecord();
-   void UnpackData(int recNum, int logOption);
+   void UnpackDataRecord(int recNum, int logOption);
    
    // Unit Conversion
    void ConvertStateKmSecToDULT(Rvector6 *kmsec, double *dult);
    
    // Time Conversion
+   void   ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay,
+                                   int &year, int &month, int &day,
+                                   int &hour, int &min, double &sec);
+   void   ToYearMonthDay(double yyymmdd, int &year, int &month, int &day);
+   void   ToYYYMMDDHHMMSS(const A1Mjd &a1Mjd, double &ymd, double &hms);
    double ToDUT(const A1Mjd &a1Mjd);
    double ToYYYMMDD(const A1Mjd &a1Mjd);
+   double ToHHMMSS(const A1Mjd &a1Mjd);
    double ToDayOfYear(const A1Mjd &a1Mjd);
    double ToSecondsOfDay(const A1Mjd &a1Mjd);
    A1Mjd  ToA1Mjd(double dutTime, int timeSystem = 2);
@@ -236,6 +245,7 @@ protected:
    std::string ToA1Gregorian(const A1Mjd &a1Mjd);
    std::string ToUtcGregorian(double dutTime, int timeSystem = 2);
    std::string ToUtcGregorian(const A1Mjd &a1Mjd, int timeSystem = 2);
+   std::string ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay);
    
    // String functions
    void CopyString(char *to, const std::string &from, int numChars);

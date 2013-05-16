@@ -48,6 +48,8 @@
 //#define DEBUG_EPHEMFILE_OPEN
 //#define DEBUG_EPHEMFILE_SPICE
 //#define DEBUG_EPHEMFILE_CCSDS
+//#define DEBUG_EPHEMFILE_CODE500
+//#define DEBUG_EPHEMFILE_INTERPOLATOR
 //#define DEBUG_EPHEMFILE_BUFFER
 //#define DEBUG_EPHEMFILE_TIME
 //#define DEBUG_EPHEMFILE_ORBIT
@@ -182,7 +184,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    saveMetaDataStart    (true),
    writingNewSegment    (true),
    continuousSegment    (false),
-   useStepSize          (false),
+   useFixedStepSize     (false),
    writeOrbit           (false),
    writeAttitude        (false),
    processData          (false),
@@ -214,7 +216,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    // CCSDS-AEM not allowed in 2010 release (bug 2219)
    //fileFormatList.push_back("CCSDS-AEM");
    fileFormatList.push_back("SPK");
-   fileFormatList.push_back("Code500-EPHEM");
+   fileFormatList.push_back("CODE500-EPHEM");
    
    epochFormatList.clear();
    epochFormatList.push_back("UTCGregorian");
@@ -369,7 +371,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    saveMetaDataStart    (ef.saveMetaDataStart),
    writingNewSegment    (ef.writingNewSegment),
    continuousSegment    (ef.continuousSegment),
-   useStepSize          (ef.useStepSize),
+   useFixedStepSize     (ef.useFixedStepSize),
    writeOrbit           (ef.writeOrbit),
    writeAttitude        (ef.writeAttitude),
    processData          (ef.processData),
@@ -454,7 +456,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    saveMetaDataStart    = ef.saveMetaDataStart;
    writingNewSegment    = ef.writingNewSegment;
    continuousSegment    = ef.continuousSegment;
-   useStepSize          = ef.useStepSize;
+   useFixedStepSize     = ef.useFixedStepSize;
    writeOrbit           = ef.writeOrbit;
    writeAttitude        = ef.writeAttitude;
    processData          = ef.processData;
@@ -558,7 +560,8 @@ void EphemerisFile::ValidateParameters()
    {
       // check for FileFormat and StateType
       if ((fileFormat == "CCSDS-OEM" && stateType == "Quaternion") ||
-          (fileFormat == "CCSDS-AEM" && stateType == "Cartesian"))
+          (fileFormat == "CCSDS-AEM" && stateType == "Cartesian") ||
+          (fileFormat == "CODE500-EPHEM" && stateType == "Quaternion"))
          throw SubscriberException
             ("FileFormat \"" + fileFormat + "\" and StateType " + "\"" + stateType +
              "\" does not match for the EphemerisFile \"" + GetName() + "\"");
@@ -650,7 +653,7 @@ bool EphemerisFile::Initialize()
       fileType = SPK_ORBIT;
    else if (fileFormat == "SPK" && stateType == "Quaternion")
       fileType = SPK_ATTITUDE;
-   else if (fileFormat == "Code500-EPHEM")
+   else if (fileFormat == "CODE500-EPHEM")
    {
       fileType = CODE500_EPHEM;
       maxSegmentSize = 50; // 50 orbit states per data record
@@ -738,9 +741,9 @@ bool EphemerisFile::Initialize()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::Initialize() <%p>'%s' returning true, writeOrbit=%d, "
-       "writeAttitude=%d\n   useStepSize=%d, writeDataInDataCS=%d, initialEpochA1Mjd=%.15f, "
+       "writeAttitude=%d\n   useFixedStepSize=%d, writeDataInDataCS=%d, initialEpochA1Mjd=%.15f, "
        "finalEpochA1Mjd=%.15f\n", this, GetName().c_str(), writeOrbit, writeAttitude,
-       useStepSize, writeDataInDataCS, initialEpochA1Mjd, finalEpochA1Mjd);
+       useFixedStepSize, writeDataInDataCS, initialEpochA1Mjd, finalEpochA1Mjd);
    #endif
    
    return true;
@@ -1254,7 +1257,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
           stepSizeList.end())
       {
          stepSize = value;
-         useStepSize = false;
+         useFixedStepSize = false;
          return true;
       }
       else
@@ -1440,8 +1443,12 @@ void EphemerisFile::CreateInterpolator()
        interpolator, interpolator ? interpolator->GetName().c_str() : "NULL");
    #endif
 
-   // if not using step size just return
-   if (!useStepSize)
+   // If ephemeris output type is SPK, no need to create interpolator
+   if (fileType == SPK_ORBIT || fileType == SPK_ATTITUDE)
+      return;
+   
+   // If not using step size just return
+   if (!useFixedStepSize)
       return;
    
    // If interpolator is not NULL, delete it first
@@ -1601,9 +1608,8 @@ void EphemerisFile::CreateCode500EphemerisFile()
    #ifdef DEBUG_EPHEMFILE_CODE500
    MessageInterface::ShowMessage
       ("   Creating Code500EphemerisFile with satId=%f, productId='%s', timeSystem='%s', "
-       "tapeId='%s', sourceId='%s'\n   centralBody='%s', coordSystem='%s'\n",
-       satId, produceId.c_str(), timeSystem.c_str(), tapeId.c_str(), souceId.c_str(),
-       centralBody.c_str(), coordSystem.c_str());
+       "tapeId='%s', sourceId='%s', centralBody='%s'\n", satId, productId.c_str(),
+       timeSystem.c_str(), tapeId.c_str(), sourceId.c_str(), centralBody.c_str());
    #endif
    
    try
@@ -1622,10 +1628,6 @@ void EphemerisFile::CreateCode500EphemerisFile()
       code500EphemFile->SetInitialKeplerianState(state);
       state = spacecraft->GetState("Cartesian");
       code500EphemFile->SetInitialCartesianState(state);
-      
-      // Just for debugging
-      code500EphemFile->WriteHeader1();
-      code500EphemFile->WriteHeader2();
    }
    catch (BaseException &e)
    {
@@ -1866,7 +1868,7 @@ void EphemerisFile::HandleCcsdsOrbitData(bool writeData)
       
       if (writeOrbit)
       {
-         if (useStepSize)
+         if (useFixedStepSize)
             WriteOrbitAt(nextReqEpoch, currState);
          else
             WriteOrbit(currEpochInSecs, currState);
@@ -1948,24 +1950,62 @@ void EphemerisFile::HandleCode500OrbitData(bool writeData)
        writingNewSegment);
    #endif
    
-   if (writeData)
+   // Check if it is time to write
+   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState);
+   
+   // LagrangeInterpolator's maximum buffer size is set to 80 which can hold
+   // 80 min of data assuming average of 60 sec data interveval.
+   // Check at least 10 min interval for large step size, since interpolater
+   // buffer size is limited
+   if (!timeToWrite)
    {
-      bool bufferData = false;
-      
-      if ((a1MjdArray.empty()) ||
-          (!a1MjdArray.empty() && currEpochInDays > a1MjdArray.back()->GetReal()))
-         bufferData = true;
-      
-      if (bufferData)
+      if ((currEpochInSecs - prevProcTime) > 600.0)
       {
-         BufferOrbitData(currEpochInDays, currState);
-         
          #ifdef DEBUG_EPHEMFILE_CODE500
-         DebugWriteOrbit("In HandleCode500OrbitData:", currEpochInDays, currState, true, true);
+         MessageInterface::ShowMessage
+            ("   ==> 10 min interval is over, so setting timeToWrite to true\n");
          #endif
+         
+         timeToWrite = true;
+      }
+   }
+   
+   #ifdef DEBUG_EPHEMFILE_CODE500
+   MessageInterface::ShowMessage
+      ("   timeToWrite=%d, writingNewSegment=%d\n", timeToWrite, writingNewSegment);
+   #endif
+   
+   if (timeToWrite)
+      prevProcTime = currEpochInSecs;
+   
+   //------------------------------------------------------------
+   // write data to file
+   //------------------------------------------------------------
+   // Now actually write data
+   if (writeData && timeToWrite)
+   {
+      if (firstTimeWriting)
+         WriteHeader();
+      
+      if (writingNewSegment)
+      {
+         //WriteComments("********** NEW SEGMENT **********");
+         #ifdef DEBUG_EPHEMFILE_WRITE
+         DebugWriteTime
+            ("********** WRITING NEW SEGMENT AT currEpochInSecs = ", currEpochInSecs, false, 2);
+         #endif
+         
+         WriteCode500OrbitDataSegment();
       }
       
-      // Set flags
+      if (writeOrbit)
+      {
+         if (useFixedStepSize)
+            WriteOrbitAt(nextReqEpoch, currState);
+         else
+            WriteOrbit(currEpochInSecs, currState);
+      }
+      
       if (firstTimeWriting)
          firstTimeWriting = false;
       
@@ -2018,8 +2058,7 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
        canFinalize);
    #endif
    
-   // Write data for the rest of time on waiting, pass false to indicate that is not
-   // the end of data receive.
+   // Write data for the rest of times on waiting
    FinishUpWriting(canFinalize);
    
    // For CCSDS data, comments are written from
@@ -2045,7 +2084,9 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
       currComments = "";
    }
    
-   InitializeData();
+   // There are no data segments for Code500 ephemeris file, continue writing
+   if (fileType != CODE500_EPHEM)
+      InitializeData();
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
@@ -2075,7 +2116,7 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
    bool retval = true;
    
    // If writing at specified interval step, do checking
-   if (useStepSize)
+   if (useFixedStepSize)
    {
       // Add data points
       if (writeOrbit)
@@ -2373,183 +2414,14 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       MessageInterface::ShowMessage
          ("   It is not finalized yet, so trying to write the remainder of data\n");
       #endif
-
+      
       if (fileType == CCSDS_OEM || fileType == CCSDS_AEM)
       {
          FinishUpWritingCCSDS(canFinalize);
-         
-         #if 0
-         if (interpolator != NULL)
-         {
-            #ifdef DEBUG_INTERPOLATOR_TRACE
-            MessageInterface::ShowMessage
-               ("===> FinishUpWriting() checking for not enough data points\n"
-                "   metaDataStartStr='%s', currEpochInSecs='%s'\n", metaDataStartStr.c_str(),
-                ToUtcGregorian(currEpochInSecs).c_str());
-            #endif
-            // First check for not enough data points for interpolation
-            if (canFinalize && interpolatorStatus == -1)
-            {
-               isFinalized = true;
-               
-               // Clear last MetaData with COMMENT
-               ClearLastCcsdsOemMetaData
-                  ("There is not enough data available to generate spacecraft "
-                   "ephemeris data at the requested interpolation order. "
-                   "There should be at least one data point more than interpolation order.");
-
-               // Throw an exception
-               std::stringstream ss("");
-               ss << "There is not enough data to generate ephmeris data to "
-                  "EphemerisFile: \"" << fileName << "\". Number of required points is "
-                  << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
-               ss << ".  There should be at least one data point more than interpolation order.";
-
-               SubscriberException se;
-               se.SetDetails(ss.str());
-               throw se;
-            }
-            
-            #ifdef DEBUG_INTERPOLATOR_TRACE
-            MessageInterface::ShowMessage
-               ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
-            #endif
-            interpolator->SetForceInterpolation(true);
-            ProcessEpochsOnWaiting(true, !canFinalize);
-            #ifdef DEBUG_INTERPOLATOR_TRACE
-            MessageInterface::ShowMessage("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
-            #endif
-            interpolator->SetForceInterpolation(false);
-            
-            // When running more than 5 days or so, the last epoch to process is a few
-            // milliseconds after the last epoch received, so the interpolator flags
-            // as epoch after the last buffered epoch, so handle last data point here.
-            // If there is 1 epoch left and the difference between the current epoch
-            // is less than 1.0e-6 then use the current epoch
-            if (epochsOnWaiting.size() == 1)
-            {
-               Real lastEpoch = epochsOnWaiting.back();
-               if (GmatMathUtil::Abs(lastEpoch - currEpochInSecs) < 1.0e-6)
-               {
-                  #ifdef DEBUG_EPHEMFILE_TIME
-                  DebugWriteTime
-                     ("   ===== Removing last epoch and adding currEpochInSecs to "
-                      "epochsOnWaiting, currEpochInSecs = ", currEpochInSecs);
-                  #endif
-                  epochsOnWaiting.pop_back();
-                  epochsOnWaiting.push_back(currEpochInSecs);
-                  #ifdef DEBUG_INTERPOLATOR_TRACE
-                  MessageInterface::ShowMessage
-                     ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
-                  #endif
-                  interpolator->SetForceInterpolation(true);
-                  ProcessEpochsOnWaiting(true);
-                  #ifdef DEBUG_INTERPOLATOR_TRACE
-                  MessageInterface::ShowMessage
-                     ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
-                  #endif
-                  interpolator->SetForceInterpolation(false);
-               }
-            }
-            
-            // Write last data received if not written yet(Do attitude later)
-            if (canFinalize)
-            {
-               if (fileType == CCSDS_OEM && useStepSize)
-               {
-                  #ifdef DEBUG_EPHEMFILE_FINISH
-                  MessageInterface::ShowMessage("   finalEpochA1Mjd=%f\n", finalEpochA1Mjd);
-                  #endif
-                  // If not using user defined final epock, do more checking for the final data
-                  if (finalEpochA1Mjd == -999.999)
-                  {
-                     // Check if current data needs to be written out
-                     if (currEpochInSecs > lastEpochWrote + 1.0e-6)
-                     {
-                        #ifdef DEBUG_EPHEMFILE_FINISH
-                        MessageInterface::ShowMessage
-                           ("   ===> %.15f > %.15f and not using step size, so writing final data\n",
-                            currEpochInSecs, lastEpochWrote);
-                        #endif
-                        WriteOrbit(currEpochInSecs, currState);
-                     }
-                  }
-                  else
-                  {
-                     #ifdef DEBUG_EPHEMFILE_FINISH
-                     MessageInterface::ShowMessage("   ===> process final data on waiting\n");
-                     #endif
-                     ProcessEpochsOnWaiting(false, false);
-                  }
-               }
-            }
-         }
-         
-         writeCommentAfterData = false;
-         
-         //WriteComments("********** FINAL SEGMENT **********");
-         #ifdef DEBUG_EPHEMFILE_WRITE
-         DebugWriteTime
-            ("********** WRITING FINAL SEGMENT AT currEpochInSecs = ", currEpochInSecs, false, 2);
-         #endif
-         if (canFinalize)
-         {
-            writeMetaDataOption = 2;
-            saveMetaDataStart = true;
-            if (continuousSegment)
-               saveMetaDataStart = false;
-         }
-         else
-         {
-            writeMetaDataOption = 0;
-            if (firstTimeMetaData)
-               writeMetaDataOption = 2; // Overwrite previous meta data
-            saveMetaDataStart = true;
-            if (continuousSegment)
-               saveMetaDataStart = false;
-         }
-         
-         WriteCcsdsOrbitDataSegment();
-         
-         #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-         if (fileType == CCSDS_AEM)
-            WriteString("DATA_STOP\n");
-         #endif
-         
-         #endif
       }
       else if (fileType == SPK_ORBIT)
       {
          FinishUpWritingSPK(canFinalize);
-         
-         #if 0
-         try 
-         {
-            if (spkWriter != NULL)
-            {
-               WriteSpkOrbitDataSegment();
-            }
-            else
-            {
-               #ifdef __USE_SPICE__
-               if (a1MjdArray.size() > 0)
-               {
-                  throw SubscriberException
-                     ("*** INTERNAL ERROR *** SPK Writer is NULL in "
-                      "EphemerisFile::FinishUpWriting()\n");
-               }
-               #endif
-            }
-         }
-         catch (BaseException &ex)
-         {
-            // Catch and ignore exceptions thrown from util, since we manage them later
-            #ifdef DEBUG_EPHEMFILE_WRITE
-               MessageInterface::ShowMessage("Caught the exception %s\n", 
-                  ex.GetFullMessage().c_str());
-            #endif
-         }
-         #endif
       }
       else if (fileType == CODE500_EPHEM)
       {
@@ -2572,6 +2444,11 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
 {
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::FinishUpWritingCCSDS() entered, canFinalize=%d\n", canFinalize);
+   #endif
+   
    if (interpolator != NULL)
    {
       #ifdef DEBUG_INTERPOLATOR_TRACE
@@ -2580,6 +2457,7 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
           "   metaDataStartStr='%s', currEpochInSecs='%s'\n", metaDataStartStr.c_str(),
           ToUtcGregorian(currEpochInSecs).c_str());
       #endif
+      
       // First check for not enough data points for interpolation
       if (canFinalize && interpolatorStatus == -1)
       {
@@ -2603,79 +2481,8 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
          throw se;
       }
       
-      #ifdef DEBUG_INTERPOLATOR_TRACE
-      MessageInterface::ShowMessage
-         ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
-      #endif
-      interpolator->SetForceInterpolation(true);
-      ProcessEpochsOnWaiting(true, !canFinalize);
-      #ifdef DEBUG_INTERPOLATOR_TRACE
-      MessageInterface::ShowMessage("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
-      #endif
-      interpolator->SetForceInterpolation(false);
-      
-      // When running more than 5 days or so, the last epoch to process is a few
-      // milliseconds after the last epoch received, so the interpolator flags
-      // as epoch after the last buffered epoch, so handle last data point here.
-      // If there is 1 epoch left and the difference between the current epoch
-      // is less than 1.0e-6 then use the current epoch
-      if (epochsOnWaiting.size() == 1)
-      {
-         Real lastEpoch = epochsOnWaiting.back();
-         if (GmatMathUtil::Abs(lastEpoch - currEpochInSecs) < 1.0e-6)
-         {
-            #ifdef DEBUG_EPHEMFILE_TIME
-            DebugWriteTime
-               ("   ===== Removing last epoch and adding currEpochInSecs to "
-                "epochsOnWaiting, currEpochInSecs = ", currEpochInSecs);
-            #endif
-            epochsOnWaiting.pop_back();
-            epochsOnWaiting.push_back(currEpochInSecs);
-            #ifdef DEBUG_INTERPOLATOR_TRACE
-            MessageInterface::ShowMessage
-               ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
-            #endif
-            interpolator->SetForceInterpolation(true);
-            ProcessEpochsOnWaiting(true);
-            #ifdef DEBUG_INTERPOLATOR_TRACE
-            MessageInterface::ShowMessage
-               ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
-            #endif
-            interpolator->SetForceInterpolation(false);
-         }
-      }
-      
-      // Write last data received if not written yet(Do attitude later)
-      if (canFinalize)
-      {
-         if (fileType == CCSDS_OEM && useStepSize)
-         {
-            #ifdef DEBUG_EPHEMFILE_FINISH
-            MessageInterface::ShowMessage("   finalEpochA1Mjd=%f\n", finalEpochA1Mjd);
-            #endif
-            // If not using user defined final epock, do more checking for the final data
-            if (finalEpochA1Mjd == -999.999)
-            {
-               // Check if current data needs to be written out
-               if (currEpochInSecs > lastEpochWrote + 1.0e-6)
-               {
-                  #ifdef DEBUG_EPHEMFILE_FINISH
-                  MessageInterface::ShowMessage
-                     ("   ===> %.15f > %.15f and not using step size, so writing final data\n",
-                      currEpochInSecs, lastEpochWrote);
-                  #endif
-                  WriteOrbit(currEpochInSecs, currState);
-               }
-            }
-            else
-            {
-               #ifdef DEBUG_EPHEMFILE_FINISH
-               MessageInterface::ShowMessage("   ===> process final data on waiting\n");
-               #endif
-               ProcessEpochsOnWaiting(false, false);
-            }
-         }
-      }
+      // Finish up final data
+      ProcessFinalDataOnWaiting();
    }
    
    writeCommentAfterData = false;
@@ -2750,31 +2557,142 @@ void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWritingCode500(bool canFinalize)
 {
-   try 
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::FinishUpWritingCCSDS() entered, canFinalize=%d\n", canFinalize);
+   #endif
+   
+   if (interpolator != NULL)
    {
-      if (code500EphemFile != NULL)
+      #ifdef DEBUG_INTERPOLATOR_TRACE
+      MessageInterface::ShowMessage
+         ("===> FinishUpWriting() checking for not enough data points\n"
+          "   metaDataStartStr='%s', currEpochInSecs='%s'\n", metaDataStartStr.c_str(),
+          ToUtcGregorian(currEpochInSecs).c_str());
+      #endif
+      
+      // First check for not enough data points for interpolation
+      if (canFinalize && interpolatorStatus == -1)
       {
-         WriteCode500OrbitDataSegment(canFinalize);
-         if (canFinalize)
-            FinalizeCode500Ephemeris();
+         isFinalized = true;
+         
+         // Throw an exception
+         std::stringstream ss("");
+         ss << "There is not enough data to generate ephmeris data to "
+            "EphemerisFile: \"" << fileName << "\". Number of required points is "
+            << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
+         ss << ".  There should be at least one data point more than interpolation order.";
+         
+         SubscriberException se;
+         se.SetDetails(ss.str());
+         throw se;
       }
-      else
+      
+      // Process final data on waiting
+      ProcessFinalDataOnWaiting();
+   }
+   
+   // Write final data
+   if (code500EphemFile != NULL)
+   {
+      WriteCode500OrbitDataSegment(canFinalize);
+      if (canFinalize)
+         FinalizeCode500Ephemeris();
+   }
+   else
+   {
+      if (a1MjdArray.size() > 0)
       {
-         if (a1MjdArray.size() > 0)
-         {
-            throw SubscriberException
-               ("*** INTERNAL ERROR *** Code500EphemFile is NULL in "
-                "EphemerisFile::FinishUpWritingCode500()\n");
-         }
+         throw SubscriberException
+            ("*** INTERNAL ERROR *** Code500EphemFile is NULL in "
+             "EphemerisFile::FinishUpWritingCode500()\n");
       }
    }
-   catch (BaseException &ex)
+}
+
+
+//------------------------------------------------------------------------------
+// void ProcessFinalDataOnWaiting(bool canFinalize = true)
+//------------------------------------------------------------------------------
+void EphemerisFile::ProcessFinalDataOnWaiting(bool canFinalize)
+{
+   #ifdef DEBUG_INTERPOLATOR_TRACE
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ProcessFinalDataOnWaiting() entered, canFinalize=%d\n",
+       canFinalize);
+   MessageInterface::ShowMessage
+      ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
+   #endif
+   interpolator->SetForceInterpolation(true);
+   ProcessEpochsOnWaiting(true, !canFinalize);
+   #ifdef DEBUG_INTERPOLATOR_TRACE
+   MessageInterface::ShowMessage
+      ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
+   #endif
+   interpolator->SetForceInterpolation(false);
+   
+   // When running more than 5 days or so, the last epoch to process is a few
+   // milliseconds after the last epoch received, so the interpolator flags
+   // as epoch after the last buffered epoch, so handle last data point here.
+   // If there is 1 epoch left and the difference between the current epoch
+   // is less than 1.0e-6 then use the current epoch
+   if (epochsOnWaiting.size() == 1)
    {
-      // Catch and ignore exceptions thrown from util, since we manage them later
-      #ifdef DEBUG_EPHEMFILE_WRITE
-      MessageInterface::ShowMessage
-         ("Caught the exception %s\n", ex.GetFullMessage().c_str());
-      #endif
+      Real lastEpoch = epochsOnWaiting.back();
+      if (GmatMathUtil::Abs(lastEpoch - currEpochInSecs) < 1.0e-6)
+      {
+         #ifdef DEBUG_EPHEMFILE_TIME
+         DebugWriteTime
+            ("   ===== Removing last epoch and adding currEpochInSecs to "
+             "epochsOnWaiting, currEpochInSecs = ", currEpochInSecs);
+         #endif
+         epochsOnWaiting.pop_back();
+         epochsOnWaiting.push_back(currEpochInSecs);
+         #ifdef DEBUG_INTERPOLATOR_TRACE
+         MessageInterface::ShowMessage
+            ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
+         #endif
+         interpolator->SetForceInterpolation(true);
+         ProcessEpochsOnWaiting(true);
+         #ifdef DEBUG_INTERPOLATOR_TRACE
+         MessageInterface::ShowMessage
+            ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
+         #endif
+         interpolator->SetForceInterpolation(false);
+      }
+   }
+   
+   // Write last data received if not written yet(Do attitude later)
+   if (canFinalize)
+   {
+      //if (fileType == CCSDS_OEM && useFixedStepSize)
+      if (useFixedStepSize)
+      {
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage("   finalEpochA1Mjd=%f\n", finalEpochA1Mjd);
+         #endif
+         // If not using user defined final epock, do more checking for the final data
+         if (finalEpochA1Mjd == -999.999)
+         {
+            // Check if current data needs to be written out
+            if (currEpochInSecs > lastEpochWrote + 1.0e-6)
+            {
+               #ifdef DEBUG_EPHEMFILE_FINISH
+               MessageInterface::ShowMessage
+                  ("   ===> %.15f > %.15f and not using step size, so writing final data\n",
+                   currEpochInSecs, lastEpochWrote);
+               #endif
+               WriteOrbit(currEpochInSecs, currState);
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage("   ===> process final data on waiting\n");
+            #endif
+            ProcessEpochsOnWaiting(false, false);
+         }
+      }
    }
 }
 
@@ -3047,7 +2965,7 @@ bool EphemerisFile::SetStepSize(Integer id, const std::string &value,
    stepSizeInSecs = rval;
    stepSizeInA1Mjd = stepSizeInSecs / GmatTimeConstants::SECS_PER_DAY;
    
-   useStepSize = true;
+   useFixedStepSize = true;
    
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
@@ -4012,7 +3930,7 @@ void EphemerisFile::FinalizeSpkFile()
 //------------------------------------------------------------------------------
 void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
 {
-   #ifdef DEBUG_EPHEMFILE_SPICE
+   #ifdef DEBUG_EPHEMFILE_CODE500
    MessageInterface::ShowMessage
       ("=====> WriteCode500OrbitDataSegment() entered, a1MjdArray.size()=%d, "
        "stateArray.size()=%d\n", a1MjdArray.size(), stateArray.size());
@@ -4089,10 +4007,17 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
+   #ifdef DEBUG_EPHEMFILE_CODE500_LOG
    // For for debugging
-   code500EphemFile->OpenForRead(fileName);
-   code500EphemFile->ReadHeader1();
-   code500EphemFile->ReadDataAt(1);
+   if (isEndOfRun)
+   {
+      MessageInterface::ShowMessage
+         ("===> EphemerisFile::FinalizeCode500Ephemeris() calling code500EphemFile for debug output\n");
+      code500EphemFile->OpenForRead(fileName);
+      code500EphemFile->ReadHeader1(1);
+      code500EphemFile->ReadDataRecords(-999, 2);
+   }
+   #endif
 }
 
 
@@ -4403,7 +4328,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       ("======================================================================\n"
        "EphemerisFile::Distribute() this=<%p>'%s' called\n", this, GetName().c_str());
    MessageInterface::ShowMessage
-      ("   len=%d, active=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRun=%d\n   "
+      ("   len=%d, active=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRund\n   "
        "runstate=%d, isManeuvering=%d, firstTimeWriting=%d\n", len, active, isEndOfReceive,
        isEndOfDataBlock, isEndOfRun, runstate, isManeuvering, firstTimeWriting);
    if (len > 0)

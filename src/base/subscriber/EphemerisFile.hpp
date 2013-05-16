@@ -171,7 +171,7 @@ protected:
    bool        saveMetaDataStart;
    bool        writingNewSegment;
    bool        continuousSegment;
-   bool        useStepSize;
+   bool        useFixedStepSize;
    bool        writeOrbit;
    bool        writeAttitude;
    bool        processData;
@@ -240,6 +240,7 @@ protected:
    void         FinishUpWritingSPK(bool canFinalize = true);
    void         FinishUpWritingCode500(bool canFinalize = true);
    
+   void         ProcessFinalDataOnWaiting(bool canFinalize = true);
    void         ProcessEpochsOnWaiting(bool checkFinalEpoch = false,
                                        bool checkEventEpoch = false);
    bool         SetEpoch(Integer id, const std::string &value,

@@ -53,6 +53,7 @@ public:
     
     Real ToPackedCalendarReal() const;      // YYYYMMDD.HHMMSSmmm
     Real ToPackedYYYMMDD() const;           // YYYMMDD.0
+    Real ToPackedHHMMSS() const;            // HHMMSS.mmm
     Real ToDayOfYear() const;               // Day count of year
     std::string& ToPackedCalendarString();  // "YYYYMMDD.HHMMSSmmm"
     

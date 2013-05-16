@@ -186,6 +186,26 @@ Real Date::ToPackedYYYMMDD() const
 
 
 //------------------------------------------------------------------------------
+//  Real ToPackedHHMMSS() const
+//------------------------------------------------------------------------------
+/*
+ * Converts time to calendar format and returns hour, minute, seconds, and
+ * milliseconds.
+ *
+ * @return time in Real in the format of HHMMSS.mmm
+ */
+//------------------------------------------------------------------------------
+Real Date::ToPackedHHMMSS() const
+{
+   Real ymd;
+   Real hms;
+   
+   ToYearMonthDayHourMinSec(ymd, hms);
+   return hms;
+}
+
+
+//------------------------------------------------------------------------------
 // Real ToDayOfYear() const
 //------------------------------------------------------------------------------
 Real Date::ToDayOfYear() const
