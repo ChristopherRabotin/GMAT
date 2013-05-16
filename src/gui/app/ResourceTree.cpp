@@ -322,7 +322,7 @@ void ResourceTree::ClearResource(bool leaveScripts)
    wxTreeItemId cf = GetFirstChild(root, cookie);
    for(UnsignedInt i = 0; i < GetChildrenCount(root, false); ++i)
    {
-      if (cf != interfaceItem)
+//      if (cf != interfaceItem)
       {
          if (cf != mScriptItem)
          {
@@ -391,6 +391,7 @@ void ResourceTree::UpdateResource(bool restartCounter)
    AddDefaultBurns(mBurnItem, restartCounter);
    AddDefaultSolvers(mSolverItem, restartCounter);
    AddDefaultSubscribers(mSubscriberItem, restartCounter);
+   AddDefaultInterfaces(interfaceItem);
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctionItem);
    AddDefaultCoordSys(mCoordSysItem);
@@ -873,6 +874,11 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    
    GetItemTypeAndIcon(obj, itemType, itemIcon);
    wxTreeItemId itemId = GetTreeItemId(itemType);
+
+   if (obj->IsOfType("DataInterface"))
+   {
+      itemType = GmatTree::USER_DEFINED_OBJECT;
+   }
    
    if (itemType != GmatTree::UNKNOWN_ITEM)
    {
@@ -1343,6 +1349,12 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemType = GmatTree::MATLAB_FUNCTION;
       itemIcon = GmatTree::RESOURCE_ICON_MATLAB_FUNCTION;
    }
+   else if (obj->IsOfType("FileInterface"))
+   {
+      itemType = GmatTree::INTERFACE;
+      itemIcon = GmatTree::RESOURCE_ICON_DEFAULT;
+   }
+
    
    // ------------------- Plugin objects
    // Hardware
@@ -1836,6 +1848,15 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
       #endif
    }
    
+   StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::INTERFACE);
+   int size = itemNames.size();
+   
+   for (int i = 0; i < size; i++)
+   {
+      GmatBase *obj = GetObject(itemNames[i]);
+      AddObjectToTree(obj);
+   }
+
    Expand(itemId);
 }
 
@@ -4822,6 +4843,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    case GmatTree::SPECIAL_POINT_FOLDER:
       menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"), CreatePopupMenu(itemType));
       break;
+   case GmatTree::INTERFACE_FOLDER:
+      menu.Append(POPUP_ADD_INTERFACE, wxT("Add"), CreatePopupMenu(itemType));
+      break;
    case GmatTree::SUBSCRIBER_FOLDER:
       menu.Append(POPUP_ADD_SUBSCRIBER, wxT("Add"), CreatePopupMenu(itemType));
       break;
@@ -5127,6 +5151,35 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       menu->Append(POPUP_ADD_BARYCENTER, wxT("Barycenter"));
       menu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
       break;
+   case GmatTree::INTERFACE_FOLDER:
+      {
+         listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::INTERFACE);
+         if (listOfObjects.size() > 0)
+         {
+            newId = PLUGIN_BEGIN;
+            for (StringArray::iterator i = listOfObjects.begin();
+                 i != listOfObjects.end(); ++i, ++newId)
+            {
+               // Ignore MatlabInterface
+               if (*i != "MatlabInterface")
+               {
+                  // Drop the ones that are already there for now
+                  std::string itemType = (*i);
+                  // Save the ID and type name for event handling
+                  pluginMap[POPUP_ADD_PLUGIN + newId] = itemType;
+                  menu->Append(POPUP_ADD_PLUGIN + newId, wxT(itemType.c_str()));
+               }
+            }
+         }
+         //else
+         //{
+         //   pluginMap[POPUP_ADD_PLUGIN + PLUGIN_BEGIN] =
+         //         GmatBase::GetObjectTypeString(gmatType);
+         //   menu->Append(POPUP_ADD_PLUGIN + PLUGIN_BEGIN,
+         //         wxT(GmatBase::GetObjectTypeString(gmatType).c_str()));
+         //}
+      }
+      break;
    case GmatTree::PLUGIN_FOLDER:
       {
          listOfObjects = theGuiInterpreter->GetCreatableList(gmatType, subtype);
@@ -5310,6 +5363,9 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::LIBRATION_POINT:
       return mSpecialPointsItem;
       
+   case GmatTree::INTERFACE:
+      return interfaceItem;
+
    case GmatTree::MATLAB_FUNCTION:
    case GmatTree::GMAT_FUNCTION:
       return mFunctionItem;

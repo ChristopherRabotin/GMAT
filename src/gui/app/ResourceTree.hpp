@@ -299,6 +299,10 @@ protected:
 
       POPUP_ADD_COORD_SYS,
 
+      // DataInterface classes
+      POPUP_ADD_INTERFACE,
+      POPUP_ADD_FILEINTERFACE,
+
       POPUP_ADD_FUNCTION,
       POPUP_ADD_MATLAB_FUNCTION,
       POPUP_ADD_GMAT_FUNCTION,
