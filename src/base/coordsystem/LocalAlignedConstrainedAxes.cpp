@@ -36,6 +36,7 @@
 //#define DEBUG_ROT_MATRIX
 //#define DEBUG_REFERENCE_SETTING
 //#define DEBUG_RENAME
+//#define DEBUG_LAC_SET
 
 #ifdef DEBUG_LAC_AXES
 #include <iostream>
@@ -165,9 +166,9 @@ LocalAlignedConstrainedAxes::LocalAlignedConstrainedAxes(
                              const LocalAlignedConstrainedAxes &copy) :
    DynamicAxes(copy),
    referenceObjName    (copy.referenceObjName),
-   referenceObject     (NULL),
+   referenceObject     (copy.referenceObject),
    constraintCSName    (copy.constraintCSName),
-   constraintCS        (NULL),
+   constraintCS        (copy.constraintCS),
    alignmentVector     (copy.alignmentVector),
    constraintVector    (copy.constraintVector),
    constraintRefVector (copy.constraintRefVector)
@@ -229,14 +230,20 @@ bool LocalAlignedConstrainedAxes::Initialize()
    DynamicAxes::Initialize();
 
    if (!referenceObject)
-      throw CoordinateSystemException("Reference Object \"" +
-         referenceObjName +
-         "\" is not yet set in local aligned constrained coordinate system!");
+   {
+      std::string errmsg = "Cannot initialize LocalAlignedConstrained object ";
+      errmsg += + "- Reference Object \"";
+      errmsg += referenceObjName + "\" is not yet set!\n";
+      throw CoordinateSystemException(errmsg);
+   }
 
    if (!constraintCS)
-      throw CoordinateSystemException("Constraint Coordinate System \"" +
-         constraintCSName +
-         "\" is not yet set in local aligned constrained coordinate system!");
+   {
+      std::string errmsg = "Cannot initialize LocalAlignedConstrained object ";
+      errmsg += + "- Coordinate System \"";
+      errmsg += constraintCSName + "\" is not yet set!\n";
+      throw CoordinateSystemException(errmsg);
+   }
 
    #ifdef DEBUG_LAC_INIT
    MessageInterface::ShowMessage
@@ -314,6 +321,10 @@ void LocalAlignedConstrainedAxes::SetReferenceObject(SpacePoint *refObj)
 {
    referenceObject  = refObj;
    referenceObjName = refObj->GetName();
+   #ifdef DEBUG_REFERENCE_SETTING
+      MessageInterface::ShowMessage("Just set reference object for LAC <%p> to %s\n",
+            this, referenceObjName.c_str());
+   #endif
 }
 
 
@@ -605,7 +616,7 @@ bool LocalAlignedConstrainedAxes::SetStringParameter(const Integer id,
    if (!allowModify)
    {
       std::string errmsg = "Modifications to built-in coordinate system ";
-      errmsg += instanceName + " are not allowed.\n";
+      errmsg += coordName + " are not allowed.\n";
       throw CoordinateSystemException(errmsg);
    }
    if (id == REFERENCE_OBJECT)
@@ -615,6 +626,13 @@ bool LocalAlignedConstrainedAxes::SetStringParameter(const Integer id,
    }
    if (id == CONSTRAINT_COORDSYS)
    {
+      if (constraintCSName == coordName)
+      {
+         std::string errmsg = "Cannot set coordinate system ";
+         errmsg += constraintCSName + " as the constraint coordinate system ";
+         errmsg += "on itself.\n";
+         throw CoordinateSystemException(errmsg);
+      }
       constraintCSName = value;
       return true;
    }
@@ -776,37 +794,38 @@ bool LocalAlignedConstrainedAxes::SetRefObject(GmatBase *obj,
 {
    #ifdef DEBUG_REFERENCE_SETTING
       MessageInterface::ShowMessage(
-         "Entering SetRefObject with type = %d and name = %s\n",
-         (Integer) type, name.c_str());
+         "Entering SetRefObject for LAC <%p> with type = %d and name = %s\n",
+         this, (Integer) type, name.c_str());
+      MessageInterface::ShowMessage("coordName for this LAC is \"%s\"", coordName.c_str());
    #endif
-   if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+   if (obj->IsOfType("CoordinateSystem"))
    {
       if (name == constraintCSName)
       {
-         if (obj == this)
+         if ((obj == this) || (name == coordName))
          {
             std::string errmsg = "Cannot set coordinate system ";
-            errmsg += instanceName + " as the constraint coordinate system ";
+            errmsg += coordName + " as the constraint coordinate system ";
             errmsg += "on itself.\n";
             throw CoordinateSystemException(errmsg);
          }
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage(
                "Setting %s as constraint CS object for %s\n",
-               name.c_str(), instanceName.c_str());
+               name.c_str(), coordName.c_str());
          #endif
          constraintCS = (CoordinateSystem*) obj;
       }
       return true;
    }
-   if (obj->IsOfType(Gmat::SPACE_POINT))
+   if (obj->IsOfType("SpacePoint"))
    {
       if (name == referenceObjName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
             MessageInterface::ShowMessage(
                "Setting %s as reference object for %s\n",
-               name.c_str(), instanceName.c_str());
+               name.c_str(), coordName.c_str());
          #endif
          referenceObject = (SpacePoint*) obj;
       }
