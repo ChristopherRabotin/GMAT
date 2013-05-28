@@ -1825,12 +1825,12 @@ void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "   AxisSystem::ComputePrecessionMatrix(%.12lf, %.12lf)\n", tTDB, 
+            "   AxisSystem::ComputePrecessionMatrix(%.15lf, %.15lf)\n", tTDB, 
             atEpoch.Get());
    #endif
    
    #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("**** tTDB = %12.10f\n",  tTDB);
+      MessageInterface::ShowMessage("**** tTDB = %.15lf\n",  tTDB);
    #endif
    Real tTDB2   = tTDB  * tTDB;
    Real tTDB3   = tTDB2 * tTDB;
@@ -1930,16 +1930,26 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // the neighbor's yard.  It can also be used, but is not tested, 
    // with the 2000 Theory.
    #ifdef DEBUG_UPDATE
+      if (nutationSrc == GmatItrf::NUTATION_1980)
+         MessageInterface::ShowMessage("NUTATION_1980\n");
+	  else if (nutationSrc == GmatItrf::NUTATION_1996)
+         MessageInterface::ShowMessage("NUTATION_1996\n");
+	  else
+         MessageInterface::ShowMessage("NUTAION other\n");
+
       MessageInterface::ShowMessage("registers set up\n");
-      MessageInterface::ShowMessage("  tTDB2 = %12.10f\n", tTDB2);
-      MessageInterface::ShowMessage("  tTDB3 = %12.10f\n", tTDB3);
-      MessageInterface::ShowMessage("  tTDB4 = %12.10f\n", tTDB4);
+	  MessageInterface::ShowMessage("  tTDB  = %.15lf\n", tTDB);
+      MessageInterface::ShowMessage("  tTDB2 = %.15lf\n", tTDB2);
+      MessageInterface::ShowMessage("  tTDB3 = %.15lf\n", tTDB3);
+      MessageInterface::ShowMessage("  tTDB4 = %.15lf\n", tTDB4);
    #endif
 
    // Compute values to be passed out first ... 
    longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
                        + 7.4722*tTDB2 + 0.007702*tTDB3 - 0.00005939*tTDB4)
                        * RAD_PER_ARCSEC;
+   longAscNodeLunar = longAscNodeLunar - ((int)(longAscNodeLunar/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;	// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+   
    Real Epsbar       = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 
                         + 0.001813*tTDB3) * RAD_PER_ARCSEC;
    cosEpsbar         = cos(Epsbar);
@@ -1948,9 +1958,9 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    Real dt = fabs(atEpoch.Subtract(lastNUTEpoch)) * SECS_PER_DAY;
    #ifdef DEBUG_UPDATE
       MessageInterface::ShowMessage("ENTERED ComputeNutation .....\n");
-      MessageInterface::ShowMessage("  longAscNodeLunar = %12.10f\n", longAscNodeLunar);
-      MessageInterface::ShowMessage("  Epsbar = %12.10f\n", Epsbar);
-      MessageInterface::ShowMessage("  cosEpsbar = %12.10f\n", cosEpsbar);
+      MessageInterface::ShowMessage("  longAscNodeLunar = %.15lf\n", longAscNodeLunar);
+      MessageInterface::ShowMessage("  Epsbar = %.15lf\n", Epsbar);
+      MessageInterface::ShowMessage("  cosEpsbar = %.15lf\n", cosEpsbar);
    #endif
    if (( dt < updateIntervalToUse) && (!forceComputation))
    {
@@ -1988,7 +1998,11 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
         - 12.7512*tTDB2 + 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
    register Real meanElongationSun = const297 + (1602961601.2090*tTDB 
         -  6.3706*tTDB2 + 0.006593*tTDB3 - 0.00003169*tTDB4)*RAD_PER_ARCSEC;
-   
+   meanAnomalyMoon = meanAnomalyMoon - ((int)(meanAnomalyMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;			// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+   meanAnomalySun = meanAnomalySun - ((int)(meanAnomalySun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;				// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+   argLatitudeMoon = argLatitudeMoon - ((int)(argLatitudeMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;			// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+   meanElongationSun = meanElongationSun - ((int)(meanElongationSun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;	// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+
    // Now, sum using nutation coefficients  (Vallado Eq. 3-60)
    Integer i  = 0;
    Real apNut = 0.0;
@@ -2265,10 +2279,12 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    
    #ifdef DEBUG_ROT_MATRIX
       MessageInterface::ShowMessage("At end of ComputeNutationmatrix ...\n");
-      MessageInterface::ShowMessage("   atEpoch   = %12.10f\n", atEpoch.Get());
-      MessageInterface::ShowMessage("   longAscNodeLunar   = %12.10f\n", longAscNodeLunar);
-      MessageInterface::ShowMessage("   cosEpsbar   = %12.10f\n", cosEpsbar);
-      MessageInterface::ShowMessage("   dPsi   = %12.10f\n", dPsi);
+      MessageInterface::ShowMessage("   atEpoch   = %.15lf\n", atEpoch.Get());
+      MessageInterface::ShowMessage("   longAscNodeLunar   = %.15lf\n", longAscNodeLunar);
+      MessageInterface::ShowMessage("   cosEpsbar   = %.15lf\n", cosEpsbar);
+      MessageInterface::ShowMessage("   dPsi   = %.15lf\n", dPsi);
+	  MessageInterface::ShowMessage("   dEps   = %.15lf\n", dEps);
+	  MessageInterface::ShowMessage("   TrueOoE   = %.15lf\n", TrueOoE);
    #endif
 //   return NUT;
 }
@@ -2356,9 +2372,9 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "      EQequinox           = %.13lf\n"
-            "      ThetaGmst           = %.13lf\n"
-            "      ThetaAst            = %.13lf\n",
+            "      EQequinox           = %.15lf\n"
+            "      ThetaGmst           = %.15lf\n"
+            "      ThetaAst            = %.15lf\n",
             EQequinox, ThetaGmst, ThetaAst);
    #endif
    #ifdef DEBUG_ROT_MATRIX
