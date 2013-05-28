@@ -30,25 +30,21 @@ if max(size(Equinoctial))~= 6
 end
 
 % Using the relationship between classical and equnoctial elements
-INC = 2*atan(sqrt(p^2+q^2));
+incl = 2*atan(sqrt(p^2+q^2));
 
-    if(INC == pi)
-    disp('Warning: Conversion results is near singularity that occurs when INC = 180(deg).');
+    if(incl == pi)
+    disp('Warning: Conversion results is near singularity that occurs when inclination = 180(deg).');
      return
     end
     
-    c = cos(INC/2);  
+    c = cos(incl/2);  
 
-% Find the Nonsingular Keplerian
-SMA = sma;
-e1 = k;
-e2 = h;
-e3 = p*c;
-e4 = q*c;
-e5 = meanLon;
+% Find the alternate equinoctial elements.
+altp = p*c;
+altq = q*c;
 
 % Output
-AltEquinoctial = real([SMA e1 e2 e3 e4 e5]');     
+AltEquinoctial = real([sma h k altp altq meanLon]');     
 
 
 

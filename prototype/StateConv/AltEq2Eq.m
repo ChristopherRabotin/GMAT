@@ -15,12 +15,12 @@ if nargin < 2
 end
 
 % Initializations
-SMA = AltEquinoctial(1,1);
-e1 = AltEquinoctial(2,1);
-e2 = AltEquinoctial(3,1);
-e3 = AltEquinoctial(4,1);
-e4 = AltEquinoctial(5,1);
-e5 = AltEquinoctial(6,1);
+sma     = AltEquinoctial(1,1);
+h       = AltEquinoctial(2,1);
+k       = AltEquinoctial(3,1);
+altp    = AltEquinoctial(4,1);
+altq    = AltEquinoctial(5,1);
+meanLon = AltEquinoctial(6,1);
 
 % Sanity check input
 if max(size(AltEquinoctial))~= 6
@@ -30,22 +30,18 @@ if max(size(AltEquinoctial))~= 6
 end
 
 % Using the relationship between classical and equnoctial elements
-INC = 2*asin(sqrt(e3^2+e4^2));
+incl = 2*asin(sqrt(altp^2+altq^2));
 
-    if(INC == pi)
-    disp('Warning: Conversion results is near singularity that occurs when INC = 180(deg).');
+    if(incl == pi)
+    disp('Warning: Conversion results is near singularity that occurs when inclination = 180(deg).');
      return
     end
     
-    c = cos(INC/2);
+    c = cos(incl/2);
         
 % Find the equnoctial elements
-sma = SMA;
-h   = e2;
-k   = e1;
-p   = e3/c;
-q   = e4/c;
-meanLon = e5;
+p   = altp/c;
+q   = altq/c;
 
 % Output
 Equinoctial = real([sma h k p q meanLon]'); 
