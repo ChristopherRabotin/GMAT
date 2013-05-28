@@ -300,7 +300,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "Calling CalculateRotationMatrix at epoch %lf; ", atEpoch.Get());
+            "Calling CalculateRotationMatrix at epoch %.15lf; ", atEpoch.Get());
    #endif
    Real theEpoch = atEpoch.Get();
    #ifdef DEBUG_BF_EPOCHS
@@ -398,7 +398,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
             Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
             MessageInterface::ShowMessage(
                "   Epoch data[mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT1, jdTT, tTDB] "
-               "=\n        [%.10lf %.10lf %.10lf %.10lf %.10lf %.10lf %.10lf ]\n",
+               "=\n        [%.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf ]\n",
                mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT, jdTT, tTDB);
          }
       #endif
@@ -456,10 +456,12 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       #endif
       
    #ifdef DEBUG_BF_MATRICES
-      MessageInterface::ShowMessage("atEpoch = %12.10f\n", atEpoch.Get());
+      MessageInterface::ShowMessage("atEpoch = %.15f\n", atEpoch.Get());
+	  MessageInterface::ShowMessage("PREC = %s\n", PREC.ToString().c_str());
       MessageInterface::ShowMessage("NUT = %s\n", NUT.ToString().c_str());
-      MessageInterface::ShowMessage("STderiv = %s\n", STderiv.ToString().c_str());
+      MessageInterface::ShowMessage("ST = %s\n", ST.ToString().c_str());
       MessageInterface::ShowMessage("PM = %s\n", PM.ToString().c_str());
+	  MessageInterface::ShowMessage("STderiv = %s\n", STderiv.ToString().c_str());
    #endif
 
       Real np[3][3], rot[3][3], tmp[3][3];
