@@ -124,6 +124,8 @@ public:
    void               SetEpoch(Real toEpoch); // A1Mjd time
    void               NeedsReinitialization();
 
+   virtual void       SetOwningSpacecraft(GmatBase *theSC);
+
    virtual bool       SetReferenceCoordinateSystemName(
                          const std::string &refName);
    /// Method to get the Euler sequence list (as strings)
@@ -319,6 +321,9 @@ protected:
    
    /// initial user-supplied epoch as an A1Mjd time (as Real)
    Real                  epoch;
+
+   // pointer to the owning spacecraft
+   GmatBase              *owningSC;
     
    /// the reference coordinate system name
    std::string           refCSName;

@@ -1316,6 +1316,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    isInitialized           (false),
    needsReinit             (false),
    epoch                   (0.0),
+   owningSC                (NULL),
    refCSName               ("EarthMJ2000Eq"),
    refCS                   (NULL),
    eulerSequence           ("321"),  // Dunn Changed from 312 to 321
@@ -1363,6 +1364,7 @@ Attitude::Attitude(const Attitude& att) :
    needsReinit             (att.needsReinit),           //  false),
    eulerSequenceList       (att.eulerSequenceList),
    epoch                   (att.epoch),
+   owningSC                (NULL),
    refCSName               (att.refCSName),
    refCS                   (att.refCS),
    eulerSequence           (att.eulerSequence),
@@ -1413,6 +1415,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    needsReinit             = false;
    eulerSequenceList       = att.eulerSequenceList;
    epoch                   = att.epoch;
+   owningSC                = att.owningSC;
    refCSName               = att.refCSName;
    refCS                   = att.refCS;
    eulerSequence           = att.eulerSequence;
@@ -1644,6 +1647,16 @@ void Attitude::NeedsReinitialization()
    needsReinit = true;
 }
 
+void Attitude::SetOwningSpacecraft(GmatBase *theSC)
+{
+   if (theSC->IsOfType("Spacecraft"))
+      owningSC = theSC;
+   else
+   {
+      throw AttitudeException(
+            "ERROR setting the owning spacecraft on attitude\n");
+   }
+}
 
 //---------------------------------------------------------------------------
 //  bool    SetReferenceCoordinateSystemName(

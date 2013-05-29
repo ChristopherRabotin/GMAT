@@ -352,6 +352,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    // Create a default unnamed attitude
    attitude = new CSFixed("");
    attitude->SetEpoch(state.GetEpoch());
+   attitude->SetOwningSpacecraft(this);
    ownedObjectCount++;
 
    #ifdef DEBUG_SC_OWNED_OBJECT
@@ -1767,6 +1768,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          instanceName.c_str());
       #endif
       attitude->SetEpoch(state.GetEpoch());
+      attitude->SetOwningSpacecraft(this);
       #ifdef __USE_SPICE__
          if (attitude->IsOfType("SpiceAttitude"))
             ((SpiceAttitude*) attitude)->SetObjectID(instanceName, naifId, naifIdRefFrame);
@@ -3048,6 +3050,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          #endif
          newAtt->SetEpoch(state.GetEpoch()); // correct? do we want to do this?  for Spinner?
          newAtt->NeedsReinitialization();
+         newAtt->SetOwningSpacecraft(this);
          attitude = newAtt;
          ownedObjectCount++;
          attitudeModel = value;
@@ -4622,6 +4625,7 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       attitude = (Attitude*)(obj->Clone());
       ++ownedObjectCount;
       attitude->SetEpoch(state.GetEpoch());
+      attitude->SetOwningSpacecraft(this);
       isInitialized = false;
    }
 }
@@ -4963,6 +4967,7 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
           attitude, attitude->GetTypeName().c_str());
       #endif
       attitude->SetEpoch(state.GetEpoch());
+      attitude->SetOwningSpacecraft(this);
       ownedObjectCount++;
       #ifdef DEBUG_SC_OWNED_OBJECT
       MessageInterface::ShowMessage
