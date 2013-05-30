@@ -4,19 +4,25 @@
 //------------------------------------------------------------------------------
 #include "Code500EphemerisFile.hpp"
 #include "TimeSystemConverter.hpp"   // For ConvertGregorianToMjd()
+#include "StateConversionUtil.hpp"   // For Convert()
 #include "Rvector6.hpp"
 #include "DateUtil.hpp"              // For friend function UnpackDate(), ToHMSFromSecondsOfDay
 #include "RealUtilities.hpp"         // For IsEqual()
 #include "GregorianDate.hpp"         // For GregorianDate()
 #include "GmatConstants.hpp"         // For GmatTimeConstants::A1_TAI_OFFSET
+#include "UtilityException.hpp"      // for UtilityException
 #include "MessageInterface.hpp"
 
+//#define DEBUG_OPEN
 //#define DEBUG_SET
 //#define DEBUG_READ_DATA
 //#define DEBUG_WRITE_HEADERS
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_WRITE_DATA_SEGMENT_MORE
+//#define DEBUG_WRITE_DATA
 //#define DEBUG_UNPACK_HEADERS
+//#define DEBUG_UNPACK_DATA
+//#define DEBUG_TIME_CONVERSION
 
 // static data
 const double Code500EphemerisFile::DUL_TO_KM         = 10000.0;
@@ -31,48 +37,30 @@ const double Code500EphemerisFile::DUT_TO_SEC        = 864.0;
 //------------------------------------------------------------------------------
 // Code500EphemerisFile(double satId, const std::string &productId, ...)
 //------------------------------------------------------------------------------
-Code500EphemerisFile::Code500EphemerisFile(double satId, const std::string &productId,
-                         const std::string &timeSystem, const std::string &tapeId,
-                         const std::string &sourceId, const std::string &centralBody)
+/**
+ * Constructor
+ *
+ * @param  satId  Spacecraft ID [123.0]
+ * @param  timeSystem  Time system used "UTC" or "A1" ["UTC"]
+ * @param  sourceId  Source ID ["GMAT"]
+ * @param  centralBody  Central body name used ["Earth"]
+ */
+//------------------------------------------------------------------------------
+Code500EphemerisFile::Code500EphemerisFile(double satId, const std::string &timeSystem,
+                          const std::string &sourceId, const std::string &centralBody)
 {
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
-      ("Code500EphemerisFile() entered\n   satId=%f, productId='%s', timeSystem='%s', "
-       "tapeId='%s', sourceId='%s', centralBody='%s'\n", satId, productId.c_str(),
-       timeSystem.c_str(), tapeId.c_str(), sourceId.c_str(), centralBody.c_str());
+      ("Code500EphemerisFile() entered\n   satId=%f, timeSystem='%s', sourceId='%s', "
+       "centralBody='%s'\n", satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
    #endif
    
    mSatId = satId;
-   CopyString(mProductId, productId, 8);
    mTimeSystem = timeSystem;
-   // Time System Indicator: 0.0 = A.1, Atomic Time, 1.0 = UTC, Universal Time Coordinated
-   mInTimeSystemIndicator = 0.0;
-   mOutTimeSystemIndicator = 0.0;
-   if (mTimeSystem == "A1")
-      mOutTimeSystemIndicator = 1.0;
-   else if (mTimeSystem == "UTC")
-      mOutTimeSystemIndicator = 2.0;
-   mCoordSystem = "2000";
-   CopyString(mTapeId, tapeId, 8);
-   CopyString(mSourceId, sourceId, 8);
+   mSourceId = sourceId;
    mCentralBody = centralBody;
-   mDataRecWriteCounter = 2; // data record starts at 3
-   mLastDataRecRead = 2;
-   mLastStateIndexRead = -1;
    
-   mSentinelData = 9.99999999999999e15;
-   mSentinelsFound = false;
-   mA1GregorianOfDUTRef = "18 Sep 1957 00:00:00.000";
-   mRefTimeForDUT_YYMMDD = 570918.0;
-   mA1MjdOfDUTRef = TimeConverterUtil::ConvertGregorianToMjd(mA1GregorianOfDUTRef);
-   mTimeIntervalBetweenPointsSecs = 0.0;
-   
-   mSwapEndian = false;
-   
-   // Fill in some header and data record with initial values
-   InitializeHeader1();
-   InitializeHeader2();
-   InitializeDataRecord();
+   Initialize();
    
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -82,6 +70,7 @@ Code500EphemerisFile::Code500EphemerisFile(double satId, const std::string &prod
        mSentinelData);
    #endif
 }
+
 
 //------------------------------------------------------------------------------
 // ~Code500EphemerisFile()
@@ -104,6 +93,12 @@ Code500EphemerisFile::~Code500EphemerisFile()
 //------------------------------------------------------------------------------
 Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef) 
 {
+   mSatId = ef.mSatId;
+   mTimeSystem = ef.mTimeSystem;
+   mSourceId = ef.mSourceId;
+   mCentralBody = ef.mCentralBody;
+   
+   Initialize();
 }
 
 
@@ -112,8 +107,72 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
 //------------------------------------------------------------------------------
 Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile& ef)
 {
-   //if (this == &ef)
+   if (this == &ef)
+   {
       return *this;
+   }
+   else
+   {
+      mSatId = ef.mSatId;
+      mTimeSystem = ef.mTimeSystem;
+      mSourceId = ef.mSourceId;
+      mCentralBody = ef.mCentralBody;
+      
+      Initialize();
+      return *this;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void Initialize()
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::Initialize()
+{
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() entered\n");
+   #endif
+   
+   mProductId = "EPHEM   ";
+   mCoordSystem = "2000";
+   mTapeId = "STANDARD";
+   
+   // Time System Indicator: 0.0 = A.1, Atomic Time, 1.0 = UTC, Universal Time Coordinated
+   mInputTimeSystem = 0.0;
+   mOutputTimeSystem = 0.0;
+   if (mTimeSystem == "A1")
+      mOutputTimeSystem = 1.0;
+   else if (mTimeSystem == "UTC")
+      mOutputTimeSystem = 2.0;
+   
+   mDataRecWriteCounter = 2; // data record starts at 3
+   mLastDataRecRead = 2;
+   mLastStateIndexRead = -1;
+   
+   mSentinelData = 9.99999999999999e15;
+   mSentinelsFound = false;
+   mGregorianOfDUTRef = "18 Sep 1957 00:00:00.000";
+   mRefTimeForDUT_YYMMDD = 570918.0;
+   mMjdOfDUTRef = TimeConverterUtil::ConvertGregorianToMjd(mGregorianOfDUTRef);
+   mTimeIntervalBetweenPointsSecs = 0.0;
+   mLeapSecsStartOutput = 0.0;
+   mLeapSecsEndOutput = 0.0;
+   mLeapSecsInput = 0.0;
+   
+   //mCentralBodyMu = 0.0;
+   //@todo Add GetOriginMu() to Spacecraft to get central body mu to
+   // do cartesian to keplerian state conversion
+   mCentralBodyMu = 398600.4415; // Set to earth mu for now for testing
+   mSwapEndian = false;
+   
+   // Fill in some header and data record with initial values
+   InitializeHeaderRecord1();
+   InitializeHeaderRecord2();
+   InitializeDataRecord();
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving\n");
+   #endif
 }
 
 
@@ -126,24 +185,26 @@ bool Code500EphemerisFile::OpenForRead(const std::string &fileName)
    MessageInterface::ShowMessage("OpenForRead() entered, fileName='%s'\n", fileName.c_str());
    #endif
    
-   // If input file is already open close it first
-   // CloseForRead();
+   // If input file is already open close it first, since different file can be opened
+   CloseForRead();
    
-   mEphemFileIn.open(fileName.c_str(), std::ios_base::binary | std::ios_base::ate);
+   mEphemFileIn.open(fileName.c_str(), std::ios_base::binary);
+   
    if (!mEphemFileIn.is_open())
-   {
-      #ifdef DEBUG_OPEN
-      MessageInterface::ShowMessage
-         ("OpenForRead() just returning, cannot open ephemfile '%s'\n",
-          fileName.c_str());
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
+      throw UtilityException("Cannot open ephemeris file \"" + fileName + "\" for reading");
    
+   #ifdef DEBUG_OPEN
    std::streampos fsize = mEphemFileIn.tellg();
+   mEphemFileIn.seekg(0, std::ios::end);
+   fsize = mEphemFileIn.tellg() - fsize;
+   mEphemFileIn.seekg(std::ios_base::beg);
+   MessageInterface::ShowMessage("OpenForRead() returning true, fsize=%d\n", fsize);
+   #endif
    
+   #ifdef DEBUG_OPEN
+   MessageInterface::ShowMessage
+      ("OpenForRead() returning true, ephemeris file successfully opened for reading\n");
+   #endif
    return true;
 }
 
@@ -159,18 +220,14 @@ bool Code500EphemerisFile::OpenForWrite(const std::string &fileName)
    #endif
    
    mEphemFileOut.open(fileName.c_str(), std::ios_base::binary);
-   if (!mEphemFileOut.is_open())
-   {
-      #ifdef DEBUG_OPEN
-      MessageInterface::ShowMessage
-         ("OpenForWrite() just returning, cannot open ephemfile '%s'\n",
-          fileName.c_str());
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
    
+   if (!mEphemFileOut.is_open())
+      throw UtilityException("Cannot open ephemeris file \"" + fileName + "\" for writing");
+   
+   #ifdef DEBUG_OPEN
+   MessageInterface::ShowMessage
+      ("OpenForWrite() returning true, ephemeris file successfully opened for writing\n");
+   #endif
    return true;
 }
 
@@ -229,7 +286,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    mEphemFileIn.read((char*)(&mEphemHeader1), RECORD_SIZE);
    
    // Save infile time system used
-   mInTimeSystemIndicator = mEphemHeader1.timeSystemIndicator;
+   mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
    
    if (logOption == 1)
       UnpackHeader1();
@@ -441,8 +498,16 @@ bool Code500EphemerisFile::FinalizeHeaders()
    
    // Write final header 1 record
    WriteHeader1();
+   mEphemFileOut.flush();
    
-   #ifdef DEBUG_HEADERS
+   #ifdef DEBUG_WRITE_HEADERS
+   MessageInterface::ShowMessage
+      ("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD);
+   MessageInterface::ShowMessage
+      ("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT);
+   #endif
+   
+   #ifdef DEBUG_WRITE_HEADERS
    MessageInterface::ShowMessage("Code500EphemerisFile::FinalizeHeaders() returning true\n");
    #endif
    return true;
@@ -555,25 +620,28 @@ bool Code500EphemerisFile::WriteDataAt(int recNumber)
 
 
 //------------------------------------------------------------------------------
-// bool WriteDataSegment(const A1Mjd &start, const A1Mjd &end,
-//                       const StateArray &stateArray, const EpochArray &epochArray,
+// bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray, 
 //                       bool canFinalize = false)
 //------------------------------------------------------------------------------
-bool Code500EphemerisFile::WriteDataSegment(const A1Mjd &start, const A1Mjd &end,
-                           const StateArray &stateArray, const EpochArray &epochArray,
-                           bool canFinalize)
+/**
+ * Handles writing state vector to data record.
+ *
+ * @param  epochArray  Array of epoch pointer
+ * @param  stateArray  Array of state vector pointer
+ *
+ * @note It assumes the maximum number of state vector receiving is NUM_STATES_PER_RECORD (50).
+ */
+//------------------------------------------------------------------------------
+bool Code500EphemerisFile::WriteDataSegment(const EpochArray &epochArray,
+                                            const StateArray &stateArray, 
+                                            bool canFinalize)
 {
-   std::string startGreg = ToA1Gregorian(start);
-   std::string endGreg = ToA1Gregorian(end);
    Integer numPoints = stateArray.size();
-
    #ifdef DEBUG_WRITE_DATA_SEGMENT
    MessageInterface::ShowMessage
-      ("==================================================\nCode500EphemerisFile::WriteDataSegment() entered, "
-       "start=%f '%s', end=%f '%s'\n", start.GetReal(), startGreg.c_str(), end.GetReal(), endGreg.c_str());
-   MessageInterface::ShowMessage
-      ("stateArray.size()=%d, epochArray.size()=%d, canFinalize=%d\n", stateArray.size(), epochArray.size(),
-       canFinalize);
+      ("============================================================\n"
+       "Code500EphemerisFile::WriteDataSegment() entered, numPoints=%d, canFinalize=%d\n",
+       numPoints, canFinalize);
    #endif
    
    if (numPoints == 0)
@@ -584,112 +652,69 @@ bool Code500EphemerisFile::WriteDataSegment(const A1Mjd &start, const A1Mjd &end
       #endif
       return true;
    }
-   
-   // Write data record
-   mDataRecWriteCounter++;
-   
-   #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage("mDataRecWriteCounter=%d\n", mDataRecWriteCounter);
-   #endif
-   
-   // Set start date of ephemeris if first data record
-   // Header1 = record1,  Header2 = record2,  Data1 = record3
-   if (mDataRecWriteCounter == 3)
+   else if (numPoints > NUM_STATES_PER_RECORD)
    {
-      SetEphemerisStartTime(start);
-      // Write initial headers
-      WriteHeader1();
-      WriteHeader2();
+      UtilityException ue;
+      ue.SetDetails("Code500EphemerisFile::WriteDataSegment() received too many state vector: %d, "
+                    "The maximum it can handle is 50\n", numPoints);
+      throw ue;
    }
-   
-   if (canFinalize)
-      SetEphemerisEndTime(end);
-   
-   mEphemData.dateOfFirstEphemPoint_YYYMMDD = ToYYYMMDD(start);
-   mEphemData.dayOfYearForFirstEphemPoint = ToDayOfYear(start);
-   mEphemData.secsOfDayForFirstEphemPoint = ToSecondsOfDay(start);
-   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
-   
-   // Write first state vector
-   double stateDULT[6];
-   ConvertStateKmSecToDULT(stateArray[0], stateDULT);
-   #ifdef DEBUG_WRITE_DATA_SEGMENT
-   DebugWriteState(stateArray[0], stateDULT, 2);
-   #endif
-   mEphemData.firstStateVector_DULT[0] = stateDULT[0];
-   mEphemData.firstStateVector_DULT[1] = stateDULT[1];
-   mEphemData.firstStateVector_DULT[2] = stateDULT[2];
-   mEphemData.firstStateVector_DULT[3] = stateDULT[3];
-   mEphemData.firstStateVector_DULT[4] = stateDULT[4];
-   mEphemData.firstStateVector_DULT[5] = stateDULT[5];
-   
-   #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage
-      ("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0]);
-   #endif
-   
-   // Write state 2 through numPoints
-   for (int i = 1; i < numPoints; i++)
+
+   // For multiple segments, end epoch of previous segment may be the same as
+   // beginning epoch of new segmnet, so check for duplicate epoch and use the
+   // state of new epoch since any maneuver or some spacecraft property update
+   // may happened.
+   if (!mA1MjdArray.empty())
    {
-      ConvertStateKmSecToDULT(stateArray[i], stateDULT);
-      for (int j = 0; j < 6; j++)
-         mEphemData.stateVector2Thru50_DULT[i][j] = stateDULT[j];
-      
-      #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
-      MessageInterface::ShowMessage
-         ("mEphemData.stateVector2Thru50_DULT[%2d][0]=% 1.15e\n", i, mEphemData.stateVector2Thru50_DULT[i][0]);
-      #endif
-   }
-   
-   // If data points received is less than NUM_STATES_PER_RECORD, write sentinel flag
-   if (numPoints < NUM_STATES_PER_RECORD)
-   {
-      #ifdef DEBUG_WRITE_DATA_SEGMENT
-      MessageInterface::ShowMessage
-         ("===> Writing %d sentinel data\n", NUM_STATES_PER_RECORD-numPoints);
-      #endif
-      
-      for (int i = numPoints + 1; i < NUM_STATES_PER_RECORD; i++)
+      A1Mjd *end = mA1MjdArray.back();
+      A1Mjd *newStart = epochArray.front();
+      if (end->GetReal() == newStart->GetReal())
       {
-         for (int j = 0; j < 6; j++)
-            mEphemData.stateVector2Thru50_DULT[i][j] = mSentinelData;
-         
-         #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
+         #ifdef DEBUG_WRITE_DATA_SEGMENT
          MessageInterface::ShowMessage
-            ("mEphemData.stateVector2Thru50_DULT[%2d][0]=% 1.15e\n", i,
-             mEphemData.stateVector2Thru50_DULT[i][0]);
+            ("Duplicate epoch found, so removing end dadta, end=%f, newStart=%f\n",
+             end->GetReal(), newStart->GetReal());
          #endif
+         
+         // Remove the last dadta
+         mA1MjdArray.pop_back();
+         mStateArray.pop_back();
       }
    }
    
-   // Write time of first data point and time interval in DUT
-   double timeInDUT = ToDUT(start);
-   mEphemData.timeOfFirstDataPoint_DUT = timeInDUT;
-   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
-   mEphemData.timeIntervalBetweenPoints_DUT = mTimeIntervalBetweenPointsSecs * SEC_TO_DUT;
-   
-   // Write data record
-   WriteDataAt(mDataRecWriteCounter);
-   
-   // If last data record contains NUM_STATES_PER_RECORD valid states and writing
-   // final data, write next record with 10 sentinels.
-   if (numPoints == NUM_STATES_PER_RECORD && canFinalize)
+   // Fill the buffer
+   for (int i = 0; i < numPoints; i++)
    {
-      #ifdef DEBUG_WRITE_DATA_SEGMENT
-      MessageInterface::ShowMessage
-         ("   Writing last data record with first 10 sentinel data\n");
-      #endif
-      mEphemData.dateOfFirstEphemPoint_YYYMMDD = mSentinelData;
-      mEphemData.dayOfYearForFirstEphemPoint = mSentinelData;
-      mEphemData.secsOfDayForFirstEphemPoint = mSentinelData;
-      mEphemData.timeIntervalBetweenPoints_SEC = mSentinelData;
+      // Push cloned epoch and state since epoch and state POINTER array is cleared in
+      // the EphemerisFile
+      mA1MjdArray.push_back(epochArray[i]->Clone());
+      mStateArray.push_back(stateArray[i]->Clone());
       
-      for (int j = 0; j < 6; j++)
-         mEphemData.firstStateVector_DULT[j] = mSentinelData;
+      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      MessageInterface::ShowMessage("i=%2d, mA1MjdArray.size()=%2d\n", i, mA1MjdArray.size());
+      #endif
+      // If buffer is full, write data
+      if ((int)mA1MjdArray.size() == NUM_STATES_PER_RECORD)
+      {
+         // Write data record and clear buffer
+         bool isEndOfData = false;
+         if (canFinalize && i == numPoints - 1)
+            isEndOfData = true;
+         WriteDataRecord(isEndOfData);
+         ClearBuffer();
+      }
+   }
+   
+   // If final data segment received, write data
+   if (canFinalize)
+   {
+      WriteDataRecord(canFinalize);
+      ClearBuffer();
    }
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage("Code500EphemerisFile::WriteDataSegment() leavng\n");
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::WriteDataSegment() leavng, mA1MjdArray.size()=%d\n", mA1MjdArray.size());
    #endif
    return true;
 }
@@ -698,13 +723,14 @@ bool Code500EphemerisFile::WriteDataSegment(const A1Mjd &start, const A1Mjd &end
 // protected methods
 //---------------------------------
 
+
 //------------------------------------------------------------------------------
-// void PpackHeader1Info()
+// void InitializeHeaderRecord1()
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::InitializeHeader1()
+void Code500EphemerisFile::InitializeHeaderRecord1()
 {
    #ifdef DEBUG_HEADRES
-   MessageInterface::ShowMessage("InitializeHeader1() entered\n");
+   MessageInterface::ShowMessage("InitializeHeaderRecord1() entered\n");
    #endif
    
    // Initialize all character arrays
@@ -727,7 +753,7 @@ void Code500EphemerisFile::InitializeHeader1()
    mEphemHeader1.satId = mSatId;
    CopyString(mEphemHeader1.tapeId, mTapeId, 8);
    CopyString(mEphemHeader1.sourceId, mSourceId, 8);
-   mEphemHeader1.timeSystemIndicator = mOutTimeSystemIndicator;
+   mEphemHeader1.timeSystemIndicator = mOutputTimeSystem;
    mEphemHeader1.refTimeForDUT_YYMMDD = mRefTimeForDUT_YYMMDD;
    CopyString(mEphemHeader1.coordSystemIndicator1, mCoordSystem, 4); // "2000" for J2000
    mEphemHeader1.coordSystemIndicator2 = 4; // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
@@ -746,26 +772,59 @@ void Code500EphemerisFile::InitializeHeader1()
    str = "COWELL  ";
    CopyString(mEphemHeader1.orbitTheory, str, 8);
    
+   // Set leap second info
+   mEphemHeader1.leapSecondIndicator = 1; // 1 = no leap sec occurrs, 2 = leap second occurrs
+   mEphemHeader1.dateOfLeapSeconds_YYYMMDD = 0.0;
+   mEphemHeader1.timeOfLeapSeconds_HHMMSS = 0.0;
+   mEphemHeader1.utcTimeAdjustment_SEC = 0.0;
+   
    #ifdef DEBUG_HEADRES   
-   MessageInterface::ShowMessage("InitializeHeader1() leaving\n");
+   MessageInterface::ShowMessage("InitializeHeaderRecord1() leaving\n");
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void InitializeHeader2()
+// void InitializeHeaderRecord2()
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::InitializeHeader2()
+void Code500EphemerisFile::InitializeHeaderRecord2()
 {
    #ifdef DEBUG_HEADRES
-   MessageInterface::ShowMessage("InitializeHeader2() entered\n");
+   MessageInterface::ShowMessage("InitializeHeaderRecord2() entered\n");
    #endif
    
    BlankOut(mEphemHeader2.harmonicsWithTitles2, RECORD_SIZE);
    
    #ifdef DEBUG_HEADRES
-   MessageInterface::ShowMessage("InitializeHeader2() leaving\n");
+   MessageInterface::ShowMessage("InitializeHeaderRecord2() leaving\n");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void InitializeDataRecord()
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::InitializeDataRecord()
+{
+   // Set to no thrust
+   mEphemData.thrustIndicator = 0.0;
+   
+   // Set all states to sentinels
+   mEphemData.firstStateVector_DULT[0] = mSentinelData;
+   mEphemData.firstStateVector_DULT[1] = mSentinelData;
+   mEphemData.firstStateVector_DULT[2] = mSentinelData;
+   mEphemData.firstStateVector_DULT[3] = mSentinelData;
+   mEphemData.firstStateVector_DULT[4] = mSentinelData;
+   mEphemData.firstStateVector_DULT[5] = mSentinelData;
+   
+   for (int i = 0; i < NUM_STATES_PER_RECORD - 1; i++)
+   {
+      for (int j = 0; j < 6; j++)
+         mEphemData.stateVector2Thru50_DULT[i-1][j] = mSentinelData;
+   }
+   
+   // Blank out spares
+   BlankOut(mEphemData.spares1, 344);
 }
 
 
@@ -783,16 +842,32 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
       ("Code500EphemerisFile::SetEphemerisStartTime() entered, a1Mjd=%f\n", a1Mjd.GetReal());
    #endif
    
-   double yyymmdd, hhmmss;
-   ToYYYMMDDHHMMSS(a1Mjd, yyymmdd, hhmmss);
+   double startMjd = 0.0;
+   if (mOutputTimeSystem == 1) // A1 time system
+      startMjd = a1Mjd.GetReal();
+   else  // UTC time system
+      startMjd = ToUtcModJulian(a1Mjd);
    
-   double doy = ToDayOfYear(a1Mjd);
-   double secsOfDay = ToSecondsOfDay(a1Mjd);
+   mLeapSecsStartOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(startMjd);
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage("mLeapSecsStartOutput = %f\n", mLeapSecsStartOutput);
+   #endif
+   
+   double yyymmdd, hhmmss;
+   ToYYYMMDDHHMMSS(startMjd, yyymmdd, hhmmss);
+   
+   double doy = ToDayOfYear(startMjd);
+   double secsOfDay = ToSecondsOfDay(startMjd);
+   
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("yyymmdd=%f, hhmmss=%f, doy=%f, secsOfDay=%f\n", yyymmdd, hhmmss, doy, secsOfDay);
+   #endif
    
    mEphemHeader1.startDateOfEphem_YYYMMDD = yyymmdd;
    mEphemHeader1.startDayCountOfYear = doy;
    mEphemHeader1.startSecondsOfDay = secsOfDay;
-   double startDut = ToDUT(a1Mjd);
+   double startDut = ToDUT(startMjd);
    mEphemHeader1.startTimeOfEphemeris_DUT = startDut;
    
    // Should I set initiation time to start time of ephemeris?
@@ -800,9 +875,11 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS = hhmmss;
    
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage
-      ("Code500EphemerisFile::SetEphemerisStartTime() leaving, "
-       "mEphemHeader1.startTimeOfEphemeris_DUT=%f\n", startDut);
+   std::string ymdhms = ToYearMonthDayHourMinSec
+      (mEphemHeader1.startDateOfEphem_YYYMMDD, mEphemHeader1.startSecondsOfDay);
+   MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss = %s\n", ymdhms.c_str());
+   MessageInterface::ShowMessage("mEphemHeader1.startTimeOfEphemeris_DUT = %f\n", startDut);
+   MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisStartTime() leaving\n");
    #endif
 }
 
@@ -821,19 +898,42 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
       ("Code500EphemerisFile::SetEphemerisEndTime() entered, a1Mjd=%f\n", a1Mjd.GetReal());
    #endif
    
-   double yyymmdd = ToYYYMMDD(a1Mjd);
-   double doy = ToDayOfYear(a1Mjd);
-   double secsOfDay = ToSecondsOfDay(a1Mjd);
+   double endMjd = 0.0;
+   if (mOutputTimeSystem == 1) // A1 time system
+      endMjd = a1Mjd.GetReal();
+   else  // UTC time system
+      endMjd = ToUtcModJulian(a1Mjd);
+   
+   // Leap seconds info
+   mLeapSecsEndOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(endMjd);
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage("mLeapSecsEndOutput = %f\n", mLeapSecsEndOutput);
+   #endif
+   
+   if ((mLeapSecsEndOutput - mLeapSecsStartOutput) > 0)
+   {
+      mEphemHeader1.leapSecondIndicator = 1;
+      mEphemHeader1.utcTimeAdjustment_SEC = mLeapSecsEndOutput - mLeapSecsStartOutput;
+      // @todo Compute time of leap second occurrs using LeapSecsFileReader
+   }
+   
+   double yyymmdd = ToYYYMMDD(endMjd);
+   double doy = ToDayOfYear(endMjd);
+   double secsOfDay = ToSecondsOfDay(endMjd);
    
    mEphemHeader1.endDateOfEphem_YYYMMDD = yyymmdd;
    mEphemHeader1.endDayCountOfYear = doy;
    mEphemHeader1.endSecondsOfDay = secsOfDay;
-   double endDut = ToDUT(a1Mjd);
+   double endDut = ToDUT(endMjd);
    mEphemHeader1.endTimeOfEphemeris_DUT = endDut;
    
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage
-      ("Code500EphemerisFile::SetEphemerisEndTime() leaving, mEphemHeader1.endTimeOfEphemeris_DUT=%f\n", endDut);
+   std::string ymdhms = ToYearMonthDayHourMinSec
+      (mEphemHeader1.endDateOfEphem_YYYMMDD, mEphemHeader1.endSecondsOfDay);
+   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
+   MessageInterface::ShowMessage("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD);
+   MessageInterface::ShowMessage("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT);
+   MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisEndTime() leaving\n");
    #endif
 }
 
@@ -876,6 +976,15 @@ void Code500EphemerisFile::SetTimeIntervalBetweenPoints(double secs)
 
 
 //------------------------------------------------------------------------------
+// void SetCentralBodyMu(double mu)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::SetCentralBodyMu(double mu)
+{
+   mCentralBodyMu = mu;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetInitialEpoch(const A1Mjd &a1Mjd)
 //------------------------------------------------------------------------------
 void Code500EphemerisFile::SetInitialEpoch(const A1Mjd &a1Mjd)
@@ -885,8 +994,22 @@ void Code500EphemerisFile::SetInitialEpoch(const A1Mjd &a1Mjd)
       ("SetInitialEpoch() entered, a1Mjd=%f\n", a1Mjd.GetReal());
    #endif
    
-   A1Mjd tempA1Mjd = a1Mjd;
-   double epochDUT = ToDUT(a1Mjd);
+   std::string initialGreg;
+   double initialMjd;
+   
+   if (mOutputTimeSystem == 1) // A1 time system
+   {
+      initialGreg = ToA1Gregorian(a1Mjd);
+      initialMjd = a1Mjd.GetReal();
+   }
+   else  // UTC time system
+   {
+      initialGreg = ToUtcGregorian(a1Mjd);
+      initialMjd = ToUtcModJulian(a1Mjd);
+   }
+   
+   A1Mjd tempA1Mjd = initialMjd;
+   double epochDUT = ToDUT(initialMjd);
    Real year, month, day, hour, min, sec;
    A1Date a1Date = tempA1Mjd.ToA1Date();
    a1Date.ToYearMonthDayHourMinSec(year, month, day, hour, min, sec);
@@ -903,6 +1026,20 @@ void Code500EphemerisFile::SetInitialEpoch(const A1Mjd &a1Mjd)
    MessageInterface::ShowMessage
       ("SetInitialEpoch() leaving, epochDUT=%f\n", epochDUT);
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInitialState(Rvector6 *kmsec)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::SetInitialState(Rvector6 *kmsec)
+{
+   Rvector6 cartState = *kmsec;
+   SetInitialCartesianState(cartState);
+   
+   Rvector6 kepState =
+      StateConversionUtil::Convert(mCentralBodyMu, cartState, "Cartesian", "Keplerian", "TA");
+   SetInitialKeplerianState(kepState);
 }
 
 
@@ -960,14 +1097,192 @@ void Code500EphemerisFile::SetInitialKeplerianState(const Rvector6 &kepState)
 
 
 //------------------------------------------------------------------------------
-// void InitializeDataRecord()
+// void WriteDataRecord(bool canFinalize)
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::InitializeDataRecord()
+void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
 {
-   // Set to no thrust
-   mEphemData.thrustIndicator = 0.0;
-   // Blank out spares
-   BlankOut(mEphemData.spares1, 344);
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage
+      ("==================================================\n"
+       "Code500EphemerisFile::WriteDataRecord() entered, canFinalize=%d, "
+       "mA1MjdArray.size()=%d, mStateArray.size()=%d\n", canFinalize,
+       mA1MjdArray.size(), mStateArray.size());
+   #endif
+   
+   int numPoints = mA1MjdArray.size();
+   A1Mjd *start = mA1MjdArray.front();
+   A1Mjd *end = mA1MjdArray.back();
+   
+   std::string startGreg;
+   std::string endGreg;
+   double startMjd = 0.0;
+   double endMjd = 0.0;
+   if (mOutputTimeSystem == 1) // A1 time system
+   {
+      startGreg = ToA1Gregorian(*start);
+      endGreg = ToA1Gregorian(*end);
+      startMjd = start->GetReal();
+      endMjd = end->GetReal();
+   }
+   else  // UTC time system
+   {
+      startGreg = ToUtcGregorian(*start);
+      endGreg = ToUtcGregorian(*end);
+      startMjd = ToUtcModJulian(*start);
+      endMjd = ToUtcModJulian(*end);
+   }
+   
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage
+      ("start=%f '%s', end=%f '%s'\n", start->GetReal(), startGreg.c_str(), end->GetReal(), endGreg.c_str());
+   #endif
+   
+   
+   // Write data record
+   mDataRecWriteCounter++;
+   
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("mDataRecWriteCounter=%d\n", mDataRecWriteCounter);
+   #endif
+   
+   // Set start date of ephemeris if first data record
+   // Header1 = record1,  Header2 = record2,  Data1 = record3
+   if (mDataRecWriteCounter == 3)
+   {
+      SetInitialEpoch(*start);
+      SetInitialState(mStateArray[0]);
+      SetEphemerisStartTime(*start);
+      // Write initial headers
+      WriteHeader1();
+      WriteHeader2();
+   }
+   
+   if (canFinalize)
+      SetEphemerisEndTime(*end);
+   
+   mEphemData.dateOfFirstEphemPoint_YYYMMDD = ToYYYMMDD(startMjd);
+   mEphemData.dayOfYearForFirstEphemPoint = ToDayOfYear(startMjd);
+   mEphemData.secsOfDayForFirstEphemPoint = ToSecondsOfDay(startMjd);
+   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
+   
+   // Write first state vector
+   double stateDULT[6];
+   ConvertStateKmSecToDULT(mStateArray[0], stateDULT);
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("----- State vector 1\n");
+   DebugWriteState(mStateArray[0], stateDULT, 2);
+   #endif
+   mEphemData.firstStateVector_DULT[0] = stateDULT[0];
+   mEphemData.firstStateVector_DULT[1] = stateDULT[1];
+   mEphemData.firstStateVector_DULT[2] = stateDULT[2];
+   mEphemData.firstStateVector_DULT[3] = stateDULT[3];
+   mEphemData.firstStateVector_DULT[4] = stateDULT[4];
+   mEphemData.firstStateVector_DULT[5] = stateDULT[5];
+   
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage
+      ("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0]);
+   #endif
+   
+   // Write state 2 through numPoints,
+   // data record state vector index starts from 0 and ends at numPoints - 1
+   for (int i = 1; i < numPoints; i++)
+   {
+      ConvertStateKmSecToDULT(mStateArray[i], stateDULT);      
+      for (int j = 0; j < 6; j++)
+         mEphemData.stateVector2Thru50_DULT[i-1][j] = stateDULT[j];
+      
+      #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
+      MessageInterface::ShowMessage("----- State vector %d\n", i+1);
+      DebugWriteState(mStateArray[i], stateDULT, 2);
+      DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i-1], i-1, 1);
+      #endif
+   }
+   
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("Check if sentinel data needs to be written out\n");
+   #endif
+   // If data points received is less than NUM_STATES_PER_RECORD, write sentinel flag
+   if ((numPoints < NUM_STATES_PER_RECORD) && canFinalize)
+   {
+      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      MessageInterface::ShowMessage
+         ("===> Writing %d sentinel data\n", NUM_STATES_PER_RECORD-numPoints);
+      #endif
+      
+      for (int i = numPoints - 1; i < NUM_STATES_PER_RECORD - 1; i++)
+      {
+         for (int j = 0; j < 6; j++)
+            mEphemData.stateVector2Thru50_DULT[i][j] = mSentinelData;
+         
+         #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
+         DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i], i, 1);
+         #endif
+      }
+   }
+   
+   // Write time of first data point and time interval in DUT
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("Writing time of first data point and time interval\n");
+   #endif
+   double timeInDUT = ToDUT(startMjd);
+   mEphemData.timeOfFirstDataPoint_DUT = timeInDUT;
+   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
+   mEphemData.timeIntervalBetweenPoints_DUT = mTimeIntervalBetweenPointsSecs * SEC_TO_DUT;
+   
+   // Write data record
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("Calling WriteDataAt(%d)\n", mDataRecWriteCounter);
+   #endif
+   WriteDataAt(mDataRecWriteCounter);
+   
+   // If last data record contains NUM_STATES_PER_RECORD valid states and writing
+   // final data, write next record with 10 sentinels.
+   if (numPoints == NUM_STATES_PER_RECORD && canFinalize)
+   {
+      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      MessageInterface::ShowMessage
+         ("   Writing last data record with first 10 sentinel data\n");
+      #endif
+      mEphemData.dateOfFirstEphemPoint_YYYMMDD = mSentinelData;
+      mEphemData.dayOfYearForFirstEphemPoint = mSentinelData;
+      mEphemData.secsOfDayForFirstEphemPoint = mSentinelData;
+      mEphemData.timeIntervalBetweenPoints_SEC = mSentinelData;
+      
+      for (int j = 0; j < 6; j++)
+         mEphemData.firstStateVector_DULT[j] = mSentinelData;
+   }
+   
+   // Flush data to file
+   mEphemFileOut.flush();
+   
+   #ifdef DEBUG_WRITE_DATA_SEGMENT
+   MessageInterface::ShowMessage("Code500EphemerisFile::WriteDataRecord() leavng\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearBuffer()
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::ClearBuffer()
+{
+   #ifdef DEBUG_CLEAR_BUFFER
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::ClearBuffer() entered, mA1MjdArray.size()=%d, "
+       "mStateArray.size()=%d\n", mA1MjdArray.size(), mStateArray.size());
+   #endif
+   
+   EpochArray::iterator ei;
+   for (ei = mA1MjdArray.begin(); ei != mA1MjdArray.end(); ++ei)
+      delete (*ei);
+   
+   StateArray::iterator si;
+   for (si = mStateArray.begin(); si != mStateArray.end(); ++si)
+      delete (*si);
+   
+   mA1MjdArray.clear();
+   mStateArray.clear();
 }
 
 
@@ -982,6 +1297,7 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("productId                           = '%s'\n", str.c_str());   
    MessageInterface::ShowMessage("satId                               = % f\n", mEphemHeader1.satId);
    MessageInterface::ShowMessage("timeSystemIndicator                 = % f\n", mEphemHeader1.timeSystemIndicator);
+   mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
    MessageInterface::ShowMessage("StartDateOfEphem_YYYMMDD            = % f\n", mEphemHeader1.startDateOfEphem_YYYMMDD);
    MessageInterface::ShowMessage("startDayCountOfYear                 = % f\n", mEphemHeader1.startDayCountOfYear);
    MessageInterface::ShowMessage("startSecondsOfDay                   = % f\n", mEphemHeader1.startSecondsOfDay);
@@ -989,6 +1305,11 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("endDayCountOfYear                   = % f\n", mEphemHeader1.endDayCountOfYear);
    MessageInterface::ShowMessage("endSecondsOfDay                     = % f\n", mEphemHeader1.endSecondsOfDay);
    MessageInterface::ShowMessage("stepSize_SEC                        = % f\n", mEphemHeader1.stepSize_SEC);
+   
+   std::string ymdhms = ToYearMonthDayHourMinSec(mEphemHeader1.startDateOfEphem_YYYMMDD, mEphemHeader1.startSecondsOfDay);
+   MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss.             = %s\n", ymdhms.c_str());
+   ymdhms = ToYearMonthDayHourMinSec(mEphemHeader1.endDateOfEphem_YYYMMDD, mEphemHeader1.endSecondsOfDay);
+   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss.               = %s\n", ymdhms.c_str());
    
    std::string tapeIdStr = mEphemHeader1.tapeId;
    std::string sourceIdStr = mEphemHeader1.sourceId;
@@ -1010,10 +1331,10 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("epochTimeOfElements_DAY.            = % f\n", mEphemHeader1.epochTimeOfElements_DUT * DUT_TO_DAY);
    
    double dutTime = mEphemHeader1.epochTimeOfElements_DUT;
-   std::string a1Greg = ToA1Gregorian(dutTime, (int)mInTimeSystemIndicator);
-   MessageInterface::ShowMessage("a1Greg  = '%s'\n", a1Greg.c_str());
-   std::string utcGreg = ToUtcGregorian(dutTime, (int)mInTimeSystemIndicator);
-   MessageInterface::ShowMessage("utcGreg = '%s'\n", utcGreg.c_str());
+   std::string epochA1Greg = ToA1Gregorian(dutTime, false);
+   MessageInterface::ShowMessage("epochA1Greg  = '%s'\n", epochA1Greg.c_str());
+   std::string epochUtcGreg = ToUtcGregorian(dutTime, false);
+   MessageInterface::ShowMessage("epochUtcGreg = '%s'\n", epochUtcGreg.c_str());
    
    MessageInterface::ShowMessage("yearOfEpoch_YYY                     = % f\n", mEphemHeader1.yearOfEpoch_YYY);
    MessageInterface::ShowMessage("monthOfEpoch_MM                     = % f\n", mEphemHeader1.monthOfEpoch_MM);
@@ -1023,27 +1344,27 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("secondsOfEpoch_MILSEC               = % f\n", mEphemHeader1.secondsOfEpoch_MILSEC);
    
    MessageInterface::ShowMessage
-      ("keplerianElementsAtEpoch_RAD[0]     = % f\n", mEphemHeader1.keplerianElementsAtEpoch_RAD[0]);
+      ("keplerianElementsAtEpoch_RAD[0]     = % 1.15e\n", mEphemHeader1.keplerianElementsAtEpoch_RAD[0]);
    for (int i = 1; i < 6; i++)
    {
       MessageInterface::ShowMessage
-         ("keplerianElementsAtEpoch_RAD[%d]     = % f\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i]);
+         ("keplerianElementsAtEpoch_RAD[%d]     = % 1.15e\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i]);
       MessageInterface::ShowMessage
-         ("keplerianElementsAtEpoch_DEG[%d].    = % f\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i] * GmatMathConstants::DEG_PER_RAD);
+         ("keplerianElementsAtEpoch_DEG[%d].    = % 1.15e\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i] * GmatMathConstants::DEG_PER_RAD);
    }
    for (int i = 0; i < 3; i++)
    {
       MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_DULT[%d]    = % f\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+         ("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
       MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_KMSE[%d].   = % f\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_TO_KM);
+         ("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_TO_KM);
    }
    for (int i = 3; i < 6; i++)
    {
       MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_DULT[%d]    = % f\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+         ("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
       MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_KMSE[%d].   = % f\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_DUT_TO_KM_SEC);
+         ("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_DUT_TO_KM_SEC);
    }
    
    MessageInterface::ShowMessage("startTimeOfEphemeris_DUT            = % f\n", mEphemHeader1.startTimeOfEphemeris_DUT);
@@ -1054,6 +1375,7 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("timeIntervalBetweenPoints_SEC.      = % f\n", mEphemHeader1.timeIntervalBetweenPoints_DUT * DUT_TO_SEC);
    MessageInterface::ShowMessage("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD);
    MessageInterface::ShowMessage("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS);
+   MessageInterface::ShowMessage("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC);
    
    MessageInterface::ShowMessage("======================================== End of Header1\n");
 }
@@ -1099,8 +1421,6 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
    {
-      int year, month, day, hour, min;
-      double sec;
       std::string ymdhmsStr =
          ToYearMonthDayHourMinSec(mEphemData.dateOfFirstEphemPoint_YYYMMDD,
                                   mEphemData.secsOfDayForFirstEphemPoint);
@@ -1179,36 +1499,21 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       return;
    }
    
-   // Initially set last state index to 49
-   mLastStateIndexRead = 49;
+   // Initially set last state index to 48, index starts from 0 to 48
+   mLastStateIndexRead = 48;
    
-   // State vector 2 through 50
-   for (int i = 1; i < 50; i++)
+   // State vector 2 through NUM_STATES_PER_RECORD
+   for (int i = 0; i < NUM_STATES_PER_RECORD - 1; i++)
    {
       sentinelCount = 0;
       for (int j = 0; j < 3; j++)
-      {
          sentinels[j] = mEphemData.stateVector2Thru50_DULT[i][j];
-         if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
-         {
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_TO_KM);
-         }
-      }
       
       for (int j = 3; j < 6; j++)
-      {
          sentinels[j] = mEphemData.stateVector2Thru50_DULT[i][j];
-         if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
-         {
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_DUT_TO_KM_SEC);
-         }
-      }
+      
+      if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
+         DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i], i, 6);
       
       #ifdef DEBUG_UNPACK_DATA
       MessageInterface::ShowMessage("Checking for sentinels\n");
@@ -1265,6 +1570,11 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
          break;
       }
    }
+   
+   //#ifdef DEBUG_UNPACK_DATA
+   MessageInterface::ShowMessage("mLastStateIndexRead = %d\n", mLastStateIndexRead);
+   
+   //#endif
    
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
    {
@@ -1365,38 +1675,72 @@ void Code500EphemerisFile::ToYearMonthDay(double yyymmdd, int &year, int &month,
 
 
 //------------------------------------------------------------------------------
-// void ToYYYMMDDHHMMSS(const A1Mjd &a1Mjd, double &ymd, double &hms)
+// void ToYYYMMDDHHMMSS(double mjd, double &ymd, double &hms)
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::ToYYYMMDDHHMMSS(const A1Mjd &a1Mjd, double &ymd, double &hms)
+void Code500EphemerisFile::ToYYYMMDDHHMMSS(double mjd, double &ymd, double &hms)
 {
-   A1Mjd tempA1Mjd = a1Mjd;
+   A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
    a1Date.ToYearMonthDayHourMinSec(ymd, hms);
+   // Since ymd is in yyyymmdd, subtract 19000000
+   ymd = ymd - 19000000.0;
 }
 
 
 //------------------------------------------------------------------------------
-// double ToDUT(const A1Mjd &a1Mjd)
+// double ToDUT(double mjd)
 //------------------------------------------------------------------------------
-double Code500EphemerisFile::ToDUT(const A1Mjd &a1Mjd)
+double Code500EphemerisFile::ToDUT(double mjd)
 {
-   double a1mjdReal = a1Mjd.GetReal();
-   double dut = (a1mjdReal - mA1MjdOfDUTRef) * DAY_TO_DUT;
+   double dut = (mjd - mMjdOfDUTRef) * DAY_TO_DUT;
    return dut;
 }
 
 
 //------------------------------------------------------------------------------
-// double ToYYYMMDD(const A1Mjd &a1Mjd)
+// double ToUtcModJulian(const A1Mjd &a1Mjd)
 //------------------------------------------------------------------------------
-double Code500EphemerisFile::ToYYYMMDD(const A1Mjd &a1Mjd)
+double Code500EphemerisFile::ToUtcModJulian(const A1Mjd &a1Mjd)
 {
    #ifdef DEBUG_TIME_CONVERSION
-   MessageInterface::ShowMessage
-      ("ToYYYMMDD() entered, a1Mjd.GetReal()=% f\n", a1Mjd.GetReal());
+   MessageInterface::ShowMessage("ToUtcModJulian() entered, a1Mjd=%f\n", a1Mjd.GetReal());
    #endif
    
-   A1Mjd tempA1Mjd = a1Mjd;
+   Real a1MjdReal = a1Mjd.GetReal();
+   
+   //std::string epochStr;
+   //Integer format = 1;
+   // Need to apply leap seconds, so use TimeConverterUtil
+   // Convert current epoch to specified format
+   //TimeConverterUtil::Convert("A1ModJulian", mjd, "", "UTCModJulian",
+   //                           utcMjd, epochStr, format);
+   
+   Real utcMjd = TimeConverterUtil::Convert(a1MjdReal, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+   
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage("ToUtcModJulian() returning utcMjd=%f\n", utcMjd);
+   #endif
+   return utcMjd;
+}
+
+
+//------------------------------------------------------------------------------
+// double ToYYYMMDD(double mjd)
+//------------------------------------------------------------------------------
+/**
+ * Converts mod julian days to YYYMMDD format. Assuming input mjd has
+ * leap seconds already applied for UTC time system.
+ *
+ * @param  mjd  Modified julian days in A1 or UTC, or other time system
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::ToYYYMMDD(double mjd)
+{
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage("ToYYYMMDD() entered, mjd=% f\n", mjd);
+   #endif
+   
+   A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
    double yyymmdd = a1Date.ToPackedYYYMMDD();
    
@@ -1409,38 +1753,50 @@ double Code500EphemerisFile::ToYYYMMDD(const A1Mjd &a1Mjd)
 
 
 //------------------------------------------------------------------------------
-// double ToHHMMSS(const A1Mjd &a1Mjd)
+// double ToHHMMSS(double mjd)
 //------------------------------------------------------------------------------
-double Code500EphemerisFile::ToHHMMSS(const A1Mjd &a1Mjd)
+/**
+ * Converts mod julian days to HHMMSS.mmm format. Assuming input mjd has
+ * leap seconds already applied for UTC time system.
+ *
+ * @param  mjd  Modified julian days in A1 or UTC, or other time system
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::ToHHMMSS(double mjd)
 {
    #ifdef DEBUG_TIME_CONVERSION
-   MessageInterface::ShowMessage
-      ("ToHHMMSS() entered, a1Mjd.GetReal()=% f\n", a1Mjd.GetReal());
+   MessageInterface::ShowMessage("ToHHMMSS() entered, mjd=f\n", mjd);
    #endif
    
-   A1Mjd tempA1Mjd = a1Mjd;
+   A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
-   double yyymmdd = a1Date.ToPackedHHMMSS();
+   double hhmmss = a1Date.ToPackedHHMMSS();
    
    #ifdef DEBUG_TIME_CONVERSION
-   MessageInterface::ShowMessage("ToHHMMSS() returning % f\n", yyymmdd);
+   MessageInterface::ShowMessage("ToHHMMSS() returning % f\n", hhmmss);
    #endif
    
-   return yyymmdd;
+   return hhmmss;
 }
 
 
 //------------------------------------------------------------------------------
-// double ToDayOfYear(const A1Mjd &a1Mjd)
+// double ToDayOfYear(double mjd)
 //------------------------------------------------------------------------------
-double Code500EphemerisFile::ToDayOfYear(const A1Mjd &a1Mjd)
+/**
+ * Converts mod julian days to day of year. Assuming input mjd has
+ * leap seconds already applied for UTC time system.
+ *
+ * @param  mjd  Modified julian days in A1 or UTC, or other time system
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::ToDayOfYear(double mjd)
 {
    #ifdef DEBUG_TIME_CONVERSION
-   MessageInterface::ShowMessage
-      ("ToDayOfYear() entered, a1Mjd.GetReal()=% f\n", a1Mjd.GetReal());
+   MessageInterface::ShowMessage("ToDayOfYear() entered, mjd=%f\n", mjd);
    #endif
    
-   A1Mjd tempA1Mjd = a1Mjd;
+   A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
    double doy = a1Date.ToDayOfYear();
    
@@ -1453,16 +1809,22 @@ double Code500EphemerisFile::ToDayOfYear(const A1Mjd &a1Mjd)
 
 
 //------------------------------------------------------------------------------
-// double ToSecondsOfDay(const A1Mjd &a1Mjd)
+// double ToSecondsOfDay(double mjd)
 //------------------------------------------------------------------------------
-double Code500EphemerisFile::ToSecondsOfDay(const A1Mjd &a1Mjd)
+/**
+ * Converts mod julian days to seconds of day part. Assuming input mjd has
+ * leap seconds already applied for UTC time system.
+ *
+ * @param  mjd  Modified julian days in A1 or UTC, or other time system
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::ToSecondsOfDay(double mjd)
 {
    #ifdef DEBUG_TIME_CONVERSION
-   MessageInterface::ShowMessage
-      ("ToSecondsOfDay() entered, a1Mjd.GetReal()=% f\n", a1Mjd.GetReal());
+   MessageInterface::ShowMessage("ToSecondsOfDay() entered, mjd=%f\n", mjd);
    #endif
    
-   A1Mjd tempA1Mjd = a1Mjd;
+   A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
    double secs = a1Date.GetSecondsOfDay();
    
@@ -1475,48 +1837,67 @@ double Code500EphemerisFile::ToSecondsOfDay(const A1Mjd &a1Mjd)
 
 
 //------------------------------------------------------------------------------
-// A1Mjd  ToA1Mjd(double dutTime, int timeSystem = 1)
+// A1Mjd  ToA1Mjd(double dutTime, bool forOutput = true)
 //------------------------------------------------------------------------------
 /**
  *  Converts DUT time in given time system to A1Mjd.
  *
  * @param  dutTime     Input time in DUT unit(centiday)
- * @param  timeSystem  Input time system of input value
- *                     = 1, A.1
- *                     = 2, UTC
+ * @param  forOutput   true if converting for writing
  */
 //------------------------------------------------------------------------------
-A1Mjd Code500EphemerisFile::ToA1Mjd(double dutTime, int timeSystem)
+A1Mjd Code500EphemerisFile::ToA1Mjd(double dutTime, bool forOutput)
 {
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToA1Mjd() entered, dutTime=%f, forOutput=%d, mInputTimeSystem=%f\n",
+       dutTime, forOutput, mInputTimeSystem);
+   #endif
+   
    Real timeOffset = 0.0;
    
-   if (timeSystem == 1)
+   #if 0
+   if (!forOutput && mInputTimeSystem == 2)
       timeOffset = 21.0 / GmatTimeConstants::SECS_PER_DAY;
+   #endif
    
-   double a1mjdReal = (dutTime * DUT_TO_DAY) + mA1MjdOfDUTRef + timeOffset;
-   A1Mjd a1Mjd = A1Mjd(a1mjdReal);
+   double a1MjdReal = (dutTime * DUT_TO_DAY) + mMjdOfDUTRef + timeOffset;
+   A1Mjd a1Mjd = A1Mjd(a1MjdReal);
+   
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToA1Mjd() returning a1Mjd=%f for dutTime=%f\n", a1MjdReal, dutTime);
+   #endif
+   
    return a1Mjd;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToA1Gregorian(double dutTime, int timeSystem = 2)
+// std::string ToA1Gregorian(double dutTime, bool forOutput = true)
 //------------------------------------------------------------------------------
 /**
  * Converts DUT time to A1 Gregorian time system (no leap seconds)
  *
  * @param  dutTime  time in DUT unit (centiday)
- * @param  timeSystem  = 1, A.1
- *                     = 2, UTC
+ * @param  forOutput  true if converting for writing 
  */
 //------------------------------------------------------------------------------
-std::string Code500EphemerisFile::ToA1Gregorian(double dutTime, int timeSystem)
+std::string Code500EphemerisFile::ToA1Gregorian(double dutTime, bool forOutput)
 {
-   // format 1 = "01 Jan 2000 11:59:28.000"
-   //        2 = "2000-01-01T11:59:28.000"
-   //Integer format = 1;
-   A1Mjd tempA1Mjd = ToA1Mjd(dutTime, timeSystem);
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToA1Gregorian() entered, dutTime=%f, forOutput=%d\n", dutTime, forOutput);
+   #endif
+   
+   A1Mjd tempA1Mjd = ToA1Mjd(dutTime, forOutput);
    std::string epochStr = ToA1Gregorian(tempA1Mjd);
+   
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToA1Gregorian() returning '%s' for dutTime=%f\n", epochStr.c_str(), dutTime);
+   #endif
+   
    return epochStr;
 }
 
@@ -1532,7 +1913,7 @@ std::string Code500EphemerisFile::ToA1Gregorian(const A1Mjd &a1Mjd)
 {
    // format 1 = "01 Jan 2000 11:59:28.000"
    //        2 = "2000-01-01T11:59:28.000"
-   #ifdef DEBUG_TIME_SYSTEM
+   #ifdef DEBUG_TIME_CONVERSION
    MessageInterface::ShowMessage("ToA1Gregorian() entered, a1Mjd=%f\n", a1Mjd.GetReal());
    #endif
    Integer format = 1;
@@ -1541,64 +1922,74 @@ std::string Code500EphemerisFile::ToA1Gregorian(const A1Mjd &a1Mjd)
    GregorianDate gregorianDate(&a1Date, format);
    std::string epochStr = gregorianDate.GetDate();
    
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToA1Gregorian() returning '%s' for a1Mjd=%f\n", epochStr.c_str(), a1Mjd.GetReal());
+   #endif
+   
    return epochStr;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToUtcGregorian(double dutTime, int timeSystem = 2)
+// std::string ToUtcGregorian(double dutTime, bool forOutput = true)
 //------------------------------------------------------------------------------
 /**
  * Converts DUT time to UTC Gregorian time system.
  *
  * @param  dutTime  time in DUT unit (centiday)
- * @param  timeSystem  = 1, A.1
- *                     = 2, UTC
+ * @param  forOutput  true if converting for writing
  */
 //------------------------------------------------------------------------------
-std::string Code500EphemerisFile::ToUtcGregorian(double dutTime, int timeSystem)
+std::string Code500EphemerisFile::ToUtcGregorian(double dutTime, bool forOutput)
 {
-   int actualTimeSystem = timeSystem;
-   // if time system is UTC, leap seconds is already applied
-   if (timeSystem == 2)
-      actualTimeSystem = 1;
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToUtcGregorian() entered, dutTime=%f, forOutput=%d\n", dutTime, forOutput);
+   #endif
    
-   A1Mjd tempA1Mjd = ToA1Mjd(dutTime, actualTimeSystem);
-   std::string epochStr = ToUtcGregorian(tempA1Mjd, timeSystem);
+   A1Mjd tempA1Mjd = ToA1Mjd(dutTime, forOutput);
+   std::string epochStr = ToUtcGregorian(tempA1Mjd, forOutput);
+   
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToUtcGregorian() returning '%s' for dutTime=%f\n", epochStr.c_str(), dutTime);
+   #endif
+   
    return epochStr;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToUtcGregorian(const A1Mjd &a1Mjd, int timeSystem = 2)
+// std::string ToUtcGregorian(const A1Mjd &a1Mjd, bool forOutput = true)
 //------------------------------------------------------------------------------
 /**
  * Converts A1 mod julian time to UTC Gregorian time system (with leap seconds)
  *
  * @param  a1Mjd  time in A1 mod julian
- * @param  timeSystem  = 1, A.1
- *                     = 2, UTC
+ * @param  forOutput  true if converting for writing
  */
 //------------------------------------------------------------------------------
-std::string Code500EphemerisFile::ToUtcGregorian(const A1Mjd &a1Mjd, int timeSystem)
+std::string Code500EphemerisFile::ToUtcGregorian(const A1Mjd &a1Mjd, bool forOutput)
 {
-   #ifdef DEBUG_TIME_SYSTEM
-   MessageInterface::ShowMessage("ToUtcGregorian() entered, a1Mjd=%f\n", a1Mjd.GetReal());
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToUtcGregorian() entered, a1Mjd=%f, forOutput=%d\n", a1Mjd.GetReal(), forOutput);
    #endif
    
    // format 1 = "01 Jan 2000 11:59:28.000"
    //        2 = "2000-01-01T11:59:28.000"
    Integer format = 1;
    std::string epochStr;
-   if (timeSystem == 1)
+   if (forOutput)
    {
-      Real toMjd;
+      Real utcMjd;
       Real epochInDays = a1Mjd.GetReal();
       
       // Need to apply leap seconds, so use TimeConverterUtil
       // Convert current epoch to specified format
       TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", "UTCGregorian",
-                                 toMjd, epochStr, format);
+                                 utcMjd, epochStr, format);
       
       if (epochStr == "")
       {
@@ -1615,6 +2006,10 @@ std::string Code500EphemerisFile::ToUtcGregorian(const A1Mjd &a1Mjd, int timeSys
       epochStr = ToA1Gregorian(a1Mjd);
    }
    
+   #ifdef DEBUG_TIME_CONVERSION
+   MessageInterface::ShowMessage
+      ("ToUtcGregorian() returning '%s' for a1Mjd=%f\n", epochStr.c_str(), a1Mjd.GetReal());
+   #endif
    return epochStr;
 }
 
@@ -1777,23 +2172,64 @@ void Code500EphemerisFile::SwapEndian(char *input, int numBytes)
    delete [] temp;
 }
 
+
 //------------------------------------------------------------------------------
-// void DebugWriteState(Rvector6 *stateKmSec, double *stateDULT int option = 1)
+// void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1)
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::DebugWriteState(Rvector6 *stateKmSec, double *stateDULT, int option)
+void Code500EphemerisFile::DebugWriteStateVector(double *stateDULT, int i, int numElem)
+{
+   for (int j = 0; j < 3; j++)
+   {
+      if (numElem < j)
+         break;
+      
+      MessageInterface::ShowMessage
+         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
+      MessageInterface::ShowMessage
+         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_TO_KM);
+   }
+   
+   for (int j = 3; j < 6; j++)
+   {
+      if (numElem < j)
+         break;
+      
+      MessageInterface::ShowMessage
+         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
+      MessageInterface::ShowMessage
+         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_DUT_TO_KM_SEC);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugWriteState(Rvector6 *stateKmSec, double *stateDULT, int option = 1)
+//------------------------------------------------------------------------------
+/**
+ * Write state in km/sec or in DULT.
+ *
+ * @param option 1 = Write only in km/sec
+ *               2 = Write in km/sec and in DUL/DUT
+ *               other = Write only in DUL/DUT
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugWriteState(Rvector6 *stateKmSec,
+                                           double *stateDULT, int option)
 {
    if (option == 1 || option == 2)
    {
       MessageInterface::ShowMessage
-         ("stateKmSec = %g %g %g %g %g %g\n", stateKmSec->Get(0), stateKmSec->Get(1),
-          stateKmSec->Get(2), stateKmSec->Get(3), stateKmSec->Get(4), stateKmSec->Get(5));
+         ("stateKmSec = % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e\n", 
+          stateKmSec->Get(0), stateKmSec->Get(1), stateKmSec->Get(2),
+          stateKmSec->Get(3), stateKmSec->Get(4), stateKmSec->Get(5));
       if (option == 2)
          MessageInterface::ShowMessage
-            ("stateDULT  = %g %g %g %g %g %g\n", stateDULT[0], stateDULT[1],
-             stateDULT[2], stateDULT[3], stateDULT[4], stateDULT[5]);
+            ("stateDULT  = % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e\n",
+             stateDULT[0], stateDULT[1], stateDULT[2], stateDULT[3], stateDULT[4], stateDULT[5]);
    }
    else
       MessageInterface::ShowMessage
-         ("stateDULT  = %g %g %g %g %g %g\n", stateDULT[0], stateDULT[1],
-          stateDULT[2], stateDULT[3], stateDULT[4], stateDULT[5]);
+         ("stateDULT  = % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e % 1.15e\n", 
+          stateDULT[0], stateDULT[1], stateDULT[2], stateDULT[3], stateDULT[4], stateDULT[5]);
 }
+

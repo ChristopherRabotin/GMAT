@@ -64,7 +64,7 @@
 //#define DEBUG_INTERPOLATOR_TRACE
 //#define DBGLVL_EPHEMFILE_DATA 1
 //#define DBGLVL_EPHEMFILE_DATA_LABELS 1
-//#define DBGLVL_EPHEMFILE_MANEUVER 2
+//#define DBGLVL_EPHEMFILE_MANEUVER 1
 //#define DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE 1
 //#define DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE 1
 
@@ -216,7 +216,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    // CCSDS-AEM not allowed in 2010 release (bug 2219)
    //fileFormatList.push_back("CCSDS-AEM");
    fileFormatList.push_back("SPK");
-   fileFormatList.push_back("CODE500-EPHEM");
+   fileFormatList.push_back("Code-500");
    
    epochFormatList.clear();
    epochFormatList.push_back("UTCGregorian");
@@ -561,7 +561,7 @@ void EphemerisFile::ValidateParameters()
       // check for FileFormat and StateType
       if ((fileFormat == "CCSDS-OEM" && stateType == "Quaternion") ||
           (fileFormat == "CCSDS-AEM" && stateType == "Cartesian") ||
-          (fileFormat == "CODE500-EPHEM" && stateType == "Quaternion"))
+          (fileFormat == "Code-500" && stateType == "Quaternion"))
          throw SubscriberException
             ("FileFormat \"" + fileFormat + "\" and StateType " + "\"" + stateType +
              "\" does not match for the EphemerisFile \"" + GetName() + "\"");
@@ -621,11 +621,11 @@ bool EphemerisFile::Initialize()
 {
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
-      ("EphemerisFile::Initialize() <%p>'%s' entered, active=%d, isInitialized=%d\n"
-       "   fileFormat='%s', stateType='%s'\n", this, GetName().c_str(), active,
-       isInitialized, fileFormat.c_str(), stateType.c_str());
+      ("EphemerisFile::Initialize() <%p>'%s' entered, active=%d, writeEphemeris=%d, "
+       "isInitialized=%d\n   fileFormat='%s', stateType='%s'\n", this, GetName().c_str(),
+       active, writeEphemeris, isInitialized, fileFormat.c_str(), stateType.c_str());
    #endif
-
+   
    if (isInitialized)
    {
       #ifdef DEBUG_EPHEMFILE_INIT
@@ -653,7 +653,7 @@ bool EphemerisFile::Initialize()
       fileType = SPK_ORBIT;
    else if (fileFormat == "SPK" && stateType == "Quaternion")
       fileType = SPK_ATTITUDE;
-   else if (fileFormat == "CODE500-EPHEM")
+   else if (fileFormat == "Code-500")
    {
       fileType = CODE500_EPHEM;
       maxSegmentSize = 50; // 50 orbit states per data record
@@ -1042,6 +1042,7 @@ bool EphemerisFile::SetBooleanParameter(const Integer id, const bool value)
    {
    case WRITE_EPHEMERIS:
       writeEphemeris = value;
+      active = value;
       return writeEphemeris;
    default:
       return Subscriber::SetBooleanParameter(id, value);
@@ -1401,7 +1402,7 @@ void EphemerisFile::InitializeData()
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      ("===== EphemerisFile::InitializeData() entered\n");
+      ("===== EphemerisFile::InitializeData() '%s' entered\n", GetName().c_str());
    #endif
    
    epochsOnWaiting.clear();
@@ -1427,7 +1428,7 @@ void EphemerisFile::InitializeData()
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      ("===== EphemerisFile::InitializeData() leaving\n");
+      ("===== EphemerisFile::InitializeData() '%s' leaving\n", GetName().c_str());
    #endif
 }
 
@@ -1598,36 +1599,27 @@ void EphemerisFile::CreateCode500EphemerisFile()
       code500EphemFile = NULL;
    }
    
-   Real        satId       = 123.0;  // dummy for now
-   std::string productId   = "EPHEM";
-   std::string timeSystem  = "A1";   // Figure out time system here
-   std::string tapeId      = "STANDARD";
-   std::string sourceId    = "GMAT"; // Should it be GTDS?
+   Real        satId       = 123.0;   // dummy for now
+   std::string timeSystem  = "UTC";   // Figure out time system here
+   std::string sourceId    = "GMAT";  // Should it be GTDS?
    std::string centralBody = spacecraft->GetOriginName();
    
    #ifdef DEBUG_EPHEMFILE_CODE500
    MessageInterface::ShowMessage
-      ("   Creating Code500EphemerisFile with satId=%f, productId='%s', timeSystem='%s', "
-       "tapeId='%s', sourceId='%s', centralBody='%s'\n", satId, productId.c_str(),
-       timeSystem.c_str(), tapeId.c_str(), sourceId.c_str(), centralBody.c_str());
+      ("   Creating Code500EphemerisFile with satId=%f, timeSystem='%s', sourceId='%s', "
+       "centralBody='%s'\n", satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
    #endif
    
    try
    {
       code500EphemFile =
-         new Code500EphemerisFile(satId, productId, timeSystem, tapeId, sourceId,
-                                  centralBody);
+         new Code500EphemerisFile(satId, timeSystem, sourceId, centralBody);
+      
       code500EphemFile->OpenForWrite(fileName);
       
-      // Spacecraft epoch and keplerian elements at epoch
-      // Is this same as initial epoch and state?
-      Real a1Epoch = spacecraft->GetEpoch();
-      Rvector6 state = spacecraft->GetState("Keplerian");
+      // @todo Set origin mu to code500 ephem so that it can do conversion
+      //code500EphemFile->SetCentralBodyMu(spacecraft->GetOriginMu());
       code500EphemFile->SetTimeIntervalBetweenPoints(stepSizeInSecs);
-      code500EphemFile->SetInitialEpoch(a1Epoch);
-      code500EphemFile->SetInitialKeplerianState(state);
-      state = spacecraft->GetState("Cartesian");
-      code500EphemFile->SetInitialCartesianState(state);
    }
    catch (BaseException &e)
    {
@@ -2032,9 +2024,6 @@ void EphemerisFile::HandleCode500OrbitData(bool writeData)
 void EphemerisFile::RestartInterpolation(const std::string &comments, bool writeAfterData,
                                          bool canFinalize, bool ignoreBlankComments)
 {
-   #ifdef DEBUG_MANEUVER
-      MessageInterface::ShowMessage("Restarting Interpolation\n");
-   #endif
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s'\n   "
@@ -2083,10 +2072,13 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
       
       currComments = "";
    }
+   else if (code500EphemFile != NULL)
+   {
+      WriteCode500OrbitDataSegment();
+   }
    
-   // There are no data segments for Code500 ephemeris file, continue writing
-   if (fileType != CODE500_EPHEM)
-      InitializeData();
+   // Initialize data
+   InitializeData();
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
@@ -2302,7 +2294,8 @@ void EphemerisFile::WriteOrbit(Real reqEpochInSecs, const Real state[6])
       AddNextEpochToWrite(nextOutEpoch, "   =====> Adding nextOutEpoch to epochsOnWaiting");
    }
    
-   WriteCcsdsOemData(outEpochInSecs, stateToWrite);
+   WriteOrbitData(outEpochInSecs, stateToWrite);
+   
    lastEpochWrote = outEpochInSecs;
    
    #ifdef DEBUG_EPHEMFILE_WRITE
@@ -2389,9 +2382,6 @@ void EphemerisFile::WriteAttitude()
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWriting(bool canFinalize)
 {
-   #ifdef DEBUG_MANEUVER
-      MessageInterface::ShowMessage("Finishing up writing\n");
-   #endif
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
       ("EphemerisFile::FinishUpWriting() '%s' entered, canFinalize=%d, isFinalized=%d, "
@@ -2515,6 +2505,10 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
       if (fileType == CCSDS_AEM)
          WriteString("DATA_STOP\n");
    #endif
+      
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage("EphemerisFile::FinishUpWritingCCSDS() leaving\n");
+   #endif
 }
 
 
@@ -2523,6 +2517,10 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
 //------------------------------------------------------------------------------
 void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
 {
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::FinishUpWritingSPK) entered, canFinalize=%d\n", canFinalize);
+   #endif
    try 
    {
       if (spkWriter != NULL)
@@ -2549,6 +2547,10 @@ void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
          ("Caught the exception %s\n", ex.GetFullMessage().c_str());
       #endif
    }
+   
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage("EphemerisFile::FinishUpWritingSPK() leaving\n");
+   #endif
 }
 
 
@@ -2559,7 +2561,7 @@ void EphemerisFile::FinishUpWritingCode500(bool canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
-      ("EphemerisFile::FinishUpWritingCCSDS() entered, canFinalize=%d\n", canFinalize);
+      ("EphemerisFile::FinishUpWritingCode500() entered, canFinalize=%d\n", canFinalize);
    #endif
    
    if (interpolator != NULL)
@@ -2608,6 +2610,10 @@ void EphemerisFile::FinishUpWritingCode500(bool canFinalize)
              "EphemerisFile::FinishUpWritingCode500()\n");
       }
    }
+   
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage("EphemerisFile::FinishUpWritingCode500() leaving\n");
+   #endif
 }
 
 
@@ -3133,16 +3139,7 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
       }
       else if (fileType == CODE500_EPHEM)
       {
-         // Save last data to become first data of next segment
-         A1Mjd *a1mjd  = new A1Mjd(*a1MjdArray.back());
-         Rvector6 *rv6 = new Rvector6(*stateArray.back());
-         
-         // Write a segment and delete data array pointers
          WriteCode500OrbitDataSegment();
-         
-         // Add saved data to arrays
-         a1MjdArray.push_back(a1mjd);
-         stateArray.push_back(rv6);
       }
    }
    
@@ -3160,9 +3157,9 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
 
 
 //------------------------------------------------------------------------------
-// void DeleteOrbitData()
+// void ClearOrbitData()
 //------------------------------------------------------------------------------
-void EphemerisFile::DeleteOrbitData()
+void EphemerisFile::ClearOrbitData()
 {
    EpochArray::iterator ei;
    for (ei = a1MjdArray.begin(); ei != a1MjdArray.end(); ++ei)
@@ -3211,7 +3208,7 @@ void EphemerisFile::WriteRealCcsdsOrbitDataSegment()
    #elif !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
    // Since array is deleted from CcsdsEphemerisFile::WriteRealCcsdsOrbitDataSegment()
    // delete orbit data here
-   DeleteOrbitData();
+   ClearOrbitData();
    #endif
 }
 
@@ -3596,13 +3593,13 @@ void EphemerisFile::WriteCcsdsOemMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6])
+// void WriteOrbitData(Real reqEpochInSecs, const Real state[6])
 //------------------------------------------------------------------------------
-void EphemerisFile::WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6])
+void EphemerisFile::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
 {
-   #ifdef DEBUG_EPHEMFILE_CCSDS
+   #ifdef DEBUG_EPHEMFILE_WRITE
    DebugWriteTime
-      ("EphemerisFile::WriteCcsdsOemData() entered, reqEpochInSecs = ", reqEpochInSecs);
+      ("EphemerisFile::WriteOrbitData() entered, reqEpochInSecs = ", reqEpochInSecs);
    MessageInterface::ShowMessage
       ("state[0:2]=%.15f, %.15f, %.15f\n", reqEpochInSecs, state[0], state[1], state[2]);
    #endif
@@ -3618,8 +3615,8 @@ void EphemerisFile::WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6])
    
    BufferOrbitData(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, outState);
    
-   #ifdef DEBUG_EPHEMFILE_CCSDS
-   MessageInterface::ShowMessage("EphemerisFile::WriteCcsdsOemData() leaving\n");
+   #ifdef DEBUG_EPHEMFILE_WRITE
+   MessageInterface::ShowMessage("EphemerisFile::WriteOrbitData() leaving\n");
    #endif
 }
 
@@ -3765,11 +3762,11 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
       try
       {
          spkWriter->WriteSegment(*start, *end, stateArray, a1MjdArray);
-         DeleteOrbitData();
+         ClearOrbitData();
       }
       catch (BaseException &e)
       {
-         DeleteOrbitData();
+         ClearOrbitData();
          spkWriteFailed = true;
          dstream.flush();
          dstream.close();
@@ -3905,7 +3902,7 @@ void EphemerisFile::FinalizeSpkFile()
       // Keep from setting a warning
       e.GetMessageType();
 
-      DeleteOrbitData();
+      ClearOrbitData();
       spkWriteFailed = true;
       #ifdef DEBUG_EPHEMFILE_SPICE
       MessageInterface::ShowMessage("spkWriter->FinalizeSpkFile() failed\n");
@@ -3943,21 +3940,21 @@ void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
             ("*** INTERNAL ERROR *** Code500 Ephem Writer is NULL in "
              "EphemerisFile::WriteCode500OrbitDataSegment()\n");
       
+      #ifdef DEBUG_EPHEMFILE_CODE500
       A1Mjd *start = a1MjdArray.front();
       A1Mjd *end   = a1MjdArray.back();
-      
-      #ifdef DEBUG_EPHEMFILE_CODE500
       MessageInterface::ShowMessage
          ("   Writing start=%.15f, end=%.15f\n", start->GetReal(), end->GetReal());
-      MessageInterface::ShowMessage("Here are epochs and states:\n");
+      MessageInterface::ShowMessage("There are %d epochs and states:\n", a1MjdArray.size());
       for (unsigned int ii = 0; ii < a1MjdArray.size(); ii++)
       {
-         A1Mjd *t = a1MjdArray[ii];
-         Real time = t->GetReal();
-         Rvector6 *st = stateArray[ii];
+         A1Mjd *tm = a1MjdArray[ii];
+         Real time = tm->GetReal();
+         Rvector6 *sv = stateArray[ii];
+         std::string format = "% 1.15e  ";
          MessageInterface::ShowMessage
-            ("[%3d] %12.10f  %s  %s", ii, time, ToUtcGregorian(time, true).c_str(),
-             (st->ToString()).c_str());
+            ("[%3d] %12.10f  %s  %s\n", ii, time, ToUtcGregorian(time, true).c_str(),
+             (sv->ToString(format, 6)).c_str());
       }
       #endif
       
@@ -3970,12 +3967,15 @@ void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
       code500WriteFailed = false;
       try
       {
-         code500EphemFile->WriteDataSegment(*start, *end, stateArray, a1MjdArray, canFinalize);
-         DeleteOrbitData();
+         #ifdef DEBUG_EPHEMFILE_CODE500
+         MessageInterface::ShowMessage("Calling code500EphemFile->WriteDataSegment()\n");
+         #endif
+         code500EphemFile->WriteDataSegment(a1MjdArray, stateArray, isEndOfRun);
+         ClearOrbitData();
       }
       catch (BaseException &e)
       {
-         DeleteOrbitData();
+         ClearOrbitData();
          code500WriteFailed = true;
          dstream.flush();
          dstream.close();
@@ -4007,7 +4007,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   #ifdef DEBUG_EPHEMFILE_CODE500_LOG
+   #ifdef DEBUG_EPHEMFILE_CODE500
    // For for debugging
    if (isEndOfRun)
    {
@@ -4356,7 +4356,8 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       writingNewSegment = true;
       #if DBGLVL_EPHEMFILE_DATA > 0
       MessageInterface::ShowMessage
-         ("=====> EphemerisFile::Distribute() returning true, it is toggled off\n");
+         ("=====> EphemerisFile::Distribute() '%s' returning true, it is toggled off\n",
+          GetName().c_str());
       #endif
       return true;
    }
@@ -4600,19 +4601,27 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
                                       Real epoch, const StringArray &satNames,
                                       const std::string &desc)
 {
-   #ifdef DEBUG_MANEUVER
-      MessageInterface::ShowMessage("Maneuvering\n");
-   #endif
-   #if DBGLVL_EPHEMFILE_MANEUVER > 1
+   #if DBGLVL_EPHEMFILE_MANEUVER
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleManeuvering() '%s' entered, originator=<%p><%s>, maneuver %s, "
+      ("\n==================================================\n"
+       "EphemerisFile::HandleManeuvering() '%s' entered, active=%d, originator=<%p><%s>, maneuver %s, "
        "epoch=%.15f, %s\n   satNames.size()=%d, satNames[0]='%s', desc='%s'\n"
        "   prevRunState=%d, runstate=%d, maneuversHandled.size()=%d\n", GetName().c_str(),
-       originator, originator ? originator->GetTypeName().c_str() : "NULL",
+       active, originator, originator ? originator->GetTypeName().c_str() : "NULL",
        maneuvering ? "started" : "stopped", epoch, ToUtcGregorian(epoch, true).c_str(),
        satNames.size(), satNames.empty() ? "NULL" : satNames[0].c_str(), desc.c_str(),
        prevRunState, runstate, maneuversHandled.size());
    #endif
+   
+   if (!active)
+   {
+      #if DBGLVL_EPHEMFILE_MANEUVER
+      MessageInterface::ShowMessage
+         ("EphemerisFile::HandleManeuvering() '%s' leaving, it is not active\n", GetName().c_str());
+      #endif
+      return;
+   }
+   
    
    if (originator == NULL)
       throw SubscriberException
@@ -4740,7 +4749,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
    
    prevRunState = runstate;
    
-   #if DBGLVL_EPHEMFILE_MANEUVER > 1
+   #if DBGLVL_EPHEMFILE_MANEUVER
    MessageInterface::ShowMessage
       ("EphemerisFile::HandleManeuvering() '%s' leaving\n", GetName().c_str());
    #endif
@@ -4752,11 +4761,21 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
 //------------------------------------------------------------------------------
 void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
 {
-   #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE > 1
+   #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandlePropagatorChange() entered, provider=<%p><%s>\n",
-       provider, provider->GetTypeName().c_str());
+      ("\n==================================================\n"
+       "EphemerisFile::HandlePropagatorChange() '%s' entered, provider=<%p><%s>, active=%d\n",
+       GetName().c_str(), provider, provider->GetTypeName().c_str(), active);
    #endif
+   
+   if (!active)
+   {
+      #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE
+      MessageInterface::ShowMessage
+         ("EphemerisFile::HandlePropagatorChange() '%s' leaving, it is not active\n", GetName().c_str());
+      #endif
+      return;
+   }
    
    if (runstate == Gmat::RUNNING || runstate == Gmat::SOLVEDPASS)
    {
@@ -4833,10 +4852,10 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
       #endif
    }
    
-   #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE > 1
+   #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandlePropagatorChange() leaving, provider=<%p><%s>\n",
-       provider, provider->GetTypeName().c_str());
+      ("EphemerisFile::HandlePropagatorChange() '%s' leaving, provider=<%p><%s>\n",
+       GetName().c_str(), provider, provider->GetTypeName().c_str());
    #endif
 }
 
@@ -4856,11 +4875,21 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
 {
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleScPropertyChange() entered, originator=<%p>, "
-       "epoch=%.15f, satName='%s', desc='%s'\n", originator, epoch, satName.c_str(),
-       desc.c_str());
+      ("\n==================================================\n"
+       "EphemerisFile::HandleScPropertyChange() '%s' entered, originator=<%p>, "
+       "epoch=%.15f, satName='%s', desc='%s', active=%d\n", GetName().c_str(),
+       originator, epoch, satName.c_str(), desc.c_str(), active);
    DebugWriteTime("   event epoch ", epoch, true);
    #endif
+   
+   if (!active)
+   {
+      #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
+      MessageInterface::ShowMessage
+         ("EphemerisFile::HandleScPropertyChange() '%s' leaving, it is not active\n", GetName().c_str());
+      #endif
+      return;
+   }
    
    if (originator == NULL)
       throw SubscriberException
@@ -4888,6 +4917,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    }
    
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
-   MessageInterface::ShowMessage("EphemerisFile::HandleScPropertyChange() leaving\n");
+   MessageInterface::ShowMessage
+      ("EphemerisFile::HandleScPropertyChange() '%s' leaving\n", GetName().c_str());
    #endif
 }

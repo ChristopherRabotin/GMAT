@@ -42,6 +42,7 @@ public:
    Rvector6(const Real vec[6]);
    Rvector6(const Rvector6 &v);
    Rvector6& operator=(const Rvector6 &v);
+   Rvector6* Clone() const;
    virtual ~Rvector6();
    
    Real Get(Integer index) const;

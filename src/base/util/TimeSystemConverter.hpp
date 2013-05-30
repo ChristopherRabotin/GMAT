@@ -120,34 +120,36 @@ namespace TimeConverterUtil
  */
    
    Integer GMAT_API GetTimeTypeID(std::string &str);
-      
+   
    Real GMAT_API Convert(const Real origValue,
-                const Integer fromType,
-                const Integer toType,
-                Real refJd);
+                         const Integer fromType,
+                         const Integer toType,
+                         Real refJd = GmatTimeConstants::JD_JAN_5_1941);
    
    Real GMAT_API ConvertToTaiMjd(Integer fromType, Real origValue,
-      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
    Real GMAT_API ConvertFromTaiMjd(Integer toType, Real origValue,
-      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
-
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
+   Real GMAT_API NumberOfLeapSecondsFrom(Real utcMjd,
+                         Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
+   
    void GMAT_API SetEopFile(EopFile *eopFile);
    void GMAT_API SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
    
    void GMAT_API GetTimeSystemAndFormat(const std::string &type, std::string &system,
-                               std::string &format);
+                         std::string &format);
    
    std::string GMAT_API ConvertMjdToGregorian(const Real mjd, Integer format = 1);   
    Real GMAT_API ConvertGregorianToMjd(const std::string &greg);
    void GMAT_API Convert(const std::string &fromType, Real fromMjd,
-                const std::string &fromStr, const std::string &toType,
-                Real &toMjd, std::string &toStr, Integer format = 1);
+                         const std::string &fromStr, const std::string &toType,
+                         Real &toMjd, std::string &toStr, Integer format = 1);
    
    bool GMAT_API ValidateTimeSystem(std::string sys);   
    bool GMAT_API ValidateTimeFormat(const std::string &format, const std::string &value,
-                           bool checkValue = true);
+                                    bool checkValue = true);
    StringArray GMAT_API GetValidTimeRepresentations();
-
+   
    bool GMAT_API IsValidTimeSystem(const std::string& system);
 }
 

@@ -23,6 +23,7 @@
 //------------------------------------------------------------------------------
 #include <stdarg.h>
 #include <sstream>
+#include <stdio.h>            // for sprintf()
 #include "ArrayTemplate.hpp"
 #include "TableTemplate.hpp"
 #include "Rmatrix.hpp"
@@ -627,6 +628,34 @@ Real Rvector::Norm()
       sum += GmatMathUtil::Pow(elementD[i], 2);
       
    return GmatMathUtil::Sqrt(sum);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(const std::string &format, Iteger col) const
+//------------------------------------------------------------------------------
+/*
+ * Formats Rvector value to String using c-style formatting.
+ *
+ * @param  format  c-style format, such as "%16.9f  "
+ * @param  col  Number of columns
+ *
+ * @return Formatted Rvector value string
+ */
+//------------------------------------------------------------------------------
+std::string Rvector::ToString(const std::string &format, Integer col) const
+{
+   char buffer[100];
+   std::stringstream ss("");
+   for (int i = 0; i < sizeD; i++)
+   {
+      sprintf(buffer, format.c_str(), elementD[i]);
+      ss << buffer;
+      if (i != 0 && (i%col) == 0)
+         ss << std::endl;
+   }
+   
+   return ss.str();
 }
 
 

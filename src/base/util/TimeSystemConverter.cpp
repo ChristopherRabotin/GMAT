@@ -69,7 +69,7 @@ Integer TimeConverterUtil::GetTimeTypeID(std::string &str)
 /**
  * Assignment operator for TimeConverter structures.
  *
- * @param <origValue>            Given Time
+ * @param <origValue> Given Time
  * @param <fromType>  Time which is converted from date format
  * @param <toType>    Time which is converted to date format
  * @param <refJd>     Reference Julian Date
@@ -108,9 +108,8 @@ Real TimeConverterUtil::Convert(const Real origValue,
    
    Real returnTime =
       TimeConverterUtil::ConvertFromTaiMjd(toType, newTime, refJd);
-
+   
    #ifdef DEBUG_FIRST_CALL
-//       if (toType == "TtMjd")
       if (toType == TTMJD)
          firstCallFired = true;
    #endif
@@ -179,16 +178,16 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
         if (theLeapSecsFileReader == NULL)
            throw TimeFileException
               ("theLeapSecsFileReader is unknown\n");
-          
+        
         // look up leap secs from file
         Real numLeapSecs =
            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
-  
+        
         #ifdef DEBUG_TIMECONVERTER_DETAILS
            MessageInterface::ShowMessage(
               "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
         #endif
-    
+        
         return (origValue + (numLeapSecs/GmatTimeConstants::SECS_PER_DAY));
     }
     case TimeConverterUtil::UT1MJD:
@@ -339,14 +338,14 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              theLeapSecsFileReader->
              NumberOfLeapSecondsFrom((origValue + offsetValue)
                                      - (taiLeapSecs/GmatTimeConstants::SECS_PER_DAY));
-    
+          
           #ifdef DEBUG_TIMECONVERTER_DETAILS
              MessageInterface::ShowMessage("      offsetValue = %.17lf\n",
                 offsetValue);
              MessageInterface::ShowMessage("      Leap secs: tai = %.17lf, utc = %.17lf\n",
                 taiLeapSecs, utcLeapSecs);
           #endif
-    
+          
           if (utcLeapSecs == taiLeapSecs)
              return (origValue - (taiLeapSecs/GmatTimeConstants::SECS_PER_DAY));
           else
@@ -426,6 +425,43 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
    }
 
    return 0;
+}
+
+
+//---------------------------------------------------------------------------
+// Real NumberOfLeapSecondsFrom(Real utcMjd, Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_194)
+//---------------------------------------------------------------------------
+/**
+ * Retrives leap seconds from the leap second file.
+ *
+ * @param  utcMjd  Modified julian days in UTC
+ * @param  jdOfMjdRef  Julidian days of modified julian days reference
+ *
+ * @return Number of leap seconds
+ */
+//---------------------------------------------------------------------------
+Real TimeConverterUtil::NumberOfLeapSecondsFrom(Real utcMjd, Real jdOfMjdRef)
+{
+   Real offsetValue = 0;
+   
+   if (jdOfMjdRef != GmatTimeConstants::JD_NOV_17_1858)
+      offsetValue = jdOfMjdRef - GmatTimeConstants::JD_NOV_17_1858;
+   
+   if (theLeapSecsFileReader == NULL)
+      throw TimeFileException
+         ("theLeapSecsFileReader is unknown\n");
+   
+   // look up leap secs from file
+   Real numLeapSecs =
+      theLeapSecsFileReader->NumberOfLeapSecondsFrom(utcMjd + offsetValue);
+   
+   #ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage
+      ("NumberOfLeapSecondsFrom() returning %f, utcMjd=%f, offsetValue=%f\n",
+       numLeapSecs, utcMjd, offsetValue);
+   #endif
+   
+   return numLeapSecs;
 }
 
 

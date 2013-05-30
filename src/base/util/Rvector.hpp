@@ -78,9 +78,9 @@ public:
    virtual bool IsZeroVector() const;
    Real Norm();
    
+   virtual std::string ToString(const std::string &format, Integer col) const;
    virtual std::string ToString(Integer precision, bool horizontal = true,
                                 const std::string &prefix = "") const;
-   
    virtual std::string ToString(bool useCurrentFormat = true,
                                 bool scientific = false, bool showPoint = false,
                                 Integer precision = GmatGlobal::DATA_PRECISION,

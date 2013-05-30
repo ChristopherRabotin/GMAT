@@ -42,6 +42,7 @@ public:
 //     A1Mjd(const A1Date &a1Date);
    A1Mjd(const A1Mjd &a1mjd);
    A1Mjd& operator= (const A1Mjd &right);
+   A1Mjd* Clone() const;
    ~A1Mjd();
    
    A1Mjd operator+ (const A1Mjd &right) const;

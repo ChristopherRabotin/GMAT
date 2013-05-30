@@ -261,7 +261,7 @@ protected:
    
    // General data buffering
    void         BufferOrbitData(Real epochInDays, const Real state[6]);
-   void         DeleteOrbitData();
+   void         ClearOrbitData();
    
    // CCSDS file writing for debug and actual
    bool         OpenCcsdsEphemerisFile();
@@ -269,7 +269,7 @@ protected:
    void         WriteCcsdsHeader();
    void         WriteCcsdsOrbitDataSegment();
    void         WriteCcsdsOemMetaData();
-   void         WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6]);
+   void         WriteOrbitData(Real reqEpochInSecs, const Real state[6]);
    void         WriteCcsdsAemMetaData();
    void         WriteCcsdsAemData(Real reqEpochInSecs, const Real quat[4]);
    void         WriteCcsdsComments(const std::string &comments, bool writeKeyword = true);

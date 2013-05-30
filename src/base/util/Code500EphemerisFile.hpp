@@ -13,10 +13,8 @@
 class GMAT_API Code500EphemerisFile
 {
 public:
-   Code500EphemerisFile(Real satId = 123.0,
-                        const std::string &productId = "EPHEM",
-                        const std::string &timeSystem = "A1",
-                        const std::string &tapeId = "STANDARD",
+   Code500EphemerisFile(double satId = 123.0,
+                        const std::string &timeSystem = "UTC",
                         const std::string &sourceId = "GMAT",
                         const std::string &centralBody = "Earth");
    
@@ -25,6 +23,7 @@ public:
    Code500EphemerisFile& operator=(const Code500EphemerisFile& ef);
    
    // methods for this class
+   void Initialize();
    bool OpenForRead(const std::string &filename);
    bool OpenForWrite(const std::string &filename);
    void CloseForRead();
@@ -35,8 +34,10 @@ public:
    bool ReadDataAt(int dataRecNumber, int logOption = 0);
    bool ReadDataRecords(int numRecordsToRead = -999, int logOption = 0);
    
+   void SetCentralBodyMu(double mu);
    void SetTimeIntervalBetweenPoints(double secs);
    void SetInitialEpoch(const A1Mjd &a1Mjd);
+   void SetInitialState(Rvector6 *kmsec);
    void SetInitialCartesianState(const Rvector6 &cartState);
    void SetInitialKeplerianState(const Rvector6 &kepState);
    
@@ -44,9 +45,7 @@ public:
    bool WriteHeader1();
    bool WriteHeader2();
    bool WriteDataAt(int recNumber);
-   
-   bool WriteDataSegment(const A1Mjd &start, const A1Mjd &end,
-                         const StateArray &stateArray, const EpochArray &epochArray,
+   bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray, 
                          bool canFinalize = false);
    
    void SetSwapEndian(bool swapEndian);
@@ -146,7 +145,7 @@ protected:
       int    leapSecondIndicator;                   // 1621-1624
       double dateOfLeapSeconds_YYYMMDD;             // 1625-1632
       double timeOfLeapSeconds_HHMMSS;              // 1633-1640
-      double utcTimeAdjustment;                     // 1641-1648
+      double utcTimeAdjustment_SEC;                 // 1641-1648
       double dcObservationTimeSpan[4];              // 1649-1680
       int    trackingValidationIndicator;           // 1681-1684
       char   spares6[660];                          // 1685-2344
@@ -175,11 +174,11 @@ protected:
 
    // Header_1 information
    double         mSatId;
-   double         mInTimeSystemIndicator;
-   double         mOutTimeSystemIndicator;
-   char           mProductId[9];
-   char           mTapeId[9];
-   char           mSourceId[9];
+   double         mInputTimeSystem;  // 1 = A1, 2 = UTC
+   double         mOutputTimeSystem; // 1 = A1, 2 = UTC
+   std::string    mProductId;
+   std::string    mTapeId;
+   std::string    mSourceId;
    std::string    mCentralBody;
    std::string    mTimeSystem;
    std::string    mCoordSystem;
@@ -192,6 +191,10 @@ protected:
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
    
+   // Epoch and state buffer
+   EpochArray     mA1MjdArray;
+   StateArray     mStateArray;
+   
    // Ephemeris input/output streams
    std::ifstream  mEphemFileIn;
    std::ofstream  mEphemFileOut;
@@ -201,29 +204,40 @@ protected:
    bool           mSentinelsFound;
    
    // DUT reference date
-   std::string    mA1GregorianOfDUTRef;
+   std::string    mGregorianOfDUTRef;
    double         mRefTimeForDUT_YYMMDD;
-   double         mA1MjdOfDUTRef;
+   double         mMjdOfDUTRef;
    
-   // Time interval
+   // Time information
    double mTimeIntervalBetweenPointsSecs;
+   double mLeapSecsStartOutput;
+   double mLeapSecsEndOutput;
+   double mLeapSecsInput;
+   
+   // For cartesian to keplerian state conversion
+   double mCentralBodyMu;
    
    // Endianness
    bool mSwapEndian;
    
-   // Header records
-   void InitializeHeader1();
-   void InitializeHeader2();
+   // Initialization
+   void InitializeHeaderRecord1();
+   void InitializeHeaderRecord2();
+   void InitializeDataRecord();
    
    void SetEphemerisStartTime(const A1Mjd &a1Mjd);
    void SetEphemerisEndTime(const A1Mjd &a1Mjd);
-   void UnpackHeader1();
    
+   // Writing
+   void WriteDataRecord(bool canFinalize);
+   
+   // Data buffering
+   void ClearBuffer();
+   
+   // Unpacking
+   void UnpackHeader1();
    void PackHeader2();
    void UnpackHeader2();
-   
-   // Data record
-   void InitializeDataRecord();
    void UnpackDataRecord(int recNum, int logOption);
    
    // Unit Conversion
@@ -234,17 +248,18 @@ protected:
                                    int &year, int &month, int &day,
                                    int &hour, int &min, double &sec);
    void   ToYearMonthDay(double yyymmdd, int &year, int &month, int &day);
-   void   ToYYYMMDDHHMMSS(const A1Mjd &a1Mjd, double &ymd, double &hms);
-   double ToDUT(const A1Mjd &a1Mjd);
-   double ToYYYMMDD(const A1Mjd &a1Mjd);
-   double ToHHMMSS(const A1Mjd &a1Mjd);
-   double ToDayOfYear(const A1Mjd &a1Mjd);
-   double ToSecondsOfDay(const A1Mjd &a1Mjd);
-   A1Mjd  ToA1Mjd(double dutTime, int timeSystem = 2);
-   std::string ToA1Gregorian(double dutTime, int timeSystem = 2);
+   void   ToYYYMMDDHHMMSS(double mjd, double &ymd, double &hms);
+   double ToDUT(double mjd);
+   double ToUtcModJulian(const A1Mjd &a1Mjd);
+   double ToYYYMMDD(double mjd);
+   double ToHHMMSS(double mjd);
+   double ToDayOfYear(double mjd);
+   double ToSecondsOfDay(double mjd);
+   A1Mjd  ToA1Mjd(double dutTime, bool forOutput = true);
+   std::string ToA1Gregorian(double dutTime, bool forOutput = true);
    std::string ToA1Gregorian(const A1Mjd &a1Mjd);
-   std::string ToUtcGregorian(double dutTime, int timeSystem = 2);
-   std::string ToUtcGregorian(const A1Mjd &a1Mjd, int timeSystem = 2);
+   std::string ToUtcGregorian(double dutTime, bool forOutput = true);
+   std::string ToUtcGregorian(const A1Mjd &a1Mjd, bool forOutput = true);
    std::string ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay);
    
    // String functions
@@ -256,8 +271,9 @@ protected:
    unsigned char AsciiToEbcdic(unsigned char ascii);
    unsigned char EbcdicToAscii(unsigned char ebc);
    void SwapEndian(char *input, int numBytes);
-
+   
    // Debug
+   void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1);
    void DebugWriteState(Rvector6 *stateKmSec, double *stateDULT, int option = 1);
 };
 
