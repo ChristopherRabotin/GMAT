@@ -85,6 +85,7 @@ public:
    bool IsParameterType(const std::string &desc);
    bool ValidateParameter(const StringArray &refNames, GmatBase *obj);
    bool ValidateSaveCommand(GmatBase *obj);
+   bool UpdateLists();
    
 private:
 
@@ -155,3 +156,4 @@ private:
 };
 
 #endif // Validator_hpp
+
