@@ -77,6 +77,7 @@
 //#define DEBUG_SPECIAL_CASE
 //#define DEBUG_PARSE_REPORT
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_OBJECT_LIST
 //#define DEBUG_FIND_OBJECT
 //#define DEBUG_FIND_PROP_ID
 //#define DEBUG_VAR_EXPRESSION
@@ -548,6 +549,8 @@ void Interpreter::BuildCreatableObjectMaps()
       MessageInterface::ShowMessage("\n");
    #endif
    
+   // Update the Parameter list in the Validator
+   theValidator->UpdateLists();
 }
 
 
@@ -10176,5 +10179,6 @@ bool Interpreter::HasFilenameTypeParameter(GmatCommand *cmd)
    
    return fileTypeFound;
 }
+
 
 
