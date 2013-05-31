@@ -220,9 +220,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new RLA(withName);
 
    // Environmental parameters
-   if (ofType == "AtmosDensity")
-      return new AtmosDensity(withName);
-   
+   #ifdef __ENABLE_ATMOS_DENSITY__
+      if (ofType == "AtmosDensity")
+         return new AtmosDensity(withName);
+   #endif
+
    // Planet parameters
    if (ofType == "MHA")
       return new MHA(withName);
@@ -670,4 +672,5 @@ ParameterFactory::~ParameterFactory()
 {
    // deletes handled by Factory destructor
 }
+
 
