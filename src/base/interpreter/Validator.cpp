@@ -3182,6 +3182,41 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool UpdateLists()
+//------------------------------------------------------------------------------
+/**
+ * Updates the parameter list (and any other lists)
+ *
+ * This method was added so that plugin Parameter classes can be registered
+ * with the Validator.
+ *
+ * @return true if the list was refreshed successfully, false if refreshing the
+ * list failed.
+ */
+//------------------------------------------------------------------------------
+bool Validator::UpdateLists()
+{
+   bool retval = false;
+
+   theModerator = Moderator::Instance();
+   StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
+   if (parms.size() > 0)
+   {
+      theParameterList.clear();
+      copy(parms.begin(), parms.end(), back_inserter(theParameterList));
+      retval = true;
+   }
+
+   #ifdef DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage("Validator knows about %d Parameters:\n",
+         parms.size());
+      for (UnsignedInt i = 0; i < parms.size(); ++i)
+         MessageInterface::ShowMessage("   %d: %s\n", i, parms[i].c_str());
+   #endif
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // bool ValidateSubCommand(GmatCommand *brCmd, Integer level, Integer manage = 1)
@@ -3497,6 +3532,13 @@ Validator::Validator()
    StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
    copy(parms.begin(), parms.end(), back_inserter(theParameterList));
    
+   #ifdef DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage("Validator knows about %d Parameters:\n",
+         parms.size());
+      for (UnsignedInt i = 0; i < parms.size(); ++i)
+         MessageInterface::ShowMessage("   %d: %s\n", i, parms[i].c_str());
+   #endif
+
    theSolarSystem = NULL;
    theCommand = NULL;
    theFunction = NULL;
@@ -3514,5 +3556,6 @@ Validator::Validator()
 Validator::~Validator()
 {
 }
+
 
 
