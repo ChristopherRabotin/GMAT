@@ -44,6 +44,7 @@ namespace GmatParam
       NO_DEP,
       OWNED_OBJ,
       ATTACHED_OBJ,
+      ODE_MODEL,
       DepObjectCount
    };
    
