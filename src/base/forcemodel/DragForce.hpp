@@ -63,9 +63,10 @@ public:
    virtual bool         GetDerivatives(Real * state, Real dt = 0.0, 
                                        Integer order = 1, 
                                        const Integer id = -1);
-   
+   virtual Rvector6     GetDerivativesForSpacecraft(Spacecraft *sc);
+
    // inherited from GmatBase
-   virtual GmatBase*    Clone(void) const;
+   virtual GmatBase*    Clone() const;
    
    // Parameter accessor methods -- overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -121,6 +122,12 @@ public:
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
                          Integer quantity);
+
+   // Made public so it can be called for the AtmosDensity parameter
+   Real                 GetDensity(Real *state,
+                              Real when = GmatTimeConstants::MJD_OF_J2000,
+                              Integer count = -1);
+
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -214,7 +221,7 @@ protected:
    
    void                 BuildPrefactors();
    void                 TranslateOrigin(const Real *state, const Real now);
-   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
+//   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
       
    Real                 CalculateAp(Real kp);
    

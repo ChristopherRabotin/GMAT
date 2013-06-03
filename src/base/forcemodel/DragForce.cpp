@@ -132,6 +132,8 @@ DragForce::DragForce(const std::string &name) :
 {
    dimension = 6;
    parameterCount = DragForceParamCount;
+   objectTypeNames.push_back("DragForce");
+
    
    // Default Sun location, from the SLP file at MJD GmatTimeConstants::MJD_OF_J2000:
    sunLoc[0] =  2.65e+07;
@@ -142,6 +144,8 @@ DragForce::DragForce(const std::string &name) :
    cbLoc[1]  = 0.0;
    cbLoc[2]  = 0.0;
    
+   density = new Real[1];
+
 //   // Nominal Earth angular velocity
 //   angVel[0]      = 0.0;
 //   angVel[1]      = 0.0;
@@ -287,6 +291,7 @@ DragForce::DragForce(const DragForce& df) :
    cbLoc[1]  = df.cbLoc[1];
    cbLoc[2]  = df.cbLoc[2];
    
+   density = new Real[1];
    ap = CalculateAp(kp);
    
    area.clear();
@@ -354,7 +359,8 @@ DragForce& DragForce::operator=(const DragForce& df)
 
    atmos                 = NULL;
    angVel                = NULL;
-   density               = NULL;
+//   density               = NULL;
+   density = new Real[1];
    prefactor             = NULL;
    firedOnce             = false;
    hasWindModel          = df.hasWindModel;
@@ -666,7 +672,11 @@ bool DragForce::Initialize()
          delete [] prefactor;
       }
       
-      density   = new Real[satCount];
+      // Set up density even if only used for a parameter
+      if (satCount > 0)
+         density   = new Real[satCount];
+      else
+         density   = new Real[1];
       prefactor = new Real[satCount];
       
       #ifdef DEBUG_MEMORY
@@ -1110,6 +1120,87 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
    #endif
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
+{
+   Rvector6 dv;
+
+   if (atmos == NULL)
+      Initialize();
+
+   Real vRelative[3], vRelMag, factor, mass, cd, area;
+   mass = sc->GetRealParameter("TotalMass");
+   cd   = sc->GetRealParameter("Cd");
+   area = sc->GetRealParameter("DragArea");
+
+   Real prefactor = -0.5 * cd * area / mass;
+
+   // First translate to the drag body from the force model origin
+   Real now = sc->GetEpoch();
+   Real *state = sc->GetState().GetState();
+   // TODO Translate origin
+
+   Real dens = 0.0;
+   if (atmos != NULL)
+   {
+      atmos->Density(state, &dens, now, 1);
+      if (angVel == NULL)
+         angVel = atmos->GetAngularVelocity();
+   }
+   else
+      throw ODEModelException("Atmospheric model is NULL in the DragForce");
+
+   if (hasWindModel)
+   {
+      Real wind[6];
+
+      // v_rel = v - w x R
+      atmos->Wind(&(state[0]), wind, now, 1);
+      vRelative[0] = state[3] - wind[3];
+      vRelative[1] = state[4] - wind[4];
+      vRelative[2] = state[5] - wind[5];
+      vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                     vRelative[2]*vRelative[2]);
+   }
+   else
+   {
+      // v_rel = v - w x R
+      vRelative[0] = state[3] -
+                     (angVel[1]*state[2] - angVel[2]*state[1]);
+      vRelative[1] = state[4] -
+                     (angVel[2]*state[0] - angVel[0]*state[2]);
+      vRelative[2] = state[5] -
+                     (angVel[0]*state[1] - angVel[1]*state[0]);
+      vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                     vRelative[2]*vRelative[2]);
+   }
+
+   factor = prefactor * dens;
+
+   // Do dv/dt first, in case deriv = state
+   dv[3] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+   dv[4] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+   dv[5] = factor * vRelMag * vRelative[2];// - a_indirect[2];
+
+   // dr/dt = v term not built from drag force
+   dv[0] =
+   dv[1] =
+   dv[2] = 0.0;
+
+   return dv;
 }
 
 
@@ -1879,18 +1970,23 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
  * @param state Cartesian position/velocity state specifying where the density
  *              is needed.
  * @param when  TAI Modified Julian epoch for the calculation
+ *
+ * @return The first computed density value
  */
 //------------------------------------------------------------------------------
-void DragForce::GetDensity(Real *state, Real when)
+Real DragForce::GetDensity(Real *state, Real when, Integer count)
 {
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Entered DragForce::GetDensity()\n";
    #endif
 
+   if (count == -1)
+      count = satCount;
+
    // Give it a default value if the atmosphere model is not set
    if (!atmos)
    {
-      for (Integer i = 0; i < satCount; ++i)
+      for (Integer i = 0; i < count; ++i)
          density[i] = 4.0e-13;
    }
    else
@@ -1916,13 +2012,13 @@ void DragForce::GetDensity(Real *state, Real when)
          dragdata << "Calling atmos->Density() on " << atmos->GetTypeName()
                   << "\n";
       #endif
-      atmos->Density(state, density, when, satCount);
+      atmos->Density(state, density, when, count);
       #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Returned from atmos->Density()\n";
       #endif
         
       #ifdef DEBUG_DRAGFORCE_DENSITY
-         for (Integer m = 0; m < satCount; ++m)
+         for (Integer m = 0; m < count; ++m)
             dragdata << "   Epoch: " << when
                      << "   State: "
                      << state[m*6] << "  "
@@ -1934,6 +2030,7 @@ void DragForce::GetDensity(Real *state, Real when)
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Leaving DragForce::GetDensity()\n";
    #endif
+   return density[0];
 }
 
 
