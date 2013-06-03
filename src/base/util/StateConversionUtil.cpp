@@ -2458,7 +2458,7 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
    MessageInterface::ShowMessage("CartesianToAngularMomentum() ");
    #endif
 
-   Real vMag = pos.GetMagnitude();
+   Real vMag = vel.GetMagnitude();
    Real vMagSq = vMag*vMag;
    if (mu == 0.0)
    {
