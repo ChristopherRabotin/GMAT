@@ -79,6 +79,7 @@ public:
    bool GetComponentMap(Integer * map, Integer order) const;
    bool Initialize();
    virtual Real EstimateError(Real *diffs, Real *answer) const;
+   virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
 
    //CelestialBody* GetBody();  // wcs: 2004/06/21 moved to PhysicalModel
    //std::string GetBodyName(); //loj: 5/7/04 added

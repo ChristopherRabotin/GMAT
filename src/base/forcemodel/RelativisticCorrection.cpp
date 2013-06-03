@@ -65,8 +65,10 @@ const Gmat::ParameterType RelativisticCorrection::PARAMETER_TYPE[RelativisticCor
 //------------------------------------------------------------------------------
 RelativisticCorrection::RelativisticCorrection(const std::string &name, const std::string &forBodyName) :
   PhysicalModel          (Gmat::PHYSICAL_MODEL, "RelativisticCorrection", name),
+  theSun                 (NULL),
   bodyRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
   bodyMu                 (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
+  sunMu                  (GmatSolarSystemDefaults::STAR_MU),
   bodySpinRate           (0.0),
   satCount               (0),
   bodyInertial           (NULL),
@@ -112,6 +114,7 @@ RelativisticCorrection::RelativisticCorrection(const RelativisticCorrection &rc)
    theSun         (NULL),
    bodyRadius     (rc.bodyRadius),
    bodyMu         (rc.bodyMu),
+   sunMu          (rc.sunMu),
    bodySpinRate   (rc.bodySpinRate),
    now            (rc.now),
    satCount       (rc.satCount),
@@ -489,6 +492,192 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 RelativisticCorrection::GetDerivativesForSpacecraft(Spacecraft* sc)
+{
+   Rvector6 dv;
+
+   Real now = sc->GetEpoch();
+   Real *state = sc->GetState().GetState();
+
+   Real      c      = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM *
+         GmatMathConstants::M_TO_KM;
+   sunMu            = theSun->GetGravitationalConstant();
+   bodyMu           = body->GetGravitationalConstant();  // from ODEModel
+
+   Rvector6  dummy(0.0, 1.0, 2.0, 3.0, 4.0, 5.0), dummyResult;
+   Real      r, v, s1, rvDotvvX4, s2_1, lt1, lt2;
+   Rmatrix33 R;    // fixed to inertial rotation matrix
+   Rmatrix33 Rdot; // fixed to inertial rotation Dot matrix
+   Real      ar[3], geodesic[3], s2[3], s3[3], schwarzschild[3], J1[3], J[3],
+             rvCrossvv[3], vvCrossJ[3];
+   Real      rv[3], vv[3], omega[3], lenseThirring[3];
+   Rvector3  bodySpinVector;
+
+   J[0]             = J[1]             = J[2]             = 0.0;
+   omega[0]         = omega[1]         = omega[2]         = 0.0;
+   geodesic[0]      = geodesic[1]      = geodesic[2]      = 0.0;
+   lenseThirring[0] = lenseThirring[1] = lenseThirring[2] = 0.0;
+
+   // needed for geodesic (for non-Sun only) and lense-thirring terms
+   if (body->GetName() != GmatSolarSystemDefaults::SUN_NAME)
+   {
+      Rvector6  stateWRTSun;
+      Real      posWRTSun[3], velWRTSun[3], vel[3], pos[3];
+      Real      posMag, muCBc2r3;
+      Real      threeOver2 = 3.0 / 2.0;
+
+      stateWRTSun  = body->GetMJ2000State(now) - theSun->GetMJ2000State(now);
+      posWRTSun[0] = stateWRTSun[0];
+      posWRTSun[1] = stateWRTSun[1];
+      posWRTSun[2] = stateWRTSun[2];
+      velWRTSun[0] = stateWRTSun[3];
+      velWRTSun[1] = stateWRTSun[4];
+      velWRTSun[2] = stateWRTSun[5];
+      posMag       = GmatMathUtil::Sqrt(posWRTSun[0] * posWRTSun[0] +
+                                        posWRTSun[1] * posWRTSun[1] +
+                                        posWRTSun[2] * posWRTSun[2]);
+
+      muCBc2r3     = sunMu/ (c * c * posMag * posMag * posMag);
+
+      vel[0]       = threeOver2 * velWRTSun[0];
+      vel[1]       = threeOver2 * velWRTSun[1];
+      vel[2]       = threeOver2 * velWRTSun[2];
+      pos[0]       = -muCBc2r3 * posWRTSun[0];
+      pos[1]       = -muCBc2r3 * posWRTSun[1];
+      pos[2]       = -muCBc2r3 * posWRTSun[2];
+      // Compute cross product
+      omega[0]     = vel[1]*pos[2] - vel[2]*pos[1];
+      omega[1]     = vel[2]*pos[0] - vel[0]*pos[2];
+      omega[2]     = vel[0]*pos[1] - vel[1]*pos[0];
+      #ifdef DEBUG_RELATIVISTIC_CORRECTION
+         MessageInterface::ShowMessage("muCBc2r3  = %le\n", muCBc2r3);
+         MessageInterface::ShowMessage("posMag    = %le\n", posMag);
+         MessageInterface::ShowMessage("pos       = %le   %le   %le\n", pos[0],
+               pos[1], pos[2]);
+         MessageInterface::ShowMessage("vel       = %le   %le   %le\n", vel[0],
+               vel[1], vel[2]);
+         MessageInterface::ShowMessage("posWRTSun = %le   %le   %le\n",
+               posWRTSun[0], posWRTSun[1], posWRTSun[2]);
+         MessageInterface::ShowMessage("velWRTSun = %le   %le   %le\n",
+               velWRTSun[0], velWRTSun[1], velWRTSun[2]);
+         MessageInterface::ShowMessage("big Omega = %le   %le   %le\n",
+               omega[0], omega[1], omega[2]);
+      #endif
+   }
+
+   bodyRadius   = body->GetEquatorialRadius();
+   // We want the body's fixed to inertial rotation matrix
+   cc.Convert(now, dummy, bodyFixed, dummyResult, bodyInertial);
+   R            = cc.GetLastRotationMatrix();
+   Rdot         = cc.GetLastRotationDotMatrix();
+
+   // Compute the body spin rate
+   bodySpinVector[0] = (-R(0,2) * Rdot(0,1)) - (R(1,2) * Rdot(1,1)) -
+         (R(2,2) * Rdot(2,1));
+   bodySpinVector[1] = ( R(0,2) * Rdot(0,0)) + (R(1,2) * Rdot(1,0)) +
+         (R(2,2) * Rdot(2,0));
+   bodySpinVector[2] = (-R(0,1) * Rdot(0,0)) - (R(1,1) * Rdot(1,0)) -
+         (R(2,1) * Rdot(2,0));
+   bodySpinRate = GmatMathUtil::Sqrt(bodySpinVector[0] * bodySpinVector[0] +
+                                     bodySpinVector[1] * bodySpinVector[1] +
+                                     bodySpinVector[2] * bodySpinVector[2]);
+   J1[0] = 0.0;
+   J1[1] = 0.0;
+   J1[2] = (2.0 / 5.0) * bodyRadius * bodyRadius * bodySpinRate;
+   J[0] = R(0,0)*J1[0] + R(0,1)*J1[1] + R(0,2)*J1[2];
+   J[1] = R(1,0)*J1[0] + R(1,1)*J1[1] + R(1,2)*J1[2];
+   J[2] = R(2,0)*J1[0] + R(2,1)*J1[1] + R(2,2)*J1[2];
+
+   #ifdef DEBUG_RELATIVISTIC_CORRECTION
+      MessageInterface::ShowMessage("R    = %s\n", R.ToString().c_str());
+      MessageInterface::ShowMessage("Rdot = %s\n", Rdot.ToString().c_str());
+      MessageInterface::ShowMessage("J                      = %le   %le   "
+            "%le\n", J[0], J[1], J[2]);
+      MessageInterface::ShowMessage("bodySpinVector         = %le   %le   "
+            "%le\n", bodySpinVector[0], bodySpinVector[1], bodySpinVector[2]);
+      MessageInterface::ShowMessage("bodySpinRate           = %le\n",
+            bodySpinRate);
+   #endif
+
+   for (Integer i = 0; i < 3; ++i)
+   {
+      rv[i] = state[i];
+      vv[i] = state[i+3];
+   }
+
+   // Compute the Schwarzschild solution
+   r        = GmatMathUtil::Sqrt(rv[0] * rv[0] + rv[1] * rv[1] + rv[2] * rv[2]);
+   v        = GmatMathUtil::Sqrt(vv[0] * vv[0] + vv[1] * vv[1] + vv[2] * vv[2]);
+   s1       = bodyMu / (c * c * r * r * r);
+   s2_1     = (4.0 * bodyMu / r) - (v * v);
+   s2[0]    = s2_1 * rv[0];
+   s2[1]    = s2_1 * rv[1];
+   s2[2]    = s2_1 * rv[2];
+   rvDotvvX4 = 4.0 * (rv[0] * vv[0] + rv[1] * vv[1] + rv[2] * vv[2]);
+   s3[0]    = rvDotvvX4 * vv[0];
+   s3[1]    = rvDotvvX4 * vv[1];
+   s3[2]    = rvDotvvX4 * vv[2];
+   schwarzschild[0] = s1 * (s2[0] + s3[0]);
+   schwarzschild[1] = s1 * (s2[1] + s3[1]);
+   schwarzschild[2] = s1 * (s2[2] + s3[2]);
+
+   // IF the body is not the Sun, compute the geodesic term
+   if (body->GetName() != GmatSolarSystemDefaults::SUN_NAME)
+   {
+      // Compute the geodesic precession
+      geodesic[0]       =  2.0 * (omega[1]*vv[2] - omega[2]*vv[1]);
+      geodesic[1]       =  2.0 * (omega[2]*vv[0] - omega[0]*vv[2]);
+      geodesic[2]       =  2.0 * (omega[0]*vv[1] - omega[1]*vv[0]);
+   }
+   else // if it is the Sun, we don't compute the geodesic term
+   {
+      geodesic[0]       =  0.0;
+      geodesic[1]       =  0.0;
+      geodesic[2]       =  0.0;
+   }
+
+   // Compute the Lense-Thirring precession
+   rvCrossvv[0] = rv[1]*vv[2] - rv[2]*vv[1];
+   rvCrossvv[1] = rv[2]*vv[0] - rv[0]*vv[2];
+   rvCrossvv[2] = rv[0]*vv[1] - rv[1]*vv[0];
+   vvCrossJ[0]  = vv[1]*J[2]  - vv[2]*J[1];
+   vvCrossJ[1]  = vv[2]*J[0]  - vv[0]*J[2];
+   vvCrossJ[2]  = vv[0]*J[1]  - vv[1]*J[0];
+   lt1          = 2.0 * s1;
+   lt2          = (3.0 / (r*r)) * (rv[0] * J[0] + rv[1] * J[1] + rv[2] * J[2]);
+
+   lenseThirring[0]  =  lt1 * ((lt2 * rvCrossvv[0]) + vvCrossJ[0]);
+   lenseThirring[1]  =  lt1 * ((lt2 * rvCrossvv[1]) + vvCrossJ[1]);
+   lenseThirring[2]  =  lt1 * ((lt2 * rvCrossvv[2]) + vvCrossJ[2]);
+
+   //Add the terms together
+   ar[0]  = schwarzschild[0] + geodesic[0] + lenseThirring[0];
+   ar[1]  = schwarzschild[1] + geodesic[1] + lenseThirring[1];
+   ar[2]  = schwarzschild[2] + geodesic[2] + lenseThirring[2];
+
+   dv[0] = 0.0;
+   dv[1] = 0.0;
+   dv[2] = 0.0;
+   dv[3] = ar[0];
+   dv[4] = ar[1];
+   dv[5] = ar[2];
+
+   return dv;
+}
+
+
 //------------------------------------------------------------------------------
 //  void SetEopFile(EopFile *eopF)
 //------------------------------------------------------------------------------
@@ -675,6 +864,7 @@ bool RelativisticCorrection::SupportsDerivative(Gmat::StateElementId id)
 
    return PhysicalModel::SupportsDerivative(id);
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStart(Gmat::StateElementId id, Integer index, Integer quantity)

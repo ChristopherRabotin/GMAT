@@ -81,6 +81,7 @@ public:
    virtual bool SetCentralBody();
    virtual bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1, 
          const Integer id = -1);
+   virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
 
    // inherited from GmatBase
    virtual GmatBase* Clone() const;

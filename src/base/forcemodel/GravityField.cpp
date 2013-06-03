@@ -649,6 +649,73 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
 
 
 //------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
+{
+   Rvector6 dv;
+   Real satState[6];
+
+   Real theEpoch = epoch;
+   epoch = sc->GetEpoch();
+
+   Real *state = sc->GetState().GetState();
+
+   Real originacc[3] = {0.0, 0.0, 0.0};  // JPD code
+   Rmatrix33 origingrad (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+   Rmatrix33 emptyGradient(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+   Rmatrix33 gradnew (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+
+   if (body != forceOrigin)
+   {
+      Real originstate[6] = { 0.0,0.0,0.0,0.0,0.0,0.0 };
+      Calculate(0.0, originstate, originacc, origingrad);
+   }
+
+   for (Integer i = 0; i < 6; ++i)
+      satState[i] = state[i];
+
+   Real accnew[3];  // JPD code
+   gradnew = emptyGradient;
+   Calculate(0.0, satState, accnew, gradnew);
+
+   for (Integer i=0;  i<=2;  ++i)
+      accnew[i] -= originacc[i];
+   gradnew -= origingrad;
+
+   // Fill Derivatives
+   dv[0] = satState[3];
+   dv[1] = satState[4];
+   dv[2] = satState[5];
+   dv[3] = accnew[0];
+   dv[4] = accnew[1];
+   dv[5] = accnew[2];
+
+   #ifdef DEBUG_DERIVATIVES
+   MessageInterface::ShowMessage("scscsc deriv = [");
+      for (Integer ii = 0; ii < 6; ++ii)
+      {
+         if (ii > 0)
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("%12.10lf", dv[ii]);
+      }
+      MessageInterface::ShowMessage("]\n", ii, dv[ii]);
+   #endif
+
+   epoch = theEpoch;
+   return dv;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool GetBodyAndMu(std::string &itsName, Real &itsMu)
 //------------------------------------------------------------------------------
 /**

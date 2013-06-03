@@ -160,6 +160,7 @@ public:
 
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
          const Integer id = -1);
+   virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
    virtual Real EstimateError(Real * diffs, Real * answer) const;
    virtual bool GetComponentMap(Integer * map, Integer order = 1, 
          Integer id = -1) const;

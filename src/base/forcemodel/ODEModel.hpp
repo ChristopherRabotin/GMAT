@@ -114,11 +114,18 @@ public:
    virtual bool CheckQualifier(const std::string &qualifier,
                                const std::string &forType);
 
+   // Methods used in propagation
    virtual bool Initialize();
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
          const Integer id = -1);
    virtual Real EstimateError(Real *diffs, Real *answer) const;
-      
+
+   // Methods used for parameter access
+   virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
+   virtual PhysicalModel* GetForceOfType(const std::string& forceType,
+         const std::string& forBody = "Earth");
+
+
    void AddForce(PhysicalModel *pPhysicalModel);
    
    void DeleteForce(const std::string &name);
@@ -317,6 +324,11 @@ protected:
    ObjectArray  dynamicObjects;
    IntegerArray dynamicIDs;
 
+   // Used with force model parameters
+   /// Flag used to detect if minimal for parm initialization has been performed
+   bool isInitializedForParameters;
+   /// Flag used to print parameter warnings only one time
+   bool warnedOnceForParameters;
 
    /// Mapping between script descriptions and force names.
    static std::map<std::string, std::string> scriptAliases;

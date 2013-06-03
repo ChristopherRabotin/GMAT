@@ -673,11 +673,79 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
+{
+   Rvector6 dv;
+
+   Real *state = sc->GetState().GetState();
+
+   Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
+
+   Real now = sc->GetEpoch();
+   Real relativePosition[3];
+   Rvector6 bodyrv = body->GetState(now);
+   SpacePoint *origin = sc->GetOrigin();
+   Rvector6 orig = origin->GetMJ2000State(now);
+
+   const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
+   Real rv[3];
+   rv[0] = brv[0] - orv[0];
+   rv[1] = brv[1] - orv[1];
+   rv[2] = brv[2] - orv[2];
+
+   // The vector from the force origin to the gravitating body
+   // Precalculations for the indirect effect term
+   rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
+   if (rbb3 != 0.0)
+   {
+      //rbb3 *= sqrt(rbb3);
+     rbb3 = sqrt(rbb3 * rbb3 * rbb3);
+      mu_rbb = mu / rbb3;
+      a_indirect[0] = mu_rbb * rv[0];
+      a_indirect[1] = mu_rbb * rv[1];
+      a_indirect[2] = mu_rbb * rv[2];
+   }
+   else
+      a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
+
+   {
+      relativePosition[0] = rv[0] - state[0];
+      relativePosition[1] = rv[1] - state[1];
+      relativePosition[2] = rv[2] - state[2];
+
+      r3 = relativePosition[0]*relativePosition[0] +
+           relativePosition[1]*relativePosition[1] +
+           relativePosition[2]*relativePosition[2];
+
+      radius = sqrt(r3);
+      r3 *= radius;
+      mu_r = mu / r3;
+
+      dv[3] = relativePosition[0] * mu_r - a_indirect[0];
+      dv[4] = relativePosition[1] * mu_r - a_indirect[1];
+      dv[5] = relativePosition[2] * mu_r - a_indirect[2];
+   }
+
+   return dv;
+}
+
 //---------------------------------
 // inherited methods from GmatBase
 //---------------------------------
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
  /**
 * This method returns a clone of the PointMassForce.

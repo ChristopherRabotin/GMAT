@@ -863,6 +863,28 @@ bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order,
 }
 
 //------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the derivative vector for a Spacecraft acted on by the model.
+ *
+ * @param sc The Spacecraft that is located at the time and place of the
+ *           derivative calculation
+ *
+ * @return The derivative vector for the spacecraft's state
+ */
+//------------------------------------------------------------------------------
+Rvector6 PhysicalModel::GetDerivativesForSpacecraft(Spacecraft *sc)
+{
+   Rvector6 retval;
+
+   throw ODEModelException("GetDerivativesForSpacecraft not implemented "
+         "for the " + typeName + " physical model.");
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
 //------------------------------------------------------------------------------
 /**

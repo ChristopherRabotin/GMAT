@@ -256,6 +256,8 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    stateEnd          (-1),
    cartStateSize     (0),
    dynamicProperties (false),
+   isInitializedForParameters (false),
+   warnedOnceForParameters (false),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
    earthEq           (NULL),
@@ -348,6 +350,8 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    stateEnd                   (fdf.stateEnd),
    cartStateSize              (0),
    dynamicProperties          (false),
+   isInitializedForParameters (false),
+   warnedOnceForParameters    (false),
    j2kBodyName                (fdf.j2kBodyName),
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
@@ -433,6 +437,8 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    stateEnd   = fdf.stateEnd;
 
    cartStateSize       = 0;
+   isInitializedForParameters = false;
+   warnedOnceForParameters = false;
    dynamicProperties   = false;
 
    numForces           = fdf.numForces;
@@ -1574,7 +1580,8 @@ bool ODEModel::Initialize()
 
          if ((*current)->IsOfType("DragForce"))
          {
-            SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
+            // This one is not a DragForce parameter:
+            // SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
             SetInternalCoordinateSystem("FixedCoordinateSystem", (*current));
          }
       }
@@ -3015,6 +3022,130 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
    }
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the Cartesian state vector derivatives for a single spacecraft
+ *
+ * @param sc The Spacecraft
+ *
+ * @return The [CartesianVelocity CartesianAcceleration] 6-vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
+{
+   if (!isInitializedForParameters)
+   {
+      MessageInterface::ShowMessage("Initializing %s for parameters\n",
+            instanceName.c_str());
+
+      for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
+            i != forceList.end(); ++i)
+      {
+         (*i)->SetSolarSystem(solarSystem);
+         (*i)->Initialize();
+      }
+      isInitializedForParameters = true;
+   }
+
+   Rvector6 dv, component;
+   dv[0] = sc->GetRealParameter("CartesianVX");
+   dv[1] = sc->GetRealParameter("CartesianVY");
+   dv[2] = sc->GetRealParameter("CartesianVZ");
+   dv[3] = dv[4] = dv[5] = 0.0;
+
+   if (sc == NULL)
+      throw ODEModelException("Derivative information cannot be computed; the "
+            "Spacecraft in the call to GetDerivativesForSpacecraft() is NULL");
+
+   // Apply superposition of forces/derivatives
+   for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
+         i != forceList.end(); ++i)
+   {
+      try
+      {
+         component = (*i)->GetDerivativesForSpacecraft(sc);
+      }
+      catch (BaseException &ex)
+      {
+         // ignore for now but post the message
+         if (warnedOnceForParameters == false)
+         {
+            MessageInterface::ShowMessage("*** Warning *** When computing "
+                  "derivative data for the force model %s, the following "
+                  "exception was caught:\n   %s\n", instanceName.c_str(),
+                  ex.GetFullMessage().c_str());
+         }
+
+         component.MakeZeroVector();
+      }
+
+      for (Integer j = 3; j < 6; ++j)
+         dv[j] += component[j];
+   }
+
+   // Sanity check the derivative
+   for (Integer index = 0; index < 6; ++index)
+   {
+      if (GmatMathUtil::IsNaN(dv[index]))
+         throw ODEModelException("The ForceModel " + instanceName +
+               " generated a derivative that is not a number");
+
+      if (GmatMathUtil::IsInf(dv[index]))
+         throw ODEModelException("The ForceModel " + instanceName +
+               " generated a derivative that is infinite");
+   }
+
+   warnedOnceForParameters = true;
+   return dv;
+}
+
+//------------------------------------------------------------------------------
+// PhysicalModel* GetForceOfType(const std::string& forceType,
+//       const std::string& forBody = "Earth");
+//------------------------------------------------------------------------------
+/**
+ * Accesses a specific force model component for use in parameter computations
+ *
+ * @param forceType The type of component ("DragForce", "PointMassForce", etc)
+ * @param forBody Where applicable, the name of the body supplying the force
+ *
+ * @return The force
+ */
+//------------------------------------------------------------------------------
+PhysicalModel* ODEModel::GetForceOfType(const std::string& forceType,
+      const std::string& forBody)
+{
+   PhysicalModel *theModel = NULL;
+
+   // Build a list of forces to delete
+   for (std::vector<PhysicalModel*>::iterator i =  forceList.begin();
+         i != forceList.end(); ++i)
+   {
+      if ((*i)->IsOfType(forceType))
+      {
+         if (forBody != "")
+         {
+            // Make sure the body also matches
+            if ((*i)->GetBodyName() == forBody)
+            {
+               theModel = *i;
+               break;
+            }
+         }
+         else
+         {
+            theModel = *i;
+            break;
+         }
+      }
+   }
+
+   return theModel;
 }
 
 

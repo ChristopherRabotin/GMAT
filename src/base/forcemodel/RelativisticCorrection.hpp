@@ -46,6 +46,7 @@ public:
    virtual bool Initialize();
    virtual bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1,
                                const Integer id = -1);
+   virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
 
    virtual void SetEopFile(EopFile *eopF);
 

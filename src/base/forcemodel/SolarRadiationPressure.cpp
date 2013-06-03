@@ -142,6 +142,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
 {
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   objectTypeNames.push_back("SolarRadiationPressure");
 }
 
 //------------------------------------------------------------------------------
@@ -1029,6 +1030,114 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
+{
+   Rvector6 dv;
+
+   if (!theSun)
+      throw ODEModelException("The Sun is not set in SRP::GetDerivatives");
+
+   if (!body)
+      throw ODEModelException(
+         "The central body is not set in SRP::GetDerivatives");
+
+   if (!cbSunVector)
+      throw ODEModelException(
+         "The sun vector is not initialized in SRP::GetDerivatives");
+
+   Real cr, area, mass;
+   Real distancefactor = 1.0, mag;
+   bool inSunlight = true, inShadow = false;
+
+   cr   = sc->GetRealParameter("Cr");
+   area = sc->GetRealParameter("SRPArea");
+   mass = sc->GetRealParameter("TotalMass");
+
+   Real ep = sc->GetEpoch();
+   sunrv = theSun->GetState(ep);
+   Real *state = sc->GetState().GetState();
+
+   // Rvector6 is initialized to all 0.0's; only change it if the body is not
+   // the Sun
+   if (!bodyIsTheSun)
+   {
+      cbrv = body->GetState(ep);
+      cbSunVector[0] = sunrv[0] - cbrv[0];
+      cbSunVector[1] = sunrv[1] - cbrv[1];
+      cbSunVector[2] = sunrv[2] - cbrv[2];
+   }
+   else
+   {
+      cbSunVector[0] = 0.0;
+      cbSunVector[1] = 0.0;
+      cbSunVector[2] = 0.0;
+   }
+
+   Real sunSat[3];
+
+   // Build vector from the Sun to the current spacecraft
+   sunSat[0] = state[0] - cbSunVector[0];
+   sunSat[1] = state[1] - cbSunVector[1];
+   sunSat[2] = state[2] - cbSunVector[2];
+   sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] +
+                     sunSat[2]*sunSat[2]);
+   if (sunDistance == 0.0)
+      sunDistance = 1.0;
+   // Make a unit vector for the force direction
+   forceVector[0] = sunSat[0] / sunDistance;
+   forceVector[1] = sunSat[1] / sunDistance;
+   forceVector[2] = sunSat[2] / sunDistance;
+
+   distancefactor = nominalSun / sunDistance;
+   // Convert m/s^2 to km/s^2
+   distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+
+   // Test shadow condition for current spacecraft (only if body isn't Sol)
+   if (!bodyIsTheSun)
+   {
+      psunrad = asin(sunRadius / sunDistance);
+      FindShadowState(inSunlight, inShadow, state);
+   }
+   else
+   {
+       inSunlight= true;
+       inShadow = false;
+       percentSun = 1.0;
+   }
+
+   if (!inShadow)
+   {
+      // Montenbruck and Gill, eq. 3.75
+      mag = percentSun * cr * fluxPressure * area * distancefactor /
+                          mass;
+
+      dv[0] = dv[1] = dv[2] = 0.0;
+      dv[3] = mag * forceVector[0];
+      dv[4] = mag * forceVector[1];
+      dv[5] = mag * forceVector[2];
+   }
+   else
+   {
+      dv[0] = dv[1] = dv[2] =
+      dv[3] = dv[4] = dv[5] = 0.0;
+   }
+
+   return dv;
+}
+
 
 //------------------------------------------------------------------------------
 // void FindShadowState(bool &lit, bool &dark, Real *state)
