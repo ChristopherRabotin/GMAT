@@ -2001,7 +2001,7 @@ wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID id,
-                                                   const wxSize &size)
+                                                   const wxSize &size, bool getMJ2000EqOnly)
 {
    // combo box for avaliable coordinate system
    
@@ -2010,9 +2010,32 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
    if (theNumCoordSys == 0)
       numCs = 3; //loj: ComboBox is too small if 1
    
-   wxComboBox *coordSysComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     theCoordSysList, wxCB_READONLY);
+   wxComboBox *coordSysComboBox;
+   if (getMJ2000EqOnly)
+   {
+      wxArrayString mj2000AxisList;
+      for (int i=0; i<theNumCoordSys; i++)
+      {
+         std::string csName = theCoordSysList[i].c_str();
+         // check for axis type
+         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
+         if (cs)
+         {
+            GmatBase *axis = cs->GetOwnedObject(0);
+            if (axis && axis->IsOfType("MJ2000EqAxes"))
+               mj2000AxisList.Add(csName);
+         }
+      }
+      coordSysComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        mj2000AxisList, wxCB_READONLY);
+   }
+   else
+   {
+      coordSysComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        theCoordSysList, wxCB_READONLY);
+   }
    
    // show first coordinate system
    coordSysComboBox->SetSelection(0);
@@ -5071,11 +5094,34 @@ void GuiItemManager::UpdateCoordSystemList()
       
       if ((*pos)->GetParent() != NULL)
       {
-         sel = (*pos)->GetSelection();
-         
-         (*pos)->Clear();
-         (*pos)->Append(theCoordSysList);
-         (*pos)->SetSelection(sel);
+         // Filter coordinate systems with MJ2000Eq axis
+         if ((*pos)->GetName() == "_MJ2000EqOnly_")
+         {
+            wxArrayString mj2000AxisList;
+            sel = (*pos)->GetSelection();
+            (*pos)->Clear();
+            for (unsigned int i = 0; i < theCoordSysList.size(); i++)
+            {
+               std::string csName = theCoordSysList[i].c_str();
+               GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName.c_str());
+               if (cs)
+               {
+                  GmatBase *axis = cs->GetOwnedObject(0);
+                  if (axis && axis->IsOfType("MJ2000EqAxes"))
+                     mj2000AxisList.Add(csName);
+               }
+            }
+            (*pos)->Append(mj2000AxisList);
+            (*pos)->SetSelection(sel);
+         }
+         else
+         {
+            sel = (*pos)->GetSelection();
+            
+            (*pos)->Clear();
+            (*pos)->Append(theCoordSysList);
+            (*pos)->SetSelection(sel);
+         }
       }
    }
 } //UpdateCoordSystemList()

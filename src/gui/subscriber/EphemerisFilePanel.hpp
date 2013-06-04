@@ -59,9 +59,12 @@ protected:
    void OnBrowse(wxCommandEvent& event);
    void OnCheck(wxCommandEvent& event);
    
+   void ShowCode500Items(bool show);
+   
    wxComboBox*     spacecraftComboBox;
-//   wxComboBox*     stateTypeComboBox;
-   wxComboBox*     coordinateSystemComboBox;
+   //wxComboBox*     stateTypeComboBox;
+   wxComboBox*     allCoordSystemComboBox;
+   wxComboBox*     onlyMj2000EqComboBox;
    wxCheckBox*     writeEphemerisCheckBox;
    wxComboBox*     fileFormatComboBox;
    wxTextCtrl*     fileNameTextCtrl;
@@ -69,13 +72,22 @@ protected:
    wxComboBox*     interpolatorComboBox;
    wxTextCtrl*     interpolationOrderTextCtrl;
    wxComboBox*     stepSizeComboBox;
+   wxComboBox*     outputFormatComboBox;
    wxComboBox*     epochFormatComboBox;
    wxComboBox*     initialEpochComboBox;
    wxComboBox*     finalEpochComboBox;
    
-   // Buffer for time conversion code
+   wxStaticText*   allCoordSystemStaticText;
+   wxStaticText*   onlyMJ2000EqStaticText;
+   
+   wxFlexGridSizer *grid1; //LOJ: Made this member data so that CS with only MJ2000Eq axis can be shown or hidden
+   wxFlexGridSizer *grid2; //LOJ: Made this member data so that OutputFormat can be shown or hidden
+   
+   // ComboBox saved value
+   wxString        fileFormat;
+   wxString        outputFormat;
    wxString        previousEpochFormat;
-
+   
    wxFileDialog *fileDialog;
    
    /// Managed wxComboBox map used by GuiItemManager

@@ -40,25 +40,46 @@ const double Code500EphemerisFile::DUT_TO_SEC        = 864.0;
 /**
  * Constructor
  *
- * @param  satId  Spacecraft ID [123.0]
- * @param  timeSystem  Time system used "UTC" or "A1" ["UTC"]
- * @param  sourceId  Source ID ["GMAT"]
+ * @param  fileName     Filename to be opened
+ * @param  satId        Spacecraft ID [123.0]
+ * @param  timeSystem   Time system used "UTC" or "A1" ["UTC"]
+ * @param  sourceId     Source ID ["GMAT"]
  * @param  centralBody  Central body name used ["Earth"]
+ * @param  fileMode     1 = input, 2 = output [2]
+ * @param  fileFormat   1 = PC, 2 = UNIX [1]
  */
 //------------------------------------------------------------------------------
-Code500EphemerisFile::Code500EphemerisFile(double satId, const std::string &timeSystem,
-                          const std::string &sourceId, const std::string &centralBody)
+Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double satId,
+                                           const std::string &timeSystem,
+                                           const std::string &sourceId,
+                                           const std::string &centralBody,
+                                           int fileMode, int fileFormat)
 {
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
-      ("Code500EphemerisFile() entered\n   satId=%f, timeSystem='%s', sourceId='%s', "
-       "centralBody='%s'\n", satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
+      ("Code500EphemerisFile() entered\n   fileName='%s', satId=%f, timeSystem='%s', sourceId='%s', "
+       "centralBody='%s'\n", fileName.c_str(), satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
    #endif
    
    mSatId = satId;
    mTimeSystem = timeSystem;
    mSourceId = sourceId;
    mCentralBody = centralBody;
+   mFileMode = fileMode;
+   mInputFileFormat = 1;
+   mOutputFileFormat = 1;
+   mInputFileName = "";
+   mOutputFileName = "";
+   if (mFileMode == 1)
+   {
+      mInputFileName = fileName;
+      mInputFileFormat = fileFormat;
+   }
+   else
+   {
+      mOutputFileName = fileName;
+      mOutputFileFormat = fileFormat;
+   }
    
    Initialize();
    
@@ -97,6 +118,11 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mTimeSystem = ef.mTimeSystem;
    mSourceId = ef.mSourceId;
    mCentralBody = ef.mCentralBody;
+   mFileMode = ef.mFileMode;
+   mInputFileFormat = ef.mInputFileFormat;
+   mOutputFileFormat = ef.mOutputFileFormat;
+   mInputFileName = ef.mInputFileName;
+   mOutputFileName = ef.mOutputFileName;
    
    Initialize();
 }
@@ -117,6 +143,11 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mTimeSystem = ef.mTimeSystem;
       mSourceId = ef.mSourceId;
       mCentralBody = ef.mCentralBody;
+      mFileMode = ef.mFileMode;
+      mInputFileFormat = ef.mInputFileFormat;
+      mOutputFileFormat = ef.mOutputFileFormat;
+      mInputFileName = ef.mInputFileName;
+      mOutputFileName = ef.mOutputFileName;
       
       Initialize();
       return *this;
@@ -136,6 +167,34 @@ void Code500EphemerisFile::Initialize()
    mProductId = "EPHEM   ";
    mCoordSystem = "2000";
    mTapeId = "STANDARD";
+   
+   // Set central body indicator
+   // 1.0 = Earth,  2.0 = Moon,    3.0 = Sun,     4.0 = Mars,     5.0 = Jupiter, 6.0 = Saturn
+   // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
+   if (mCentralBody == "Earth")
+      mCentralBodyIndicator = 1.0;
+   if (mCentralBody == "Luna")
+      mCentralBodyIndicator = 2.0;
+   else if (mCentralBody == "Sun")
+      mCentralBodyIndicator = 3.0;
+   else if (mCentralBody == "Mars")
+      mCentralBodyIndicator = 4.0;
+   else if (mCentralBody == "Jupiter")
+      mCentralBodyIndicator = 5.0;
+   else if (mCentralBody == "Saturn")
+      mCentralBodyIndicator = 6.0;
+   else if (mCentralBody == "Uranus")
+      mCentralBodyIndicator = 7.0;
+   else if (mCentralBody == "Neptune")
+      mCentralBodyIndicator = 8.0;
+   else if (mCentralBody == "Pluto")
+      mCentralBodyIndicator = 9.0;
+   else if (mCentralBody == "Mercury")
+      mCentralBodyIndicator = 10.0;
+   else if (mCentralBody == "Venus")
+      mCentralBodyIndicator = 11.0;
+   else
+      mCentralBodyIndicator = -99.99;
    
    // Time System Indicator: 0.0 = A.1, Atomic Time, 1.0 = UTC, Universal Time Coordinated
    mInputTimeSystem = 0.0;
@@ -163,12 +222,19 @@ void Code500EphemerisFile::Initialize()
    //@todo Add GetOriginMu() to Spacecraft to get central body mu to
    // do cartesian to keplerian state conversion
    mCentralBodyMu = 398600.4415; // Set to earth mu for now for testing
-   mSwapEndian = false;
+   mSwapInputEndian = false;
+   mSwapOutputEndian = false;
    
    // Fill in some header and data record with initial values
    InitializeHeaderRecord1();
    InitializeHeaderRecord2();
    InitializeDataRecord();
+   
+   // Open file
+   if (mFileMode == 1)
+      OpenForRead(mInputFileName, mInputFileFormat);
+   else if (mFileMode == 2)
+      OpenForWrite(mOutputFileName, mOutputFileFormat);
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving\n");
@@ -177,21 +243,66 @@ void Code500EphemerisFile::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool OpenForRead(const std::string &fileName)
+// void Validate()
 //------------------------------------------------------------------------------
-bool Code500EphemerisFile::OpenForRead(const std::string &fileName)
+/**
+ * Validates header data. This method is usually called after Initialize.
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::Validate()
+{
+   // If file mode is writing, check for some header value
+   if (mFileMode == 1)
+   {
+      // Check for uninitialized central body indicator
+      if (mCentralBodyIndicator == -99.99)
+         throw UtilityException
+            ("Code 500 ephemeris header field error: central body indicator "
+             "is uninitialized for the file \"" + mOutputFileName + "\"");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool OpenForRead(const std::string &fileName, int fileFormat = 1)
+//------------------------------------------------------------------------------
+/**
+ * Opens ephemeris file for reading.
+ *
+ * @param  fileName  File name to be open for reading
+ * @param  fileFormat  Input file format (1 = PC, 2 = UNIX)
+ */
+//------------------------------------------------------------------------------
+bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileFormat)
 {
    #ifdef DEBUG_OPEN
-   MessageInterface::ShowMessage("OpenForRead() entered, fileName='%s'\n", fileName.c_str());
+   MessageInterface::ShowMessage
+      ("OpenForRead() entered, fileName='%s', fileFormat=%d\n", fileName.c_str(), fileFormat);
    #endif
    
-   // If input file is already open close it first, since different file can be opened
-   CloseForRead();
+   if (fileName == "")
+   {
+      #ifdef DEBUG_OPEN
+      MessageInterface::ShowMessage
+         ("OpenForRead() returning false, file name is blank\n");
+      #endif
+      return false;
+   }
    
-   mEphemFileIn.open(fileName.c_str(), std::ios_base::binary);
-   
-   if (!mEphemFileIn.is_open())
-      throw UtilityException("Cannot open ephemeris file \"" + fileName + "\" for reading");
+   if (mInputFileName != fileName)
+   {
+      // Close it first
+      CloseForRead();      
+      mEphemFileIn.open(fileName.c_str(), std::ios_base::binary);
+      
+      if (!mEphemFileIn.is_open())
+         throw UtilityException("Cannot open code 500 ephemeris file \"" + fileName + "\" for reading");
+      
+      mInputFileName = fileName;
+      mSwapInputEndian = false;
+      if (fileFormat == 2)
+         mSwapInputEndian = true;
+   }
    
    #ifdef DEBUG_OPEN
    std::streampos fsize = mEphemFileIn.tellg();
@@ -210,19 +321,45 @@ bool Code500EphemerisFile::OpenForRead(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
-// bool Code500EphemerisFile::OpenForWrite(const std::string &fileName)
+// bool OpenForWrite(const std::string &fileName, int fileFormat = 1)
 //------------------------------------------------------------------------------
-bool Code500EphemerisFile::OpenForWrite(const std::string &fileName)
+/**
+ * Opens ephemeris file for writing.
+ *
+ * @param  fileName  File name to be open for writing
+ * @param  fileFormat  Output file format (1 = PC, 2 = UNIX)
+ */
+//------------------------------------------------------------------------------
+bool Code500EphemerisFile::OpenForWrite(const std::string &fileName, int fileFormat)
 {
    #ifdef DEBUG_OPEN
    MessageInterface::ShowMessage
-      ("OpenForWrite() entered, fileName='%s'\n", fileName.c_str());
+      ("OpenForWrite() entered, fileName='%s', fileFormat=%d\n", fileName.c_str(), fileFormat);
    #endif
    
-   mEphemFileOut.open(fileName.c_str(), std::ios_base::binary);
+   if (fileName == "")
+   {
+      #ifdef DEBUG_OPEN
+      MessageInterface::ShowMessage
+         ("OpenForWrite() returning false, file name is blank\n");
+      #endif
+      return false;
+   }
    
-   if (!mEphemFileOut.is_open())
-      throw UtilityException("Cannot open ephemeris file \"" + fileName + "\" for writing");
+   if (mInputFileName != fileName)
+   {
+      // Close it firat
+      CloseForWrite();
+      mEphemFileOut.open(fileName.c_str(), std::ios_base::binary);
+      
+      if (!mEphemFileOut.is_open())
+         throw UtilityException("Cannot open code 500 ephemeris file \"" + fileName + "\" for writing");
+      
+      mOutputFileName != fileName;
+      mSwapOutputEndian = false;
+      if (fileFormat == 2)
+         mSwapOutputEndian = true;
+   }
    
    #ifdef DEBUG_OPEN
    MessageInterface::ShowMessage
@@ -271,15 +408,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    #endif
    
    if (!mEphemFileIn.is_open())
-   {
-      #ifdef DEBUG_READ_HEADERS
-      MessageInterface::ShowMessage
-         ("ReadHeader1() returning false, input ephem file is not opened\n");
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
+      throw UtilityException("Cannot open code 500 ephemeris file \"" + mInputFileName + "\" for reading");
    
    // Read the first header
    mEphemFileIn.seekg(std::ios_base::beg);
@@ -311,15 +440,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
 bool Code500EphemerisFile::ReadHeader2(int logOption)
 {
    if (!mEphemFileIn.is_open())
-   {
-      #ifdef DEBUG_READ_HEADERS
-      MessageInterface::ShowMessage
-         ("ReadHeader2() returning false, input ephem file is not opened\n");
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
+      throw UtilityException("Cannot open code 500 ephemeris file \"" + mInputFileName + "\" for reading");
    
    // Read the second header
    mEphemFileIn.seekg(RECORD_SIZE, std::ios_base::beg);
@@ -355,15 +476,7 @@ bool Code500EphemerisFile::ReadDataAt(int dataRecNumber, int logOption)
    #endif
    
    if (!mEphemFileIn.is_open())
-   {
-      #ifdef DEBUG_READ_DATA
-      MessageInterface::ShowMessage
-         ("ReadDataAt() returning false, input ephem file is not opened\n");
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
+      throw UtilityException("Cannot open code 500 ephemeris file \"" + mInputFileName + "\" for reading");
    
    int filePos = (dataRecNumber + 1) * RECORD_SIZE;
    #ifdef DEBUG_READ_DATA
@@ -421,15 +534,7 @@ bool Code500EphemerisFile::ReadDataRecords(int numRecordsToRead, int logOption)
    #endif
    
    if (!mEphemFileIn.is_open())
-   {
-      #ifdef DEBUG_READ_DATA
-      MessageInterface::ShowMessage
-         ("ReadDataRecords() returning false, input ephem file is not opened\n");
-      #endif
-      
-      //@note Should exception be thrown here?
-      return false;
-   }
+      throw UtilityException("Cannot open code 500 ephemeris file \"" + mInputFileName + "\" for reading");
    
    int recCount = 1;
    
@@ -757,6 +862,7 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    mEphemHeader1.refTimeForDUT_YYMMDD = mRefTimeForDUT_YYMMDD;
    CopyString(mEphemHeader1.coordSystemIndicator1, mCoordSystem, 4); // "2000" for J2000
    mEphemHeader1.coordSystemIndicator2 = 4; // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
+   mEphemHeader1.centralBodyIndicator = mCentralBodyIndicator;
    
    std::string str = mEphemHeader1.tapeId;
    #ifdef DEBUG_HEADRES

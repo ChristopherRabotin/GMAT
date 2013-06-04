@@ -13,10 +13,12 @@
 class GMAT_API Code500EphemerisFile
 {
 public:
-   Code500EphemerisFile(double satId = 123.0,
+   Code500EphemerisFile(const std::string &fileName = "",
+                        double satId = 123.0,
                         const std::string &timeSystem = "UTC",
                         const std::string &sourceId = "GMAT",
-                        const std::string &centralBody = "Earth");
+                        const std::string &centralBody = "Earth",
+                        int fileMode = 2, int fileFormat = 1);
    
    ~Code500EphemerisFile();
    Code500EphemerisFile(const Code500EphemerisFile &ef);
@@ -24,8 +26,9 @@ public:
    
    // methods for this class
    void Initialize();
-   bool OpenForRead(const std::string &filename);
-   bool OpenForWrite(const std::string &filename);
+   void Validate();
+   bool OpenForRead(const std::string &filename, int fileFormat = 1);
+   bool OpenForWrite(const std::string &filename, int fileFormat = 1);
    void CloseForRead();
    void CloseForWrite();
    
@@ -48,8 +51,8 @@ public:
    bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray, 
                          bool canFinalize = false);
    
-   void SetSwapEndian(bool swapEndian);
-   bool GetSwapEndian();
+   void SetSwapEndian(bool swapEndian, int fileMode);
+   bool GetSwapEndian(int fileMode);
    
    void ConvertAsciiToEbcdic(char *ascii, char *ebcdic, int numChars);
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
@@ -176,6 +179,7 @@ protected:
    double         mSatId;
    double         mInputTimeSystem;  // 1 = A1, 2 = UTC
    double         mOutputTimeSystem; // 1 = A1, 2 = UTC
+   double         mCentralBodyIndicator; 
    std::string    mProductId;
    std::string    mTapeId;
    std::string    mSourceId;
@@ -195,10 +199,6 @@ protected:
    EpochArray     mA1MjdArray;
    StateArray     mStateArray;
    
-   // Ephemeris input/output streams
-   std::ifstream  mEphemFileIn;
-   std::ofstream  mEphemFileOut;
-   
    // Sentinel data and flag
    double         mSentinelData;
    bool           mSentinelsFound;
@@ -217,8 +217,20 @@ protected:
    // For cartesian to keplerian state conversion
    double mCentralBodyMu;
    
+   // File mode, format, and name (read or write)
+   int  mFileMode;
+   int  mInputFileFormat;
+   int  mOutputFileFormat;
+   std::string mInputFileName;
+   std::string mOutputFileName;
+   
+   // File input/output streams
+   std::ifstream  mEphemFileIn;
+   std::ofstream  mEphemFileOut;
+   
    // Endianness
-   bool mSwapEndian;
+   bool mSwapInputEndian;
+   bool mSwapOutputEndian;
    
    // Initialization
    void InitializeHeaderRecord1();

@@ -127,6 +127,7 @@ protected:
    std::string interpolatorName;
    std::string stateType;
    std::string outCoordSystemName;
+   std::string outputFormat;
    bool writeEphemeris;
    /// for propagator change
    std::string prevPropName;
@@ -211,6 +212,8 @@ protected:
    static StringArray writeEphemerisList;
    /// Available interpolator type list
    static StringArray interpolatorTypeList;
+   /// Avilable output format list
+   static StringArray outputFormatList;
    
    // Initialization
    void         InitializeData();
@@ -342,6 +345,7 @@ protected:
       INTERPOLATION_ORDER,
       STATE_TYPE,
       COORDINATE_SYSTEM,
+      OUTPUT_FORMAT,
       WRITE_EPHEMERIS,
       FILE_NAME,                // deprecated
       EphemerisFileParamCount   // Count of the parameters for this class

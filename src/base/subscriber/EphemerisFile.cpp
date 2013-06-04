@@ -87,6 +87,7 @@ StringArray EphemerisFile::stepSizeList;
 StringArray EphemerisFile::stateTypeList;
 StringArray EphemerisFile::writeEphemerisList;
 StringArray EphemerisFile::interpolatorTypeList;
+StringArray EphemerisFile::outputFormatList;
 
 const std::string
 EphemerisFile::PARAMETER_TEXT[EphemerisFileParamCount - SubscriberParamCount] =
@@ -102,6 +103,7 @@ EphemerisFile::PARAMETER_TEXT[EphemerisFileParamCount - SubscriberParamCount] =
    "InterpolationOrder",    // INTERPOLATION_ORDER
    "StateType",             // STATE_TYPE
    "CoordinateSystem",      // COORDINATE_SYSTEM
+   "OutputFormat",          // OUTPUT_FORMAT
    "WriteEphemeris",        // WRITE_EPHEMERIS
    "FileName",              // FILE_NAME - deprecated
 };
@@ -120,6 +122,7 @@ EphemerisFile::PARAMETER_TYPE[EphemerisFileParamCount - SubscriberParamCount] =
    Gmat::INTEGER_TYPE,      // INTERPOLATION_ORDER
    Gmat::ENUMERATION_TYPE,  // STATE_TYPE
    Gmat::OBJECT_TYPE,       // COORDINATE_SYSTEM
+   Gmat::ENUMERATION_TYPE,  // OUTPUT_FORMAT
    Gmat::BOOLEAN_TYPE,      // WRITE_EPHEMERIS
    Gmat::STRING_TYPE,       // FILE_NAME - deprecated
 };
@@ -149,6 +152,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    interpolatorName     ("Lagrange"),
    stateType            ("Cartesian"),
    outCoordSystemName   ("EarthMJ2000Eq"),
+   outputFormat         ("PC"),
    writeEphemeris       (true),
    prevPropName         (""),
    currPropName         (""),
@@ -253,6 +257,10 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    // SLERP not allowed in 2010 release (Bug 2219)
    //interpolatorTypeList.push_back("SLERP");
    
+   outputFormatList.clear();
+   outputFormatList.push_back("PC");
+   outputFormatList.push_back("UNIX");
+   
    #ifdef DEBUG_EPHEMFILE
    MessageInterface::ShowMessage
       ("EphemerisFile::EphemerisFile() <%p>'%s' leaving\n", this, GetName().c_str());
@@ -336,6 +344,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    interpolatorName     (ef.interpolatorName),
    stateType            (ef.stateType),
    outCoordSystemName   (ef.outCoordSystemName),
+   outputFormat         (ef.outputFormat),
    writeEphemeris       (ef.writeEphemeris),
    prevPropName         (ef.prevPropName),
    currPropName         (ef.currPropName),
@@ -421,6 +430,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    interpolatorName     = ef.interpolatorName;
    stateType            = ef.stateType;
    outCoordSystemName   = ef.outCoordSystemName;
+   outputFormat         = ef.outputFormat;
    writeEphemeris       = ef.writeEphemeris;
    prevPropName         = ef.prevPropName;
    currPropName         = ef.currPropName;
@@ -1012,6 +1022,8 @@ const StringArray& EphemerisFile::GetPropertyEnumStrings(const Integer id) const
       return stateTypeList;
    case INTERPOLATOR:
       return interpolatorTypeList;
+   case OUTPUT_FORMAT:
+      return outputFormatList;
    default:
       return Subscriber::GetPropertyEnumStrings(id);
    }
@@ -1141,6 +1153,8 @@ std::string EphemerisFile::GetStringParameter(const Integer id) const
       return stateType;
    case COORDINATE_SYSTEM:
       return outCoordSystemName;
+   case OUTPUT_FORMAT:
+      return outputFormat;
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       return fileName;
@@ -1300,6 +1314,9 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       }
    case COORDINATE_SYSTEM:
       outCoordSystemName = value;
+      return true;
+   case OUTPUT_FORMAT:
+      outputFormat = value;
       return true;
    case FILE_NAME:
       WriteDeprecatedMessage(id);
@@ -1613,9 +1630,9 @@ void EphemerisFile::CreateCode500EphemerisFile()
    try
    {
       code500EphemFile =
-         new Code500EphemerisFile(satId, timeSystem, sourceId, centralBody);
+         new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody);
       
-      code500EphemFile->OpenForWrite(fileName);
+      //code500EphemFile->OpenForWrite(fileName);
       
       // @todo Set origin mu to code500 ephem so that it can do conversion
       //code500EphemFile->SetCentralBodyMu(spacecraft->GetOriginMu());
@@ -4007,7 +4024,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   //#ifdef DEBUG_EPHEMFILE_CODE500
    // For for debugging
    if (isEndOfRun)
    {
@@ -4017,7 +4034,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
-   #endif
+   //#endif
 }
 
 

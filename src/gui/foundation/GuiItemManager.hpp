@@ -183,7 +183,7 @@ public:
                                    const wxSize &size);
    
    wxComboBox* GetCoordSystemComboBox(wxWindow *parent, wxWindowID id,
-                                      const wxSize &size);
+                                      const wxSize &size, bool getMJ2000EqOnly = false);
    
    wxComboBox* GetCelestialBodyComboBox(wxWindow *parent, wxWindowID id,
                                         const wxSize &size);
