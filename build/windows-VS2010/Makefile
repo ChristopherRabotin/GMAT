@@ -1,4 +1,4 @@
-GMAT_HOME = J:/GMAT
+GMAT_HOME = C:/Users/builduser/Documents
 GMAT_CURRENT_DIR = $(GMAT_HOME)/DailyBuildScript/VS
 GMAT_DIR = $(GMAT_HOME)/GmatDevelopment
 GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
@@ -33,14 +33,14 @@ LATEST_DOCS_BUILD_DIR = Y:/Builds/DevDocs
 # compiles the latest build
 all: 
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GmatVS2010.sln //p:Configuration=ReleaseWithSPICE //t:Rebuild //fl ;
+	msbuild.exe GmatVS2010.sln //p:Configuration=Release //t:Rebuild //fl ;
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
 	msbuild.exe GmatPlugins.sln //p:Configuration=Release //t:Rebuild //fl ;
 
 # cleans up the compiled source code and docs files
 clean:
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GmatVS2010.sln //p:Configuration=ReleaseWithSPICE //fl //target:Clean;
+	msbuild.exe GmatVS2010.sln //p:Configuration=Release //fl //target:Clean;
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
 	msbuild.exe GmatPlugins.sln //p:Configuration=Release //fl //target:Clean;
 	cd $(GMAT_BIN_DIR) && rm -rf *.dll
@@ -72,24 +72,30 @@ dist:
 	cd $(GMAT_PLUGIN_BIN_DIR); \
 	cp libMatlabInterface.dll $(DAILY_PLUGINS_DEST_DIR); \
 	cp libFminconOptimizer.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libGmatEstimation.dll $(DAILY_PLUGINS_DEST_DIR); 
+	cp libGmatEstimation.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libDataInterface.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libEphemPropagator.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libEventLocator.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libExtraPropagators.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libFormation.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libGmatFunction.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libSaveCommand.dll $(DAILY_PLUGINS_DEST_DIR); \
+	cp libStation.dll $(DAILY_PLUGINS_DEST_DIR);
 	cd $(GMAT_PROPRIETARY_BIN_DIR); \
 	cp libMsise86.dll $(DAILY_PROPRIETARY_DEST_DIR); \
+	cp libNewParameters.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libNRLMsise00.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libMarsGRAM.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libEventLocator.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libVF13Optimizer.dll $(DAILY_PROPRIETARY_DEST_DIR); 
 	cd $(GMAT_HELP_BUILD_DIR); \
 	cp help-a4.pdf $(DAILY_HELP_DEST_DIR); \
 	cp help-letter.pdf $(DAILY_HELP_DEST_DIR); \
-	cp training-a4.pdf $(DAILY_HELP_DEST_DIR); \
-	cp training-letter.pdf $(DAILY_HELP_DEST_DIR); \
 	cp help.html $(DAILY_HELP_DEST_DIR); \
 	cp help.chm $(DAILY_HELP_DEST_DIR); \
 	cp -r $(GMAT_HELP_BUILD_DIR)/html $(DAILY_HELP_DEST_DIR);  \
 	cp -r $(GMAT_HELP_BUILD_DIR)/files $(DAILY_HELP_DEST_DIR); 
 	rm -rf $(LATEST_BUILD_DIR);
-	$(GMAT_BUILD_DIR)/assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR) -n $(NETWORK_DIR)
+	$(GMAT_BUILD_DIR)/assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR) -n $(NETWORK_DIR) -b $(DAILY_DESTINATION_DIR)
 
 dist-devdocs:
 	rm -rf $(LATEST_DOCS_BUILD_DIR)
@@ -102,7 +108,7 @@ check:
 
 # makes the user docs
 userdocs:
-	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE)
+	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help
 
 # makes the dev docs
 devdocs:

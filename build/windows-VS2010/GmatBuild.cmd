@@ -2,7 +2,7 @@
 REM Clears the screen
 CLS
 
-set MSYS=C:\msys
+set MSYS=C:\MinGW\msys\1.0
 set SH=%MSYS%\bin\sh.exe
 set Path=%MSYS%\bin;%Path%
 
@@ -12,10 +12,10 @@ echo    * Cleaning up old build (%time%)...
 IF ERRORLEVEL 2 echo      There were errors cleaning the old build
 IF ERRORLEVEL 0 echo      Cleanup was successful
 
-rem echo    * Checking out the code (%time%)...
+echo    * Checking out the code (%time%)...
 %SH% -c "make checkout > GmatCheckout.log 2> GmatCheckout.err"
-rem IF ERRORLEVEL 2 GOTO CheckoutError
-rem IF ERRORLEVEL 0 echo      Checkout from svn was successful
+IF ERRORLEVEL 2 GOTO CheckoutError
+IF ERRORLEVEL 0 echo      Checkout from svn was successful
 
 echo    * Compiling GMAT (%time%)...
 %SH% -c "make all > GmatBuild.log 2> GmatBuild.err"
