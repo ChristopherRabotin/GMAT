@@ -86,6 +86,8 @@
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DEBUG_FOR_CINTERFACE
 //#define DEBUG_TRANSIENT_FORCES
+//#define DEBUG_PARAMETER_INITIALIZATION
+
 
 
 //#ifndef DEBUG_MEMORY
@@ -3040,8 +3042,10 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
 {
    if (!isInitializedForParameters)
    {
-      MessageInterface::ShowMessage("Initializing %s for parameters\n",
-            instanceName.c_str());
+      #ifdef DEBUG_PARAMETER_INITIALIZATION
+         MessageInterface::ShowMessage("Initializing %s for parameters\n",
+               instanceName.c_str());
+      #endif
 
       for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
             i != forceList.end(); ++i)
@@ -3143,6 +3147,22 @@ PhysicalModel* ODEModel::GetForceOfType(const std::string& forceType,
             break;
          }
       }
+   }
+
+   // Make sure the model is initialized by init'ing them all if any needed
+   if ((theModel != NULL) && !isInitializedForParameters)
+   {
+      #ifdef DEBUG_PARAMETER_INITIALIZATION
+         MessageInterface::ShowMessage("Initializing %s for parameters\n",
+               instanceName.c_str());
+      #endif
+      for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
+            i != forceList.end(); ++i)
+      {
+         (*i)->SetSolarSystem(solarSystem);
+         (*i)->Initialize();
+      }
+      isInitializedForParameters = true;
    }
 
    return theModel;
