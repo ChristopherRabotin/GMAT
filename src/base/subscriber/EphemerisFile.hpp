@@ -43,10 +43,11 @@ public:
    virtual void         ValidateParameters();
    
    // methods inherited from Subscriber
-   virtual bool         Initialize();
    virtual void         SetProvider(GmatBase *provider);
    
    // methods inherited from GmatBase
+   virtual bool         Validate();
+   virtual bool         Initialize();
    virtual GmatBase*    Clone(void) const;
    virtual void         Copy(const GmatBase* orig);
    

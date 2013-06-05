@@ -119,9 +119,7 @@ void EphemerisFilePanel::Create()
    wxStaticBoxSizer *optionsStaticBoxSizer = new wxStaticBoxSizer(wxHORIZONTAL,
          this, "Options");
    
-   //wxFlexGridSizer *grid1 = new wxFlexGridSizer( 2, 0, 0 );
    grid1 = new wxFlexGridSizer( 2, 0, 0 );
-   //grid1->AddGrowableCol(1);
    
    id = mObject->GetParameterID("Spacecraft");
    wxStaticText * spacecraftStaticText =
@@ -172,9 +170,7 @@ void EphemerisFilePanel::Create()
    // 2. Create File Settings box:
    wxStaticBoxSizer *fileSettingsStaticBoxSizer =
       new wxStaticBoxSizer(wxHORIZONTAL, this, "File Settings");
-   //wxFlexGridSizer *grid2 = new wxFlexGridSizer( 3, 0, 0 );
    grid2 = new wxFlexGridSizer( 3, 0, 0 );
-   //grid2->AddGrowableCol(1);
    
    id = mObject->GetParameterID("FileFormat");
    wxStaticText * fileFormatStaticText =
@@ -224,19 +220,34 @@ void EphemerisFilePanel::Create()
    
    // StepSize
    id = mObject->GetParameterID("StepSize");
-   wxStaticText * stepSizeStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("S"GUI_ACCEL_KEY"tep Size"),
-            wxDefaultPosition, wxDefaultSize, 0 );
-   stepSizeComboBox = (wxComboBox*) BuildControl(this, id);
-   stepSizeComboBox->SetToolTip(pConfig->Read(_T("StepSizeHint")));
-   wxStaticText * stepSizeUnitsStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("sec"),
-            wxDefaultPosition, wxDefaultSize, 0 );
-   grid2->Add(stepSizeStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
-   grid2->Add(stepSizeComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-   grid2->Add(stepSizeUnitsStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
-   
-   //fileSettingsStaticBoxSizer->Add( grid2, 0, wxALIGN_LEFT|wxALL, bsize );
+   allStepSizeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("S"GUI_ACCEL_KEY"tep Size"),
+                       wxDefaultPosition, wxDefaultSize, 0 );
+   allStepSizeComboBox = (wxComboBox*) BuildControl(this, id);
+   allStepSizeComboBox->SetToolTip(pConfig->Read(_T("StepSizeHint")));
+   allStepSizeUnit =
+      new wxStaticText(this, ID_TEXT, wxT("sec"),
+                       wxDefaultPosition, wxDefaultSize, 0 );
+   // StepSize for code 500 takes real numbers only, so create TextCtrl,
+   // add to sizer and hide
+   numericStepSizeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("S"GUI_ACCEL_KEY"tep Size"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   numericStepSizeTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(180,-1),
+                     0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   numericStepSizeUnit =
+      new wxStaticText(this, ID_TEXT, wxT("sec"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   grid2->Add(allStepSizeStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(allStepSizeComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(allStepSizeUnit, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(numericStepSizeStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(numericStepSizeTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(numericStepSizeUnit, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Hide(numericStepSizeStaticText);
+   grid2->Hide(numericStepSizeTextCtrl);
+   grid2->Hide(numericStepSizeUnit);
    
    // OutputFormat
    id = mObject->GetParameterID("OutputFormat");
@@ -247,6 +258,7 @@ void EphemerisFilePanel::Create()
    outputFormatComboBox->SetToolTip(pConfig->Read(_T("OutputFormatHint")));
    grid2->Add(outputFormatStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(outputFormatComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(0, 0, wxALIGN_CENTER|wxALL, bsize );
    
    fileSettingsStaticBoxSizer->Add( grid2, 0, wxALIGN_LEFT|wxALL, bsize );
    
@@ -308,7 +320,7 @@ void EphemerisFilePanel::LoadData()
       LoadControl("StateType");
       LoadControl("CoordinateSystem");
       LoadControl("WriteEphemeris");
-      LoadControl("FileFormat");
+      LoadControl("FileFormat"); // Load file format before step size or output format
       LoadControl("Filename");
       LoadControl("Interpolator");
       LoadControl("InterpolationOrder");
@@ -622,7 +634,8 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    else if (label == "StepSize")
    {
       valueString = wxT(mObject->GetStringParameter(label).c_str());
-      stepSizeComboBox->SetValue(valueString);
+      numericStepSizeTextCtrl->SetValue(valueString);
+      allStepSizeComboBox->SetValue(valueString);
    }
    else if (label == "OutputFormat")
    {
@@ -715,11 +728,19 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
    }
    else if (label == "StepSize")
    {
-      valueString = stepSizeComboBox->GetValue();
-      if ((valueString == "IntegratorSteps") ||
-          (CheckReal(stepSize, valueString, "StepSize", "Real Number > 0.0 or "
-                "equals 'IntegratorSteps'", false, true, true, false)))
+      if (fileFormat == "Code-500")
+      {
+         valueString = numericStepSizeTextCtrl->GetValue();
          clonedObj->SetStringParameter(paramId, valueString);
+      }
+      else
+      {
+         valueString = allStepSizeComboBox->GetValue();
+         if ((valueString == "IntegratorSteps") ||
+             (CheckReal(stepSize, valueString, "StepSize", "Real Number > 0.0 or "
+                        "equals 'IntegratorSteps'", false, true, true, false)))
+            clonedObj->SetStringParameter(paramId, valueString);
+      }
    }
    else if (label == "OutputFormat")
    {
@@ -1012,6 +1033,14 @@ void EphemerisFilePanel::ShowCode500Items(bool show)
       grid1->Show(onlyMJ2000EqStaticText);
       grid1->Show(onlyMj2000EqComboBox);
       grid1->Layout();
+      // Show numeric only step size
+      grid2->Hide(allStepSizeStaticText);
+      grid2->Hide(allStepSizeComboBox);
+      grid2->Hide(allStepSizeUnit);
+      grid2->Show(numericStepSizeStaticText);
+      grid2->Show(numericStepSizeTextCtrl);
+      grid2->Show(numericStepSizeUnit);
+      grid2->Layout();
       // Enable output format
       outputFormatComboBox->Enable(true);
       theMiddleSizer->Layout();
@@ -1024,6 +1053,14 @@ void EphemerisFilePanel::ShowCode500Items(bool show)
       grid1->Hide(onlyMJ2000EqStaticText);
       grid1->Hide(onlyMj2000EqComboBox);
       grid1->Layout();
+      // Show all step size options
+      grid2->Show(allStepSizeStaticText);
+      grid2->Show(allStepSizeComboBox);
+      grid2->Show(allStepSizeUnit);
+      grid2->Hide(numericStepSizeStaticText);
+      grid2->Hide(numericStepSizeTextCtrl);
+      grid2->Hide(numericStepSizeUnit);
+      grid2->Layout();
       // Set output format to "PC" and disable it
       outputFormatComboBox->SetValue("PC");
       outputFormatComboBox->Enable(false);

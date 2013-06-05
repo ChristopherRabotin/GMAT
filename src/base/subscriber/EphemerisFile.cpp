@@ -625,6 +625,35 @@ void EphemerisFile::ValidateParameters()
 //----------------------------------
 
 //------------------------------------------------------------------------------
+// virtual void SetProvider(GmatBase *provider)
+//------------------------------------------------------------------------------
+void EphemerisFile::SetProvider(GmatBase *provider)
+{
+   Subscriber::SetProvider(provider);
+   HandlePropagatorChange(provider);
+}
+
+
+//----------------------------------
+// methods inherited from GmatBase
+//----------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Initialize()
+//------------------------------------------------------------------------------
+bool EphemerisFile::Validate()
+{
+   if (fileFormat == "Code-500")
+   {
+      if (!useFixedStepSize)
+         throw SubscriberException
+            ("Code-500 ephemeris file requires fixed step size");
+   }
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // virtual bool Initialize()
 //------------------------------------------------------------------------------
 bool EphemerisFile::Initialize()
@@ -667,6 +696,10 @@ bool EphemerisFile::Initialize()
    {
       fileType = CODE500_EPHEM;
       maxSegmentSize = 50; // 50 orbit states per data record
+      // Check for step size, only fixed step size is allowed
+      if (!useFixedStepSize)
+         throw SubscriberException
+            ("Code-500 EphemerisFiles requires fixed step size");
    }
    else
       throw SubscriberException
@@ -757,16 +790,6 @@ bool EphemerisFile::Initialize()
    #endif
    
    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetProvider(GmatBase *provider)
-//------------------------------------------------------------------------------
-void EphemerisFile::SetProvider(GmatBase *provider)
-{
-   Subscriber::SetProvider(provider);
-   HandlePropagatorChange(provider);
 }
 
 

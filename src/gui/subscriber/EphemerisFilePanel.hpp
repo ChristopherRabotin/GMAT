@@ -63,22 +63,28 @@ protected:
    
    wxComboBox*     spacecraftComboBox;
    //wxComboBox*     stateTypeComboBox;
-   wxComboBox*     allCoordSystemComboBox;
-   wxComboBox*     onlyMj2000EqComboBox;
    wxCheckBox*     writeEphemerisCheckBox;
    wxComboBox*     fileFormatComboBox;
    wxTextCtrl*     fileNameTextCtrl;
    wxBitmapButton* browseButton;
    wxComboBox*     interpolatorComboBox;
    wxTextCtrl*     interpolationOrderTextCtrl;
-   wxComboBox*     stepSizeComboBox;
    wxComboBox*     outputFormatComboBox;
    wxComboBox*     epochFormatComboBox;
    wxComboBox*     initialEpochComboBox;
    wxComboBox*     finalEpochComboBox;
    
+   wxComboBox*     allCoordSystemComboBox;
    wxStaticText*   allCoordSystemStaticText;
+   wxComboBox*     onlyMj2000EqComboBox;
    wxStaticText*   onlyMJ2000EqStaticText;
+   
+   wxStaticText*   allStepSizeStaticText;
+   wxComboBox*     allStepSizeComboBox;
+   wxStaticText*   allStepSizeUnit;
+   wxStaticText*   numericStepSizeStaticText;
+   wxTextCtrl*     numericStepSizeTextCtrl;
+   wxStaticText*   numericStepSizeUnit;
    
    wxFlexGridSizer *grid1; //LOJ: Made this member data so that CS with only MJ2000Eq axis can be shown or hidden
    wxFlexGridSizer *grid2; //LOJ: Made this member data so that OutputFormat can be shown or hidden

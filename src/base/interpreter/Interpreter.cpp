@@ -8230,6 +8230,20 @@ bool Interpreter::FinalPass()
          }
       }
       
+      // Validate EphemerisFile disallowed value
+      if (obj->IsOfType(Gmat::EPHEMERIS_FILE))
+      {
+         try
+         {
+            obj->Validate();
+         }
+         catch (BaseException& ex)
+         {
+            HandleError(ex, false);
+            retval = false;
+         }
+      }
+      
       if (obj->GetType() == Gmat::PARAMETER)
       {
          std::string type, owner, depObj;
@@ -8253,7 +8267,8 @@ bool Interpreter::FinalPass()
                   HandleError(ex, false);
                   retval = false;
                }
-               else if (param->GetOwnerType() != refObj->GetType())
+               //else if (param->GetOwnerType() != refObj->GetType())
+               else if (!refObj->IsOfType(param->GetOwnerType()))
                {
                   InterpreterException ex
                      ("\"" + type + "\" is not property of \"" +
