@@ -106,6 +106,7 @@ protected:
    wxComboBox *mObjectTypeComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
+   wxComboBox *mODEModelComboBox;
    
    wxListBox *mUserParamListBox;
    wxListBox *mObjectListBox;

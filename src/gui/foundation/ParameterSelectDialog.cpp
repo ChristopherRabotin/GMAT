@@ -143,6 +143,7 @@ ParameterSelectDialog::~ParameterSelectDialog()
    theGuiManager->UnregisterListBox(mObjectType, mObjectListBox);
    theGuiManager->UnregisterListBox("Hardware", mHardwareListBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+   theGuiManager->UnregisterComboBox("ODEModel", mODEModelComboBox);
    theGuiManager->UnregisterComboBox("CelestialBody", mCentralBodyComboBox);
 }
 
@@ -246,6 +247,7 @@ void ParameterSelectDialog::Create()
                            &mPropertyListBox, LISTBOX_ID,
                            &mCoordSysComboBox, COMBOBOX_ID,
                            &mCentralBodyComboBox, COMBOBOX_ID,
+                           &mODEModelComboBox, COMBOBOX_ID,
                            &mCoordSysLabel, &mCoordSysSizer,
                            &mUpButton, BUTTON_ID,
                            &mDownButton, BUTTON_ID,
@@ -293,8 +295,10 @@ void ParameterSelectDialog::LoadData()
             mCoordSysLabel->Hide();
             mCoordSysComboBox->SetValue("");
             mCentralBodyComboBox->SetValue("");
+            mODEModelComboBox->SetValue("");
             mCoordSysComboBox->Hide();
             mCentralBodyComboBox->Hide();
+            mODEModelComboBox->Hide();
          }
          else
          {
@@ -1478,7 +1482,7 @@ void ParameterSelectDialog::ShowCoordSystem()
    if (property == "")
    {
       #ifdef DEBUG_CS
-      MessageInterface::ShowMessage("ShowCoordSystem() property is empty, so just retun\n");
+      MessageInterface::ShowMessage("ShowCoordSystem() property is empty, so just return\n");
       #endif
       return;
    }
@@ -1498,9 +1502,11 @@ void ParameterSelectDialog::ShowCoordSystem()
       
       mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
       mCoordSysSizer->Add(mCoordSysComboBox);
       mCoordSysComboBox->Show();
       mCentralBodyComboBox->Hide();
+      mODEModelComboBox->Hide();
       mCoordSysSizer->Layout();
       mParameterSizer->Layout();
    }
@@ -1513,8 +1519,27 @@ void ParameterSelectDialog::ShowCoordSystem()
       // otherwise, mCentralBodyComboBox shows too far to right
       mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
       mCoordSysSizer->Add(mCentralBodyComboBox);
       mCentralBodyComboBox->Show();
+      mCoordSysComboBox->Hide();
+      mODEModelComboBox->Hide();
+      mCoordSysSizer->Layout();
+      mParameterSizer->Layout();
+   }
+   else if (depObj == GmatParam::ODE_MODEL)
+   {
+      MessageInterface::ShowMessage("Show ODE Models here\n");
+
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("ODE"GUI_ACCEL_KEY"Model");
+      
+      mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
+      mCoordSysSizer->Add(mODEModelComboBox);
+      mODEModelComboBox->Show();
+      mCentralBodyComboBox->Hide();
       mCoordSysComboBox->Hide();
       mCoordSysSizer->Layout();
       mParameterSizer->Layout();
@@ -1523,9 +1548,11 @@ void ParameterSelectDialog::ShowCoordSystem()
    {
       mCoordSysSizer->Detach(mCentralBodyComboBox);
       mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
       mCoordSysLabel->Hide();
       mCoordSysComboBox->Hide();
       mCentralBodyComboBox->Hide();
+      mODEModelComboBox->Hide();
       mCoordSysSizer->Layout();
       mParameterSizer->Layout();
    }
@@ -1545,6 +1572,7 @@ void ParameterSelectDialog::ClearProperties()
    
    mCoordSysLabel->Hide();
    mCoordSysComboBox->Hide();
+   mODEModelComboBox->Hide();
    mCentralBodyComboBox->Hide();
    mParameterSizer->Layout();
 }
@@ -1917,6 +1945,8 @@ wxString ParameterSelectDialog::FormParameterName()
       depObjName = mCoordSysComboBox->GetValue();
    else if (mCentralBodyComboBox->IsShown())
       depObjName = mCentralBodyComboBox->GetValue();
+   else if (mODEModelComboBox->IsShown())
+      depObjName = mODEModelComboBox->GetValue();
    
    if (mHardwareListBox->IsShown())
       hwName = mHardwareListBox->GetStringSelection();
@@ -1979,6 +2009,8 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
          depObjName = std::string(mCoordSysComboBox->GetValue().c_str());
       else if (mCentralBodyComboBox->IsShown())
          depObjName = std::string(mCentralBodyComboBox->GetValue().c_str());
+      else if (mODEModelComboBox->IsShown())
+         depObjName = std::string(mODEModelComboBox->GetValue().c_str());
       
       param = theGuiInterpreter->CreateParameter(propName, paramName);
       
