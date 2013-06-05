@@ -278,7 +278,7 @@ void ParameterSelectDialog::Create()
 void ParameterSelectDialog::LoadData()
 {   
    #ifdef DEBUG_LOAD
-   MessageInterface::ShowMessage("\nParameterSelectDialog::LoadData() entered.\n");
+      MessageInterface::ShowMessage("\nParameterSelectDialog::LoadData() entered.\n");
    #endif
    
    if (mShowOption == GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
@@ -1529,8 +1529,6 @@ void ParameterSelectDialog::ShowCoordSystem()
    }
    else if (depObj == GmatParam::ODE_MODEL)
    {
-      MessageInterface::ShowMessage("Show ODE Models here\n");
-
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("ODE"GUI_ACCEL_KEY"Model");
       
