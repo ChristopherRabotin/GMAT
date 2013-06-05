@@ -591,7 +591,7 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    }
    else if (label == "FileFormat")
    {
-      fileFormat = mObject->GetStringParameter(label);
+      fileFormat = (mObject->GetStringParameter(label)).c_str();
       //valueString = wxT(mObject->GetStringParameter(label).c_str());
       valueString = fileFormat.c_str();
       fileFormatComboBox->SetValue(valueString);
