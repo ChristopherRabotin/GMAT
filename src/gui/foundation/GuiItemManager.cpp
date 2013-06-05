@@ -1834,6 +1834,38 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 
 
 //------------------------------------------------------------------------------
+//  wxComboBox* GetObjectTypeComboBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return object type combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetODEModelComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   #ifdef DEBUG_OBJECT_TYPE_COMBOBOX
+   MessageInterface::ShowMessage("GuiItemManager::GetODEModelComboBox() entered\n");
+   #endif
+   
+   wxArrayString emptyList;
+   wxComboBox *cb =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, emptyList,
+                     wxCB_READONLY);
+   
+   for (UnsignedInt j = 0; j < theForceModelList.size(); ++j)
+      cb->Append(theForceModelList[j]);
+   
+   cb->SetSelection(0);
+   
+   #ifdef DEBUG_OBJECT_TYPE_COMBOBOX
+      MessageInterface::ShowMessage("==> GuiItemManager::GetODEModelComboBox() leaving\n");
+   #endif
+   
+   return cb;
+}
+
+
+//------------------------------------------------------------------------------
 //  wxComboBox* GetObjectTypeComboBox(wxWindow *parent, const wxSize &size, ...)
 //------------------------------------------------------------------------------
 /**
@@ -2023,7 +2055,7 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
          {
             GmatBase *axis = cs->GetOwnedObject(0);
             if (axis && axis->IsOfType("MJ2000EqAxes"))
-               mj2000AxisList.Add(csName);
+               mj2000AxisList.Add(csName.c_str());
          }
       }
       coordSysComboBox =
@@ -3780,6 +3812,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
     wxListBox **propertyListBox, wxWindowID propertyListBoxId,
     wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
     wxComboBox **originComboBox, wxWindowID originComboBoxId,
+    wxComboBox **odeModelComboBox, wxWindowID odeModelComboBoxId,
     wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
     wxButton **upButton, wxWindowID upButtonId,
     wxButton **downButton, wxWindowID downButtonId,
@@ -4000,6 +4033,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
       *originComboBox =
          GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
       (*originComboBox)->SetToolTip(pConfig->Read(_T("OriginHint")));
+
+      *odeModelComboBox = 
+         GetODEModelComboBox(parent, odeModelComboBoxId, wxSize(170, 20));
+      (*odeModelComboBox)->SetToolTip(pConfig->Read(_T("ODEModelHint")));
+
       
       //----- coordSysBoxSizer
       *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);   
@@ -5108,7 +5146,7 @@ void GuiItemManager::UpdateCoordSystemList()
                {
                   GmatBase *axis = cs->GetOwnedObject(0);
                   if (axis && axis->IsOfType("MJ2000EqAxes"))
-                     mj2000AxisList.Add(csName);
+                     mj2000AxisList.Add(csName.c_str());
                }
             }
             (*pos)->Append(mj2000AxisList);

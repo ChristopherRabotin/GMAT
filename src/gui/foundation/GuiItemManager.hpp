@@ -169,6 +169,9 @@ public:
                                      const wxSize &size,
                                      const wxArrayString objectTypeList);
    
+   wxComboBox* GetODEModelComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size);
+
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
    
@@ -336,6 +339,7 @@ public:
           wxListBox **propertyListBox, wxWindowID propertyListBoxId,
           wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
           wxComboBox **originComboBox, wxWindowID originComboBoxId,
+          wxComboBox **odeModelComboBox, wxWindowID odeModelComboBoxId,
           wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
           wxButton **upButton, wxWindowID upButtonId,
           wxButton **downButton, wxWindowID downButtonId,
