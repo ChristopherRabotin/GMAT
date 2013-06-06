@@ -1471,7 +1471,7 @@ void PropagationConfigPanel::SaveData()
          // ForceModel is deleted in PropSetup::SetForceModel()
          //theForceModel = newFm;
 
-         // Since the force model and it's physical models are cloned in the
+         // Since the force model and its physical models are cloned in the
          // base code, get new pointers
          theForceModel = thePropSetup->GetODEModel();
          if (theForceModel != NULL)
@@ -1516,6 +1516,14 @@ void PropagationConfigPanel::SaveData()
          #ifdef DEBUG_PROP_PANEL_SAVE
          ShowForceList("SaveData() AFTER  saving ForceModel");
          #endif
+
+         // If there is a configured ForceModel that matches this updated one, update it
+         GmatBase *configFM = theGuiInterpreter->GetConfiguredObject(fmName);
+         if (configFM->IsOfType(Gmat::ODE_MODEL))
+         {
+            (*((ODEModel*)(configFM))) = (*theForceModel);
+         }
+
       } // end if(isForceModelChange)
       else
       {
