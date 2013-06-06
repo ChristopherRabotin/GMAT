@@ -58,9 +58,10 @@ PLUGIN                 = ../plugins/libDataInterface
 #PLUGIN                = ../plugins/libSaveCommand
 
 # Internal-only plugins
-PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libMsise86
+PLUGIN                 = ../plugins/proprietary/libNewParameters
+PLUGIN                 = ../plugins/proprietary/libNRLMsise00
+PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
 #PLUGIN                = ../plugins/proprietary/libMarsGRAM
 
 #-----------------------------------------------------------
