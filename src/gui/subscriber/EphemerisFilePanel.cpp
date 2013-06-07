@@ -634,7 +634,11 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    else if (label == "StepSize")
    {
       valueString = wxT(mObject->GetStringParameter(label).c_str());
-      numericStepSizeTextCtrl->SetValue(valueString);
+      Real stepSizeReal = ToReal(valueString);
+      if (stepSizeReal != 0.0 && stepSizeReal != GmatRealConstants::REAL_UNDEFINED)
+         numericStepSizeTextCtrl->SetValue(valueString);
+      else
+         numericStepSizeTextCtrl->SetValue("60.0"); // Set 60.0 as default
       allStepSizeComboBox->SetValue(valueString);
    }
    else if (label == "OutputFormat")

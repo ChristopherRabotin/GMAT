@@ -648,6 +648,10 @@ bool EphemerisFile::Validate()
       if (!useFixedStepSize)
          throw SubscriberException
             ("Code-500 ephemeris file requires fixed step size");
+      
+      // Give default step size for code-500
+      stepSize = "60.0";
+      stepSizeInSecs = 60.0;
    }
    return true;
 }
@@ -1244,13 +1248,19 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
           fileFormatList.end())
       {
          fileFormat = value;
-
+         
          // Code to link interpolator selection to file type
          if (fileFormat == "CCSDS-OEM")
             interpolatorName = "Lagrange";
-         if (fileFormat == "SPK")
+         else if (fileFormat == "SPK")
             interpolatorName = "Hermite";
-
+         else if (fileFormat == "Code-500")
+         {
+            interpolatorName = "Lagrange";
+            // Also set default fixed step size to 60.0
+            stepSize = "60.0";
+            useFixedStepSize = true;
+         }
          return true;
       }
       else
