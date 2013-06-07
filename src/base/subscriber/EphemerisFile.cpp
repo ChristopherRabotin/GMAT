@@ -650,8 +650,11 @@ bool EphemerisFile::Validate()
             ("Code-500 ephemeris file requires fixed step size");
       
       // Give default step size for code-500
-      stepSize = "60.0";
-      stepSizeInSecs = 60.0;
+      if (stepSize == "IntegratorSteps")
+      {
+         stepSize = "60";
+         stepSizeInSecs = 60.0;
+      }
    }
    return true;
 }
