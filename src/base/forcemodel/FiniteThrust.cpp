@@ -809,6 +809,85 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order,
 
 
 //------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the Cartesian state vector of derivatives w.r.t. time
+ *
+ * @param sc The spacecraft that holds the state vector
+ *
+ * @return The derivative vector
+ */
+//------------------------------------------------------------------------------
+Rvector6 FiniteThrust::GetDerivativesForSpacecraft(Spacecraft* sc)
+{
+   Rvector6 dv;
+
+   Real accel[3], burnData[4];
+   //Real mDot;     // in case we want a mass flow parameter
+
+   if (find(mySpacecraft.begin(), mySpacecraft.end(), sc->GetName()) !=
+       mySpacecraft.end())
+   {
+      // Start with zero thrust
+      //mDot =
+      accel[0] = accel[1] = accel[2] = 0.0;
+
+      // Accumulate thrust and mass flow for each active thruster
+      for (std::vector <FiniteBurn*>::iterator fb = burns.begin();
+           fb != burns.end(); ++fb)
+      {
+         (*fb)->SetSpacecraftToManeuver(sc);
+         Real now = sc->GetEpoch();
+         if ((*fb)->Fire(burnData, now))
+         {
+            accel[0] += burnData[0];
+            accel[1] += burnData[1];
+            accel[2] += burnData[2];
+
+            // No mass flow (for now, so left in place)
+            //if ((*fb)->DepletesMass())
+            //{
+            //   if (order != 1)
+            //      throw ODEModelException("Mass depletion cannot be "
+            //              "performed with the selected propagator.");
+            //   mDot += burnData[3];
+            //   #ifdef DEBUG_MASS_FLOW
+            //      MessageInterface::ShowMessage("  mDot =  %.12lf\n",
+            //            mDot);
+            //   #endif
+            //}
+            //#ifdef DEBUG_MASS_FLOW
+            //   else
+            //      MessageInterface::ShowMessage("  mDot =  0.0\n");
+            //#endif
+         }
+      }
+
+      // Apply the burns to the state vector
+      dv[0]     =
+      dv[1] =
+      dv[2] = 0.0;
+      dv[3] = accel[0];
+      dv[4] = accel[1];
+      dv[5] = accel[2];
+
+   }
+   else // Thrust does not apply to this spacecraft
+   {
+      dv[0] =
+      dv[1] =
+      dv[2] =
+      dv[3] =
+      dv[4] =
+      dv[5] = 0.0;
+   }
+
+   return dv;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)
 //------------------------------------------------------------------------------
 /**
@@ -900,3 +979,4 @@ bool FiniteThrust::SetStart(Gmat::StateElementId id, Integer index,
    
    return retval;
 }
+

@@ -69,6 +69,8 @@ public:
    virtual bool            Initialize();
    virtual bool            GetDerivatives(Real * state, Real dt, Integer order, 
                                           const Integer id = -1);
+   virtual Rvector6        GetDerivativesForSpacecraft(Spacecraft *sc);
+
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
@@ -105,3 +107,4 @@ protected:
 };
 
 #endif // FiniteThrust_hpp
+
