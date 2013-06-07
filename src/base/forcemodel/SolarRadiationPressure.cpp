@@ -1068,7 +1068,11 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
 
    Real ep = sc->GetEpoch();
    sunrv = theSun->GetState(ep);
-   Real *state = sc->GetState().GetState();
+
+   Real *j2kState = sc->GetState().GetState();
+   Real state[6];
+
+   BuildModelState(ep, state, j2kState);
 
    // Rvector6 is initialized to all 0.0's; only change it if the body is not
    // the Sun
@@ -1545,3 +1549,4 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
    
    return retval;
 }
+

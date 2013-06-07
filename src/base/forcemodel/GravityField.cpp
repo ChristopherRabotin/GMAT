@@ -91,6 +91,7 @@
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_CREATE_DELETE
 
+
 using namespace GmatMathUtil;
 
 //---------------------------------
@@ -98,7 +99,7 @@ using namespace GmatMathUtil;
 //---------------------------------
 
 #ifdef DEBUG_FIRST_CALL
-static bool firstCallFired = false;
+   static bool firstCallFired = false;
 #endif
 
 std::vector<HarmonicGravity*> GravityField::cache;
@@ -665,9 +666,9 @@ Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
    Real satState[6];
 
    Real theEpoch = epoch;
+   Real *j2kState = sc->GetState().GetState();
    epoch = sc->GetEpoch();
-
-   Real *state = sc->GetState().GetState();
+   BuildModelState(epoch, satState, j2kState);
 
    Real originacc[3] = {0.0, 0.0, 0.0};  // JPD code
    Rmatrix33 origingrad (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
@@ -679,9 +680,6 @@ Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
       Real originstate[6] = { 0.0,0.0,0.0,0.0,0.0,0.0 };
       Calculate(0.0, originstate, originacc, origingrad);
    }
-
-   for (Integer i = 0; i < 6; ++i)
-      satState[i] = state[i];
 
    Real accnew[3];  // JPD code
    gradnew = emptyGradient;
@@ -708,6 +706,12 @@ Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
          MessageInterface::ShowMessage("%12.10lf", dv[ii]);
       }
       MessageInterface::ShowMessage("]\n", ii, dv[ii]);
+   #endif
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage("Drag Accel: [%le %le %le]\n", dv[3],
+               dv[4], dv[5]);
    #endif
 
    epoch = theEpoch;
@@ -1262,4 +1266,5 @@ HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
    #endif
    return newOne;
 }
+
 

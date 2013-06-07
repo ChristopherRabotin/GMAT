@@ -78,15 +78,16 @@
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_REORIGIN
 //#define DEBUG_ERROR_ESTIMATE
-//#define DUMP_TOTAL_DERIVATIVE
 //#define DEBUG_STM_AMATRIX_DERIVS
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
-//#define DUMP_ERROR_ESTIMATE_DATA
 //#define DEBUG_FOR_CINTERFACE
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_PARAMETER_INITIALIZATION
+//#define DUMP_ERROR_ESTIMATE_DATA
+//#define DUMP_TOTAL_DERIVATIVE
+//#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
 
 
 
@@ -2612,11 +2613,22 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    #endif
 
    #ifdef DUMP_TOTAL_DERIVATIVE
-      MessageInterface::ShowMessage(
-               "   Derivative = [");
-      for (Integer i = 0; i < dimension-1; ++i) //< state->GetSize()-1; ++i)
-         MessageInterface::ShowMessage("%.12le, ", deriv[i]); //(*state)[i]);
-      MessageInterface::ShowMessage("%.12le]\n", deriv[dimension-1]); //(*state)[state->GetSize()-1]);
+      bool initialStatesOnly = false;
+
+      #ifdef DUMP_INITIAL_STATE_DERIVATIVES_ONLY
+         initialStatesOnly = true;
+      #endif
+
+      if ((dt == 0.0) || !initialStatesOnly)
+      {
+         MessageInterface::ShowMessage("   Derivative A1MJD Epoch = %.12lf",
+               epoch + (dt / 86400.0));
+         MessageInterface::ShowMessage(
+                  "   Derivative = [");
+         for (Integer i = 0; i < dimension-1; ++i) //< state->GetSize()-1; ++i)
+            MessageInterface::ShowMessage("%.12le, ", deriv[i]); //(*state)[i]);
+         MessageInterface::ShowMessage("%.12le]\n", deriv[dimension-1]); //(*state)[state->GetSize()-1]);
+      }
    #endif
 
    #ifdef DEBUG_STM_AMATRIX_DERIVS
@@ -3067,6 +3079,8 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
             "Spacecraft in the call to GetDerivativesForSpacecraft() is NULL");
 
    // Apply superposition of forces/derivatives
+   Integer warningsIssued = 0;
+
    for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
          i != forceList.end(); ++i)
    {
@@ -3083,6 +3097,7 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
                   "derivative data for the force model %s, the following "
                   "exception was caught:\n   %s\n", instanceName.c_str(),
                   ex.GetFullMessage().c_str());
+            ++warningsIssued;
          }
 
          component.MakeZeroVector();
@@ -3104,7 +3119,15 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
                " generated a derivative that is infinite");
    }
 
-   warnedOnceForParameters = true;
+   if (warningsIssued > 0)
+      warnedOnceForParameters = true;
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage("ODE Accel: [%le %le %le]\n", dv[3],
+               dv[4], dv[5]);
+   #endif
+
    return dv;
 }
 
@@ -4771,4 +4794,5 @@ Integer ODEModel::GetOwnedObjectId(Integer id, GmatBase **owner) const
    
    return actualId;
 }
+
 

@@ -35,6 +35,7 @@
 //#define DEBUG_DRAGFORCE_PARAM
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
+//#define DEBUG_FIRST_CALL
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -50,6 +51,11 @@
    
    std::ofstream dragdata;
 #endif
+
+#ifdef DEBUG_FIRST_CALL
+   static bool firstCallFired = false;
+#endif
+
 
 
 //---------------------------------
@@ -1149,9 +1155,11 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    Real prefactor = -0.5 * cd * area / mass;
 
    // First translate to the drag body from the force model origin
+   Real *j2kState = sc->GetState().GetState();
+   Real state[6];
    Real now = sc->GetEpoch();
-   Real *state = sc->GetState().GetState();
-   // TODO Translate origin
+
+   BuildModelState(now, state, j2kState);
 
    Real dens = 0.0;
    if (atmos != NULL)
@@ -1199,6 +1207,12 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    dv[0] =
    dv[1] =
    dv[2] = 0.0;
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage("Drag Accel: [%le %le %le]\n", dv[3],
+               dv[4], dv[5]);
+   #endif
 
    return dv;
 }
@@ -2078,3 +2092,4 @@ Real DragForce::CalculateAp(Real kp)
 
    return newAp;
 }
+

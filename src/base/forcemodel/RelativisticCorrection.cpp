@@ -508,8 +508,11 @@ Rvector6 RelativisticCorrection::GetDerivativesForSpacecraft(Spacecraft* sc)
 {
    Rvector6 dv;
 
+   Real *j2kState = sc->GetState().GetState();
+   Real state[6];
    Real now = sc->GetEpoch();
-   Real *state = sc->GetState().GetState();
+
+   BuildModelState(now, state, j2kState);
 
    Real      c      = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM *
          GmatMathConstants::M_TO_KM;
@@ -926,4 +929,5 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
 // private methods
 //------------------------------------------------------------------------------
 // N/A
+
 

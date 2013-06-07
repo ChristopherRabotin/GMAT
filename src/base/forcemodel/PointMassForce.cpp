@@ -75,6 +75,13 @@
 //#define DEBUG_FORCE_ORIGIN
 //#define DUMP_PLANET_DATA
 //#define DEBUG_INDIRECT_TERM
+//#define DEBUG_FIRST_CALL
+
+#ifdef DEBUG_FIRST_CALL
+   static bool firstCallFired = false;
+#endif
+
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -689,11 +696,21 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
 {
    Rvector6 dv;
 
-   Real *state = sc->GetState().GetState();
+   Real *j2kState = sc->GetState().GetState();
+   Real state[6];
+   Real now = sc->GetEpoch();
+
+   BuildModelState(now, state, j2kState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage("Point Mass %s: Pos = [%lf %lf %lf] -> ",
+               bodyName.c_str(), state[0], state[1], state[2]);
+   #endif
+
 
    Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
 
-   Real now = sc->GetEpoch();
    Real relativePosition[3];
    Rvector6 bodyrv = body->GetState(now);
    SpacePoint *origin = sc->GetOrigin();
@@ -737,6 +754,12 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
       dv[4] = relativePosition[1] * mu_r - a_indirect[1];
       dv[5] = relativePosition[2] * mu_r - a_indirect[2];
    }
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage("Accel = [%le %le %le]\n", dv[3],
+               dv[4], dv[5]);
+   #endif
 
    return dv;
 }
@@ -1141,3 +1164,4 @@ void  PointMassForce::ShowDerivative(const std::string &header, Real *state,
       }
    #endif
 }
+
