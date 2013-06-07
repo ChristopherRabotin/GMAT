@@ -1719,3 +1719,48 @@ const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
 {
    return derivativeNames;
 }
+
+//------------------------------------------------------------------------------
+// bool BuildModelState(GmatEpoch now, Real* state, Real* j2kState,
+//       Integer dimension)
+//------------------------------------------------------------------------------
+/**
+ * Takes internal state vector and translates it to the PhysicalModel's origin
+ *
+ * @param now The epoch of the transformation
+ * @param state The transformed state -- this is the output vector, in MJ2000Eq
+ *              coordinates at the PhysicalModel's origin
+ * @param j3kState The input state vector.  This should be a vector in the
+ *                 j2kBody's MJ2000Eq coordinates
+ * @param dimension The size of the state vector.  This allows multiple position
+ *                  velocity sextuplets to be processed in a single call.  If
+ *                  dimension is not a multiple of 6, an exception is thrown.
+ *
+ * @return true is teh transformation succeeded, false if it failed.
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::BuildModelState(GmatEpoch now, Real* state, Real* j2kState,
+      Integer dimension)
+{
+   bool retval = false;
+
+   Integer count = dimension / 6;
+   if (count*6 != dimension)
+      throw ODEModelException("Error translating states when building the "
+            "model state");
+
+   if (body != NULL)
+   {
+      Rvector6 bodyState = body->GetMJ2000State(now);
+      for (Integer i = 0; i < count; ++i)
+      {
+         Integer i6 = i*6;
+         for (Integer j = 0; j < 6; ++j)
+            state[i6 + j] = j2kState[i6 + j] - bodyState[j];
+      }
+      retval = true;
+   }
+
+   return retval;
+}
+
