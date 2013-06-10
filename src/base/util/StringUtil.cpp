@@ -532,7 +532,7 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    #endif
 
    // remove trailing end-of-lines (\r or \n) or blanks or tabs (\t)
-   // before removing semicolns
+   // before removing semicolons
    if (removeSemicolon)
    {
       if (str2.size() > 0)
@@ -540,8 +540,12 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
          // if option is to remove eol
          if (removeEol)
          {
-            // replace all occurance of tab with a space
-            str2 = Replace(str2, "\t", " ");
+            // This line is no longer needed; the new code preserved tabs in
+            // string literals and replaces then with spaces everywhere else
+            // when the file is read.  That means that the only tab characters
+            // left are in string literals, and those need to be preserved.
+//            // replace all occurrence of tab with a space
+//            str2 = Replace(str2, "\t", " ");
 
             // remove trailing \r and \n
             while (str2[str2.size()-1] == '\n' || str2[str2.size()-1] == '\r')
@@ -5196,4 +5200,6 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
       MessageInterface::ShowMessage("%s'%s'\n", prefix.c_str(), strArray[i].c_str());
    }
 }
+
+
 
