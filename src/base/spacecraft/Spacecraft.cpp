@@ -1273,6 +1273,13 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    refObjectTypes.push_back(Gmat::HARDWARE);
+   if (attitude)
+   {
+      ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
+      for (unsigned int ii = 0; ii < attRefObjTypes.size(); ii++)
+         if (find(refObjectTypes.begin(), refObjectTypes.end(), attRefObjTypes.at(ii)) == refObjectTypes.end())
+            refObjectTypes.push_back(attRefObjTypes.at(ii));
+   }
    // Now Attitude is local object it will be created all the time
    //refObjectTypes.push_back(Gmat::ATTITUDE);
    return refObjectTypes;
@@ -1351,6 +1358,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
       {
          fullList.push_back(attitude->GetRefObjectName(type)); // makes no sense
          return fullList;
+      }
+      else if (type == Gmat::CELESTIAL_BODY)
+      {
+         // Add Attitude's ref. object names
+         std::string attRefObjName = attitude->GetRefObjectName(type);
+         if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
+            fullList.push_back(attRefObjName);
       }
 
       if (type == Gmat::FUEL_TANK)
@@ -1775,6 +1789,33 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       #endif
       return true;
    }
+   else
+   {
+      // first, try setting it on the attitude (owned object)   .......
+      if (attitude)
+      {
+         try
+         {
+            #ifdef DEBUG_SC_ATTITUDE
+            MessageInterface::ShowMessage
+               ("   Setting <%p><%s>'%s' to attitude <%p>\n", obj,
+                objType.c_str(), objName.c_str(), attitude);
+            #endif
+            // Pass objName as name since name can be blank.
+            // Attitude::SetRefObject() checks names before setting
+            attitude->SetRefObject(obj, type, objName);
+         }
+         catch (BaseException &)
+         {
+            #ifdef DEBUG_SC_ATTITUDE
+            MessageInterface::ShowMessage(
+               "------ error setting ref object %s on attitude\n",
+               name.c_str());
+            #endif
+         }
+      }
+   }
+
 
    #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage
