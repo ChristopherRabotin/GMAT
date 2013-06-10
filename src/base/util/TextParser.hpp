@@ -78,6 +78,7 @@ protected:
       
    bool IsCommand(const std::string &str);
    char GetClosingBracket(const char &openBracket);
+   std::string TabToSpaceExceptStrings(const std::string& startingBlock);
    
 private:
    
@@ -94,4 +95,6 @@ private:
 
 
 #endif // TextParser_hpp
+
+
 

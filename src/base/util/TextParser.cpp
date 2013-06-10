@@ -107,7 +107,8 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
    std::string str = logicalBlock;
 
    // Replace tabs with spaces to make parsing simpler
-   std::replace(str.begin(), str.end(), '\t', ' ');
+   str = TabToSpaceExceptStrings(str);
+//   std::replace(str.begin(), str.end(), '\t', ' ');
    length = str.length();
 
    std::string block;
@@ -371,7 +372,8 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    #endif
    if (theInstruction != "")
    {
-      std::replace(theInstruction.begin(), theInstruction.end(), '\t', ' ');
+//      std::replace(theInstruction.begin(), theInstruction.end(), '\t', ' ');
+      theInstruction = TabToSpaceExceptStrings(theInstruction);
 
       // Strip off leading and trailing whitespace
       std::string whitespace = " \t";
@@ -1184,6 +1186,42 @@ char TextParser::GetClosingBracket(const char &openBracket)
       sprintf(errorMsg, "TextParser found unknown open bracket: %c", openBracket);
       throw UtilityException(errorMsg);
    }
+}
+
+//------------------------------------------------------------------------------
+// std::string TextParser::TabToSpaceExceptStrings(
+//       const std::string& startingBlock)
+//------------------------------------------------------------------------------
+/**
+ * Replace tab by space when not in string
+ *
+ * Replaces tab characters with spaces, except when the character is in a single
+ * quoted string.
+ *
+ * @param startingBlock The string that can have tabs that are replaced
+ *
+ * @return The string with tabs replaced when appropriate
+ */
+//------------------------------------------------------------------------------
+std::string TextParser::TabToSpaceExceptStrings(
+      const std::string& startingBlock)
+{
+   std::string retstring = startingBlock;
+
+   bool instring = false;
+   for (UnsignedInt i = 0; i < retstring.length(); ++i)
+   {
+      if (retstring[i] == '\'')
+         instring = !instring;
+
+      if (!instring)
+      {
+         if (retstring[i] == '\t')
+            retstring[i] = ' ';
+      }
+   }
+
+   return retstring;
 }
 
 
