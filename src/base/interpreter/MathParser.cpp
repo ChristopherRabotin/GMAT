@@ -159,7 +159,10 @@ MathParser::~MathParser()
 //------------------------------------------------------------------------------
 bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
 {
-   theEquation = str;
+   // Convert tabs to spaces as we start
+   std::string strNoTab = GmatStringUtil::Replace(str, "\t", " ");
+
+   theEquation = strNoTab;
    
    #if DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage
@@ -177,7 +180,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    Integer errCode;
    
    // Check if string is enclosed with quotes
-   if (GmatStringUtil::IsEnclosedWith(str, "'"))
+   if (GmatStringUtil::IsEnclosedWith(strNoTab, "'"))
    {
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
@@ -186,7 +189,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       return false;
    }
    // Check if it is just a number
-   else if (GmatStringUtil::IsValidReal(str, rval, errCode))
+   else if (GmatStringUtil::IsValidReal(strNoTab, rval, errCode))
    {
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage("   real value = %g\n", rval);
@@ -212,7 +215,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
          throw MathException("Invalid number or math equation");
       }
       
-      std::string str1 = str;
+      std::string str1 = strNoTab;
       // Check for any math symbols or blank and comma, etc
       if (str1.find_first_of(" (),*/+-^'") == str1.npos)
       {
@@ -591,8 +594,10 @@ std::string MathParser::FindLowestOperator(const std::string &str,
 //------------------------------------------------------------------------------
 MathNode* MathParser::Parse(const std::string &str)
 {
-   originalEquation = str;
-   theEquation = str;
+   std::string strNoTab = GmatStringUtil::Replace(str, "\t", " ");
+
+   originalEquation = strNoTab;
+   theEquation = strNoTab;
    
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
@@ -602,8 +607,8 @@ MathNode* MathParser::Parse(const std::string &str)
    MessageInterface::ShowMessage
       ("=================================================================\n");
    #endif
-   
-   // first remove all blank spaces, extra layer of parenthesis, and semicoln
+
+   // first remove all blank spaces, extra layer of parenthesis, and semicolon
    std::string newEq = RemoveSpaceInMathEquation(theEquation);
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
