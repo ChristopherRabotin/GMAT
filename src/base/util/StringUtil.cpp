@@ -4979,13 +4979,16 @@ bool GmatStringUtil::HasMissingQuote(const std::string &str,
 bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpOnly,
                                     bool blankNameIsOk)
 {
+   // Convert tabs to spaces as we start
+   std::string strNoTab = GmatStringUtil::Replace(str, "\t", " ");
+
    #if DEBUG_MATH_EQ > 0
    MessageInterface::ShowMessage
       ("\nGmatStringUtil::IsMathEquation() entered, str=<%s>, checkInvalidOpOnly=%d, "
        "blankNameIsOk=%d\n", str.c_str(), checkInvalidOpOnly, blankNameIsOk);
    #endif
    
-   if (IsEnclosedWith(str, "'"))
+   if (IsEnclosedWith(strNoTab, "'"))
    {
       #if DEBUG_MATH_EQ
       MessageInterface::ShowMessage
@@ -4999,7 +5002,7 @@ bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpO
    {
       // Remove spaces, dots, commas, underscores, and parenthesis
       std::string removeStr = " .,_()";
-      std::string str1 = RemoveAll(str, removeStr);
+      std::string str1 = RemoveAll(strNoTab, removeStr);
       #if DEBUG_MATH_EQ > 1
       MessageInterface::ShowMessage
          ("   after '%s' removed '%s'\n", removeStr.c_str(), str1.c_str());
@@ -5030,7 +5033,7 @@ bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpO
    
    // Do more through checking
    
-   StringArray parts = SeparateBy(str, "+-*/^'");
+   StringArray parts = SeparateBy(strNoTab, "+-*/^'");
    Integer numParts = parts.size();
    
    #if DEBUG_MATH_EQ > 1
@@ -5044,7 +5047,7 @@ bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpO
       if (blankNameIsOk)
       {
          // Check if any spaces found
-         if (str.find_first_of(' ') == str.npos)
+         if (strNoTab.find_first_of(' ') == strNoTab.npos)
          {
             #if DEBUG_MATH_EQ
             MessageInterface::ShowMessage
@@ -5068,14 +5071,14 @@ bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpO
    MessageInterface::ShowMessage("   ..... Checking if parentheses part of array\n");
    #endif
    
-   std::string::size_type index = str.find_first_of("(");
-   if (index != str.npos)
+   std::string::size_type index = strNoTab.find_first_of("(");
+   if (index != strNoTab.npos)
    {
       // check if parentheses balanced
       #if DEBUG_MATH_EQ > 1
       MessageInterface::ShowMessage("   ..... Checking if parentheses is balanced\n");
       #endif
-      if (!IsParenBalanced(str))
+      if (!IsParenBalanced(strNoTab))
       {
          #if DEBUG_MATH_EQ
          MessageInterface::ShowMessage
@@ -5089,7 +5092,7 @@ bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpO
    MessageInterface::ShowMessage("   ..... Checking each part\n");
    #endif
    
-   bool retval = AreAllNamesValid(str);
+   bool retval = AreAllNamesValid(strNoTab);
    
    #if DEBUG_MATH_EQ
    MessageInterface::ShowMessage
