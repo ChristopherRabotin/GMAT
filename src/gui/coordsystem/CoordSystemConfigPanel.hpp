@@ -31,11 +31,11 @@ public:
    
 private:
    CoordinateSystem *theCoordSys;
-   CoordPanel *mCoordPanel;
-   wxString mEpochFormat;
-   bool mOriginChanged;
-   bool mObjRefChanged;
-   bool mEpochChanged;
+   CoordPanel       *mCoordPanel;
+   wxString         mEpochFormat;
+   bool             mOriginChanged;
+   bool             mObjRefChanged;
+   bool             mEpochChanged;
    
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;
@@ -45,6 +45,8 @@ private:
    wxComboBox *primaryComboBox;
    wxComboBox *formatComboBox;
    wxComboBox *secondaryComboBox;
+   wxComboBox *refObjectComboBox;
+   wxComboBox *constraintCSComboBox;
    
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;

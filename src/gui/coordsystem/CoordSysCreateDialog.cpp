@@ -31,6 +31,7 @@
 //#define DEBUG_COORD_DIALOG_LOAD
 //#define DEBUG_COORD_DIALOG_SAVE
 //#define DEBUG_COORD_DIALOG_XYZ
+//#define DEBUG_TEXT_MODS
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWidgets
@@ -53,8 +54,9 @@ END_EVENT_TABLE()
 CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("New Coordinate System")))
 {
-   mIsCoordCreated = false;
-   mIsTextModified = false;
+   mIsCoordCreated    = false;
+   mIsTextModified    = false;
+   mIsLACTextModified = false;
    
    Create();
    ShowData();
@@ -123,10 +125,12 @@ void CoordSysCreateDialog::LoadData()
    {
       epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
 
-      originComboBox = mCoordPanel->GetOriginComboBox();
-      typeComboBox = mCoordPanel->GetTypeComboBox();
-      primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-      secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
+      originComboBox       = mCoordPanel->GetOriginComboBox();
+      typeComboBox         = mCoordPanel->GetTypeComboBox();
+      primaryComboBox      = mCoordPanel->GetPrimaryComboBox();
+      secondaryComboBox    = mCoordPanel->GetSecondaryComboBox();
+      refObjectComboBox    = mCoordPanel->GetSecondaryComboBox();
+      constraintCSComboBox = mCoordPanel->GetSecondaryComboBox();
 
       xComboBox = mCoordPanel->GetXComboBox();
       yComboBox = mCoordPanel->GetYComboBox();
@@ -160,8 +164,8 @@ void CoordSysCreateDialog::SaveData()
 {
    #ifdef DEBUG_COORD_DIALOG_SAVE
    MessageInterface::ShowMessage
-      ("CoordSysCreateDialog::SaveData() entered, mIsTextModified=%d\n",
-       mIsTextModified);
+      ("CoordSysCreateDialog::SaveData() entered, mIsTextModified=%d, mIsLACTextModified = %d\n",
+       mIsTextModified, mIsLACTextModified);
    #endif
    
    canClose = true;
@@ -216,10 +220,19 @@ void CoordSysCreateDialog::SaveData()
                         DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
    }
    
+   if (mIsLACTextModified)
+   {
+      #ifdef DEBUG_TEXT_MODS
+         MessageInterface::ShowMessage("calling coordPanel->CheckAlign ...\n");
+      #endif
+      canClose = canClose && mCoordPanel->CheckAlignmentConstraintValues();
+   }
+
    if (!canClose)
       return;
    
-   mIsTextModified = false;
+   mIsTextModified    = false;
+   mIsLACTextModified = false;
    
    CoordinateSystem *coord =
       (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(coordName);
@@ -228,7 +241,11 @@ void CoordSysCreateDialog::SaveData()
    {
       AxisSystem *axis =
          (AxisSystem *)coord->GetRefObject(Gmat::AXIS_SYSTEM, "");
-      
+      #ifdef DEBUG_COORD_DIALOG_SAVE
+       MessageInterface::ShowMessage
+          ("CoordSysCreateDialog::SaveData() About to call SaveData for mIsCoordCreated\n");
+       #endif
+
       canClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
    }
    else
@@ -324,6 +341,15 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
    {
       EnableUpdate(true);
       mIsTextModified = true;
+   }
+
+   if (mCoordPanel->IsAlignmentConstraintTextModified())
+   {
+      #ifdef DEBUG_TEXT_MODS
+         MessageInterface::ShowMessage(" .... setting mIsLACTextModified to true ...\n");
+      #endif
+      EnableUpdate(true);
+      mIsLACTextModified = true;
    }
 }
 

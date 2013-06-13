@@ -23,8 +23,9 @@
 #include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "CoordinateSystem.hpp"
+#include "UserInputValidator.hpp"
 
-class CoordPanel : public wxPanel
+class CoordPanel : public wxPanel, public UserInputValidator
 {
 public:
     // constructors/destructors
@@ -38,6 +39,8 @@ public:
    wxComboBox *GetTypeComboBox() {return typeComboBox;}
    wxComboBox *GetPrimaryComboBox() {return primaryComboBox;}
    wxComboBox *GetSecondaryComboBox() {return secondaryComboBox;}
+   wxComboBox *GetReferenceObjectComboBox() {return refObjectComboBox;}
+   wxComboBox *GetConstraintCSComboBox() {return constraintCSComboBox;}
    wxComboBox *GetFormatComboBox() {return formatComboBox;}
    
    wxComboBox *GetXComboBox() {return xComboBox;}
@@ -46,6 +49,7 @@ public:
    
    bool GetShowPrimaryBody() {return mShowPrimaryBody;}
    bool GetShowSecondaryBody() {return mShowSecondaryBody;}
+   bool GetShowAlignmentConstraint() {return mShowAlignmentConstraint;}
    bool GetShowEpoch() {return mShowEpoch;}
    bool GetShowXyz() {return mShowXyz;}
    bool GetShowUpdateInterval() {return mShowUpdate;}
@@ -53,10 +57,14 @@ public:
    wxTextCtrl *GetEpochTextCtrl() {return epochTextCtrl;}
    wxTextCtrl *GetIntervalTextCtrl() {return intervalTextCtrl;}
    
+   bool IsAlignmentConstraintTextModified();
+   bool CheckAlignmentConstraintValues(bool setOnAxis = false, AxisSystem* theAxis = NULL);
+
    void EnableOptions(AxisSystem *axis = NULL);
    void SetDefaultAxis();
    void SetDefaultEpochRefAxis();
    void SetDefaultObjectRefAxis();
+   void SetDefaultAlignmentConstraintAxis();
    void ShowAxisData(AxisSystem *axis);
    AxisSystem* CreateAxis();
    bool SaveData(const std::string &coordName, AxisSystem *axis,
@@ -68,6 +76,7 @@ private:
    
    bool mShowPrimaryBody;
    bool mShowSecondaryBody;
+   bool mShowAlignmentConstraint;
    bool mShowEpoch;
    bool mShowXyz;
    bool mShowUpdate;
@@ -79,6 +88,18 @@ private:
    wxStaticText *formatStaticText;
    wxStaticText *secondaryStaticText;
    wxStaticText *epochStaticText;
+   wxStaticText *refObjectStaticText;
+   wxStaticText *constraintCSStaticText;
+
+   wxStaticText *alignXStaticText;
+   wxStaticText *alignYStaticText;
+   wxStaticText *alignZStaticText;
+   wxStaticText *constraintXStaticText;
+   wxStaticText *constraintYStaticText;
+   wxStaticText *constraintZStaticText;
+   wxStaticText *constraintRefXStaticText;
+   wxStaticText *constraintRefYStaticText;
+   wxStaticText *constraintRefZStaticText;
 
    wxStaticText *xStaticText;
    wxStaticText *yStaticText;
@@ -90,22 +111,59 @@ private:
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;
 
+   wxTextCtrl *alignXTextCtrl;
+   wxTextCtrl *alignYTextCtrl;
+   wxTextCtrl *alignZTextCtrl;
+   wxTextCtrl *constraintXTextCtrl;
+   wxTextCtrl *constraintYTextCtrl;
+   wxTextCtrl *constraintZTextCtrl;
+   wxTextCtrl *constraintRefXTextCtrl;
+   wxTextCtrl *constraintRefYTextCtrl;
+   wxTextCtrl *constraintRefZTextCtrl;
+
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;
    wxComboBox *primaryComboBox;
    wxComboBox *formatComboBox;
    wxComboBox *secondaryComboBox;
+   wxComboBox *refObjectComboBox;
+   wxComboBox *constraintCSComboBox;
 
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
 
+   wxFlexGridSizer *flexgridsizerAlignment;
+   wxFlexGridSizer *flexgridsizerConstraint;
+
+   wxFlexGridSizer *flexgridsizer1;
+   wxBoxSizer      *boxsizer2;
+
+
+   #ifdef __WXMAC__
+   wxBoxSizer   *boxsizerAxes;
+   wxBoxSizer   *boxsizerA;
+   wxBoxSizer   *boxsizerC;
+   wxStaticText *titleAlignmentStaticText;
+   wxStaticText *titleConstraintStaticText;
+   wxStaticText *title1StaticText;
+   #else
+   wxStaticBoxSizer   *staticboxsizerA;
+   wxStaticBoxSizer   *staticboxsizerC;
+   wxStaticBoxSizer   *staticboxsizerAxes;
+   #endif
+
+
+
    void Create();
    void LoadData();
    
+   void EnableAlignmentConstraint(bool enableAll = true);
+
    bool IsValidAxis(const wxString &axisType, const wxString &priName,
-                    const wxString &secName, const wxString &x,
-                    const wxString &y, const wxString &z);
+                    const wxString &secName,  const wxString &x,
+                    const wxString &y,        const wxString &z,
+                    const wxString &refName,  const wxString &constraintCSName);
    bool IsValidXYZ(const wxString &x, const wxString &y, const wxString &z);
    
    // IDs for the controls and the menu commands

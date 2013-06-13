@@ -38,6 +38,7 @@ public:
 protected:
    bool mIsCoordCreated;
    bool mIsTextModified;
+   bool mIsLACTextModified;
    
    wxString mCoordName;
    CoordPanel *mCoordPanel;
@@ -77,6 +78,8 @@ private:
    wxComboBox *primaryComboBox;
    wxComboBox *formatComboBox;
    wxComboBox *secondaryComboBox;
+   wxComboBox *refObjectComboBox;
+   wxComboBox *constraintCSComboBox;
    
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;

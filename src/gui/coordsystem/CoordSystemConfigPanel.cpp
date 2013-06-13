@@ -114,10 +114,12 @@ void CoordSystemConfigPanel::LoadData()
    
    epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
    
-   originComboBox = mCoordPanel->GetOriginComboBox();
-   typeComboBox = mCoordPanel->GetTypeComboBox();
-   primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-   secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
+   originComboBox        = mCoordPanel->GetOriginComboBox();
+   typeComboBox          = mCoordPanel->GetTypeComboBox();
+   primaryComboBox       = mCoordPanel->GetPrimaryComboBox();
+   secondaryComboBox     = mCoordPanel->GetSecondaryComboBox();
+   refObjectComboBox     = mCoordPanel->GetReferenceObjectComboBox();
+   constraintCSComboBox  = mCoordPanel->GetConstraintCSComboBox();
    
    xComboBox = mCoordPanel->GetXComboBox();
    yComboBox = mCoordPanel->GetYComboBox();
@@ -353,6 +355,14 @@ void CoordSystemConfigPanel::OnComboUpdate(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == primaryComboBox ||
             event.GetEventObject() == secondaryComboBox)
+   {
+      mObjRefChanged = true;
+   }
+   else if (event.GetEventObject() == refObjectComboBox)
+   {
+      mObjRefChanged = true;
+   }
+   else if (event.GetEventObject() == constraintCSComboBox)
    {
       mObjRefChanged = true;
    }

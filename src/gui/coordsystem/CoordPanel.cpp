@@ -22,6 +22,7 @@
 #include "StringUtil.hpp"           // for ToReal()
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include <wx/config.h>
 #include <sstream>
 
@@ -46,13 +47,14 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
-   mShowPrimaryBody   = false;
-   mShowSecondaryBody = false;
-   mShowEpoch         = false;
-   mShowXyz           = false;
-   mShowUpdate        = false;
+   mShowPrimaryBody         = false;
+   mShowSecondaryBody       = false;
+   mShowEpoch               = false;
+   mShowXyz                 = false;
+   mShowUpdate              = false;   // currently, nutation update interval is not shown
+   mShowAlignmentConstraint = false;
    
-   mEnableAll         = enableAll;
+   mEnableAll               = enableAll;
    
    Create();
    LoadData();
@@ -72,6 +74,8 @@ CoordPanel::~CoordPanel()
    theGuiManager->UnregisterComboBox("SpacePoint", originComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", primaryComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", secondaryComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", refObjectComboBox);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", constraintCSComboBox);
 }
 
 
@@ -119,6 +123,11 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    else
       mShowSecondaryBody = true; 
    
+   if (tmpAxis->UsesReferenceObject() == GmatCoordinate::NOT_USED)
+      mShowAlignmentConstraint    = false;
+   else
+      mShowAlignmentConstraint    = true;
+
    if (tmpAxis->UsesEpoch() == GmatCoordinate::NOT_USED)
       mShowEpoch = false;
    else
@@ -161,23 +170,84 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       SetDefaultEpochRefAxis();
    else if((typeStr == "MOEEq") || (typeStr == "MOEEc"))
       SetDefaultEpochRefAxis();
+   else if (typeStr == "LocalAlignedConstrained")
+      SetDefaultAlignmentConstraintAxis();
    
    if (mEnableAll)
    {
-      primaryStaticText->Enable(mShowPrimaryBody);
-      primaryComboBox->Enable(mShowPrimaryBody);
-      secondaryStaticText->Enable(mShowSecondaryBody);
-      secondaryComboBox->Enable(mShowSecondaryBody);
-      epochStaticText->Enable(mShowEpoch);
-      if (!mShowEpoch)
-         epochTextCtrl->SetValue("");
-      epochTextCtrl->Enable(mShowEpoch);
-      xStaticText->Enable(mShowXyz);
-      xComboBox->Enable(mShowXyz);
-      yStaticText->Enable(mShowXyz);
-      yComboBox->Enable(mShowXyz);
-      zStaticText->Enable(mShowXyz);
-      zComboBox->Enable(mShowXyz);
+
+      if (mShowAlignmentConstraint)
+      {
+         // Hide and disable primary, secondary, epoch, X, Y, Z
+//         primaryStaticText->Show(false);
+//         primaryComboBox->Show(false);
+//         secondaryStaticText->Show(false);
+//         secondaryComboBox->Show(false);
+//         epochStaticText->Show(false);
+//         epochTextCtrl->Show(false);
+//         xStaticText->Show(false);
+//         xComboBox->Show(false);
+//         yStaticText->Show(false);
+//         yComboBox->Show(false);
+//         zStaticText->Show(false);
+//         zComboBox->Show(false);
+
+         flexgridsizer1->Show(false);
+         boxsizer2->Show(false);
+
+         primaryStaticText->Enable(false);
+         primaryComboBox->Enable(false);
+         secondaryStaticText->Enable(false);
+         secondaryComboBox->Enable(false);
+         epochStaticText->Enable(false);
+         epochTextCtrl->Enable(false);
+         xStaticText->Enable(false);
+         xComboBox->Enable(false);
+         yStaticText->Enable(false);
+         yComboBox->Enable(false);
+         zStaticText->Enable(false);
+         zComboBox->Enable(false);
+
+         // Show and enable the alignment and constraint widgets
+         EnableAlignmentConstraint(true);
+      }
+      else
+      {
+         // Show and enable primary, secondary, epoch, X, Y, Z
+//         primaryStaticText->Show(true);
+//         primaryComboBox->Show(true);
+//         secondaryStaticText->Show(true);
+//         secondaryComboBox->Show(true);
+//         epochStaticText->Show(true);
+//         epochTextCtrl->Show(true);
+//         xStaticText->Show(true);
+//         xComboBox->Show(true);
+//         yStaticText->Show(true);
+//         yComboBox->Show(true);
+//         zStaticText->Show(true);
+//         zComboBox->Show(true);
+
+         flexgridsizer1->Show(true);
+         boxsizer2->Show(true);
+
+         primaryStaticText->Enable(mShowPrimaryBody);
+         primaryComboBox->Enable(mShowPrimaryBody);
+         secondaryStaticText->Enable(mShowSecondaryBody);
+         secondaryComboBox->Enable(mShowSecondaryBody);
+         epochStaticText->Enable(mShowEpoch);
+         epochTextCtrl->Enable(mShowEpoch);
+         if (!mShowEpoch)
+            epochTextCtrl->Clear();
+         xStaticText->Enable(mShowXyz);
+         xComboBox->Enable(mShowXyz);
+         yStaticText->Enable(mShowXyz);
+         yComboBox->Enable(mShowXyz);
+         zStaticText->Enable(mShowXyz);
+         zComboBox->Enable(mShowXyz);
+
+         // Hide and disable the alignment and constraint widgets
+         EnableAlignmentConstraint(false);
+      }
       
       // disable some items
       if (typeStr == "GSE" || typeStr == "GSM")
@@ -203,23 +273,112 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    }
    else  // disable all of them
    {
+      // Disable primary, secondary, epoch, X, Y, Z
       originStaticText->Enable(false);
-      typeStaticText->Enable(false);
-      primaryStaticText->Enable(false);
-      secondaryStaticText->Enable(false);
-      epochStaticText->Enable(false);
       originComboBox->Enable(false);
+      typeStaticText->Enable(false);
       typeComboBox->Enable(false);
+      primaryStaticText->Enable(false);
       primaryComboBox->Enable(false);
+      secondaryStaticText->Enable(false);
       secondaryComboBox->Enable(false);
+      epochStaticText->Enable(false);
       epochTextCtrl->Enable(false);
+
       xStaticText->Enable(false);
       xComboBox->Enable(false);
       yStaticText->Enable(false);
       yComboBox->Enable(false);
       zStaticText->Enable(false);
       zComboBox->Enable(false);
+
+      // Hide and disable the alignment and constraint widgets
+      EnableAlignmentConstraint(false);
    }
+   #ifdef __WXMAC__
+   // this next line is needed for the Mac
+   primaryStaticText->SetFocus();
+   boxsizerAxes->Layout();
+   #else
+   primaryStaticText->SetFocus();
+   staticboxsizerAxes->Layout();
+   #endif
+   Refresh();
+}
+
+bool CoordPanel::IsAlignmentConstraintTextModified()
+{
+   if (alignXTextCtrl->IsModified() || alignYTextCtrl->IsModified() ||
+       alignZTextCtrl->IsModified())
+      return true;
+   if (constraintXTextCtrl->IsModified() || constraintYTextCtrl->IsModified() ||
+       constraintZTextCtrl->IsModified())
+      return true;
+   if (constraintRefXTextCtrl->IsModified() || constraintRefYTextCtrl->IsModified() ||
+       constraintRefZTextCtrl->IsModified())
+      return true;
+   return false;
+}
+
+bool CoordPanel::CheckAlignmentConstraintValues(bool setOnAxis, AxisSystem *theAxis)
+{
+
+   if (setOnAxis && (theAxis == NULL))
+      return false;
+
+   std::string str = "";
+   Real x, y, z;
+   bool isValid = true;
+   // Set the alignment vector
+   if (alignXTextCtrl->IsEnabled() && alignYTextCtrl->IsEnabled() &&
+       alignZTextCtrl->IsEnabled())
+   {
+      str = alignXTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(x, str, "AlignmentVectorX", "Real Number");
+      str = alignYTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(y, str, "AlignmentVectorY", "Real Number");
+      str = alignZTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(z, str, "AlignmentVectorZ", "Real Number");
+      if (isValid && setOnAxis)
+      {
+         theAxis->SetRealParameter("AlignmentVectorX", x);
+         theAxis->SetRealParameter("AlignmentVectorY", y);
+         theAxis->SetRealParameter("AlignmentVectorZ", z);
+      }
+   }
+   if (constraintXTextCtrl->IsEnabled() && constraintYTextCtrl->IsEnabled() &&
+       constraintZTextCtrl->IsEnabled())
+   {
+      str = constraintXTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(x, str, "ConstraintVectorX", "Real Number");
+      str = constraintYTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(y, str, "ConstraintVectorY", "Real Number");
+      str = constraintZTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(z, str, "ConstraintVectorZ", "Real Number");
+      if (isValid && setOnAxis)
+      {
+         theAxis->SetRealParameter("ConstraintVectorX", x);
+         theAxis->SetRealParameter("ConstraintVectorY", y);
+         theAxis->SetRealParameter("ConstraintVectorZ", z);
+      }
+   }
+   if (constraintRefXTextCtrl->IsEnabled() && constraintRefYTextCtrl->IsEnabled() &&
+       constraintRefZTextCtrl->IsEnabled())
+   {
+      str = constraintRefXTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(x, str, "ConstraintReferenceVectorX", "Real Number");
+      str = constraintRefYTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(y, str, "ConstraintReferenceVectorY", "Real Number");
+      str = constraintRefZTextCtrl->GetValue().c_str();
+      isValid = isValid && CheckReal(z, str, "ConstraintReferenceVectorZ", "Real Number");
+      if (isValid && setOnAxis)
+      {
+         theAxis->SetRealParameter("ConstraintReferenceVectorX", x);
+         theAxis->SetRealParameter("ConstraintReferenceVectorY", y);
+         theAxis->SetRealParameter("ConstraintReferenceVectorZ", z);
+      }
+   }
+   return isValid;
 }
 
 
@@ -273,6 +432,29 @@ void CoordPanel::SetDefaultObjectRefAxis()
    xComboBox->SetValue("R");
    yComboBox->SetValue("");;
    zComboBox->SetValue("N");
+}
+
+//------------------------------------------------------------------------------
+// void SetDefaultAlignmentConstraintAxis()
+//------------------------------------------------------------------------------
+/**
+ * Sets the default LocalAlignedConstrained axis.
+ */
+//------------------------------------------------------------------------------
+void CoordPanel::SetDefaultAlignmentConstraintAxis()
+{
+   // default settings
+   refObjectComboBox->SetValue("Luna");
+   constraintCSComboBox->SetValue("MJ2000Eq");
+   alignXTextCtrl->SetValue(wxT("1.0"));
+   alignYTextCtrl->SetValue(wxT("0.0"));
+   alignZTextCtrl->SetValue(wxT("0.0"));
+   constraintXTextCtrl->SetValue(wxT("0.0"));
+   constraintYTextCtrl->SetValue(wxT("0.0"));
+   constraintZTextCtrl->SetValue(wxT("1.0"));
+   constraintRefXTextCtrl->SetValue(wxT("0.0"));
+   constraintRefYTextCtrl->SetValue(wxT("0.0"));
+   constraintRefZTextCtrl->SetValue(wxT("1.0"));
 }
 
 
@@ -340,6 +522,43 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
          yComboBox->SetStringSelection(axis->GetYAxis().c_str());
          zComboBox->SetStringSelection(axis->GetZAxis().c_str());
       }
+
+      if (mShowAlignmentConstraint)
+      {
+         #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+         MessageInterface::ShowMessage("Reference Object is %s\n", (axis->GetStringParameter("ReferenceObject")).c_str());
+         MessageInterface::ShowMessage("Constraint CS is %s\n", (axis->GetStringParameter("ConstraintCoordinateSystem")).c_str());
+         #endif
+         refObjectComboBox->
+            SetStringSelection(axis->GetStringParameter("ReferenceObject").c_str());
+         constraintCSComboBox->
+            SetStringSelection(axis->GetStringParameter("ConstraintCoordinateSystem").c_str());
+
+         // Load alignment and constraint data here
+         Real realVal;
+         realVal = axis->GetRealParameter("AlignmentVectorX");
+         alignXTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("AlignmentVectorY");
+         alignYTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("AlignmentVectorZ");
+         alignZTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+
+         realVal = axis->GetRealParameter("ConstraintVectorX");
+         constraintXTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("ConstraintVectorY");
+         constraintYTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("ConstraintVectorZ");
+         constraintZTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+
+         realVal = axis->GetRealParameter("ConstraintReferenceVectorX");
+         constraintRefXTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("ConstraintReferenceVectorY");
+         constraintRefYTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+         realVal = axis->GetRealParameter("ConstraintReferenceVectorZ");
+            constraintRefZTextCtrl->SetValue(theGuiManager->ToWxString(realVal));
+
+      }
+
    }
    catch (BaseException &e)
    {
@@ -361,24 +580,26 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
 //------------------------------------------------------------------------------
 AxisSystem* CoordPanel::CreateAxis()
 {
-   wxString priName = primaryComboBox->GetValue().Trim();
-   wxString secName = secondaryComboBox->GetValue().Trim();
+   wxString priName  = primaryComboBox->GetValue().Trim();
+   wxString secName  = secondaryComboBox->GetValue().Trim();
    wxString axisType = typeComboBox->GetValue().Trim();
    wxString epochStr = epochTextCtrl->GetValue().Trim();
-   wxString xStr = xComboBox->GetValue();
-   wxString yStr = yComboBox->GetValue();
-   wxString zStr = zComboBox->GetValue();
+   wxString xStr     = xComboBox->GetValue();
+   wxString yStr     = yComboBox->GetValue();
+   wxString zStr     = zComboBox->GetValue();
+   wxString refName  = refObjectComboBox->GetValue().Trim();
+   wxString cCSName  = constraintCSComboBox->GetValue().Trim();
    
    AxisSystem *axis = NULL;
    
-   if (IsValidAxis(axisType, priName, secName, xStr, yStr, zStr))
+   if (IsValidAxis(axisType, priName, secName, xStr, yStr, zStr, refName, cCSName))  // need all vectors too?
    {
       #ifdef DEBUG_COORD_PANEL_XYZ
          MessageInterface::ShowMessage("CoordPanel::IsValidAxis returned true\n");
       #endif
       // Create AxisSystem
       axis = (AxisSystem *)theGuiInterpreter->CreateObject(axisType.c_str(), "");
-      
+
       if (axis != NULL)
       {
          try
@@ -389,14 +610,14 @@ AxisSystem* CoordPanel::CreateAxis()
                   GetConfiguredObject(std::string(priName.c_str()));
                axis->SetPrimaryObject(primary);
             }
-            
+
             if (axis->UsesSecondary())
             {
                SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
                   GetConfiguredObject(std::string(secName.c_str()));
                axis->SetSecondaryObject(secondary);
             }
-            
+
             if (axis->UsesXAxis() || axis->UsesYAxis() || axis->UsesZAxis())
             {
                // set the x, y, and z
@@ -404,7 +625,7 @@ AxisSystem* CoordPanel::CreateAxis()
                axis->SetYAxis(std::string(yStr.c_str()));
                axis->SetZAxis(std::string(zStr.c_str()));
             }
-            
+
             // convert epoch to a1mjd
             // if Epoch is not in A1ModJulian, convert to A1ModJulian(loj: 1/23/07)
             if (axis->UsesEpoch())
@@ -419,14 +640,28 @@ AxisSystem* CoordPanel::CreateAxis()
                #endif
                axis->SetEpoch(a1mjd);
             }
-            
+            if (axis->UsesReferenceObject())
+            {
+               // Assuming that if it uses a reference object, it will also use
+               // a constraint coordinate system
+               SpacePoint *refObject = (SpacePoint *)theGuiInterpreter->
+                  GetConfiguredObject(std::string(refName.c_str()));
+               axis->SetStringParameter("ReferenceObject", refObject->GetName());
+               axis->SetReferenceObject(refObject);
+               CoordinateSystem *constraintCoord = (CoordinateSystem *)theGuiInterpreter->
+                  GetConfiguredObject(std::string(cCSName.c_str()));
+               axis->SetStringParameter("ConstraintCoordinateSystem", constraintCoord->GetName());
+               axis->SetRefObject(constraintCoord, Gmat::COORDINATE_SYSTEM, constraintCoord->GetName());
+
+               CheckAlignmentConstraintValues(true, axis);
+            }
          }
          catch (BaseException &e)
          {
             MessageInterface::ShowMessage
                ("CoordPanel::CreateAxis() error occurred in setting data!\n%s\n",
                 e.GetFullMessage().c_str());
-            
+
             delete axis;
             axis = NULL;
          }
@@ -446,27 +681,55 @@ AxisSystem* CoordPanel::CreateAxis()
 // private methods
 //---------------------------------
 
+void CoordPanel::EnableAlignmentConstraint(bool enableAll)
+{
+	#ifdef __WXMAC__
+	boxsizerA->Show(enableAll);
+	boxsizerC->Show(enableAll);
+	#else
+	staticboxsizerA->Show(enableAll);
+	staticboxsizerC->Show(enableAll);
+	#endif
+    refObjectComboBox->Enable(enableAll);
+    constraintCSComboBox->Enable(enableAll);
+    alignXTextCtrl->Enable(enableAll);
+    alignYTextCtrl->Enable(enableAll);
+    alignZTextCtrl->Enable(enableAll);
+    constraintXTextCtrl->Enable(enableAll);
+    constraintYTextCtrl->Enable(enableAll);
+    constraintZTextCtrl->Enable(enableAll);
+    constraintRefXTextCtrl->Enable(enableAll);
+    constraintRefYTextCtrl->Enable(enableAll);
+    constraintRefZTextCtrl->Enable(enableAll);
+}
+
+
 //------------------------------------------------------------------------------
 // bool IsValidAxis(const wxString &axisType, const wxString &priName,
 //                  const wxString &secName,  const wxString &xStr,
-//                  const wxString &yStr,     const wxString &zStr)
+//                  const wxString &yStr,     const wxString &zStr,
+//                  const wxString &refName,  const wxString &constraintCSName)
 //------------------------------------------------------------------------------
 /**
  * Returns a flag indicating whether or not the axes are valid
  *
- * @param axisType      axis type
- * @param priName       primary object name
- * @param secName       secondary object name
- * @param xStr          X-axis value
- * @param yStr          Y-axis value
- * @param zStr          Z-axis value
+ * @param axisType         axis type
+ * @param priName          primary object name
+ * @param secName          secondary object name
+ * @param xStr             X-axis value
+ * @param yStr             Y-axis value
+ * @param zStr             Z-axis value
+ * @param refName          name of the reference object
+ * @param constraintCSName name of the constraint coordinate system
  *
  * @return   true if valid; false otherwise
  */
 //------------------------------------------------------------------------------
 bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
-                             const wxString &secName, const wxString &xStr,
-                             const wxString &yStr, const wxString &zStr)
+                             const wxString &secName,  const wxString &xStr,
+                             const wxString &yStr,     const wxString &zStr,
+                             const wxString &refName,
+                             const wxString &constraintCSName)
 {
    #ifdef DEBUG_COORD_PANEL_XYZ
       MessageInterface::ShowMessage("Entering CoordPanel::IsValidAxis with X = %s, Y = %s, Z = %s\n",
@@ -499,6 +762,10 @@ bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
          MessageInterface::ShowMessage("In CoordPanel::IsValidAxis, calling IsValidXYZ\n");
       #endif
       return IsValidXYZ(xStr, yStr, zStr);
+   }
+   else if (axisType == "LocalAlignedConstrained")
+   {
+      // ******* TBD ***** need to check ref object and alignment/constraint info in here
    }
    
    return true;
@@ -593,12 +860,10 @@ bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void Setup( wxWindow *parent)
+// void Create()
 //------------------------------------------------------------------------------
 /**
  * Creates the panel.
- *
- * @param parent        the parent window
  */
 //------------------------------------------------------------------------------
 void CoordPanel::Create()
@@ -615,30 +880,6 @@ void CoordPanel::Create()
     // wxStaticText
    originStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"),
       wxDefaultPosition, wxDefaultSize, 0 );
-   typeStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Type"),
-      wxDefaultPosition, wxDefaultSize, 0 );
-   primaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Primary"),
-      wxDefaultPosition, wxDefaultSize, 0 );
-   secondaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Secondary"),
-      wxDefaultPosition, wxDefaultSize, 0 );
-   epochStaticText = new wxStaticText( this, ID_TEXT, wxT("A1MJD "GUI_ACCEL_KEY"Epoch"),
-      wxDefaultPosition, wxDefaultSize, 0 );
-
-   xStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"X: "),
-      wxDefaultPosition, wxDefaultSize, 0 );
-   yStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Y: "),
-      wxDefaultPosition, wxDefaultSize, 0 );
-   zStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Z: "),
-      wxDefaultPosition, wxDefaultSize, 0 );
-          
-   #if __WXMAC__
-   wxStaticText *title1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Axes"),
-                        wxDefaultPosition, wxSize(120,20),
-                        wxBOLD);
-   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                    true, _T(""), wxFONTENCODING_SYSTEM));
-   #endif
 
    //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
@@ -647,67 +888,170 @@ void CoordPanel::Create()
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(150,-1), false);
    originComboBox->SetToolTip(pConfig->Read(_T("OriginHint")));
+   typeStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Type"),
+      wxDefaultPosition, wxDefaultSize, 0 );
    typeComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    typeComboBox->SetToolTip(pConfig->Read(_T("TypeHint")));
+   primaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Primary"),
+      wxDefaultPosition, wxDefaultSize, 0 );
    primaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    primaryComboBox->SetToolTip(pConfig->Read(_T("PrimaryHint")));
+   secondaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Secondary"),
+      wxDefaultPosition, wxDefaultSize, 0 );
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    secondaryComboBox->SetToolTip(pConfig->Read(_T("SecondaryHint")));
+//   refObjectComboBox->SetToolTip(pConfig->Read(_T("RefObjectHint")));  // TBD
+   xStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"X: "),
+      wxDefaultPosition, wxDefaultSize, 0 );
    xComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    xComboBox->SetToolTip(pConfig->Read(_T("XHint")));
+   yStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Y: "),
+      wxDefaultPosition, wxDefaultSize, 0 );
    yComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    yComboBox->SetToolTip(pConfig->Read(_T("YHint")));
+   zStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Z: "),
+      wxDefaultPosition, wxDefaultSize, 0 );
    zComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    zComboBox->SetToolTip(pConfig->Read(_T("ZHint")));
 
    //wxTextCtrl
+   epochStaticText = new wxStaticText( this, ID_TEXT, wxT("A1MJD "GUI_ACCEL_KEY"Epoch"),
+      wxDefaultPosition, wxDefaultSize, 0 );
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
    epochTextCtrl->SetToolTip(pConfig->Read(_T("EpochHint")));
 
+   alignXStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"X"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   alignXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   alignXTextCtrl->SetToolTip(pConfig->Read(_T("AlignXHint")));
+   alignYStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"Y"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   alignYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   alignYTextCtrl->SetToolTip(pConfig->Read(_T("AlignYHint")));
+   alignZStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"Z"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   alignZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   alignZTextCtrl->SetToolTip(pConfig->Read(_T("AlignZHint")));
+   refObjectStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"ReferenceObject"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   refObjectComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
+      wxSize(120,-1), false);
+
+   //Get CordinateSystem ComboBox from the GuiItemManager.
+   constraintCSStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Constraint Coord. Sys."),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintCSComboBox =
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
+      constraintCSComboBox->SetToolTip(pConfig->Read(_T("ConstraintCSHint")));  // TBD
+
+   constraintXStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"X"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintXHint")));
+   constraintYStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"Y"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintYHint")));
+   constraintZStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"Z"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintZTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintZHint")));
+   constraintRefXStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"X"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintRefXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintRefXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefXHint")));
+   constraintRefYStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"Y"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintRefYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintRefYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefYHint")));
+   constraintRefZStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"Z"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   constraintRefZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(120,-1), 0 );
+//   constraintRefZTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefZHint")));
+
    // wx*Sizers
    wxBoxSizer *theMainSizer = new wxBoxSizer( wxVERTICAL );
-   #if __WXMAC__
-   wxBoxSizer *boxsizer4 = new wxBoxSizer( wxVERTICAL );
+   #ifdef __WXMAC__
+   boxsizerAxes = new wxBoxSizer( wxVERTICAL );   // box for the entire Axes part
+   boxsizerA    = new wxBoxSizer( wxVERTICAL );   // for Alignment
+   boxsizerC    = new wxBoxSizer( wxVERTICAL );   // for Constraint
+   title1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Axes"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
+                             wxFONTWEIGHT_BOLD,
+                             true, _T(""), wxFONTENCODING_SYSTEM));
+   titleAlignmentStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Alignment Vector"),
+                        wxDefaultPosition, wxSize(220,20),
+                        wxBOLD);
+   titleAlignmentStaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
+                                     wxFONTWEIGHT_BOLD,
+                                     true, _T(""), wxFONTENCODING_SYSTEM));
+   titleConstraintStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Constraint Vectors"),
+                        wxDefaultPosition, wxSize(220,20),
+                        wxBOLD);
+   titleConstraintStaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
+                                      wxFONTWEIGHT_BOLD,
+                                      true, _T(""), wxFONTENCODING_SYSTEM));
    #else
-   wxStaticBox *staticbox1 = new wxStaticBox( this, -1, wxT("Axes") );
-   wxStaticBoxSizer *staticboxsizer1 = new wxStaticBoxSizer( staticbox1,
-      wxVERTICAL );
+   staticboxsizerAxes = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Axes") );
+   staticboxsizerA = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Alignment Vector") );
+   staticboxsizerC = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Constraint Vectors") );
    #endif
-   wxFlexGridSizer *flexgridsizer1 = new wxFlexGridSizer( 3, 4, 0, 0 );
-   wxBoxSizer *boxsizer1 = new wxBoxSizer( wxHORIZONTAL );
-   wxBoxSizer *boxsizer2 = new wxBoxSizer( wxHORIZONTAL );
-   wxBoxSizer *boxsizer3 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *boxsizerType = new wxBoxSizer( wxHORIZONTAL );
 
-   boxsizer1->Add( originStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer1->Add( originComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+   flexgridsizerAlignment  = new wxFlexGridSizer( 3, 4, 0, 0 ); // for Alignment
+   flexgridsizerConstraint = new wxFlexGridSizer( 4, 4, 0, 0 ); // for Constraint
 
-   // row 1
-   flexgridsizer1->Add( typeStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( typeComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizer1 = new wxFlexGridSizer( 2, 4, 0, 0 );  // use when not LAC
 
-   // row 2
+   wxBoxSizer *boxsizerOrigin = new wxBoxSizer( wxHORIZONTAL );
+   boxsizer2 = new wxBoxSizer( wxHORIZONTAL );
+//   wxBoxSizer *boxsizer3 = new wxBoxSizer( wxHORIZONTAL );   // stays empty
+
+   // Set up Origin widget
+   boxsizerOrigin->Add( originStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizerOrigin->Add( originComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+
+   // Set up Type widget
+   boxsizerType->Add( typeStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizerType->Add( typeComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+
+   // Set up the primary/secondary widgets
    flexgridsizer1->Add( primaryStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
    flexgridsizer1->Add( primaryComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
    flexgridsizer1->Add( secondaryStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
    flexgridsizer1->Add( secondaryComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
 
-   // row 3
+   // Set up the epoch widgets
    flexgridsizer1->Add( epochStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
    flexgridsizer1->Add( epochTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
 
+
+   // Set up the X/Y/Z widgets
    boxsizer2->Add(xStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer2->Add(xComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer2->Add(yStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -715,21 +1059,81 @@ void CoordPanel::Create()
    boxsizer2->Add(zStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer2->Add(zComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
 
-   #if __WXMAC__
-   boxsizer4->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer4->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer4->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
-   
-   theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
-   theMainSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL, 5);
-   theMainSizer->Add(boxsizer4, 0, wxALIGN_CENTRE|wxALL, 5);
-   #else
-   staticboxsizer1->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
-   staticboxsizer1->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
-   staticboxsizer1->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
+   // Set up the Alignment Vector widgets
+   // Row 1
+   flexgridsizerAlignment->Add(alignXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(refObjectStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(refObjectComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
 
-   theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
-   theMainSizer->Add(staticboxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
+   // Row 2
+   flexgridsizerAlignment->Add(alignYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   // Row 3
+   flexgridsizerAlignment->Add(alignZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   // Set up the Constraint Vectors widgets
+   // Row 1
+   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintCSStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintCSComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   // Row 2
+   flexgridsizerConstraint->Add(constraintXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   // Row 3
+   flexgridsizerConstraint->Add(constraintYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   // Row 4
+   flexgridsizerConstraint->Add(constraintZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintRefZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+
+   #ifdef __WXMAC__
+   boxsizerA->Add(titleAlignmentStaticText, 0, wxALIGN_LEFT|wxALL, 5);
+   boxsizerA->Add(flexgridsizerAlignment, 0, wxALIGN_LEFT|wxALL, 5);
+
+   boxsizerC->Add(titleConstraintStaticText, 0, wxALIGN_LEFT|wxALL, 5);
+   boxsizerC->Add(flexgridsizerConstraint, 0, wxALIGN_LEFT|wxALL, 5);
+
+   boxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, 5);
+   boxsizerAxes->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizerAxes->Add( boxsizerA, 0, wxALIGN_CENTER|wxALL, 5);
+   boxsizerAxes->Add( boxsizerC, 0, wxALIGN_CENTER|wxALL, 5);
+   boxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
+//   boxsizerAxes->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
+   
+   theMainSizer->Add(boxsizerOrigin, 0, wxALIGN_CENTRE|wxALL, 5);
+   theMainSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL, 5);
+   theMainSizer->Add(boxsizerAxes, 0, wxALIGN_CENTRE|wxALL, 5);
+   #else
+   staticboxsizerA->Add(flexgridsizerAlignment, 0, wxALIGN_TOP|wxALL, 5);
+
+   staticboxsizerC->Add(flexgridsizerConstraint, 0, wxALIGN_TOP|wxALL, 5);
+
+   staticboxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, 5);
+   staticboxsizerAxes->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
+   staticboxsizerAxes->Add( staticboxsizerA, 0, wxALIGN_CENTER|wxALL, 5);
+   staticboxsizerAxes->Add( staticboxsizerC, 0, wxALIGN_CENTER|wxALL, 5);
+   staticboxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
+//   staticboxsizerAxes->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
+
+   theMainSizer->Add(boxsizerOrigin, 0, wxALIGN_CENTRE|wxALL, 5);
+   theMainSizer->Add(staticboxsizerAxes, 0, wxALIGN_CENTRE|wxALL, 5);
    #endif
    
    if (!mEnableAll)
@@ -802,6 +1206,8 @@ void CoordPanel::LoadData()
             e.GetFullMessage().c_str());
    }
    
+   EnableOptions();
+
    #ifdef DEBUG_COORD_PANEL_LOAD
    MessageInterface::ShowMessage("CoordPanel::LoadData() leaving\n");
    #endif
@@ -887,6 +1293,12 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       // set Axis and Origin
       //-------------------------------------------------------
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+      axis->SetCoordinateSystemName(coordName);
+      #ifdef DEBUG_COORD_PANEL_SAVE
+      MessageInterface::ShowMessage
+         ("CoordPanel::SaveData() axis <%p> set on coordSys %s\n",
+          axis, coordName.c_str());
+      #endif
 
       wxString originName = originComboBox->GetValue().Trim();
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
@@ -956,6 +1368,124 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                secondary->SetJ2000Body(j2000body);
          }
       }
+      #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+         MessageInterface::ShowMessage("CoordPanel::SD, ref object enabled? %s\n",
+               (refObjectComboBox->IsEnabled()? "YES" : "no"));
+         MessageInterface::ShowMessage("CoordPanel::SD, constraint CS enabled? %s\n",
+               (constraintCSComboBox->IsEnabled()? "YES" : "no"));
+      #endif
+      // Set reference object, if it exists
+      if (refObjectComboBox->IsEnabled())
+      {
+         wxString refName   = refObjectComboBox->GetValue().Trim();
+         SpacePoint *refObj = (SpacePoint*)theGuiInterpreter->
+                              GetConfiguredObject(refName.c_str());
+         #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+            MessageInterface::ShowMessage("CoordPanel::SD, ref object name = %s\n",
+                  refName.c_str());
+            MessageInterface::ShowMessage("CoordPanel::SD, reference object is %s\n",
+                  (refObj? "NOT NULL" : "NULL"));
+            MessageInterface::ShowMessage("CoordPanel::SD, axis pointer (%s) is %p\n",
+                  axis->GetTypeName().c_str(), axis);
+         #endif
+         Integer refObjID = axis->GetParameterID("ReferenceObject");
+         axis->SetStringParameter(refObjID, refName.c_str());
+         axis->SetReferenceObject(refObj);
+      }
+
+      std::string str = "";
+      Real x, y, z;
+      bool isValid = true;
+      // Set the alignment vector
+      if (alignXTextCtrl->IsEnabled() && alignYTextCtrl->IsEnabled() &&
+          alignZTextCtrl->IsEnabled())
+      {
+         str = alignXTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(x, str, "AlignmentVectorX", "Real Number");
+         str = alignYTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(y, str, "AlignmentVectorY", "Real Number");
+         str = alignZTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(z, str, "AlignmentVectorZ", "Real Number");
+         if (isValid)
+         {
+            axis->SetRealParameter("AlignmentVectorX", x);
+            axis->SetRealParameter("AlignmentVectorY", y);
+            axis->SetRealParameter("AlignmentVectorZ", z);
+         }
+         else
+         {
+            canClose = false;
+         }
+      }
+
+      // Set constraint coordinate system, if it exists
+      if (constraintCSComboBox->IsEnabled())
+      {
+         try
+         {
+            wxString cCSName      = constraintCSComboBox->GetValue().Trim();
+            CoordinateSystem *constraintCoord = (CoordinateSystem *)theGuiInterpreter->
+               GetConfiguredObject(std::string(cCSName.c_str()));
+            axis->SetStringParameter("ConstraintCoordinateSystem", cCSName.c_str());
+            axis->SetRefObject(constraintCoord, Gmat::COORDINATE_SYSTEM, constraintCoord->GetName());
+            #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+               MessageInterface::ShowMessage("CoordPanel::SD, constraint CS name = %s\n",
+                     cCSName.c_str());
+               MessageInterface::ShowMessage("CoordPanel::SD, constraint CS is %s\n",
+                     (constraintCoord? "NOT NULL" : "NULL"));
+            #endif
+         }
+         catch (BaseException &be)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+            canClose = false;
+         }
+      }
+      // Set the constraint vectors
+      if (constraintXTextCtrl->IsEnabled() && constraintYTextCtrl->IsEnabled() &&
+          constraintZTextCtrl->IsEnabled())
+      {
+         isValid = true;
+         str = constraintXTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(x, str, "ConstraintVectorX", "Real Number");
+         str = constraintYTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(y, str, "ConstraintVectorY", "Real Number");
+         str = constraintZTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(z, str, "ConstraintVectorZ", "Real Number");
+         if (isValid)
+         {
+            axis->SetRealParameter("ConstraintVectorX", x);
+            axis->SetRealParameter("ConstraintVectorY", y);
+            axis->SetRealParameter("ConstraintVectorZ", z);
+         }
+         else
+         {
+            canClose = false;
+         }
+      }
+      // Set the constraint reference vectors
+      if (constraintRefXTextCtrl->IsEnabled() && constraintRefYTextCtrl->IsEnabled() &&
+          constraintRefZTextCtrl->IsEnabled())
+      {
+         isValid = true;
+         str = constraintRefXTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(x, str, "ConstraintReferenceVectorX", "Real Number");
+         str = constraintRefYTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(y, str, "ConstraintReferenceVectorY", "Real Number");
+         str = constraintRefZTextCtrl->GetValue().c_str();
+         isValid = isValid && CheckReal(z, str, "ConstraintReferenceVectorZ", "Real Number");
+         if (isValid)
+         {
+            axis->SetRealParameter("ConstraintReferenceVectorX", x);
+            axis->SetRealParameter("ConstraintReferenceVectorY", y);
+            axis->SetRealParameter("ConstraintReferenceVectorZ", z);
+         }
+         else
+         {
+            canClose = false;
+         }
+      }
+
       
       //-------------------------------------------------------
       // set new direction
