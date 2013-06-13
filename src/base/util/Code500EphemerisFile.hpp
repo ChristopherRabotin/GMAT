@@ -5,7 +5,7 @@
 #ifndef Code500EphemerisFile_hpp
 #define Code500EphemerisFile_hpp
 
-#include "gmatdefs.hpp"
+#include "gmatdefs.hpp"       // For type Byte
 #include "A1Mjd.hpp"
 #include <iostream>
 #include <fstream>
@@ -18,7 +18,8 @@ public:
                         const std::string &timeSystem = "UTC",
                         const std::string &sourceId = "GMAT",
                         const std::string &centralBody = "Earth",
-                        int fileMode = 2, int fileFormat = 1);
+                        int fileMode = 2, int fileFormat = 1, 
+                        int yearFormat = 1);
    
    ~Code500EphemerisFile();
    Code500EphemerisFile(const Code500EphemerisFile &ef);
@@ -53,6 +54,8 @@ public:
    
    void SetSwapEndian(bool swapEndian, int fileMode);
    bool GetSwapEndian(int fileMode);
+   double SwapDoubleEndian(double value);
+   int    SwapIntegerEndian(int value);
    
    void ConvertAsciiToEbcdic(char *ascii, char *ebcdic, int numChars);
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
@@ -173,6 +176,40 @@ protected:
       double thrustIndicator;                         // 2449-2456
       char   spares1[344];                            // 2457-2800
    };
+   
+   // For swaping endianness
+   struct DoubleByteType
+   {
+      unsigned byte1 : 8;
+      unsigned byte2 : 8;
+      unsigned byte3 : 8;
+      unsigned byte4 : 8;
+      unsigned byte5 : 8;
+      unsigned byte6 : 8;
+      unsigned byte7 : 8;
+      unsigned byte8 : 8;
+   };
+   
+   union DoubleUnionType
+   {
+      DoubleByteType doubleBytes;
+      double         doubleValue;
+   };
+   
+   struct IntByteType
+   {
+      unsigned byte1 : 8;
+      unsigned byte2 : 8;
+      unsigned byte3 : 8;
+      unsigned byte4 : 8;
+   };
+   
+   union IntUnionType
+   {
+      IntByteType intBytes;
+      int         intValue;
+   };
+   
 #pragma pack(pop)
 
    // Header_1 information
@@ -218,7 +255,7 @@ protected:
    double mCentralBodyMu;
    
    // File mode, format, and name (read or write)
-   int  mFileMode;
+   int  mFileMode;  // 1 = input, 2 = output
    int  mInputFileFormat;
    int  mOutputFileFormat;
    std::string mInputFileName;
@@ -228,9 +265,17 @@ protected:
    std::ifstream  mEphemFileIn;
    std::ofstream  mEphemFileOut;
    
+   // YearMonthDay format (1 = YYY, 2 = YYYY)
+   int  mInputYearFormat;
+   int  mOutputYearFormat;
+   
    // Endianness
    bool mSwapInputEndian;
    bool mSwapOutputEndian;
+   DoubleUnionType mDoubleOriginBytes;
+   DoubleUnionType mDoubleSwappedBytes;
+   IntUnionType mIntOriginBytes;
+   IntUnionType mIntSwappedBytes;
    
    // Initialization
    void InitializeHeaderRecord1();
@@ -239,9 +284,15 @@ protected:
    
    void SetEphemerisStartTime(const A1Mjd &a1Mjd);
    void SetEphemerisEndTime(const A1Mjd &a1Mjd);
+
+   // Reading
+   double ReadDoubleField(double *field);
+   int    ReadIntegerField(int *field);
    
    // Writing
    void WriteDataRecord(bool canFinalize);
+   void WriteDoubleField(double *field, double value);
+   void WriteIntegerField(int *field, int value);
    
    // Data buffering
    void ClearBuffer();
@@ -282,10 +333,19 @@ protected:
    // Platform related
    unsigned char AsciiToEbcdic(unsigned char ascii);
    unsigned char EbcdicToAscii(unsigned char ebc);
-   void SwapEndian(char *input, int numBytes);
+   double SwapDouble();
+   double SwapDoubleBytes(const Byte byte1, const Byte byte2, const Byte byte3,
+                          const Byte byte4, const Byte byte5, const Byte byte6,
+                          const Byte byte7, const Byte byte8);
+   int SwapInteger();
+   int SwapIntegerBytes(const Byte byte1, const Byte byte2, const Byte byte3, const Byte byte4);
    
    // Debug
-   void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1);
+   void DebugDouble(const std::string &fieldAndFormat, double value, bool swapEndian = false);
+   void DebugDouble(const std::string &fieldAndFormat, int index, double value, bool swapEndian = false);
+   void DebugDouble(const std::string &fieldAndFormat, int index1, int index2, double value, bool swapEndian = false);
+   void DebugInteger(const std::string &fieldAndFormat, int value, bool swapEndian = false);
+   void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1, bool swapEndian = false);
    void DebugWriteState(Rvector6 *stateKmSec, double *stateDULT, int option = 1);
 };
 

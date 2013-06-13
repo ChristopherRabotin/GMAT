@@ -2,6 +2,34 @@
 //------------------------------------------------------------------------------
 //                                  Code500EphemerisFile
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2013 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Linda Jun
+// Created: 2013.05.01
+//
+// This class reads and writes ephemeris file in Code-500 format in either
+// big-endian (UNIX) or little-endian (PC) byte order.
+//
+// The file format is based on the section 4.1.1 of Flight Dynamics Division
+// Generic Data Products Formats Interface Control Document & Appendix A.3
+// of Swingby User's Guide: Swingby User 552-FDD-93-046R3UD0 document.
+//
+// Notes on endianness:
+// Endianness refers to how bytes are ordered within a data item. A big-endian
+// machine stores the most significant byte first at the lowest byte address
+// while a little-endian machine stores the least significant byte first.
+//
+//
+//------------------------------------------------------------------------------
+
+
 #include "Code500EphemerisFile.hpp"
 #include "TimeSystemConverter.hpp"   // For ConvertGregorianToMjd()
 #include "StateConversionUtil.hpp"   // For Convert()
@@ -14,6 +42,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OPEN
+//#define DEBUG_INIT
 //#define DEBUG_SET
 //#define DEBUG_READ_DATA
 //#define DEBUG_WRITE_HEADERS
@@ -24,7 +53,10 @@
 //#define DEBUG_UNPACK_DATA
 //#define DEBUG_TIME_CONVERSION
 
+//---------------------------------
 // static data
+//---------------------------------
+// For unit conversion
 const double Code500EphemerisFile::DUL_TO_KM         = 10000.0;
 const double Code500EphemerisFile::DUL_DUT_TO_KM_SEC = 10000.0 / 864.0;
 const double Code500EphemerisFile::KM_TO_DUL         = 1.0 / 10000.0;
@@ -33,6 +65,7 @@ const double Code500EphemerisFile::SEC_TO_DUT        = 1.0 / 864.0;
 const double Code500EphemerisFile::DAY_TO_DUT        = 86400.0 / 864.0;
 const double Code500EphemerisFile::DUT_TO_DAY        = 864.0 / 86400.0;
 const double Code500EphemerisFile::DUT_TO_SEC        = 864.0;
+
 
 //------------------------------------------------------------------------------
 // Code500EphemerisFile(double satId, const std::string &productId, ...)
@@ -47,18 +80,22 @@ const double Code500EphemerisFile::DUT_TO_SEC        = 864.0;
  * @param  centralBody  Central body name used ["Earth"]
  * @param  fileMode     1 = input, 2 = output [2]
  * @param  fileFormat   1 = PC, 2 = UNIX [1]
+ * @param  yearFormat   1 = YYY, 2 = YYYY
  */
 //------------------------------------------------------------------------------
 Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double satId,
                                            const std::string &timeSystem,
                                            const std::string &sourceId,
                                            const std::string &centralBody,
-                                           int fileMode, int fileFormat)
+                                           int fileMode, int fileFormat,
+                                           int yearFormat)
 {
-   #ifdef DEBUG_CONSTRUCTOR
+   #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("Code500EphemerisFile() entered\n   fileName='%s', satId=%f, timeSystem='%s', sourceId='%s', "
        "centralBody='%s'\n", fileName.c_str(), satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
+   MessageInterface::ShowMessage
+      ("   fileMode=%d, fileFormat=%d, yearFormat=%d\n", fileMode, fileFormat, yearFormat);
    #endif
    
    mSatId = satId;
@@ -66,27 +103,35 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    mSourceId = sourceId;
    mCentralBody = centralBody;
    mFileMode = fileMode;
-   mInputFileFormat = 1;
-   mOutputFileFormat = 1;
-   mInputFileName = "";
-   mOutputFileName = "";
+   
    if (mFileMode == 1)
    {
       mInputFileName = fileName;
       mInputFileFormat = fileFormat;
+      mInputYearFormat = yearFormat;
    }
    else
    {
       mOutputFileName = fileName;
       mOutputFileFormat = fileFormat;
+      mOutputYearFormat = yearFormat;
+      
+      // Just for testing
+      mInputYearFormat = 2;
+      mOutputYearFormat = 2;
    }
    
    Initialize();
    
-   #ifdef DEBUG_CONSTRUCTOR
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("%s ephemeris file in %s format\n", fileMode == 1 ? "Reading" : "Writing", fileFormat == 1 ? "PC" : "UNIX");
+   MessageInterface::ShowMessage
+      ("mOutputFileName='%s', mOutputFileFormat=%d, mOutputYearFormat=%d\n", mOutputFileName.c_str(),
+       mOutputFileFormat, mOutputYearFormat);
    MessageInterface::ShowMessage
       ("Code500EphemerisFile() leaving\n   size of header1 = %d\n   "
-       "size of header2 = %d\n   size of data    = %d\n   mSentinelData    = % 1.15e\n",
+       "size of header2 = %d\n   size of data    = %d\n   mSentinelData   = % 1.15e\n",
        sizeof(mEphemHeader1), sizeof(mEphemHeader2), sizeof(mEphemData),
        mSentinelData);
    #endif
@@ -123,6 +168,8 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mOutputFileFormat = ef.mOutputFileFormat;
    mInputFileName = ef.mInputFileName;
    mOutputFileName = ef.mOutputFileName;
+   mInputYearFormat = ef.mInputYearFormat;
+   mOutputYearFormat = ef.mOutputYearFormat;
    
    Initialize();
 }
@@ -148,6 +195,8 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mOutputFileFormat = ef.mOutputFileFormat;
       mInputFileName = ef.mInputFileName;
       mOutputFileName = ef.mOutputFileName;
+      mInputYearFormat = ef.mInputYearFormat;
+      mOutputYearFormat = ef.mOutputYearFormat;
       
       Initialize();
       return *this;
@@ -161,7 +210,9 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
 void Code500EphemerisFile::Initialize()
 {
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() entered\n");
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::Initialize() entered, mCentralBody='%s', mSwapInputEndian=%d, "
+       "mSwapOutputEndian=%d\n", mCentralBody.c_str(), mSwapInputEndian, mSwapOutputEndian);
    #endif
    
    mProductId = "EPHEM   ";
@@ -173,7 +224,7 @@ void Code500EphemerisFile::Initialize()
    // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
    if (mCentralBody == "Earth")
       mCentralBodyIndicator = 1.0;
-   if (mCentralBody == "Luna")
+   else if (mCentralBody == "Luna")
       mCentralBodyIndicator = 2.0;
    else if (mCentralBody == "Sun")
       mCentralBodyIndicator = 3.0;
@@ -222,19 +273,30 @@ void Code500EphemerisFile::Initialize()
    //@todo Add GetOriginMu() to Spacecraft to get central body mu to
    // do cartesian to keplerian state conversion
    mCentralBodyMu = 398600.4415; // Set to earth mu for now for testing
+   
    mSwapInputEndian = false;
    mSwapOutputEndian = false;
    
-   // Fill in some header and data record with initial values
-   InitializeHeaderRecord1();
-   InitializeHeaderRecord2();
-   InitializeDataRecord();
+   #if 0
+   if (mFileMode == 1 && mInputFileFormat == 2)
+      mSwapInputEndian = true;
+   if (mFileMode == 2 && mOutputFileFormat == 2)
+      mSwapOutputEndian = true;
+   #endif
    
    // Open file
    if (mFileMode == 1)
       OpenForRead(mInputFileName, mInputFileFormat);
    else if (mFileMode == 2)
       OpenForWrite(mOutputFileName, mOutputFileFormat);
+   
+   // Fill in some header and data record with initial values if writing
+   if (mFileMode == 2)
+   {
+      InitializeHeaderRecord1();
+      InitializeHeaderRecord2();
+      InitializeDataRecord();
+   }
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving\n");
@@ -404,7 +466,8 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
 {
    #ifdef DEBUG_READ_HEADERS
    MessageInterface::ShowMessage
-      ("Code500EphemerisFile::ReadHeader1() entered, logOption=%d\n", logOption);
+      ("Code500EphemerisFile::ReadHeader1() entered, logOption=%d, mInputYearFormat=%d\n",
+       logOption, mInputYearFormat);
    #endif
    
    if (!mEphemFileIn.is_open())
@@ -415,14 +478,16 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    mEphemFileIn.read((char*)(&mEphemHeader1), RECORD_SIZE);
    
    // Save infile time system used
-   mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
+   //mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
+   mInputTimeSystem = ReadDoubleField(&mEphemHeader1.timeSystemIndicator);
    
    if (logOption == 1)
       UnpackHeader1();
    
    #ifdef DEBUG_READ_HEADERS
    MessageInterface::ShowMessage
-      ("Code500EphemerisFile::ReadHeader1() returning true\n");
+      ("Code500EphemerisFile::ReadHeader1() returning true, mInputTimeSystem=%d\n",
+       mInputTimeSystem);
    #endif
    return true;
 }
@@ -606,10 +671,8 @@ bool Code500EphemerisFile::FinalizeHeaders()
    mEphemFileOut.flush();
    
    #ifdef DEBUG_WRITE_HEADERS
-   MessageInterface::ShowMessage
-      ("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD);
-   MessageInterface::ShowMessage
-      ("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT);
+   DebugDouble("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD, mSwapOutputEndian);
+   DebugDouble("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT, mSwapOutputEndian);
    #endif
    
    #ifdef DEBUG_WRITE_HEADERS
@@ -712,7 +775,7 @@ bool Code500EphemerisFile::WriteDataAt(int recNumber)
    #endif
    
    // Set to no thrust
-   mEphemData.thrustIndicator = 2.0; // 1 = thrust, 2 = free flight
+   WriteDoubleField(&mEphemData.thrustIndicator, 2.0); // 1 = thrust, 2 = free flight
    
    mEphemFileOut.seekp(RECORD_SIZE * (recNumber-1), std::ios_base::beg);
    mEphemFileOut.write((char*)&mEphemData, RECORD_SIZE);
@@ -824,6 +887,72 @@ bool Code500EphemerisFile::WriteDataSegment(const EpochArray &epochArray,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetSwapEndian(bool swapEndian, int fileMode)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::SetSwapEndian(bool swapEndian, int fileMode)
+{
+   #ifdef DEBUG_SWAP_ENDIAN
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::SetSwapEndian() entered, swapEndian=%d, fileMode=%d\n",
+       swapEndian, fileMode);
+   #endif
+   
+   if (fileMode == 1)
+      mSwapInputEndian = swapEndian;
+   else
+      mSwapOutputEndian = swapEndian;
+   
+   #ifdef DEBUG_SWAP_ENDIAN
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::SetSwapEndian() leaving, mSwapInputEndian=%d, mSwapOutputEndian=%d\n",
+       mSwapInputEndian, mSwapOutputEndian);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetSwapEndian(int fileMode)
+//------------------------------------------------------------------------------
+bool Code500EphemerisFile::GetSwapEndian(int fileMode)
+{
+   if (fileMode == 1)
+      return mSwapInputEndian;
+   else
+      return mSwapOutputEndian;
+}
+
+
+//------------------------------------------------------------------------------
+// double SwapDoubleEndian(double value)
+//------------------------------------------------------------------------------
+/**
+ * Swaps endiness for double value
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::SwapDoubleEndian(double value)
+{
+   mDoubleOriginBytes.doubleValue = value;
+   double swapped = SwapDouble();
+   return swapped;
+}
+
+
+//------------------------------------------------------------------------------
+// int SwapIntegerEndian(ing value)
+//------------------------------------------------------------------------------
+/**
+ * Swaps endiness for int value
+ */
+//------------------------------------------------------------------------------
+int Code500EphemerisFile::SwapIntegerEndian(int value)
+{
+   mIntOriginBytes.intValue = value;
+   int swapped = SwapInteger();
+   return swapped;
+}
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -835,7 +964,8 @@ bool Code500EphemerisFile::WriteDataSegment(const EpochArray &epochArray,
 void Code500EphemerisFile::InitializeHeaderRecord1()
 {
    #ifdef DEBUG_HEADRES
-   MessageInterface::ShowMessage("InitializeHeaderRecord1() entered\n");
+   MessageInterface::ShowMessage
+      ("InitializeHeaderRecord1() entered, mSwapOutputEndian=%d\n", mSwapOutputEndian);
    #endif
    
    // Initialize all character arrays
@@ -855,22 +985,20 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    BlankOut(mEphemHeader1.harmonicsWithTitles1, 456);
    
    CopyString(mEphemHeader1.productId, mProductId, 8);
-   mEphemHeader1.satId = mSatId;
+   WriteDoubleField(&mEphemHeader1.satId, mSatId);
    CopyString(mEphemHeader1.tapeId, mTapeId, 8);
    CopyString(mEphemHeader1.sourceId, mSourceId, 8);
-   mEphemHeader1.timeSystemIndicator = mOutputTimeSystem;
-   mEphemHeader1.refTimeForDUT_YYMMDD = mRefTimeForDUT_YYMMDD;
+   WriteDoubleField(&mEphemHeader1.timeSystemIndicator, mOutputTimeSystem);
+   WriteDoubleField(&mEphemHeader1.refTimeForDUT_YYMMDD, mRefTimeForDUT_YYMMDD);
+   WriteDoubleField(&mEphemHeader1.centralBodyIndicator, mCentralBodyIndicator);
    CopyString(mEphemHeader1.coordSystemIndicator1, mCoordSystem, 4); // "2000" for J2000
-   mEphemHeader1.coordSystemIndicator2 = 4; // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
-   mEphemHeader1.centralBodyIndicator = mCentralBodyIndicator;
+   WriteIntegerField(&mEphemHeader1.coordSystemIndicator2, 4); // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
    
-   std::string str = mEphemHeader1.tapeId;
+   std::string str;
    #ifdef DEBUG_HEADRES
+   str = mEphemHeader1.tapeId;
    MessageInterface::ShowMessage("tapeId = '%s'\n", str.substr(0,8).c_str());
-   #endif
-   
    str = mEphemHeader1.sourceId;
-   #ifdef DEBUG_HEADRES
    MessageInterface::ShowMessage("sourceId = '%s'\n", str.substr(0,8).c_str());
    #endif
    
@@ -879,10 +1007,10 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    CopyString(mEphemHeader1.orbitTheory, str, 8);
    
    // Set leap second info
-   mEphemHeader1.leapSecondIndicator = 1; // 1 = no leap sec occurrs, 2 = leap second occurrs
-   mEphemHeader1.dateOfLeapSeconds_YYYMMDD = 0.0;
-   mEphemHeader1.timeOfLeapSeconds_HHMMSS = 0.0;
-   mEphemHeader1.utcTimeAdjustment_SEC = 0.0;
+   WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 1); // 1 = no leap sec occurrs, 2 = leap second occurrs
+   WriteDoubleField(&mEphemHeader1.dateOfLeapSeconds_YYYMMDD, 0.0);
+   WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS, 0.0);
+   WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC, 0.0);
    
    #ifdef DEBUG_HEADRES   
    MessageInterface::ShowMessage("InitializeHeaderRecord1() leaving\n");
@@ -969,22 +1097,25 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    MessageInterface::ShowMessage
       ("yyymmdd=%f, hhmmss=%f, doy=%f, secsOfDay=%f\n", yyymmdd, hhmmss, doy, secsOfDay);
    #endif
-   
-   mEphemHeader1.startDateOfEphem_YYYMMDD = yyymmdd;
-   mEphemHeader1.startDayCountOfYear = doy;
-   mEphemHeader1.startSecondsOfDay = secsOfDay;
+
+   if (mOutputYearFormat == 2)
+      yyymmdd = yyymmdd + 19000000;
+   WriteDoubleField(&mEphemHeader1.startDateOfEphem_YYYMMDD, yyymmdd);
+   WriteDoubleField(&mEphemHeader1.startDayCountOfYear, doy);
+   WriteDoubleField(&mEphemHeader1.startSecondsOfDay, secsOfDay);
    double startDut = ToDUT(startMjd);
-   mEphemHeader1.startTimeOfEphemeris_DUT = startDut;
+   WriteDoubleField(&mEphemHeader1.startTimeOfEphemeris_DUT, startDut);
    
    // Should I set initiation time to start time of ephemeris?
-   mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD = yyymmdd;
-   mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS = hhmmss;
+   WriteDoubleField(&mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, yyymmdd);
+   WriteDoubleField(&mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, hhmmss);
    
    #ifdef DEBUG_SET
-   std::string ymdhms = ToYearMonthDayHourMinSec
-      (mEphemHeader1.startDateOfEphem_YYYMMDD, mEphemHeader1.startSecondsOfDay);
+   if (mOutputYearFormat == 2)
+      yyymmdd = yyymmdd - 19000000;
+   std::string ymdhms = ToYearMonthDayHourMinSec(yymmdd, secsOfDay);
    MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss = %s\n", ymdhms.c_str());
-   MessageInterface::ShowMessage("mEphemHeader1.startTimeOfEphemeris_DUT = %f\n", startDut);
+   DebugDouble("mEphemHeader1.startTimeOfEphemeris_DUT = %f\n", startDut, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisStartTime() leaving\n");
    #endif
 }
@@ -1027,18 +1158,21 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    double doy = ToDayOfYear(endMjd);
    double secsOfDay = ToSecondsOfDay(endMjd);
    
-   mEphemHeader1.endDateOfEphem_YYYMMDD = yyymmdd;
-   mEphemHeader1.endDayCountOfYear = doy;
-   mEphemHeader1.endSecondsOfDay = secsOfDay;
+   if (mOutputYearFormat == 2)
+      yyymmdd = yyymmdd + 19000000;
+   WriteDoubleField(&mEphemHeader1.endDateOfEphem_YYYMMDD, yyymmdd);
+   WriteDoubleField(&mEphemHeader1.endDayCountOfYear, doy);
+   WriteDoubleField(&mEphemHeader1.endSecondsOfDay, secsOfDay);
    double endDut = ToDUT(endMjd);
-   mEphemHeader1.endTimeOfEphemeris_DUT = endDut;
+   WriteDoubleField(&mEphemHeader1.endTimeOfEphemeris_DUT, endDut);
    
    #ifdef DEBUG_SET
-   std::string ymdhms = ToYearMonthDayHourMinSec
-      (mEphemHeader1.endDateOfEphem_YYYMMDD, mEphemHeader1.endSecondsOfDay);
-   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
-   MessageInterface::ShowMessage("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD);
-   MessageInterface::ShowMessage("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT);
+   if (mOutputYearFormat == 2)
+      yyymmdd = yyymmdd - 19000000;
+   std::string ymdhms = ToYearMonthDayHourMinSec(yyymmdd, secsOfDay);
+   MessageInterface::ShowMessage(("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
+   DebugDouble("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD, mSwapOutputEndian);
+   DebugDouble("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisEndTime() leaving\n");
    #endif
 }
@@ -1062,16 +1196,16 @@ void Code500EphemerisFile::SetTimeIntervalBetweenPoints(double secs)
    if (secs == -999.999)
    {
       mTimeIntervalBetweenPointsSecs = 0.0;//@note What should be the default value?
-      mEphemHeader1.outputIntervalIndicator = 2; // 1 = fixed step, 2 = variable step
+      WriteIntegerField(&mEphemHeader1.outputIntervalIndicator, 2); // 1 = fixed step, 2 = variable step
    }
    else
    {
       mTimeIntervalBetweenPointsSecs = secs;
-      mEphemHeader1.outputIntervalIndicator = 1; // 1 = fixed step, 2 = variable step
+      WriteIntegerField(&mEphemHeader1.outputIntervalIndicator, 1); // 1 = fixed step, 2 = variable step
    }
    
-   mEphemHeader1.stepSize_SEC = mTimeIntervalBetweenPointsSecs;
-   mEphemHeader1.timeIntervalBetweenPoints_DUT = mTimeIntervalBetweenPointsSecs * SEC_TO_DUT;
+   WriteDoubleField(&mEphemHeader1.stepSize_SEC, mTimeIntervalBetweenPointsSecs);
+   WriteDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT, mTimeIntervalBetweenPointsSecs * SEC_TO_DUT);
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
@@ -1120,13 +1254,13 @@ void Code500EphemerisFile::SetInitialEpoch(const A1Mjd &a1Mjd)
    A1Date a1Date = tempA1Mjd.ToA1Date();
    a1Date.ToYearMonthDayHourMinSec(year, month, day, hour, min, sec);
    
-   mEphemHeader1.epochTimeOfElements_DUT = epochDUT;
-   mEphemHeader1.yearOfEpoch_YYY = year - 1900;
-   mEphemHeader1.monthOfEpoch_MM = month;
-   mEphemHeader1.dayOfEpoch_DD = day;
-   mEphemHeader1.hourOfEpoch_HH = hour;
-   mEphemHeader1.minuteOfEpoch_MM = min;
-   mEphemHeader1.secondsOfEpoch_MILSEC = sec * 1000.0;
+   WriteDoubleField(&mEphemHeader1.epochTimeOfElements_DUT, epochDUT);
+   WriteDoubleField(&mEphemHeader1.yearOfEpoch_YYY, year - 1900);
+   WriteDoubleField(&mEphemHeader1.monthOfEpoch_MM, month);
+   WriteDoubleField(&mEphemHeader1.dayOfEpoch_DD, day);
+   WriteDoubleField(&mEphemHeader1.hourOfEpoch_HH, hour);
+   WriteDoubleField(&mEphemHeader1.minuteOfEpoch_MM, min);
+   WriteDoubleField(&mEphemHeader1.secondsOfEpoch_MILSEC, sec * 1000.0);
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
@@ -1166,7 +1300,10 @@ void Code500EphemerisFile::SetInitialCartesianState(const Rvector6 &cartState)
       cartStateDULT[i] = cartState[i] * KM_SEC_TO_DUL_DUT;
    
    for (int i = 0; i < 6; i++)
-      mEphemHeader1.cartesianElementsAtEpoch_DULT[i] = cartStateDULT[i];
+   {
+      //mEphemHeader1.cartesianElementsAtEpoch_DULT[i] = cartStateDULT[i];
+      WriteDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i], cartStateDULT[i]);
+   }
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
@@ -1193,7 +1330,10 @@ void Code500EphemerisFile::SetInitialKeplerianState(const Rvector6 &kepState)
       kepStateRad[i] = kepState[i] * GmatMathConstants::RAD_PER_DEG;
    
    for (int i = 0; i < 6; i++)
-      mEphemHeader1.keplerianElementsAtEpoch_RAD[i] = kepStateRad[i];
+   {
+      //mEphemHeader1.keplerianElementsAtEpoch_RAD[i] = kepStateRad[i];
+      WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[i], kepStateRad[i]);
+   }
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
@@ -1266,10 +1406,10 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    if (canFinalize)
       SetEphemerisEndTime(*end);
    
-   mEphemData.dateOfFirstEphemPoint_YYYMMDD = ToYYYMMDD(startMjd);
-   mEphemData.dayOfYearForFirstEphemPoint = ToDayOfYear(startMjd);
-   mEphemData.secsOfDayForFirstEphemPoint = ToSecondsOfDay(startMjd);
-   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
+   WriteDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD, ToYYYMMDD(startMjd));
+   WriteDoubleField(&mEphemData.dayOfYearForFirstEphemPoint, ToDayOfYear(startMjd));
+   WriteDoubleField(&mEphemData.secsOfDayForFirstEphemPoint, ToSecondsOfDay(startMjd));
+   WriteDoubleField(&mEphemData.timeIntervalBetweenPoints_SEC, mTimeIntervalBetweenPointsSecs);
    
    // Write first state vector
    double stateDULT[6];
@@ -1278,16 +1418,15 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    MessageInterface::ShowMessage("----- State vector 1\n");
    DebugWriteState(mStateArray[0], stateDULT, 2);
    #endif
-   mEphemData.firstStateVector_DULT[0] = stateDULT[0];
-   mEphemData.firstStateVector_DULT[1] = stateDULT[1];
-   mEphemData.firstStateVector_DULT[2] = stateDULT[2];
-   mEphemData.firstStateVector_DULT[3] = stateDULT[3];
-   mEphemData.firstStateVector_DULT[4] = stateDULT[4];
-   mEphemData.firstStateVector_DULT[5] = stateDULT[5];
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[0], stateDULT[0]);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[1], stateDULT[1]);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[2], stateDULT[2]);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[3], stateDULT[3]);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[4], stateDULT[4]);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[5], stateDULT[5]);
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage
-      ("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0]);
+   DebugDouble("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0], mSwapOutputEndian);
    #endif
    
    // Write state 2 through numPoints,
@@ -1296,12 +1435,12 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    {
       ConvertStateKmSecToDULT(mStateArray[i], stateDULT);      
       for (int j = 0; j < 6; j++)
-         mEphemData.stateVector2Thru50_DULT[i-1][j] = stateDULT[j];
+         WriteDoubleField(&mEphemData.stateVector2Thru50_DULT[i-1][j], stateDULT[j]);
       
       #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
       MessageInterface::ShowMessage("----- State vector %d\n", i+1);
       DebugWriteState(mStateArray[i], stateDULT, 2);
-      DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i-1], i-1, 1);
+      DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i-1], i-1, 1, swap);
       #endif
    }
    
@@ -1319,7 +1458,7 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       for (int i = numPoints - 1; i < NUM_STATES_PER_RECORD - 1; i++)
       {
          for (int j = 0; j < 6; j++)
-            mEphemData.stateVector2Thru50_DULT[i][j] = mSentinelData;
+            WriteDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j], mSentinelData);
          
          #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
          DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i], i, 1);
@@ -1332,9 +1471,9 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    MessageInterface::ShowMessage("Writing time of first data point and time interval\n");
    #endif
    double timeInDUT = ToDUT(startMjd);
-   mEphemData.timeOfFirstDataPoint_DUT = timeInDUT;
-   mEphemData.timeIntervalBetweenPoints_SEC = mTimeIntervalBetweenPointsSecs;
-   mEphemData.timeIntervalBetweenPoints_DUT = mTimeIntervalBetweenPointsSecs * SEC_TO_DUT;
+   WriteDoubleField(&mEphemData.timeOfFirstDataPoint_DUT, timeInDUT);
+   WriteDoubleField(&mEphemData.timeIntervalBetweenPoints_SEC, mTimeIntervalBetweenPointsSecs);
+   WriteDoubleField(&mEphemData.timeIntervalBetweenPoints_DUT, mTimeIntervalBetweenPointsSecs * SEC_TO_DUT);
    
    // Write data record
    #ifdef DEBUG_WRITE_DATA_SEGMENT
@@ -1350,13 +1489,13 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       MessageInterface::ShowMessage
          ("   Writing last data record with first 10 sentinel data\n");
       #endif
-      mEphemData.dateOfFirstEphemPoint_YYYMMDD = mSentinelData;
-      mEphemData.dayOfYearForFirstEphemPoint = mSentinelData;
-      mEphemData.secsOfDayForFirstEphemPoint = mSentinelData;
-      mEphemData.timeIntervalBetweenPoints_SEC = mSentinelData;
+      WriteDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD, mSentinelData);
+      WriteDoubleField(&mEphemData.dayOfYearForFirstEphemPoint, mSentinelData);
+      WriteDoubleField(&mEphemData.secsOfDayForFirstEphemPoint, mSentinelData);
+      WriteDoubleField(&mEphemData.timeIntervalBetweenPoints_SEC, mSentinelData);
       
       for (int j = 0; j < 6; j++)
-         mEphemData.firstStateVector_DULT[j] = mSentinelData;
+         WriteDoubleField(&mEphemData.firstStateVector_DULT[j], mSentinelData);
    }
    
    // Flush data to file
@@ -1365,6 +1504,74 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    #ifdef DEBUG_WRITE_DATA_SEGMENT
    MessageInterface::ShowMessage("Code500EphemerisFile::WriteDataRecord() leavng\n");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// double ReadDoubleField(double *field)
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::ReadDoubleField(double *field)
+{
+   double value = *field;
+   if (mSwapInputEndian)
+   {
+      mDoubleOriginBytes.doubleValue = value;
+      double swapped = SwapDouble();
+      value = swapped;
+   }
+   return value;
+}
+
+
+//------------------------------------------------------------------------------
+// int ReadIntegerField(int *field)
+//------------------------------------------------------------------------------
+int Code500EphemerisFile::ReadIntegerField(int *field)
+{
+   int value = *field;
+   if (mSwapInputEndian)
+   {
+      mIntOriginBytes.intValue = value;
+      int swapped = SwapInteger();
+      value = swapped;
+   }
+   return value;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteDoubleField(double *field, double value)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::WriteDoubleField(double *field, double value)
+{
+   if (mSwapOutputEndian)
+   {
+      mDoubleOriginBytes.doubleValue = value;
+      double swapped = SwapDouble();
+      *field = swapped;
+   }
+   else
+   {
+      *field = value;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteIntegerField(int *field, int value)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::WriteIntegerField(int *field, int value)
+{
+   if (mSwapOutputEndian)
+   {
+      mIntOriginBytes.intValue = value;
+      int swapped = SwapInteger();
+      *field = swapped;
+   }
+   else
+   {
+      *field = value;
+   }
 }
 
 
@@ -1399,23 +1606,34 @@ void Code500EphemerisFile::UnpackHeader1()
 {
    MessageInterface::ShowMessage("======================================== Begin of Header1\n");
    
-   std::string str(mEphemHeader1.productId);
-   MessageInterface::ShowMessage("productId                           = '%s'\n", str.c_str());   
-   MessageInterface::ShowMessage("satId                               = % f\n", mEphemHeader1.satId);
-   MessageInterface::ShowMessage("timeSystemIndicator                 = % f\n", mEphemHeader1.timeSystemIndicator);
-   mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
-   MessageInterface::ShowMessage("StartDateOfEphem_YYYMMDD            = % f\n", mEphemHeader1.startDateOfEphem_YYYMMDD);
-   MessageInterface::ShowMessage("startDayCountOfYear                 = % f\n", mEphemHeader1.startDayCountOfYear);
-   MessageInterface::ShowMessage("startSecondsOfDay                   = % f\n", mEphemHeader1.startSecondsOfDay);
-   MessageInterface::ShowMessage("endDateOfEphem_YYYMMDD              = % f\n", mEphemHeader1.endDateOfEphem_YYYMMDD);
-   MessageInterface::ShowMessage("endDayCountOfYear                   = % f\n", mEphemHeader1.endDayCountOfYear);
-   MessageInterface::ShowMessage("endSecondsOfDay                     = % f\n", mEphemHeader1.endSecondsOfDay);
-   MessageInterface::ShowMessage("stepSize_SEC                        = % f\n", mEphemHeader1.stepSize_SEC);
+   bool swap = mSwapInputEndian;
+   MessageInterface::ShowMessage("mSwapInputEndian = %d\n", mSwapInputEndian);
    
-   std::string ymdhms = ToYearMonthDayHourMinSec(mEphemHeader1.startDateOfEphem_YYYMMDD, mEphemHeader1.startSecondsOfDay);
-   MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss.             = %s\n", ymdhms.c_str());
-   ymdhms = ToYearMonthDayHourMinSec(mEphemHeader1.endDateOfEphem_YYYMMDD, mEphemHeader1.endSecondsOfDay);
-   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss.               = %s\n", ymdhms.c_str());
+   std::string str(mEphemHeader1.productId);
+   MessageInterface::ShowMessage("productId                           = '%s'\n", str.substr(0,8).c_str());
+   DebugDouble("satId                               = % f\n", mEphemHeader1.satId, swap);
+   DebugDouble("timeSystemIndicator                 = % f\n", mEphemHeader1.timeSystemIndicator, swap);
+   DebugDouble("StartDateOfEphem_YYYMMDD            = % f\n", mEphemHeader1.startDateOfEphem_YYYMMDD, swap);
+   DebugDouble("startDayCountOfYear                 = % f\n", mEphemHeader1.startDayCountOfYear, swap);
+   DebugDouble("startSecondsOfDay                   = % f\n", mEphemHeader1.startSecondsOfDay, swap);
+   DebugDouble("endDateOfEphem_YYYMMDD              = % f\n", mEphemHeader1.endDateOfEphem_YYYMMDD, swap);
+   DebugDouble("endDayCountOfYear                   = % f\n", mEphemHeader1.endDayCountOfYear, swap);
+   DebugDouble("endSecondsOfDay                     = % f\n", mEphemHeader1.endSecondsOfDay, swap);
+   DebugDouble("stepSize_SEC                        = % f\n", mEphemHeader1.stepSize_SEC, swap);
+   
+   double yyymmddStart = ReadDoubleField(&mEphemHeader1.startDateOfEphem_YYYMMDD);
+   //MessageInterface::ShowMessage("==> yyymmddStart = %f\n", yyymmddStart);
+   if (mInputYearFormat == 2) yyymmddStart = yyymmddStart - 19000000;
+   //MessageInterface::ShowMessage("==> yyymmddStart = %f\n", yyymmddStart);
+   double secsOfDayStart = ReadDoubleField(&mEphemHeader1.startSecondsOfDay);
+   std::string ymdhmsStart = ToYearMonthDayHourMinSec(yyymmddStart, secsOfDayStart);
+   MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss.             = %s\n", ymdhmsStart.c_str());
+   
+   double yyymmddEnd = ReadDoubleField(&mEphemHeader1.endDateOfEphem_YYYMMDD);
+   if (mInputYearFormat == 2) yyymmddEnd = yyymmddEnd - 19000000;
+   double secsOfDayEnd = ReadDoubleField(&mEphemHeader1.endSecondsOfDay);
+   std::string ymdhmsEnd = ToYearMonthDayHourMinSec(yyymmddEnd, secsOfDayEnd);
+   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss.               = %s\n", ymdhmsEnd.c_str());
    
    std::string tapeIdStr = mEphemHeader1.tapeId;
    std::string sourceIdStr = mEphemHeader1.sourceId;
@@ -1425,63 +1643,65 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("tapeId                              = '%s'\n", tapeIdStr.substr(0,8).c_str());
    MessageInterface::ShowMessage("sourceId                            = '%s'\n", sourceIdStr.substr(0,8).c_str());
    MessageInterface::ShowMessage("headerTitle                         = '%s'\n", headerTitleStr.substr(0,56).c_str());
-   MessageInterface::ShowMessage("centralBodyIndicator                = % f\n", mEphemHeader1.centralBodyIndicator);
-   MessageInterface::ShowMessage("refTimeForDUT_YYMMDD                = % f\n", mEphemHeader1.refTimeForDUT_YYMMDD);
+   DebugDouble("centralBodyIndicator                = % f\n", mEphemHeader1.centralBodyIndicator, swap);
+   DebugDouble("refTimeForDUT_YYMMDD                = % f\n", mEphemHeader1.refTimeForDUT_YYMMDD, swap);
    MessageInterface::ShowMessage("coordSystemIndicator1               = '%s'\n", coordSystemStr.substr(0,4).c_str());
-   MessageInterface::ShowMessage("coordSystemIndicator2               = %d\n", mEphemHeader1.coordSystemIndicator2);
+   DebugInteger("coordSystemIndicator2               = %d\n", mEphemHeader1.coordSystemIndicator2, swap);
    MessageInterface::ShowMessage("orbitTheory                         = '%s'\n", orbitTheoryStr.substr(0,8).c_str());
-   MessageInterface::ShowMessage("timeIntervalBetweenPoints_DUT       = % f\n", mEphemHeader1.timeIntervalBetweenPoints_DUT);
-   MessageInterface::ShowMessage("timeIntervalBetweenPoints_SEC.      = % f\n", mEphemHeader1.timeIntervalBetweenPoints_DUT * DUT_TO_SEC);
-   MessageInterface::ShowMessage("outputIntervalIndicator             = %d\n", mEphemHeader1.outputIntervalIndicator);
-   MessageInterface::ShowMessage("epochTimeOfElements_DUT             = % f\n", mEphemHeader1.epochTimeOfElements_DUT);
-   MessageInterface::ShowMessage("epochTimeOfElements_DAY.            = % f\n", mEphemHeader1.epochTimeOfElements_DUT * DUT_TO_DAY);
+   double timeIntervalDUT = ReadDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT);
+   DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", timeIntervalDUT);
+   DebugDouble("timeIntervalBetweenPoints_SEC.      = % f\n", timeIntervalDUT * DUT_TO_SEC, false);
+   DebugInteger("outputIntervalIndicator             = %d\n", mEphemHeader1.outputIntervalIndicator, swap);
+   double epochTimeDUT = ReadDoubleField(&mEphemHeader1.epochTimeOfElements_DUT);
+   DebugDouble("epochTimeOfElements_DUT             = % f\n", epochTimeDUT);
+   DebugDouble("epochTimeOfElements_DAY.            = % f\n", epochTimeDUT * DUT_TO_DAY, false);
    
-   double dutTime = mEphemHeader1.epochTimeOfElements_DUT;
+   double dutTime = ReadDoubleField(&mEphemHeader1.epochTimeOfElements_DUT);
    std::string epochA1Greg = ToA1Gregorian(dutTime, false);
-   MessageInterface::ShowMessage("epochA1Greg  = '%s'\n", epochA1Greg.c_str());
+   MessageInterface::ShowMessage("epochA1Greg.                        = '%s'\n", epochA1Greg.c_str());
    std::string epochUtcGreg = ToUtcGregorian(dutTime, false);
-   MessageInterface::ShowMessage("epochUtcGreg = '%s'\n", epochUtcGreg.c_str());
+   MessageInterface::ShowMessage("epochUtcGreg.                       = '%s'\n", epochUtcGreg.c_str());
    
-   MessageInterface::ShowMessage("yearOfEpoch_YYY                     = % f\n", mEphemHeader1.yearOfEpoch_YYY);
-   MessageInterface::ShowMessage("monthOfEpoch_MM                     = % f\n", mEphemHeader1.monthOfEpoch_MM);
-   MessageInterface::ShowMessage("dayOfEpoch_DD                       = % f\n", mEphemHeader1.dayOfEpoch_DD);
-   MessageInterface::ShowMessage("hourOfEpoch_HH                      = % f\n", mEphemHeader1.hourOfEpoch_HH);
-   MessageInterface::ShowMessage("minuteOfEpoch_MM                    = % f\n", mEphemHeader1.minuteOfEpoch_MM);
-   MessageInterface::ShowMessage("secondsOfEpoch_MILSEC               = % f\n", mEphemHeader1.secondsOfEpoch_MILSEC);
+   DebugDouble("yearOfEpoch_YYY                     = % f\n", mEphemHeader1.yearOfEpoch_YYY, swap);
+   DebugDouble("monthOfEpoch_MM                     = % f\n", mEphemHeader1.monthOfEpoch_MM, swap);
+   DebugDouble("dayOfEpoch_DD                       = % f\n", mEphemHeader1.dayOfEpoch_DD, swap);
+   DebugDouble("hourOfEpoch_HH                      = % f\n", mEphemHeader1.hourOfEpoch_HH, swap);
+   DebugDouble("minuteOfEpoch_MM                    = % f\n", mEphemHeader1.minuteOfEpoch_MM, swap);
+   DebugDouble("secondsOfEpoch_MILSEC               = % f\n", mEphemHeader1.secondsOfEpoch_MILSEC, swap);
    
-   MessageInterface::ShowMessage
-      ("keplerianElementsAtEpoch_RAD[0]     = % 1.15e\n", mEphemHeader1.keplerianElementsAtEpoch_RAD[0]);
+   DebugDouble("keplerianElementsAtEpoch_RAD[0]     = % 1.15e\n",
+               mEphemHeader1.keplerianElementsAtEpoch_RAD[0], swap);
    for (int i = 1; i < 6; i++)
    {
-      MessageInterface::ShowMessage
-         ("keplerianElementsAtEpoch_RAD[%d]     = % 1.15e\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i]);
-      MessageInterface::ShowMessage
-         ("keplerianElementsAtEpoch_DEG[%d].    = % 1.15e\n", i, mEphemHeader1.keplerianElementsAtEpoch_RAD[i] * GmatMathConstants::DEG_PER_RAD);
+      double elemRad = ReadDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[i]);
+      DebugDouble("keplerianElementsAtEpoch_RAD[%d]     = % 1.15e\n", i, elemRad, false);
+      DebugDouble("keplerianElementsAtEpoch_DEG[%d].    = % 1.15e\n", i, elemRad * GmatMathConstants::DEG_PER_RAD, false);
    }
    for (int i = 0; i < 3; i++)
    {
-      MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
-      MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_TO_KM);
+      double posDult = ReadDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+      DebugDouble("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, posDult, false);
+      DebugDouble("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, posDult * DUL_TO_KM, false);
    }
    for (int i = 3; i < 6; i++)
    {
-      MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
-      MessageInterface::ShowMessage
-         ("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, mEphemHeader1.cartesianElementsAtEpoch_DULT[i] * DUL_DUT_TO_KM_SEC);
+      double velDult = ReadDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+      DebugDouble("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, velDult, false);
+      DebugDouble("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, velDult * DUL_DUT_TO_KM_SEC, false);
    }
-   
-   MessageInterface::ShowMessage("startTimeOfEphemeris_DUT            = % f\n", mEphemHeader1.startTimeOfEphemeris_DUT);
-   MessageInterface::ShowMessage("startTimeOfEphemeris_DAY.           = % f\n", mEphemHeader1.startTimeOfEphemeris_DUT * DUT_TO_DAY);
-   MessageInterface::ShowMessage("endTimeOfEphemeris_DUT              = % f\n", mEphemHeader1.endTimeOfEphemeris_DUT);
-   MessageInterface::ShowMessage("endTimeOfEphemeris_DAY.             = % f\n", mEphemHeader1.endTimeOfEphemeris_DUT * DUT_TO_DAY);
-   MessageInterface::ShowMessage("timeIntervalBetweenPoints_DUT       = % f\n", mEphemHeader1.timeIntervalBetweenPoints_DUT);
-   MessageInterface::ShowMessage("timeIntervalBetweenPoints_SEC.      = % f\n", mEphemHeader1.timeIntervalBetweenPoints_DUT * DUT_TO_SEC);
-   MessageInterface::ShowMessage("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD);
-   MessageInterface::ShowMessage("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS);
-   MessageInterface::ShowMessage("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC);
+
+   double rval = ReadDoubleField(&mEphemHeader1.startTimeOfEphemeris_DUT);
+   DebugDouble("startTimeOfEphemeris_DUT            = % f\n", rval, false);
+   DebugDouble("startTimeOfEphemeris_DAY.           = % f\n", rval * DUT_TO_DAY, false);
+   rval = ReadDoubleField(&mEphemHeader1.endTimeOfEphemeris_DUT);
+   DebugDouble("endTimeOfEphemeris_DUT              = % f\n", rval, false);
+   DebugDouble("endTimeOfEphemeris_DAY.             = % f\n", rval * DUT_TO_DAY, false);
+   rval = ReadDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT);
+   DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", rval, false);
+   DebugDouble("timeIntervalBetweenPoints_SEC.      = % f\n", rval * DUT_TO_SEC, false);
+   DebugDouble("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, swap);
+   DebugDouble("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, swap);
+   DebugDouble("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
    
    MessageInterface::ShowMessage("======================================== End of Header1\n");
 }
@@ -1518,42 +1738,53 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       MessageInterface::ShowMessage
          ("======================================== Begin of data record %d\n", recNum);
    
+   bool swap = mSwapInputEndian;
+   MessageInterface::ShowMessage("mSwapInputEndian = %d\n", mSwapInputEndian);
+   
    double sentinels[50];
-   sentinels[0] = mEphemData.dateOfFirstEphemPoint_YYYMMDD;
-   sentinels[1] = mEphemData.dayOfYearForFirstEphemPoint;
-   sentinels[2] = mEphemData.secsOfDayForFirstEphemPoint;
-   sentinels[3] = mEphemData.timeIntervalBetweenPoints_SEC;
+   sentinels[0] = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
+   sentinels[1] = ReadDoubleField(&mEphemData.dayOfYearForFirstEphemPoint);
+   sentinels[2] = ReadDoubleField(&mEphemData.secsOfDayForFirstEphemPoint);
+   sentinels[3] = ReadDoubleField(&mEphemData.timeIntervalBetweenPoints_SEC);
+   
    mLastDataRecRead = recNum;
    
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
    {
-      std::string ymdhmsStr =
-         ToYearMonthDayHourMinSec(mEphemData.dateOfFirstEphemPoint_YYYMMDD,
-                                  mEphemData.secsOfDayForFirstEphemPoint);
-      
+      double firstDate = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
+      double firstSecs = ReadDoubleField(&mEphemData.secsOfDayForFirstEphemPoint);
+      std::string ymdhmsStr = ToYearMonthDayHourMinSec(firstDate, firstSecs);
       MessageInterface::ShowMessage("timeOfFirstEphemPoint.          =  %s\n", ymdhmsStr.c_str());
-      MessageInterface::ShowMessage("dateOfFirstEphemPoint_YYYMMDD   = % f\n", mEphemData.dateOfFirstEphemPoint_YYYMMDD);
-      MessageInterface::ShowMessage("dayOfYearForFirstEphemPoint     = % f\n", mEphemData.dayOfYearForFirstEphemPoint);
-      MessageInterface::ShowMessage("secsOfDayForFirstEphemPoint     = % f\n", mEphemData.secsOfDayForFirstEphemPoint);
-      MessageInterface::ShowMessage("timeIntervalBetweenPoints_SEC   = % f\n", mEphemData.timeIntervalBetweenPoints_SEC);
+      DebugDouble("dateOfFirstEphemPoint_YYYMMDD   = % f\n", mEphemData.dateOfFirstEphemPoint_YYYMMDD, swap);
+      DebugDouble("dayOfYearForFirstEphemPoint     = % f\n", mEphemData.dayOfYearForFirstEphemPoint, swap);
+      DebugDouble("secsOfDayForFirstEphemPoint     = % f\n", mEphemData.secsOfDayForFirstEphemPoint, swap);
+      DebugDouble("timeIntervalBetweenPoints_SEC   = % f\n", mEphemData.timeIntervalBetweenPoints_SEC, swap);
    }
+   
+   double posDult, velDult;
    
    // First position vector
    for (int j = 0; j < 3; j++)
    {
-      sentinels[4+j] = mEphemData.firstStateVector_DULT[j];
+      sentinels[4+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
       if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
-         MessageInterface::ShowMessage("firstStateVector_DULT[%d]        = % 1.15e\n", j, mEphemData.firstStateVector_DULT[j]);
-         MessageInterface::ShowMessage("firstStateVector_KMSE[%d].       = % 1.15e\n", j, mEphemData.firstStateVector_DULT[j] * DUL_TO_KM);
+      {
+         posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+         DebugDouble("firstStateVector_DULT[%d]        = % 1.15e\n", j, posDult, false);
+         DebugDouble("firstStateVector_KMSE[%d].       = % 1.15e\n", j, posDult * DUL_TO_KM, false);
+      }
    }
    
    // First velocity vector
    for (int j = 3; j < 6; j++)
    {
-      sentinels[7+j] = mEphemData.firstStateVector_DULT[j];
+      sentinels[7+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
       if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
-         MessageInterface::ShowMessage("firstStateVector_DULT[%d]        = % 1.15e\n", j, mEphemData.firstStateVector_DULT[j]);
-         MessageInterface::ShowMessage("firstStateVector_KMSE[%d].       = % 1.15e\n", j, mEphemData.firstStateVector_DULT[j] * DUL_DUT_TO_KM_SEC);
+      {
+         velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+         DebugDouble("firstStateVector_DULT[%d]        = % 1.15e\n", j, velDult, false);
+         DebugDouble("firstStateVector_KMSE[%d].       = % 1.15e\n", j, velDult * DUL_DUT_TO_KM_SEC, false);
+      }
    }
    
    // If sentinels already found, log data and return
@@ -1565,27 +1796,25 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       {
          if (logOption >= 2)
          {
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_TO_KM);
+            posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+            DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, posDult, false);
+            DebugDouble("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, posDult * DUL_TO_KM, false);
          }
       }
       
       for (int j = 3; j < 6; j++)
       {
-         sentinels[j] = mEphemData.stateVector2Thru50_DULT[i][j];
+         sentinels[j] = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
          if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
          {
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
-            MessageInterface::ShowMessage
-               ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_DUT_TO_KM_SEC);
+            velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+            DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, velDult, false);
+            DebugDouble("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, velDult * DUL_DUT_TO_KM_SEC, false);
          }
       }
       return;
    }
-
+   
    
    // Check for sentinels
    int sentinelCount = 0;
@@ -1613,13 +1842,13 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    {
       sentinelCount = 0;
       for (int j = 0; j < 3; j++)
-         sentinels[j] = mEphemData.stateVector2Thru50_DULT[i][j];
+         sentinels[j] = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
       
       for (int j = 3; j < 6; j++)
-         sentinels[j] = mEphemData.stateVector2Thru50_DULT[i][j];
+         sentinels[j] = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
       
       if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
-         DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i], i, 6);
+         DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i], i, 6, swap);
       
       #ifdef DEBUG_UNPACK_DATA
       MessageInterface::ShowMessage("Checking for sentinels\n");
@@ -1677,16 +1906,15 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       }
    }
    
-   //#ifdef DEBUG_UNPACK_DATA
+   #ifdef DEBUG_UNPACK_DATA
    MessageInterface::ShowMessage("mLastStateIndexRead = %d\n", mLastStateIndexRead);
-   
-   //#endif
+   #endif
    
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
    {
-      MessageInterface::ShowMessage("timeOfFirstDataPoint_DUT        = % f\n", mEphemData.timeOfFirstDataPoint_DUT);
-      MessageInterface::ShowMessage("timeIntervalBetweenPoints_DUT   = % f\n", mEphemData.timeIntervalBetweenPoints_DUT);
-      MessageInterface::ShowMessage("thrustIndicator                 = % f\n", mEphemData.thrustIndicator);
+      DebugDouble("timeOfFirstDataPoint_DUT        = % f\n", mEphemData.timeOfFirstDataPoint_DUT, swap);
+      DebugDouble("timeIntervalBetweenPoints_DUT   = % f\n", mEphemData.timeIntervalBetweenPoints_DUT, swap);
+      DebugDouble("thrustIndicator                 = % f\n", mEphemData.thrustIndicator, swap);
       MessageInterface::ShowMessage
          ("======================================== End of data record %d\n", recNum);
    }
@@ -1773,9 +2001,13 @@ std::string Code500EphemerisFile::ToYearMonthDayHourMinSec(double yyymmdd, doubl
 //------------------------------------------------------------------------------
 // void ToYearMonthDay(double yyymmdd, int &year, int &month, int &day)
 //------------------------------------------------------------------------------
+/**
+ * Converts time in yyymmdd to yyyy, mm, day.
+ */
+//------------------------------------------------------------------------------
 void Code500EphemerisFile::ToYearMonthDay(double yyymmdd, int &year, int &month, int &day)
 {
-   double yyyymmdd = yyymmdd + 19000000.0;
+   double yyyymmdd = yyymmdd + 19000000;
    UnpackDate(yyyymmdd, year, month, day);
 }
 
@@ -1788,6 +2020,7 @@ void Code500EphemerisFile::ToYYYMMDDHHMMSS(double mjd, double &ymd, double &hms)
    A1Mjd tempA1Mjd(mjd);
    A1Date a1Date = tempA1Mjd.ToA1Date();
    a1Date.ToYearMonthDayHourMinSec(ymd, hms);
+
    // Since ymd is in yyyymmdd, subtract 19000000
    ymd = ymd - 19000000.0;
 }
@@ -2262,7 +2495,7 @@ unsigned char Code500EphemerisFile::EbcdicToAscii(unsigned char ebcd)
     return (asc);
 }
 
-
+#if 0
 //------------------------------------------------------------------------------
 // void SwapEndian(char *input, int numBytes)
 //------------------------------------------------------------------------------
@@ -2277,22 +2510,175 @@ void Code500EphemerisFile::SwapEndian(char *input, int numBytes)
    
    delete [] temp;
 }
+#endif
 
 
 //------------------------------------------------------------------------------
-// void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1)
+// double SwapDouble()
 //------------------------------------------------------------------------------
-void Code500EphemerisFile::DebugWriteStateVector(double *stateDULT, int i, int numElem)
+double Code500EphemerisFile::SwapDouble()
 {
+   return SwapDoubleBytes(mDoubleOriginBytes.doubleBytes.byte1, mDoubleOriginBytes.doubleBytes.byte2,
+                          mDoubleOriginBytes.doubleBytes.byte3, mDoubleOriginBytes.doubleBytes.byte4,
+                          mDoubleOriginBytes.doubleBytes.byte5, mDoubleOriginBytes.doubleBytes.byte6,
+                          mDoubleOriginBytes.doubleBytes.byte7, mDoubleOriginBytes.doubleBytes.byte8);
+}
+
+//------------------------------------------------------------------------------
+// double SwapDoubleBytes(const Byte byte1, const Byte byte2, const Byte byte3, ...)
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::SwapDoubleBytes(const Byte byte1, const Byte byte2, const Byte byte3,
+                                             const Byte byte4, const Byte byte5, const Byte byte6,
+                                             const Byte byte7, const Byte byte8)
+{
+   mDoubleSwappedBytes.doubleBytes.byte1 = byte8;
+   mDoubleSwappedBytes.doubleBytes.byte2 = byte7;
+   mDoubleSwappedBytes.doubleBytes.byte3 = byte6;
+   mDoubleSwappedBytes.doubleBytes.byte4 = byte5;
+   mDoubleSwappedBytes.doubleBytes.byte5 = byte4;
+   mDoubleSwappedBytes.doubleBytes.byte6 = byte3;
+   mDoubleSwappedBytes.doubleBytes.byte7 = byte2;
+   mDoubleSwappedBytes.doubleBytes.byte8 = byte1;
+   return mDoubleSwappedBytes.doubleValue;
+}
+
+
+//------------------------------------------------------------------------------
+// int SwapInteger()
+//------------------------------------------------------------------------------
+int Code500EphemerisFile::SwapInteger()
+{
+   return SwapIntegerBytes(mIntOriginBytes.intBytes.byte1, mIntOriginBytes.intBytes.byte2,
+                           mIntOriginBytes.intBytes.byte3, mIntOriginBytes.intBytes.byte4);
+}
+
+
+//------------------------------------------------------------------------------
+// int SwapIntegerBytes(const Byte byte1, const Byte byte2, const Byte byte3, const Byte byte4)
+//------------------------------------------------------------------------------
+int Code500EphemerisFile::SwapIntegerBytes(const Byte byte1, const Byte byte2,
+                                           const Byte byte3, const Byte byte4)
+{
+   mIntSwappedBytes.intBytes.byte1 = byte4;
+   mIntSwappedBytes.intBytes.byte2 = byte3;
+   mIntSwappedBytes.intBytes.byte3 = byte2;
+   mIntSwappedBytes.intBytes.byte4 = byte1;
+   return mIntSwappedBytes.intValue;
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugDouble(const std::string &fieldAndFormat, double value, bool swapEndian = false)
+//------------------------------------------------------------------------------
+/**
+ * Writes debug out of double field value.
+ *
+ * @param  fieldAndFormat  Filed name and format
+ * @param  value  Real value
+ * @param  swapEndian  true if swapping endian; false otherwise
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugDouble(const std::string &fieldAndFormat, double value,
+                                       bool swapEndian)
+{
+   if (swapEndian)
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), SwapDoubleEndian(value));
+   else
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), value);
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugDouble(const std::string &fieldAndFormat, double value, int index,
+//                  bool swapEndian = false)
+//------------------------------------------------------------------------------
+/**
+ * Writes debug out of double field value.
+ *
+ * @param  fieldAndFormat  Filed name and format
+ * @param  index  Index of input field
+ * @param  value  Real value
+ * @param  swapEndian  true if swapping endian; false otherwise
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugDouble(const std::string &fieldAndFormat, int index,
+                                       double value, bool swapEndian)
+{
+   if (swapEndian)
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), index, SwapDoubleEndian(value));
+   else
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), index, value);
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugDouble(const std::string &fieldAndFormat, double value, int index1,
+//                  int index2, bool swapEndian = false)
+//------------------------------------------------------------------------------
+/**
+ * Writes debug out of double field value.
+ *
+ * @param  fieldAndFormat  Filed name and format
+ * @param  index1  Row index of input field
+ * @param  index2  Column index of input field
+ * @param  value  Real value
+ * @param  swapEndian  true if swapping endian; false otherwise
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugDouble(const std::string &fieldAndFormat, int index1,
+                                       int index2, double value, bool swapEndian)
+{
+   if (swapEndian)
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), index1, index2, SwapDoubleEndian(value));
+   else
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), index1, index2, value);
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugInteger(const std::string &fieldAndFormat, int value, bool swapEndian = false)
+//------------------------------------------------------------------------------
+/**
+ * Writes debug out of integer field value.
+ *
+ * @param  fieldAndFormat  Filed name and format
+ * @param  value  Integer value
+ * @param  swapEndian  Set to true if swapping endian; false otherwise
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugInteger(const std::string &fieldAndFormat, int value,
+                                       bool swapEndian)
+{
+   if (swapEndian)
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), SwapIntegerEndian(value));
+   else
+      MessageInterface::ShowMessage(fieldAndFormat.c_str(), value);
+}
+
+
+//------------------------------------------------------------------------------
+// void DebugWriteStateVector(double *stateDULT, int i, int numElem = 1,
+//                            bool swapEndian = false)
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::DebugWriteStateVector(double *stateDULT, int i, int numElem,
+                                                 bool swapEndian)
+{
+   double posDult, velDult;
+   
    for (int j = 0; j < 3; j++)
    {
       if (numElem < j)
          break;
       
+      if (swapEndian)
+         posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+      else
+         posDult = mEphemData.stateVector2Thru50_DULT[i][j];
+      
       MessageInterface::ShowMessage
-         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
+         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, posDult);
       MessageInterface::ShowMessage
-         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_TO_KM);
+         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, posDult * DUL_TO_KM);
    }
    
    for (int j = 3; j < 6; j++)
@@ -2300,10 +2686,15 @@ void Code500EphemerisFile::DebugWriteStateVector(double *stateDULT, int i, int n
       if (numElem < j)
          break;
       
+      if (swapEndian)
+         velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+      else
+         velDult = mEphemData.stateVector2Thru50_DULT[i][j];
+      
       MessageInterface::ShowMessage
-         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j]);
+         ("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, velDult);
       MessageInterface::ShowMessage
-         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, mEphemData.stateVector2Thru50_DULT[i][j] * DUL_DUT_TO_KM_SEC);
+         ("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, velDult * DUL_DUT_TO_KM_SEC);
    }
 }
 

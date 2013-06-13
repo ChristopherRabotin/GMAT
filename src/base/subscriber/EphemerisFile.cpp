@@ -648,7 +648,7 @@ bool EphemerisFile::Validate()
       if (!useFixedStepSize)
          throw SubscriberException
             ("Code-500 ephemeris file requires fixed step size");
-      
+
       // Give default step size for code-500
       if (stepSize == "IntegratorSteps")
       {
@@ -1352,8 +1352,16 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       outCoordSystemName = value;
       return true;
    case OUTPUT_FORMAT:
-      outputFormat = value;
-      return true;
+      if (find(outputFormatList.begin(), outputFormatList.end(), value) !=
+          outputFormatList.end())
+      {
+         outputFormat = value;
+         return true;
+      }
+      else
+      {
+         HandleError(OUTPUT_FORMAT, value, outputFormatList);
+      }
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       fileName = value;
@@ -1656,6 +1664,9 @@ void EphemerisFile::CreateCode500EphemerisFile()
    std::string timeSystem  = "UTC";   // Figure out time system here
    std::string sourceId    = "GMAT";  // Should it be GTDS?
    std::string centralBody = spacecraft->GetOriginName();
+   int fileFormat = 1;
+   if (outputFormat == "UNIX")
+      fileFormat = 2;
    
    #ifdef DEBUG_EPHEMFILE_CODE500
    MessageInterface::ShowMessage
@@ -1666,9 +1677,7 @@ void EphemerisFile::CreateCode500EphemerisFile()
    try
    {
       code500EphemFile =
-         new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody);
-      
-      //code500EphemFile->OpenForWrite(fileName);
+         new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody, 2, fileFormat);
       
       // @todo Set origin mu to code500 ephem so that it can do conversion
       //code500EphemFile->SetCentralBodyMu(spacecraft->GetOriginMu());
@@ -4066,7 +4075,11 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    {
       MessageInterface::ShowMessage
          ("===> EphemerisFile::FinalizeCode500Ephemeris() calling code500EphemFile for debug output\n");
+      bool swapByteOrder = false;
+      if (outputFormat == "UNIX")
+         swapByteOrder = true;
       code500EphemFile->OpenForRead(fileName);
+      code500EphemFile->SetSwapEndian(swapByteOrder, 1);
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
