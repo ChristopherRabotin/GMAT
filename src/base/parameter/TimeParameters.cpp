@@ -40,7 +40,8 @@
  */
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day", true)
+   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day", true,
+         Gmat::SPACECRAFT)
 {
    // Write deprecated message once per GMAT session
    static bool writeDeprecatedMsg = true;
@@ -161,7 +162,8 @@ GmatBase* CurrA1MJD::Clone(void) const
  */
 //------------------------------------------------------------------------------
 A1ModJulian::A1ModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "A1ModJulian", obj, "A1 Mod. Julian Days", "day", true)
+   : TimeReal(name, "A1ModJulian", obj, "A1 Mod. Julian Days", "day", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -278,7 +280,8 @@ GmatBase* A1ModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 A1Gregorian::A1Gregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "A1Gregorian", obj, "A1 Gregorian Date", "", true)
+   : TimeString(name, "A1Gregorian", obj, "A1 Gregorian Date", "", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -388,7 +391,8 @@ GmatBase* A1Gregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TAIModJulian::TAIModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TAIModJulian", obj, "TAI Mod. Julian Days", "day", true)
+   : TimeReal(name, "TAIModJulian", obj, "TAI Mod. Julian Days", "day", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -498,7 +502,8 @@ GmatBase* TAIModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TAIGregorian::TAIGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TAIGregorian", obj, "TAI Gregorian Date", "", true)
+   : TimeString(name, "TAIGregorian", obj, "TAI Gregorian Date", "", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -608,7 +613,8 @@ GmatBase* TAIGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TTModJulian::TTModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TTModJulian", obj, "TT Mod. Julian Days", "day", true)
+   : TimeReal(name, "TTModJulian", obj, "TT Mod. Julian Days", "day", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -718,7 +724,8 @@ GmatBase* TTModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TTGregorian::TTGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TTGregorian", obj, "TT Gregorian Date", "", true)
+   : TimeString(name, "TTGregorian", obj, "TT Gregorian Date", "", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -828,7 +835,8 @@ GmatBase* TTGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TDBModJulian::TDBModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TDBModJulian", obj, "TDB Mod. Julian Days", "day", true)
+   : TimeReal(name, "TDBModJulian", obj, "TDB Mod. Julian Days", "day", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -940,7 +948,8 @@ GmatBase* TDBModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TDBGregorian::TDBGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TDBGregorian", obj, "TDB Gregorian Date", "", true)
+   : TimeString(name, "TDBGregorian", obj, "TDB Gregorian Date", "", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -1052,7 +1061,8 @@ GmatBase* TDBGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 UTCModJulian::UTCModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "UTCModJulian", obj, "UTC Mod. Julian Days", "day", true)
+   : TimeReal(name, "UTCModJulian", obj, "UTC Mod. Julian Days", "day", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -1162,7 +1172,8 @@ GmatBase* UTCModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 UTCGregorian::UTCGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "UTCGregorian", obj, "UTC Gregorian Date", "", true)
+   : TimeString(name, "UTCGregorian", obj, "UTC Gregorian Date", "", true,
+         Gmat::SPACE_POINT)
 {
 }
 
@@ -1291,7 +1302,8 @@ ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - ParameterParamCount] =
  */
 //------------------------------------------------------------------------------
 ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "ElapsedDays", obj, "Elapsed Days", "Day")
+   : TimeReal(name, "ElapsedDays", obj, "Elapsed Days", "Day", false,
+         Gmat::SPACECRAFT)
 {
    // GmatBase data
    parameterCount = ElapsedDaysParamCount;
@@ -1584,7 +1596,8 @@ ElapsedDaysFromStart::PARAMETER_TYPE[ElapsedDaysFromStartParamCount - ParameterP
  */
 //------------------------------------------------------------------------------
 ElapsedDaysFromStart::ElapsedDaysFromStart(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "ElapsedDaysFromStart", obj, "Elapsed Days", "Day")
+   : TimeReal(name, "ElapsedDaysFromStart", obj, "Elapsed Days", "Day", false,
+         Gmat::SPACECRAFT)
 {
    // GmatBase data
    parameterCount = ElapsedDaysFromStartParamCount;
@@ -1878,7 +1891,8 @@ ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - ParameterParamCount] =
  */
 //------------------------------------------------------------------------------
 ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "ElapsedSecs", obj, "Elapsed Seconds", "s")
+   : TimeReal(name, "ElapsedSecs", obj, "Elapsed Seconds", "s", false,
+         Gmat::SPACECRAFT)
 {
    // GmatBase data
    parameterCount = ElapsedSecsParamCount;
@@ -2171,7 +2185,8 @@ ElapsedSecsFromStart::PARAMETER_TYPE[ElapsedSecsFromStartParamCount - ParameterP
  */
 //------------------------------------------------------------------------------
 ElapsedSecsFromStart::ElapsedSecsFromStart(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "ElapsedSecsFromStart", obj, "Elapsed Seconds", "s")
+   : TimeReal(name, "ElapsedSecsFromStart", obj, "Elapsed Seconds", "s", false,
+         Gmat::SPACECRAFT)
 {
    // GmatBase data
    parameterCount = ElapsedSecsFromStartParamCount;

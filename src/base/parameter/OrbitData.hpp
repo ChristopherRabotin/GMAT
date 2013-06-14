@@ -37,7 +37,8 @@ class GMAT_API OrbitData : public RefData
 {
 public:
 
-   OrbitData(const std::string &name = "");
+   OrbitData(const std::string &name = "",
+             const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    OrbitData(const OrbitData &data);
    OrbitData& operator= (const OrbitData& right);
    virtual ~OrbitData();
@@ -83,11 +84,26 @@ public:
    const Rmatrix33& GetStmRmat33(Integer item);
    
    // The inherited methods from RefData
-   virtual bool ValidateRefObjects(GmatBase *param);
+   virtual bool               ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
-   
+
+   // More inherited methods from RefData
+   virtual std::string        GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+
+   virtual bool               SetRefObjectName(const Gmat::ObjectType type,
+                                               const std::string &name);
+   virtual GmatBase*          GetRefObject(const Gmat::ObjectType type,
+                                           const std::string &name = "");
+   virtual bool               SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                           const std::string &name = "");
+
 protected:
-   
+
+   virtual bool              AddRefObject(const Gmat::ObjectType type,
+                                          const std::string &name, GmatBase *obj = NULL,
+                                          bool replaceName = false);
+
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
    
@@ -114,6 +130,7 @@ protected:
    Integer stateTypeId;
    
    Spacecraft *mSpacecraft;
+   SpacePoint *mSpacePoint;
    SolarSystem *mSolarSystem;
    SpacePoint *mOrigin;
    CoordinateSystem *mInternalCoordSystem;

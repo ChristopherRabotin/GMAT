@@ -3343,6 +3343,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    }
    
    // Ceate new Parameter but do not add to ConfigManager yet
+   #if DEBUG_CREATE_PARAMETER
+   MessageInterface::ShowMessage
+      ("   about to call the factory manager to create %s\n", name.c_str());
+   #endif
    param = theFactoryManager->CreateParameter(newType, name);
    
    #ifdef DEBUG_MEMORY
@@ -7746,7 +7750,7 @@ void Moderator::CreateDefaultParameters()
    CreateParameter("TDBModJulian", "DefaultSC.TDBModJulian");
    CreateParameter("TDBGregorian", "DefaultSC.TDBGregorian");
    CreateParameter("UTCModJulian", "DefaultSC.UTCModJulian");
-   CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");      
+   CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default time parameters  created\n");
    #endif
@@ -7972,7 +7976,8 @@ void Moderator::CreateDefaultParameters()
       // need spacecraft if system parameter
       if (param->GetKey() == GmatParam::SYSTEM_PARAM)
       {
-         if (param->GetOwnerType() == Gmat::SPACECRAFT)
+//         if (param->GetOwnerType() == Gmat::SPACECRAFT)
+         if ((param->GetOwnerType() == Gmat::SPACECRAFT) || (param->GetOwnerType() == Gmat::SPACE_POINT))
          {
             //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
             //param->SetStringParameter("Expression", param->GetName());
@@ -8186,8 +8191,9 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
          ("   parameter owner type = %d, object type = %d\n", (*param)->GetOwnerType(),
           obj->GetType());
       #endif
-      
-      if ((*param)->GetOwnerType() != obj->GetType())
+      Gmat::ObjectType paramType = (*param)->GetOwnerType();
+//      if ((*param)->GetOwnerType() != obj->GetType())
+      if (!obj->IsOfType(paramType))
       {
          std::string paramOwnerType =
             GmatBase::GetObjectTypeString((*param)->GetOwnerType());

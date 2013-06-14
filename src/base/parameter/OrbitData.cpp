@@ -91,32 +91,34 @@ const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
 // public methods
 //---------------------------------
 
+//LOJ: NEW_PARAMETER: Added paramOwnerType to use in InitializeRefObjects()
 //------------------------------------------------------------------------------
-// OrbitData(const std::string &name = "")
+// OrbitData(const std::string &name = "", const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-OrbitData::OrbitData(const std::string &name)
-   : RefData(name),
+OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType)
+   : RefData(name, paramOwnerType),
    stateTypeId (-1)
 {
-   mCartState = Rvector6::RVECTOR6_UNDEFINED;
-   mKepState = Rvector6::RVECTOR6_UNDEFINED;
-   mModKepState = Rvector6::RVECTOR6_UNDEFINED;
+   mCartState     = Rvector6::RVECTOR6_UNDEFINED;
+   mKepState      = Rvector6::RVECTOR6_UNDEFINED;
+   mModKepState   = Rvector6::RVECTOR6_UNDEFINED;
    mSphRaDecState = Rvector6::RVECTOR6_UNDEFINED;
    mSphAzFpaState = Rvector6::RVECTOR6_UNDEFINED;
-   mCartEpoch = 0.0;
-   mGravConst = 0.0;
+   mCartEpoch     = 0.0;
+   mGravConst     = 0.0;
    
-   mSpacecraft = NULL;
-   mSolarSystem = NULL;
-   mOrigin = NULL;
-   mInternalCoordSystem = NULL;
-   mOutCoordSystem = NULL;
+   mSpacecraft           = NULL;
+   mSpacePoint           = NULL;
+   mSolarSystem          = NULL;
+   mOrigin               = NULL;
+   mInternalCoordSystem  = NULL;
+   mOutCoordSystem       = NULL;
    
-   mIsParamOriginDep = false;
+   mIsParamOriginDep     = false;
    firstTimeEpochWarning = false;
 }
 
@@ -148,6 +150,7 @@ OrbitData::OrbitData(const OrbitData &data)
    mGravConst = data.mGravConst;
    
    mSpacecraft = data.mSpacecraft;
+   mSpacePoint = data.mSpacePoint;
    mSolarSystem = data.mSolarSystem;
    mOrigin = data.mOrigin;
    mInternalCoordSystem = data.mInternalCoordSystem;
@@ -184,6 +187,7 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    mGravConst = right.mGravConst;
    
    mSpacecraft = right.mSpacecraft;
+   mSpacePoint = right.mSpacePoint;
    mSolarSystem = right.mSolarSystem;
    mOrigin = right.mOrigin;
    mInternalCoordSystem = right.mInternalCoordSystem;
@@ -222,61 +226,79 @@ void OrbitData::SetReal(Integer item, Real rval)
       ("OrbitData::SetReal() entered, item=%d, rval=%f\n", item, rval);
    #endif
    
-   if (mSpacecraft == NULL)
+   //if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
       InitializeRefObjects();
    
-   if (mSpacecraft == NULL)
+   //if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
    {
       MessageInterface::ShowMessage
-         ("*** INTERNAL ERROR *** Cannot find Spacecraft object so returning %f\n",
+         //("*** INTERNAL ERROR *** Cannot find Spacecraft object so returning %f\n",
+         ("*** INTERNAL ERROR *** Cannot find SpacePoint object so returning %f\n",
           GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
    }
    
-   CoordinateSystem *satCS =
-      (CoordinateSystem*)mSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
+   //LOJ: NEW_PARAMETER: added
+   CoordinateSystem *paramOwnerCS = NULL;
+   
+   if ((mSpacePoint->IsOfType(Gmat::SPACECRAFT)) ||
+       (mSpacePoint->IsOfType("Spacecraft")))
+   {
+      mSpacecraft = (Spacecraft*)mSpacePoint;
+      
+      //CoordinateSystem *satCS =
+      paramOwnerCS = 
+         (CoordinateSystem*)mSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
+   }
+   else
+   {
+      paramOwnerCS = mInternalCoordSystem;
+   }
+   
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("   Parameter CS        = <%p>'%s'\n", mOutCoordSystem,
+      ("   Parameter CS         = <%p>'%s'\n", mOutCoordSystem,
        mOutCoordSystem ? mOutCoordSystem->GetName().c_str() : "NULL");
    MessageInterface::ShowMessage
-      ("   Sat       CS        = <%p>'%s'\n", satCS,
-       satCS ? satCS->GetName().c_str() : "NULL");
+      ("   ParamOwner CS        = <%p>'%s'\n", paramOwnerCS,
+       paramOwnerCS ? paramOwnerCS->GetName().c_str() : "NULL");
    MessageInterface::ShowMessage
-      ("   Parameter CS Origin = <%p>'%s'\n", mOutCoordSystem,
+      ("   Parameter CS Origin  = <%p>'%s'\n", mOutCoordSystem,
        mOutCoordSystem ? mOutCoordSystem->GetOriginName().c_str() : "NULL");
    MessageInterface::ShowMessage
-      ("   Sat       CS Origin = <%p>'%s'\n", satCS,
-       satCS ? satCS->GetOriginName().c_str() : "NULL");
+      ("   ParamOwner CS Origin = <%p>'%s'\n", paramOwnerCS,
+       paramOwnerCS ? paramOwnerCS->GetOriginName().c_str() : "NULL");
    #endif
    
    // Check if origin is different from spacecraft CS origin
    if (mIsParamOriginDep && mOrigin)
    {
-      if (satCS->GetOriginName() != mOrigin->GetName())
+      if (paramOwnerCS->GetOriginName() != mOrigin->GetName())
       {
          ParameterException pe;
          pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
                        "requires values to be in the '%s' origin (setting "
                        "values in different origin will be implemented in "
                        "future builds)",  mActualParamName.c_str(),
-                       mSpacecraft->GetName().c_str(), satCS->GetOriginName().c_str());
+                       mSpacecraft->GetName().c_str(), paramOwnerCS->GetOriginName().c_str());
          throw pe;
       }
    }
    
    // Check for different coordinate system (2013.03.28)
-   //if (mOutCoordSystem != NULL && mOutCoordSystem != satCS)
-   if (!mIsParamOriginDep && mOutCoordSystem != NULL && satCS != NULL)
+   //if (mOutCoordSystem != NULL && mOutCoordSystem != paramOwnerCS)
+   if (!mIsParamOriginDep && mOutCoordSystem != NULL && paramOwnerCS != NULL)
    {
-      if (mOutCoordSystem->GetName() != satCS->GetName())
+      if (mOutCoordSystem->GetName() != paramOwnerCS->GetName())
       {
          ParameterException pe;
          pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
                        "requires values to be in the '%s' coordinate system (setting "
                        "values in different coordinate systems will be implemented in "
                        "future builds)",  mActualParamName.c_str(),
-                       mSpacecraft->GetName().c_str(), satCS->GetName().c_str());
+                       mSpacecraft->GetName().c_str(), paramOwnerCS->GetName().c_str());
          throw pe;
       }
    }
@@ -284,6 +306,12 @@ void OrbitData::SetReal(Integer item, Real rval)
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage("   Now calling Spacecraft::SetRealParameter()\n");
    #endif
+   
+   //LOJ: NEW_PARAMETER: Old code assuming parameter owner is always spacecraft
+   if (mSpacePoint == NULL)
+      throw ParameterException
+         ("OrbitData::SetReal() Cannot set Parameter " + GmatRealUtil::ToString(item) +
+          ". SpacePoint object is NULL\n");
    
    switch (item)
    {
@@ -455,16 +483,57 @@ void OrbitData::SetRvector6(const Rvector6 &val)
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartState()
 {
-   if (mSpacecraft == NULL || mSolarSystem == NULL)
-      InitializeRefObjects();
+   //LOJ: NEW_PARAMETER: Change mSpacecraft to mSpacePoint here
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("--- is mSpacePoint NULL?  %s\n",
+         (mSpacePoint? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("--- is mSpacecraft NULL?  %s\n",
+         (mSpacecraft? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("--- is mSolarSystem NULL?  %s\n",
+         (mSolarSystem? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("OrbitData::GetCartState() for '%s'\n",
+       mSpacePoint->GetName().c_str());
+   MessageInterface::ShowMessage("Is it a Spacecraft?  %s\n",
+         (mSpacePoint->IsOfType("Spacecraft")? "YES!" : "no"));
+   MessageInterface::ShowMessage
+      ("In GetCartState, mParamOwnerType = %d, mParamTypeName=%s, mParamOwnerName=%s, mParamDepName=%s\n",
+       mParamOwnerType, mParamTypeName.c_str(), mParamOwnerName.c_str(), mParamDepName.c_str());
+   #endif
    
-   mCartEpoch = mSpacecraft->GetEpoch();
-   mCartState.Set(mSpacecraft->GetState().GetState());
+   if (mSolarSystem == NULL || mSpacePoint == NULL ||
+      (mSpacePoint->IsOfType("Spacecraft") && mSpacecraft == NULL))
+      InitializeRefObjects();
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("InitializeRefObjects done ...\n");
+   MessageInterface::ShowMessage("--- is mSpacePoint NULL now?  %s\n",
+         (mSpacePoint? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("--- is mSpacecraft NULL now?  %s\n",
+         (mSpacecraft? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("--- is mSolarSystem NULL now?  %s\n",
+         (mSolarSystem? "NO" : "YES, it's NULL"));
+   MessageInterface::ShowMessage("OrbitData::GetCartState() for '%s'\n",
+       mSpacePoint->GetName().c_str());
+   MessageInterface::ShowMessage("Is it a Spacecraft now?  %s\n",
+         (mSpacePoint->IsOfType("Spacecraft")? "YES!" : "no"));
+   #endif
+
+   mCartEpoch = mSpacePoint->GetEpoch();
+   mCartState = mSpacePoint->GetLastState();
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("----- epoch from spacepoint is %le\n", mCartEpoch);
+   MessageInterface::ShowMessage
+      ("----- state from spacepoint is %s\n", mCartState.ToString().c_str());
+   #endif
    
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() '%s' mCartState=\n   %s\n",
-       mSpacecraft->GetName().c_str(), mCartState.ToString().c_str());
+       mSpacePoint->GetName().c_str(), mCartState.ToString().c_str());
+   MessageInterface::ShowMessage("   mInternalCoordSystem is %s, mOutCoordSystem is %s\n",
+         (mInternalCoordSystem? "NOT NULL" : "NULL"),  (mOutCoordSystem? "NOT NULL" : "NULL"));
+   MessageInterface::ShowMessage("   mInternalCS = <%p>, mOutCS = <%p>\n",
+         mInternalCoordSystem, mOutCoordSystem);
    #endif
    
    // if origin dependent parameter, the relative position/velocity is computed in
@@ -513,10 +582,12 @@ Rvector6 OrbitData::GetCartState()
          if (objRefOrigin->IsOfType("Spacecraft"))
          {
             std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
-            if (objRefScName != mSpacecraft->GetName())
+//            if (objRefScName != mSpacecraft->GetName())
+            if (objRefScName != mSpacePoint->GetName())
             {
                // Get the epochs of the spacecraft to see if they are different
-               Real scEpoch   = mSpacecraft->GetRealParameter("A1Epoch");
+//               Real scEpoch   = mSpacecraft->GetRealParameter("A1Epoch");
+               Real scEpoch   = mSpacePoint->GetRealParameter("A1Epoch");
                Real origEpoch = ((Spacecraft*) objRefOrigin)->GetRealParameter("A1Epoch");
                #ifdef DEBUG_ORBITDATA_OBJREF_EPOCH
                   MessageInterface::ShowMessage("obj ref cs sc epoch = %12.10f\n", origEpoch);
@@ -526,7 +597,8 @@ Rvector6 OrbitData::GetCartState()
                {
                   std::string errmsg = "Warning:  In Coordinate System \"";
                   errmsg += mOutCoordSystem->GetName() + "\", \"";
-                  errmsg += mSpacecraft->GetName() + "\" and \"";
+//                  errmsg += mSpacecraft->GetName() + "\" and \"";
+                  errmsg += mSpacePoint->GetName() + "\" and \"";
                   errmsg += objRefScName + "\" have different epochs.\n";
 //                  MessageInterface::PopupMessage(Gmat::WARNING_, errmsg);
                   MessageInterface::ShowMessage(errmsg);
@@ -572,6 +644,8 @@ Rvector6 OrbitData::GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetKepState()
 {
+   //LOJ: NEW_PARAMETER: Using mSpacecraft here, no change
+   
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
 
@@ -1133,6 +1207,136 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
       return false;
 }
 
+// The inherited methods from RefData
+std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
+{
+//   try
+//   {
+      return RefData::GetRefObjectName(type);
+//   }
+//   catch (ParameterException &pe)
+//   {
+//      // if the type was SpacePoint, we may need to look in the Spacecraft
+//      // list, or vice versa
+//      Gmat::ObjectType altType = type;
+//      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
+//      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+//      for (int i=0; i<mNumRefObjects; i++)
+//      {
+//         if (mRefObjList[i].objType == altType)
+//         {
+//            //Notes: will return first object name.
+//            return mRefObjList[i].objName;
+//         }
+//      }
+//
+//      throw;
+//   }
+}
+
+const StringArray& OrbitData::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return RefData::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Adds type and name to reference object list.
+ *
+ * @param <type> reference object type
+ * @param <name> reference object name
+ *
+ * @return true if type and name has successfully added to the list
+ *
+ */
+//------------------------------------------------------------------------------
+bool OrbitData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+{
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
+       (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
+       (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::SetRefObjectName(useType, name);
+
+}
+
+GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   try
+   {
+      GmatBase* theObj = RefData::GetRefObject(type, name);
+      return theObj;
+   }
+   catch (ParameterException &pe)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list, or vice versa, since we are looking for a spacecraft
+      Gmat::ObjectType altType = type;
+      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         if (mRefObjList[i].objType == altType)
+         {
+//            if (name == "") //if name is "", return first object
+//               return mRefObjList[i].obj;
+
+            if ((name == "" || mRefObjList[i].objName == name) &&
+                (mRefObjList[i].obj)->IsOfType("Spacecraft"))
+            {
+               return mRefObjList[i].obj;
+            }
+         }
+      }
+
+      throw;
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets object which is used in evaluation.
+ *
+ * @return true if the object has been added.
+ */
+//------------------------------------------------------------------------------
+bool OrbitData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name)
+{
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
+       (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
+       (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::SetRefObject(obj, useType, name);
+}
+
+bool OrbitData::AddRefObject(const Gmat::ObjectType type,
+                            const std::string &name, GmatBase *obj,
+                            bool replaceName)
+{
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
+       (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
+       (type == Gmat::BARYCENTER))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::AddRefObject(useType, name, obj, replaceName);
+}
+
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -1241,27 +1445,49 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 void OrbitData::InitializeRefObjects()
 {
    #ifdef DEBUG_ORBITDATA_INIT
-   MessageInterface::ShowMessage("OrbitData::InitializeRefObjects() entered.\n");
+   MessageInterface::ShowMessage
+      ("OrbitData::InitializeRefObjects() entered, mActualParamName='%s', "
+       "mParamOwnerType=%d, mParamOwnerName='%s', mParamDepName='%s', mParamTypeName='%s'\n",
+       mActualParamName.c_str(), mParamOwnerType, mParamOwnerName.c_str(), mParamDepName.c_str(),
+       mParamTypeName.c_str());
    #endif
    
-   mSpacecraft =
-      (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+   //LOJ: NEW_PARAMETER: Changed mSpacecraft to mSpacePoint and to use FindObject with mParamOwnerName
+   // Changed to pass Gmat::SPACE_POINT since orbit Parameter's owner type is SpacePoint
+   mSpacePoint = (SpacePoint*)FindObject(mParamOwnerType, mParamOwnerName);
+   //mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    
-   if (mSpacecraft == NULL)
+   #ifdef DEBUG_ORBITDATA_INIT
+   MessageInterface::ShowMessage("   mSpacePoint=<%p>\n", mSpacePoint);
+   #endif
+   
+   //if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
    {
       #ifdef DEBUG_ORBITDATA_INIT
       MessageInterface::ShowMessage
-         ("OrbitData::InitializeRefObjects() Cannot find spacecraft: " +
-          GetRefObjectName(Gmat::SPACECRAFT) + ".\n" +
+         //("OrbitData::InitializeRefObjects() Cannot find spacecraft: " +
+         ("OrbitData::InitializeRefObjects() Cannot find SpacePoint: " +
+          GetRefObjectName(Gmat::SPACE_POINT) + ".\n" +
           "Make sure Spacecraft is set to any internal parameters.\n");
       #endif
       
       throw ParameterException
-         ("Cannot find spacecraft: " + GetRefObjectName(Gmat::SPACECRAFT));
+         //("Cannot find spacecraft: " + GetRefObjectName(Gmat::SPACE_POINT));
+         ("Cannot find Spacepoint: " + GetRefObjectName(Gmat::SPACE_POINT));
    }
    
-   if (stateTypeId == -1)
-      stateTypeId = mSpacecraft->GetParameterID("DisplayStateType");
+   //LOJ: NEW_PARAMETER: Handle special to spacecraft
+   if ((mParamOwnerType == Gmat::SPACECRAFT) || (mSpacePoint->IsOfType("Spacecraft")))
+   {
+      mSpacecraft = (Spacecraft*)mSpacePoint;
+      if (stateTypeId == -1)
+         stateTypeId = mSpacecraft->GetParameterID("DisplayStateType");
+   }
+   #ifdef DEBUG_ORBITDATA_INIT
+   MessageInterface::ShowMessage
+      ("OrbitData::InitializeRefObjects()  ... 1\n");
+   #endif
    
    mSolarSystem =
       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
@@ -1275,14 +1501,35 @@ void OrbitData::InitializeRefObjects()
          ("OrbitData::InitializeRefObjects() Cannot find internal "
           "CoordinateSystem object\n");
    
+   #ifdef DEBUG_ORBITDATA_INIT
+   MessageInterface::ShowMessage
+      ("OrbitData::InitializeRefObjects()  solar system and coord system are not NULL\n");
+   #endif
+
    //-----------------------------------------------------------------
    // if dependent body name exist and it is a CelestialBody,
    // it is origin dependent parameter, set new gravity constant.
    //-----------------------------------------------------------------
-   std::string originName =
-      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
    
+   //LOJ: NEW_PARAMETER: Changed to use mParamDepName
+
+   //std::string originName =
+   //   FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
+   
+   std::string originName;
+   GmatBase *depObj = NULL;
    mIsParamOriginDep = false;
+   if (mParamDepName != "")
+   {
+      depObj = FindObject(Gmat::SPACE_POINT, mParamDepName);
+      if (depObj)
+         originName = depObj->GetName();
+   }
+   
+   #ifdef DEBUG_ORBITDATA_INIT
+   MessageInterface::ShowMessage
+      ("   originName='%s', depObj=<%p>\n", originName.c_str(), depObj);
+   #endif
    
    if (originName != "")
    {
@@ -1292,8 +1539,10 @@ void OrbitData::InitializeRefObjects()
           originName.c_str());
       #endif
       
-      mOrigin =
-         (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+      mOrigin = (SpacePoint*)depObj;
+      
+      //mOrigin =
+      //   (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
       
       if (!mOrigin)
          throw InvalidDependencyException
@@ -1309,7 +1558,7 @@ void OrbitData::InitializeRefObjects()
                   mGravConst, (mOrigin->GetName()).c_str());
          #endif
       }
-
+      
       mIsParamOriginDep = true;
    }
    //-----------------------------------------------------------------
@@ -1366,8 +1615,8 @@ void OrbitData::InitializeRefObjects()
       ("OrbitData::InitializeRefObjects() exiting, mOrigin.Name=%s, mGravConst=%f, "
        "mIsParamOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mIsParamOriginDep);
    MessageInterface::ShowMessage
-      ("   mSpacecraft=<%p> '%s', mSolarSystem=<%p>, mOutCoordSystem=<%p>, mOrigin=<%p>\n",
-       mSpacecraft, mSpacecraft->GetName().c_str(),mSolarSystem, mOutCoordSystem, mOrigin);
+      ("   mSpacePoint=<%p> '%s', mSolarSystem=<%p>, mOutCoordSystem=<%p>, mOrigin=<%p>\n",
+       mSpacecraft, mSpacePoint->GetName().c_str(),mSolarSystem, mOutCoordSystem, mOrigin);
    #endif
 }
 

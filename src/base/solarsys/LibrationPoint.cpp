@@ -354,7 +354,8 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    
    // Translate so that the origin is at the j2000Body
    Rvector6 rvResult = rvFK5 + primaryState;
-   
+   lastState         = rvResult;
+   lastStateTime     = atTime;
    #ifdef DEBUG_GET_STATE
    MessageInterface::ShowMessage
       ("LibrationPoint::GetMJ2000State() returning\n   %s\n",

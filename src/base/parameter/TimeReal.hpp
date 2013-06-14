@@ -33,7 +33,7 @@ public:
 
    TimeReal(const std::string &name, const std::string &typeStr, 
             GmatBase *obj, const std::string &desc, const std::string &unit,
-            bool isSettable = false);
+            bool isSettable = false, Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    TimeReal(const TimeReal &copy);
    TimeReal& operator=(const TimeReal &right);
    virtual ~TimeReal();

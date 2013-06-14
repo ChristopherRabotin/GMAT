@@ -35,6 +35,7 @@
 #include "FileUtil.hpp"
 #include "CoordinateConverter.hpp"      // for Convert()
 #include "MessageInterface.hpp"
+#include "GmatBaseException.hpp"
 #ifdef __USE_SPICE__
    #include "SpiceInterface.hpp"
 #endif
@@ -69,6 +70,7 @@ SpacePoint::PARAMETER_TEXT[SpacePointParamCount - GmatBaseParamCount] =
    "AttitudeSpiceKernelName",
    "SCClockSpiceKernelName",
    "FrameSpiceKernelName",
+   "A1Epoch",
 };
 
 const Gmat::ParameterType
@@ -81,6 +83,7 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
    Gmat::STRINGARRAY_TYPE,  // "AttitudeSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "SCClockSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "FrameSpiceKernelName"
+   Gmat::REAL_TYPE,         // "A1Epoch"
 };
 
 #ifdef __USE_SPICE__
@@ -241,6 +244,52 @@ SpacePoint::~SpacePoint()
 void SpacePoint::SetSolarSystem(SolarSystem *ss)
 {
    theSolarSystem = ss;
+}
+
+//------------------------------------------------------------------------------
+// Real GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current epoch of the object, in A.1 Modified Julian format.
+ *
+ * @return The A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real SpacePoint::GetEpoch()
+{
+   std::string errmsg = "GetEpoch not implemented for SpacePoint ";
+   errmsg += instanceName + "\n";
+   throw GmatBaseException(errmsg);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetEpoch(const Real ep)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
+ *
+ * @param <ep> The new A.1 epoch.
+ *
+ * @return The updated A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real SpacePoint::SetEpoch(const Real ep)
+{
+   std::string errmsg = "SetEpoch not implemented for SpacePoint ";
+   errmsg += instanceName + "\n";
+   throw GmatBaseException(errmsg);
+}
+
+Rvector6 SpacePoint::GetLastState()
+{
+   std::string errmsg = "GetLastState not implemented for SpacePoint ";
+   errmsg += instanceName + "\n";
+   throw GmatBaseException(errmsg);
 }
 
 //------------------------------------------------------------------------------
@@ -619,6 +668,12 @@ bool SpacePoint::IsParameterReadOnly(const Integer id) const
    if (id == FRAME_SPICE_KERNEL_NAME)
       if (frameSpiceKernelNames.size() == 0)
          return true;
+
+   // Hide A1Epoch
+   if (id == EPOCH_PARAM)
+   {
+      return true;
+   }
 
    return GmatBase::IsParameterReadOnly(id);
 }

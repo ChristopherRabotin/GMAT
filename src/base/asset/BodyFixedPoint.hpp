@@ -46,7 +46,9 @@ public:
    BodyFixedPoint& operator=(const BodyFixedPoint& bfp);
 
    virtual bool            Initialize();
-
+   virtual Real            GetEpoch();
+   virtual Real            SetEpoch(const Real ep);
+   virtual Rvector6        GetLastState();
 
    // Parameter access methods - overridden from GmatBase
    virtual void            Copy(const GmatBase* orig);
@@ -149,6 +151,9 @@ protected:
    std::string       mj2kcsName;
    /// A MJ2000 coordinate system
    CoordinateSystem  *mj2kcs;
+
+   A1Mjd             lastStateTime;
+   Rvector6          lastState;
 
    /// Converter helper
    CoordinateConverter ccvtr;

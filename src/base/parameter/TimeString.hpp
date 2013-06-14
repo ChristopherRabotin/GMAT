@@ -33,7 +33,7 @@ public:
 
    TimeString(const std::string &name, const std::string &typeStr, 
               GmatBase *obj, const std::string &desc, const std::string &unit,
-              bool isSettable = false);
+              bool isSettable = false, Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    TimeString(const TimeString &copy);
    TimeString& operator=(const TimeString &right);
    virtual ~TimeString();

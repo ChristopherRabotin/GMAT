@@ -55,10 +55,10 @@
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
                      GmatBase *obj, const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Integer itemId, bool isSettable,
-                     bool isPlottable, bool isReportable)
+                     bool isPlottable, bool isReportable, Gmat::ObjectType paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, Gmat::SPACECRAFT, false, isSettable, isPlottable, isReportable),
-     OrbitData(name)
+             depObj, paramOwnerType, false, isSettable, isPlottable, isReportable),
+     OrbitData(name, paramOwnerType)
 {
    mItemId = itemId;
    mNeedCoordSystem = true;
@@ -480,6 +480,11 @@ bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
        type, name.c_str(), this->GetName().c_str());
    #endif
    
-   return OrbitData::SetRefObject(obj, type, name);
+   bool setOK = OrbitData::SetRefObject(obj, type, name);
+   // Setting states for SpacePoints, other than Spacecraft, is not allowed
+   if (setOK && obj->IsOfType("SpacePoint") && !(obj->IsOfType("Spacecraft")))
+      mIsSettable = false;
+   return setOK;
+//   return OrbitData::SetRefObject(obj, type, name);
 }
 

@@ -46,9 +46,10 @@
 //------------------------------------------------------------------------------
 OrbitRvec6::OrbitRvec6(const std::string &name, const std::string &typeStr, 
                        GmatBase *obj, const std::string &desc,
-                       const std::string &unit, GmatParam::DepObject depObj)
+                       const std::string &unit, GmatParam::DepObject depObj,
+                       Gmat::ObjectType objType)
    : Rvec6Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
-              Gmat::SPACECRAFT)
+              objType)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

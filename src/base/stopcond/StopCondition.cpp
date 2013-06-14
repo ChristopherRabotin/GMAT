@@ -1298,7 +1298,7 @@ bool StopCondition::Validate()
             ("StopCondition::Validate(): Creating KepEcc...\n");
          #endif
          
-         mEccParam = new KepEcc(mStopParam->GetRefObjectName(Gmat::SPACECRAFT));
+         mEccParam = new KepEcc(mStopParam->GetRefObjectName(Gmat::SPACECRAFT) + ".ECC");
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             (mEccParam, mEccParam->GetName(), "StopCondition::Validate()",
@@ -1340,7 +1340,7 @@ bool StopCondition::Validate()
                 depObjName.c_str());
             #endif
             
-            mRmagParam = new SphRMag(mStopParam->GetRefObjectName(Gmat::SPACECRAFT));
+            mRmagParam = new SphRMag(mStopParam->GetRefObjectName(Gmat::SPACECRAFT) + ".RMAG");
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Add
                (mRmagParam, mRmagParam->GetName(), "StopCondition::Validate()",

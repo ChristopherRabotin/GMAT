@@ -71,7 +71,8 @@ class GMAT_API RefData
 {
 public:
 
-   RefData(const std::string &name = "");
+   RefData(const std::string &name = "",
+           const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    RefData(const RefData &rd);
    RefData& operator= (const RefData &rd);
    virtual ~RefData();
@@ -82,33 +83,38 @@ public:
    
    Integer              GetNumRefObjects() const;
    
-   std::string          GetRefObjectName(const Gmat::ObjectType type) const;
-   const StringArray&   GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual std::string          GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&   GetRefObjectNameArray(const Gmat::ObjectType type);
    
-   bool                 SetRefObjectName(const Gmat::ObjectType type,
-                                         const std::string &name);
-   GmatBase*            GetRefObject(const Gmat::ObjectType type,
-                                     const std::string &name = "");
-   bool                 SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                     const std::string &name = "");
+   virtual bool                 SetRefObjectName(const Gmat::ObjectType type,
+                                                 const std::string &name);
+   virtual GmatBase*            GetRefObject(const Gmat::ObjectType type,
+                                             const std::string &name = "");
+   virtual bool                 SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                             const std::string &name = "");
    
-   bool                 RenameRefObject(const Gmat::ObjectType type,
-                                        const std::string &oldName,
-                                        const std::string &newName);
+   virtual bool                 RenameRefObject(const Gmat::ObjectType type,
+                                             const std::string &oldName,
+                                             const std::string &newName);
    
-   virtual bool         ValidateRefObjects(GmatBase *param) = 0;
-   virtual const std::string* GetValidObjectList() const;
+   virtual bool                ValidateRefObjects(GmatBase *param) = 0;
+   virtual const std::string*  GetValidObjectList() const;
 
 protected:
 
    std::string mActualParamName;
+   std::string mParamOwnerName;
+   std::string mParamDepName;
+   std::string mParamTypeName;
+   Gmat::ObjectType mParamOwnerType;
+   
    std::vector<RefObjType> mRefObjList;
    
    StringArray mObjectTypeNames;
    StringArray mAllRefObjectNames;
    Integer mNumRefObjects;
    
-   bool                 AddRefObject(const Gmat::ObjectType type,
+   virtual bool         AddRefObject(const Gmat::ObjectType type,
                                      const std::string &name, GmatBase *obj = NULL,
                                      bool replaceName = false);
    
@@ -120,6 +126,9 @@ protected:
    GmatBase*            FindFirstObject(const std::string &type) const;
    GmatBase*            FindFirstObject(const Gmat::ObjectType type) const;
    std::string          FindFirstObjectName(const Gmat::ObjectType type) const;
+   
+   StringArray          FindObjectNames(const Gmat::ObjectType type) const;
+   GmatBase*            FindObject(const Gmat::ObjectType type, const std::string name) const;
    
    virtual void         InitializeRefObjects();
    virtual bool         IsValidObjectType(Gmat::ObjectType type) = 0;

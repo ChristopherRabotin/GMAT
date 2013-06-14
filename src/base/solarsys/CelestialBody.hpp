@@ -150,6 +150,10 @@ public:
    virtual bool                 Initialize();
    virtual void                 SetUpBody();
    
+   virtual Real                 GetEpoch();
+   virtual Real                 SetEpoch(const Real ep);
+   virtual Rvector6             GetLastState();
+
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
    virtual const Real           GetFirstStateTime();
@@ -501,6 +505,8 @@ protected:
    A1Mjd                  lastEphemTime;
    /// last state value calculated
    Rvector6               lastState;
+   /// last MJ2000 state calculated
+   Rvector6               j2kState;
    
    Real                   prevState[6];
    

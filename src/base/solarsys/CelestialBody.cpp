@@ -72,6 +72,7 @@
 //#define DEBUG_CB_EQ_RAD
 //#define DEBUG_CB_CARTOGRAPHIC
 //#define DEBUG_CB_DESTRUCT
+//#define DEBUG_CB_EPOCH
 
 
 //#ifndef DEBUG_MEMORY
@@ -428,6 +429,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    ephemUpdateInterval (cBody.ephemUpdateInterval),
    lastEphemTime       (cBody.lastEphemTime),
    lastState           (cBody.lastState),
+   j2kState            (cBody.j2kState),
    rotationSrc         (cBody.rotationSrc),
    userDefined         (cBody.userDefined),
    allowSpice          (cBody.allowSpice),
@@ -572,6 +574,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    ephemUpdateInterval = cBody.ephemUpdateInterval;
    lastEphemTime       = cBody.lastEphemTime;
    lastState           = cBody.lastState;
+   j2kState            = cBody.j2kState;
    rotationSrc         = cBody.rotationSrc;
    userDefined         = cBody.userDefined;
    allowSpice          = cBody.allowSpice;
@@ -724,6 +727,57 @@ void CelestialBody::SetUpBody()
    }
    // add other set-up kinds of things later?
    return;
+}
+
+//------------------------------------------------------------------------------
+// Real GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current epoch of the object, in A.1 Modified Julian format.
+ *
+ * @return The A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real CelestialBody::GetEpoch()
+{
+   #ifdef DEBUG_CB_EPOCH
+      MessageInterface::ShowMessage("Entering CB::GetEpoch and returning %le\n",
+            stateTime.Get());
+   #endif
+   return lastEphemTime.Get();
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetEpoch(const Real ep)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
+ *
+ * @param <ep> The new A.1 epoch.
+ *
+ * @return The updated A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real CelestialBody::SetEpoch(const Real ep)
+{
+   #ifdef DEBUG_CB_EPOCH
+      MessageInterface::ShowMessage(
+            "Entering CB::SetEpoch and setting stateTime to %le\n",
+            ep);
+   #endif
+   A1Mjd a1(ep);
+   GetMJ2000State(a1);  // will set j2kState and lastEphemTime
+   return lastEphemTime.Get();
+}
+
+Rvector6 CelestialBody::GetLastState()
+{
+   return j2kState;
 }
 
 
@@ -936,7 +990,7 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
       for (Integer i=0;i<6;i++) outState[i] = prevState[i];
    }
    
-   Rvector6 state;
+//   Rvector6 state;
    switch (posVelSrc)
    {
 //      case Gmat::TWO_BODY_PROPAGATION :  // 2012.01.24 - wcs - disallow for now
@@ -1017,6 +1071,7 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
    
    stateTime     = atTime;
    lastEphemTime = atTime;
+   state.Set(outState[0],outState[1],outState[2],outState[3],outState[4],outState[5]);
    lastState.Set(outState[0],outState[1],outState[2],outState[3],outState[4],outState[5]);
    
    for (Integer i=0;i<6;i++)
@@ -2515,11 +2570,22 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
             instanceName.c_str(), ttTime, tdbTime,
             theState[0], theState[1], theState[2], theState[3], theState[4], theState[5]);
    #endif
+
+   // we need to store the last computed j2k state
+   // the lastEphemTime will have been set when we called GetState
+
    // SPICE does the subtraction itself
    if (posVelSrc == Gmat::SPICE)
-      return stateEphem;
+   {
+      j2kState = stateEphem;
+//      return stateEphem;
+   }
    else // DE or TwoBodyPropagation
-      return (stateEphem - j2kEphemState);
+   {
+      j2kState = stateEphem - j2kEphemState;
+//      return (stateEphem - j2kEphemState);
+   }
+   return j2kState;
 }
 
 
@@ -2807,6 +2873,16 @@ std::string CelestialBody::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetRealParameter(const Integer id) const
 {
+   /// from SpacePoint - this should only be called from Parameters
+   if (id == EPOCH_PARAM)
+   {
+      #ifdef DEBUG_CB_EPOCH
+         MessageInterface::ShowMessage(
+               "Entering CB::GetReal and getting stateTime as  %le\n",
+               lastEphemTime.Get());
+      #endif
+      return lastEphemTime.Get();
+   }
    if (id == MASS)               return mass;
    if (id == EQUATORIAL_RADIUS)  return equatorialRadius;
    if (id == FLATTENING)         return flattening;
@@ -2864,6 +2940,18 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
    std::string noTwoBody = "The two-body ephemeris model for a celestial body has been deprecated. The following setting is invalid \n";
    // 2012.01.24 - wcs - two body propagation disallowed for now
 
+   /// from SpacePoint - this should only be called from Parameters
+   if (id == EPOCH_PARAM)
+   {
+      #ifdef DEBUG_CB_EPOCH
+         MessageInterface::ShowMessage(
+               "Entering CB::SetReal and setting stateTime to  %le\n",
+               value);
+      #endif
+      A1Mjd a1(value);
+      GetMJ2000State(a1);  // will set lastEphemTime and j2kState
+      return lastEphemTime.Get();
+   }
       
    if (id == EQUATORIAL_RADIUS)
    {
@@ -3869,6 +3957,7 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
        (id == SPIN_AXIS_DEC_CONSTANT) || (id == SPIN_AXIS_DEC_RATE) ||
        (id == ROTATION_CONSTANT)      || (id == ROTATION_RATE)))
       return true;
+
 
    // NAIF ID is not read-only for celestial bodies
    if (id == NAIF_ID)  return false;

@@ -160,11 +160,13 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
    // if it's built-in, get the state from the SpacePoint
    if (isBuiltIn)
    {
+      lastStateTime = atTime;
+      lastState     = builtInSP->GetMJ2000State(atTime);
       #ifdef DEBUG_BARYCENTER_STATE
          MessageInterface::ShowMessage("Computing state for Barycenter %s, whose builtInSP is %s\n",
                instanceName.c_str(), (builtInSP->GetName()).c_str());
       #endif
-      return builtInSP->GetMJ2000State(atTime);
+      return lastState;
    }
    // otherwise, sum the masses and states
    CheckBodies();
@@ -202,8 +204,10 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
       MessageInterface::ShowMessage("sumMassPos = %s\n",
             (sumMassPos.ToString()).c_str());
    #endif
-   return Rvector6(sumMassPos(0), sumMassPos(1), sumMassPos(2),
-                   sumMassVel(0), sumMassVel(1), sumMassVel(2));
+   lastState.Set(sumMassPos(0), sumMassPos(1), sumMassPos(2),
+         sumMassVel(0), sumMassVel(1), sumMassVel(2));
+   lastStateTime = atTime;
+   return lastState;
 }
 
 //---------------------------------------------------------------------------

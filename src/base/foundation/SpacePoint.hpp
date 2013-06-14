@@ -57,6 +57,10 @@ public:
    
    virtual void       SetSolarSystem(SolarSystem *ss);
    
+   virtual Real       GetEpoch();
+   virtual Real       SetEpoch(const Real ep);
+   virtual Rvector6   GetLastState();
+
    // methods for accessing the bodyName or body pointer
    virtual bool       RequiresJ2000Body();
    const std::string  GetJ2000BodyName() const;
@@ -189,6 +193,7 @@ protected:
       ATTITUDE_SPICE_KERNEL_NAME,
       SC_CLOCK_SPICE_KERNEL_NAME,
       FRAME_SPICE_KERNEL_NAME,
+      EPOCH_PARAM,
       SpacePointParamCount
    };
    
@@ -202,9 +207,9 @@ protected:
    
    /// the solar system to which this body belongs
    SolarSystem     *theSolarSystem;
-   /// Inertial coordinate system to be unsed in GetAttitude()
+   /// Inertial coordinate system to be used in GetAttitude()
    CoordinateSystem *inertialCS;
-   /// BodyFixed coordinate system to be unsed in GetAttitude()
+   /// BodyFixed coordinate system to be used in GetAttitude()
    CoordinateSystem *bodyFixedCS;
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)

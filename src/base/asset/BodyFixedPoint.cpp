@@ -116,7 +116,8 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
    bfcsName             (""),
    bfcs                 (NULL),
    mj2kcsName           (""),
-   mj2kcs               (NULL)
+   mj2kcs               (NULL),
+   lastStateTime        (GmatTimeConstants::MJD_OF_J2000)
 {
    objectTypes.push_back(Gmat::BODY_FIXED_POINT);
    objectTypeNames.push_back("BodyFixedPoint");
@@ -176,7 +177,9 @@ BodyFixedPoint::BodyFixedPoint(const BodyFixedPoint& bfp) :
    bfcsName             (bfp.bfcsName),
    bfcs                 (NULL),
    mj2kcsName           (bfp.mj2kcsName),
-   mj2kcs               (NULL)
+   mj2kcs               (NULL),
+   lastStateTime        (bfp.lastStateTime),
+   lastState            (bfp.lastState)
 {
    location[0]   = bfp.location[0];
    location[1]   = bfp.location[1];
@@ -219,6 +222,8 @@ BodyFixedPoint& BodyFixedPoint::operator=(const BodyFixedPoint& bfp)
       mj2kcsName           = bfp.mj2kcsName;
       //mj2kcs               = bfp.mj2kcs;     // yes or no?
       mj2kcs               = NULL;
+      lastStateTime        = bfp.lastStateTime;
+      lastState            = bfp.lastState;
 
       location[0]          = bfp.location[0];
       location[1]          = bfp.location[1];
@@ -320,6 +325,51 @@ bool BodyFixedPoint::Initialize()
    #endif
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// Real GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current epoch of the object, in A.1 Modified Julian format.
+ *
+ * @return The A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real BodyFixedPoint::GetEpoch()
+{
+   return lastStateTime.Get();
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetEpoch(const Real ep)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
+ *
+ * @param <ep> The new A.1 epoch.
+ *
+ * @return The updated A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real BodyFixedPoint::SetEpoch(const Real ep)
+{
+   A1Mjd a1(ep);
+   GetMJ2000State(a1);
+   return lastStateTime.Get();
+}
+
+Rvector6 BodyFixedPoint::GetLastState()
+{
+   return lastState;
+}
+
+
 
 // Parameter access methods - overridden from GmatBase
 
@@ -805,6 +855,10 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 Real BodyFixedPoint::GetRealParameter(const Integer id) const
 {
+   if (id == EPOCH_PARAM)  // from SpacePoint
+   {
+      return lastStateTime.Get();
+   }
    if ((id >= LOCATION_1) && (id <= LOCATION_3))
    {
       if ((stateType == "Cartesian") || (id == LOCATION_3))  // all units are km
@@ -821,6 +875,12 @@ Real BodyFixedPoint::GetRealParameter(const Integer id) const
 Real BodyFixedPoint::SetRealParameter(const Integer id,
                                       const Real value)
 {
+   if (id == EPOCH_PARAM)  // from SpacePoint
+   {
+      A1Mjd a1(value);
+      GetMJ2000State(a1);
+      return lastStateTime.Get();
+   }
    #ifdef DEBUG_BODYFIXED_SET_REAL
       MessageInterface::ShowMessage("Entering BFP::SetRealParameter with id = %d (%s) and value = %12.10f\n",
             id, (GetParameterText(id)).c_str(), value);
@@ -1106,6 +1166,8 @@ const Rvector6 BodyFixedPoint::GetMJ2000State(const A1Mjd &atTime)
             (j2000PosVel.ToString()).c_str());
    #endif
 
+   lastStateTime = atTime;
+   lastState     = j2000PosVel;
    return j2000PosVel;
 }
 

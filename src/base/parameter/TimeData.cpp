@@ -41,7 +41,8 @@ const std::string TimeData::TIME_STRING_UNDEFINED = "INVALID_TIME";
 const std::string
 TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 {
-   "Spacecraft" //loj: use spacecraft to get current time?
+   "Spacecraft", //loj: use spacecraft to get current time?
+   "SpacePoint" // can use times for non-Spacecraft SpacePoints
 }; 
 
 
@@ -56,12 +57,13 @@ TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
  * Constructor.
  */
 //------------------------------------------------------------------------------
-TimeData::TimeData(const std::string &name)
-   : RefData(name)
+TimeData::TimeData(const std::string &name, Gmat::ObjectType paramOwnerType)
+   : RefData(name, paramOwnerType)
 {
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
    mSpacecraft = NULL;
+   mSpacePoint = NULL;
 }
 
 
@@ -77,9 +79,10 @@ TimeData::TimeData(const std::string &name)
 TimeData::TimeData(const TimeData &copy)
    : RefData(copy)
 {
-   mInitialEpoch = copy.mInitialEpoch;
+   mInitialEpoch      = copy.mInitialEpoch;
    mIsInitialEpochSet = copy.mIsInitialEpochSet;
-   mSpacecraft = copy.mSpacecraft;
+   mSpacecraft        = copy.mSpacecraft;
+   mSpacePoint        = copy.mSpacePoint;
 }
 
 
@@ -100,9 +103,10 @@ TimeData& TimeData::operator= (const TimeData &right)
    {
       RefData::operator=(right);
       
-      mInitialEpoch = right.mInitialEpoch;
+      mInitialEpoch      = right.mInitialEpoch;
       mIsInitialEpochSet = right.mIsInitialEpochSet;
-      mSpacecraft = right.mSpacecraft;
+      mSpacecraft        = right.mSpacecraft;
+      mSpacePoint        = right.mSpacePoint;
    }
    
    return *this;
@@ -172,7 +176,7 @@ Real TimeData::GetInitialEpoch() const
 //------------------------------------------------------------------------------
 void TimeData::SetInitialEpoch(const Real &initialEpoch)
 {
-   mInitialEpoch = initialEpoch;
+   mInitialEpoch      = initialEpoch;
    mIsInitialEpochSet = true;
    
    #ifdef DEBUG_TIMEDATA
@@ -193,10 +197,12 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 Real TimeData::GetTimeReal(Integer id)
 {
    // Get current time from Spacecraft
-   if (mSpacecraft == NULL)
+//   if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
       InitializeRefObjects();
    
-   Real a1Mjd = mSpacecraft->GetEpoch();
+//   Real a1Mjd = mSpacecraft->GetEpoch();
+   Real a1Mjd = mSpacePoint->GetEpoch();
 
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
@@ -250,13 +256,15 @@ Real TimeData::GetTimeReal(Integer id)
 // void SetTimeReal(Integer id, Real value)
 //------------------------------------------------------------------------------
 /**
- * Sets time of real value to Spacecraft
+ * Sets time of real value to Spacecraft  << SpacePoint
  */
 //------------------------------------------------------------------------------
 void TimeData::SetTimeReal(Integer id, Real value)
 {
+//   // Set input time to Spacecraft
+//   if (mSpacecraft == NULL)
    // Set input time to Spacecraft
-   if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
       InitializeRefObjects();
    
    #ifdef DEBUG_TIMEDATA_SET
@@ -266,36 +274,42 @@ void TimeData::SetTimeReal(Integer id, Real value)
    #endif
    
    Real a1Mjd = -9999.999;
-   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+//   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+   Integer epochId = mSpacePoint->GetParameterID("A1Epoch");
    
    switch (id)
    {
    case A1:
-      mSpacecraft->SetRealParameter(epochId, value);
+//      mSpacecraft->SetRealParameter(epochId, value);
+      mSpacePoint->SetRealParameter(epochId, value);
       break;
    case TAI:
       a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TAIMJD,
                                          TimeConverterUtil::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TT:
       a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TTMJD,
                                          TimeConverterUtil::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TDB:
       a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TDBMJD,
                                          TimeConverterUtil::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case UTC:
       a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::UTCMJD,
                                          TimeConverterUtil::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
      break;
    default:
       throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
@@ -318,8 +332,10 @@ void TimeData::SetTimeReal(Integer id, Real value)
 //------------------------------------------------------------------------------
 std::string TimeData::GetTimeString(Integer id)
 {
+//   // Get current time from Spacecraft
+//   if (mSpacecraft == NULL)
    // Get current time from Spacecraft
-   if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
       InitializeRefObjects();
    
    Real time = GetTimeReal(id);
@@ -336,7 +352,7 @@ std::string TimeData::GetTimeString(Integer id)
          ("TimeData::GetTimeString() id=%d, timeStr = %s\n", id,
           TimeConverterUtil::ConvertMjdToGregorian(time).c_str());
       #endif
-      return TimeConverterUtil::ConvertMjdToGregorian(time);
+      return TimeConverterUtil::ConvertMjdToGregorian(time);// need toUTC
    default:
       throw ParameterException("TimeData::GetTimeString() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
@@ -353,8 +369,10 @@ std::string TimeData::GetTimeString(Integer id)
 //------------------------------------------------------------------------------
 void TimeData::SetTimeString(Integer id, const std::string &value)
 {
+//   // Set input time to Spacecraft
+//   if (mSpacecraft == NULL)
    // Set input time to Spacecraft
-   if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
       InitializeRefObjects();
    
    #ifdef DEBUG_TIMEDATA_SET
@@ -363,7 +381,8 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
        mSpacecraft, mSpacecraft->GetName().c_str(), value.c_str());
    #endif
    
-   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+//   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+   Integer epochId = mSpacePoint->GetParameterID("A1Epoch");
    Real fromMjd = -999.999;
    Real a1Mjd = -999.999;
    std::string a1MjdString;
@@ -372,27 +391,32 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
    case A1:
       TimeConverterUtil::Convert("A1Gregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TAI:
       TimeConverterUtil::Convert("TAIGregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TT:
       TimeConverterUtil::Convert("TTGregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TDB:
       TimeConverterUtil::Convert("TDBGregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case UTC:
       TimeConverterUtil::Convert("UTCGregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      mSpacePoint->SetRealParameter(epochId, a1Mjd);
      break;
    default:
       throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
@@ -452,6 +476,121 @@ const std::string* TimeData::GetValidObjectList() const
    return VALID_OBJECT_TYPE_LIST;
 }
 
+// The inherited methods from RefData
+std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
+{
+//   try
+//   {
+      return RefData::GetRefObjectName(type);
+//   }
+//   catch (ParameterException &pe)
+//   {
+//      // if the type was SpacePoint, we may need to look in the Spacecraft
+//      // list, or vice versa
+//      Gmat::ObjectType altType = type;
+//      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
+//      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+//      for (int i=0; i<mNumRefObjects; i++)
+//      {
+//         if (mRefObjList[i].objType == altType)
+//         {
+//            //Notes: will return first object name.
+//            return mRefObjList[i].objName;
+//         }
+//      }
+//
+//      throw;
+//   }
+}
+
+const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return RefData::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Adds type and name to reference object list.
+ *
+ * @param <type> reference object type
+ * @param <name> reference object name
+ *
+ * @return true if type and name has successfully added to the list
+ *
+ */
+//------------------------------------------------------------------------------
+bool TimeData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+{
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
+       (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
+       (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::SetRefObjectName(useType, name);
+
+}
+
+GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   try
+   {
+      GmatBase* theObj = RefData::GetRefObject(type, name);
+      return theObj;
+   }
+   catch (ParameterException &pe)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list, or vice versa, since we are looking for a spacecraft
+      Gmat::ObjectType altType = type;
+      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         if (mRefObjList[i].objType == altType)
+         {
+//            if (name == "") //if name is "", return first object
+//               return mRefObjList[i].obj;
+
+            if ((name == "" || mRefObjList[i].objName == name) &&
+                (mRefObjList[i].obj)->IsOfType("Spacecraft"))
+            {
+               return mRefObjList[i].obj;
+            }
+         }
+      }
+
+      throw;
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets object which is used in evaluation.
+ *
+ * @return true if the object has been added.
+ */
+//------------------------------------------------------------------------------
+bool TimeData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                            const std::string &name)
+{
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
+       (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
+       (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::SetRefObject(obj, useType, name);
+}
+
 
 //------------------------------------------------------------------------------
 // bool ValidateRefObjects(GmatBase *param)
@@ -465,7 +604,9 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
    //loj: 3/23/04 removed checking for type
    bool status = false;
     
-   if (HasObjectType(VALID_OBJECT_TYPE_LIST[SPACECRAFT]))
+//   if (HasObjectType(VALID_OBJECT_TYPE_LIST[SPACECRAFT]))
+   if ((HasObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT])) ||
+       (HasObjectType(VALID_OBJECT_TYPE_LIST[SPACECRAFT])))
    {
       if (mIsInitialEpochSet)
       {
@@ -473,12 +614,17 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
       }
       else
       {
-         Spacecraft *sc = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-         Real rval = sc->GetRealParameter("A1Epoch");
+//         Spacecraft *sc = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+         SpacePoint *sp = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+         if (!sp)
+         {
+            sp = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+         }
+         Real rval = sp->GetRealParameter("A1Epoch");
 
          if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
          {
-            mInitialEpoch = sc->GetRealParameter("A1Epoch");
+            mInitialEpoch = sp->GetRealParameter("A1Epoch");
             mIsInitialEpochSet = true;
             status = true;
          }
@@ -494,25 +640,34 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 //------------------------------------------------------------------------------
 void TimeData::InitializeRefObjects()
 {
-   mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-   if (mSpacecraft == NULL)
+//   mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+   mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+   if (!mSpacePoint)
+      mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+
+//   if (mSpacecraft == NULL)
+   if (mSpacePoint == NULL)
    {
-      std::string scName = GetRefObjectName(Gmat::SPACECRAFT);
+//      std::string scName = GetRefObjectName(Gmat::SPACECRAFT);
+      std::string scName = GetRefObjectName(Gmat::SPACE_POINT);
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
-         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named "
+//         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named "
+         ("TimeData::InitializeRefObjects() Cannot find SpacePoint object named "
           "\"%s\"\n", scName.c_str());
       #endif
       
       throw ParameterException
-         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named \"" + 
+//         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named \"" +
+         ("TimeData::InitializeRefObjects() Cannot find SpacePoint object named \"" +
           scName + "\"\n");
    }
    else
    {
       if (!mIsInitialEpochSet)
       {
-         mInitialEpoch = mSpacecraft->GetEpoch();
+//         mInitialEpoch = mSpacecraft->GetEpoch();
+         mInitialEpoch = mSpacePoint->GetEpoch();
          mIsInitialEpochSet = true;
          
          #ifdef DEBUG_TIMEDATA
@@ -520,6 +675,10 @@ void TimeData::InitializeRefObjects()
             ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
          #endif
       }
+   }
+   if (mSpacePoint->IsOfType("Spacecraft"))
+   {
+      mSpacecraft = (Spacecraft*)mSpacePoint;
    }
 }
 
@@ -545,5 +704,29 @@ bool TimeData::IsValidObjectType(Gmat::ObjectType type)
 
 }
 
+bool TimeData::AddRefObject(const Gmat::ObjectType type,
+                            const std::string &name, GmatBase *obj,
+                            bool replaceName)
+{
+   #ifdef DEBUG_TIME_STRING_ADD
+      MessageInterface::ShowMessage("In TimeData::AddRefObject - obj is %s\n",
+            (obj? " NOT NULL" : "NULL!"));
+      MessageInterface::ShowMessage("... replaceName = %s\n",
+            (replaceName? "true" : "false"));
+      if (obj)
+      {
+         MessageInterface::ShowMessage("... obj is %s\n", obj->GetName().c_str());
+         MessageInterface::ShowMessage("... type is %d\n", obj->GetType());
+      }
+   #endif
+   // We need to be able to handle SpacePoints, not just Spacecraft
+   Gmat::ObjectType useType = type;
+   if ((type == Gmat::GROUND_STATION)    || (type == Gmat::BODY_FIXED_POINT)  ||
+       (type == Gmat::CALCULATED_POINT)  || (type == Gmat::LIBRATION_POINT) ||
+       (type == Gmat::BARYCENTER))
+      useType = Gmat::SPACE_POINT;
+
+   return RefData::AddRefObject(useType, name, obj, replaceName);
+}
 
 

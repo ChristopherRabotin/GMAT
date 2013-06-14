@@ -60,6 +60,9 @@ public:
    virtual void         SetIsBuiltIn(bool builtIn, const std::string &ofType);
    virtual StringArray  GetBuiltInNames() = 0;
 
+   virtual Real         GetEpoch();
+   virtual Real         SetEpoch(const Real ep);
+   virtual Rvector6     GetLastState();
 
    // methods inherited from SpacePoint, that must be implemented
    // in the derived classes
@@ -78,6 +81,12 @@ public:
    
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                      const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                      const Real value);
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
@@ -150,6 +159,9 @@ protected:
    /// flag indicating whether or not this is a built-in CalculatedPoint
    bool                        isBuiltIn;
    std::string                 builtInType;
+
+   A1Mjd                       lastStateTime;
+   Rvector6                    lastState;
 
    bool ValidateBodyName(const std::string &itsName, bool addToList = true, bool addToEnd = true, Integer index = 0);
     

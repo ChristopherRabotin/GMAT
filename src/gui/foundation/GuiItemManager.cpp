@@ -4300,7 +4300,7 @@ void GuiItemManager::UpdatePropertyList()
       if (items[i] == "CurrA1MJD")
          continue;
       
-      // Do not include attached object dependent Paramters such as Sat1.Tank1.Temperature.
+      // Do not include attached object dependent Parameters such as Sat1.Tank1.Temperature.
       // ParameterSelectDialog is not ready to handle this kind of Parameters
       // since it needs to show dependent object in the ComboBox. (LOJ: 2012.03.09)
       // Changed to call ParameterInfo::IsForAttachedObject() (LOJ: 2012.04.02)
@@ -4319,8 +4319,9 @@ void GuiItemManager::UpdatePropertyList()
          MessageInterface::ShowMessage
             ("   name: %-20s, objectType: %d\n",  items[i].c_str(), objectType);
          #endif
-         
-         if (objectType == Gmat::SPACECRAFT)
+         // Need to check for SPACE_POINT now too, since for TimeParameters, we
+         // can use any SpacePoint, not just SPACECRAFT
+         if ((objectType == Gmat::SPACECRAFT) || (objectType == Gmat::SPACE_POINT))
          {
             if (theParamInfo->IsForAttachedObject(items[i]))
                // update Spacecraft attached object property list

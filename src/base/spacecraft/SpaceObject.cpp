@@ -30,19 +30,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount -
-                                              SpacePointParamCount] =
-   {
-      "A1Epoch"
-   };
-
-
-const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount - 
-                                                      SpacePointParamCount] =
-   {
-      Gmat::REAL_TYPE
-   };
+//
+//const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount -
+//                                              SpacePointParamCount] =
+//   {
+//      "A1Epoch"
+//   };
+//
+//
+//const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
+//                                                      SpacePointParamCount] =
+//   {
+//      Gmat::REAL_TYPE
+//   };
 
 
 //---------------------------------
@@ -158,6 +158,14 @@ GmatState& SpaceObject::GetState()
             instanceName.c_str());
    #endif
    return state;
+}
+
+Rvector6 SpaceObject::GetLastState()
+{
+   Rvector6 result;
+   Real *st = state.GetState();
+   result.Set(st[0], st[1], st[2], st[3], st[4], st[5]);
+   return result;
 }
 
 
@@ -412,83 +420,83 @@ const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
 }
 
 
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param <str> string for the requested parameter.
- *
- * @return ID for the requested parameter.
- */
-//------------------------------------------------------------------------------
-Integer SpaceObject::GetParameterID(const std::string &str) const
-{
-   for (Integer i = SpacePointParamCount; i < SpaceObjectParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - SpacePointParamCount])
-         return i;
-   }
-   
-   return SpacePoint::GetParameterID(str);
-}
+////------------------------------------------------------------------------------
+////  Integer  GetParameterID(const std::string &str) const
+////------------------------------------------------------------------------------
+///**
+// * This method returns the parameter ID, given the input parameter string.
+// *
+// * @param <str> string for the requested parameter.
+// *
+// * @return ID for the requested parameter.
+// */
+////------------------------------------------------------------------------------
+//Integer SpaceObject::GetParameterID(const std::string &str) const
+//{
+//   for (Integer i = SpacePointParamCount; i < SpaceObjectParamCount; i++)
+//   {
+//      if (str == PARAMETER_TEXT[i - SpacePointParamCount])
+//         return i;
+//   }
+//
+//   return SpacePoint::GetParameterID(str);
+//}
 
 
-//------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param <id> Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- */
-//------------------------------------------------------------------------------
-std::string SpaceObject::GetParameterText(const Integer id) const
-{
-   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
-      return PARAMETER_TEXT[id - SpacePointParamCount];
-   return SpacePoint::GetParameterText(id);
-}
-
-
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- */
-//------------------------------------------------------------------------------
-Gmat::ParameterType SpaceObject::GetParameterType(const Integer id) const
-{
-   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
-      return PARAMETER_TYPE[id - SpacePointParamCount];
-   
-   return SpacePoint::GetParameterType(id);
-}
-
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- */
-//------------------------------------------------------------------------------
-std::string SpaceObject::GetParameterTypeString(const Integer id) const
-{
-   return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
-}
+////------------------------------------------------------------------------------
+//// std::string GetParameterText(const Integer id) const
+////------------------------------------------------------------------------------
+///**
+// * This method returns the parameter text, given the input parameter ID.
+// *
+// * @param <id> Id for the requested parameter text.
+// *
+// * @return parameter text for the requested parameter.
+// */
+////------------------------------------------------------------------------------
+//std::string SpaceObject::GetParameterText(const Integer id) const
+//{
+//   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
+//      return PARAMETER_TEXT[id - SpacePointParamCount];
+//   return SpacePoint::GetParameterText(id);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  Gmat::ParameterType  GetParameterType(const Integer id) const
+////------------------------------------------------------------------------------
+///**
+// * This method returns the parameter type, given the input parameter ID.
+// *
+// * @param <id> ID for the requested parameter.
+// *
+// * @return parameter type of the requested parameter.
+// */
+////------------------------------------------------------------------------------
+//Gmat::ParameterType SpaceObject::GetParameterType(const Integer id) const
+//{
+//   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
+//      return PARAMETER_TYPE[id - SpacePointParamCount];
+//
+//   return SpacePoint::GetParameterType(id);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  std::string  GetParameterTypeString(const Integer id) const
+////------------------------------------------------------------------------------
+///**
+// * This method returns the parameter type string, given the input parameter ID.
+// *
+// * @param <id> ID for the requested parameter.
+// *
+// * @return parameter type string of the requested parameter.
+// */
+////------------------------------------------------------------------------------
+//std::string SpaceObject::GetParameterTypeString(const Integer id) const
+//{
+//   return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
+//}
 
 
 //------------------------------------------------------------------------------

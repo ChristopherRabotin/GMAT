@@ -71,7 +71,8 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
    SpacePoint(Gmat::CALCULATED_POINT, ptType, itsName),
    numberOfBodies (0),
    isBuiltIn      (false),
-   builtInType    ("")
+   builtInType    (""),
+   lastStateTime  (GmatTimeConstants::MJD_OF_J2000)
 {
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
@@ -91,7 +92,9 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
 CalculatedPoint::CalculatedPoint(const CalculatedPoint &cp) :
    SpacePoint    (cp),
    isBuiltIn     (cp.isBuiltIn),
-   builtInType   (cp.builtInType)
+   builtInType   (cp.builtInType),
+   lastStateTime (cp.lastStateTime),
+   lastState     (cp.lastState)
 {
    bodyNames.clear();
    bodyList.clear();
@@ -155,6 +158,8 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
    }
    isBuiltIn       = cp.isBuiltIn;
    builtInType     = cp.builtInType;
+   lastStateTime   = cp.lastStateTime;
+   lastState       = cp.lastState;
 
    return *this;
 }
@@ -202,6 +207,49 @@ void CalculatedPoint::SetIsBuiltIn(bool builtIn, const std::string &ofType)
    isBuiltIn   = builtIn;
    builtInType = ofType;
 }
+
+//------------------------------------------------------------------------------
+// Real GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current epoch of the object, in A.1 Modified Julian format.
+ *
+ * @return The A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real CalculatedPoint::GetEpoch()
+{
+   return lastStateTime.Get();
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetEpoch(const Real ep)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
+ *
+ * @param <ep> The new A.1 epoch.
+ *
+ * @return The updated A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
+Real CalculatedPoint::SetEpoch(const Real ep)
+{
+   A1Mjd a1(ep);
+   GetMJ2000State(a1);
+   return lastStateTime.Get();
+}
+
+Rvector6 CalculatedPoint::GetLastState()
+{
+   return lastState;
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -360,6 +408,43 @@ Integer     CalculatedPoint::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label)); 
 }
+
+Real CalculatedPoint::GetRealParameter(const Integer id) const
+{
+   if (id == EPOCH_PARAM)  // from SpacePoint
+   {
+      return lastStateTime.Get();
+   }
+
+   return SpacePoint::GetRealParameter(id);
+}
+
+
+Real CalculatedPoint::SetRealParameter(const Integer id,
+                                       const Real value)
+{
+   if (id == EPOCH_PARAM)  // from SpacePoint
+   {
+      A1Mjd a1(value);
+      GetMJ2000State(a1);
+      return lastStateTime.Get();
+   }
+
+   return SpacePoint::SetRealParameter(id, value);
+}
+
+
+Real CalculatedPoint::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+Real CalculatedPoint::SetRealParameter(const std::string &label,
+                                      const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetStringParameter(const Integer id, const Integer index) const

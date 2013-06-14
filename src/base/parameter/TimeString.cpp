@@ -25,6 +25,9 @@
 #include "StringUtil.hpp"               // for ParseParameter()
 #include "MessageInterface.hpp"
 
+//#define DEBUG_TIME_STRING_ADD
+//#define DEBUG_TIME_STRING
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -45,15 +48,19 @@
 //------------------------------------------------------------------------------
 TimeString::TimeString(const std::string &name, const std::string &typeStr, 
                        GmatBase *obj, const std::string &desc,
-                       const std::string &unit, bool isSettable)
+                       const std::string &unit, bool isSettable,
+                       Gmat::ObjectType paramOwnerType)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-               GmatParam::NO_DEP, Gmat::SPACECRAFT, true, isSettable),
-     TimeData(name)
+               GmatParam::NO_DEP, paramOwnerType, true, isSettable),
+     TimeData(name, paramOwnerType)
 {
    std::string type, ownerName, depObj;
    GmatStringUtil::ParseParameter(name, type, ownerName, depObj);
    mOwnerName = ownerName;
    mExpr = name;
+   #ifdef DEBUG_TIME_STRING
+      MessageInterface::ShowMessage("Creating a time string %s\n", name.c_str());
+   #endif
    AddRefObject(obj);
 }
 
@@ -138,7 +145,7 @@ Integer TimeString::GetNumRefObjects() const
 
 
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *obj, bool replaceName = false)
+// virtual bool (GmatBase *obj, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -150,6 +157,18 @@ Integer TimeString::GetNumRefObjects() const
 //------------------------------------------------------------------------------
 bool TimeString::AddRefObject(GmatBase *obj, bool replaceName)
 {
+   #ifdef DEBUG_TIME_STRING_ADD
+      MessageInterface::ShowMessage("In TimeString::AddRefObject - obj is %s\n",
+            (obj? " NOT NULL" : "NULL!"));
+      MessageInterface::ShowMessage("... replaceName = %s\n",
+            (replaceName? "true" : "false"));
+      if (obj)
+      {
+         MessageInterface::ShowMessage("... obj is %s\n", obj->GetName().c_str());
+         MessageInterface::ShowMessage("... type is %d\n", obj->GetType());
+      }
+   #endif
+
    if (obj != NULL)
       return TimeData::AddRefObject(obj->GetType(), obj->GetName(), obj,
                                     replaceName);

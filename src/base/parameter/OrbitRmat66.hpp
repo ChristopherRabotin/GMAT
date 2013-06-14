@@ -31,7 +31,8 @@ public:
    
    OrbitRmat66(const std::string &name, const std::string &typeStr, 
                GmatBase *obj, const std::string &desc, const std::string &unit,
-               GmatParam::DepObject depObj, bool isSettable = false);
+               GmatParam::DepObject depObj, bool isSettable = false,
+               Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    OrbitRmat66(const OrbitRmat66 &copy);
    OrbitRmat66& operator=(const OrbitRmat66 &right);
    virtual ~OrbitRmat66();

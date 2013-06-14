@@ -38,7 +38,8 @@
 // OrbitStm(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OrbitStm::OrbitStm(const std::string &name, GmatBase *obj)
-   : OrbitRmat66(name, "OrbitSTM", obj, "Orbit STM", "", GmatParam::NO_DEP, true)
+   : OrbitRmat66(name, "OrbitSTM", obj, "Orbit STM", "", GmatParam::NO_DEP,
+         true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);

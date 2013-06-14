@@ -35,7 +35,8 @@ public:
              GmatBase *obj, const std::string &desc,
              const std::string &unit,  GmatParam::DepObject depObj,
              Integer itemId = -999, bool isSettable = false,
-             bool isPlottable = true, bool isReportable = true);
+             bool isPlottable = true, bool isReportable = true,
+             Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    OrbitReal(const OrbitReal &copy);
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();

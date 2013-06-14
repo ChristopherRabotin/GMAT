@@ -48,7 +48,7 @@
 //------------------------------------------------------------------------------
 VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VelApoapsis", obj, "Velocity at Apoapsis", "Km/s",
-               GmatParam::ORIGIN)
+               GmatParam::ORIGIN, -999, false, true, true, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -168,7 +168,7 @@ GmatBase* VelApoapsis::Clone(void) const
 //------------------------------------------------------------------------------
 VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VelPeriapsis", obj, "Velocity at Periapsis", "Km/s",
-               GmatParam::ORIGIN)
+               GmatParam::ORIGIN, -999, false, true, true, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -289,7 +289,7 @@ GmatBase* VelPeriapsis::Clone(void) const
 //------------------------------------------------------------------------------
 Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN,
-               -999, false, false, false)
+               -999, false, false, false, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -424,7 +424,7 @@ GmatBase* Apoapsis::Clone(void) const
 //------------------------------------------------------------------------------
 Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN,
-               -999, false, false, false)
+               -999, false, false, false, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -564,7 +564,7 @@ GmatBase* Periapsis::Clone(void) const
 //------------------------------------------------------------------------------
 OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN,
-               ORBIT_PERIOD)
+               ORBIT_PERIOD, false, true, true, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -681,7 +681,7 @@ GmatBase* OrbitPeriod::Clone(void) const
 //------------------------------------------------------------------------------
 C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN,
-               C3_ENERGY)
+               C3_ENERGY, false, true, true, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -798,7 +798,7 @@ GmatBase* C3Energy::Clone(void) const
 //------------------------------------------------------------------------------
 Energy::Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Energy", obj, "Orbit Energy", "Km^2/s^2", GmatParam::ORIGIN,
-               ENERGY)
+               ENERGY, false, true, true, Gmat::SPACECRAFT)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");

@@ -47,7 +47,8 @@
  */
 //------------------------------------------------------------------------------
 CartX::CartX(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS, CART_X, true)
+   : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS, CART_X,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -162,7 +163,8 @@ GmatBase* CartX::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartY::CartY(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS, CART_Y, true)
+   : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS, CART_Y,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -277,7 +279,8 @@ GmatBase* CartY::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartZ::CartZ(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS, CART_Z, true)
+   : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS, CART_Z,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -391,7 +394,8 @@ GmatBase* CartZ::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVx::CartVx(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS, CART_VX, true)
+   : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS, CART_VX,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -506,7 +510,8 @@ GmatBase* CartVx::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVy::CartVy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VY", obj, "Cartesian VY", "Km/s", GmatParam::COORD_SYS, CART_VY, true)
+   : OrbitReal(name, "VY", obj, "Cartesian VY", "Km/s", GmatParam::COORD_SYS, CART_VY,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -621,7 +626,8 @@ GmatBase* CartVy::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVz::CartVz(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS, CART_VZ, true)
+   : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS, CART_VZ,
+         true, true, true, Gmat::SPACE_POINT)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -739,7 +745,7 @@ GmatBase* CartVz::Clone(void) const
 //------------------------------------------------------------------------------
 CartState::CartState(const std::string &name, GmatBase *obj)
    : OrbitRvec6(name, "Cartesian", obj, "Cartesian State Vector",
-                "Km/s", GmatParam::COORD_SYS)
+                "Km/s", GmatParam::COORD_SYS, Gmat::SPACE_POINT)
 {
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
