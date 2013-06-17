@@ -437,7 +437,12 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                //}
                //else
                deriv[i6] = deriv[1 + i6] = deriv[2 + i6] = 0.0;
-                  
+               #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+                  if ((dt == 0) && (i6 == 0))                  
+                     MessageInterface::ShowMessage("***PMF AX in GD   : "
+                        "%.12lf * %.12le - %.12le = %.12le\n", 
+                        relativePosition[0], mu_r, a_indirect[0], deriv[3]);
+               #endif
             } 
             else 
             {
@@ -738,9 +743,12 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
       a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
 
    {
-      relativePosition[0] = rv[0] - state[0];
-      relativePosition[1] = rv[1] - state[1];
-      relativePosition[2] = rv[2] - state[2];
+      //relativePosition[0] = rv[0] - state[0];
+      //relativePosition[1] = rv[1] - state[1];
+      //relativePosition[2] = rv[2] - state[2];
+      relativePosition[0] = - state[0];
+      relativePosition[1] = - state[1];
+      relativePosition[2] = - state[2];
 
       r3 = relativePosition[0]*relativePosition[0] +
            relativePosition[1]*relativePosition[1] +
@@ -753,6 +761,11 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
       dv[3] = relativePosition[0] * mu_r - a_indirect[0];
       dv[4] = relativePosition[1] * mu_r - a_indirect[1];
       dv[5] = relativePosition[2] * mu_r - a_indirect[2];
+      #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+         MessageInterface::ShowMessage("***PMF AX in GD4SC: %.12lf * %.12le -"
+            " %.12le = %.12le\n", relativePosition[0], mu_r, a_indirect[0], 
+            dv[3]);
+      #endif
    }
 
    #ifdef DEBUG_FIRST_CALL
