@@ -12,8 +12,8 @@
 // Created: 2009/09/02
 //
 /**
- * Writes a spacecraft orbit states or attitude to an ephemeris file either
- * CCSDS or SPK format.
+ * Writes a spacecraft orbit states or attitude to an ephemeris file in
+ * CCSDS, SPK, or Code-500 format.
  */
 //------------------------------------------------------------------------------
 
@@ -189,6 +189,9 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    writingNewSegment    (true),
    continuousSegment    (false),
    useFixedStepSize     (false),
+   interpolateBeginState(false),
+   interpolateFinalState(false),
+   createInterpolator   (false),
    writeOrbit           (false),
    writeAttitude        (false),
    processData          (false),
@@ -381,6 +384,9 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    writingNewSegment    (ef.writingNewSegment),
    continuousSegment    (ef.continuousSegment),
    useFixedStepSize     (ef.useFixedStepSize),
+   interpolateBeginState(ef.interpolateBeginState),
+   interpolateFinalState(ef.interpolateFinalState),
+   createInterpolator   (ef.createInterpolator),
    writeOrbit           (ef.writeOrbit),
    writeAttitude        (ef.writeAttitude),
    processData          (ef.processData),
@@ -467,6 +473,9 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    writingNewSegment    = ef.writingNewSegment;
    continuousSegment    = ef.continuousSegment;
    useFixedStepSize     = ef.useFixedStepSize;
+   interpolateBeginState= ef.interpolateBeginState;
+   interpolateFinalState= ef.interpolateFinalState;
+   createInterpolator   = ef.createInterpolator;
    writeOrbit           = ef.writeOrbit;
    writeAttitude        = ef.writeAttitude;
    processData          = ef.processData;
@@ -656,6 +665,24 @@ bool EphemerisFile::Validate()
          stepSizeInSecs = 60.0;
       }
    }
+   
+   if (fileFormat == "SPK" || fileFormat == "Code-500")
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
+      #endif
+      if (outCoordSystem)
+      {
+         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+         {
+            SubscriberException se;
+            se.SetDetails("%s ephemeris file allows output coordinate system "
+                          "with MJ2000Eq Axis only", fileFormat.c_str());
+            throw se;
+         }
+      }
+   }
+   
    return true;
 }
 
@@ -711,6 +738,39 @@ bool EphemerisFile::Initialize()
    else
       throw SubscriberException
          ("FileFormat \"" + fileFormat + "\" is not valid");
+
+   if (fileFormat == "SPK" || fileFormat == "Code-500")
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
+      #endif
+      if (outCoordSystem)
+      {
+         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+         {
+            SubscriberException se;
+            se.SetDetails("%s ephemeris file allows output coordinate system "
+                          "with MJ2000Eq Axis only", fileFormat.c_str());
+            throw se;
+         }
+      }
+   }
+   
+   // Check if interpolator needs to be created
+   if (stepSize == "IntegratorSteps")
+   {
+      if (initialEpoch != "InitialSpacecraftEpoch")
+         interpolateBeginState = true;
+      
+      if (finalEpoch != "FinalSpacecraftEpoch")
+         interpolateFinalState = true;
+      
+      if (interpolateBeginState || interpolateFinalState)
+         createInterpolator = true;
+   }
+   else
+      createInterpolator = true;
+   
    
    // Initialize data
    writeMetaDataOption = 0;
@@ -1263,6 +1323,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
             // Also set default fixed step size to 60.0
             stepSize = "60.0";
             useFixedStepSize = true;
+            createInterpolator = true;
          }
          return true;
       }
@@ -1504,13 +1565,15 @@ void EphemerisFile::CreateInterpolator()
       ("EphemerisFile::CreateInterpolator() entered, interpolator=<%p>'%s'\n",
        interpolator, interpolator ? interpolator->GetName().c_str() : "NULL");
    #endif
-
+   
    // If ephemeris output type is SPK, no need to create interpolator
    if (fileType == SPK_ORBIT || fileType == SPK_ATTITUDE)
       return;
    
    // If not using step size just return
-   if (!useFixedStepSize)
+   //if (!useFixedStepSize)
+   // If not creating interpolator
+   if (!createInterpolator)
       return;
    
    // If interpolator is not NULL, delete it first
@@ -3034,6 +3097,7 @@ bool EphemerisFile::SetStepSize(Integer id, const std::string &value,
    stepSizeInA1Mjd = stepSizeInSecs / GmatTimeConstants::SECS_PER_DAY;
    
    useFixedStepSize = true;
+   createInterpolator = true;
    
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
@@ -4069,7 +4133,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   //#ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_EPHEMFILE_CODE500
    // For for debugging
    if (isEndOfRun)
    {
@@ -4083,7 +4147,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
-   //#endif
+   #endif
 }
 
 

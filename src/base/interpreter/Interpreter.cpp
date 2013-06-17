@@ -8235,6 +8235,13 @@ bool Interpreter::FinalPass()
       {
          try
          {
+            StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
+            for (unsigned int i = 0; i < csNames.size(); i++)
+            {
+               GmatBase *csObj = FindObject(csNames[i]);
+               obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
+            }
+            
             obj->Validate();
          }
          catch (BaseException& ex)

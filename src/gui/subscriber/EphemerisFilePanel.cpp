@@ -330,6 +330,12 @@ void EphemerisFilePanel::LoadData()
       LoadControl("InitialEpoch");
       LoadControl("FinalEpoch");
       
+      // Show all or only MJ2000Eq coordinate system
+      if (fileFormat == "CCSDS-OEM")
+         ShowAllCoordSystems(true);
+      else
+         ShowAllCoordSystems(false);
+      
       // Show or hide output format
       if (fileFormat == "Code-500")
          ShowCode500Items(true);
@@ -798,6 +804,11 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
             interpolatorComboBox->SetValue("Hermite");
          else if (newFileFormat == "CCSDS-OEM" || newFileFormat == "Code-500")
             interpolatorComboBox->SetValue("Lagrange");
+
+         if (newFileFormat == "CCSDS-OEM")
+            ShowAllCoordSystems(true);
+         else
+            ShowAllCoordSystems(false);
          
          if (newFileFormat == "Code-500")
             ShowCode500Items(true);
@@ -1024,51 +1035,41 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void ShowAllCoordSystems(bool show)
+//------------------------------------------------------------------------------
+void EphemerisFilePanel::ShowAllCoordSystems(bool show)
+{
+   grid1->Show(allCoordSystemStaticText, show);
+   grid1->Show(allCoordSystemComboBox, show);
+   grid1->Show(onlyMJ2000EqStaticText, !show);
+   grid1->Show(onlyMj2000EqComboBox, !show);
+   grid1->Layout();
+   theMiddleSizer->Layout();
+}
+
 //------------------------------------------------------------------------------
 // void ShowCode500Items(bool show)
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::ShowCode500Items(bool show)
 {
-   if (show)
-   {
-      // Show only MJ2000Eq coordiante system
-      grid1->Hide(allCoordSystemStaticText);
-      grid1->Hide(allCoordSystemComboBox);
-      grid1->Show(onlyMJ2000EqStaticText);
-      grid1->Show(onlyMj2000EqComboBox);
-      grid1->Layout();
-      // Show numeric only step size
-      grid2->Hide(allStepSizeStaticText);
-      grid2->Hide(allStepSizeComboBox);
-      grid2->Hide(allStepSizeUnit);
-      grid2->Show(numericStepSizeStaticText);
-      grid2->Show(numericStepSizeTextCtrl);
-      grid2->Show(numericStepSizeUnit);
-      grid2->Layout();
-      // Enable output format
-      outputFormatComboBox->Enable(true);
-      theMiddleSizer->Layout();
-   }
-   else
-   {
-      // Show all coordiante system
-      grid1->Show(allCoordSystemStaticText);
-      grid1->Show(allCoordSystemComboBox);
-      grid1->Hide(onlyMJ2000EqStaticText);
-      grid1->Hide(onlyMj2000EqComboBox);
-      grid1->Layout();
-      // Show all step size options
-      grid2->Show(allStepSizeStaticText);
-      grid2->Show(allStepSizeComboBox);
-      grid2->Show(allStepSizeUnit);
-      grid2->Hide(numericStepSizeStaticText);
-      grid2->Hide(numericStepSizeTextCtrl);
-      grid2->Hide(numericStepSizeUnit);
-      grid2->Layout();
-      // Set output format to "PC" and disable it
+   // Show or hide all step size
+   // Show or hide numeric only step size
+   grid2->Show(allStepSizeStaticText, !show);
+   grid2->Show(allStepSizeComboBox, !show);
+   grid2->Show(allStepSizeUnit, !show);
+   grid2->Show(numericStepSizeStaticText, show);
+   grid2->Show(numericStepSizeTextCtrl, show);
+   grid2->Show(numericStepSizeUnit, show);
+   grid2->Layout();
+   
+   // If not showing code 500, set output format to "PC"
+   if (!show)
       outputFormatComboBox->SetValue("PC");
-      outputFormatComboBox->Enable(false);
-      theMiddleSizer->Layout();
-   }
+   
+   // Enable or disable output format
+   outputFormatComboBox->Enable(show);
+   theMiddleSizer->Layout();
 }
 

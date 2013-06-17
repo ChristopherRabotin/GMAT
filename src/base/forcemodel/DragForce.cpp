@@ -1047,6 +1047,11 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
 
          factor = prefactor[i] * density[i];
    
+         #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+            MessageInterface::ShowMessage("GD4P Drag: Prefactor = %.12lf, "
+               "density = %.12le\n", prefactor[i], density[i]);
+         #endif
+
          if (order == 1)
          {
             // Do dv/dt first, in case deriv = state
@@ -1152,7 +1157,8 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    cd   = sc->GetRealParameter("Cd");
    area = sc->GetRealParameter("DragArea");
 
-   Real prefactor = -0.5 * cd * area / mass;
+   // Note: Prefactor is scaled to account for density in kg / m^3
+   Real prefactor = -500.0 * cd * area / mass;
 
    // First translate to the drag body from the force model origin
    Real *j2kState = sc->GetState().GetState();
@@ -1197,6 +1203,11 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    }
 
    factor = prefactor * dens;
+
+   #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+      MessageInterface::ShowMessage("GD4S Drag: Prefactor = %.12lf, "
+         "density = %.12le\n", prefactor, dens);
+   #endif
 
    // Do dv/dt first, in case deriv = state
    dv[3] = factor * vRelMag * vRelative[0];// - a_indirect[0];

@@ -29,7 +29,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 #include "Code500EphemerisFile.hpp"
 #include "TimeSystemConverter.hpp"   // For ConvertGregorianToMjd()
 #include "StateConversionUtil.hpp"   // For Convert()
@@ -1359,6 +1358,15 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    A1Mjd *start = mA1MjdArray.front();
    A1Mjd *end = mA1MjdArray.back();
    
+   if (numPoints == 0)
+   {
+      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      MessageInterface::ShowMessage
+         ("Code500EphemerisFile::WriteDataRecord() leaving, there are no data to write\n");
+      #endif
+      return;
+   }
+   
    std::string startGreg;
    std::string endGreg;
    double startMjd = 0.0;
@@ -1502,7 +1510,7 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    mEphemFileOut.flush();
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage("Code500EphemerisFile::WriteDataRecord() leavng\n");
+   MessageInterface::ShowMessage("Code500EphemerisFile::WriteDataRecord() leaving\n");
    #endif
 }
 

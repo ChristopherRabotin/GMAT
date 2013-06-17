@@ -1350,3 +1350,32 @@ std::string Parameter::GetDependentTypeString(const GmatParam::DepObject depObj)
    
    return depObjStr;
 }
+
+
+//------------------------------------------------------------------------------
+// bool NeedsForces() const
+//------------------------------------------------------------------------------
+/**
+ * Checks for force model usage, so the Transient force table can be added
+ *
+ * @return true if the transient forces are needed, false (the default) if not
+ */
+//------------------------------------------------------------------------------
+bool Parameter::NeedsForces() const
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*>* tf)
+//------------------------------------------------------------------------------
+/**
+ * Method used to add the transient force table to the parameter if needed
+ *
+ * @param tf The transient force table
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetTransientForces(std::vector<PhysicalModel*>* tf)
+{
+}

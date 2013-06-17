@@ -520,6 +520,29 @@ bool Sandbox::Initialize()
    transientForces.clear();
    events.clear();
    
+   // Set transient force vector on Parameters that need it
+   for (std::map<std::string,GmatBase*>::iterator i = objectMap.begin();
+         i != objectMap.end(); ++i)
+   {
+      GmatBase *obj = (*i).second;
+      if (obj->IsOfType(Gmat::PARAMETER))
+      {
+         if (((Parameter*)obj)->NeedsForces())
+            ((Parameter*)obj)->SetTransientForces(&transientForces);
+      }
+   }
+   // Set transient force vector on Parameters that need it
+   for (std::map<std::string,GmatBase*>::iterator i = globalObjectMap.begin();
+         i != globalObjectMap.end(); ++i)
+   {
+      GmatBase* obj = (*i).second;
+      if (obj->IsOfType(Gmat::PARAMETER))
+      {
+         if (((Parameter*)obj)->NeedsForces())
+            ((Parameter*)obj)->SetTransientForces(&transientForces);
+      }
+   }
+
    // Already initialized
    if (state == INITIALIZED)
       return true;

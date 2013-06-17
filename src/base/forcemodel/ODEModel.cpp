@@ -85,6 +85,8 @@
 //#define DEBUG_FOR_CINTERFACE
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_PARAMETER_INITIALIZATION
+//#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
+
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
@@ -3105,7 +3107,18 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
 
       for (Integer j = 3; j < 6; ++j)
          dv[j] += component[j];
+
+      #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+         MessageInterface::ShowMessage("   %s -> [%.12le %.12le %.12le]\n",
+               (*i)->GetName().c_str(), component[3], component[4],
+               component[5]);
+      #endif
    }
+
+   #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
+      MessageInterface::ShowMessage("Total:  [%.12le %.12le %.12le]\n", dv[3],
+            dv[4], dv[5]);
+   #endif
 
    // Sanity check the derivative
    for (Integer index = 0; index < 6; ++index)

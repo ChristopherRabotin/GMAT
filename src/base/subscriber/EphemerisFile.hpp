@@ -174,6 +174,9 @@ protected:
    bool        writingNewSegment;
    bool        continuousSegment;
    bool        useFixedStepSize;
+   bool        interpolateBeginState;
+   bool        interpolateFinalState;
+   bool        createInterpolator;
    bool        writeOrbit;
    bool        writeAttitude;
    bool        processData;

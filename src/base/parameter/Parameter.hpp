@@ -28,6 +28,8 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 
+class PhysicalModel;
+
 namespace GmatParam
 {
    enum ParameterKey
@@ -93,6 +95,10 @@ public:
    bool  IsOriginDependent() const;
    bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
+
+   // Methods needed to provide handling for transient forces (e.g. finite burn)
+   virtual bool NeedsForces() const;
+   virtual void SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    bool operator==(const Parameter &right) const;
    bool operator!=(const Parameter &right) const;

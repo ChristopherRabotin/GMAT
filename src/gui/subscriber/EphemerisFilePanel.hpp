@@ -59,6 +59,7 @@ protected:
    void OnBrowse(wxCommandEvent& event);
    void OnCheck(wxCommandEvent& event);
    
+   void ShowAllCoordSystems(bool show);
    void ShowCode500Items(bool show);
    
    wxComboBox*     spacecraftComboBox;
