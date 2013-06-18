@@ -787,6 +787,7 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
                      #endif
 
                      ((SpaceObject*)target)->SetEpoch(newEpoch);
+                     retval = true;
                   }
                }
                else
@@ -855,10 +856,11 @@ Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
       CoordinateSystem *toCS =
             (CoordinateSystem*)target->GetRefObject(Gmat::COORDINATE_SYSTEM,"");
 
-      GmatEpoch epoch = ConvertToSystemTime(
-            theInterface->GetTimeSystemName("Epoch"),
-            theInterface->GetRealValue("Epoch"));
+      //GmatEpoch epoch = ConvertToSystemTime(
+      //      theInterface->GetTimeSystemName("Epoch"),
+      //      theInterface->GetRealValue("Epoch"));
 
+      GmatEpoch epoch = ((SpaceObject*)target)->GetEpoch();
 
       if ((fromCS != NULL) && (toCS != NULL))
       {
@@ -883,6 +885,19 @@ Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
    return newRep;
 }
 
+
+//-----------------------------------------------------------------------------
+// GmatEpoch ConvertToSystemTime(const std::string& from, GmatEpoch fromTime)
+//-----------------------------------------------------------------------------
+/**
+ * Converts a time representation into A.1 Mod Julian time
+ *
+ * @param from String nemae of teh input time system
+ * @param fromTime The input time
+ *
+ * @return The corresponding A.1 modJulian time
+ */
+//-----------------------------------------------------------------------------
 GmatEpoch Set::ConvertToSystemTime(const std::string& from, GmatEpoch fromTime)
 {
    std::string outStr;
@@ -958,14 +973,20 @@ void Set::CheckForOptions(const std::string options)
                      selections[i].c_str());
             #endif
          }
-         else 
+         else
             MessageInterface::ShowMessage("*** Warning ***: The Set command "
                   "specifies a \"Data\" option, but no data is specified in "
                   "the line\n%s\nAll data will be loaded\n", 
                   generatingString.c_str());
 
          if (selections.size() > 0)
-            loadAll = false;
+            if (find(selections.begin(), selections.end(), "All") == selections.end())
+               loadAll = false;
+            else if (selections.size() > 1)
+               MessageInterface::ShowMessage("*** Warning ***: The Set command "
+                     "specifies several \"Data\" options including \"All\" in "
+                     "the line\n%s\nAll data will be loaded\n", 
+                     generatingString.c_str());
       }
       else
          throw CommandException("The Set command option " + 
