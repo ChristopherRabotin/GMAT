@@ -43,6 +43,7 @@
 //#define DEBUG_MA
 //#define DEBUG_HA
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
+//#define DEBUG_ORBITDATA_OBJNAME
 
 using namespace GmatMathUtil;
 
@@ -1210,33 +1211,53 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 // The inherited methods from RefData
 std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
 {
-//   try
-//   {
+   try
+   {
       return RefData::GetRefObjectName(type);
-//   }
-//   catch (ParameterException &pe)
-//   {
-//      // if the type was SpacePoint, we may need to look in the Spacecraft
-//      // list, or vice versa
-//      Gmat::ObjectType altType = type;
-//      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
-//      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
-//      for (int i=0; i<mNumRefObjects; i++)
-//      {
-//         if (mRefObjList[i].objType == altType)
-//         {
-//            //Notes: will return first object name.
-//            return mRefObjList[i].objName;
-//         }
-//      }
-//
-//      throw;
-//   }
+   }
+   catch (ParameterException &pe)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
+      Gmat::ObjectType altType = type;
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
+      #ifdef DEBUG_ORBITDATA_OBJNAME
+         MessageInterface::ShowMessage(
+               "OrbitData::GetRefObjectName -> couldn't find type %d, so look for type %d\n",
+               type, altType);
+      #endif
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         if (mRefObjList[i].objType == altType)
+         {
+            //Notes: will return first object name.
+            #ifdef DEBUG_ORBITDATA_OBJNAME
+            MessageInterface::ShowMessage
+               ("---> OrbitData::GetRefObjectName() altType=%d returning: %s\n", altType,
+                mRefObjList[i].objName.c_str());
+            #endif
+            return mRefObjList[i].objName;
+         }
+      }
+
+      throw;
+   }
 }
 
 const StringArray& OrbitData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   return RefData::GetRefObjectNameArray(type);
+   RefData::GetRefObjectNameArray(type);
+
+   if (mAllRefObjectNames.empty() && type == Gmat::SPACE_POINT)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
+      return RefData::GetRefObjectNameArray(Gmat::SPACECRAFT);
+   }
+   else
+      return mAllRefObjectNames;
 }
 
 //------------------------------------------------------------------------------
@@ -1276,20 +1297,26 @@ GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
    catch (ParameterException &pe)
    {
       // if the type was SpacePoint, we may need to look in the Spacecraft
-      // list, or vice versa, since we are looking for a spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
       Gmat::ObjectType altType = type;
-      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
-      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
       for (int i=0; i<mNumRefObjects; i++)
       {
          if (mRefObjList[i].objType == altType)
          {
-//            if (name == "") //if name is "", return first object
-//               return mRefObjList[i].obj;
+            if (name == "") //if name is "", return first object
+               return mRefObjList[i].obj;
 
             if ((name == "" || mRefObjList[i].objName == name) &&
                 (mRefObjList[i].obj)->IsOfType("Spacecraft"))
             {
+               //Notes: will return first object name.
+               #ifdef DEBUG_ORBITDATA_OBJNAME
+               MessageInterface::ShowMessage
+                  ("---> OrbitData::GetRefObject() altType=%d returning: %s\n", altType,
+                   mRefObjList[i].objName.c_str());
+               #endif
                return mRefObjList[i].obj;
             }
          }

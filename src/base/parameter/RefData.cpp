@@ -206,7 +206,8 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("   mRefObjList[%d].objType=%d\n", i, mRefObjList[i].objType);
+         ("   mRefObjList[%d].objType=%d, %s\n", i,
+               mRefObjList[i].objType, mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
@@ -452,7 +453,7 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
        type != Gmat::THRUSTER         && type != Gmat::FUEL_TANK         &&
        type != Gmat::BARYCENTER       && type != Gmat::LIBRATION_POINT   &&
        type != Gmat::BODY_FIXED_POINT && type != Gmat::GROUND_STATION    &&
-       type != Gmat::CELESTIAL_BODY)
+       type != Gmat::CELESTIAL_BODY   && type != Gmat::SPACE_POINT)
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
@@ -479,6 +480,10 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
          ("   instance name changed to '%s'\n", mActualParamName.c_str());
       #endif
    }
+   if (mParamOwnerName == oldName)
+      mParamOwnerName = newName;
+   if (mParamDepName == oldName)
+      mParamDepName = newName;
    
    Integer numRenamed = 0;
    for (int i=0; i<mNumRefObjects; i++)

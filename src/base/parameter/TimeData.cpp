@@ -29,6 +29,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEDATA
+//#define DEBUG_TIMEDATA_OBJNAME
 
 //---------------------------------
 // static data
@@ -479,33 +480,53 @@ const std::string* TimeData::GetValidObjectList() const
 // The inherited methods from RefData
 std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
 {
-//   try
-//   {
+   try
+   {
       return RefData::GetRefObjectName(type);
-//   }
-//   catch (ParameterException &pe)
-//   {
-//      // if the type was SpacePoint, we may need to look in the Spacecraft
-//      // list, or vice versa
-//      Gmat::ObjectType altType = type;
-//      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
-//      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
-//      for (int i=0; i<mNumRefObjects; i++)
-//      {
-//         if (mRefObjList[i].objType == altType)
-//         {
-//            //Notes: will return first object name.
-//            return mRefObjList[i].objName;
-//         }
-//      }
-//
-//      throw;
-//   }
+   }
+   catch (ParameterException &pe)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
+      Gmat::ObjectType altType = type;
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
+      #ifdef DEBUG_TIMEDATA_OBJNAME
+         MessageInterface::ShowMessage(
+               "TimeData::GetRefObjectName -> couldn't find type %d, so look for type %d\n",
+               type, altType);
+      #endif
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         if (mRefObjList[i].objType == altType)
+         {
+            //Notes: will return first object name.
+            #ifdef DEBUG_TIMEDATA_OBJNAME
+            MessageInterface::ShowMessage
+               ("---> TimeData::GetRefObjectName() altType=%d returning: %s\n", altType,
+                mRefObjList[i].objName.c_str());
+            #endif
+            return mRefObjList[i].objName;
+         }
+      }
+
+      throw;
+   }
 }
 
 const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   return RefData::GetRefObjectNameArray(type);
+   RefData::GetRefObjectNameArray(type);
+
+   if (mAllRefObjectNames.empty() && type == Gmat::SPACE_POINT)
+   {
+      // if the type was SpacePoint, we may need to look in the Spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
+      return RefData::GetRefObjectNameArray(Gmat::SPACECRAFT);
+   }
+   else
+      return mAllRefObjectNames;
 }
 
 //------------------------------------------------------------------------------
@@ -545,20 +566,26 @@ GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
    catch (ParameterException &pe)
    {
       // if the type was SpacePoint, we may need to look in the Spacecraft
-      // list, or vice versa, since we are looking for a spacecraft
+      // list (or vice versa?), since we are looking for a Spacecraft
+      // and a Spacecraft is a SpacePoint
       Gmat::ObjectType altType = type;
-      if (type == Gmat::SPACECRAFT)  altType = Gmat::SPACE_POINT;
-      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;    // is this right?????
+      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
       for (int i=0; i<mNumRefObjects; i++)
       {
          if (mRefObjList[i].objType == altType)
          {
-//            if (name == "") //if name is "", return first object
-//               return mRefObjList[i].obj;
+            if (name == "") //if name is "", return first object
+               return mRefObjList[i].obj;
 
             if ((name == "" || mRefObjList[i].objName == name) &&
                 (mRefObjList[i].obj)->IsOfType("Spacecraft"))
             {
+               //Notes: will return first object name.
+               #ifdef DEBUG_TIMEDATA_OBJNAME
+               MessageInterface::ShowMessage
+                  ("---> TimeData::GetRefObject() altType=%d returning: %s\n", altType,
+                   mRefObjList[i].objName.c_str());
+               #endif
                return mRefObjList[i].obj;
             }
          }
