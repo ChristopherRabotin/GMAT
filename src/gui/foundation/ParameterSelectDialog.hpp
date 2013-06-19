@@ -160,6 +160,7 @@ private:
    void AddAll();
    void RemoveParameter();
    void ShowSpacecraft();
+   void ShowSpacePoints();
    void ShowImpulsiveBurns();
    void ShowArrays();
    void ShowStrings();

@@ -81,6 +81,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    reportFile = (ReportFile*)subscriber;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();

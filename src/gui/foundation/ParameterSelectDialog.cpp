@@ -37,6 +37,7 @@
 //#define DEBUG_CS
 //#define DEBUG_ADD_ALL
 //#define DEBUG_SHOW_ARRAY_INDEX
+//#define DEBUG_PSD
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -113,7 +114,7 @@ ParameterSelectDialog::ParameterSelectDialog
    
    mParamNameArray.Clear();
    
-   #ifdef DEBUG
+   #ifdef DEBUG_PSD
    MessageInterface::ShowMessage
       ("ParameterSelectDialog() mShowOption=%d, mShowOjectOption=%d, "
        "mAllowMultiSelect=%d, mAllowString=%d, mAllowSysParam=%d, mAllowVariable=%d\n"
@@ -134,7 +135,7 @@ ParameterSelectDialog::ParameterSelectDialog
 //------------------------------------------------------------------------------
 ParameterSelectDialog::~ParameterSelectDialog()
 {
-   #ifdef DEBUG
+   #ifdef DEBUG_PSD
    MessageInterface::ShowMessage
       ("ParameterSelectDialog::~ParameterSelectDialog() Unregister "
        "mObjectListBox:%p\n", mObjectListBox);
@@ -201,7 +202,7 @@ void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
 {
    mParamNameArray = paramNames;
    
-   #ifdef DEBUG
+   #ifdef DEBUG_PSD
    MessageInterface::ShowMessage
       ("SetParamNameArray() param count=%d\n", mParamNameArray.GetCount());
    #endif
@@ -222,7 +223,7 @@ void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::Create()
 {
-   #ifdef DEBUG
+   #ifdef DEBUG_PSD
    MessageInterface::ShowMessage("ParameterSelectDialog::Create() entered.\n");
    #endif
    
@@ -524,6 +525,10 @@ void ParameterSelectDialog::OnListBoxSelect(wxCommandEvent& event)
             BuildAttachedHardware(objName);
             ShowObjectProperties();
          }
+         else if (objType == "SpacePoint")
+         {
+            ShowObjectProperties();
+         }
          else if (objType == "Array")
          {
             // Show array element if not showing whole array
@@ -659,6 +664,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       
       if (objType == "Spacecraft")
          ShowSpacecraft();
+      else if (objType == "SpacePoint")
+         ShowSpacePoints();
       else if (objType == "ImpulsiveBurn")
          ShowImpulsiveBurns();
       else if (objType == "Variable")
@@ -746,6 +753,10 @@ void ParameterSelectDialog::OnCheckBoxChange(wxCommandEvent& event)
             ShowAttachedHardware(false);
             ShowObjectProperties();
          }
+         else if (objType == "SpacePoint")
+         {
+            ShowObjectProperties();
+         }
       }
       else
       {
@@ -755,7 +766,8 @@ void ParameterSelectDialog::OnCheckBoxChange(wxCommandEvent& event)
          mObjectListBox->SetWindowStyle(wxLB_SINGLE);
          if (mObjectTypeComboBox->GetValue() == "Array")
             ShowArrayIndex(true);
-         else if ((objType == "Spacecraft") || objType == "ImpulsiveBurn")
+         else if ((objType == "Spacecraft") || objType == "ImpulsiveBurn" ||
+                  (objType == "SpacePoint"))
          {
             ShowObjectProperties();
             if (objType == "Spacecraft")
@@ -1223,6 +1235,42 @@ void ParameterSelectDialog::ShowSpacecraft()
 
 
 //------------------------------------------------------------------------------
+// void ShowSpacePoints()
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::ShowSpacePoints()
+{
+   // Show or hide entire object option
+   mEntireObjectCheckBox->Hide();
+   mAllowWholeObject = false;
+   if (mShowObjectOption == 1)
+   {
+      mEntireObjectCheckBox->Show();
+      mAllowWholeObject = mEntireObjectCheckBox->IsChecked();
+   }
+
+   #ifdef DEBUG_SHOW_SPACEPOINTS
+   MessageInterface::ShowMessage
+      ("ShowSpacePoints() entered, mAllowWholeObject=%d\n", mAllowWholeObject);
+   #endif
+
+   // Show Spacecraft objects
+   mObjectListBox->InsertItems(theGuiManager->GetSpacePointList(true), 0);
+   mObjectListBox->SetToolTip(mConfig->Read(_T("SpacePointListHint")));
+   mObjectListBox->SetSelection(0);
+
+   // Show object properties if not showing entire object
+   if (!mAllowWholeObject)
+   {
+      ShowObjectProperties();
+   }
+
+   #ifdef DEBUG_SHOW_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("ShowSpacePoints() leaving, mAllowWholeObject=%d\n", mAllowWholeObject);
+   #endif
+}
+
+//------------------------------------------------------------------------------
 // void ShowImpulsiveBurns()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::ShowImpulsiveBurns()
@@ -1435,7 +1483,8 @@ void ParameterSelectDialog::ShowObjectProperties()
                                             mShowSettableOnly, mForStopCondition));
       
       mPropertyListBox->SetSelection(0);
-      if (mObjectTypeComboBox->GetValue() == "Spacecraft")
+      if ((mObjectTypeComboBox->GetValue() == "Spacecraft") ||
+          (mObjectTypeComboBox->GetValue() == "SpacePoint"))
          ShowCoordSystem();
    }
 }
@@ -1722,7 +1771,7 @@ wxString ParameterSelectDialog::GetObjectSelection()
       
       // check if only one selections is allowed, if so deselect one one
       if (objectType == "Array" || objectType == "Spacecraft" ||
-          objectType == "ImpulsiveBurn")
+          objectType == "ImpulsiveBurn" || objectType == "SpacePoint")
       {
          // Allow only one selection if entire object selection is not allowed
          if (oldCount > 0 && mEntireObjectCheckBox->GetValue() == false)
@@ -2016,6 +2065,8 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
          param->SetRefObjectName(Gmat::SPACECRAFT, objName);
       else if (objTypeName == "ImpulsiveBurn")
          param->SetRefObjectName(Gmat::IMPULSIVE_BURN, objName);
+      else if (objTypeName == "SpacePoint")
+         param->SetRefObjectName(Gmat::SPACE_POINT, objName);
       else
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "*** WARNING *** %s is not a valid object for property %s\n"

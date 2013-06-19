@@ -81,6 +81,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    mNumYParams = 0;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();

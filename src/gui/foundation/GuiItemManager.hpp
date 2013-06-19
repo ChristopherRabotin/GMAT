@@ -145,6 +145,8 @@ public:
    wxArrayString GetOptimizerList() { return theOptimizerList; }
    wxArrayString GetAutoGlobalObjectList() { return theAutoGlobalObjectList; }
    
+   wxArrayString GetSpacePointList(bool excludeSC = false);
+
    wxArrayString GetAttachedHardwareList(const wxString &scName);
    wxArrayString GetPropertyList(const wxString &objName,
                                  const wxString &ownedObjName = "",
@@ -195,7 +197,8 @@ public:
                                    const wxSize &size);
    
    wxComboBox* GetSpacePointComboBox(wxWindow *parent, wxWindowID id, 
-                                     const wxSize &size, bool addVector = false);
+                                     const wxSize &size, bool addVector = false,
+                                     bool excludeSC = false);
    
    wxComboBox* GetCelestialPointComboBox(wxWindow *parent, wxWindowID id, 
                                          const wxSize &size, bool addVector = false);
@@ -239,7 +242,8 @@ public:
                                              const wxSize &size,
                                              wxArrayString *excList = NULL,
                                              bool includeCelesBodies = false,
-                                             bool includeCalPoints = false);      
+                                             bool includeCalPoints = false,
+                                             bool excludeSC = false);
    wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);      
@@ -250,7 +254,8 @@ public:
    
    // ListBox
    wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id, 
-                                   const wxSize &size, bool addVector = false);
+                                   const wxSize &size, bool addVector = false,
+                                   bool excludeSC = false);
    
    wxListBox* GetCelestialPointListBox(wxWindow *parent, wxWindowID id,
                                        const wxSize &size,
@@ -463,6 +468,9 @@ private:
    // Spacecraft property
    int theNumScProperty;
    
+   // SpacePoint Property
+   int theNumSpacePtProperty;
+
    // Burn Properties
    int theNumImpBurnProperty;
    int theNumFiniteBurnProperty;
@@ -526,6 +534,9 @@ private:
    // Spacecraft Attached Object Properties
    wxArrayString theScAttachedObjPropertyList;
    
+   // SpacePoint properties
+   wxArrayString theSpacePointPropertyList;
+
    // Burn Properties
    wxArrayString theImpBurnPropertyList;
    wxArrayString theFiniteBurnPropertyList;

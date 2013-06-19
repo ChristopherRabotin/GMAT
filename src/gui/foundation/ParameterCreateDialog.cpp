@@ -91,6 +91,7 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, ParameterType par
    mVariableChanged = false;
    mStringChanged = false;
    mSelectVarStrings.Add("Spacecraft");
+   mSelectVarStrings.Add("SpacePoint");
    mSelectVarStrings.Add("ImpulsiveBurn");
    
    Create(); 
@@ -127,6 +128,7 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, const wxString pa
       mIsParamCreated = false;
       mPageChangedByUser = false;
       mSelectVarStrings.Add("Spacecraft");
+      mSelectVarStrings.Add("SpacePoint");
       mSelectVarStrings.Add("ImpulsiveBurn");
       
       Create(); 

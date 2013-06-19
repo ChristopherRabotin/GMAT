@@ -60,6 +60,8 @@
 //#define DBGLVL_GUI_ITEM_PROP 2
 //#define DBGLVL_GUI_ITEM_FM 2
 //#define DBGLVL_GUI_ITEM_ALL_OBJECT 2
+//#define DBGLVL_SC_LISTBOX 2
+//#define DEBUG_PARAM_SIZER 2
 
 //------------------------------
 // static data
@@ -1659,6 +1661,24 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
 
 //------------------------------------------------------------------------------
+// wxArrayString GetSpacePointList(bool excludeSC = false)
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetSpacePointList(bool excludeSC)
+{
+   wxArrayString spacePtList;
+   GmatBase *obj = NULL;
+   for (int i=0; i<theNumSpacePoint; i++)
+   {
+      obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+      bool isSC = obj->IsOfType(Gmat::SPACECRAFT);
+      if (!isSC || (isSC && !excludeSC))
+         spacePtList.push_back(theSpacePointList[i]);
+   }
+   return spacePtList;
+}
+
+
+//------------------------------------------------------------------------------
 // wxArrayString GetAttachedHardwareList(const wxString &scName)
 //------------------------------------------------------------------------------
 wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
@@ -1797,6 +1817,16 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
       #endif
       return array;
    }
+   else if (obj->IsOfType("SpacePoint"))
+   {
+      // for now all space point parameters are reportable and plottable
+      array = theSpacePointPropertyList;
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning SpacePoint properties\n");
+      #endif
+      return array;
+   }
    else
    {
       MessageInterface::ShowMessage
@@ -1824,6 +1854,8 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 {
    if (objType == "Spacecraft")
       return theNumScProperty;
+   else if (objType == "SpacePoint")
+      return theNumSpacePtProperty;
    else if (objType == "ImpulsiveBurn")
       return theNumImpBurnProperty;
    else if (objType == "FiniteBurn")
@@ -1891,6 +1923,8 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
    for (unsigned int i=0; i<objectTypeList.size(); i++)
    {
       if (objectTypeList[i] == "Spacecraft")
+         cb->Append(objectTypeList[i]);
+      else if (objectTypeList[i] == "SpacePoint")
          cb->Append(objectTypeList[i]);
       else if (objectTypeList[i] == "ImpulsiveBurn")
          cb->Append(objectTypeList[i]);
@@ -2142,7 +2176,8 @@ wxComboBox* GuiItemManager::GetFunctionComboBox(wxWindow *parent, wxWindowID id,
 
 //------------------------------------------------------------------------------
 // wxComboBox* GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
-//                                   const wxSize &size, bool addVector = false)
+//                                   const wxSize &size, bool addVector = false,
+//                                   bool excludeSC = false)
 //------------------------------------------------------------------------------
 /**
  * @return configured SpacePoint object ComboBox pointer
@@ -2150,7 +2185,8 @@ wxComboBox* GuiItemManager::GetFunctionComboBox(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 wxComboBox*
 GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
-                                      const wxSize &size, bool addVector)
+                                      const wxSize &size, bool addVector,
+                                      bool excludeSC)
 {
    #if DBGLVL_GUI_ITEM_SP
    MessageInterface::ShowMessage
@@ -2166,9 +2202,19 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
    if (addVector)
       spacePointComboBox->Append("Vector");
    
+   GmatBase *obj = NULL;
    for (int i=0; i<theNumSpacePoint; i++)
+   {
       if (spacePointComboBox->FindString(theSpacePointList[i]) == wxNOT_FOUND)
-         spacePointComboBox->Append(theSpacePointList[i]);
+      {
+         obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+         bool isSC = obj->IsOfType(Gmat::SPACECRAFT);
+         if (!isSC || (isSC && !excludeSC))
+         {
+            spacePointComboBox->Append(theSpacePointList[i]);
+         }
+      }
+   }
    
    //---------------------------------------------
    // register to update list
@@ -2651,7 +2697,8 @@ wxCheckListBox* GuiItemManager::GetXyPlotCheckListBox(wxWindow *parent, wxWindow
 wxCheckListBox*
 GuiItemManager::GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id,
                                           const wxSize &size, wxArrayString *excList,
-                                          bool includeCelesBodies, bool includeCalPoints)
+                                          bool includeCelesBodies, bool includeCalPoints,
+                                          bool excludeSC)
 {
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
@@ -2673,6 +2720,11 @@ GuiItemManager::GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id,
             else if (obj->IsOfType(Gmat::CALCULATED_POINT))
             {
                if (includeCalPoints)
+                  checkListBox->Append(theSpacePointList[i]);
+            }
+            else if (obj->IsOfType(Gmat::SPACECRAFT))
+            {
+               if (!excludeSC)
                   checkListBox->Append(theSpacePointList[i]);
             }
             else
@@ -2854,14 +2906,16 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
 // ListBox
 //------------------------------------------------------------------------------
 // wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id,
-//                                 const wxSize &size, bool addVector = false)
+//                                 const wxSize &size, bool addVector = false,
+//                                 bool excludeSC = false)
 //------------------------------------------------------------------------------
 /**
  * @return configured CelestialBody and CalculatedPoint object ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
-                                                const wxSize &size, bool addVector)
+                                                const wxSize &size, bool addVector,
+                                                bool excludeSC)
 {
    #if DBGLVL_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::GetSpacePointListBox() entered\n");
@@ -2880,8 +2934,16 @@ wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
    if (addVector)
       spacePointListBox->Append("Vector");
    
+   GmatBase *obj = NULL;
    for (int i=0; i<theNumSpacePoint; i++)
-      spacePointListBox->Append(theSpacePointList[i]);
+   {
+      obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+      bool isSC = obj->IsOfType(Gmat::SPACECRAFT);
+      if (!isSC || (isSC && !excludeSC))
+      {
+         spacePointListBox->Append(theSpacePointList[i]);
+      }
+   }
    
    // select first item
    spacePointListBox->SetSelection(0);
@@ -3110,14 +3172,28 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
    {
       for (int i=0; i<theNumSpacecraft; i++)
       {
-         if (excList->Index(theSpacecraftList[i]) == wxNOT_FOUND)
+         if (excList != NULL && excList->Index(theSpacecraftList[i]) == wxNOT_FOUND)
+         {
+            #if DBGLVL_SC_LISTBOX
+            MessageInterface::ShowMessage
+               ("GetSpacecraftListBox() some things are excluded ... now adding %s\n",
+                     theSpacecraftList[i].c_str());
+            #endif
             spacecraftListBox->Append(theSpacecraftList[i]);
+         }
       }
    }
    else
    {
       for (int i=0; i<theNumSpacecraft; i++)
+      {
+         #if DBGLVL_SC_LISTBOX
+         MessageInterface::ShowMessage
+            ("GetSpacecraftListBox() NOTHING excluded ... now adding %s\n",
+                  theSpacecraftList[i].c_str());
+         #endif
          spacecraftListBox->Append(theSpacecraftList[i]);
+      }
    }
    
    //---------------------------------------------
@@ -3298,6 +3374,28 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
          #endif
          propertyListBox->Append("Apoapsis");
          propertyListBox->Append("Periapsis");
+      }
+   }
+   else if (objType == "SpacePoint")
+   {
+      // Do we need to check for Settable ones here?????????
+      if (showOption == SHOW_REPORTABLE)
+      {
+         for (int i=0; i<theNumSpacePtProperty; i++)
+         {
+            paramName = theSpacePointPropertyList[i].c_str();
+            if (theParamInfo->IsReportable(paramName))
+               propertyListBox->Append(theSpacePointPropertyList[i]);
+         }
+      }
+      else if (showOption == SHOW_PLOTTABLE)
+      {
+         for (int i=0; i<theNumSpacePtProperty; i++)
+         {
+            paramName = theSpacePointPropertyList[i].c_str();
+            if (theParamInfo->IsPlottable(paramName))
+               propertyListBox->Append(theSpacePointPropertyList[i]);
+         }
       }
    }
    else if (objType == "ImpulsiveBurn")
@@ -3913,6 +4011,21 @@ wxSizer* GuiItemManager::CreateParameterSizer
                               allowMultiSelect);
       (*objectListBox)->SetToolTip(pConfig->Read(_T("SpacecraftListHint")));
    }
+   else if (objectType == "SpacePoint")
+   {
+      // Show entire object option
+      (*entireObjCheckBox)->Hide();
+      if (showObjectOption == 1)
+      {
+         (*entireObjCheckBox)->SetLabel("Select Entire Object");
+         (*entireObjCheckBox)->Show();
+      }
+      // create SpacePoint ListBox
+      *objectListBox =
+         GetSpacePointListBox(parent, objectListBoxId, wxSize(170, 95),
+                             false, true);
+      (*objectListBox)->SetToolTip(pConfig->Read(_T("SpacePointListHint")));
+   }
    else if (objectType == "ImpulsiveBurn")
    {
       // Show entire object option
@@ -4199,7 +4312,7 @@ wxSizer* GuiItemManager::CreateUserVarSizer
 }
 
 //-------------------------------
-// priavate methods
+// private methods
 //-------------------------------
 
 //------------------------------------------------------------------------------
@@ -4287,10 +4400,12 @@ void GuiItemManager::UpdatePropertyList()
    #endif
    
    theNumScProperty = 0;
+   theNumSpacePtProperty = 0;
    theNumImpBurnProperty = 0;
    Gmat::ObjectType objectType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    theScPropertyList.Clear();
+   theSpacePointPropertyList.Clear();
    theImpBurnPropertyList.Clear();
    
    for (int i=0; i<numParams; i++)
@@ -4329,6 +4444,11 @@ void GuiItemManager::UpdatePropertyList()
             else
                // update Spacecraft property list
                theScPropertyList.Add(items[i].c_str());
+
+            if (objectType == Gmat::SPACE_POINT)
+            {
+               theSpacePointPropertyList.Add(items[i].c_str());
+            }
          }
          else if (objectType == Gmat::IMPULSIVE_BURN)
          {
@@ -4340,7 +4460,8 @@ void GuiItemManager::UpdatePropertyList()
       }
    }
    
-   theNumScProperty = theScPropertyList.GetCount();
+   theNumScProperty      = theScPropertyList.GetCount();
+   theNumSpacePtProperty = theSpacePointPropertyList.GetCount();
    theNumImpBurnProperty = theImpBurnPropertyList.GetCount();
    
    #if DBGLVL_GUI_ITEM_PROPERTY
@@ -4525,10 +4646,21 @@ void GuiItemManager::UpdateSpacecraftList()
    }
    
    theNumSpacecraft = numSc;
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSpacecraftList() setting theNumSpacecraft = %d\n",
+            theNumSpacecraft);
+   #endif
    
    //-------------------------------------------------------
    // update registered Spacecraft ListBox
    //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSpacecraftList() About to update the registered SpacecraftListbox\n");
+   MessageInterface::ShowMessage("      size of mSpacecraftExcList is %d\n",
+         (Integer) mSpacecraftExcList.size());
+   #endif
    std::vector<wxArrayString*>::iterator exPos = mSpacecraftExcList.begin();
    
    for (std::vector<wxListBox*>::iterator pos = mSpacecraftLBList.begin();
@@ -4536,10 +4668,20 @@ void GuiItemManager::UpdateSpacecraftList()
    {
       wxArrayString *excList = *exPos++;
       (*pos)->Clear();
-      
+      #if DBGLVL_GUI_ITEM_SP
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSpacecraftList() excList is %s\n",
+               (excList? "NOT NULL" : "NULL"));
+      #endif
+
       for (int i=0; i<theNumSpacecraft; i++)
       {
-         if (excList->Index(theSpacecraftList[i].c_str()) == wxNOT_FOUND)
+         #if DBGLVL_GUI_ITEM_SP
+         MessageInterface::ShowMessage
+            ("GuiItemManager::UpdateSpacecraftList() checking for index %s\n",
+                  theSpacecraftList[i].c_str());
+         #endif
+         if (excList != NULL && (excList->Index(theSpacecraftList[i].c_str()) == wxNOT_FOUND))
             (*pos)->Append(theSpacecraftList[i]);
       }
    }
@@ -4547,6 +4689,10 @@ void GuiItemManager::UpdateSpacecraftList()
    //-------------------------------------------------------
    // update registered Spacecraft ComboBox
    //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSpacecraftList() About to update the registered ComboBox\n");
+   #endif
    for (std::vector<wxComboBox*>::iterator pos = mSpacecraftCBList.begin();
         pos != mSpacecraftCBList.end(); ++pos)
    {
@@ -4563,6 +4709,10 @@ void GuiItemManager::UpdateSpacecraftList()
    //-------------------------------------------------------
    // update registered Spacecraft CheckListBox
    //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSpacecraftList() About to update the registered CheckListbox\n");
+   #endif
    wxArrayString itemCheckedArray;
    for (std::vector<wxCheckListBox*>::iterator pos = mSpacecraftCLBList.begin();
         pos != mSpacecraftCLBList.end(); ++pos)
@@ -6292,6 +6442,7 @@ GuiItemManager::GuiItemManager()
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    
    theNumScProperty = 0;
+   theNumSpacePtProperty = 0;
    theNumImpBurnProperty = 0;
    theNumFiniteBurnProperty = 0;
    theNumAllObject = 0;
