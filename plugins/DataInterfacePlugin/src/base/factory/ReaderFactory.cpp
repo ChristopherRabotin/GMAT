@@ -122,12 +122,15 @@ GmatBase* ReaderFactory::CreateObject(const std::string &ofType,
    if (ofType == "TVHF_ASCII")
       retval = new TcopsVHFAscii(withName);
 
-   if (retval->IsOfType("DataReader") == false)
+   if (retval != NULL)
    {
-      delete retval;
-      retval = NULL;
-      MessageInterface::ShowMessage("The Reader Factory can only create "
-            "DataReader subobjects; %s is not a DataReader\n", ofType.c_str());
+      if (retval->IsOfType("DataReader") == false)
+      {
+         delete retval;
+         retval = NULL;
+         MessageInterface::ShowMessage("The Reader Factory can only create "
+               "DataReader subobjects; %s is not a DataReader\n", ofType.c_str());
+      }
    }
 
    return retval;
