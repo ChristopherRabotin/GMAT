@@ -69,6 +69,7 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
    mIncrIsParam  = false;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    
    Create();
    Show();

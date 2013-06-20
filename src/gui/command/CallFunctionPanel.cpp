@@ -51,6 +51,7 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
    theCommand = (CallFunction *)cmd;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    mObjectTypeList.Add("ImpulsiveBurn");
    
    if (theCommand != NULL)

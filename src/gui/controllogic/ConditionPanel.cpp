@@ -65,6 +65,7 @@ ConditionPanel::ConditionPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(p
    mNumberOfLogicalOps = 0;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    mLhsList.clear();
    mEqualityOpStrings.clear();
    mRhsList.clear();
