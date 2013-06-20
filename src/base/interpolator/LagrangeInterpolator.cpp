@@ -282,7 +282,7 @@ bool LagrangeInterpolator::AddPoint(const Real ind, const Real *data)
 {
    #ifdef DEBUG_LAGRANGE_ADD
    MessageInterface::ShowMessage
-      ("LagrangeInterpolator::AddPoint() entered, ind=%f, previousX=%f, data[0]=%f, "
+      ("LagrangeInterpolator::AddPoint() entered, ind=%f, previousX=%g, data[0]=%f, "
        "data[1]=%f, data[2]=%f\n", ind, previousX, data[0], data[1], data[2]);
    #endif
    

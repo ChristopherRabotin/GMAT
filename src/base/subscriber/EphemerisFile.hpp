@@ -154,8 +154,8 @@ protected:
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
    Real        finalEpochA1Mjd;
-   Real        nextOutEpoch;
-   Real        nextReqEpoch;
+   Real        nextOutEpochInSecs;
+   Real        nextReqEpochInSecs;
    Real        currEpochInDays;
    Real        currEpochInSecs;
    Real        prevEpochInSecs;
@@ -174,7 +174,7 @@ protected:
    bool        writingNewSegment;
    bool        continuousSegment;
    bool        useFixedStepSize;
-   bool        interpolateBeginState;
+   bool        interpolateInitialState;
    bool        interpolateFinalState;
    bool        createInterpolator;
    bool        writeOrbit;
@@ -182,6 +182,7 @@ protected:
    bool        processData;
    bool        finalEpochReached;
    bool        handleFinalEpoch;
+   bool        finalEpochProcessed;
    bool        writeDataInDataCS;
    bool        processingLargeStep;
    bool        spkWriteFailed;
