@@ -54,18 +54,21 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    objectStringMap["Epoch"] = "Epoch";
    objectIDMap["Epoch"]     = -1;
    dataType["Epoch"]        = READER_TIMESTRING;
+   dataLoaded["Epoch"]      = false;
 
    supportedFields.push_back("CartesianState");
    fileStringMap["CartesianState"]   = "CARTESIAN COORDINATES";
    objectStringMap["CartesianState"] = "CartesianX";
    objectIDMap["CartesianState"]     = -1;
    dataType["CartesianState"]        = READER_RVECTOR6;
+   dataLoaded["CartesianState"]      = false;
 
    supportedFields.push_back("Cr");
    fileStringMap["Cr"]   = "CSUBR";
    objectStringMap["Cr"] = "Cr";
    objectIDMap["Cr"]     = -1;
    dataType["Cr"]        = READER_REAL;
+   dataLoaded["Cr"]      = false;
 
    // Subtypes map the parameter names for individual elements of a 6-vector
    supportedFields.push_back("X ");
@@ -73,36 +76,42 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    objectStringMap["X "] = "X";
    objectIDMap["X "]     = -1;
    dataType["X "]        = READER_SUBTYPE;
+   dataLoaded["X "]      = false;
 
    supportedFields.push_back("Y ");
    fileStringMap["Y "]   = "Y ";
    objectStringMap["Y "] = "Y";
    objectIDMap["Y "]     = -1;
    dataType["Y "]        = READER_SUBTYPE;
+   dataLoaded["Y "]      = false;
 
    supportedFields.push_back("Z ");
    fileStringMap["Z "]   = "Z ";
    objectStringMap["Z "] = "Z";
    objectIDMap["Z "]     = -1;
    dataType["Z "]        = READER_SUBTYPE;
+   dataLoaded["Z "]      = false;
 
    supportedFields.push_back("XDOT");
    fileStringMap["XDOT"]   = "XDOT";
    objectStringMap["XDOT"] = "VX";
    objectIDMap["XDOT"]     = -1;
    dataType["XDOT"]        = READER_SUBTYPE;
+   dataLoaded["XDOT"]      = false;
 
    supportedFields.push_back("YDOT");
    fileStringMap["YDOT"]   = "YDOT";
    objectStringMap["YDOT"] = "VY";
    objectIDMap["YDOT"]     = -1;
    dataType["YDOT"]        = READER_SUBTYPE;
+   dataLoaded["YDOT"]      = false;
 
    supportedFields.push_back("ZDOT");
    fileStringMap["ZDOT"]   = "ZDOT";
    objectStringMap["ZDOT"] = "VZ";
    objectIDMap["ZDOT"]     = -1;
    dataType["ZDOT"]        = READER_SUBTYPE;
+   dataLoaded["ZDOT"]      = false;
 
    // Data needed to build the coordinate system name
    supportedFields.push_back("CoordinateSystem");
@@ -111,12 +120,14 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    objectStringMap["CoordinateSystem"] = "";
    objectIDMap["CoordinateSystem"]     = -1;
    dataType["CoordinateSystem"]        = READER_STRING;
+   dataLoaded["CoordinateSystem"]      = false;
 
    supportedFields.push_back("CentralBody");
    fileStringMap["CentralBody"]   = "CENTRAL BODY:";
    objectStringMap["CentralBody"] = "";
    objectIDMap["CentralBody"]     = -1;
    dataType["CentralBody"]        = READER_STRING;
+   dataLoaded["CentralBody"]      = false;
 }
 
 TcopsVHFData::~TcopsVHFData()
@@ -250,10 +261,17 @@ void TcopsVHFData::BuildCSName()
 
       if (cs == "J2000")
          csSuffix = "MJ2000Eq";
-      if (cs == "TOD")
-         csSuffix = "TODEq";
-      if (cs == "1950")
+      else if (cs == "TOD")
+         throw InterfaceException("The TVHF state data is set in the TOD "
+               "coordinate system, which is not supported by GMAT's TVHF "
+               "reader");
+//         csSuffix = "TODEq";
+      else if (cs == "1950")
          throw InterfaceException("The TVHF state data is set in the Mean "
                "Equator and Equinox of 1950, which is not supported in GMAT");
+      else
+         throw InterfaceException("The TVHF state data is set in the " + cs +
+               "coordinate system, which is not recognized by GMAT's "
+               "TVHF reader");
    }
 }
