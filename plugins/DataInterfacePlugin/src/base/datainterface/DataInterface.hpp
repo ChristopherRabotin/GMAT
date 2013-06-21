@@ -74,6 +74,7 @@ public:
                                                 const Integer index) const;
 
    const StringArray&   GetSupportedFieldNames() const;
+   bool                 WasDataLoaded(const std::string& forField);
    const std::string    GetObjectParameterName(const std::string& forField);
    const DataReader::readerDataType
                         GetReaderParameterType(const std::string& forField);

@@ -284,6 +284,11 @@ Integer DataInterface::Open(const std::string& name)
    return retval;
 }
 
+bool DataInterface::WasDataLoaded(const std::string& forField)
+{
+   return theReader->WasDataLoaded(forField);
+}
+
 //------------------------------------------------------------------------------
 // const std::string GetObjectParameterName(const std::string& forField)
 //------------------------------------------------------------------------------
