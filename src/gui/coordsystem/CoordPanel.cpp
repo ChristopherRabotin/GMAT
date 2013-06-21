@@ -1126,9 +1126,9 @@ void CoordPanel::Create()
    staticboxsizerC->Add(flexgridsizerConstraint, 0, wxALIGN_TOP|wxALL, 5);
 
    staticboxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, 5);
-   staticboxsizerAxes->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
-   staticboxsizerAxes->Add( staticboxsizerA, 0, wxALIGN_CENTER|wxALL, 5);
-   staticboxsizerAxes->Add( staticboxsizerC, 0, wxALIGN_CENTER|wxALL, 5);
+   staticboxsizerAxes->Add( flexgridsizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
+   staticboxsizerAxes->Add( staticboxsizerA, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
+   staticboxsizerAxes->Add( staticboxsizerC, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
    staticboxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
 //   staticboxsizerAxes->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
 
