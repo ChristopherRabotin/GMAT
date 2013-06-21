@@ -439,8 +439,64 @@ void TcopsVHFAscii::ParseTime(std::string& theField)
       else if (year < 100)
          year += 1900;
 
+      // Validate the ranges
+      std::stringstream errstream;
+      if (year < 1950)
+         errstream << "   The specified year, " << year << ", is not valid.\n";
+      if ((month < 1) || (month > 12))
+         errstream << "   The specified month, " << month 
+                   << ", is not valid; it must be between 1 and 12.\n";
+      if ((day < 1) || (day > 31))
+         errstream <<    "   The specified day of month, " << day << ", is not valid.\n";
+      else
+      {
+         if (month == 2)
+         {
+            if (day > 29)
+               errstream << "   The specified day of month, " << day << ", is not "
+                  "valid for month " << month << ".\n";
+            else if (day == 29)
+            {
+               if (year % 4 != 0)
+                  errstream << "   The specified day of month, " << day 
+                            << ", is not valid for month " << month 
+                            << "in the year " << year << ".\n";
+            }
+         }
+         if ((month == 4) || (month == 6) || (month == 9) || (month == 11))
+            if (day > 30)
+               errstream << "   The specified day of month, " << day 
+                         << ", is not valid for month " << month << ".\n";
+      }
+
+      if ((hour < 0) || (hour > 24))
+         errstream << "   The specified hour of day, " << hour 
+                     << ", is not valid[ it must be between 0 and 24.\n";
+      else
+         if (((minute > 0) || (second > 0.0)) && (hour == 24))
+            errstream << "   The specified hour of day, " << hour 
+                        << ", is not valid with non-zero minutes "
+                           "or seconds.\n";
+
+      if ((minute < 0) || (minute > 60))
+         errstream << "   The specified number of minutes, " << minute 
+                     << ", is not valid; it must be between 0 and 60.\n";
+      else
+         if ((minute == 60) && (second > 0.0))
+            errstream << "   The specified number of minutes, " << minute 
+                        << ", is not valid with non-zero seconds.\n";
+
+      if ((second < 0.0) || (second > 60.5))
+         errstream << "   The specified number of seconds, " << second 
+                   << ", is not valid; it must be between 0 and 60.5\n";
+
+      if (errstream.str().length() > 0)
+         throw InterfaceException("Error parsing the epoch data from the data file " + filename +
+         ":\n" + errstream.str());
+
       utcEpoch = ModifiedJulianDate(year,month,day,hour,minute,second);
       realData[theField] = utcEpoch;
+      dataLoaded[theField] = true;
 
       #ifdef DEBUG_FILEREAD
          MessageInterface::ShowMessage("   %s is at [%d %d %d %d %d %lf] = "
