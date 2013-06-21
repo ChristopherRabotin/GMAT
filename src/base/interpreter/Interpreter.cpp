@@ -8239,7 +8239,16 @@ bool Interpreter::FinalPass()
             for (unsigned int i = 0; i < csNames.size(); i++)
             {
                GmatBase *csObj = FindObject(csNames[i]);
-               obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
+               if (csObj)
+                  obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
+               else
+               {
+                  InterpreterException ex
+                     ("Nonexistent object \"" + csNames[i] + "\" referenced in \"" +
+                      obj->GetName() + "\"");
+                  HandleError(ex, false);
+                  retval = false;
+               }
             }
             
             obj->Validate();
