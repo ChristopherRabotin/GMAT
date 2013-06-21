@@ -339,7 +339,8 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
    if (j2000Body == NULL)
       throw SpaceObjectException(
          "SpaceObject::GetMJ2000State MJ2000 body not yet set for " +
-         instanceName + "\n");
+         instanceName + ".  Possible circular dependency in Spacecraft and "
+         "Coordinate System configuration.\n");
          
    Real *st = state.GetState(); //ps.GetState();
 
