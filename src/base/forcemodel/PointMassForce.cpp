@@ -76,6 +76,7 @@
 //#define DUMP_PLANET_DATA
 //#define DEBUG_INDIRECT_TERM
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -718,8 +719,7 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
 
    Real relativePosition[3];
    Rvector6 bodyrv = body->GetState(now);
-   SpacePoint *origin = sc->GetOrigin();
-   Rvector6 orig = origin->GetMJ2000State(now);
+   Rvector6 orig = forceOrigin->GetMJ2000State(now);
 
    const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
    Real rv[3];
