@@ -2532,7 +2532,13 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
    
    // If j2000Body is this body, return the zero state vector
    if(j2000Body->GetName() == instanceName) 
-      return Rvector6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   {
+      state.Set(0.0,0.0,0.0,0.0,0.0,0.0);
+      stateTime     = atTime;
+      lastEphemTime = atTime;
+      lastState     = state;
+      return state;
+   }
    
    Rvector6         stateEphem    = GetState(atTime);
    Rvector6         j2kEphemState;
