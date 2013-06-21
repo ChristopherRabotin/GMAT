@@ -30,6 +30,8 @@
 #include "TimeSystemConverter.hpp"
 #include "SpaceObject.hpp"
 
+#include <sstream>
+
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_SET_EXEC
 //#define DEBUG_SET_OUTPUT
@@ -403,7 +405,35 @@ bool Set::InterpretAction()
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
    #endif
 
-   // StringArray chunks = parser.SeparateBrackets(blocks[0], "()", "", false);
+   // Check for paren matching
+   UnsignedInt loc = blocks[0].find('(');
+   if (loc != std::string::npos)
+   {
+      UnsignedInt loc2 = blocks[0].find('(', loc+1);
+      if (loc2 != std::string::npos)
+      {
+         throw CommandException("Too many opening parens in the Set command");
+      }
+
+      loc2 = blocks[0].find(')');
+      if (loc2 == std::string::npos)
+      {
+         throw CommandException("Missing closing parens in the Set command");
+      }
+
+      if (loc > loc2)
+      {
+         throw CommandException("Closing paren found before opening paren in the Set command");
+      }
+
+      UnsignedInt loc3 = blocks[0].find(')', loc2+1);
+      if (loc3 != std::string::npos)
+      {
+         throw CommandException("Too many closing parens in the Set command");
+      }
+
+   }
+
    StringArray chunks = parser.SeparateBy(blocks[0], "()");
 
    #ifdef DEBUG_PARSING
@@ -477,6 +507,10 @@ bool Set::Initialize()
 
    if (obj->IsOfType("DataInterface"))
       theInterface = (DataInterface*)obj;
+   else
+      throw CommandException("The object \"" + interfaceName +
+               "\" is not a FileInterface object."); 
+
 
    // If specific data elements are requested, warn if not in the reader
    if (!loadAll)
@@ -513,6 +547,10 @@ bool Set::Execute()
    #endif
    
    bool retval = false, valueSet = false;
+
+   if (theInterface == NULL)
+      throw CommandException("The FileInterface object \"" + interfaceName +
+               "\" was not found."); 
    
    if (theInterface->Open() == 0)
    {
@@ -534,14 +572,34 @@ bool Set::Execute()
          else
             parmCount = selections.size();
 
+         std::stringstream parametersNotSet;
+
          for (UnsignedInt i = 0; i < parmCount; ++i)
          {
             theItem = (loadAll ? allItems[i] : selections[i]);
             DataReader::readerDataType fieldType =
                      theInterface->GetReaderParameterType(theItem);
-            if (SetTargetParameterData(fieldType,theItem))
+
+            if (SetTargetParameterData(fieldType, theItem))
                valueSet = true;
+            else
+               parametersNotSet << "   The parameter " << theItem 
+                                << " did not set data on the object "
+                                << targetName 
+                                << "; either the field is missing from the "
+                                << "file or the field value is not valid.\n";
          }
+
+         if (parametersNotSet.str().length() > 0)
+            //if (loadAll)
+            //   MessageInterface::ShowMessage("*** Warning *** Loading failed "
+            //            "for the following parameters:\n%sin the line\n%s\n",
+            //            parametersNotSet.str().c_str(),
+            //            GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            //else
+               throw CommandException("Error loading data from a DataInterface:\n" +
+                        parametersNotSet.str() + "in the line\n" + 
+                        GetGeneratingString(Gmat::NO_COMMENTS));
       }
       #ifdef DEBUG_SET_EXEC
          else
@@ -708,9 +766,11 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
       const std::string& forField)
 {
    bool retval = false;
-   try
+   std::string theParmString;
+
+   if (theInterface->WasDataLoaded(forField))
    {
-      std::string theParmString =
+      theParmString =
             theInterface->GetObjectParameterName(forField);
       if (theParmString != "")
       {
@@ -767,6 +827,7 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
             break;
 
          case DataReader::READER_STRING:
+            retval = true;
             break;
 
          case DataReader::READER_TIMESTRING:
@@ -800,16 +861,29 @@ bool Set::SetTargetParameterData(DataReader::readerDataType theType,
             }
             break;
 
+         case DataReader::READER_SUBTYPE:
+            retval = true;
+            break;
+
          default:
             break;
          }
       }
+      else
+      {
+         if (!loadAll)
+            throw CommandException("The field " + forField +
+               " was requested in the Set command, but the " + 
+               theInterface->GetTypeName() + " " +
+               interfaceName + " does not set that field on the object " + 
+               targetName + ".");
+         retval = true;
+      }
    }
-   catch (BaseException &/*ex*/)
-   {
-      // Ignore exceptions here because they just indicate that the
-      // field is not in the object
-   }
+   else //if (!loadAll)
+      throw CommandException("The field " + forField +
+               " was requested in the Set command, but the FileInterface " +
+               interfaceName + " does not contain data for that field.");
 
    return retval;
 }
@@ -853,8 +927,10 @@ Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
       #endif
       CoordinateSystem *fromCS = CoordinateSystem::CreateLocalCoordinateSystem(
             from, axisType, origin, NULL, NULL, j2000body, solarSys);
-      CoordinateSystem *toCS =
-            (CoordinateSystem*)target->GetRefObject(Gmat::COORDINATE_SYSTEM,"");
+      //CoordinateSystem *toCS =
+      //      (CoordinateSystem*)target->GetRefObject(Gmat::COORDINATE_SYSTEM,"");
+      CoordinateSystem *toCS = CoordinateSystem::CreateLocalCoordinateSystem(
+            "temp", "MJ2000Eq", solarSys->GetBody("Earth"), NULL, NULL, j2000body, solarSys);
 
       //GmatEpoch epoch = ConvertToSystemTime(
       //      theInterface->GetTimeSystemName("Epoch"),
@@ -873,6 +949,11 @@ Rvector6 Set::ConvertToTargetCoordinateSystem(const std::string& from,
                "coordinate system %s\n", from.c_str());
          newRep = fromState;
       }
+
+      if (fromCS)
+         delete fromCS;
+      if (toCS)
+         delete toCS;
    }
    else
    {
@@ -931,7 +1012,37 @@ void Set::CheckForOptions(const std::string options)
    else
       ++start;
    UnsignedInt end = options.find_last_of(")");
-   std::string data = options.substr(start, end-start); 
+   std::string data = options.substr(start, end-start);
+
+   // Check for bracket matching
+   UnsignedInt loc = data.find('{');
+   if (loc != std::string::npos)
+   {
+      UnsignedInt loc2 = data.find('{', loc+1);
+      if (loc2 != std::string::npos)
+      {
+         throw CommandException("Too many opening brackets in the Set command");
+      }
+
+      loc2 = data.find('}');
+      if (loc2 == std::string::npos)
+      {
+         throw CommandException("Missing closing bracket in the Set command");
+      }
+
+      if (loc > loc2)
+      {
+         throw CommandException("Closing bracket found before opening bracket in the Set command");
+      }
+
+      UnsignedInt loc3 = data.find('}', loc2+1);
+      if (loc3 != std::string::npos)
+      {
+         throw CommandException("Too many closing brackets in the Set command");
+      }
+   }
+
+
    #ifdef DEBUG_PARSING
       MessageInterface::ShowMessage("Data string: \"%s\"\n", 
          data.c_str());
@@ -964,7 +1075,10 @@ void Set::CheckForOptions(const std::string options)
             #endif
             StringArray parts = parser.SeparateBy(chunks[index], "', ");
             for (UnsignedInt i = 0; i < parts.size(); ++i)
-               selections.push_back(parts[i]);
+               if (parts[i] != "Epoch")
+                  selections.push_back(parts[i]);
+               else     // Always have time at the beginning
+                  selections.insert(selections.begin(), parts[i]);
 
             #ifdef DEBUG_PARSING
                MessageInterface::ShowMessage("Data selections are\n");

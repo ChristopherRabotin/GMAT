@@ -76,9 +76,9 @@ public:
 //                        GetStringArrayParameter(const Integer id) const;
 
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
       
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
