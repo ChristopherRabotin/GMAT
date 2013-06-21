@@ -462,7 +462,7 @@ void CallFunctionPanel::OnButtonClick(wxCommandEvent& event)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     2, true, true, true, true, true, true);
+                                     2, true, true, true, true, true, true, "Spacecraft", true, true);
       
       paramDlg.SetParamNameArray(mOutputWxStrings);
       paramDlg.ShowModal();
