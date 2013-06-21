@@ -215,6 +215,7 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
       if (GmatStringUtil::IsValidReal(theData, value, retcode))
       {
          realData[theField] = value;
+         dataLoaded[theField] = true;
          retval = true;
          #ifdef DEBUG_PARSING
             MessageInterface::ShowMessage("Current realData mapping:\n");
@@ -224,6 +225,10 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
                      i->first.c_str(), i->second);
          #endif
       }
+      else
+         MessageInterface::ShowMessage("*** Warning *** The field %s does not "
+               "contain a valid real number value in the file %s\n", 
+               theField.c_str(), filename.c_str());
    }
 
    return retval;
@@ -260,6 +265,7 @@ bool FileReader::ParseRvector6Value(const Integer i,
    bool retval = false;
 
    Rvector6 theVector(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   Integer validFieldCount = 0;
 
    for (UnsignedInt j = 0; j < fieldIdentifiers.size(); ++j)
    {
@@ -269,14 +275,21 @@ bool FileReader::ParseRvector6Value(const Integer i,
          {
             theVector[j] = realData[fieldIdentifiers[j]];
             realData.erase(fieldIdentifiers[j]);
-            retval = true;
+            ++validFieldCount;
             break;
          }
       }
    }
 
+   // Check that all components loaded
+   if (validFieldCount == 6)
+      retval = true;
+
    if (retval)
+   {
       rvector6Data[theField] = theVector;
+      dataLoaded[theField] = true;
+   }
 
    #ifdef DEBUG_PARSING
       MessageInterface::ShowMessage("Current rvector6Data mapping:\n");
@@ -345,9 +358,19 @@ bool FileReader::ParseStringValue(const Integer i, const std::string& theField)
          MessageInterface::ShowMessage("The data for field %s is set to "
                "\"%s\"\n", theField.c_str(), theData.c_str());
       #endif
+      
+      // To be valid the string must contain some type of data
+      if (theData.length() > 0)
+      {
+         stringData[theField] = theData;
+         dataLoaded[theField] = true;
+         retval = true;
+      }
+      else
+         MessageInterface::ShowMessage("*** Warning *** The field %s does not "
+               "contain a valid string value in the file %s\n", 
+               theField.c_str(), filename.c_str());
 
-      stringData[theField] = theData;
-      retval = true;
       #ifdef DEBUG_PARSING
          MessageInterface::ShowMessage("Current stringData mapping:\n");
          for (std::map<std::string,std::string>::iterator i=stringData.begin();
