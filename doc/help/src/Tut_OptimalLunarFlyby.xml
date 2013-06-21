@@ -454,7 +454,7 @@ Create Variable errorMOIRadApo errorMOIRadPer errorMOIInclination
 
 %  Variables for managing time calculations
 Create Variable patchTwoElapsedDays patchOneEpoch patchTwoEpoch refEpoch
-Create Variable launchEpoch flybyEpoch moiEpoch patchOneElapsedDays
+Create Variable launchEpoch toiEpoch flybyEpoch moiEpoch patchOneElapsedDays
 Create Variable deltaTimeFlyBy
 
 %  Constants and miscellaneous variables
