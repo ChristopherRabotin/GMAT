@@ -99,8 +99,16 @@ const StringArray& DataReader::GetSupportedFieldNames()
    return supportedFields;
 }
 
+bool DataReader::WasDataLoaded(const std::string &theField)
+{
+   return dataLoaded[theField];
+}
+
 void DataReader::ClearData()
 {
+   for (std::map<std::string, bool>::iterator i = dataLoaded.begin(); 
+        i != dataLoaded.end(); ++i)
+      (*i).second = false;
    dataReady = false;
 }
 
@@ -195,8 +203,7 @@ const std::string DataReader::GetObjectParameterName(
 }
 
 //------------------------------------------------------------------------------
-// const DataReader::readerDataType GetReaderDataType(
-//       const std::string& forField)
+// const readerDataType GetReaderDataType(const std::string& forField)
 //------------------------------------------------------------------------------
 /**
  * Returns the data type as seen in the DataReader object.

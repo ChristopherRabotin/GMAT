@@ -53,6 +53,7 @@ public:
    virtual const StringArray& GetSupportedFieldNames();
 
    virtual bool ReadData() = 0;
+   virtual bool WasDataLoaded(const std::string &theField);
    virtual void ClearData();
 
    // Accessors; these are intentionally NOT virtual, and call virtual protected
@@ -91,6 +92,8 @@ protected:
    std::map<std::string, Integer> objectIDMap;
    /// Map of the user string to the data type for the data
    std::map<std::string, readerDataType> dataType;
+   /// Map indicating if a valid read has happened
+   std::map<std::string, bool> dataLoaded;
 
 
    /// Mapping for the Real data
