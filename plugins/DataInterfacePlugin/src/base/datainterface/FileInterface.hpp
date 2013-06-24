@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Definition of file based DataInterfaces
  */
 //------------------------------------------------------------------------------
 

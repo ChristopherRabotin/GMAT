@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Implementation of file based DataInterfaces
  */
 //------------------------------------------------------------------------------
 
@@ -30,6 +30,9 @@
 //#define DEBUG_READER_CREATION
 
 
+//-----------------------------------------
+// Static data
+//-----------------------------------------
 const std::string
 FileInterface::PARAMETER_LABEL[FileInterfaceParamCount - DataInterfaceParamCount] =
 {
@@ -43,6 +46,15 @@ FileInterface::PARAMETER_TYPE[FileInterfaceParamCount - DataInterfaceParamCount]
 };
 
 
+//------------------------------------------------------------------------------
+// FileInterface(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ *
+ * @param name The name of the constructed object
+ */
+//------------------------------------------------------------------------------
 FileInterface::FileInterface(const std::string &name) :
    DataInterface           ("FileInterface", name),
    filename                (""),
@@ -52,12 +64,29 @@ FileInterface::FileInterface(const std::string &name) :
    parameterCount = FileInterfaceParamCount;
 }
 
+
+//------------------------------------------------------------------------------
+// ~FileInterface()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 FileInterface::~FileInterface()
 {
    if (theReader != NULL)
       delete theReader;
 }
 
+//------------------------------------------------------------------------------
+// FileInterface(const FileInterface& fi)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param fi The interface that is copied here
+ */
+//------------------------------------------------------------------------------
 FileInterface::FileInterface(const FileInterface& fi) :
    DataInterface           (fi),
    filename                (fi.filename),
@@ -65,6 +94,17 @@ FileInterface::FileInterface(const FileInterface& fi) :
 {
 }
 
+//------------------------------------------------------------------------------
+// FileInterface operator=(const FileInterface& fi)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param fi The interface providing data for this one
+ *
+ * @return This FileInterface, configured to match fi
+ */
+//------------------------------------------------------------------------------
 FileInterface FileInterface::operator=(const FileInterface& fi)
 {
    if (this != &fi)
@@ -77,11 +117,31 @@ FileInterface FileInterface::operator=(const FileInterface& fi)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a new FileInterface tht matches this one
+ *
+ * @return The new object
+ */
+//------------------------------------------------------------------------------
 GmatBase* FileInterface::Clone() const
 {
    return new FileInterface(*this);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the script label of a parameter
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The label
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetParameterText(const Integer id) const
 {
    if (id >= DataInterfaceParamCount && id < FileInterfaceParamCount)
@@ -89,6 +149,17 @@ std::string FileInterface::GetParameterText(const Integer id) const
    return DataInterface::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the integer ID of a parameter
+ *
+ * @param str The label for the parameter
+ *
+ * @return The parameter's ID
+ */
+//------------------------------------------------------------------------------
 Integer FileInterface::GetParameterID(const std::string& str) const
 {
    Integer id = -1;
@@ -114,6 +185,17 @@ Integer FileInterface::GetParameterID(const std::string& str) const
    return id;
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type of a parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The parameter's type
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType FileInterface::GetParameterType(const Integer id) const
 {
    if (id >= DataInterfaceParamCount && id < FileInterfaceParamCount)
@@ -122,21 +204,65 @@ Gmat::ParameterType FileInterface::GetParameterType(const Integer id) const
    return DataInterface::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a text description of a parameter's type
+ *
+ * @param id The parameter's ID
+ *
+ * @return The description
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if the parameter is user settable
+ *
+ * @param id The parameter's ID
+ *
+ * @return true for parameters that can be edited, false otherwise
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::IsParameterReadOnly(const Integer id) const
 {
    return DataInterface::IsParameterReadOnly(id);
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if the parameter is user settable
+ *
+ * @param label The parameter's script label
+ *
+ * @return true for parameters that can be edited, false otherwise
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::IsParameterReadOnly(const std::string& label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The parameter
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
@@ -145,6 +271,18 @@ std::string FileInterface::GetStringParameter(const Integer id) const
    return DataInterface::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a string parameter
+ *
+ * @param id The parameter's ID
+ * @param value The new parameter value
+ *
+ * @return true if set successfully, false if not.
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::SetStringParameter(const Integer id,
       const std::string& value)
 {
@@ -157,35 +295,111 @@ bool FileInterface::SetStringParameter(const Integer id,
    return DataInterface::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter from a string array
+ *
+ * @param id The parameter's ID
+ * @param index The index into the array
+ *
+ * @return The referenced string
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetStringParameter(const Integer id,
       const Integer index) const
 {
    return DataInterface::GetStringParameter(id, index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter from a string array
+ *
+ * @param id The parameter's ID
+ * @param value The new value
+ * @param index The index into the array
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
    return DataInterface::SetStringParameter(id, value, index);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter
+ *
+ * @param label The parameter's script label
+ *
+ * @return The parameter
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetStringParameter(const std::string& label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a string parameter
+ *
+ * @param label The parameter's script label
+ * @param value The new parameter value
+ *
+ * @return true if set successfully, false if not.
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::SetStringParameter(const std::string& label,
       const std::string& value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string& label,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter from a string array
+ *
+ * @param label The parameter's script label
+ * @param index The index into the array
+ *
+ * @return The referenced string
+ */
+//------------------------------------------------------------------------------
 std::string FileInterface::GetStringParameter(const std::string& label,
       const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter from a string array
+ *
+ * @param label The parameter's script label
+ * @param value The new value
+ * @param index The index into the array
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool FileInterface::SetStringParameter(const std::string& label,
       const std::string& value, const Integer index)
 {
@@ -216,6 +430,10 @@ bool FileInterface::Initialize()
             "the \"Filename\" field on the object.");
 
    // Verify that the file exists
+   std::string sep = GmatFileUtil::GetPathSeparator();
+   std::replace(filename.begin(), filename.end(), '/', sep[0]);
+   std::replace(filename.begin(), filename.end(), '\\', sep[0]);
+
    if (GmatFileUtil::DoesFileExist(filename))
    {
       if (readerFormat == "")
