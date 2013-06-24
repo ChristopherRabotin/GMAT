@@ -368,8 +368,11 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
                   }
                   else
                   {
+                     std::string rType = GmatBase::GetObjectTypeString(refTypes[i]);
+                     if (rType == "SpacePoint")
+                        rType += " (for example, Spacecraft, CelestialBody, etc.)";
                      theErrorMsg = "\"" + refNames[j] + "\" referenced in the " + objName +
-                        " is not an object of " + GmatBase::GetObjectTypeString(refTypes[i]);
+                        " is not an object of " + rType;
                      retval = HandleError() && retval;
                   }
                }
