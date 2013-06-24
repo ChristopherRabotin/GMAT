@@ -132,29 +132,17 @@ private:
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
-
-   wxFlexGridSizer *flexgridsizerAlignment;
-   wxFlexGridSizer *flexgridsizerConstraint;
-
-   wxFlexGridSizer *flexgridsizer1;
-   wxBoxSizer      *boxsizer2;
-
-
-   #ifdef __WXMAC__
-   wxBoxSizer   *boxsizerAxes;
-   wxBoxSizer   *boxsizerA;
-   wxBoxSizer   *boxsizerC;
-   wxStaticText *titleAlignmentStaticText;
-   wxStaticText *titleConstraintStaticText;
-   wxStaticText *title1StaticText;
-   #else
-   wxStaticBoxSizer   *staticboxsizerA;
-   wxStaticBoxSizer   *staticboxsizerC;
-   wxStaticBoxSizer   *staticboxsizerAxes;
-   #endif
-
-
-
+   
+   wxSizer  *flexgridsizerAlignment;
+   wxSizer  *flexgridsizerConstraint;
+   
+   wxSizer  *flexgridsizer1;
+   wxSizer  *boxsizer2;
+   
+   wxSizer  *staticboxsizerA;
+   wxSizer  *staticboxsizerC;
+   wxSizer  *staticboxsizerAxes;
+   
    void Create();
    void LoadData();
    

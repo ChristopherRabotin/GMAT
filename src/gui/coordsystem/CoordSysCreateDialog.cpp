@@ -52,7 +52,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
-   : GmatDialog(parent, -1, wxString(_T("New Coordinate System")))
+: GmatDialog(parent, -1, wxString(_T("New Coordinate System")))
 {
    mIsCoordCreated    = false;
    mIsTextModified    = false;
@@ -95,12 +95,13 @@ void CoordSysCreateDialog::Create()
    
    // wx*Sizers
    wxBoxSizer *boxsizer1 = new wxBoxSizer( wxVERTICAL );
+   int bsize = 2;
    
-   boxsizer1->Add( nameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer1->Add( nameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer1->Add( nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer1->Add( nameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize );
    
-   theMiddleSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
-   theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 5);
+   theMiddleSizer->Add(boxsizer1, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add( mCoordPanel, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    #ifdef DEBUG_COORDDIALOG_CREATE
    MessageInterface::ShowMessage("CoordSysCreateDialog::Create() leaving\n");

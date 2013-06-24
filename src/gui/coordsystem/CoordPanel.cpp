@@ -295,14 +295,8 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       // Hide and disable the alignment and constraint widgets
       EnableAlignmentConstraint(false);
    }
-   #ifdef __WXMAC__
-   // this next line is needed for the Mac
-   primaryStaticText->SetFocus();
-   boxsizerAxes->Layout();
-   #else
    primaryStaticText->SetFocus();
    staticboxsizerAxes->Layout();
-   #endif
    Refresh();
 }
 
@@ -681,26 +675,24 @@ AxisSystem* CoordPanel::CreateAxis()
 // private methods
 //---------------------------------
 
+//------------------------------------------------------------------------------
+// void EnableAlignmentConstraint(bool enableAll)
+//------------------------------------------------------------------------------
 void CoordPanel::EnableAlignmentConstraint(bool enableAll)
 {
-	#ifdef __WXMAC__
-	boxsizerA->Show(enableAll);
-	boxsizerC->Show(enableAll);
-	#else
 	staticboxsizerA->Show(enableAll);
 	staticboxsizerC->Show(enableAll);
-	#endif
-    refObjectComboBox->Enable(enableAll);
-    constraintCSComboBox->Enable(enableAll);
-    alignXTextCtrl->Enable(enableAll);
-    alignYTextCtrl->Enable(enableAll);
-    alignZTextCtrl->Enable(enableAll);
-    constraintXTextCtrl->Enable(enableAll);
-    constraintYTextCtrl->Enable(enableAll);
-    constraintZTextCtrl->Enable(enableAll);
-    constraintRefXTextCtrl->Enable(enableAll);
-    constraintRefYTextCtrl->Enable(enableAll);
-    constraintRefZTextCtrl->Enable(enableAll);
+   refObjectComboBox->Enable(enableAll);
+   constraintCSComboBox->Enable(enableAll);
+   alignXTextCtrl->Enable(enableAll);
+   alignYTextCtrl->Enable(enableAll);
+   alignZTextCtrl->Enable(enableAll);
+   constraintXTextCtrl->Enable(enableAll);
+   constraintYTextCtrl->Enable(enableAll);
+   constraintZTextCtrl->Enable(enableAll);
+   constraintRefXTextCtrl->Enable(enableAll);
+   constraintRefYTextCtrl->Enable(enableAll);
+   constraintRefZTextCtrl->Enable(enableAll);
 }
 
 
@@ -991,36 +983,11 @@ void CoordPanel::Create()
 
    // wx*Sizers
    wxBoxSizer *theMainSizer = new wxBoxSizer( wxVERTICAL );
-   #ifdef __WXMAC__
-   boxsizerAxes = new wxBoxSizer( wxVERTICAL );   // box for the entire Axes part
-   boxsizerA    = new wxBoxSizer( wxVERTICAL );   // for Alignment
-   boxsizerC    = new wxBoxSizer( wxVERTICAL );   // for Constraint
-   title1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Axes"),
-                        wxDefaultPosition, wxSize(120,20),
-                        wxBOLD);
-   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
-                             wxFONTWEIGHT_BOLD,
-                             true, _T(""), wxFONTENCODING_SYSTEM));
-   titleAlignmentStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Alignment Vector"),
-                        wxDefaultPosition, wxSize(220,20),
-                        wxBOLD);
-   titleAlignmentStaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
-                                     wxFONTWEIGHT_BOLD,
-                                     true, _T(""), wxFONTENCODING_SYSTEM));
-   titleConstraintStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Constraint Vectors"),
-                        wxDefaultPosition, wxSize(220,20),
-                        wxBOLD);
-   titleConstraintStaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE,
-                                      wxFONTWEIGHT_BOLD,
-                                      true, _T(""), wxFONTENCODING_SYSTEM));
-   #else
+   int bsize = 2;
+   
    staticboxsizerAxes = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Axes") );
    staticboxsizerA = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Alignment Vector") );
    staticboxsizerC = new GmatStaticBoxSizer( wxVERTICAL, this, wxT("Constraint Vectors") );
-   #endif
    wxBoxSizer *boxsizerType = new wxBoxSizer( wxHORIZONTAL );
 
    flexgridsizerAlignment  = new wxFlexGridSizer( 3, 4, 0, 0 ); // for Alignment
@@ -1030,111 +997,93 @@ void CoordPanel::Create()
 
    wxBoxSizer *boxsizerOrigin = new wxBoxSizer( wxHORIZONTAL );
    boxsizer2 = new wxBoxSizer( wxHORIZONTAL );
-//   wxBoxSizer *boxsizer3 = new wxBoxSizer( wxHORIZONTAL );   // stays empty
 
    // Set up Origin widget
-   boxsizerOrigin->Add( originStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizerOrigin->Add( originComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizerOrigin->Add( originStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizerOrigin->Add( originComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
 
    // Set up Type widget
-   boxsizerType->Add( typeStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizerType->Add( typeComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizerType->Add( typeStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizerType->Add( typeComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
 
    // Set up the primary/secondary widgets
-   flexgridsizer1->Add( primaryStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( primaryComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( secondaryStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( secondaryComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizer1->Add( primaryStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizer1->Add( primaryComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizer1->Add( secondaryStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizer1->Add( secondaryComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Set up the epoch widgets
-   flexgridsizer1->Add( epochStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizer1->Add( epochTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizer1->Add( epochStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizer1->Add( epochTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
 
 
    // Set up the X/Y/Z widgets
-   boxsizer2->Add(xStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer2->Add(xComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer2->Add(yStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer2->Add(yComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer2->Add(zStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizer2->Add(zComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer2->Add(xStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer2->Add(xComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer2->Add(yStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer2->Add(yComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer2->Add(zStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxsizer2->Add(zComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
 
    // Set up the Alignment Vector widgets
    // Row 1
-   flexgridsizerAlignment->Add(alignXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add(alignXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add(refObjectStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add(refObjectComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignXStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add(alignXTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add(refObjectStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add(refObjectComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Row 2
-   flexgridsizerAlignment->Add(alignYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add(alignYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignYStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add(alignYTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Row 3
-   flexgridsizerAlignment->Add(alignZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add(alignZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerAlignment->Add(alignZStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add(alignZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerAlignment->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Set up the Constraint Vectors widgets
    // Row 1
-   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintCSStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintCSComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintCSStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintCSComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Row 2
-   flexgridsizerConstraint->Add(constraintXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefXStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefXTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintXStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintXTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefXStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefXTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Row 3
-   flexgridsizerConstraint->Add(constraintYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefYStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefYTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintYStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintYTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefYStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefYTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
 
    // Row 4
-   flexgridsizerConstraint->Add(constraintZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefZStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-   flexgridsizerConstraint->Add(constraintRefZTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+   flexgridsizerConstraint->Add(constraintZStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefZStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexgridsizerConstraint->Add(constraintRefZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
 
-   #ifdef __WXMAC__
-   boxsizerA->Add(titleAlignmentStaticText, 0, wxALIGN_LEFT|wxALL, 5);
-   boxsizerA->Add(flexgridsizerAlignment, 0, wxALIGN_LEFT|wxALL, 5);
-
-   boxsizerC->Add(titleConstraintStaticText, 0, wxALIGN_LEFT|wxALL, 5);
-   boxsizerC->Add(flexgridsizerConstraint, 0, wxALIGN_LEFT|wxALL, 5);
-
-   boxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, 5);
-   boxsizerAxes->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
-   boxsizerAxes->Add( boxsizerA, 0, wxALIGN_CENTER|wxALL, 5);
-   boxsizerAxes->Add( boxsizerC, 0, wxALIGN_CENTER|wxALL, 5);
-   boxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
-//   boxsizerAxes->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
+   staticboxsizerA->Add(flexgridsizerAlignment, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   staticboxsizerC->Add(flexgridsizerConstraint, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   theMainSizer->Add(boxsizerOrigin, 0, wxALIGN_CENTRE|wxALL, 5);
-   theMainSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL, 5);
-   theMainSizer->Add(boxsizerAxes, 0, wxALIGN_CENTRE|wxALL, 5);
-   #else
-   staticboxsizerA->Add(flexgridsizerAlignment, 0, wxALIGN_TOP|wxALL, 5);
-
-   staticboxsizerC->Add(flexgridsizerConstraint, 0, wxALIGN_TOP|wxALL, 5);
-
-   staticboxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, 5);
-   staticboxsizerAxes->Add( flexgridsizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
-   staticboxsizerAxes->Add( staticboxsizerA, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
-   staticboxsizerAxes->Add( staticboxsizerC, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
-   staticboxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
-//   staticboxsizerAxes->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
-
-   theMainSizer->Add(boxsizerOrigin, 0, wxALIGN_CENTRE|wxALL, 5);
-   theMainSizer->Add(staticboxsizerAxes, 0, wxALIGN_CENTRE|wxALL, 5);
-   #endif
+   staticboxsizerAxes->Add( boxsizerType, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticboxsizerAxes->Add( flexgridsizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   staticboxsizerAxes->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, bsize );
+   staticboxsizerAxes->Add( staticboxsizerA, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   staticboxsizerAxes->Add( staticboxsizerC, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   staticboxsizerAxes->Add( 10, 20, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
+   
+   // Initially hide alignment to reduce the blank space at the bottom
+   staticboxsizerAxes->Hide(staticboxsizerA);
+   
+   theMainSizer->Add(boxsizerOrigin, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMainSizer->Add(staticboxsizerAxes, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    if (!mEnableAll)
    {
@@ -1144,7 +1093,7 @@ void CoordPanel::Create()
                               "System and cannot be modified."),
                           wxDefaultPosition, wxDefaultSize, 0);
       msg->SetForegroundColour(*wxRED);
-      theMainSizer->Add(msg, 0, wxALIGN_CENTRE|wxALL, 5);
+      theMainSizer->Add(msg, 0, wxALIGN_CENTRE|wxALL, bsize);
    }
    
    this->SetAutoLayout( true );
