@@ -60,6 +60,7 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    mTolerance = "1.0e-6";
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    
    Create();
    Show();

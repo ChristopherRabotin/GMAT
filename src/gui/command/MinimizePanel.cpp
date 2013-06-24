@@ -54,6 +54,7 @@ MinimizePanel::MinimizePanel(wxWindow *parent, GmatCommand *cmd)
    mVarNameChanged = false;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    
    Create();
    Show();

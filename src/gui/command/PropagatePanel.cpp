@@ -63,6 +63,7 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    
    InitializeData();   
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    
    Create();
    Show();

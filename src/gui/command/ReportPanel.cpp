@@ -74,6 +74,7 @@ ReportPanel::ReportPanel(wxWindow *parent, GmatCommand *cmd)
    if (theCommand != NULL)
    {
       mObjectTypeList.Add("Spacecraft");
+      mObjectTypeList.Add("SpacePoint");
       mObjectTypeList.Add("ImpulsiveBurn");
       Create();
       Show();

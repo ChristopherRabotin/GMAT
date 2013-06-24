@@ -50,6 +50,7 @@ NonlinearConstraintPanel::NonlinearConstraintPanel(wxWindow *parent, GmatCommand
 {
    mNonlinearConstraintCommand = (NonlinearConstraint *)cmd;      
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("SpacePoint");
    theGuiManager = GuiItemManager::GetInstance();
    
    Create();
