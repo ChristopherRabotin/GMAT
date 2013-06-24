@@ -1820,11 +1820,8 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    else if (obj->IsOfType("SpacePoint"))
    {
       // for now all space point parameters are reportable and plottable
-      array = theSpacePointPropertyList;
-      #if DBGLVL_GUI_ITEM_PROPERTY
-      MessageInterface::ShowMessage
-         ("GuiItemManager::GetPropertyList() returning SpacePoint properties\n");
-      #endif
+      // However, cartesian parameters are NOT settable
+      array =  GetSpacePointProperties(showOption, showSettableOnly);
       return array;
    }
    else
@@ -3378,24 +3375,12 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    }
    else if (objType == "SpacePoint")
    {
-      // Do we need to check for Settable ones here?????????
-      if (showOption == SHOW_REPORTABLE)
+      wxArrayString spacePtProps = GetSpacePointProperties(
+                    showOption, showSettableOnly);
+      int sz = spacePtProps.GetCount();
+      for (int ii = 0; ii < sz; ii++)
       {
-         for (int i=0; i<theNumSpacePtProperty; i++)
-         {
-            paramName = theSpacePointPropertyList[i].c_str();
-            if (theParamInfo->IsReportable(paramName))
-               propertyListBox->Append(theSpacePointPropertyList[i]);
-         }
-      }
-      else if (showOption == SHOW_PLOTTABLE)
-      {
-         for (int i=0; i<theNumSpacePtProperty; i++)
-         {
-            paramName = theSpacePointPropertyList[i].c_str();
-            if (theParamInfo->IsPlottable(paramName))
-               propertyListBox->Append(theSpacePointPropertyList[i]);
-         }
+         propertyListBox->Append(spacePtProps[ii]);
       }
    }
    else if (objType == "ImpulsiveBurn")
@@ -4371,6 +4356,73 @@ wxArrayString GuiItemManager::GetSpacecraftProperties(int showOption,
        array.GetCount());
    #endif
    
+   return array;
+}
+
+//------------------------------------------------------------------------------
+// wxArrayString GetSpacePointProperties(int showOption, bool showSettableOnly)
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetSpacePointProperties(int showOption,
+                                                      bool showSettableOnly)
+{
+   #if DBGLVL_GUI_ITEM_PROPERTY > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpacePointProperties() entered, showOption=%d, "
+       "showSettableOnly=%d\n", showOption, showSettableOnly);
+   #endif
+
+   wxArrayString array;
+   ParameterInfo *theParamInfo = ParameterInfo::Instance();
+   std::string p;
+   bool add = false;
+
+   for (int i=0; i<theNumSpacePtProperty; i++)
+   {
+      p = theSpacePointPropertyList[i].c_str();
+      add = false;
+      #if DBGLVL_GUI_ITEM_PROPERTY > 1
+      MessageInterface::ShowMessage("   ==> Checking '%s'\n", p.c_str());
+      #endif
+
+      if (theParamInfo->IsReportable(p) && showOption == SHOW_REPORTABLE)
+      {
+         if (!showSettableOnly)
+            add = true;
+         else if (theParamInfo->IsSettable(p))
+         {
+            if ((p != "X")  && (p != "Y")  && (p != "Z")    &&
+                (p != "VX") && (p != "VY") && (p != "VZ"))
+               add = true;
+         }
+      }
+      else if (theParamInfo->IsPlottable(p) && showOption == SHOW_PLOTTABLE)
+      {
+         if (!showSettableOnly)
+            add = true;
+         else if (theParamInfo->IsSettable(p))
+         {
+            if ((p != "X")  && (p != "Y")  && (p != "Z")    &&
+                (p != "VX") && (p != "VY") && (p != "VZ"))
+               add = true;
+         }
+      }
+
+      if (add)
+      {
+         #if DBGLVL_GUI_ITEM_PROPERTY > 1
+         MessageInterface::ShowMessage("       Adding %s\n", p.c_str());
+         #endif
+
+         array.Add(p.c_str());
+      }
+   }
+
+   #if DBGLVL_GUI_ITEM_PROPERTY > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpacePointProperties() returning %d items\n",
+       array.GetCount());
+   #endif
+
    return array;
 }
 

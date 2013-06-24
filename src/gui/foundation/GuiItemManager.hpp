@@ -375,6 +375,7 @@ private:
    GuiItemManager& operator=(const GuiItemManager&);
 
    wxArrayString GetSpacecraftProperties(int showOption, bool showSettableOnly);
+   wxArrayString GetSpacePointProperties(int showOption, bool showSettableOnly);
    
    void UpdatePropertyList();
    void UpdateParameterList();
