@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 3, 2013
 /**
- * 
+ * Implementation of the TCOPS Vector Hold File ASCII reader
  */
 //------------------------------------------------------------------------------
 

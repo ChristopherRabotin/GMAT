@@ -29,7 +29,7 @@
 #include <fstream>
 
 /**
- * Command used to write objects to ASCII files.
+ * Retrieves data from a DataInterface and set it on a target object.
  */
 class DATAINTERFACE_API Set : public GmatCommand
 {

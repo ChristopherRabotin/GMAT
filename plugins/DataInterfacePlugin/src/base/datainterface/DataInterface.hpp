@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Definition of DataInterfaces
  */
 //------------------------------------------------------------------------------
 
@@ -26,6 +26,9 @@
 #include "DataReader.hpp"
 
 
+/**
+ * Base class for Interfaces that retrieve data that is passed into objects
+ */
 class DATAINTERFACE_API DataInterface: public Interface
 {
 public:

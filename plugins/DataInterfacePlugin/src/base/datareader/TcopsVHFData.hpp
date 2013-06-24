@@ -57,18 +57,6 @@ protected:
 
    void BuildOriginName();
    void BuildCSName();
-
-   /// TBD: Go we need the GmatBase parameters in this internal object?
-   /// Parameter IDs
-//   enum
-//   {
-//      TVHFDataParamCount = FileReaderParamCount,
-//   };
-//
-//   /// TCOPS VHF parameter types
-//   static const Gmat::ParameterType PARAMETER_TYPE[TVHFDataParamCount - FileReaderParamCount];
-//   /// TCOPS VHF parameter labels
-//   static const std::string PARAMETER_LABEL[TVHFDataParamCount - FileReaderParamCount];
 };
 
 #endif /* TcopsVHFData_hpp */

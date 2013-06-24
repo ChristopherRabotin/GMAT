@@ -1094,6 +1094,7 @@ void Set::CheckForOptions(const std::string options)
                   generatingString.c_str());
 
          if (selections.size() > 0)
+         {
             if (find(selections.begin(), selections.end(), "All") == selections.end())
                loadAll = false;
             else if (selections.size() > 1)
@@ -1101,6 +1102,7 @@ void Set::CheckForOptions(const std::string options)
                      "specifies several \"Data\" options including \"All\" in "
                      "the line\n%s\nAll data will be loaded\n", 
                      generatingString.c_str());
+         }
       }
       else
          throw CommandException("The Set command option " + 

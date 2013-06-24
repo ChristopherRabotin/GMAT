@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 3, 2013
 /**
- * 
+ * Implementation of the TCOPS Vector Hold File data reader
  */
 //------------------------------------------------------------------------------
 
@@ -22,20 +22,17 @@
 #include "FileUtil.hpp"
 #include "InterfaceException.hpp"
 
-//const std::string
-//TcopsVHFData::PARAMETER_LABEL[TVHFDataParamCount - FileReaderParamCount] =
-//   {
-//         "",
-//   };
-//
-//const Gmat::ParameterType
-//TcopsVHFData::PARAMETER_TYPE[TVHFDataParamCount - FileReaderParamCount] =
-//   {
-//         Gmat::,
-//   };
 
-
-
+//------------------------------------------------------------------------------
+// TcopsVHFData(const std::string& theTypeName, const std::string& theName)
+//------------------------------------------------------------------------------
+/**
+ * DEfault constructor
+ *
+ * @param theTypeName Name of the reader type
+ * @param theName The name of the reader
+ */
+//------------------------------------------------------------------------------
 TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
       const std::string& theName) :
    FileReader        (theTypeName, theName),
@@ -130,15 +127,42 @@ TcopsVHFData::TcopsVHFData(const std::string& theTypeName,
    dataLoaded["CentralBody"]      = false;
 }
 
+//------------------------------------------------------------------------------
+// ~TcopsVHFData()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 TcopsVHFData::~TcopsVHFData()
 {
 }
 
+//------------------------------------------------------------------------------
+// TcopsVHFData(const TcopsVHFData& vhf) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param vhf The reader copied to make the new one
+ */
+//------------------------------------------------------------------------------
 TcopsVHFData::TcopsVHFData(const TcopsVHFData& vhf) :
    FileReader        (vhf)
 {
 }
 
+//------------------------------------------------------------------------------
+// TcopsVHFData& operator=(const TcopsVHFData& vhf)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param vhf The reader used to set properties for this one
+ *
+ * @return This reader, set to match vhf
+ */
+//------------------------------------------------------------------------------
 TcopsVHFData& TcopsVHFData::operator=(const TcopsVHFData& vhf)
 {
    if (this == &vhf)
@@ -150,55 +174,136 @@ TcopsVHFData& TcopsVHFData::operator=(const TcopsVHFData& vhf)
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetSupportedFieldNames()
+//------------------------------------------------------------------------------
+/**
+ * Returns the list of supported field
+ *
+ * @note: This method is overriding the base class method (see
+ * DataReader::GetSupportedFieldNames()) and does not add functionality, so it
+ * should be removed.
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
 const StringArray& TcopsVHFData::GetSupportedFieldNames()
 {
    return supportedFields;
 }
 
+//------------------------------------------------------------------------------
+// bool TcopsVHFData::UsesCoordinateSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses a coordinate system
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if a coordinate system is associated with the field, false
+ *              if not
+ */
+//------------------------------------------------------------------------------
 bool TcopsVHFData::UsesCoordinateSystem(const std::string& forField)
 {
    if (forField == "CartesianState")
       return true;
-   return false;
+   return false;  // Should call the base class method here
 }
 
+//------------------------------------------------------------------------------
+// std::string GetCoordinateSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used coordinate system
+ *
+ * @param forField The field identifier for the data that used the coordinate
+ *                 system
+ *
+ * @return The name of the coordinate system
+ */
+//------------------------------------------------------------------------------
 std::string TcopsVHFData::GetCoordinateSystemName(const std::string& forField)
 {
    std::string retval = "";
    if (forField == "CartesianState")
       retval = origin + csSuffix;
-   return retval;
+   return retval;  // Should call the base class method here
 }
 
+//------------------------------------------------------------------------------
+// bool UsesOrigin(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses an origin
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if an origin is associated with the field, false if not
+ */
+//------------------------------------------------------------------------------
 bool TcopsVHFData::UsesOrigin(const std::string& forField)
 {
    // Uncomment if needed; CartesianState needs full CS, I think
 //   if (forField == "CartesianState")
 //      return true;
-   return false;
+   return false;  // Should call the base class method here
 }
 
+//------------------------------------------------------------------------------
+// std::string GetOriginName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used origin
+ *
+ * @param forField The field identifier for the data that used the origin
+ *
+ * @return The name of the origin
+ */
+//------------------------------------------------------------------------------
 std::string TcopsVHFData::GetOriginName(const std::string& forField)
 {
    std::string retval = "";
    if (forField == "CartesianState")
       retval = origin;
-   return retval;
+   return retval;  // Should call the base class method here
 }
 
+//------------------------------------------------------------------------------
+// bool UsesTimeSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses a time system
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if a time system is associated with the field, false if not
+ */
+//------------------------------------------------------------------------------
 bool TcopsVHFData::UsesTimeSystem(const std::string& forField)
 {
    if (forField == "Epoch")
       return true;
-   return false;
+   return false;  // Should call the base class method here
 }
 
+//------------------------------------------------------------------------------
+// std::string GetTimeSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used time system
+ *
+ * @param forField The field identifier for the data that used the time system
+ *
+ * @return The name of the time system
+ */
+//------------------------------------------------------------------------------
 std::string TcopsVHFData::GetTimeSystemName(const std::string& forField)
 {
    std::string retval = "";
    if (forField == "Epoch")
       retval = "UTCModJulian";
-   return retval;
+   return retval;  // Should call the base class method here
 }
 
 //------------------------------------------------------------------------------

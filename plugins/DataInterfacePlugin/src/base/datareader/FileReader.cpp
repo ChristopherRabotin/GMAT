@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Implementation for file based data readers
  */
 //------------------------------------------------------------------------------
 
@@ -22,22 +22,6 @@
 #include "StringUtil.hpp"
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
-
-//#define DEBUG_SETUP
-//#define DEBUG_PARSING
-
-//const std::string
-//FileReader::PARAMETER_LABEL[FileReaderParamCount - DataReaderParamCount] =
-//{
-//      "Filename",
-//};
-//
-//const Gmat::ParameterType
-//FileReader::PARAMETER_TYPE[FileReaderParamCount - DataReaderParamCount] =
-//{
-//      Gmat::FILENAME_TYPE,
-//};
-
 
 
 //------------------------------------------------------------------------------
@@ -67,7 +51,6 @@ FileReader::FileReader(const std::string& theTypeName, const std::string& theNam
 //------------------------------------------------------------------------------
 FileReader::~FileReader()
 {
-   // TODO Auto-generated destructor stub
 }
 
 //------------------------------------------------------------------------------
@@ -84,7 +67,6 @@ FileReader::FileReader(const FileReader& fr) :
    filename             (fr.filename),
    theStream            (NULL)
 {
-
 }
 
 //------------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Definition for file based data readers
  */
 //------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
 #include "DataReader.hpp"
 
 /**
- *
+ * Defines the base class for DataReaders that retrieve data from a file
  */
 class DATAINTERFACE_API FileReader: public DataReader
 {

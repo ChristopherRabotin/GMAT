@@ -4,17 +4,18 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2012 Thinking Systems, Inc.
-// Free usage granted to all users; this is shell code.  Adapt and enjoy.  
-// Attribution is appreciated.
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS
+// contract, Task Order 28
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: September 20, 2012
 //
 /**
  * Implementation of a factory used in a GMAT plugin
- *
- * Replace code in the indicated places for your Factory
  */
 //------------------------------------------------------------------------------
 

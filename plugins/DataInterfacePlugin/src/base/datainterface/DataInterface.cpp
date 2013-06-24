@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Implementation of file based DataInterfaces
  */
 //------------------------------------------------------------------------------
 
@@ -22,6 +22,9 @@
 #include "InterfaceException.hpp"
 
 
+//-----------------------------------------
+// Static data
+//-----------------------------------------
 const std::string
 DataInterface::PARAMETER_LABEL[DataInterfaceParamCount - InterfaceParamCount] =
 {
@@ -40,6 +43,16 @@ DataInterface::PARAMETER_TYPE[DataInterfaceParamCount - InterfaceParamCount] =
 
 
 
+//------------------------------------------------------------------------------
+// DataInterface(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ *
+ * @param type The type of the interface
+ * @param name The new object's name
+ */
+//------------------------------------------------------------------------------
 DataInterface::DataInterface(const std::string &type, const std::string &name) :
    Interface         (type, name),
    readerFormat      (""),
@@ -50,10 +63,26 @@ DataInterface::DataInterface(const std::string &type, const std::string &name) :
    objectTypeNames.push_back("DataInterface");
 }
 
+//------------------------------------------------------------------------------
+// ~DataInterface()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 DataInterface::~DataInterface()
 {
 }
 
+//------------------------------------------------------------------------------
+// DataInterface(const DataInterface& di)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param di The interface copied to the new instance
+ */
+//------------------------------------------------------------------------------
 DataInterface::DataInterface(const DataInterface& di) :
    Interface         (di),
    readerFormat      (di.readerFormat),
@@ -61,6 +90,17 @@ DataInterface::DataInterface(const DataInterface& di) :
 {
 }
 
+//------------------------------------------------------------------------------
+// DataInterface& operator=(const DataInterface& di)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param di The interface copied to this one
+ *
+ * @return This instance set to match di
+ */
+//------------------------------------------------------------------------------
 DataInterface& DataInterface::operator=(const DataInterface& di)
 {
    if (this != &di)
@@ -74,6 +114,17 @@ DataInterface& DataInterface::operator=(const DataInterface& di)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ *Retrieves the script label for a parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The label
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetParameterText(const Integer id) const
 {
    if (id >= InterfaceParamCount && id < DataInterfaceParamCount)
@@ -81,6 +132,17 @@ std::string DataInterface::GetParameterText(const Integer id) const
    return Interface::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID of a parameter
+ *
+ * @param str The label for the parameter
+ *
+ * @return The parameter ID
+ */
+//------------------------------------------------------------------------------
 Integer DataInterface::GetParameterID(const std::string& str) const
 {
    Integer id = -1;
@@ -107,6 +169,17 @@ Integer DataInterface::GetParameterID(const std::string& str) const
    return Interface::GetParameterID(str);
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type for a parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The type of the parameter
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType DataInterface::GetParameterType(const Integer id) const
 {
    if (id >= InterfaceParamCount && id < DataInterfaceParamCount)
@@ -115,11 +188,33 @@ Gmat::ParameterType DataInterface::GetParameterType(const Integer id) const
    return Interface::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a descriptive label for a parameter's type
+ *
+ * @param id The parameter's ID
+ *
+ * @return The label
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a parameter is user settable
+ *
+ * @param id The parameter's ID
+ *
+ * @return true for user settable parameters, false if not settable
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::IsParameterReadOnly(const Integer id) const
 {
    if ((id == SUPPORTED_FIELD_NAMES) || (id == SELECTED_FIELD_NAMES))
@@ -127,11 +222,33 @@ bool DataInterface::IsParameterReadOnly(const Integer id) const
    return Interface::IsParameterReadOnly(id);
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a parameter is user settable
+ *
+ * @param label The parameter's script label
+ *
+ * @return true for user settable parameters, false if not settable
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::IsParameterReadOnly(const std::string& label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value for a string parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The parameter
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetStringParameter(const Integer id) const
 {
    if (id == FORMAT)
@@ -140,6 +257,18 @@ std::string DataInterface::GetStringParameter(const Integer id) const
    return Interface::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the data for a string parameter
+ *
+ * @param id The parameter's ID
+ * @param value The new parameter value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::SetStringParameter(const Integer id,
       const std::string& value)
 {
@@ -152,6 +281,18 @@ bool DataInterface::SetStringParameter(const Integer id,
    return Interface::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter from a string array
+ *
+ * @param id The parameter ID
+ * @param index The index into the array
+ *
+ * @return The value
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetStringParameter(const Integer id,
       const Integer index) const
 {
@@ -186,6 +327,20 @@ std::string DataInterface::GetStringParameter(const Integer id,
    return Interface::GetStringParameter(id, index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of a string parameter in a string array
+ *
+ * @param id The parameter ID
+ * @param value The new parameter value
+ * @param index The index of the parameter in the array
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
@@ -210,29 +365,90 @@ bool DataInterface::SetStringParameter(const Integer id,
    return Interface::SetStringParameter(id, value, index);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value for a string parameter
+ *
+ * @param label The parameter's script label
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetStringParameter(const std::string& label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the data for a string parameter
+ *
+ * @param label The parameter's script label
+ * @param value The new parameter value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::SetStringParameter(const std::string& label,
       const std::string& value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string& label,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter from a string array
+ *
+ * @param label The parameter's script label
+ * @param index The index into the array
+ *
+ * @return The value
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetStringParameter(const std::string& label,
       const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of a string parameter in a string array
+ *
+ * @param label The parameter's script label
+ * @param value The new parameter value
+ * @param index The index of the parameter in the array
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::SetStringParameter(const std::string& label,
       const std::string& value, const Integer index)
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray parameter
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataInterface::GetStringArrayParameter(
       const Integer id) const
 {
@@ -252,24 +468,71 @@ const StringArray& DataInterface::GetStringArrayParameter(
    return Interface::GetStringArrayParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray parameter from a vector of StringArrays
+ *
+ * @param id The parameter ID
+ * @param index The index into the vector
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataInterface::GetStringArrayParameter(const Integer id,
       const Integer index) const
 {
    return Interface::GetStringArrayParameter(id, index);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& DataInterface::GetStringArrayParameter(
+//       const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray parameter
+ *
+ * @param label The script label for the parameter
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataInterface::GetStringArrayParameter(
       const std::string& label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& DataInterface::GetStringArrayParameter(
+//       const std::string& label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray parameter from a vector of StringArrays
+ *
+ * @param label The script label for the parameter
+ * @param index The index into the vector
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataInterface::GetStringArrayParameter(
       const std::string& label, const Integer index) const
 {
    return GetStringArrayParameter(GetParameterID(label), index);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetSupportedFieldNames() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of fields that the interface supports
+ *
+ * @return The list, in a StringArray
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataInterface::GetSupportedFieldNames() const
 {
    if (theReader)
@@ -278,12 +541,34 @@ const StringArray& DataInterface::GetSupportedFieldNames() const
          "DataInterface \"" + instanceName + "\"");
 }
 
+//------------------------------------------------------------------------------
+// Integer Open(const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Opens the interface stream
+ *
+ * @param name A name used when opening the interface
+ *
+ * @return 0 on success, or an error code
+ */
+//------------------------------------------------------------------------------
 Integer DataInterface::Open(const std::string& name)
 {
    Integer retval = -1;
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool DataInterface::WasDataLoaded(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if data was loaded in the interface's reader
+ *
+ * @param forField The field descriptor being checked
+ *
+ * @return true is the data was loaded, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::WasDataLoaded(const std::string& forField)
 {
    return theReader->WasDataLoaded(forField);
@@ -366,6 +651,17 @@ Real DataInterface::GetRealValue(const std::string& forField)
    return theReader->GetRealValue(forField);
 }
 
+//------------------------------------------------------------------------------
+// Rvector6 GetReal6Vector(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function to access a read 6-vector of Real numbers
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The number
+ */
+//------------------------------------------------------------------------------
 Rvector6 DataInterface::GetReal6Vector(const std::string& forField)
 {
    if (!theReader)
@@ -373,6 +669,17 @@ Rvector6 DataInterface::GetReal6Vector(const std::string& forField)
    return theReader->GetReal6Vector(forField);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringValue(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function to access a read string
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The number
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetStringValue(const std::string& forField)
 {
    if (!theReader)
@@ -380,6 +687,17 @@ std::string DataInterface::GetStringValue(const std::string& forField)
    return theReader->GetStringValue(forField);
 }
 
+//------------------------------------------------------------------------------
+// bool UsesCoordinateSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function to see if a field is coordinate system dependent
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return true if the field is coordinate system dependent, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::UsesCoordinateSystem(const std::string& forField)
 {
    bool retval = false;
@@ -388,6 +706,17 @@ bool DataInterface::UsesCoordinateSystem(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetCoordinateSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the coordinate system name for a coordinate system dependent field
+ *
+ * @param forField The field label
+ *
+ * @return The coordinate system name
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetCoordinateSystemName(const std::string& forField)
 {
    std::string retval = "";
@@ -396,6 +725,17 @@ std::string DataInterface::GetCoordinateSystemName(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool UsesOrigin(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses an origin
+ *
+ * @param forField The field label
+ *
+ * @return true if an origin is used, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::UsesOrigin(const std::string& forField)
 {
    bool retval = false;
@@ -404,6 +744,17 @@ bool DataInterface::UsesOrigin(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetOriginName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a field's origin
+ *
+ * @param forField The field label
+ *
+ * @return The name of the origin
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetOriginName(const std::string& forField)
 {
    std::string retval = "";
@@ -412,6 +763,17 @@ std::string DataInterface::GetOriginName(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool UsesTimeSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses a time system
+ *
+ * @param forField The field label
+ *
+ * @return true is a time system is used, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataInterface::UsesTimeSystem(const std::string& forField)
 {
    bool retval = false;
@@ -420,6 +782,17 @@ bool DataInterface::UsesTimeSystem(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetTimeSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves teh name of a used time system
+ *
+ * @param forField The field label
+ *
+ * @return The time system name
+ */
+//------------------------------------------------------------------------------
 std::string DataInterface::GetTimeSystemName(const std::string& forField)
 {
    std::string retval = "";

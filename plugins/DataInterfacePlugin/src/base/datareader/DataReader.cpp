@@ -14,28 +14,23 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Implementation of the base reader class used in the DataInterface subsystem
  */
 //------------------------------------------------------------------------------
 
 #include "DataReader.hpp"
 
 
-//const std::string
-//DataReader::PARAMETER_LABEL[DataReaderParamCount - GmatBaseParamCount] =
-//{
-//      "SelectedFieldNames",
-//      "SupportedFieldNames",
-//};
-//
-//const Gmat::ParameterType
-//DataReader::PARAMETER_TYPE[DataReaderParamCount - GmatBaseParamCount] =
-//{
-//      Gmat::STRINGARRAY_TYPE,
-//      Gmat::STRINGARRAY_TYPE,
-//};
-
-
+//------------------------------------------------------------------------------
+// DataReader(const std::string& theTypeName, const std::string& theName)
+//------------------------------------------------------------------------------
+/**
+ * DEfault constructor
+ *
+ * @param theTypeName Type name for the DataReader subtype
+ * @param theName The name of the created instance
+ */
+//------------------------------------------------------------------------------
 DataReader::DataReader(const std::string& theTypeName, const std::string& theName) :
    GmatBase                (Gmat::DATAINTERFACE_SOURCE, theTypeName, theName),
    readAllSupportedFields  (true),
@@ -47,10 +42,26 @@ DataReader::DataReader(const std::string& theTypeName, const std::string& theNam
    objectTypeNames.push_back("DataReader");
 }
 
+//------------------------------------------------------------------------------
+// ~DataReader()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 DataReader::~DataReader()
 {
 }
 
+//------------------------------------------------------------------------------
+// DataReader(const DataReader& dr)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param dr The DataReader copied to the new instance
+ */
+//------------------------------------------------------------------------------
 DataReader::DataReader(const DataReader& dr) :
    GmatBase                (dr),
    selectedFields          (dr.selectedFields),
@@ -65,6 +76,17 @@ DataReader::DataReader(const DataReader& dr) :
 {
 }
 
+//------------------------------------------------------------------------------
+// DataReader& operator=(const DataReader& dr)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param dr The DataReader used to set the properties of this one.
+ *
+ * @return This reader set to match dr
+ */
+//------------------------------------------------------------------------------
 DataReader& DataReader::operator=(const DataReader& dr)
 {
    if (this != &dr)
@@ -83,27 +105,75 @@ DataReader& DataReader::operator=(const DataReader& dr)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetSelectedFieldNames()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of selected fields
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataReader::GetSelectedFieldNames()
 {
    return selectedFields;
 }
 
+//------------------------------------------------------------------------------
+// void SetSelectedFieldNames(const StringArray& selections)
+//------------------------------------------------------------------------------
+/**
+ * Sets new selections in the reader
+ *
+ * @param selections The new selections
+ */
+//------------------------------------------------------------------------------
 void DataReader::SetSelectedFieldNames(const StringArray& selections)
 {
    selectedFields = selections;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetSupportedFieldNames()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of fields the reader supports
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
 const StringArray& DataReader::GetSupportedFieldNames()
 {
    // Leaf classes fill in the field identifiers; we just return that list here
    return supportedFields;
 }
 
+//------------------------------------------------------------------------------
+// bool WasDataLoaded(const std::string &theField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if data was loaded for a specific field
+ *
+ * @param theField The field identifier
+ *
+ * @return true if data was loaded, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataReader::WasDataLoaded(const std::string &theField)
 {
    return dataLoaded[theField];
 }
 
+//------------------------------------------------------------------------------
+// void ClearData()
+//------------------------------------------------------------------------------
+/**
+ * Clears loaded data
+ *
+ * This method does not actually remove loaded data.  The "dataLoaded" flags are
+ * cleared and the object level dataReady flag is set to false.
+ */
+//------------------------------------------------------------------------------
 void DataReader::ClearData()
 {
    for (std::map<std::string, bool>::iterator i = dataLoaded.begin(); 
@@ -112,6 +182,17 @@ void DataReader::ClearData()
    dataReady = false;
 }
 
+//------------------------------------------------------------------------------
+// Real GetRealValue(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a real data value
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The value if data was loaded, or a dummy value if not.
+ */
+//------------------------------------------------------------------------------
 Real DataReader::GetRealValue(const std::string& forField)
 {
    Real retval = -999999.999999;
@@ -124,6 +205,17 @@ Real DataReader::GetRealValue(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Rvector6 GetReal6Vector(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a 6-vector of real data values
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The value if data was loaded, or a dummy vector if not.
+ */
+//------------------------------------------------------------------------------
 Rvector6 DataReader::GetReal6Vector(const std::string& forField)
 {
    Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -136,6 +228,17 @@ Rvector6 DataReader::GetReal6Vector(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringValue(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string value
+ *
+ * @param forField The field identifier for the data
+ *
+ * @return The value if data was loaded, or a dummy string if not.
+ */
+//------------------------------------------------------------------------------
 std::string DataReader::GetStringValue(const std::string& forField)
 {
    std::string retval = "No data";
@@ -148,31 +251,99 @@ std::string DataReader::GetStringValue(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool UsesCoordinateSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses a coordinate system
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if a coordinate system is associated with the field, false
+ *              if not
+ */
+//------------------------------------------------------------------------------
 bool DataReader::UsesCoordinateSystem(const std::string& forField)
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetCoordinateSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used coordinate system
+ *
+ * @param forField The field identifier for the data that used the coordinate
+ *                 system
+ *
+ * @return The name of the coordinate system
+ */
+//------------------------------------------------------------------------------
 std::string DataReader::GetCoordinateSystemName(const std::string& forField)
 {
    return "";
 }
 
+//------------------------------------------------------------------------------
+// bool UsesOrigin(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses an origin
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if an origin is associated with the field, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataReader::UsesOrigin(const std::string& forField)
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetOriginName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used origin
+ *
+ * @param forField The field identifier for the data that used the origin
+ *
+ * @return The name of the origin
+ */
+//------------------------------------------------------------------------------
 std::string DataReader::GetOriginName(const std::string& forField)
 {
    return "";
 }
 
+//------------------------------------------------------------------------------
+// bool UsesTimeSystem(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a field uses a time system
+ *
+ * @param forField The field identifier for check
+ *
+ * @return true if a time system is associated with the field, false if not
+ */
+//------------------------------------------------------------------------------
 bool DataReader::UsesTimeSystem(const std::string& forField)
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetTimeSystemName(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a used time system
+ *
+ * @param forField The field identifier for the data that used the time system
+ *
+ * @return The name of the time system
+ */
+//------------------------------------------------------------------------------
 std::string DataReader::GetTimeSystemName(const std::string& forField)
 {
    return "";
@@ -224,6 +395,17 @@ const DataReader::readerDataType DataReader::GetReaderDataType(
    return theType;
 }
 
+//------------------------------------------------------------------------------
+// Real GetRData(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a real data value
+ *
+ * @param forField The interface identifier for the parameter.
+ *
+ * @return The value
+ */
+//------------------------------------------------------------------------------
 Real DataReader::GetRData(const std::string& forField)
 {
    Real retval = -999999.999999;
@@ -234,6 +416,17 @@ Real DataReader::GetRData(const std::string& forField)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Rvector6 GetRVectorData(const std::string& forField)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a 6-vector of real data
+ *
+ * @param forField The interface identifier for the parameter.
+ *
+ * @return The data vector
+ */
+//------------------------------------------------------------------------------
 Rvector6 DataReader::GetRVectorData(const std::string& forField)
 {
    Rvector6 retval(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);

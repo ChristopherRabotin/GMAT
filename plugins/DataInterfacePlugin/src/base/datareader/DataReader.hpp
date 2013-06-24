@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: May 2, 2013
 /**
- * 
+ * Definition of the base reader class used in the DataInterface subsystem
  */
 //------------------------------------------------------------------------------
 
@@ -26,7 +26,9 @@
 #include "Rvector6.hpp"
 
 
-
+/**
+ * Base reader class used in the DataInterface subsystem
+ */
 class DATAINTERFACE_API DataReader : public GmatBase
 {
 public:
