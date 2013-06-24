@@ -233,7 +233,7 @@ bool LocalAlignedConstrainedAxes::Initialize()
    {
       std::string errmsg = "Cannot initialize LocalAlignedConstrained object ";
       errmsg += + "- Reference Object \"";
-      errmsg += referenceObjName + "\" is not yet set!\n";
+      errmsg += referenceObjName + "\" is not yet set, or is of an invalid type!\n";
       throw CoordinateSystemException(errmsg);
    }
 
@@ -241,7 +241,7 @@ bool LocalAlignedConstrainedAxes::Initialize()
    {
       std::string errmsg = "Cannot initialize LocalAlignedConstrained object ";
       errmsg += + "- Coordinate System \"";
-      errmsg += constraintCSName + "\" is not yet set!\n";
+      errmsg += constraintCSName + "\" is not yet set, or is of an invalid type!\n";
       throw CoordinateSystemException(errmsg);
    }
 
@@ -891,12 +891,12 @@ void LocalAlignedConstrainedAxes::CalculateRotationMatrix(
    if (!referenceObject)
       throw CoordinateSystemException("Reference Object \"" +
          referenceObjName +
-         "\" is not yet set in local aligned constrained coordinate system!");
+         "\" is not yet set, or is of an invalid type, in local aligned constrained coordinate system!");
 
    if (!constraintCS)
       throw CoordinateSystemException("Constraint Coordinate System \"" +
             constraintCSName +
-         "\" is not yet set in local aligned constrained coordinate system!");
+            "\" is not yet set, or is of an invalid type, in local aligned constrained coordinate system!");
 
    // alignment and constraint vectors are user-input
    // alignmentVector                           // av_B
