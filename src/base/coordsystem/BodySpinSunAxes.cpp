@@ -373,4 +373,8 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("Exit  BodySpinSunAxes::CalculateRotationMatrix()...\n");
    #endif
 
+   if (mj2kcs != NULL)
+      delete mj2kcs;
+   if (bfcs != NULL)
+      delete bfcs;
 }
