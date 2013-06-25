@@ -179,7 +179,6 @@ protected:
    bool        createInterpolator;
    bool        writeOrbit;
    bool        writeAttitude;
-   bool        processData;
    bool        finalEpochReached;
    bool        handleFinalEpoch;
    bool        finalEpochProcessed;
@@ -229,9 +228,10 @@ protected:
    
    // Time and data
    bool         CheckInitialAndFinalEpoch();
-   void         HandleCcsdsOrbitData(bool writeData);
-   void         HandleSpkOrbitData(bool writeData);
-   void         HandleCode500OrbitData(bool writeDatda);
+   void         HandleSpkOrbitData(bool writeData, bool timeToWrite);
+   void         HandleCcsdsOrbitData(bool writeData, bool timeToWrite);
+   void         HandleCode500OrbitData(bool writeDatda, bool timeToWrite);
+   void         HandleWriteOrbit();
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
