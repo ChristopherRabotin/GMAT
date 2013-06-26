@@ -702,6 +702,13 @@ const StringArray& Achieve::GetWrapperObjectNameArray(bool completeSet)
 bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, 
               const std::string &withName)
 {
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Achieve::SetElementWrapper() this=<%p> entered, wrapperName='%s'\n",
+       this, withName.c_str());
+   ShowWrapper("   ", "", toWrapper);
+   MessageInterface::ShowMessage("   achieve=<%p>, tolerance=<%p>\n", achieve, tolerance);
+   #endif
    bool retval = false;
 
    if (toWrapper == NULL) return false;
@@ -742,19 +749,12 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
       retval = true;
    }
    
+   std::vector<ElementWrapper*> temp;
    if (achieveName == withName)
    {
       if (achieve != NULL)
-      {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (achieve, achieve->GetDescription(),
-             "Achieve::SetElementWrapper()",
-             GetGeneratingString(Gmat::NO_COMMENTS) +
-             " deleting achieve ew");
-         #endif
-         delete achieve;
-      }
+         temp.push_back(achieve);
+      
       achieve = toWrapper;
       #ifdef DEBUG_WRAPPER_CODE   
       MessageInterface::ShowMessage
@@ -767,14 +767,8 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
    {
       if (tolerance != NULL)
       {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (tolerance, tolerance->GetDescription(),
-             "Achieve::SetElementWrapper()",
-             GetGeneratingString(Gmat::NO_COMMENTS) +
-             " deleting tolerance ew");
-         #endif
-         delete tolerance;
+         if (find(temp.begin(), temp.end(), tolerance) == temp.end())
+            temp.push_back(tolerance);
       }
       tolerance = toWrapper;
       #ifdef DEBUG_WRAPPER_CODE   
@@ -783,6 +777,27 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
       #endif
       retval = true;
    }
+   
+   // Delete old wrappers
+   ElementWrapper *wrapper;
+   for (UnsignedInt i = 0; i < temp.size(); ++i)
+   {
+      wrapper = temp[i];
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (wrapper, wrapper->GetDescription(), "Achieve::ClearWrappers()",
+          GetGeneratingString(Gmat::NO_COMMENTS) + " deleting wrapper");
+      #endif
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage("   Deleting wrapper<%p>\n", wrapper);
+      #endif
+      delete wrapper;
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Achieve::SetElementWrapper() returning %d\n", retval);
+   #endif
    
    return retval;
 }
@@ -793,6 +808,9 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
 //------------------------------------------------------------------------------
 void Achieve::ClearWrappers()
 {
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Achieve::ClearWrappers() this=<%p> entered\n", this);
+   #endif
    std::vector<ElementWrapper*> temp;
    if (goal)
    {
@@ -802,18 +820,14 @@ void Achieve::ClearWrappers()
    if (achieve)
    {
       if (find(temp.begin(), temp.end(), achieve) == temp.end())
-      {
          temp.push_back(achieve);
-         achieve = NULL;
-      }
+      achieve = NULL;
    }
    if (tolerance)
    {
       if (find(temp.begin(), temp.end(), tolerance) == temp.end())
-      {
          temp.push_back(tolerance);
-         tolerance = NULL;
-      }
+      tolerance = NULL;
    }
    
    ElementWrapper *wrapper;
@@ -825,8 +839,14 @@ void Achieve::ClearWrappers()
          (wrapper, wrapper->GetDescription(), "Achieve::ClearWrappers()",
           GetGeneratingString(Gmat::NO_COMMENTS) + " deleting wrapper");
       #endif
+      #ifdef DEBUG_WRAPPER_CODE
+      MessageInterface::ShowMessage("   Deleting wrapper<%p>\n", wrapper);
+      #endif
       delete wrapper;
    }
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Achieve::ClearWrappers() this=<%p> leaving\n", this);
+   #endif
 }
 
 

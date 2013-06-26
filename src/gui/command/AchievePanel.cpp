@@ -203,6 +203,9 @@ void AchievePanel::LoadData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   #if DEBUG_ACHIEVE_PANEL_LOAD
+   MessageInterface::ShowMessage("AchievePanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -235,25 +238,29 @@ void AchievePanel::SaveData()
    
    if (!canClose)
       return;
-      
+   
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
    try
    {
-      mAchieveCommand->SetStringParameter
-         (mAchieveCommand->GetParameterID("TargeterName"), mSolverName.c_str());
+      #if DEBUG_ACHIEVE_PANEL_SAVE
+      MessageInterface::ShowMessage("   Setting Solver to '%s'\n", mSolverName.c_str());
+      #endif
       
       mAchieveCommand->SetStringParameter
-         (mAchieveCommand->GetParameterID("Goal"), mGoalName.c_str());
+         (mAchieveCommand->GetParameterID("TargeterName"), mSolverName.c_str());
       
       if (mIsTextModified)
       {
          #if DEBUG_ACHIEVE_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("   Setting GoalValue to %s\n   Setting Tolerance to %s\n",
-             mGoalValue.c_str(), mTolerance.c_str());
+            ("   Setting Goal to '%s', Value to '%s', Tolerance to '%s'\n",
+             mGoalName.c_str(), mGoalValue.c_str(), mTolerance.c_str());
          #endif
+         
+         mAchieveCommand->SetStringParameter
+            (mAchieveCommand->GetParameterID("Goal"), mGoalName.c_str());
          
          mAchieveCommand->SetStringParameter
             (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
@@ -263,17 +270,30 @@ void AchievePanel::SaveData()
             (mAchieveCommand->GetParameterID("Tolerance"), mTolerance.c_str());
          
          mIsTextModified = false;
+         
+         #if DEBUG_ACHIEVE_PANEL_SAVE
+         MessageInterface::ShowMessage("   Calling theGuiInterpreter->ValidateCommand()\n");
+         #endif
+         
+         if (!theGuiInterpreter->ValidateCommand(mAchieveCommand))
+         {
+            #if DEBUG_ACHIEVE_PANEL_SAVE
+            MessageInterface::ShowMessage("   Failed to validate command\n");
+            #endif
+            canClose = false;
+         }
       }
-      
-      if (!theGuiInterpreter->ValidateCommand(mAchieveCommand))
-         canClose = false;
-      
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
    }
+   
+   #if DEBUG_ACHIEVE_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("AchievePanel::SaveData() leaving, canClose=%d\n", canClose);
+   #endif
 }
 
 
