@@ -84,7 +84,10 @@ BodyFixedPoint::PARAMETER_TYPE[BodyFixedPointParamCount - SpacePointParamCount] 
          Gmat::REAL_TYPE,
          Gmat::STRING_TYPE,
          Gmat::STRING_TYPE,
-         Gmat::STRING_TYPE
+         Gmat::STRING_TYPE,
+         Gmat::STRING_TYPE,
+         Gmat::STRING_TYPE,
+         Gmat::STRING_TYPE,
    };
 
 
