@@ -7781,6 +7781,16 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default keplerian parameters created\n");
    #endif
    
+   // Equinoctial parameters
+   CreateParameter("EquinoctialH", "DefaultSC.EarthMJ2000Eq.EquinoctialH");
+   CreateParameter("EquinoctialK", "DefaultSC.EarthMJ2000Eq.EquinoctialK");
+   CreateParameter("EquinoctialP", "DefaultSC.EarthMJ2000Eq.EquinoctialP");
+   CreateParameter("EquinoctialQ", "DefaultSC.EarthMJ2000Eq.EquinoctialQ");
+   CreateParameter("MLONG", "DefaultSC.EarthMJ2000Eq.MLONG");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default equinoctial parameters created\n");
+   #endif
+   
    // Orbital parameters
    CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
    CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
