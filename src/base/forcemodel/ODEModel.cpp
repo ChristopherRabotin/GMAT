@@ -265,8 +265,6 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    warnedOnceForParameters (false),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
-   earthEq           (NULL),
-   earthFixed        (NULL),
    transientCount    (0)
 {
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
@@ -361,8 +359,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
    j2kBody                    (fdf.j2kBody),
-   earthEq                    (fdf.earthEq),
-   earthFixed                 (fdf.earthFixed),
    transientCount             (fdf.transientCount)
 {
    #ifdef DEBUG_ODEMODEL
@@ -469,8 +465,6 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
    j2kBody             = fdf.j2kBody;
-   earthEq             = fdf.earthEq;
-   earthFixed          = fdf.earthFixed; 
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    transientCount      = fdf.transientCount;
 
@@ -1818,40 +1812,31 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
       
       if (cs == NULL)
       {
-         // We need to handle both inertial and fixed CS's here
-         if (earthEq == NULL)
-            throw ODEModelException(
-               "Error setting force model coordinate system for " +
-               instanceName + ": EarthEq pointer has not been initialized!");
-         if (earthFixed == NULL)
-            throw ODEModelException(
-               "Error setting force model coordinate system for " +
-               instanceName + ": EarthFixed pointer has not been initialized!");
-         
+         std::string axisString;
          if (csName.find("Fixed", 0) == std::string::npos)
-         {
-            cs = (CoordinateSystem *)earthEq->Clone();
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
-                "cs = earthEq->Clone()", this);
-            #endif
-         }
+            axisString = "BodyFixed";
          else
-         {
-            cs = (CoordinateSystem *)earthFixed->Clone();
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
-                "cs = earthFixed->Clone()", this);
-            #endif
-         }
+            axisString = "MJ2000Eq";
+
+         if (solarSystem == NULL)
+            throw ODEModelException("Trying to create a local coordinate "
+                  "system, but the solar system pointer is NULL");
+
+         SpacePoint *earthPtr = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+         cs = CoordinateSystem::CreateLocalCoordinateSystem(csName,
+               axisString, earthPtr, NULL, NULL, j2kBody, solarSystem);
          
          cs->SetName(csName);
          cs->SetStringParameter("Origin", centralBodyName);
          cs->SetRefObject(forceOrigin, Gmat::CELESTIAL_BODY, 
             centralBodyName);
          internalCoordinateSystems.push_back(cs);
+
+         #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Add
+               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
+                "cs = earthFixed->Clone()", this);
+         #endif
 
          #ifdef DEBUG_ODEMODEL_INIT
             MessageInterface::ShowMessage("Created %s with description\n\n%s\n", 
@@ -3496,24 +3481,6 @@ bool ODEModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    bool wasSet = false;
    
-   // Handle the CS pointers we always want
-   if (name == "EarthMJ2000Eq")
-   {
-      if (type == Gmat::COORDINATE_SYSTEM)
-         earthEq = (CoordinateSystem*)obj;
-      else
-         throw ODEModelException(
-            "Object named EarthMJ2000Eq is not a coordinate system.");
-   }
-   if (name == "EarthFixed")
-   {
-      if (type == Gmat::COORDINATE_SYSTEM)
-         earthFixed = (CoordinateSystem*)obj;
-      else
-         throw ODEModelException(
-            "Object named EarthFixed is not a coordinate system.");
-   }
-
    // Attempt to set the object for the base class    
    try
    {

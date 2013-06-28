@@ -357,11 +357,6 @@ protected:
    std::vector <CoordinateSystem*>
                              internalCoordinateSystems;
    
-   /// EarthMJ2000Eq pointer, so that it can be cloned to make other Eq systems 
-   CoordinateSystem          *earthEq;
-   /// EarthFixed pointer, so that it can be cloned to make other fixed systems 
-   CoordinateSystem          *earthFixed;
-   
    ObjectArray               stateObjects;
    
    void                      MoveToOrigin(Real newEpoch = -1.0);
