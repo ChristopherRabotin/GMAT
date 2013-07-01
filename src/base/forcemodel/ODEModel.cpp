@@ -1813,7 +1813,7 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
       if (cs == NULL)
       {
          std::string axisString;
-         if (csName.find("Fixed", 0) == std::string::npos)
+         if (csName.find("Fixed", 0) != std::string::npos)
             axisString = "BodyFixed";
          else
             axisString = "MJ2000Eq";
