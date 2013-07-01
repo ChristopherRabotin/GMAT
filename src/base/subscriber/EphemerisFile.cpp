@@ -994,7 +994,11 @@ bool EphemerisFile::TakeAction(const std::string &action,
       writeEphemeris = false;
       // If toggle off, finish writing ephemeris and restart interpolation
       if (action == "ToggleOff")
-         RestartInterpolation("", true, true);
+      {
+         //LOJ: Write continuous ephemeris if CODE500_EPHEM
+         if (fileType != CODE500_EPHEM)
+            RestartInterpolation("", true, true);
+      }
    }
    
    if (action == "ChangeTypeName")
@@ -5012,7 +5016,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
          ("EphemerisFile::HandleManeuvering() Calling FinishUpWriting()\n");
       #endif
       
-      FinishUpWriting();
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM
+      if (fileType != CODE500_EPHEM)
+         FinishUpWriting();
       
       maneuverEpochInDays = epoch;
       
@@ -5037,7 +5043,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
          comment = "This block begins after " + desc + " at " + epochStr;
       }
       
-      RestartInterpolation(comment, true);
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM
+      if (fileType != CODE500_EPHEM)
+         RestartInterpolation(comment, true);
    }
    
    prevRunState = runstate;
@@ -5118,7 +5126,9 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
                         #endif
                         
                         // Write any data in the buffer (fixes missing lines for GMT-3745)
-                        FinishUpWriting();
+                        //LOJ: Write continuous ephemeris if CODE500_EPHEM
+                        if (fileType != CODE500_EPHEM)
+                           FinishUpWriting();
                         
                         #if DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE
                         MessageInterface::ShowMessage
@@ -5128,8 +5138,10 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
                         // Restart interpolation
                         std::string comment = "This block begins after propagator change from " +
                            prevPropName + " to " + currPropName;
-                        
-                        RestartInterpolation(comment, true);
+
+                        //LOJ: Write continuous ephemeris if CODE500_EPHEM
+                        if (fileType != CODE500_EPHEM)
+                           RestartInterpolation(comment, true);
                      }
                      
                      prevPropName = currPropName;
@@ -5220,13 +5232,17 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
       #endif
       
       // Write any data in the buffer
-      FinishUpWriting();
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM
+      if (fileType != CODE500_EPHEM)
+         FinishUpWriting();
       
       // Restart interpolation
       std::string comment = "This block begins after spacecraft setting " +
          desc + " at " + epochStr;
       
-      RestartInterpolation(comment, true);
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM
+      if (fileType != CODE500_EPHEM)
+         RestartInterpolation(comment, true);
    }
    
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
