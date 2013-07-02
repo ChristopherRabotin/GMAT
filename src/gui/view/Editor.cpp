@@ -1450,7 +1450,11 @@ bool Editor::InitializePrefs(const wxString &name)
    
    // set spaces and indention
    SetTabWidth(3);
-   SetUseTabs(false);
+
+   // GMT-3336  Preserve tabs
+   //SetUseTabs(false);
+   SetUseTabs(true);
+
    SetTabIndents(true);
    SetBackSpaceUnIndents(true);
    SetIndent(GmatEditor::globalCommonPrefs.indentEnable ? 3 : 0);
