@@ -672,7 +672,6 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
          break;
          
       case Gmat::INTERFACE:
-         MessageInterface::ShowMessage("Interface code goes here\n");
          clist = interfaceList;
          break;
 
