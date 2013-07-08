@@ -32,6 +32,8 @@
 Interface::Interface(const std::string &type, const std::string &name) :
    GmatBase (Gmat::INTERFACE, type, name)
 {
+   objectTypes.push_back(Gmat::INTERFACE);
+   objectTypeNames.push_back("Interface");
 }
 
 
