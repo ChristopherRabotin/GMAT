@@ -58,8 +58,6 @@ DataInterface::DataInterface(const std::string &type, const std::string &name) :
    readerFormat      (""),
    theReader         (NULL)
 {
-   // Engine required fields
-   objectTypes.push_back(Gmat::INTERFACE);
    objectTypeNames.push_back("DataInterface");
 }
 
