@@ -316,14 +316,13 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("spin axis unit vector  = [ %18.12le,  %18.12le,  %18.12le]\n", spinaxisFK5[0],  spinaxisFK5[1], spinaxisFK5[2]);
       MessageInterface::ShowMessage("Step to specify rotation matrix from BodySpinSun coordinate system to FK5:\n");
    #endif
-   rvSunVec = secondary->GetMJ2000State(atEpoch) -
-              primary->GetMJ2000State(atEpoch);
+   rvSunVec = primary->GetMJ2000State(atEpoch) - secondary->GetMJ2000State(atEpoch);
 
    Rvector3 rSun  = rvSunVec.GetR();
    Rvector3 vSun  = rvSunVec.GetV();
 
    Real     rMag  = rSun.GetMagnitude();
-   Rvector3 x = rSun/ rMag;		//Rvector3 x = -rSun/ rMag;
+   Rvector3 x = rSun/ rMag;
 
    Rvector3 yFK5  = Cross(spinaxisFK5,x);
    Real     yMag  = yFK5.GetMagnitude();
