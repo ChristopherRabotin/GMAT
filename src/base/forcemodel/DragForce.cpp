@@ -37,6 +37,11 @@
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
 
+//#define DUMP_DERIVATIVE
+//#define DUMP_DENSITY
+//#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
+
+
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -996,6 +1001,24 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
    GetDensity(dragState, now);
    Real wind[6];
 
+   #ifdef DUMP_DENSITY
+      bool writeDensity = true;
+
+      #ifdef DUMP_INITIAL_STATE_DERIVATIVES_ONLY
+         if (dt != 0.0)
+            writeDensity = false;
+      #endif
+
+      if (writeDensity)
+      {
+         MessageInterface::ShowMessage("Density:  %.12lf", now);
+
+         for (Integer m = 0; m < satCount; ++m)
+            MessageInterface::ShowMessage("  %.15le", density[m]);
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
+
    if (fillCartesian)
    {
    
@@ -1120,6 +1143,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
       }
    }
+
+   //#ifdef DUMP_DERIVATIVE
+
 
    #ifdef DEBUG_SHOW_Force
       static int iter = 0;
