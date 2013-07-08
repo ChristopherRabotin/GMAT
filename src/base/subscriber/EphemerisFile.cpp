@@ -1114,8 +1114,9 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
       return true;
    // Disable interpolator type until it is selectable -- currently set by
    // ephem file format
-   if (id == INTERPOLATOR)
-      return true;
+   // Commented to fix GMT-4022
+   //if (id == INTERPOLATOR)
+   //   return true;
    
    return Subscriber::IsParameterReadOnly(id);
 }
@@ -1444,19 +1445,19 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    // Interpolator is now set along with file format (bug 2219); if the parm is
    // passed in, just ensure compatibility
    case INTERPOLATOR:
-      if (fileFormat == "CCSDS-OEM")
+      if (fileFormat == "CCSDS-OEM" || fileFormat == "Code-500")
       {
          if (value != "Lagrange")
             throw SubscriberException("Cannot set interpolator \"" + value +
-                  "\" on the EphemerisFile named \"" + instanceName +
-                  "\"; CCSDS-OEM ephemerides require Lagrange interpolators");
+                  "\" on the EphemerisFile named \"" + instanceName + "\"; " +
+                  fileFormat + " ephemerides require \"Lagrange\" interpolators");
       }
       else if (fileFormat == "SPK")
       {
          if (value != "Hermite")
             throw SubscriberException("Cannot set interpolator \"" + value +
                   "\" on the EphemerisFile named \"" + instanceName +
-                  "\"; SPK ephemerides require Hermite interpolators");
+                  "\"; SPK ephemerides require \"Hermite\" interpolators");
       }
       else
          throw SubscriberException("The interpolator \"" + value +
