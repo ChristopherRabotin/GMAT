@@ -209,7 +209,7 @@ namespace GmatTree
       END_OF_RESOURCE_FOLDER,
 
       // not openable
-      INTERFACE,
+      INTERFACE,           // Interface objects are now openable (e.g. FileInterface)
       MATLAB_INTERFACE,
       MATLAB_SERVER,
 
@@ -275,6 +275,8 @@ namespace GmatTree
       MATLAB_FUNCTION,
       PREDEFINED_COORDINATE_SYSTEM,
       USER_COORDINATE_SYSTEM,
+
+      INTERFACE_OPENABLE,           // Kludge to make data interfaces work
 
       USER_DEFINED_OBJECT = 41750,
 
