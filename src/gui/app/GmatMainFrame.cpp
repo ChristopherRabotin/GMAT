@@ -4210,6 +4210,7 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    case GmatTree::ASSIGNMENT:
       sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::SET:
    case GmatTree::OTHER_COMMAND:
       #ifdef DEBUG_CREATE_CHILD
       MessageInterface::ShowMessage

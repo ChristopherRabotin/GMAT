@@ -48,6 +48,7 @@
 #include "bitmaps/optimize.xpm"
 #include "bitmaps/mt_Default.xpm"
 #include "bitmaps/mt_Stop.xpm"
+#include "bitmaps/mt_SetCommand.xpm"
 #include "bitmaps/mt_MarkPoint.xpm"
 #include "bitmaps/mt_ClearPlot.xpm"
 #include "bitmaps/mt_Global.xpm"
@@ -2796,6 +2797,7 @@ void MissionTree::AddIcons()
    theGuiManager->LoadIcon("endfb", bitmapType, &bitmaps[++index], endfb_xpm);
    theGuiManager->LoadIcon("report", bitmapType, &bitmaps[++index], report_xpm);
    
+   theGuiManager->LoadIcon("mt_Set", bitmapType, &bitmaps[++index], mt_SetCommand_xpm);
    theGuiManager->LoadIcon("mt_Stop", bitmapType, &bitmaps[++index], mt_Stop_xpm);
    theGuiManager->LoadIcon("penup", bitmapType, &bitmaps[++index], penup_xpm);
    theGuiManager->LoadIcon("pendown", bitmapType, &bitmaps[++index], pendown_xpm);
@@ -4075,6 +4077,8 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_CALL_GMAT_FUNCTION;
    if (cmd == "CallMatlabFunction")
       return GmatTree::MISSION_ICON_CALL_MATLAB_FUNCTION;
+   if (cmd == "Set")
+      return GmatTree::MISSION_ICON_SET;
    if (cmd == "Stop")
       return GmatTree::MISSION_ICON_STOP;
    if (cmd == "BeginScript")
@@ -4270,6 +4274,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::CALL_FUNCTION;
    if (cmd == "CallMatlabFunction")
       return GmatTree::CALL_FUNCTION;
+   if (cmd == "Set")
+      return GmatTree::SET;
    if (cmd == "Stop")
       return GmatTree::STOP;
    if (cmd == "GMAT")

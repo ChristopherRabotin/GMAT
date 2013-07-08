@@ -81,6 +81,7 @@
 // Matlab Engine/Server
 #include "bitmaps/rt_Matlab.xpm"
 #include "bitmaps/rt_MatlabServer.xpm"
+#include "bitmaps/rt_FileInterface.xpm"
 // Function
 #include "bitmaps/rt_GmatFunction.xpm"
 #include "bitmaps/rt_MatlabFunction.xpm"
@@ -1352,7 +1353,7 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    else if (obj->IsOfType("FileInterface"))
    {
       itemType = GmatTree::INTERFACE;
-      itemIcon = GmatTree::RESOURCE_ICON_DEFAULT;
+	  itemIcon = GmatTree::RESOURCE_ICON_FILEINTERFACE;
    }
 
    
@@ -2700,6 +2701,7 @@ void ResourceTree::AddIcons()
 
    theGuiManager->LoadIcon("rt_GmatFunction", bitmapType, &bitmaps[++index], rt_GmatFunction_xpm);
    theGuiManager->LoadIcon("rt_MatlabFunction", bitmapType, &bitmaps[++index], rt_MatlabFunction_xpm);
+   theGuiManager->LoadIcon("rt_FileInterface", bitmapType, &bitmaps[++index], rt_FileInterface_xpm);
    
    theGuiManager->LoadIcon("rt_MeasurementModel", bitmapType, &bitmaps[++index], rt_MeasurementModel_xpm);
    theGuiManager->LoadIcon("network", bitmapType, &bitmaps[++index], network_xpm);
