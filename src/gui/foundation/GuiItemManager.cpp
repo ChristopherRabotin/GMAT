@@ -795,6 +795,9 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
       case Gmat::EVENT_LOCATOR:
          UpdateLocator(true);
          break;
+      case Gmat::INTERFACE:
+         UpdateInterface(true);
+         break;
       default:
          MessageInterface::ShowMessage
             ("*** INTERNAL ERROR *** GuiItemManager::UpdateAll() the object type "
@@ -1263,6 +1266,23 @@ void GuiItemManager::UpdateLocator(bool updateObjectArray)
    #endif
 
    UpdateLocatorList();
+   if (updateObjectArray)
+      RefreshAllObjectArray();
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateInterface(bool updateObjectArray = true)
+//------------------------------------------------------------------------------
+/**
+ * Updates interface related GUI components
+ *
+ * @param updateObjectArray TBD
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateInterface(bool updateObjectArray)
+{
+   UpdateInterfaceList();
    if (updateObjectArray)
       RefreshAllObjectArray();
 }
@@ -6474,6 +6494,21 @@ void GuiItemManager::RefreshAllObjectArray()
       ("GuiItemManager::RefreshAllObjectArray() exiting, theNumAllObject = %d\n",
        theNumAllObject);
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateInterfaceList()
+//------------------------------------------------------------------------------
+/**
+ * Updates configured interface list.
+ *
+ * @note: Not implemented yet because it is not needed until the GUI got the 
+ *        FileInterface is put in place
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateInterfaceList()
+{
 }
 
 

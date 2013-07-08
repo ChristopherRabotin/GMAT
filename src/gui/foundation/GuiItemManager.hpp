@@ -94,6 +94,7 @@ public:
    void UpdateSolver(bool updateObjectArray = true);
    void UpdateSubscriber(bool updateObjectArray = true);
    void UpdateLocator(bool updateObjectArray = true);
+   void UpdateInterface(bool updateObjectArray = true);
    
    // For handling of resource update 
    void AddToResourceUpdateListeners(GmatPanel *panel);
@@ -400,6 +401,7 @@ private:
    void UpdatePropagatorList();
    void UpdateForceModelList();
    void UpdateLocatorList();
+   void UpdateInterfaceList();
    
    void RefreshAllObjectArray();
    
