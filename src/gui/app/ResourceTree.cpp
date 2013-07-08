@@ -878,7 +878,7 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
 
    if (obj->IsOfType("DataInterface"))
    {
-      itemType = GmatTree::USER_DEFINED_OBJECT;
+      itemType = GmatTree::INTERFACE_OPENABLE;
    }
    
    if (itemType != GmatTree::UNKNOWN_ITEM)
@@ -3924,7 +3924,11 @@ void ResourceTree::OnAddUserObject(wxCommandEvent &event)
       GetItemTypeAndIcon(obj, dummyType, iconToUse);
       
       wxString name = newName.c_str();
-      AppendItem(item, name, iconToUse, -1,
+      if (obj->IsOfType("Interface"))
+         AppendItem(item, name, iconToUse, -1,
+                 new GmatTreeItemData(name, GmatTree::INTERFACE_OPENABLE));
+      else
+         AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::USER_DEFINED_OBJECT));
       
       Expand(item);
@@ -5288,6 +5292,9 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
       break;
    case GmatTree::MEASUREMENT_MODEL:
       objType = Gmat::MEASUREMENT_MODEL;
+      break;
+   case GmatTree::INTERFACE_OPENABLE:
+      objType = Gmat::INTERFACE;
       break;
    default:
       objType = Gmat::UNKNOWN_OBJECT;
