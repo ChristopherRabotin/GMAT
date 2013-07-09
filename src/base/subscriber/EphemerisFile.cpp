@@ -970,44 +970,45 @@ bool EphemerisFile::TakeAction(const std::string &action,
 {
    #ifdef DEBUG_EPHEMFILE_ACTION
    MessageInterface::ShowMessage
-      ("EphemerisFile::TakeAction() action=%s, actionData=%s\n", action.c_str(),
-       actionData.c_str());
+      ("EphemerisFile::TakeAction() this=<%p>'%s' entered, action='%s', actionData='%s'\n",
+       this, GetName().c_str(), action.c_str(), actionData.c_str());
    #endif
    
+   bool retval = false;
    if (action == "Clear")
    {
-      return true;
+      retval = true;
    }
-   
-   if (action == "Finalize")
+   else if (action == "Finalize")
    {
-      return true;
+      retval = true;
    }
-
-   if (action == "ToggleOn")
+   else if (action == "ToggleOn")
    {
       writeEphemeris = true;
+      retval = true;
    }
-   
-   if (action == "ToggleOff")
+   else if (action == "ToggleOff")
    {
       writeEphemeris = false;
       // If toggle off, finish writing ephemeris and restart interpolation
-      if (action == "ToggleOff")
-      {
-         //LOJ: Write continuous ephemeris if CODE500_EPHEM
-         if (fileType != CODE500_EPHEM)
-            RestartInterpolation("", true, true);
-      }
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM
+      if (fileType != CODE500_EPHEM)
+         RestartInterpolation("", true, true);
+      retval = true;
    }
-   
-   if (action == "ChangeTypeName")
+   else if (action == "ChangeTypeName")
    {
       typeName = actionData;
-      return true;
+      retval = true;
    }
    
-   return false;
+   #ifdef DEBUG_EPHEMFILE_ACTION
+   MessageInterface::ShowMessage
+      ("EphemerisFile::TakeAction() this=<%p>'%s' returning %d\n",
+       this, GetName().c_str(), retval);
+   #endif
+   return retval;
 }
 
 
@@ -4591,8 +4592,8 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       ("======================================================================\n"
        "EphemerisFile::Distribute() this=<%p>'%s' called\n", this, GetName().c_str());
    MessageInterface::ShowMessage
-      ("   len=%d, active=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRund\n   "
-       "runstate=%d, isManeuvering=%d, firstTimeWriting=%d\n", len, active, isEndOfReceive,
+      ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRun=%d\n   "
+       "runstate=%d, isManeuvering=%d, firstTimeWriting=%d\n", len, active, writeEphemeris, isEndOfReceive,
        isEndOfDataBlock, isEndOfRun, runstate, isManeuvering, firstTimeWriting);
    if (len > 0)
    {
@@ -4649,17 +4650,29 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
       std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
       MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() Calling FinishUpWriting(), isEndOfReceive=%d, "
-          "isEndOfDataBlock=%d, isEndOfRun=%d, len=%d\n   lastEpochWrote=%s, "
+         ("EphemerisFile::Distribute() isEndOfReceive=%d, isEndOfDataBlock=%d, "
+          "isEndOfRun=%d, len=%d, firstTimeWriting=%d,\n   lastEpochWrote=%s, "
           "currEpochInSecs=%s, prevEpochInSecs=%s\n   a1MjdArray.size()=%d\n",
-          isEndOfReceive, isEndOfDataBlock, isEndOfRun, len, lastEpochWroteStr.c_str(),
-          currEpochStr.c_str(), prevEpochStr.c_str(), a1MjdArray.size());
+          isEndOfReceive, isEndOfDataBlock, isEndOfRun, len, firstTimeWriting,
+          lastEpochWroteStr.c_str(), currEpochStr.c_str(), prevEpochStr.c_str(),
+          a1MjdArray.size());
       #endif
       
-      FinishUpWriting();
+      // If not first time and there is data to process, finish up writing
+      if (!firstTimeWriting && !a1MjdArray.empty())
+      {
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage("EphemerisFile::Distribute() Calling FinishUpWriting()\n");
+         #endif
+         FinishUpWriting();
+      }
+      
+      #if DBGLVL_EPHEMFILE_DATA > 0
+      MessageInterface::ShowMessage("EphemerisFile::Distribute() returning true\n");
+      #endif
       return true;
    }
-
+   
    //======================================================================
    // Do not write block if EndOfReceive and EndOfDataBlock received
    // (LOJ: 2013.04.04 GMT-3745 FIX)
@@ -4714,7 +4727,13 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    
    
    if (len == 0)
+   {
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("EphemerisFile::Distribute() Just returning true, data length is zero\n");
+      #endif
       return true;
+   }
    
    isFinalized = false;
    
