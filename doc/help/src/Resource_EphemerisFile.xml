@@ -74,19 +74,19 @@
 
         <tbody>
           <row>
-            <entry><guilabel>InterpolationOrder</guilabel></entry>
+            <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>Allows you to set the interpolation order for the
-            available interpolator methods (<guilabel>Lagrange</guilabel> or
-            <guilabel>Hermite</guilabel>) for either
-            <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
-            formats. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris data in the
+            coordinate system that is selected from
+            <guilabel>CoordinateSystem</guilabel> field. The user can choose
+            to also generate ephemeris data in user-defined coordinate system.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Integer</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -94,7 +94,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>1 &lt;= Integer Number &lt;= 10</para>
+                    <para><guilabel>CoordinateSystem</guilabel>
+                    resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -102,66 +103,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>Set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>7</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>StepSize</guilabel></entry>
-
-            <entry><para> The ephemeris file is generated at the step size
-            that is specified for <guilabel>StepSize</guilabel> field. The
-            user can generate ephemeris file at default Integration step size
-            (using raw integrator steps) or by defining a fixed step size
-            provided by user. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real Number &gt; 0.0 or equals Default Value</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>Set</para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -170,7 +112,7 @@
 
                   <listitem>
                     <para>
-                      <literal>IntegratorSteps</literal>
+                      <guilabel>EarthMJ2000Eq</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -495,6 +437,65 @@
           </row>
 
           <row>
+            <entry><guilabel>InterpolationOrder</guilabel></entry>
+
+            <entry><para>Allows you to set the interpolation order for the
+            available interpolator methods (<guilabel>Lagrange</guilabel> or
+            <guilabel>Hermite</guilabel>) for either
+            <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
+            formats. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>1 &lt;= Integer Number &lt;= 10</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>Set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>7</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Interpolator</guilabel></entry>
 
             <entry><para> This field defines the available interpolator method
@@ -557,12 +558,11 @@
           </row>
 
           <row>
-            <entry><guilabel>WriteEphemeris</guilabel></entry>
+            <entry><guilabel>Maximized</guilabel></entry>
 
-            <entry><para>Allows the user to optionally calculate/write or not
-            calculate/write an ephemeris that has been created and configured.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry><para>Allows the user to maximize the generated ephemeris
+            file window. This field cannot be modified in the Mission
+            Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -591,245 +591,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>true</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>Unit</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>CoordinateSystem</guilabel></entry>
-
-            <entry><para>Allows the user to generate ephemeris data in the
-            coordinate system that is selected from
-            <guilabel>CoordinateSystem</guilabel> field. The user can choose
-            to also generate ephemeris data in user-defined coordinate system.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>CoordinateSystem</guilabel>
-                    resource</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>EarthMJ2000Eq</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Spacecraft</guilabel></entry>
-
-            <entry><para>Allows the user to generate ephemeris data of
-            spacecraft(s) that are defined in <guilabel>Spacecraft</guilabel>
-            field. This field cannot be modified in the Mission Sequence.
-            </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Default spacecraft or any number of user-defined
-                    spacecrafts or formations</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>DefaultSC</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>UpperLeft</guilabel></entry>
-
-            <entry><para>Allows the user to pan the generated ephemeris file
-            display window in any direction. First value in [0 0] matrix helps
-            to pan the window horizontally and second value helps to pan the
-            window vertically. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any Real number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 0 0 ]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Size</guilabel></entry>
-
-            <entry><para>Allows the user to control the display size of
-            generated ephemeris file panel. First value in [0 0] matrix
-            controls horizonal size and second value controls vertical size of
-            ephemeris file display window. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any Real number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 0 0 ]</para>
+                    <para>false</para>
                   </listitem>
                 </varlistentry>
 
@@ -913,11 +675,249 @@
           </row>
 
           <row>
-            <entry><guilabel>Maximized</guilabel></entry>
+            <entry><guilabel>Size</guilabel></entry>
 
-            <entry><para>Allows the user to maximize the generated ephemeris
-            file window. This field cannot be modified in the Mission
-            Sequence. </para> <variablelist>
+            <entry><para>Allows the user to control the display size of
+            generated ephemeris file panel. First value in [0 0] matrix
+            controls horizonal size and second value controls vertical size of
+            ephemeris file display window. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Spacecraft</guilabel></entry>
+
+            <entry><para>Allows the user to generate ephemeris data of
+            spacecraft(s) that are defined in <guilabel>Spacecraft</guilabel>
+            field. This field cannot be modified in the Mission Sequence.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Default spacecraft or any number of user-defined
+                    spacecrafts or formations</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>DefaultSC</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>StepSize</guilabel></entry>
+
+            <entry><para> The ephemeris file is generated at the step size
+            that is specified for <guilabel>StepSize</guilabel> field. The
+            user can generate ephemeris file at default Integration step size
+            (using raw integrator steps) or by defining a fixed step size
+            provided by user. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real Number &gt; 0.0 or equals Default Value</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>Set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>IntegratorSteps</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>UpperLeft</guilabel></entry>
+
+            <entry><para>Allows the user to pan the generated ephemeris file
+            display window in any direction. First value in [0 0] matrix helps
+            to pan the window horizontally and second value helps to pan the
+            window vertically. This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[ 0 0 ]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>WriteEphemeris</guilabel></entry>
+
+            <entry><para>Allows the user to optionally calculate/write or not
+            calculate/write an ephemeris that has been created and configured.
+            This field cannot be modified in the Mission Sequence.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -946,7 +946,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>false</para>
+                    <para>true</para>
                   </listitem>
                 </varlistentry>
 
@@ -954,7 +954,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/A</para>
+                    <para>Unit</para>
                   </listitem>
                 </varlistentry>
 
@@ -962,7 +962,7 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>script</para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
