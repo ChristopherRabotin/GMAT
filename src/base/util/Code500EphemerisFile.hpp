@@ -231,6 +231,8 @@ protected:
    int            mDataRecWriteCounter;
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
+   std::string    mLastDataRecStartGreg;
+   std::string    mLastDataRecEndGreg;
    
    // Epoch and state buffer
    EpochArray     mA1MjdArray;

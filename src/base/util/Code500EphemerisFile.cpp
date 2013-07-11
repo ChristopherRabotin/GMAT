@@ -48,6 +48,8 @@
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_WRITE_DATA_SEGMENT_MORE
 //#define DEBUG_WRITE_DATA
+//#define DEBUG_DATA_SEGMENT_TIME
+//#define DEBUG_WRITE_SENTINELS
 //#define DEBUG_UNPACK_HEADERS
 //#define DEBUG_UNPACK_DATA
 //#define DEBUG_TIME_CONVERSION
@@ -826,7 +828,7 @@ bool Code500EphemerisFile::WriteDataSegment(const EpochArray &epochArray,
                     "The maximum it can handle is 50\n", numPoints);
       throw ue;
    }
-
+   
    // For multiple segments, end epoch of previous segment may be the same as
    // beginning epoch of new segmnet, so check for duplicate epoch and use the
    // state of new epoch since any maneuver or some spacecraft property update
@@ -1040,20 +1042,20 @@ void Code500EphemerisFile::InitializeHeaderRecord2()
 void Code500EphemerisFile::InitializeDataRecord()
 {
    // Set to no thrust
-   mEphemData.thrustIndicator = 0.0;
+   WriteDoubleField(&mEphemData.thrustIndicator, 0.0);
    
    // Set all states to sentinels
-   mEphemData.firstStateVector_DULT[0] = mSentinelData;
-   mEphemData.firstStateVector_DULT[1] = mSentinelData;
-   mEphemData.firstStateVector_DULT[2] = mSentinelData;
-   mEphemData.firstStateVector_DULT[3] = mSentinelData;
-   mEphemData.firstStateVector_DULT[4] = mSentinelData;
-   mEphemData.firstStateVector_DULT[5] = mSentinelData;
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[0], mSentinelData);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[1], mSentinelData);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[2], mSentinelData);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[3], mSentinelData);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[4], mSentinelData);
+   WriteDoubleField(&mEphemData.firstStateVector_DULT[5], mSentinelData);
    
    for (int i = 0; i < NUM_STATES_PER_RECORD - 1; i++)
    {
       for (int j = 0; j < 6; j++)
-         mEphemData.stateVector2Thru50_DULT[i-1][j] = mSentinelData;
+         WriteDoubleField(&mEphemData.stateVector2Thru50_DULT[i-1][j], mSentinelData);
    }
    
    // Blank out spares
@@ -1367,36 +1369,34 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       return;
    }
    
-   std::string startGreg;
-   std::string endGreg;
+   //std::string mLastDataRecStartGreg;
+   //std::string mLastDataRecEndGreg;
    double startMjd = 0.0;
    double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
    {
-      startGreg = ToA1Gregorian(*start);
-      endGreg = ToA1Gregorian(*end);
+      mLastDataRecStartGreg = ToA1Gregorian(*start);
+      mLastDataRecEndGreg = ToA1Gregorian(*end);
       startMjd = start->GetReal();
       endMjd = end->GetReal();
    }
    else  // UTC time system
    {
-      startGreg = ToUtcGregorian(*start);
-      endGreg = ToUtcGregorian(*end);
+      mLastDataRecStartGreg = ToUtcGregorian(*start);
+      mLastDataRecEndGreg = ToUtcGregorian(*end);
       startMjd = ToUtcModJulian(*start);
       endMjd = ToUtcModJulian(*end);
    }
    
-   #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage
-      ("start=%f '%s', end=%f '%s'\n", start->GetReal(), startGreg.c_str(), end->GetReal(), endGreg.c_str());
-   #endif
-   
-   
    // Write data record
    mDataRecWriteCounter++;
    
-   #ifdef DEBUG_WRITE_DATA_SEGMENT
-   MessageInterface::ShowMessage("mDataRecWriteCounter=%d\n", mDataRecWriteCounter);
+   #ifdef DEBUG_DATA_SEGMENT_TIME
+   // Note: Subtracted 2 from mDataRecWriteCounter for actual data record counter
+   // since it started at 2
+   MessageInterface::ShowMessage
+      ("===> mDataRecWriteCounter=%2d, start=%f '%s', end=%f '%s'\n", mDataRecWriteCounter-2,
+       start->GetReal(), mLastDataRecStartGreg.c_str(), end->GetReal(), mLastDataRecEndGreg.c_str());
    #endif
    
    // Set start date of ephemeris if first data record
@@ -1458,7 +1458,7 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    // If data points received is less than NUM_STATES_PER_RECORD, write sentinel flag
    if ((numPoints < NUM_STATES_PER_RECORD) && canFinalize)
    {
-      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      #ifdef DEBUG_WRITE_SENTINELS
       MessageInterface::ShowMessage
          ("===> Writing %d sentinel data\n", NUM_STATES_PER_RECORD-numPoints);
       #endif
@@ -1489,24 +1489,32 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    #endif
    WriteDataAt(mDataRecWriteCounter);
    
+   // Flush data to a file
+   mEphemFileOut.flush();
+   
    // If last data record contains NUM_STATES_PER_RECORD valid states and writing
    // final data, write next record with 10 sentinels.
    if (numPoints == NUM_STATES_PER_RECORD && canFinalize)
    {
-      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      #ifdef DEBUG_WRITE_SENTINELS
       MessageInterface::ShowMessage
-         ("   Writing last data record with first 10 sentinel data\n");
+         ("===> Writing last data record with first 10 sentinel data\n");
       #endif
+      
+      // Initialize state vectors with sentinel value
+      InitializeDataRecord();
+      
+      // Write 4 fields with sentinels
       WriteDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD, mSentinelData);
       WriteDoubleField(&mEphemData.dayOfYearForFirstEphemPoint, mSentinelData);
       WriteDoubleField(&mEphemData.secsOfDayForFirstEphemPoint, mSentinelData);
       WriteDoubleField(&mEphemData.timeIntervalBetweenPoints_SEC, mSentinelData);
       
-      for (int j = 0; j < 6; j++)
-         WriteDoubleField(&mEphemData.firstStateVector_DULT[j], mSentinelData);
+      mDataRecWriteCounter++;
+      WriteDataAt(mDataRecWriteCounter);
    }
    
-   // Flush data to file
+   // Flush data to a file
    mEphemFileOut.flush();
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
@@ -1747,7 +1755,8 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
          ("======================================== Begin of data record %d\n", recNum);
    
    bool swap = mSwapInputEndian;
-   MessageInterface::ShowMessage("mSwapInputEndian = %d\n", mSwapInputEndian);
+   MessageInterface::ShowMessage
+      ("mSwapInputEndian = %d, mSentinelsFound=%d\n", mSwapInputEndian, mSentinelsFound);
    
    double sentinels[50];
    sentinels[0] = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
@@ -1761,7 +1770,11 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    {
       double firstDate = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
       double firstSecs = ReadDoubleField(&mEphemData.secsOfDayForFirstEphemPoint);
-      std::string ymdhmsStr = ToYearMonthDayHourMinSec(firstDate, firstSecs);
+      std::string ymdhmsStr = "sentinel";
+      // If data and secs are not sentinels, convert to string
+      if ((!GmatMathUtil::IsEqual(firstDate, mSentinelData, 1.0e-10) &&
+           !GmatMathUtil::IsEqual(firstSecs, mSentinelData, 1.0e-10)))
+         ymdhmsStr = ToYearMonthDayHourMinSec(firstDate, firstSecs);
       MessageInterface::ShowMessage("timeOfFirstEphemPoint.          =  %s\n", ymdhmsStr.c_str());
       DebugDouble("dateOfFirstEphemPoint_YYYMMDD   = % f\n", mEphemData.dateOfFirstEphemPoint_YYYMMDD, swap);
       DebugDouble("dayOfYearForFirstEphemPoint     = % f\n", mEphemData.dayOfYearForFirstEphemPoint, swap);
@@ -1786,7 +1799,7 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    // First velocity vector
    for (int j = 3; j < 6; j++)
    {
-      sentinels[7+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      sentinels[4+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
       if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
       {
          velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
@@ -1795,15 +1808,18 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       }
    }
    
+   
    // If sentinels already found, log data and return
    if (mSentinelsFound)
    {
       int i = mLastStateIndexRead;
+      if (logOption >= 2)
+         MessageInterface::ShowMessage("timeOfLastEphemPoint.           =  %s\n", mLastDataRecEndGreg.c_str());
       
       for (int j = 0; j < 3; j++)
       {
          if (logOption >= 2)
-         {
+         {           
             posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
             DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, posDult, false);
             DebugDouble("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, posDult * DUL_TO_KM, false);
@@ -1812,8 +1828,7 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       
       for (int j = 3; j < 6; j++)
       {
-         sentinels[j] = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
-         if (logOption > 2 || (logOption == 2 && i == mLastStateIndexRead))
+         if (logOption >= 2)
          {
             velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
             DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, velDult, false);
@@ -1828,15 +1843,21 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    int sentinelCount = 0;
    for (int k = 0; k < 10; k++)
    {
-      if (GmatMathUtil::IsEqual(sentinels[k], mSentinelData, 10.0))
+      #ifdef DEBUG_UNPACK_DATA
+      MessageInterface::ShowMessage("   sentinels[%d] = % 1.15e\n", k, sentinels[k]);
+      #endif
+      if (GmatMathUtil::IsEqual(sentinels[k], mSentinelData, 1.0e-10))
          sentinelCount++;
    }
    
+   #ifdef DEBUG_UNPACK_DATA
+   MessageInterface::ShowMessage("   sentinelCount = %d\n", sentinelCount);
+   #endif
+   
    if (sentinelCount == 10)
    {
-      #ifdef DEBUG_UNPACK_DATA
-      MessageInterface::ShowMessage("First 10 sentinels found\n");
-      #endif
+      if (logOption > 0)
+         MessageInterface::ShowMessage("=====> First 10 sentinels found\n");
       mSentinelsFound = true;
       mLastStateIndexRead = -1;
       return;
@@ -1875,9 +1896,8 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       
       if (sentinelCount > 5)
       {
-         #ifdef DEBUG_UNPACK_DATA
-         MessageInterface::ShowMessage("State sentinels found\n");
-         #endif
+         if (logOption > 0)
+            MessageInterface::ShowMessage("=====> State sentinels found\n");
          mSentinelsFound = true;
          mLastStateIndexRead = i - 1;
          break;
@@ -1905,9 +1925,8 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       
       if (sentinelCount > 5)
       {
-         #ifdef DEBUG_UNPACK_DATA
-         MessageInterface::ShowMessage("State zero vector found\n");
-         #endif
+         if (logOption > 0)
+            MessageInterface::ShowMessage("=====> State zero vector found\n");
          mSentinelsFound = true;
          mLastStateIndexRead = i - 1;
          break;
@@ -2583,7 +2602,7 @@ int Code500EphemerisFile::SwapIntegerBytes(const Byte byte1, const Byte byte2,
  *
  * @param  fieldAndFormat  Filed name and format
  * @param  value  Real value
- * @param  swapEndian  true if swapping endian; false otherwise
+ * @param  swapEndian  true if swapping endian; false otherwise [false]
  */
 //------------------------------------------------------------------------------
 void Code500EphemerisFile::DebugDouble(const std::string &fieldAndFormat, double value,
