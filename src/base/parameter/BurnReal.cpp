@@ -51,7 +51,8 @@ BurnReal::BurnReal(const std::string &name, const std::string &typeStr,
                    const std::string &desc, const std::string &unit,
                    GmatParam::DepObject depObj, bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, ownerType, false, isSettable)
+             depObj, ownerType, false, isSettable),
+     BurnData(name, ownerType)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

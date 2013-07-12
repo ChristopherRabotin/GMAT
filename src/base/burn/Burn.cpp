@@ -31,6 +31,7 @@
 //#define DEBUG_BURN_SET
 //#define DEBUG_BURN_INIT
 //#define DEBUG_BURN_CONVERT
+//#define DEBUG_BURN_CONVERT_ROTMAT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -113,7 +114,9 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    satName              (""),
    usingLocalCoordSys   (true),
    isMJ2000EqAxes       (false),
-   isSpacecraftBodyAxes (false)
+   isSpacecraftBodyAxes (false),
+   hasFired             (false),
+   epochAtLastFire      (GmatTimeConstants::MJD_OF_J2000)
 {
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
@@ -189,7 +192,9 @@ Burn::Burn(const Burn &b) :
    vectorFormat         (b.vectorFormat),
    usingLocalCoordSys   (b.usingLocalCoordSys),
    isMJ2000EqAxes       (b.isMJ2000EqAxes),
-   isSpacecraftBodyAxes (b.isSpacecraftBodyAxes)
+   isSpacecraftBodyAxes (b.isSpacecraftBodyAxes),
+   hasFired             (false),
+   epochAtLastFire      (b.epochAtLastFire)
 {
    deltaV[0] = b.deltaV[0];
    deltaV[1] = b.deltaV[1];
@@ -230,31 +235,35 @@ Burn& Burn::operator=(const Burn &b)
    
    GmatBase::operator=(b);
    
-   solarSystem        = b.solarSystem;
-   localCoordSystem   = NULL;
-   coordSystem        = b.coordSystem;
-   localOrigin        = b.localOrigin;
-   j2000Body          = b.j2000Body;
-   spacecraft         = NULL;
-   coordSystemName    = b.coordSystemName;
-   localOriginName    = b.localOriginName;
-   localAxesName      = b.localAxesName;
-   j2000BodyName      = b.j2000BodyName;
-   satName            = b.satName;
-   vectorFormat       = b.vectorFormat;
-   usingLocalCoordSys = b.usingLocalCoordSys;
-   localAxesLabels    = b.localAxesLabels;
+   solarSystem          = b.solarSystem;
+   localCoordSystem     = NULL;
+   coordSystem          = b.coordSystem;
+   localOrigin          = b.localOrigin;
+   j2000Body            = b.j2000Body;
+   spacecraft           = NULL;
+   coordSystemName      = b.coordSystemName;
+   localOriginName      = b.localOriginName;
+   localAxesName        = b.localAxesName;
+   j2000BodyName        = b.j2000BodyName;
+   satName              = b.satName;
+   vectorFormat         = b.vectorFormat;
+   usingLocalCoordSys   = b.usingLocalCoordSys;
+   isMJ2000EqAxes       = b.isMJ2000EqAxes;
+   isSpacecraftBodyAxes = b.isSpacecraftBodyAxes;
+   hasFired             = b.hasFired;
+   epochAtLastFire      = b.epochAtLastFire;
+   localAxesLabels      = b.localAxesLabels;
 
    // Override the copied init flag
-   isInitialized      = false;
+   isInitialized        = false;
    
-   deltaV[0] = b.deltaV[0];
-   deltaV[1] = b.deltaV[1];
-   deltaV[2] = b.deltaV[2];
+   deltaV[0]            = b.deltaV[0];
+   deltaV[1]            = b.deltaV[1];
+   deltaV[2]            = b.deltaV[2];
    
-   deltaVInertial[0] = 0.0;
-   deltaVInertial[1] = 0.0;
-   deltaVInertial[2] = 0.0;
+   deltaVInertial[0]    = 0.0;
+   deltaVInertial[1]    = 0.0;
+   deltaVInertial[2]    = 0.0;
    
    for (Integer i = 0; i < 3; i++)
       for (Integer j = 0; j < 3; j++)
@@ -270,6 +279,30 @@ Burn& Burn::operator=(const Burn &b)
 bool Burn::IsUsingLocalCoordSystem()
 {
    return usingLocalCoordSys;
+}
+
+//------------------------------------------------------------------------------
+// bool HasFired()
+//------------------------------------------------------------------------------
+bool Burn::HasFired() const
+{
+   return hasFired;
+}
+
+//------------------------------------------------------------------------------
+// Real* GetDeltaVInertial()
+//------------------------------------------------------------------------------
+Real* Burn::GetDeltaVInertial()
+{
+   return deltaVInertial;
+}
+
+//------------------------------------------------------------------------------
+// Real GetEpochAtLastFire()
+//------------------------------------------------------------------------------
+Real Burn::GetEpochAtLastFire()
+{
+   return epochAtLastFire;
 }
 
 
@@ -614,7 +647,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       {
          localAxesName = value;
          
-         // Do we need to determin Local CS here?
+         // Do we need to determine Local CS here?
          // Yes, old ImpulsiveBurn script doesn't have CoordinateSystem field, 
          // so Axes should be used to determine Local CS or not
          if (find(localAxesLabels.begin(), localAxesLabels.end(), localAxesName)
@@ -1000,6 +1033,7 @@ bool Burn::Initialize()
        this, GetName().c_str(), retval, localCoordSystem);
    #endif
    
+//   hasFired = false;    // do I want this here?
    return retval;
 }
 
@@ -1154,6 +1188,10 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
          // inertial to body
          Rmatrix33 inertialToBody = spacecraft->GetAttitude(epoch);
          Rmatrix33 rotMat = inertialToBody.Transpose();
+         #ifdef DEBUG_BURN_CONVERT_ROTMAT
+         MessageInterface::ShowMessage
+            ("for local Spacecraft body ----- rotMat=\n%s\n", rotMat.ToString(16, 20).c_str());
+         #endif
          outDeltaV = inDeltaV * rotMat;
          for (Integer i=0; i<3; i++)
             dvInertial[i] = outDeltaV[i];

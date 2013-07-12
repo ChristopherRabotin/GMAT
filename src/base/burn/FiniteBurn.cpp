@@ -306,6 +306,8 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
           GetName().c_str(), burnData[0], burnData[1], burnData[2], dm);
    #endif
 
+   hasFired = true;
+   epochAtLastFire = epoch;
    return true;
 }
 

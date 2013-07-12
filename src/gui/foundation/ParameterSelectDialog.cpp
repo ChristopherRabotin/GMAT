@@ -105,6 +105,8 @@ ParameterSelectDialog::ParameterSelectDialog
    mForStopCondition = forStopCondition;
    mObjectType = objectType;
    
+   mLastCoordSysName = "EarthMJ2000Eq";
+
    // Set initial flag for allowing selecting whole object
    mAllowWholeObject = false;
    
@@ -291,7 +293,8 @@ void ParameterSelectDialog::LoadData()
       {
          mPropertyListBox->SetSelection(0);
          
-         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
+         if (mAllowMultiSelect)
+//         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
          {
             mCoordSysLabel->Hide();
             mCoordSysComboBox->SetValue("");
@@ -306,7 +309,7 @@ void ParameterSelectDialog::LoadData()
             mLastCoordSysName = mCoordSysComboBox->GetString(0);
             
             // Show coordinate system or central body
-            ShowCoordSystem();
+            ShowCoordSystem(false);
          }
       }
    }
@@ -571,7 +574,9 @@ void ParameterSelectDialog::OnListBoxSelect(wxCommandEvent& event)
       #endif
       
       // Show coordinate system or central body
-      ShowCoordSystem();
+      wxString objType = mObjectTypeComboBox->GetValue();
+      bool objIsBurn = (objType == "ImpulsiveBurn");
+      ShowCoordSystem(objIsBurn);
    }
    
    #ifdef DEBUG_LISTBOX_SELECT
@@ -705,6 +710,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
    else if(obj == mCoordSysComboBox)
    {
       mLastCoordSysName = mCoordSysComboBox->GetValue();
+
       #ifdef DEBUG_COMBOBOX_CHANGE
       MessageInterface::ShowMessage
          ("   CoordSysComboBox changed to %s\n", mLastCoordSysName.c_str());
@@ -1483,9 +1489,11 @@ void ParameterSelectDialog::ShowObjectProperties()
                                             mShowSettableOnly, mForStopCondition));
       
       mPropertyListBox->SetSelection(0);
-      if ((mObjectTypeComboBox->GetValue() == "Spacecraft") ||
-          (mObjectTypeComboBox->GetValue() == "SpacePoint"))
-         ShowCoordSystem();
+      wxString objTypeSelect = mObjectTypeComboBox->GetValue();
+      if ((objTypeSelect == "Spacecraft")    ||
+          (objTypeSelect == "ImpulsiveBurn") ||
+          (objTypeSelect == "SpacePoint"))
+         ShowCoordSystem(objTypeSelect == "ImpulsiveBurn");
    }
 }
 
@@ -1518,9 +1526,9 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
 
 
 //------------------------------------------------------------------------------
-// void ShowCoordSystem()
+// void ShowCoordSystem(bool showBlank = false)
 //------------------------------------------------------------------------------
-void ParameterSelectDialog::ShowCoordSystem()
+void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
 {
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage("ShowCoordSystem() entered\n");
@@ -1547,7 +1555,21 @@ void ParameterSelectDialog::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate "GUI_ACCEL_KEY"System");
       
-      mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
+      if (showBlank)
+      {
+         int blankPos = mCoordSysComboBox->FindString("");
+         if (blankPos == wxNOT_FOUND)   mCoordSysComboBox->Append("");
+         mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
+      }
+      else
+      {
+         int blankPos = mCoordSysComboBox->FindString("");
+         if (blankPos != wxNOT_FOUND)  mCoordSysComboBox->Delete((unsigned int) blankPos);
+         if (mLastCoordSysName == "")
+            mCoordSysComboBox->SetSelection(0);
+         else
+            mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
+      }
       
       mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysSizer->Detach(mCentralBodyComboBox);
@@ -2074,10 +2096,12 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
              propName.c_str());
       
       if (depObjName != "")
+      {
          param->SetStringParameter("DepObject", depObjName);
       
-      if (param->IsCoordSysDependent())
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+         if (param->IsCoordSysDependent())
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+      }
    }
    
    return param;

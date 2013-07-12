@@ -34,7 +34,8 @@ class GMAT_API BurnData : public RefData
 {
 public:
 
-   BurnData();
+   BurnData(const std::string &name = "",
+            const Gmat::ObjectType paramOwnerType = Gmat::IMPULSIVE_BURN);
    BurnData(const BurnData &data);
    BurnData& operator= (const BurnData& right);
    virtual ~BurnData();
@@ -69,6 +70,10 @@ protected:
    
    CoordinateConverter mCoordConverter;
    
+   bool mIsParamCSDep;
+   bool firstTimeEpochWarning;
+   bool firstTimeHasntFiredWarning;
+
    enum {ELEMENT1, ELEMENT2, ELEMENT3};
    
    enum

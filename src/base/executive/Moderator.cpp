@@ -3328,19 +3328,21 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    
    // Check for deprecated Element* on Thruster, new Parameters are ThrustDirection*
    std::string newType = type;
-   if (type == "Element1" || type == "Element2" || type == "Element3")
-   {
-      Integer numDots = GmatStringUtil::NumberOfOccurrences(name, '.');
-      if (numDots > 1)
-      {
-         newType = GmatStringUtil::Replace(newType, "Element", "ThrustDirection");
-         #if DEBUG_CREATE_PARAMETER
-         MessageInterface::ShowMessage
-            ("   Parameter type '%s' in '%s' changed to '%s'\n", type.c_str(),
-             name.c_str(), newType.c_str());
-         #endif
-      }
-   }
+   // Element1/2/3 no longer allowed for Thrusters as we have added
+   // Burn parameters with dependencies - WCS 2013.07.11
+//   if (type == "Element1" || type == "Element2" || type == "Element3")
+//   {
+//      Integer numDots = GmatStringUtil::NumberOfOccurrences(name, '.');
+//      if (numDots > 1)
+//      {
+//         newType = GmatStringUtil::Replace(newType, "Element", "ThrustDirection");
+//         #if DEBUG_CREATE_PARAMETER
+//         MessageInterface::ShowMessage
+//            ("   Parameter type '%s' in '%s' changed to '%s'\n", type.c_str(),
+//             name.c_str(), newType.c_str());
+//         #endif
+//      }
+//   }
    
    // Ceate new Parameter but do not add to ConfigManager yet
    #if DEBUG_CREATE_PARAMETER
@@ -3390,7 +3392,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    {
       // check if object is to be managed in configuration(loj: 2008.03.18)
       // @note Do not use objectManageOption here since manage flag overrides
-      // this option for automatic objects such as Paramters
+      // this option for automatic objects such as Parameters
       if (manage == 1)
       {
          bool oldFlag = theConfigManager->HasConfigurationChanged();
@@ -8243,9 +8245,22 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
                 paramOwnerType.c_str());
             #endif
             
-            throw GmatBaseException
-               ("Parameter type: " + type + " should be property of " +
-                paramOwnerType);
+            if ((type == "Element1") || (type == "Element2") ||
+                (type == "Element3"))
+            {
+               std::string newType =
+                     GmatStringUtil::Replace(type, "Element", "ThrustDirection");
+               std::string errmsg  = "*** ERROR *** The Parameter type \"";
+               errmsg             += type + "\" of Thruster is no longer accepted; ";
+               errmsg             += "please use \"" + newType + "\" instead.\n";
+               throw GmatBaseException(errmsg);
+            }
+            else
+            {
+               throw GmatBaseException
+                  ("Parameter type: " + type + " should be property of " +
+                   paramOwnerType);
+            }
          }
       }
    }

@@ -170,7 +170,7 @@ private:
    void ShowObjectProperties();
    void BuildAttachedHardware(const wxString &scName);
    void ShowHardwareProperties(const wxString &scName, const wxString &hwName);
-   void ShowCoordSystem();
+   void ShowCoordSystem(bool showBlank = false);
    void ClearProperties();
    void DeselectAllObjects();
    void DeselectObjects(wxArrayInt &newSelects, wxArrayInt &oldSelects);

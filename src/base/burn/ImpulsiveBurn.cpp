@@ -211,8 +211,8 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
-      ("   usingLocalCoordSys=%d, spacecraft=<%p>, initialized=%d, "
-       "localCoordSystem=<%p>\n", usingLocalCoordSys, spacecraft, initialized,
+      ("   usingLocalCoordSys=%d, spacecraft=<%p>, "
+       "localCoordSystem=<%p>\n", usingLocalCoordSys, spacecraft,
        localCoordSystem);
    #endif
    
@@ -269,6 +269,8 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    MessageInterface::ShowMessage("ImpulsiveBurn::Fire() returning true\n");
    #endif
    
+   hasFired        = true;
+   epochAtLastFire = epoch;
    return true;
 }
 

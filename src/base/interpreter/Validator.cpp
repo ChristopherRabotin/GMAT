@@ -988,7 +988,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    //-------------------------------------------------------------------
    bool isLeftValid = true;
    ElementWrapper *leftEw = NULL;
-   static bool writeWarning = true; // To write warning messaage per session
+   static bool writeWarning = true; // To write warning message per session
    
    try
    {         
@@ -1005,24 +1005,27 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       // This will enable assignment such as Sat.Thruster1.FuelMass = 735;
       // Handle deprecated Element* on Thruster (2009.12.15)
       std::string newType = type;
-      if ((type == "Element1" || type == "Element2" || type == "Element3") &&
-          GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1)
-      {
-         newType = GmatStringUtil::Replace(newType, "Element", "ThrustDirection");
-         #if DBGLVL_WRAPPERS > 0
-         MessageInterface::ShowMessage
-            ("   Parameter type '%s' in '%s' changed to '%s'\n", type.c_str(),
-             lhs.c_str(), newType.c_str());
-         #endif
-         if (writeWarning)
-         {
-            MessageInterface::ShowMessage
-               ("*** WARNING *** The Parameter type \"" + type + "\" of Thruster is "
-                "deprecated and will be removed from a future build; please use \"" +
-                newType + "\" instead in \"" + lhs + ".\"\n");
-            writeWarning = false;
-         }
-      }
+      // Element1/2/3 no longer allowed for Thrusters as we have added
+      // Burn parameters with dependencies - WCS 2013.07.11
+      //
+//      if ((type == "Element1" || type == "Element2" || type == "Element3") &&
+//          GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1)
+//      {
+//         newType = GmatStringUtil::Replace(newType, "Element", "ThrustDirection");
+//         #if DBGLVL_WRAPPERS > 0
+//         MessageInterface::ShowMessage
+//            ("   Parameter type '%s' in '%s' changed to '%s'\n", type.c_str(),
+//             lhs.c_str(), newType.c_str());
+//         #endif
+//         if (writeWarning)
+//         {
+//            MessageInterface::ShowMessage
+//               ("*** WARNING *** The Parameter type \"" + type + "\" of Thruster is "
+//                "no longer accepted; please use \"" +
+//                newType + "\" instead in \"" + lhs + ".\"\n");
+//            writeWarning = false;
+//         }
+//      }
       
       ParameterInfo *paramInfo = ParameterInfo::Instance();
       bool isLhsSettableParam = paramInfo->IsSettable(newType);
@@ -1062,8 +1065,8 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       //if (leftEw == NULL)
       //   return false;
       
-      // Eventhough LHS wrapper was created, Assignment::SetElementWrapper() may
-      // throw an exceptin when it is not valid, so use the flag instead (LOJ: 2013.03.27)
+      // Even though LHS wrapper was created, Assignment::SetElementWrapper() may
+      // throw an exception when it is not valid, so use the flag instead (LOJ: 2013.03.27)
       if (leftEw == NULL)
       {
          isLeftValid = false;
@@ -2543,6 +2546,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
                // Special case for Element1/2/3 since these are deprecated types of Spacecraft
                // owned Thruster Parameter such as sat1.Thruster1.Element1 or owned FuelTank
                // We don't want to throw an exception for this case
+               // WCS 2013.07.11 - @todo should we remove part or all of this first condition?
                GmatBase *ownedObj = FindObject(depobj);
                if (ownedObj && (ownedObj->IsOfType(Gmat::THRUSTER) ||
                      ownedObj->IsOfType(Gmat::FUEL_TANK)))

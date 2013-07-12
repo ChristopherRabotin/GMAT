@@ -41,6 +41,9 @@ public:
    Burn&                operator=(const Burn &b);
 
    bool                 IsUsingLocalCoordSystem();
+   bool                 HasFired() const;
+   Real*                GetDeltaVInertial();
+   Real                 GetEpochAtLastFire();
    
    // Inherited (GmatBase) methods
    // for parameters
@@ -145,6 +148,10 @@ protected:
    bool                 isMJ2000EqAxes;
    /// Flag indicating if axes is SpacecrftBody
    bool                 isSpacecraftBodyAxes;
+   /// flag indicating whether or not the burn has fired
+   bool                 hasFired;
+   /// epoch at the last fire
+   Real                 epochAtLastFire;
    
    /// Available local axes labels
    static StringArray   localAxesLabels;
