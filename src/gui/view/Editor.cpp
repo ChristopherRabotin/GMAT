@@ -1247,7 +1247,9 @@ void Editor::OnCharAdded (wxStyledTextEvent &event)
       if (lineInd == 0)
          return;
       SetLineIndentation (currentLine, lineInd);
-      GotoPos(PositionFromLine (currentLine) + lineInd);
+	  // if UseTabs is on, use LineEnd(), if off, use GotoPos
+	  LineEnd();
+      //GotoPos(PositionFromLine (currentLine) + lineInd);
    }
 }
 
