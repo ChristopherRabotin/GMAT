@@ -396,7 +396,23 @@ bool Set::InterpretAction()
          typeName.c_str());
    #endif
 
-   StringArray blocks = parser.DecomposeBlock(generatingString);
+   std::string mainString = generatingString;
+   // Remove trailing semicolons
+   UnsignedInt loc = mainString.find_last_of(';');
+   while (loc != std::string::npos)
+   {
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("Went from '%s' to ",
+               mainString.c_str());
+      #endif
+      mainString = mainString.substr(0, loc);
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("'%s'\n", mainString.c_str());
+      #endif
+      loc = mainString.find_last_of(';');
+   }
+
+   StringArray blocks = parser.DecomposeBlock(mainString);
 
    #ifdef DEBUG_PARSING
       MessageInterface::ShowMessage("Top level blocks from \"%s\":\n",
@@ -406,7 +422,7 @@ bool Set::InterpretAction()
    #endif
 
    // Check for paren matching
-   UnsignedInt loc = blocks[0].find('(');
+   loc = blocks[0].find('(');
    if (loc != std::string::npos)
    {
       UnsignedInt loc2 = blocks[0].find('(', loc+1);
