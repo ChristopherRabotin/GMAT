@@ -2930,8 +2930,8 @@ void EphemerisFile::ProcessFinalDataOnWaiting(bool canFinalize)
    // Write last data received if not written yet(Do attitude later)
    if (canFinalize)
    {
-      //if (fileType == CCSDS_OEM && useFixedStepSize)
-      if (useFixedStepSize)
+      // Write last data received only for CCSDS not for Code500 (GMT-3997 fix)
+      if (fileType == CCSDS_OEM && useFixedStepSize)
       {
          #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage("   finalEpochA1Mjd=%f\n", finalEpochA1Mjd);
@@ -4259,6 +4259,10 @@ void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
 //------------------------------------------------------------------------------
 void EphemerisFile::FinalizeCode500Ephemeris()
 {
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage("EphemerisFile::FinalizeCode500Ephemeris() entered\n");
+   #endif
+   
    if (code500EphemFile == NULL)
       throw SubscriberException
          ("*** INTERNAL ERROR *** Code500 Ephem Writer is NULL in "
@@ -4281,6 +4285,10 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
+   #endif
+   
+   #ifdef DEBUG_EPHEMFILE_FINISH
+   MessageInterface::ShowMessage("EphemerisFile::FinalizeCode500Ephemeris() leaving\n");
    #endif
 }
 
@@ -4590,7 +4598,7 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    #if DBGLVL_EPHEMFILE_DATA > 0
    MessageInterface::ShowMessage
       ("======================================================================\n"
-       "EphemerisFile::Distribute() this=<%p>'%s' called\n", this, GetName().c_str());
+       "EphemerisFile::Distribute() this=<%p>'%s' entered\n", this, GetName().c_str());
    MessageInterface::ShowMessage
       ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRun=%d\n   "
        "runstate=%d, isManeuvering=%d, firstTimeWriting=%d\n", len, active, writeEphemeris, isEndOfReceive,
@@ -4625,18 +4633,6 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #endif
       return true;
    }
-
-   #if 0
-   if (finalEpochProcessed)
-   {
-      #ifdef DEBUG_EPHEMFILE_FINISH
-      MessageInterface::ShowMessage
-         ("=====> EphemerisFile::Distribute() '%s' returning true, final epoch processed\n",
-          GetName().c_str());
-      #endif
-      return true;
-   }
-   #endif
    
    // If end of run received, finishup writing
    if (isEndOfRun)
@@ -4650,12 +4646,12 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
       std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
       MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() isEndOfReceive=%d, isEndOfDataBlock=%d, "
-          "isEndOfRun=%d, len=%d, firstTimeWriting=%d,\n   lastEpochWrote=%s, "
-          "currEpochInSecs=%s, prevEpochInSecs=%s\n   a1MjdArray.size()=%d\n",
-          isEndOfReceive, isEndOfDataBlock, isEndOfRun, len, firstTimeWriting,
-          lastEpochWroteStr.c_str(), currEpochStr.c_str(), prevEpochStr.c_str(),
-          a1MjdArray.size());
+         ("EphemerisFile::Distribute() this=<%p>'%s', isEndOfReceive=%d, "
+          "isEndOfDataBlock=%d, isEndOfRun=%d, len=%d, firstTimeWriting=%d\n"
+          "   lastEpochWrote=%s, currEpochInSecs=%s, prevEpochInSecs=%s\n"
+          "   a1MjdArray.size()=%d\n", this, GetName().c_str(), isEndOfReceive,
+          isEndOfDataBlock, isEndOfRun, len, firstTimeWriting, lastEpochWroteStr.c_str(),
+          currEpochStr.c_str(), prevEpochStr.c_str(), a1MjdArray.size());
       #endif
       
       // If not first time and there is data to process, finish up writing
