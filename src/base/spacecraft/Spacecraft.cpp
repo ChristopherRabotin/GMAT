@@ -3064,12 +3064,20 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             errmsg += value + "\n";
             throw SpaceObjectException(errmsg);
          }
+         // Get reference coordinate system from old attitude object
+         std::string oldAttCSName    = "";
+         GmatBase    *oldAttCS       = NULL;
+         bool        oldAttCSFound   = false;
          if (attitude != NULL)
          {
             #ifdef DEBUG_SC_ATTITUDE
                MessageInterface::ShowMessage("   new attitude is of type %s\n",
                      newAtt->GetAttitudeModelName().c_str());
             #endif
+            // Get reference coordinate system from old attitude object
+            oldAttCSName  = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+            oldAttCS      = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+            oldAttCSFound = true;
             delete attitude;
             ownedObjectCount--;
          }
@@ -3092,6 +3100,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          newAtt->SetEpoch(state.GetEpoch()); // correct? do we want to do this?  for Spinner?
          newAtt->NeedsReinitialization();
          newAtt->SetOwningSpacecraft(this);
+         if (oldAttCSFound)
+         {
+            newAtt->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+            newAtt->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
+         }
          attitude = newAtt;
          ownedObjectCount++;
          attitudeModel = value;
@@ -4658,8 +4671,16 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
 
    if (obj->IsOfType(Gmat::ATTITUDE))
    {
+      // Get reference coordinate system from old attitude object
+      std::string oldAttCSName  = "";
+      GmatBase    *oldAttCS     = NULL;
+      bool        oldAttCSFound = false;
       if (attitude != NULL)
       {
+         // Get reference coordinate system from old attitude object
+         oldAttCSName  = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+         oldAttCS      = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+         oldAttCSFound = true;
          delete attitude;
          --ownedObjectCount;
       }
@@ -4667,6 +4688,11 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       ++ownedObjectCount;
       attitude->SetEpoch(state.GetEpoch());
       attitude->SetOwningSpacecraft(this);
+      if (oldAttCSFound)
+      {
+         attitude->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+         attitude->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
+      }
       isInitialized = false;
    }
 }
