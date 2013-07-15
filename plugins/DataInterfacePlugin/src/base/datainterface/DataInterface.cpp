@@ -36,7 +36,7 @@ DataInterface::PARAMETER_LABEL[DataInterfaceParamCount - InterfaceParamCount] =
 const Gmat::ParameterType
 DataInterface::PARAMETER_TYPE[DataInterfaceParamCount - InterfaceParamCount] =
 {
-      Gmat::STRING_TYPE,
+      Gmat::ENUMERATION_TYPE,
       Gmat::STRINGARRAY_TYPE,
       Gmat::STRINGARRAY_TYPE
 };
@@ -84,7 +84,8 @@ DataInterface::~DataInterface()
 DataInterface::DataInterface(const DataInterface& di) :
    Interface         (di),
    readerFormat      (di.readerFormat),
-   theReader         (NULL)
+   theReader         (NULL),
+   supportedFormats    (di.supportedFormats)
 {
 }
 
@@ -107,6 +108,7 @@ DataInterface& DataInterface::operator=(const DataInterface& di)
       if (theReader)
          delete theReader;
       theReader = NULL;
+      supportedFormats = di.supportedFormats;
    }
 
    return *this;
@@ -272,8 +274,26 @@ bool DataInterface::SetStringParameter(const Integer id,
 {
    if (id == FORMAT)
    {
-      readerFormat = value;
-      return true;
+      if (find(supportedFormats.begin(), supportedFormats.end(), value) !=
+            supportedFormats.end())
+      {
+         readerFormat = value;
+         return true;
+      }
+      else
+      {
+         std::string theList;
+         for (UnsignedInt i = 0; i < supportedFormats.size(); ++i)
+         {
+            if (i > 0)
+               theList += ", ";
+            theList += supportedFormats[i];
+         }
+         InterfaceException ex("");
+         ex.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+               GetParameterText(id).c_str(), theList.c_str());
+         throw ex;
+      }
    }
 
    return Interface::SetStringParameter(id, value);
@@ -521,6 +541,43 @@ const StringArray& DataInterface::GetStringArrayParameter(
 {
    return GetStringArrayParameter(GetParameterID(label), index);
 }
+
+//------------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of field values accepted for an enumerated field
+ *
+ * @param id The ID of the field
+ *
+ * @return The list of accepted values
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataInterface::GetPropertyEnumStrings(const Integer id) const
+{
+   if (id == FORMAT)
+      return supportedFormats;
+
+   return Interface::GetPropertyEnumStrings(id);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of field values accepted for an enumerated field
+ *
+ * @param label The scripted string for the field
+ *
+ * @return The list of accepted values
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataInterface::GetPropertyEnumStrings(
+      const std::string &label) const
+{
+   return GetPropertyEnumStrings(GetParameterID(label));
+}
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetSupportedFieldNames() const

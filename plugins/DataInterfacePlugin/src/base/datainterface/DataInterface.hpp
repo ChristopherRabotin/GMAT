@@ -76,6 +76,11 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const std::string &label) const;
+
    const StringArray&   GetSupportedFieldNames() const;
    bool                 WasDataLoaded(const std::string& forField);
    const std::string    GetObjectParameterName(const std::string& forField);
@@ -106,6 +111,8 @@ protected:
    std::string readerFormat;
    /// The reader that this interface uses
    DataReader *theReader;
+   /// List of data types the interface supports
+   StringArray supportedFormats;
 
    /// Parameter IDs
    enum
