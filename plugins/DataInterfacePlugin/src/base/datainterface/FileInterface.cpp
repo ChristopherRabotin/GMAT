@@ -36,7 +36,7 @@
 const std::string
 FileInterface::PARAMETER_LABEL[FileInterfaceParamCount - DataInterfaceParamCount] =
 {
-      "Filename",
+   "Filename",
 };
 
 const Gmat::ParameterType
@@ -62,6 +62,12 @@ FileInterface::FileInterface(const std::string &name) :
 {
    objectTypeNames.push_back("FileInterface");
    parameterCount = FileInterfaceParamCount;
+
+   ReaderFactory fact;
+   supportedFormats = fact.GetListOfCreatableObjects();
+
+   if (supportedFormats.size() > 0)
+      readerFormat = supportedFormats[0];
 }
 
 
