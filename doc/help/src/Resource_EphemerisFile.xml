@@ -76,12 +76,12 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>Allows the user to generate ephemeris data in the
-            coordinate system that is selected from
-            <guilabel>CoordinateSystem</guilabel> field. The user can choose
-            to also generate ephemeris data in user-defined coordinate system.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry><para>Allows you to set the interpolation order for the
+            available interpolator methods (<guilabel>Lagrange</guilabel> or
+            <guilabel>Hermite</guilabel>) for either
+            <guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK</guilabel> or
+            <guilabel>Code 500</guilabel> file formats. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -94,8 +94,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>CoordinateSystem</guilabel>
-                    resource</para>
+                    <para>For CCSDS-OEM and Code-500 file formats: 1 &lt;=
+                    Integer Number &lt;= 10. For SPK file format: 1 &lt;= Odd
+                    Integer Number &lt;= 9</para>
                   </listitem>
                 </varlistentry>
 
@@ -138,10 +139,13 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>Allows you to select format of the epoch that the
-            user defines in <guilabel>InitialEpoch</guilabel> and
-            <guilabel>FinalEpoch</guilabel> fields. This field cannot be
-            modified in the Mission Sequence. </para> <variablelist>
+            <entry><para> The ephemeris file is generated at the step size
+            that is specified for <guilabel>StepSize</guilabel> field. The
+            user can generate ephemeris file at default Integration step size
+            (using raw integrator steps) or by defining a fixed step size
+            provided by user. For Code-500 ephemeris, only fixed step size is
+            supported This field cannot be modified in the Mission
+            Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -262,9 +266,9 @@
           <row>
             <entry><guilabel>FileName</guilabel></entry>
 
-            <entry><para>Allows the user to name the generated ephemeris file
-            and save it in user-specified location. This field cannot be
-            modified in the Mission Sequence. </para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris file in three
+            available file formats: CCSDS-OEM, SPK and Code-500. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -277,7 +281,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Valid File Path and Name</para>
+                    <para><guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK,
+                    Code-500</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -516,8 +521,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>Lagrange</guilabel> for CCSDS file,
-                    <guilabel>Hermite</guilabel> for SPK file</para>
+                    <para><guilabel>Lagrange</guilabel> for CCSDS-OEM and
+                    Code-500 files, <guilabel>Hermite</guilabel> for SPK
+                    file</para>
                   </listitem>
                 </varlistentry>
 
@@ -1018,7 +1024,8 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Behavior of Coordinate System Field for CCSDS File Format</title>
+      <title>Behavior of Coordinate System Field for CCSDS and Code 500 File
+      Formats</title>
 
       <para>If the selected <guilabel>CoordinateSystem</guilabel> uses
       MJ2000Eq axes, the CCSDS ephemeris file contains “EME2000” for the
@@ -1028,6 +1035,9 @@
       user's guide is the ICD for all axes supported by GMAT. Also if you
       create a new coordinate system whose origin is Luna, then the CCSDS
       ephemeris file contains “Moon” for the CENTER_NAME.</para>
+
+      <para>For code 500 file format, J2000 epoch can be with reference to
+      central body that you select.</para>
 
       <para>There is one important difference between GMAT and IAU
       conventions. By IAU convention, there is no name for the IAU2000 axes
@@ -1088,8 +1098,8 @@
     </refsection>
 
     <refsection>
-      <title>Behavior of Interpolation Order Field for CCSDS and SPK File
-      Formats</title>
+      <title>Behavior of Interpolation Order Field for CCSDS, SPK and Code 500
+      File Formats</title>
 
       <para>For CCSDS file formats, whenever there is not enough raw data
       available to support the requested interpolation type and order, GMA
@@ -1101,8 +1111,19 @@
       the requested interpolation order.</para>
 
       <para>For SPK file formats, raw data is always collected at every
-      integrator step for each segment and then sent to SPK kernel writer. No
-      interpolation takes place for SPK ephemeris file.</para>
+      integrator step for each segment and then sent to SPK kernel writer.
+      GMAT does not perform any interpolation for SPK files as SPK contains
+      its own interpolation. As a result, <guilabel>InitialEpoch</guilabel>
+      and <guilabel>FinalEpoch</guilabel> fields behave differently for SPK
+      ephemerides. The first epoch on the file is the first step after
+      <guilabel>InitialEpoch</guilabel>. The last epoch on the file is the
+      last step before <guilabel>FinalEpoch.</guilabel></para>
+
+      <para>For code 500 file formats, you can set the interpolation order and
+      currently GMAT supports Lagrange as the available interpolator method.
+      For code 500 file formats, if there is not enough raw data available to
+      support interpolation type and order, GMAT will throw an error message
+      and stop interpolation.</para>
     </refsection>
 
     <refsection>
@@ -1144,6 +1165,27 @@ Toggle anEphmerisFile Off
 Propagate aProp(aSat) {aSat.ElapsedDays = 2}
 Toggle anEphmerisFile On
 Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior of Code 500 Ephemeris File During Discontinuous &amp;
+      Iterative Processes</title>
+
+      <para>Code 500 ephemeris file follows the ephemeris format and
+      definitions that have been defined in <emphasis>Flight Dynamics Division
+      (FDD) Generic Data Product Formats Interface Control
+      Document</emphasis>.</para>
+
+      <para>Unlike CCSDS ephemeris file, code 500 ephemeris does not support
+      separate chunks in the data blocks whenever discontinuous or discrete
+      mission events such as impulsive/finite maneuvers, change in dynamics or
+      assignment command takes place. Rather, code 500 ephemeris is generated
+      all in one continuous data block regardless of any number of mission
+      events that may occur between initial and final epochs of ephemeris
+      file. Furthermore, when a mission sequence employs iterative processes
+      such as differential correction or optimization, GMAT will only write
+      the ephemeris for the final solution from the iterative
+      processes.</para>
     </refsection>
   </refsection>
 
