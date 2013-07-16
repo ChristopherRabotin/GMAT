@@ -94,6 +94,9 @@ BurnThrusterPanel::~BurnThrusterPanel()
    theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
    theGuiManager->UnregisterComboBox("CelestialBody", originComboBox);
    theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
+
+   if (localObject != NULL)
+	 delete localObject;
 }
 
 //-------------------------------
@@ -112,6 +115,8 @@ void BurnThrusterPanel::Create()
    #ifdef DEBUG_BURNPANEL_CREATE
    MessageInterface::ShowMessage("BurnThrusterPanel::Create() entered\n");
    #endif
+
+   localObject = NULL;
    
    Integer bsize = 2; // border size
    // get the config object
@@ -516,6 +521,32 @@ void BurnThrusterPanel::LoadData()
 // void SaveData()
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::SaveData()
+{
+   #ifdef DEBUG_BURNPANEL_SAVE
+   MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() entered\n");
+   #endif
+   // create local copy of mObject
+   if (localObject != NULL)
+   {
+	   delete localObject;
+   }
+   localObject = mObject->Clone();
+   SaveData(localObject);
+
+   // if no errors, save again
+   if (canClose)
+	 SaveData(theObject);
+
+   #ifdef DEBUG_BURNPANEL_SAVE
+   MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() exiting\n");
+   #endif
+}
+
+   
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+void BurnThrusterPanel::SaveData(GmatBase *theObject)
 {
    #ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() entered\n");

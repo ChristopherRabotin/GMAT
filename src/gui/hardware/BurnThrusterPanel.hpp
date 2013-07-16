@@ -45,7 +45,10 @@ protected:
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
+   virtual void SaveData(GmatBase *theObject);
    
+   // local copy of object for verifying changes before commit/apply
+   GmatBase *localObject;
    GmatBase* theObject;
    RealArray   cCoefs;
    RealArray   kCoefs;

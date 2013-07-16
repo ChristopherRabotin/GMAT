@@ -30,7 +30,7 @@ public:
 protected:
    virtual void Create();
    virtual void LoadData();
-   virtual void SaveData();
+   virtual void SaveData(GmatBase *theObject);
    
 private:
 };

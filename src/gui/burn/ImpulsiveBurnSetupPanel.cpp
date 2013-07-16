@@ -133,9 +133,9 @@ void ImpulsiveBurnSetupPanel::LoadData()
 
 
 //------------------------------------------------------------------------------
-// void SaveData()
+// void SaveData(GmatBase *theObject)
 //------------------------------------------------------------------------------
-void ImpulsiveBurnSetupPanel::SaveData()
+void ImpulsiveBurnSetupPanel::SaveData(GmatBase *theObject)
 {
    #ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel::SaveData() entered\n");
@@ -165,7 +165,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
          theObject->SetRealParameter(paramID, isp);
       }
 
-      BurnThrusterPanel::SaveData();
+      BurnThrusterPanel::SaveData(theObject);
       
       // Validation checks mass depletion settings
       theObject->Validate();
