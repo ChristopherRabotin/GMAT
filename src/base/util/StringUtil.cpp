@@ -1671,12 +1671,16 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
       if (!isdigit(str2[i]))
       {
          // Handle scientific notation
-         if ((str2[i] == 'e' || str2[i] == 'E') &&
-             (str2[i+1] == '+' || str2[i+1] == '-' || isdigit(str2[i+1])))
+         if (str2[i] == 'e' || str2[i] == 'E')
          {
-            sciNotationFound = true;
-            continue;
+            if ((i + 1 < str2.length()) &&
+                (str2[i+1] == '+' || str2[i+1] == '-' || isdigit(str2[i+1])))        
+            {
+               sciNotationFound = true;
+               continue;
+            }
          }
+
          
          if ((str2[i] == '+' || str2[i] == '-' || isdigit(str2[i])) &&
              (str2[i-1] == 'e' || str2[i-1] == 'E'))
