@@ -39,8 +39,8 @@
     to write and stop writing data to a text file through the
     <guilabel>Toggle</guilabel>
     <guilabel>On</guilabel>/<guilabel>Off</guilabel> command. See the <xref
-      linkend="ReportFile_Remarks" xrefstyle="select:title"/>
-    section below for detailed discussion of the interaction between
+    linkend="ReportFile_Remarks" xrefstyle="select:title"/> section below for
+    detailed discussion of the interaction between
     <guilabel>ReportFile</guilabel> resource and <guilabel>Toggle</guilabel>
     command.</para>
 
@@ -367,8 +367,8 @@
           <row>
             <entry><guilabel>Precision</guilabel></entry>
 
-            <entry><para>Allows the user to set the number of digits of the
-            data written to a report. </para> <variablelist>
+            <entry><para>Allows the user to set the number of significant
+            digits of the data written to a report.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
