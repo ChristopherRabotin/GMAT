@@ -129,9 +129,9 @@ std::string GmatTimeUtil::FormatCurrentTime(Integer format)
       tm *loctime = localtime(&currTime);
       char timeBuf[20];
       if (format == 2)
-         strftime(timeBuf, 20, "%Y-%m-%dT%I:%M:%S", loctime);
+         strftime(timeBuf, 20, "%Y-%m-%dT%H:%M:%S", loctime);
       else
-         strftime(timeBuf, 20, "%Y-%m-%d %I:%M:%S", loctime);
+         strftime(timeBuf, 20, "%Y-%m-%d %H:%M:%S", loctime);
       return timeBuf;
    }
 }
