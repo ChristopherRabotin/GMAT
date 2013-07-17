@@ -2361,7 +2361,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                originFlattening         = ((CelestialBody*)cmdOrigin)->GetFlattening();
                originHourAngle          = ((CelestialBody*)cmdOrigin)->GetHourAngle(a1);
             }
-            else
+            else // or we could allow LibrationPoint or Barycenter origins
             {
                originIsCelestialBody    = false;
             }
@@ -2379,8 +2379,11 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             #endif
             cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
-            kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
-            modKepState     = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "ModifiedKeplerian");
+            if (originIsCelestialBody)
+            {
+               kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
+               modKepState     = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "ModifiedKeplerian");
+            }
             sphStateAZFPA   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalAZFPA");
             sphStateRADEC   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalRADEC");
 
@@ -2390,69 +2393,70 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
             isEccentric      = false;
             isHyperbolic     = false;
+            ma               = 0.0;
             ea               = 0.0;
             ha               = 0.0;
-            if (kepState[1] < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))
-            {
-               ea                   = StateConversionUtil::TrueToEccentricAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
-                                      kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
-               isEccentric          = true;
-            }
-            else if (kepState[1] > (1.0 + GmatOrbitConstants::KEP_TOL)) // *** or KEP_ECC_TOL or need new tolerance for this?  1.0e-10
-            {
-               ha                   = StateConversionUtil::TrueToHyperbolicAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
-                                      kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
-               isHyperbolic         = true;
-            }
-            ma               = StateConversionUtil::TrueToMeanAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
-                               kepState[1], !isHyperbolic) * GmatMathConstants::DEG_PER_RAD;
-
-
-            // Compute the origin-to-sun unit vector
-            Rvector3 originToSun(0.0,0.0,0.0);
-            if (cmdOrigin->GetName() != SolarSystem::SUN_NAME)
-            {
-               Rvector3 sunPos      = (solarSys->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(a1);
-               Rvector3 originPos   = cmdOrigin->GetMJ2000Position(a1);
-               originToSun = sunPos - originPos;
-               originToSun.Normalize();
-            }
-            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
-               MessageInterface::ShowMessage("----> Spacecraft Origin is %s of type %s\n",
-                     objOrigin->GetName().c_str(), objOrigin->GetTypeName().c_str());
-               MessageInterface::ShowMessage("----> Command Origin for %s is %s of type %s\n",
-                     summaryName.c_str(), cmdOrigin->GetName().c_str(), cmdOrigin->GetTypeName().c_str());
-            #endif
-
-            Rvector6 relativeState = cartState;
-            if (cmdOrigin->GetName() != SolarSystem::EARTH_NAME)
-            {
-               Rvector6 originState = cmdOrigin->GetMJ2000State(a1);
-               relativeState       -= originState;
-            }
-
-            meanMotion       = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cartState, originMu);
-            semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", relativeState, originMu, originToSun);
-            angularMomentum  = GmatCalcUtil::CalculateAngularData("HMag", cartState, originMu, originToSun);
-            betaAngle        = GmatCalcUtil::CalculateAngularData("BetaAngle", cartState, originMu, originToSun);
-            orbitEnergy      = GmatCalcUtil::CalculateKeplerianData("Energy", cartState, originMu);
-            c3               = GmatCalcUtil::CalculateKeplerianData("C3Energy", cartState, originMu);
-            velPeriapsis     = GmatCalcUtil::CalculateKeplerianData("VelPeriapsis", cartState, originMu);
-            periAltitude     = modKepState[0] - originEqRad;
-
-            if (isEccentric)
-            {
-               orbitPeriod       = GmatCalcUtil::CalculateKeplerianData("OrbitPeriod", cartState, originMu);
-               velApoapsis       = GmatCalcUtil::CalculateKeplerianData("VelApoapsis", cartState, originMu);
-            }
-            else  // these shouldn't be written anyway
-            {
-               orbitPeriod       = 0.0;
-               velApoapsis       = 0.0;
-            }
-
             if (originIsCelestialBody)
             {
+               if (kepState[1] < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))
+               {
+                  ea                   = StateConversionUtil::TrueToEccentricAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                                         kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
+                  isEccentric          = true;
+               }
+               else if (kepState[1] > (1.0 + GmatOrbitConstants::KEP_TOL)) // *** or KEP_ECC_TOL or need new tolerance for this?  1.0e-10
+               {
+                  ha                   = StateConversionUtil::TrueToHyperbolicAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                                         kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
+                  isHyperbolic         = true;
+               }
+               ma               = StateConversionUtil::TrueToMeanAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                                  kepState[1], !isHyperbolic) * GmatMathConstants::DEG_PER_RAD;
+
+
+               // Compute the origin-to-sun unit vector
+               Rvector3 originToSun(0.0,0.0,0.0);
+               if (cmdOrigin->GetName() != SolarSystem::SUN_NAME)
+               {
+                  Rvector3 sunPos      = (solarSys->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(a1);
+                  Rvector3 originPos   = cmdOrigin->GetMJ2000Position(a1);
+                  originToSun = sunPos - originPos;
+                  originToSun.Normalize();
+               }
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+                  MessageInterface::ShowMessage("----> Spacecraft Origin is %s of type %s\n",
+                        objOrigin->GetName().c_str(), objOrigin->GetTypeName().c_str());
+                  MessageInterface::ShowMessage("----> Command Origin for %s is %s of type %s\n",
+                        summaryName.c_str(), cmdOrigin->GetName().c_str(), cmdOrigin->GetTypeName().c_str());
+               #endif
+
+               Rvector6 relativeState = cartState;
+               if (cmdOrigin->GetName() != SolarSystem::EARTH_NAME)
+               {
+                  Rvector6 originState = cmdOrigin->GetMJ2000State(a1);
+                  relativeState       -= originState;
+               }
+
+               meanMotion       = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cartState, originMu);
+               semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", relativeState, originMu, originToSun);
+               angularMomentum  = GmatCalcUtil::CalculateAngularData("HMag", cartState, originMu, originToSun);
+               betaAngle        = GmatCalcUtil::CalculateAngularData("BetaAngle", cartState, originMu, originToSun);
+               orbitEnergy      = GmatCalcUtil::CalculateKeplerianData("Energy", cartState, originMu);
+               c3               = GmatCalcUtil::CalculateKeplerianData("C3Energy", cartState, originMu);
+               velPeriapsis     = GmatCalcUtil::CalculateKeplerianData("VelPeriapsis", cartState, originMu);
+               periAltitude     = modKepState[0] - originEqRad;
+
+               if (isEccentric)
+               {
+                  orbitPeriod       = GmatCalcUtil::CalculateKeplerianData("OrbitPeriod", cartState, originMu);
+                  velApoapsis       = GmatCalcUtil::CalculateKeplerianData("VelApoapsis", cartState, originMu);
+               }
+               else  // these shouldn't be written anyway
+               {
+                  orbitPeriod       = 0.0;
+                  velApoapsis       = 0.0;
+               }
+
                #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
                   MessageInterface::ShowMessage("----> Now creating BodyFixed cs and passing into PlanetData objects.\n");
                #endif
@@ -2500,14 +2504,30 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                   dla              = 0.0;
                   rla              = 0.0;
                }
-            } // if originIsCelestialBody
-            else  // these shouldn't be written anyway
+            }
+            else   // origin is not a CelestialBody, so these shouldn't be written anyway
             {
+               meanMotion         = 0.0;
+               semilatusRectum    = 0.0;
+               angularMomentum    = 0.0;
+               betaAngle          = 0.0;
+               orbitEnergy        = 0.0;
+               c3                 = 0.0;
+               velPeriapsis       = 0.0;
+               periAltitude       = 0.0;
                lst                = 0.0;
                mha                = 0.0;
                latitude           = 0.0;
                longitude          = 0.0;
                altitude           = 0.0;
+               orbitPeriod        = 0.0;
+               velApoapsis        = 0.0;
+               bDotT              = 0.0;
+               bDotR              = 0.0;
+               bVectorAngle       = 0.0;
+               bVectorMag         = 0.0;
+               dla                = 0.0;
+               rla                = 0.0;
             }
 
             //TimeConverterUtil::Convert
@@ -2556,55 +2576,64 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             data.precision(15);
             data.width(20);
 
-            data << "        Cartesian State                       "
-                 << "Keplerian State\n"
-                                      << "        ---------------------------           "
-                                      << "-------------------------------- \n"
-                 << "        X  = "   << BuildNumber(cartState[0])  << " km     "
-                 << "        SMA  = " << BuildNumber(kepState[0])   << " km\n"
-                 << "        Y  = "   << BuildNumber(cartState[1])  << " km     "
-                 << "        ECC  = " << BuildNumber(kepState[1])   << "\n"
-                 << "        Z  = "   << BuildNumber(cartState[2])  << " km     "
-                 << "        INC  = " << BuildNumber(kepState[2])   << " deg\n"
-                 << "        VX = "   << BuildNumber(cartState[3])  << " km/sec "
-                 << "        RAAN = " << BuildNumber(kepState[3])   << " deg\n"
-                 << "        VY = "   << BuildNumber(cartState[4])  << " km/sec "
-                 << "        AOP  = " << BuildNumber(kepState[4])   << " deg\n"
-                 << "        VZ = "   << BuildNumber(cartState[5])  << " km/sec "
-                 << "        TA   = " << BuildNumber(kepState[5])   << " deg\n"
-                 << "                                      "        << "        MA   = " << BuildNumber(ma) << " deg\n";
-            if (isEccentric)
-               data << "                                      "     << "        EA   = " << BuildNumber(ea) << " deg\n";
-            else if (isHyperbolic)
-               data << "                                      "     << "        HA   = " << BuildNumber(ha) << " deg\n";
-            data << "\n        Spherical State                       "
-                 << "Other Orbit Data\n"
-                 << "        ---------------------------           "
-                 << "--------------------------------\n"
-                 << "        RMAG = "               << BuildNumber(sphStateAZFPA[0])           << " km   "
-                 << "        Mean Motion        = " << BuildNumber(meanMotion, true)           << " deg/sec\n"
-                 << "        RA   = "               << BuildNumber(sphStateAZFPA[1])           << " deg  "
-                 << "        Orbit Energy       = " << BuildNumber(orbitEnergy, false)         << " km^2/s^2\n"
-                 << "        DEC  = "               << BuildNumber(sphStateAZFPA[2])           << " deg  "
-                 << "        C3                 = " << BuildNumber(c3, false)                  << " km^2/s^2\n"
-                 << "        VMAG = "               << BuildNumber(sphStateAZFPA[3])           << " km/s "
-                 << "        Semilatus Rectum   = " << BuildNumber(semilatusRectum, false)     << " km   \n"
-                 << "        AZI  = "               << BuildNumber(sphStateAZFPA[4])           << " deg  "
-                 << "        Angular Momentum   = " << BuildNumber(angularMomentum, false)     << " km^2/s\n"
-                 << "        VFPA = "               << BuildNumber(sphStateAZFPA[5])           << " deg  "
-                 << "        Beta Angle         = " << BuildNumber(betaAngle, false)           << " deg  \n"
-                 << "        RAV  = "               << BuildNumber(sphStateRADEC[4])           << " deg  "
-                 << "        Periapsis Altitude = " << BuildNumber(periAltitude, false)        << " km   \n"
-                 << "        DECV = "               << BuildNumber(sphStateRADEC[5])           << " deg  "
-                 << "        VelPeriapsis       = " << BuildNumber(velPeriapsis, false)        << " km/s\n";
-            if (isEccentric)
-            {
-               data << "                                       " << "       VelApoapsis        = " << BuildNumber(velApoapsis, false) << " km/s \n"
-                    << "                                       " << "       Orbit Period       = " << BuildNumber(orbitPeriod, false) << " s    \n";
-            }
-            // add planetodetic parameters, if the origin is a Celestial Body
             if (originIsCelestialBody)
             {
+               data << "        Cartesian State                       "
+                    << "Keplerian State\n"
+                                         << "        ---------------------------           "
+                                         << "-------------------------------- \n"
+                    << "        X  = "   << BuildNumber(cartState[0])  << " km     "
+                    << "        SMA  = " << BuildNumber(kepState[0])   << " km\n"
+                    << "        Y  = "   << BuildNumber(cartState[1])  << " km     "
+                    << "        ECC  = " << BuildNumber(kepState[1])   << "\n"
+                    << "        Z  = "   << BuildNumber(cartState[2])  << " km     "
+                    << "        INC  = " << BuildNumber(kepState[2])   << " deg\n"
+                    << "        VX = "   << BuildNumber(cartState[3])  << " km/sec "
+                    << "        RAAN = " << BuildNumber(kepState[3])   << " deg\n"
+                    << "        VY = "   << BuildNumber(cartState[4])  << " km/sec "
+                    << "        AOP  = " << BuildNumber(kepState[4])   << " deg\n"
+                    << "        VZ = "   << BuildNumber(cartState[5])  << " km/sec "
+                    << "        TA   = " << BuildNumber(kepState[5])   << " deg\n"
+                    << "                                      "
+                    << "        MA   = " << BuildNumber(ma) << " deg\n";
+               if (isEccentric)
+               {
+                  data << "                                      "
+                       << "        EA   = " << BuildNumber(ea) << " deg\n";
+               }
+               else if (isHyperbolic)
+               {
+                  data << "                                      "
+                       << "        HA   = " << BuildNumber(ha) << " deg\n";
+               }
+               data << "\n        Spherical State                       "
+                    << "Other Orbit Data\n"
+                    << "        ---------------------------           "
+                    << "--------------------------------\n"
+                    << "        RMAG = "               << BuildNumber(sphStateAZFPA[0])           << " km   "
+                    << "        Mean Motion        = " << BuildNumber(meanMotion, true)           << " deg/sec\n"
+                    << "        RA   = "               << BuildNumber(sphStateAZFPA[1])           << " deg  "
+                    << "        Orbit Energy       = " << BuildNumber(orbitEnergy, false)         << " km^2/s^2\n"
+                    << "        DEC  = "               << BuildNumber(sphStateAZFPA[2])           << " deg  "
+                    << "        C3                 = " << BuildNumber(c3, false)                  << " km^2/s^2\n"
+                    << "        VMAG = "               << BuildNumber(sphStateAZFPA[3])           << " km/s "
+                    << "        Semilatus Rectum   = " << BuildNumber(semilatusRectum, false)     << " km   \n"
+                    << "        AZI  = "               << BuildNumber(sphStateAZFPA[4])           << " deg  "
+                    << "        Angular Momentum   = " << BuildNumber(angularMomentum, false)     << " km^2/s\n"
+                    << "        VFPA = "               << BuildNumber(sphStateAZFPA[5])           << " deg  "
+                    << "        Beta Angle         = " << BuildNumber(betaAngle, false)           << " deg  \n"
+                    << "        RAV  = "               << BuildNumber(sphStateRADEC[4])           << " deg  "
+                    << "        Periapsis Altitude = " << BuildNumber(periAltitude, false)        << " km   \n"
+                    << "        DECV = "               << BuildNumber(sphStateRADEC[5])           << " deg  "
+                    << "        VelPeriapsis       = " << BuildNumber(velPeriapsis, false)        << " km/s\n";
+               if (isEccentric)
+               {
+                  data << "                                       "
+                       << "       VelApoapsis        = " << BuildNumber(velApoapsis, false) << " km/s \n"
+                       << "                                       "
+                       << "       Orbit Period       = " << BuildNumber(orbitPeriod, false) << " s    \n";
+               }
+               // add planetodetic parameters, if the origin is a Celestial Body
                // and include hyperbolic parameters, if appropriate
                if (isHyperbolic)
                {
@@ -2635,6 +2664,29 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                        << "        Longitude = " << BuildNumber(longitude, false)     << " deg\n"
                        << "        Altitude  = " << BuildNumber(altitude, false)      << " km\n";
                }
+            }
+            else  // origin is NOT a celestial body
+            {
+               data << "        Cartesian State                       "
+                    << "Spherical State\n"
+                                         << "        ---------------------------           "
+                                         << "-------------------------------- \n"
+                    << "        X  = "   << BuildNumber(cartState[0])      << " km     "
+                    << "        RMAG = " << BuildNumber(sphStateAZFPA[0])  << " km   \n"
+                    << "        Y  = "   << BuildNumber(cartState[1])      << " km     "
+                    << "        RA   = " << BuildNumber(sphStateAZFPA[1])  << " deg  \n"
+                    << "        Z  = "   << BuildNumber(cartState[2])      << " km     "
+                    << "        DEC  = " << BuildNumber(sphStateAZFPA[2])  << " deg  \n"
+                    << "        VX = "   << BuildNumber(cartState[3])      << " km/sec "
+                    << "        VMAG = " << BuildNumber(sphStateAZFPA[3])  << " km/s \n"
+                    << "        VY = "   << BuildNumber(cartState[4])      << " km/sec "
+                    << "        AZI  = " << BuildNumber(sphStateAZFPA[4])  << " deg  \n"
+                    << "        VZ = "   << BuildNumber(cartState[5])      << " km/sec "
+                    << "        VFPA = " << BuildNumber(sphStateAZFPA[5])  << " deg  \n"
+                    << "                                      "
+                    << "        RAV  = " << BuildNumber(sphStateRADEC[4])  << " deg  \n"
+                    << "                                      "
+                    << "        DECV = " << BuildNumber(sphStateRADEC[5])  << " deg  \n";
             }
 
             data << "\n\n        Spacecraft Properties \n"

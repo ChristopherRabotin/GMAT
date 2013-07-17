@@ -273,7 +273,8 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
       else if (currentCS == coordSystemNames.at(ii)) newCS = currentCS;
       tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
       origin     = tmpCS->GetOrigin();
-      if (origin->IsOfType("CelestialBody") && (!tmpCS->UsesSpacecraft()))  // add it to the list
+      if ((origin->IsOfType("CelestialBody") || origin->IsOfType("LibrationPoint") ||
+           origin->IsOfType("Barycenter")) && (!tmpCS->UsesSpacecraft()))  // add it to the list
          coordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
    }
    coordSysComboBox->SetValue(newCS.c_str());
