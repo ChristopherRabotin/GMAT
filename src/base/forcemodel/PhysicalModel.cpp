@@ -194,7 +194,8 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
 PhysicalModel::~PhysicalModel()
 {
    #ifdef DEBUG_STATE_ALLOCATION
-      MessageInterface::ShowMessage("Deleting PhysicalModel at %p\n", this);
+      MessageInterface::ShowMessage("Deleting PhysicalModel (type %s) at %p\n",
+            typeName.c_str(), this);
    #endif
 
    if (rawState != modelState)
@@ -541,8 +542,8 @@ bool PhysicalModel::Initialize()
       #endif
 
       #ifdef DEBUG_STATE_ALLOCATION
-         MessageInterface::ShowMessage("Deleting modelState at %p\n",
-               modelState);
+         MessageInterface::ShowMessage("Deleting modelState (for %s) at %p\n",
+               typeName.c_str(), modelState);
       #endif
       delete [] modelState;
       modelState = NULL;
@@ -563,8 +564,17 @@ bool PhysicalModel::Initialize()
    }
 
    // MessageInterface::ShowMessage("PMInitialize setting dim = %d\n", dimension);   
+   #ifdef DEBUG_STATE_ALLOCATION
+      MessageInterface::ShowMessage("Allocating modelState (for %s) at ",
+            typeName.c_str());
+   #endif
    
    modelState = new Real[dimension];
+
+   #ifdef DEBUG_STATE_ALLOCATION
+      MessageInterface::ShowMessage("%p\n", modelState);
+   #endif
+
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
       (modelState, "modelState", "PhysicalModel::Initialize()",
@@ -734,10 +744,12 @@ void PhysicalModel::SetState(const Real * st)
          "PhysicalModel::SetState() called for %s<%s>\n", 
          typeName.c_str(), instanceName.c_str());
    #endif
-                                 
-   for (Integer i = 0; i < dimension; i++)
-      modelState[i] = st[i];
-   stateChanged = true;
+   if (modelState != NULL)
+   {
+      for (Integer i = 0; i < dimension; i++)
+         modelState[i] = st[i];
+      stateChanged = true;
+   }
 }
 
 
