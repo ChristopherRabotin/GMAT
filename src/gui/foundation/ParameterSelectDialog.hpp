@@ -59,6 +59,8 @@ protected:
    wxArrayString mObjectTypeList;
    wxString mObjectType;
    wxString mLastCoordSysName;
+   // the last non-blank CS name selected
+   wxString mPreviousCoordSysName;
    wxArrayString mParamNameArray;
    
    bool mHasSelectionChanged;

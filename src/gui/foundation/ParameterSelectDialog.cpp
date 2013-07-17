@@ -105,7 +105,8 @@ ParameterSelectDialog::ParameterSelectDialog
    mForStopCondition = forStopCondition;
    mObjectType = objectType;
    
-   mLastCoordSysName = "EarthMJ2000Eq";
+   mLastCoordSysName     = "EarthMJ2000Eq";
+   mPreviousCoordSysName = "EarthMJ2000Eq";
 
    // Set initial flag for allowing selecting whole object
    mAllowWholeObject = false;
@@ -306,7 +307,8 @@ void ParameterSelectDialog::LoadData()
          }
          else
          {
-            mLastCoordSysName = mCoordSysComboBox->GetString(0);
+            mLastCoordSysName     = mCoordSysComboBox->GetString(0);
+            mPreviousCoordSysName = mCoordSysComboBox->GetString(0);
             
             // Show coordinate system or central body
             ShowCoordSystem(false);
@@ -709,11 +711,14 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    else if(obj == mCoordSysComboBox)
    {
+      if (mLastCoordSysName != "") mPreviousCoordSysName = mLastCoordSysName;
       mLastCoordSysName = mCoordSysComboBox->GetValue();
 
       #ifdef DEBUG_COMBOBOX_CHANGE
       MessageInterface::ShowMessage
          ("   CoordSysComboBox changed to %s\n", mLastCoordSysName.c_str());
+      MessageInterface::ShowMessage
+         ("   mPreviousCoordSysName changed to %s\n", mPreviousCoordSysName.c_str());
       #endif
    }
    
@@ -1557,8 +1562,17 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
       
       if (showBlank)
       {
+         // Add blank to the front of the list if it is not already on it
          int blankPos = mCoordSysComboBox->FindString("");
-         if (blankPos == wxNOT_FOUND)   mCoordSysComboBox->Append("");
+         if (blankPos == wxNOT_FOUND)
+         {
+            mCoordSysComboBox->Insert("",0);
+            // Make sure to save the previous coordinate system as we don't
+            // want blank to be used for other property types
+            if (mLastCoordSysName != "")
+               mPreviousCoordSysName = mLastCoordSysName;
+            mLastCoordSysName = "";
+         }
          mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       }
       else
@@ -1566,7 +1580,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
          int blankPos = mCoordSysComboBox->FindString("");
          if (blankPos != wxNOT_FOUND)  mCoordSysComboBox->Delete((unsigned int) blankPos);
          if (mLastCoordSysName == "")
-            mCoordSysComboBox->SetSelection(0);
+            mCoordSysComboBox->SetStringSelection(mPreviousCoordSysName);
          else
             mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       }
