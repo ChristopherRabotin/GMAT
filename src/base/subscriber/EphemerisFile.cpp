@@ -48,6 +48,7 @@
 //#define DEBUG_EPHEMFILE_OPEN
 //#define DEBUG_EPHEMFILE_SPICE
 //#define DEBUG_EPHEMFILE_CCSDS
+//#define DEBUG_CODE500_CREATE
 //#define DEBUG_EPHEMFILE_CODE500
 //#define DEBUG_EPHEMFILE_INTERPOLATOR
 //#define DEBUG_EPHEMFILE_BUFFER
@@ -560,9 +561,9 @@ std::string EphemerisFile::GetFileName()
 
 
 //------------------------------------------------------------------------------
-// void ValidateParameters()
+// void ValidateParameters(bool forInitialization)
 //------------------------------------------------------------------------------
-void EphemerisFile::ValidateParameters()
+void EphemerisFile::ValidateParameters(bool forInitialization)
 {
    if (fileFormat == "SPK")
    {
@@ -600,23 +601,79 @@ void EphemerisFile::ValidateParameters()
                ("The Interpolator must be \"SLERP\" for StateType of \"Quaternion\" for "
                 "the EphemerisFile \"" + GetName() + "\"");
       }
+      
+      if (fileFormat == "Code-500")
+      {
+         if (!useFixedStepSize)
+            throw SubscriberException
+               ("Code-500 ephemeris file \"" + GetName() + "\" requires fixed step size");
+         
+         // Give default step size for code-500
+         if (stepSize == "IntegratorSteps")
+         {
+            stepSize = "60";
+            stepSizeInSecs = 60.0;
+         }
+      }
    }
    
-   // check for NULL pointers
-   if (spacecraft == NULL)
-      throw SubscriberException
-         ("The Spacecraft \"" + spacecraftName + "\" has not been set for "
-          "the EphemerisFile \"" + GetName() + "\"");
-   
+   // By this time, coordinate system should not be NULL, so check it
    if (outCoordSystem == NULL)
       throw SubscriberException
          ("The CoordinateSystem \"" + outCoordSystemName + "\" has not been set for "
           "the EphemerisFile \"" + GetName() + "\"");
    
-   if (theDataCoordSystem == NULL)
-      throw SubscriberException
-         ("The internal CoordinateSystem which orbit data represents has not been set for "
-          "the EphemerisFile \"" + GetName() + "\"");
+   // Do some validation
+   if (fileFormat == "SPK" || fileFormat == "Code-500")
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
+      #endif
+      if (outCoordSystem)
+      {
+         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+         {
+            SubscriberException se;
+            se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
+                          "with MJ2000Eq Axis", fileFormat.c_str(), GetName().c_str());
+            throw se;
+         }
+         
+         // Check for valid central body for Code500 ephem
+         // 1=Earth, 2=Moon, 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus, 8=Neptune,
+         // 9=Pluto, 10=Mercury, 11=Venus
+         if (fileFormat == "Code-500")
+         {
+            std::string origin = outCoordSystem->GetOriginName();
+            if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
+                origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
+                origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
+                origin != "Mercury" && origin != "Venus")
+            {
+               SubscriberException se;
+               se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
+                             "with Planet or Luna(Earth Moon) origin", fileFormat.c_str(),
+                             GetName().c_str());
+               throw se;
+            }
+         }
+      }
+   }
+   
+   // If for initialization, all other pointers should have been set, so check it
+   if (forInitialization)
+   {
+      // check for NULL pointers
+      if (spacecraft == NULL)
+         throw SubscriberException
+            ("The Spacecraft \"" + spacecraftName + "\" has not been set for "
+             "the EphemerisFile \"" + GetName() + "\"");
+      
+      if (theDataCoordSystem == NULL)
+         throw SubscriberException
+            ("The internal CoordinateSystem which orbit data represents has not been set for "
+             "the EphemerisFile \"" + GetName() + "\"");
+   }
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -652,12 +709,23 @@ void EphemerisFile::SetProvider(GmatBase *provider)
 //------------------------------------------------------------------------------
 bool EphemerisFile::Validate()
 {
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::Validate() <%p>'%s' entered, fileFormat='%s', spacecraft=<%p>'%s', "
+       "outCoordSystem=<%p>'%s'\n", this, GetName().c_str(), fileFormat.c_str(), spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL", outCoordSystem,
+       outCoordSystem ? outCoordSystem->GetName().c_str() : "NULL");
+   #endif
+   
+   ValidateParameters(false);
+   
+   #if 0
    if (fileFormat == "Code-500")
    {
       if (!useFixedStepSize)
          throw SubscriberException
             ("Code-500 ephemeris file requires fixed step size");
-
+      
       // Give default step size for code-500
       if (stepSize == "IntegratorSteps")
       {
@@ -680,9 +748,32 @@ bool EphemerisFile::Validate()
                           "with MJ2000Eq Axis only", fileFormat.c_str());
             throw se;
          }
+         
+         // Check for valid central body for Code500 ephem
+         // 1=Earth, 2=Moon, 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus, 8=Neptune,
+         // 9=Pluto, 10=Mercury, 11=Venus
+         if (fileFormat == "Code-500")
+         {
+            std::string origin = outCoordSystem->GetOriginName();
+            if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
+                origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
+                origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
+                origin != "Mercury" && origin != "Venus")
+            {
+               SubscriberException se;
+               se.SetDetails("%s ephemeris file only allows coordinate system "
+                             "with Planet or Luna(Earth Moon) origin", fileFormat.c_str());
+               throw se;
+            }
+         }
       }
    }
+   #endif
    
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::Validate() <%p>'%s' returning true\n", this, GetName().c_str());
+   #endif
    return true;
 }
 
@@ -694,9 +785,11 @@ bool EphemerisFile::Initialize()
 {
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
-      ("EphemerisFile::Initialize() <%p>'%s' entered, active=%d, writeEphemeris=%d, "
-       "isInitialized=%d\n   fileFormat='%s', stateType='%s'\n", this, GetName().c_str(),
-       active, writeEphemeris, isInitialized, fileFormat.c_str(), stateType.c_str());
+      ("EphemerisFile::Initialize() <%p>'%s' entered, spacecraftName='%s', active=%d, "
+       "writeEphemeris=%d, isInitialized=%d\n   fileFormat='%s', stateType='%s', "
+       "outputFormat='%s'\n", this, GetName().c_str(), spacecraftName.c_str(), active,
+       writeEphemeris, isInitialized, fileFormat.c_str(), stateType.c_str(),
+       outputFormat.c_str());
    #endif
    
    if (isInitialized)
@@ -712,8 +805,8 @@ bool EphemerisFile::Initialize()
    Subscriber::Initialize();
    
    // Do some validation, reset flags and clear buffers
-   ValidateParameters();
-
+   ValidateParameters(true);
+   
    // Maximum segment size for CCSDS or SPK is initially set to 1000
    maxSegmentSize = 1000;
    
@@ -730,31 +823,35 @@ bool EphemerisFile::Initialize()
    {
       fileType = CODE500_EPHEM;
       maxSegmentSize = 50; // 50 orbit states per data record
-      // Check for step size, only fixed step size is allowed
-      if (!useFixedStepSize)
-         throw SubscriberException
-            ("Code-500 EphemerisFiles requires fixed step size");
+      
+      // This is get caught in ValidateParamters()
+      // // Check for step size, only fixed step size is allowed
+      // if (!useFixedStepSize)
+      //    throw SubscriberException
+      //       ("Code-500 ephemeris file \"" + GetName() + "\" requires fixed step size");
    }
    else
       throw SubscriberException
          ("FileFormat \"" + fileFormat + "\" is not valid");
    
-   if (fileFormat == "SPK" || fileFormat == "Code-500")
-   {
-      #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
-      #endif
-      if (outCoordSystem)
-      {
-         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
-         {
-            SubscriberException se;
-            se.SetDetails("%s ephemeris file allows output coordinate system "
-                          "with MJ2000Eq Axis only", fileFormat.c_str());
-            throw se;
-         }
-      }
-   }
+   
+   // This is get caught in ValidateParamters()
+   // if (fileFormat == "SPK" || fileFormat == "Code-500")
+   // {
+   //    #ifdef DEBUG_EPHEMFILE_INIT
+   //    MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
+   //    #endif
+   //    if (outCoordSystem)
+   //    {
+   //       if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+   //       {
+   //          SubscriberException se;
+   //          se.SetDetails("%s ephemeris file allows output coordinate system "
+   //                        "with MJ2000Eq Axis only", fileFormat.c_str());
+   //          throw se;
+   //       }
+   //    }
+   // }
    
    // Set interpolation flag for first and final state
    if (stepSize == "IntegratorSteps")
@@ -1709,9 +1806,11 @@ void EphemerisFile::CreateSpiceKernelWriter()
    }
    
    std::string name = spacecraft->GetName();
-   std::string centerName = spacecraft->GetOriginName();
+   //std::string centerName = spacecraft->GetOriginName();
+   std::string centerName = outCoordSystem->GetOriginName();
    Integer objNAIFId = spacecraft->GetIntegerParameter("NAIFId");
-   Integer centerNAIFId = (spacecraft->GetOrigin())->GetIntegerParameter("NAIFId");
+   //Integer centerNAIFId = (spacecraft->GetOrigin())->GetIntegerParameter("NAIFId");
+   Integer centerNAIFId = (outCoordSystem->GetOrigin())->GetIntegerParameter("NAIFId");
    
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
@@ -1767,10 +1866,10 @@ void EphemerisFile::CreateSpiceKernelWriter()
 //------------------------------------------------------------------------------
 void EphemerisFile::CreateCode500EphemerisFile()
 {
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_CODE500_CREATE
    MessageInterface::ShowMessage
-      ("EphemerisFile::CreateCode500EphemerisFile() entered, code500EphemFile=<%p>\n",
-       code500EphemFile);
+      ("\nEphemerisFile::CreateCode500EphemerisFile() this=<%p>'%s' entered, code500EphemFile=<%p>,"
+       " outputFormat='%s'\n", this, GetName().c_str(), code500EphemFile, outputFormat.c_str());
    #endif
    
    // If code500EphemFile is not NULL, delete it first
@@ -1788,23 +1887,26 @@ void EphemerisFile::CreateCode500EphemerisFile()
    Real        satId       = 123.0;   // dummy for now
    std::string timeSystem  = "UTC";   // Figure out time system here
    std::string sourceId    = "GMAT";  // Should it be GTDS?
-   std::string centralBody = spacecraft->GetOriginName();
-   int fileFormat = 1;
+   //std::string centralBody = spacecraft->GetOriginName();
+   std::string centralBody = outCoordSystem->GetOriginName();
+   int ephemOutputFormat = 1;
    if (outputFormat == "UNIX")
-      fileFormat = 2;
+      ephemOutputFormat = 2;
    
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_CODE500_CREATE
    MessageInterface::ShowMessage
       ("   Creating Code500EphemerisFile with satId=%f, timeSystem='%s', sourceId='%s', "
-       "centralBody='%s'\n", satId, timeSystem.c_str(), sourceId.c_str(), centralBody.c_str());
+       "centralBody='%s', ephemOutputFormat=%d\n", satId, timeSystem.c_str(), sourceId.c_str(),
+       centralBody.c_str(), ephemOutputFormat);
    #endif
    
    try
    {
       code500EphemFile =
-         new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody, 2, fileFormat);
+         new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody, 2, ephemOutputFormat);
       
       // @todo Set origin mu to code500 ephem so that it can do conversion
+      // @note Do I need to get outCoorSystem->GetOriginMu()?
       //code500EphemFile->SetCentralBodyMu(spacecraft->GetOriginMu());
       code500EphemFile->SetTimeIntervalBetweenPoints(stepSizeInSecs);
    }
@@ -1813,7 +1915,7 @@ void EphemerisFile::CreateCode500EphemerisFile()
       // Keep from getting a compiler warning about e not being used
       e.GetMessageType();
       
-      #ifdef DEBUG_EPHEMFILE_CODE500
+      #ifdef DEBUG_CODE500_CREATE
       MessageInterface::ShowMessage
          ("Error opening Code500EphemerisFile: %s", (e.GetFullMessage()).c_str());
       #endif
@@ -1826,8 +1928,7 @@ void EphemerisFile::CreateCode500EphemerisFile()
        "code500EphemFile = new SpiceOrbitKernelWriter()");
    #endif
    
-   
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_CODE500_CREATE
    MessageInterface::ShowMessage
       ("EphemerisFile::CreateCode500EphemerisFile() leaving, code500EphemFile=<%p>\n",
        code500EphemFile);
@@ -3888,7 +3989,8 @@ void EphemerisFile::WriteCcsdsAemMetaData()
 {
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
    std::string objId  = spacecraft->GetStringParameter("Id");
-   std::string origin = spacecraft->GetOriginName();
+   //std::string origin = spacecraft->GetOriginName();
+   std::string origin = outCoordSystem->GetOriginName();
    std::string csType = "UNKNOWN";
    GmatBase *cs = (GmatBase*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
    if (cs)
@@ -4057,7 +4159,8 @@ void EphemerisFile::WriteSpkOrbitMetaData()
    #endif
    
    std::string objId  = spacecraft->GetStringParameter("Id");
-   std::string origin = spacecraft->GetOriginName();
+   //std::string origin = spacecraft->GetOriginName();
+   std::string origin = outCoordSystem->GetOriginName();
    std::string csType = "UNKNOWN";
    GmatBase *cs = (GmatBase*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
    if (cs)
@@ -4271,7 +4374,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   //#ifdef DEBUG_EPHEMFILE_CODE500
    // For for debugging
    if (isEndOfRun)
    {
@@ -4285,7 +4388,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
-   #endif
+   //#endif
    
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage("EphemerisFile::FinalizeCode500Ephemeris() leaving\n");
@@ -4748,7 +4851,13 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    
    // Get proper id with data label
    if (theDataLabels.empty())
+   {
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("EphemerisFile::Distribute() Just returning true, data labels are empty\n");
+      #endif
       return true;
+   }
    
    StringArray dataLabels = theDataLabels[0];
    
@@ -4778,7 +4887,14 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    // if any of index not found, just return true
    if (idX  == -1 || idY  == -1 || idZ  == -1 ||
        idVx == -1 || idVy == -1 || idVz == -1)
+   {
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("EphemerisFile::Distribute() '%s' Just returning true, data index not found\n",
+          GetName().c_str());
+      #endif
       return true;
+   }
    
    #if DBGLVL_EPHEMFILE_DATA
    MessageInterface::ShowMessage
@@ -4882,10 +4998,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
              "EphemerisFile::Distribute()\n");
       }
    }
-      
+   
    #if DBGLVL_EPHEMFILE_DATA > 0
    MessageInterface::ShowMessage
-      ("EphemerisFile::Distribute() this=<%p>'%s' returning true\n", this,
+      ("EphemerisFile::Distribute() this=<%p>'%s' returning true, processed the data as expected\n", this,
        GetName().c_str());
    #endif
    return true;

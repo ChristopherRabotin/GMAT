@@ -134,7 +134,7 @@ public:
    
    // to check commands
    bool ValidateCommand(GmatCommand *cmd);
-   // to check subscriber
+   // to create subscriber wrappers
    bool ValidateSubscriber(GmatBase *obj);
    
    bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
@@ -325,8 +325,9 @@ protected:
                                  const std::string &childType,
                                  const std::string &objName);
    
-   // Final setting of reference object pointers needed by the GUI
+   // Final setting of reference object pointers needed by the GUI and validation
    bool FinalPass();
+   bool FinalPassSubscribers();
    
    // for debug
    void WriteStringArray(const std::string &title1, const std::string &title2,

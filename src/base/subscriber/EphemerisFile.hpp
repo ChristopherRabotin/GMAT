@@ -40,7 +40,7 @@ public:
    
    // methods for this class
    std::string          GetFileName();
-   virtual void         ValidateParameters();
+   virtual void         ValidateParameters(bool forInitialization);
    
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider);

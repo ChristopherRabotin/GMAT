@@ -1562,10 +1562,11 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
 // bool ValidateSubscriber(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
- * Checks the input subscriber to make sure it wrappers are set up for it
- * correctly, if necessary.
+ * Creates subscriber element wrappers through Validator and sets to subscriber.
+ * This method is also called from GUI subscriber setup panel to create new wrappers.
+ * Currently ReportFile and XYPlot uses element wrappers.
  *
- * @param <obj> the subscriber to validate
+ * @param <obj> the subscriber to create wrappers
  */
 //------------------------------------------------------------------------------
 bool Interpreter::ValidateSubscriber(GmatBase *obj)
@@ -8228,37 +8229,7 @@ bool Interpreter::FinalPass()
             retval = false;
          }
       }
-      
-      // Validate EphemerisFile disallowed value
-      if (obj->IsOfType(Gmat::EPHEMERIS_FILE))
-      {
-         try
-         {
-            StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
-            for (unsigned int i = 0; i < csNames.size(); i++)
-            {
-               GmatBase *csObj = FindObject(csNames[i]);
-               if (csObj)
-                  obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
-               else
-               {
-                  InterpreterException ex
-                     ("Nonexistent object \"" + csNames[i] + "\" referenced in \"" +
-                      obj->GetName() + "\"");
-                  HandleError(ex, false);
-                  retval = false;
-               }
-            }
             
-            obj->Validate();
-         }
-         catch (BaseException& ex)
-         {
-            HandleError(ex, false);
-            retval = false;
-         }
-      }
-      
       if (obj->GetType() == Gmat::PARAMETER)
       {
          std::string type, owner, depObj;
@@ -9014,7 +8985,15 @@ bool Interpreter::FinalPass()
          retval = false;
       }
    }
-
+   
+   //-------------------------------------------------------------------
+   // For EphemerisFile validation, we need to do this after CoordinateSystems
+   // are initialized, so that EphemerisFile can query for the origin name
+   // for validation.
+   //-------------------------------------------------------------------
+   retval = FinalPassSubscribers();
+   
+   
    //-------------------------------------------------------------------
    // Special case for SolverBranchCommand such as Optimize, Target,
    // we need to set Solver object to SolverBranchCommand and then
@@ -9065,6 +9044,85 @@ bool Interpreter::FinalPass()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool FinalPassSubscribers()
+//------------------------------------------------------------------------------
+/**
+ * Checks for non-existent objects or disallowed value for Subscribers in parsing mode.
+ *
+ * @throws exception when validation fails
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::FinalPassSubscribers()
+{
+   bool retval = true;
+   StringArray objList = theModerator->GetListOfObjects(Gmat::EPHEMERIS_FILE);
+   
+   #if DBGLVL_FINAL_PASS > 1
+   MessageInterface::ShowMessage("FinalPassSubscribers:: EphemerisFile list =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("   %s\n", (objList.at(ii)).c_str());
+   #endif
+   
+   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
+   {
+      GmatBase *obj = FindObject(*i);
+      if (obj != NULL)
+      {
+         try
+         {
+            StringArray objNames = obj->GetRefObjectNameArray(Gmat::SPACECRAFT);
+            for (unsigned int i = 0; i < objNames.size(); i++)
+            {
+               GmatBase *satObj = FindObject(objNames[i]);
+               if (satObj)
+                  obj->SetRefObject(satObj, Gmat::SPACECRAFT, satObj->GetName());
+               else
+               {
+                  InterpreterException ex;
+                  if (objNames[i] == "")
+                  {
+                     ex.SetDetails("The Spacecraft was not set in EphemerisFile \"%s\"",
+                                   obj->GetName().c_str());
+                  }
+                  else
+                  {
+                     ex.SetDetails("Nonexistent Spacecraft object \"%s\" referenced in \"%s\"",
+                                   objNames[i].c_str(), obj->GetName().c_str());
+                  }
+                  HandleError(ex, false);
+                  retval = false;
+               }
+            }
+            
+            objNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
+            for (unsigned int i = 0; i < objNames.size(); i++)
+            {
+               GmatBase *csObj = FindObject(objNames[i]);
+               if (csObj)
+                  obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
+               else
+               {
+                  InterpreterException ex
+                     ("Nonexistent CoordinateSystem object \"" + objNames[i] + "\" referenced in \"" +
+                      obj->GetName() + "\"");
+                  HandleError(ex, false);
+                  retval = false;
+               }
+            }
+            
+            obj->Validate();
+         }
+         catch (BaseException& ex)
+         {
+            HandleError(ex, false);
+            retval = false;
+         }
+      }
+   }
+   
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // bool Interpreter::ValidateMcsCommands(GmatCommand *first)
