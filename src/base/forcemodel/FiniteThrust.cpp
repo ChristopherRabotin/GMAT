@@ -542,6 +542,13 @@ bool FiniteThrust::Initialize()
    #endif
 
    isInitialized = PhysicalModel::Initialize();
+
+   if (modelState != NULL)
+   {
+      delete [] modelState;
+      modelState = NULL;
+      rawState = NULL;
+   }
       
    if (!isInitialized)
       throw ODEModelException("Unable to initialize FiniteThrust base");
