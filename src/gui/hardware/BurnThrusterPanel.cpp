@@ -535,7 +535,7 @@ void BurnThrusterPanel::SaveData()
 
    // if no errors, save again
    if (canClose)
-	 SaveData(theObject);
+	   theObject->Copy(localObject);
 
    #ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() exiting\n");
