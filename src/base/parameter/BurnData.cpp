@@ -31,6 +31,7 @@
 //#define DEBUG_BURNDATA_RUN 1
 //#define DEBUG_BURNDATA_SET 1
 //#define DEBUG_BURNDATA_GET
+//#define DEBUG_BURNDATA_COORD_CONVERT
 
 using namespace GmatMathUtil;
 
@@ -177,8 +178,11 @@ Real BurnData::GetReal(Integer item)
       if ((mInternalCoordSystem == NULL) ||
           (mOutCoordSystem == NULL))
       {
-         throw ParameterException
-            ("BurnData::GetReal() internal or output CoordinateSystem is NULL.\n");
+         std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+         errmsg            += "nonexistent internal or output ";
+         errmsg            += "CoordinateSystem object, for parameter \"";
+         errmsg            += mActualParamName + "\"\n";
+         throw ParameterException(errmsg);
       }
 
       if (!mImpBurn->HasFired())
@@ -186,7 +190,8 @@ Real BurnData::GetReal(Integer item)
          if (!firstTimeHasntFiredWarning)
          {
             std::string errmsg = "Warning: Impulsive Burn ";
-            errmsg += mImpBurn->GetName() + " has not fired.\n";
+            errmsg += mImpBurn->GetName() + " has not fired, so returning \"0\" ";
+            errmsg += "for maneuver parameter.\n";
             MessageInterface::ShowMessage(errmsg);
             firstTimeHasntFiredWarning = true;
          }
@@ -214,19 +219,30 @@ Real BurnData::GetReal(Integer item)
             mInternalCoordSystem->GetName().c_str(),
             mOutCoordSystem->GetName().c_str());
       #endif
+      Rvector6 burnOut(0.0,0.0,0.0,0.0,0.0,0.0);
       if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
       {
          mCoordConverter.Convert(A1Mjd(burnEpoch), burnState, mInternalCoordSystem,
-                                 burnState, mOutCoordSystem, false); // true);   // do I want true here?
+                                 burnOut, mOutCoordSystem, false, true);   // do I want true here?
+         #ifdef DEBUG_BURNDATA_COORD_CONVERT
+            MessageInterface::ShowMessage("before conversion, burnState = %s\n",
+                  burnState.ToString().c_str());
+            Rmatrix33 lastR = mCoordConverter.GetLastRotationMatrix();
+               MessageInterface::ShowMessage("Last R is: %s\n", lastR.ToString().c_str());
+            Rmatrix33 lastRDot = mCoordConverter.GetLastRotationDotMatrix();
+               MessageInterface::ShowMessage("Last RDot is: %s\n", lastRDot.ToString().c_str());
+            MessageInterface::ShowMessage("after conversion, burnOut = %s\n",
+                  burnOut.ToString().c_str());
+         #endif
       }
       switch (item)
       {
       case ELEMENT1:
-         return burnState[3];
+         return burnOut[3];
       case ELEMENT2:
-         return burnState[4];
+         return burnOut[4];
       case ELEMENT3:
-         return burnState[5];
+         return burnOut[5];
       default:
          throw ParameterException("BurnData::GetReal() Unknown ELEMENT id: " +
                                   GmatRealUtil::ToString(item));
@@ -379,9 +395,13 @@ void BurnData::InitializeRefObjects()
 //          ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
     if (mInternalCoordSystem == NULL)
-       throw ParameterException
-          ("BurnData::InitializeRefObjects() Cannot find internal "
-           "CoordinateSystem object\n");
+    {
+       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+       errmsg            += "nonexistent internal CoordinateSystem object, ";
+       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+       throw ParameterException(errmsg);
+    }
+
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
       ("BurnData::InitializeRefObjects() Found internal coordinate system\n");
@@ -391,9 +411,12 @@ void BurnData::InitializeRefObjects()
        (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    
     if (mOutCoordSystem == NULL)
-       throw ParameterException
-          ("BurnData::InitializeRefObjects() Cannot find output "
-           "CoordinateSystem object\n");
+    {
+       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+       errmsg            += "nonexistent output CoordinateSystem object, ";
+       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+       throw ParameterException(errmsg);
+    }
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
       ("BurnData::InitializeRefObjects() Found OUT coordinate system\n");
@@ -413,32 +436,6 @@ void BurnData::InitializeRefObjects()
 //      ("BurnData::InitializeRefObjects() Found spacecraft coordinate system\n");
 //   #endif
 
-//    // get origin
-//    std::string originName =
-//       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
-   
-//    if (originName != "")
-//    {
-//       #if DEBUG_BURNDATA_INIT
-//       MessageInterface::ShowMessage
-//          ("BurnData::InitializeRefObjects() getting originName:%s pointer.\n",
-//           originName.c_str());
-//       #endif
-      
-//       mOrigin =
-//          (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
-
-//       if (!mOrigin)
-//          throw ParameterException
-//             ("BurnData::InitializeRefObjects() Cannot find Origin object: " +
-//              originName + "\n");
-      
-//    }
-//    else
-//    {
-//       throw ParameterException
-//          ("BurnData::InitializeRefObjects() Burn Origin not specified\n");
-//    }
    
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
