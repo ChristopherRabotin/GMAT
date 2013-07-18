@@ -164,8 +164,8 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    Real *out = new Real[outState.GetSize()];
 
    #ifdef DEBUG_TO_FROM
-   MessageInterface::ShowMessage("in: %f %f %f %f %f %f %f\n", in[0], in[1], in[2], in[3], in[4], in[5]);
-   MessageInterface::ShowMessage("out: %f %f %f %f %f %f %f\n", out[0], out[1], out[2], out[3], out[4], out[5]);
+   MessageInterface::ShowMessage("in: %f %f %f %f %f %f\n", in[0], in[1], in[2], in[3], in[4], in[5]);
+   MessageInterface::ShowMessage("out: %f %f %f %f %f %f\n", out[0], out[1], out[2], out[3], out[4], out[5]);
    #endif
    
    if (Convert(epoch, in, inCoord, out, outCoord, forceComputation, omitTranslation))
