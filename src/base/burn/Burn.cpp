@@ -1153,9 +1153,6 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
    // if not using local CS, use ref CoordinateSystem
    if (!usingLocalCoordSys)
    {     
-//      // Now rotate to MJ2000Eq axes, we don't want to translate so
-//      // set coincident to true
-//      coordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
       // Now rotate to MJ2000Eq axes, we don't want to translate so
       // set coincident to true
       coordSystem->ToBaseSystem(epoch, inDeltaV, outDeltaV, true);  // @todo - need ToMJ2000Eq here?
