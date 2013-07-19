@@ -223,7 +223,7 @@
 
                   <listitem>
                     <para><guilabel>CCSDS-OEM</guilabel>,
-                    <guilabel>SPK</guilabel></para>
+                    <guilabel>SPK</guilabel>, <guilabel>Code-500</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -281,8 +281,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK,
-                    Code-500</guilabel></para>
+                    <para>Valid File Path and Name</para>
                   </listitem>
                 </varlistentry>
 
@@ -619,6 +618,65 @@
               </variablelist></entry>
           </row>
 
+		            <row>
+            <entry><guilabel>OutputFormat</guilabel></entry>
+
+            <entry><para>Allows the user to specify what type of format they want GSFC Code-500 ephmeris to be generated in. 
+			GSFC Code-500 ephemeris can be generated in the PC or UNIX version. This field cannot be
+            modified in the Mission Sequence.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>PC</guilabel>,
+                    <guilabel>UNIX</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>Set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>PC</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+		  
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
