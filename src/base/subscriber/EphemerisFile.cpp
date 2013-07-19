@@ -50,6 +50,7 @@
 //#define DEBUG_EPHEMFILE_CCSDS
 //#define DEBUG_CODE500_CREATE
 //#define DEBUG_EPHEMFILE_CODE500
+//#define DEBUG_CODE500_OUTPUT
 //#define DEBUG_EPHEMFILE_INTERPOLATOR
 //#define DEBUG_EPHEMFILE_BUFFER
 //#define DEBUG_EPHEMFILE_TIME
@@ -170,6 +171,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    initialCount         (0),
    waitCount            (0),
    afterFinalEpochCount (0),
+   toggleStatus         (0),
    stepSizeInA1Mjd      (-999.999),
    stepSizeInSecs       (-999.999),
    initialEpochA1Mjd    (-999.999),
@@ -203,6 +205,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    spkWriteFailed       (true),
    code500WriteFailed   (true),
    writeCommentAfterData (true),
+   checkForLargeTimeGap (false),
    prevRunState         (Gmat::IDLE)
 {
    #ifdef DEBUG_EPHEMFILE
@@ -365,6 +368,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    initialCount         (ef.initialCount),
    waitCount            (ef.waitCount),
    afterFinalEpochCount (ef.afterFinalEpochCount),
+   toggleStatus         (ef.toggleStatus),
    stepSizeInA1Mjd      (ef.stepSizeInA1Mjd),
    stepSizeInSecs       (ef.stepSizeInSecs),
    initialEpochA1Mjd    (ef.initialEpochA1Mjd),
@@ -398,6 +402,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    spkWriteFailed       (ef.spkWriteFailed),
    code500WriteFailed   (ef.code500WriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
+   checkForLargeTimeGap (ef.checkForLargeTimeGap),
    prevRunState         (ef.prevRunState)
 {
    coordConverter = ef.coordConverter;
@@ -454,6 +459,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    initialCount         = ef.initialCount;
    waitCount            = ef.waitCount;
    afterFinalEpochCount = ef.afterFinalEpochCount;
+   toggleStatus         = ef.toggleStatus;
    stepSizeInA1Mjd      = ef.stepSizeInA1Mjd;
    stepSizeInSecs       = ef.stepSizeInSecs;
    initialEpochA1Mjd    = ef.initialEpochA1Mjd;
@@ -487,6 +493,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    spkWriteFailed       = ef.spkWriteFailed;
    code500WriteFailed   = ef.code500WriteFailed;
    writeCommentAfterData = ef.writeCommentAfterData;
+   checkForLargeTimeGap = ef.checkForLargeTimeGap;
    prevRunState         = ef.prevRunState;
    coordConverter       = ef.coordConverter;
    
@@ -565,6 +572,12 @@ std::string EphemerisFile::GetFileName()
 //------------------------------------------------------------------------------
 void EphemerisFile::ValidateParameters(bool forInitialization)
 {
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ValidateParameters() <%p>'%s' entered, forInitialization=%d\n",
+       this, GetName().c_str(), forInitialization);
+   #endif
+   
    if (fileFormat == "SPK")
    {
       if (stateType == "Quaternion")
@@ -627,38 +640,40 @@ void EphemerisFile::ValidateParameters(bool forInitialization)
    if (fileFormat == "SPK" || fileFormat == "Code-500")
    {
       #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
+      MessageInterface::ShowMessage
+         ("   outCoordSystem=<%p>'%s'\n", outCoordSystem, outCoordSystem->GetName().c_str());
       #endif
-      if (outCoordSystem)
+      if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
       {
-         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+         SubscriberException se;
+         se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
+                       "with MJ2000Eq Axis", fileFormat.c_str(), GetName().c_str());
+         throw se;
+      }
+      
+      // Check for valid central body for Code500 ephem
+      // 1=Earth, 2=Luna(Earth Moon), 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus,
+      // 8=Neptune, 9=Pluto, 10=Mercury, 11=Venus
+      if (fileFormat == "Code-500")
+      {
+         std::string origin = outCoordSystem->GetOriginName();
+         if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
+             origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
+             origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
+             origin != "Mercury" && origin != "Venus")
          {
             SubscriberException se;
             se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
-                          "with MJ2000Eq Axis", fileFormat.c_str(), GetName().c_str());
+                          "with Sun, Planet or Luna(Earth Moon) origin", fileFormat.c_str(),
+                          GetName().c_str());
             throw se;
-         }
-         
-         // Check for valid central body for Code500 ephem
-         // 1=Earth, 2=Moon, 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus, 8=Neptune,
-         // 9=Pluto, 10=Mercury, 11=Venus
-         if (fileFormat == "Code-500")
-         {
-            std::string origin = outCoordSystem->GetOriginName();
-            if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
-                origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
-                origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
-                origin != "Mercury" && origin != "Venus")
-            {
-               SubscriberException se;
-               se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
-                             "with Planet or Luna(Earth Moon) origin", fileFormat.c_str(),
-                             GetName().c_str());
-               throw se;
-            }
          }
       }
    }
+   
+   // Catch invalid initial epoch early if spacecraft is not NULL
+   if (spacecraft != NULL)
+      ConvertInitialAndFinalEpoch();
    
    // If for initialization, all other pointers should have been set, so check it
    if (forInitialization)
@@ -675,13 +690,20 @@ void EphemerisFile::ValidateParameters(bool forInitialization)
              "the EphemerisFile \"" + GetName() + "\"");
    }
    
+   if (forInitialization)
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+         ("   spacecraft=<%p>'%s', outCoordSystem=<%p>'%s', theDataCoordSystem=<%p>'%s'\n",
+          spacecraft, spacecraft->GetName().c_str(), outCoordSystem,
+          outCoordSystem->GetName().c_str(), theDataCoordSystem,
+          theDataCoordSystem->GetName().c_str());
+      #endif
+   }
+   
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
-      ("EphemerisFile::ValidateParameters() leaving, spacecraft=<%p>'%s'\n   "
-       "outCoordSystem=<%p>'%s', theDataCoordSystem=<%p>'%s'\n",
-       spacecraft, spacecraft->GetName().c_str(), outCoordSystem,
-       outCoordSystem->GetName().c_str(), theDataCoordSystem,
-       theDataCoordSystem->GetName().c_str());
+      ("EphemerisFile::ValidateParameters() <%p>'%s' leaving\n", this, GetName().c_str());
    #endif
 }
 
@@ -718,57 +740,6 @@ bool EphemerisFile::Validate()
    #endif
    
    ValidateParameters(false);
-   
-   #if 0
-   if (fileFormat == "Code-500")
-   {
-      if (!useFixedStepSize)
-         throw SubscriberException
-            ("Code-500 ephemeris file requires fixed step size");
-      
-      // Give default step size for code-500
-      if (stepSize == "IntegratorSteps")
-      {
-         stepSize = "60";
-         stepSizeInSecs = 60.0;
-      }
-   }
-   
-   if (fileFormat == "SPK" || fileFormat == "Code-500")
-   {
-      #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
-      #endif
-      if (outCoordSystem)
-      {
-         if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
-         {
-            SubscriberException se;
-            se.SetDetails("%s ephemeris file allows output coordinate system "
-                          "with MJ2000Eq Axis only", fileFormat.c_str());
-            throw se;
-         }
-         
-         // Check for valid central body for Code500 ephem
-         // 1=Earth, 2=Moon, 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus, 8=Neptune,
-         // 9=Pluto, 10=Mercury, 11=Venus
-         if (fileFormat == "Code-500")
-         {
-            std::string origin = outCoordSystem->GetOriginName();
-            if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
-                origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
-                origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
-                origin != "Mercury" && origin != "Venus")
-            {
-               SubscriberException se;
-               se.SetDetails("%s ephemeris file only allows coordinate system "
-                             "with Planet or Luna(Earth Moon) origin", fileFormat.c_str());
-               throw se;
-            }
-         }
-      }
-   }
-   #endif
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -834,25 +805,6 @@ bool EphemerisFile::Initialize()
       throw SubscriberException
          ("FileFormat \"" + fileFormat + "\" is not valid");
    
-   
-   // This is get caught in ValidateParamters()
-   // if (fileFormat == "SPK" || fileFormat == "Code-500")
-   // {
-   //    #ifdef DEBUG_EPHEMFILE_INIT
-   //    MessageInterface::ShowMessage("   outCoordSystem=<%p>\n", outCoordSystem);
-   //    #endif
-   //    if (outCoordSystem)
-   //    {
-   //       if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
-   //       {
-   //          SubscriberException se;
-   //          se.SetDetails("%s ephemeris file allows output coordinate system "
-   //                        "with MJ2000Eq Axis only", fileFormat.c_str());
-   //          throw se;
-   //       }
-   //    }
-   // }
-   
    // Set interpolation flag for first and final state
    if (stepSize == "IntegratorSteps")
    {
@@ -861,6 +813,13 @@ bool EphemerisFile::Initialize()
       
       if (finalEpoch != "FinalSpacecraftEpoch")
          interpolateFinalState = true;
+   }
+   
+   // Do some more initialization here
+   if (fileType == CCSDS_OEM || fileType == CODE500_EPHEM)
+   {
+      if (stepSizeInSecs == -999.999)
+         stepSizeInSecs = 60.0;
    }
    
    // Initialize data
@@ -911,41 +870,11 @@ bool EphemerisFile::Initialize()
        theDataCoordSystem->GetName() != outCoordSystemName)
       writeDataInDataCS = false;
    
-   // Determine initial and final epoch in A1ModJulian, this format is what spacecraft
-   // currently outputs.
-   Real dummyA1Mjd = -999.999;
-   std::string epochStr;
-   
-   // Convert initial epoch to A1Mjd
-   if (initialEpoch != "InitialSpacecraftEpoch")
-      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, initialEpoch,
-                                 "A1ModJulian", initialEpochA1Mjd, epochStr);
-   
-   // Convert final epoch to A1Mjd
-   if (finalEpoch != "FinalSpacecraftEpoch")
-      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, finalEpoch,
-                                 "A1ModJulian", finalEpochA1Mjd, epochStr);
+   // Convert inital and final epoch to A1ModJulian
+   Real satInitialEpoch = ConvertInitialAndFinalEpoch();
    
    if (!useFixedStepSize)
-   {
-      Real satInitialEpoch = spacecraft->GetEpoch();
-      
-      #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage
-         ("   initialEpochA1Mjd=%f, satInitialEpoch=%f\n", initialEpochA1Mjd, satInitialEpoch);
-      #endif
-
-      //@note - Do we need to check initial epoch?
-      // Check if time is before spacecraft initial epoch
-      if ((initialEpoch != "InitialSpacecraftEpoch") && initialEpochA1Mjd < satInitialEpoch)
-      {
-         SubscriberException se;
-         se.SetDetails("Ephemeris file start time %f cannot be before the "
-                       "spacecraft initial epoch %f\n", initialEpochA1Mjd,
-                       satInitialEpoch);
-         throw se;
-      }
-      
+   {      
       // If user defined initial epoch is the same or less than spacecraft
       // initial epoch, no interpolation is needed for the first state
       if (initialEpochA1Mjd == satInitialEpoch)
@@ -1082,11 +1011,25 @@ bool EphemerisFile::TakeAction(const std::string &action,
    }
    else if (action == "ToggleOn")
    {
+      // If it was last toggled off
+      if (fileType == CODE500_EPHEM && toggleStatus == 2 && !firstTimeWriting)
+         checkForLargeTimeGap = true;
+      else
+         checkForLargeTimeGap = false;
+      
+      toggleStatus = 1;
       writeEphemeris = true;
       retval = true;
    }
    else if (action == "ToggleOff")
    {
+      // Check if it needs to check for large time gap for Code500
+      if (fileType == CODE500_EPHEM && !firstTimeWriting)
+         checkForLargeTimeGap = true;
+      else
+         checkForLargeTimeGap = false;
+      
+      toggleStatus = 2;
       writeEphemeris = false;
       // If toggle off, finish writing ephemeris and restart interpolation
       //LOJ: Write continuous ephemeris if CODE500_EPHEM
@@ -1886,7 +1829,7 @@ void EphemerisFile::CreateCode500EphemerisFile()
    
    Real        satId       = 123.0;   // dummy for now
    std::string timeSystem  = "UTC";   // Figure out time system here
-   std::string sourceId    = "GMAT";  // Should it be GTDS?
+   std::string sourceId    = "GTDS";
    //std::string centralBody = spacecraft->GetOriginName();
    std::string centralBody = outCoordSystem->GetOriginName();
    int ephemOutputFormat = 1;
@@ -2016,6 +1959,48 @@ bool EphemerisFile::OpenTextEphemerisFile()
    #endif
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Real ConvertInitialAndFinalEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Converts initial and final epoch to A1ModJulian time format since spacecraft
+ * uses this time format
+ *
+ * @throws SubscriberException if initial epoch is before spacecraft initial epoch
+ */
+//------------------------------------------------------------------------------
+Real EphemerisFile::ConvertInitialAndFinalEpoch()
+{
+   // Convert initial and final epoch to A1ModJulian format if needed.
+   // Currently spacecraft uses A1ModJulian as output epoch
+   Real dummyA1Mjd = -999.999;
+   std::string epochStr;
+   
+   // Convert initial epoch to A1Mjd
+   if (initialEpoch != "InitialSpacecraftEpoch")
+      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, initialEpoch,
+                                 "A1ModJulian", initialEpochA1Mjd, epochStr);
+   
+   // Convert final epoch to A1Mjd
+   if (finalEpoch != "FinalSpacecraftEpoch")
+      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, finalEpoch,
+                                 "A1ModJulian", finalEpochA1Mjd, epochStr);
+   
+   // Check if ephemeris initial epoch is before the spacecraft initial epoch
+   Real satInitialEpoch = spacecraft->GetEpoch();
+   if ((initialEpoch != "InitialSpacecraftEpoch") && initialEpochA1Mjd < satInitialEpoch)
+   {
+      SubscriberException se;
+      se.SetDetails("Initial epoch (%f) of ephemeris file \"%s\" cannot be before "
+                    "initial epoch (%f) of spacecraft \"%s\"\n", initialEpochA1Mjd,
+                    GetName().c_str(), satInitialEpoch, spacecraft->GetName().c_str());
+      throw se;
+   }
+   
+   return satInitialEpoch;
 }
 
 
@@ -3302,7 +3287,7 @@ bool EphemerisFile::SetEpoch(Integer id, const std::string &value,
 
 
 //------------------------------------------------------------------------------
-// bool SetStepSize(const std::string &value)
+// bool SetStepSize(Integer id, const std::string &value, const StringArray &allowedValues)
 //------------------------------------------------------------------------------
 /*
  * Sets real value step size.
@@ -3310,6 +3295,7 @@ bool EphemerisFile::SetEpoch(Integer id, const std::string &value,
  * @param value step size value string
  *
  * @exception SubscriberException is thrown if value not converted to real number
+ *            or value is negative
  */
 //------------------------------------------------------------------------------
 bool EphemerisFile::SetStepSize(Integer id, const std::string &value,
@@ -3321,10 +3307,11 @@ bool EphemerisFile::SetStepSize(Integer id, const std::string &value,
        id, value.c_str());
    #endif
    
-   Real rval;
-   if (GmatStringUtil::ToReal(value, rval) == false)
+   Real rval = -999.999;
+   bool isReal = GmatStringUtil::ToReal(value, rval);
+   if (!isReal || rval <= 0.0)
    {
-      HandleError(id, value, allowedValues, " or Real Number");
+      HandleError(id, value, allowedValues, " or Real Number > 0.0");
    }
    
    stepSize = value;
@@ -4374,7 +4361,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   #ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_CODE500_OUTPUT
    // For for debugging
    if (isEndOfRun)
    {
@@ -4934,6 +4921,31 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       #endif
       return true;
    }
+   
+   //Hold this for now to complete GMT-4066(LOJ: 2013.07.19)
+   //
+   #if 0
+   // Check for large time gap if needed
+   if (checkForLargeTimeGap)
+   {
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage("   Checking for large time gap for Code500 ephemeris\n");
+      #endif
+      
+      // Assuming time gap is greater than 0.1 day
+      if (currEpochInSecs > ( prevEpochInSecs + 8640.0))
+      {
+         std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
+         std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
+         SubscriberException se;
+         se.SetDetails("Cannot continue ephemeris generation for the EphemerisFile \"%s\".\n   "
+                       "It encounterd large time gap between points, so stopping.\n   "
+                       "current epoch: %s, previous epoch: %s\n", GetName().c_str(),
+                       currTimeStr.c_str(), prevTimeStr.c_str());
+         throw se;
+      }
+   }
+   #endif
    
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data

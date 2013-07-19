@@ -150,6 +150,8 @@ protected:
    Integer     initialCount;
    Integer     waitCount;
    Integer     afterFinalEpochCount;
+   Integer     toggleStatus;
+   
    Real        stepSizeInA1Mjd;
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
@@ -187,6 +189,7 @@ protected:
    bool        spkWriteFailed;
    bool        code500WriteFailed;
    bool        writeCommentAfterData;
+   bool        checkForLargeTimeGap;
    
    Gmat::RunState prevRunState;
    
@@ -227,6 +230,7 @@ protected:
    bool         OpenTextEphemerisFile();
    
    // Time and data
+   Real         ConvertInitialAndFinalEpoch();
    bool         CheckInitialAndFinalEpoch();
    void         HandleSpkOrbitData(bool writeData, bool timeToWrite);
    void         HandleCcsdsOrbitData(bool writeData, bool timeToWrite);
