@@ -15,7 +15,7 @@
 // Created: 2004/03/29
 //
 /**
- * Implements BurnReal class which provides base class for orbit realated Real
+ * Implements BurnReal class which provides base class for orbit related Real
  * Parameters
  */
 //------------------------------------------------------------------------------
