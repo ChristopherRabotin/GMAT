@@ -4374,7 +4374,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    // Write any final header data
    code500EphemFile->FinalizeHeaders();
    
-   //#ifdef DEBUG_EPHEMFILE_CODE500
+   #ifdef DEBUG_EPHEMFILE_CODE500
    // For for debugging
    if (isEndOfRun)
    {
@@ -4388,7 +4388,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
    }
-   //#endif
+   #endif
    
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage("EphemerisFile::FinalizeCode500Ephemeris() leaving\n");
