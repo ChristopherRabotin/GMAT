@@ -1601,15 +1601,24 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool restartCounter
          if (formSize > 0)
          {
             GmatBase *sc = GetObject(formSc[0]);
-            GmatTree::ItemType scType;
-            GmatTree::ResourceIconType scIcon;
-            GetItemTypeAndIcon(sc, scType, scIcon);
-            
-            for (int j = 0; j<formSize; j++)
+            if (sc != NULL)
             {
-               objName = wxString(formSc[j].c_str());
-               AppendItem(formationItem, wxT(objName), scIcon, -1,
-                          new GmatTreeItemData(wxT(objName), scType));
+               GmatTree::ItemType scType;
+               GmatTree::ResourceIconType scIcon;
+               GetItemTypeAndIcon(sc, scType, scIcon);
+            
+               for (int j = 0; j<formSize; j++)
+               {
+                  objName = wxString(formSc[j].c_str());
+                  AppendItem(formationItem, wxT(objName), scIcon, -1,
+                             new GmatTreeItemData(wxT(objName), scType));
+               }
+            }
+            else
+            {
+               MessageInterface::ShowMessage("**** WARNING **** The formation "
+                  "member \"%s\" in Formation \"%s\" could not be found.\n",
+                  formSc[0].c_str(), itemNames[i].c_str());
             }
             Expand(formationItem);
          }
