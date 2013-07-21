@@ -8991,7 +8991,7 @@ bool Interpreter::FinalPass()
    // are initialized, so that EphemerisFile can query for the origin name
    // for validation.
    //-------------------------------------------------------------------
-   retval = FinalPassSubscribers();
+   retval = retval && FinalPassSubscribers();
    
    
    //-------------------------------------------------------------------
