@@ -55,6 +55,7 @@ MinimizePanel::MinimizePanel(wxWindow *parent, GmatCommand *cmd)
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -177,7 +178,13 @@ void MinimizePanel::SaveData()
    {
       std::string varName = variableName.c_str();
       
-	  canClose = CheckVariable(varName, Gmat::SPACECRAFT, "Variable to be Minimized", "Variable, Array element, Spacecraft parameter", false);
+      ObjectTypeArray objTypes;
+      objTypes.push_back(Gmat::SPACE_POINT);
+      objTypes.push_back(Gmat::IMPULSIVE_BURN);
+
+	  canClose = CheckVariable(varName, objTypes,
+	        "Variable to be Minimized",
+	        "Variable, Array element, Spacecraft parameter", false);
    }
    
    if (!canClose)

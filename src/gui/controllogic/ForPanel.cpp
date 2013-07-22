@@ -70,6 +70,7 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -240,17 +241,20 @@ void ForPanel::SaveData()
    #endif
    
    canClose = true;
+   ObjectTypeArray objTypes;
+   objTypes.push_back(Gmat::SPACE_POINT);
+   objTypes.push_back(Gmat::IMPULSIVE_BURN);
    
    //-----------------------------------------------------------------
    // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
-   CheckVariable(mIndexString.c_str(), Gmat::SPACECRAFT, "Index",
+   CheckVariable(mIndexString.c_str(), objTypes, "Index",
                  "Variable", false);
-   CheckVariable(mStartString.c_str(), Gmat::SPACECRAFT, "Start",
+   CheckVariable(mStartString.c_str(), objTypes, "Start",
                  "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mIncrString.c_str(), Gmat::SPACECRAFT, "Increment",
+   CheckVariable(mIncrString.c_str(), objTypes, "Increment",
                  "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mEndString.c_str(), Gmat::SPACECRAFT, "End",
+   CheckVariable(mEndString.c_str(), objTypes, "End",
                  "Real Number, Variable, Array element, plottable Parameter", true);
    
    if (!canClose)

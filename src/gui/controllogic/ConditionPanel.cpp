@@ -66,6 +66,7 @@ ConditionPanel::ConditionPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(p
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
    mLhsList.clear();
    mEqualityOpStrings.clear();
    mRhsList.clear();
@@ -273,12 +274,16 @@ void ConditionPanel::SaveData()
    //-----------------------------------------------------------------
    // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
+   ObjectTypeArray objTypes;
+   objTypes.push_back(Gmat::SPACE_POINT);
+   objTypes.push_back(Gmat::IMPULSIVE_BURN);
+
    for (UnsignedInt i=0; i<mLhsList.size(); i++)
-      CheckVariable(mLhsList[i].c_str(), Gmat::SPACECRAFT, "LHS",
+      CheckVariable(mLhsList[i].c_str(), objTypes, "LHS",
                     "Variable, Array element, plottable Parameter", true);
    
    for (UnsignedInt i=0; i<mRhsList.size(); i++)
-      CheckVariable(mRhsList[i].c_str(), Gmat::SPACECRAFT, "RHS",
+      CheckVariable(mRhsList[i].c_str(), objTypes, "RHS",
                     "Variable, Array element, plottable Parameter", true);
    
    if (!canClose)

@@ -294,8 +294,7 @@ void ParameterSelectDialog::LoadData()
       {
          mPropertyListBox->SetSelection(0);
          
-         if (mAllowMultiSelect)
-//         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
+         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
          {
             mCoordSysLabel->Hide();
             mCoordSysComboBox->SetValue("");

@@ -61,6 +61,7 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -227,12 +228,16 @@ void AchievePanel::SaveData()
    //-----------------------------------------------------------------
    if (mIsTextModified)
    {
+      ObjectTypeArray objTypes;
+      objTypes.push_back(Gmat::SPACE_POINT);
+      objTypes.push_back(Gmat::IMPULSIVE_BURN);
+
       inputString = mGoalValue.c_str();
-      CheckVariable(mGoalValue.c_str(), Gmat::SPACECRAFT, "GoalValue",
+      CheckVariable(mGoalValue.c_str(), objTypes, "GoalValue",
                     "Real Number, Variable, Array element, plottable Parameter", true);
       
       inputString = mToleranceTextCtrl->GetValue();
-      CheckVariable(inputString.c_str(), Gmat::SPACECRAFT, "Tolerance",
+      CheckVariable(inputString.c_str(), objTypes, "Tolerance",
                     "Real Number, Variable, Array element, plottable Parameter", true);
    }
    

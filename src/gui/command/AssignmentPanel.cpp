@@ -194,8 +194,11 @@ void AssignmentPanel::SaveData()
       #if DEBUG_ASSIGNMENT_PANEL_SAVE
       MessageInterface::ShowMessage("   Calling CheckVariable() to validate LHS\n");
       #endif
+      ObjectTypeArray objTypes;
+      objTypes.push_back(Gmat::UNKNOWN_OBJECT);
+
       // lhs should be an existing variable or valid object property
-      CheckVariable(newLhs, Gmat::UNKNOWN_OBJECT, "Left hand side",
+      CheckVariable(newLhs, objTypes, "Left hand side",
                     "Variable, Array, Array element, Object property", false,
                     true, true, true);
    }

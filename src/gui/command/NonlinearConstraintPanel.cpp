@@ -51,6 +51,8 @@ NonlinearConstraintPanel::NonlinearConstraintPanel(wxWindow *parent, GmatCommand
    mNonlinearConstraintCommand = (NonlinearConstraint *)cmd;      
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
+
    theGuiManager = GuiItemManager::GetInstance();
    
    Create();
@@ -230,11 +232,15 @@ void NonlinearConstraintPanel::SaveData()
    //-----------------------------------------------------------------
    // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
+   ObjectTypeArray objTypes;
+   objTypes.push_back(Gmat::SPACE_POINT);
+   objTypes.push_back(Gmat::IMPULSIVE_BURN);
+
    inputString = mLHSTextCtrl->GetValue().c_str();
-   CheckVariable(inputString, Gmat::SPACECRAFT, "Constraint",
+   CheckVariable(inputString, objTypes, "Constraint",
                  "Real Number, Variable, Array element, plottable Parameter", true);
    inputString = mRHSTextCtrl->GetValue().c_str();
-   CheckVariable(inputString, Gmat::SPACECRAFT, "Constraint Value",
+   CheckVariable(inputString, objTypes, "Constraint Value",
                  "Real Number, Variable, Array element, plottable Parameter", true);
    
    if (!canClose)

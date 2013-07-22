@@ -64,6 +64,7 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    InitializeData();   
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -1234,8 +1235,12 @@ void PropagatePanel::SaveData()
          if ((stopCondGrid->GetCellValue(i, STOPCOND_LEFT_COL) != "") ||
               (stopCondGrid->GetCellValue(i, STOPCOND_RIGHT_COL) != ""))
          {
+            ObjectTypeArray objTypes;
+            objTypes.push_back(Gmat::SPACE_POINT); // is this right? or should it only be SPACECRAFT?
+            objTypes.push_back(Gmat::IMPULSIVE_BURN);
+
             CheckVariable(stopCondGrid->GetCellValue
-                          (i, STOPCOND_LEFT_COL).c_str(), Gmat::SPACECRAFT, "Parameter",
+                          (i, STOPCOND_LEFT_COL).c_str(), objTypes, "Parameter",
                           "Variable, Array element, plottable Parameter", true, true);
             
             // check condition if parameter is not Periapsis nor Apoapsis
@@ -1243,7 +1248,7 @@ void PropagatePanel::SaveData()
             if (!paramName.Contains(".Periapsis") && !paramName.Contains(".Apoapsis"))
             {
                CheckVariable(stopCondGrid->GetCellValue
-                             (i, STOPCOND_RIGHT_COL).c_str(), Gmat::SPACECRAFT, "Condition",
+                             (i, STOPCOND_RIGHT_COL).c_str(), objTypes, "Condition",
                              "Variable, Array element, plottable Parameter", true, true);
             }
          }

@@ -57,7 +57,7 @@ public:
                           bool includeLower = false,
                           bool includeUpper = false);
    
-   bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
+   bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
                       const std::string &field, const std::string &expRange,
                       bool allowNumber = true, bool allowNonPlottable = false,
                       bool allowObjectProperty = false, bool allowWholeArray = false);

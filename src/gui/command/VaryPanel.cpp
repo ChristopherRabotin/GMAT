@@ -322,54 +322,56 @@ void VaryPanel::SaveData()
    //-----------------------------------------------------------------
    
    std::string expRange = "Real Number, Variable, Array element, Plottable Parameter";
+   ObjectTypeArray objTypes;
+   objTypes.push_back(Gmat::UNKNOWN_OBJECT);
    
    // Any plottable Parameters allowed, so use UNKNOWN_OBJECT
    if (mInitialTextCtrl->IsModified())
    {
       strInitVal = mInitialTextCtrl->GetValue().c_str();
-      CheckVariable(strInitVal, Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strInitVal, objTypes,
                     "InitialValue", expRange, true);
    }
    
    if (mPertTextCtrl->IsModified())
    {
       strPert = mPertTextCtrl->GetValue().c_str();
-      CheckVariable(strPert, Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strPert, objTypes,
                     "Perturbation", expRange, true);
    }
    
    if (mLowerValueTextCtrl->IsModified())
    {
       strLower = mLowerValueTextCtrl->GetValue().c_str();
-      CheckVariable(strLower, Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strLower, objTypes,
                     "Lower", expRange, true);
    }
    
    if (mUpperValueTextCtrl->IsModified())
    {
       strUpper = mUpperValueTextCtrl->GetValue().c_str();
-      CheckVariable(strUpper.c_str(), Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strUpper.c_str(), objTypes,
                     "Upper", expRange, true);
    }
    
    if (mMaxStepTextCtrl->IsModified())
    {
       strMaxStep = mMaxStepTextCtrl->GetValue().c_str();
-      CheckVariable(strMaxStep.c_str(), Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strMaxStep.c_str(), objTypes,
                     "MaxStep", expRange, true);
    }
    
    if (mAdditiveTextCtrl->IsModified())
    {
       strAddSf = mAdditiveTextCtrl->GetValue().c_str();
-      CheckVariable(strAddSf.c_str(), Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strAddSf.c_str(), objTypes,
                     "AdditiveScaleFactor", expRange, true);
    }
    
    if (mMultiplicativeTextCtrl->IsModified())
    {
       strMultSf = mMultiplicativeTextCtrl->GetValue().c_str();
-      CheckVariable(strMultSf.c_str(), Gmat::UNKNOWN_OBJECT,
+      CheckVariable(strMultSf.c_str(), objTypes,
                     "MultiplicativeScaleFactor", expRange, true);
    }
    
