@@ -601,6 +601,9 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    {
       valueString = wxT(mObject->GetStringParameter(label).c_str());
       allCoordSystemComboBox->SetValue(valueString);
+	  // keep 2 comboboxes in sync
+      if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
+	    onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
    }
    else if (label == "WriteEphemeris")
    {
@@ -947,6 +950,17 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       }
       
       EnableUpdate(true);
+   }
+   // keep allCoordSystemComboBox and onlyMj2000EqComboBox in sync if possible 
+   else if (event.GetEventObject() == allCoordSystemComboBox)
+   {
+	   if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
+		   onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
+   }
+   else if (event.GetEventObject() == onlyMj2000EqComboBox)
+   {
+	   if (allCoordSystemComboBox->FindString(onlyMj2000EqComboBox->GetValue()) != wxNOT_FOUND)
+		   allCoordSystemComboBox->SetValue(onlyMj2000EqComboBox->GetValue());
    }
    
    //if (theApplyButton != NULL)
