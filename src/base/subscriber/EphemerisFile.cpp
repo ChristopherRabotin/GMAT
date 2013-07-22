@@ -2000,6 +2000,19 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
       throw se;
    }
    
+   // Check if ephemeris final epoch is greater than initial epoch
+   if ((initialEpoch != "InitialSpacecraftEpoch") && (initialEpoch != "InitialSpacecraftEpoch"))
+   {
+      if (initialEpochA1Mjd > finalEpochA1Mjd)
+      {
+         SubscriberException se;
+         se.SetDetails("Initial epoch (%f) of ephemeris file \"%s\" cannot be greater than "
+                       "final epoch (%f)\n", initialEpochA1Mjd, GetName().c_str(),
+                       finalEpochA1Mjd);
+         throw se;
+      }
+   }
+   
    return satInitialEpoch;
 }
 
