@@ -481,8 +481,9 @@ bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    #endif
    
    bool setOK = OrbitData::SetRefObject(obj, type, name);
-   // Setting states for SpacePoints, other than Spacecraft, is not allowed
-   if (setOK && obj->IsOfType("SpacePoint") && !(obj->IsOfType("Spacecraft")))
+   // Setting states for SpacePoint parameter owners, other than Spacecraft, is not allowed
+   if (setOK && obj->IsOfType("SpacePoint") && !(obj->IsOfType("Spacecraft")) &&
+       (obj->GetName() == mParamOwnerName))
       mIsSettable = false;
    return setOK;
 //   return OrbitData::SetRefObject(obj, type, name);
