@@ -1059,6 +1059,14 @@ void EphemerisFilePanel::ShowAllCoordSystems(bool show)
    grid1->Show(allCoordSystemComboBox, show);
    grid1->Show(onlyMJ2000EqStaticText, !show);
    grid1->Show(onlyMj2000EqComboBox, !show);
+   if (allCoordSystemComboBox->GetValue() != onlyMj2000EqComboBox->GetValue())
+   {
+	   // if changing to allCoordSystemComboBox or onlyMj does not have value
+	   if (show || (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) == wxNOT_FOUND))
+		   allCoordSystemComboBox->SetValue( onlyMj2000EqComboBox->GetValue() );
+	   else 
+		   onlyMj2000EqComboBox->SetValue( allCoordSystemComboBox->GetValue() );
+   }
    grid1->Layout();
    theMiddleSizer->Layout();
 }
