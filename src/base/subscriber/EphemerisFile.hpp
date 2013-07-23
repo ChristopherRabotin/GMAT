@@ -229,6 +229,9 @@ protected:
    void         CreateCode500EphemerisFile();
    bool         OpenTextEphemerisFile();
    
+   // Finalization
+   void         CloseEphemerisFile();
+   
    // Time and data
    Real         ConvertInitialAndFinalEpoch();
    bool         CheckInitialAndFinalEpoch();

@@ -133,6 +133,10 @@ EphemerisFile::PARAMETER_TYPE[EphemerisFileParamCount - SubscriberParamCount] =
 //------------------------------------------------------------------------------
 // EphemerisFile(const std::string &name, const std::string &type = "EphemerisFile")
 //------------------------------------------------------------------------------
+/**
+ * Default constructor
+ */
+//------------------------------------------------------------------------------
 EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    Subscriber           (type, name),
    maxSegmentSize       (1000),
@@ -278,6 +282,10 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
 //------------------------------------------------------------------------------
 // ~EphemerisFile()
 //------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 EphemerisFile::~EphemerisFile()
 {
    #ifdef DEBUG_EPHEMFILE
@@ -300,7 +308,7 @@ EphemerisFile::~EphemerisFile()
    MessageInterface::ShowMessage
       ("   spkWriter=<%p>, spkWriteFailed=%d\n", spkWriter, spkWriteFailed);
    #endif
-   if (spkWriter != NULL && !spkWriteFailed)
+   if (spkWriter != NULL)
    {
       if (!spkWriteFailed)
          FinalizeSpkFile();
@@ -314,9 +322,11 @@ EphemerisFile::~EphemerisFile()
    }
    #endif
    
+   // Delete Code500 ephemeris
    if (code500EphemFile)
       delete code500EphemFile;
    
+   // Close CCSDS ephemeris
    dstream.flush();
    dstream.close();
    
@@ -329,6 +339,10 @@ EphemerisFile::~EphemerisFile()
 
 //------------------------------------------------------------------------------
 // EphemerisFile(const EphemerisFile &ef)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ */
 //------------------------------------------------------------------------------
 EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    Subscriber           (ef),
@@ -1963,6 +1977,39 @@ bool EphemerisFile::OpenTextEphemerisFile()
 
 
 //------------------------------------------------------------------------------
+// void CloseEphemerisFile()
+//------------------------------------------------------------------------------
+void EphemerisFile::CloseEphemerisFile()
+{
+   // Close SPK file
+   #ifdef __USE_SPICE__
+   #ifdef DEBUG_EPHEMFILE
+   MessageInterface::ShowMessage
+      ("EphemerisFile::CloseEphemerisFile() spkWriter=<%p>, spkWriteFailed=%d\n",
+       spkWriter, spkWriteFailed);
+   #endif
+   if (spkWriter != NULL)
+   {
+      if (!spkWriteFailed)
+         FinalizeSpkFile();
+      
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (spkWriter, "SPK writer", "EphemerisFile::~EphemerisFile()()",
+          "deleting local SPK writer");
+      #endif
+      delete spkWriter;
+      spkWriter = NULL;
+   }
+   #endif
+   
+   // Close CCSDS file
+   dstream.flush();
+   dstream.close();
+}
+
+
+//------------------------------------------------------------------------------
 // Real ConvertInitialAndFinalEpoch()
 //------------------------------------------------------------------------------
 /**
@@ -2001,7 +2048,7 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
    }
    
    // Check if ephemeris final epoch is greater than initial epoch
-   if ((initialEpoch != "InitialSpacecraftEpoch") && (initialEpoch != "InitialSpacecraftEpoch"))
+   if ((initialEpoch != "InitialSpacecraftEpoch") && (finalEpoch != "FinalSpacecraftEpoch"))
    {
       if (initialEpochA1Mjd > finalEpochA1Mjd)
       {
@@ -2777,7 +2824,12 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       }
       
       if (canFinalize)
+      {
+         // Close ephemeris file (GMT-4049 fix)
+         if (isEndOfRun)
+            CloseEphemerisFile();
          isFinalized = true;
+      }
    }
    
    #ifdef DEBUG_EPHEMFILE_FINISH
@@ -4387,8 +4439,12 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       code500EphemFile->SetSwapEndian(swapByteOrder, 1);
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
+      code500EphemFile->CloseForRead();
    }
    #endif
+   
+   // Close Code500 ephemeris file
+   code500EphemFile->CloseForWrite();
    
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage("EphemerisFile::FinalizeCode500Ephemeris() leaving\n");
