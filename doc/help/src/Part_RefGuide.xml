@@ -53,6 +53,7 @@
       <xi:include href="Resource_CoordinateSystem.xml" />
       <xi:include href="Resource_DifferentialCorrector.xml" />
       <xi:include href="Resource_EphemerisFile.xml" />
+      <xi:include href="Resource_FileInterface.xml" />
       <xi:include href="Resource_FiniteBurn.xml" />
       <xi:include href="Resource_FminconOptimizer.xml"/>
       <xi:include href="Resource_Formation.xml" />
@@ -101,6 +102,7 @@
       <xi:include href="Command_PenUpPenDown.xml" />
       <xi:include href="Command_Propagate.xml" />
       <xi:include href="Command_Report.xml" />
+      <xi:include href="Command_Set.xml" />
       <xi:include href="Command_Stop.xml" />
       <xi:include href="Command_Target.xml" />
       <xi:include href="Command_Toggle.xml" />
