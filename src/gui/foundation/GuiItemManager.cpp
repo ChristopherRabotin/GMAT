@@ -386,7 +386,7 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
  *           1 if varName found AND is one of Variable, Array element, or parameter OR
  *                        it is array and allowWholeArray is true
  *
- * @note mLastErrorMsg contains the detaild error message
+ * @note mLastErrorMsg contains the detailed error message
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidParameter(const std::string &varName,
@@ -1594,7 +1594,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
          find(mCoordSysCBList.begin(), mCoordSysCBList.end(), cb);
       
       if (pos != mCoordSysCBList.end())
+      {
+         #if DBGLVL_GUI_ITEM_CS
+         MessageInterface::ShowMessage
+            ("GuiItemManager::UnregisterComboBox() UNregistering coord sys combobox %s\n",
+             ((*pos)->GetName()).c_str());
+         #endif
          mCoordSysCBList.erase(pos);
+      }
    }
    else if (type == "Function")
    {
@@ -5347,12 +5354,24 @@ void GuiItemManager::UpdateCoordSystemList()
    // update registered CoordinateSystem ComboBox
    //-------------------------------------------------------
    int sel;
+   #if DBGLVL_GUI_ITEM_CS > 1
+   MessageInterface::ShowMessage
+      ("   There are %d CoordSys combo boxes\n", (Integer) mCoordSysCBList.size());
+   #endif
    
    for (std::vector<wxComboBox*>::iterator pos = mCoordSysCBList.begin();
         pos != mCoordSysCBList.end(); ++pos)
    {
       // How can I catch bad pointer?
       
+      if ((*pos) == NULL)
+         continue;
+
+      #if DBGLVL_GUI_ITEM_CS > 1
+      MessageInterface::ShowMessage
+         ("   Coord Sys Combo Box name = %s\n",((*pos)->GetName()).c_str());
+      #endif
+
       if ((*pos)->GetParent() != NULL)
       {
          // Filter coordinate systems with MJ2000Eq axis
