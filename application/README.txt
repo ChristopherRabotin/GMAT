@@ -28,13 +28,14 @@ default to your personal %LOCALAPPDATA% folder. This can be customized
 during installation.
 
 GMAT is distributed in source form as well, and can be compiled on the
-Mac and on Linux. It has not, however, been rigorously tested on these platforms.
+Mac and on Linux. It has not, however, been rigorously tested on these
+platforms.
 
 -----------------------------------------------------------------------
                            Running GMAT
 -----------------------------------------------------------------------
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2013a, and then click GMAT R2013a. If you are using the zip-file bundle,
+GMAT R2013b, and then click GMAT R2013b. If you are using the zip-file bundle,
 double-click the bin\GMAT.exe application.
 
 -----------------------------------------------------------------------
@@ -98,12 +99,12 @@ Some icons are courtesy of Mark James ( http://www.famfamfam.com/ )
                            Contact Information
 -----------------------------------------------------------------------
 
-For general project info see: http://gmat.gsfc.nasa.gov
+For general project info see: http://gmatcentral.org
 
 For source code and application distributions see:
 http://sourceforge.net/projects/gmat/
 
-For other comments and questions email:  gmat@gsfc.nasa.gov
+For other comments and questions, email: gmat@gsfc.nasa.gov
 
 -----------------------------------------------------------------------
                          Known Issues and Status
@@ -112,11 +113,12 @@ For other comments and questions email:  gmat@gsfc.nasa.gov
 Please see the release notes, located online at http://gmat.sf.net/docs.
 
 For a list of known issues, please visit
-http://li64-187.members.linode.com:8080 or email gmat@gsfc.nasa.gov. 
+http://bugs.gmatcentral.org or email gmat@gsfc.nasa.gov.
 
 The following plugins are included and have the listed status:
 
 Official plugins:
+libDataInterface
 libEphemPropagator
 libFormation
 libStation
@@ -133,6 +135,7 @@ libSaveCommand
 
 Internal-only plugins:
 libVF13Optimizer
+libNewParameters
 libNRLMsise00
 libMsise86
 libMarsGRAM (alpha)
