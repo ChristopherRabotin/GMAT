@@ -34,14 +34,7 @@ GMAT AQUA.Attitude = CoordinateSystemFixed;
 GMAT AQUA.AttitudeDisplayStateType = 'Quaternion';
 GMAT AQUA.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT AQUA.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT AQUA.Q1 = 0;
-GMAT AQUA.Q2 = 0;
-GMAT AQUA.Q3 = 0;
-GMAT AQUA.Q4 = 1;
-GMAT AQUA.EulerAngleSequence = '312';
-GMAT AQUA.AngularVelocityX = 0;
-GMAT AQUA.AngularVelocityY = 0;
-GMAT AQUA.AngularVelocityZ = 0;
+
 
 Create Spacecraft TDRSS4;
 GMAT TDRSS4.DateFormat = UTCGregorian;
@@ -66,14 +59,6 @@ GMAT TDRSS4.Attitude = CoordinateSystemFixed;
 GMAT TDRSS4.AttitudeDisplayStateType = 'Quaternion';
 GMAT TDRSS4.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT TDRSS4.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT TDRSS4.Q1 = 0;
-GMAT TDRSS4.Q2 = 0;
-GMAT TDRSS4.Q3 = 0;
-GMAT TDRSS4.Q4 = 1;
-GMAT TDRSS4.EulerAngleSequence = '312';
-GMAT TDRSS4.AngularVelocityX = 0;
-GMAT TDRSS4.AngularVelocityY = 0;
-GMAT TDRSS4.AngularVelocityZ = 0;
 
 Create Spacecraft TDRSS5;
 GMAT TDRSS5.DateFormat = UTCGregorian;
@@ -98,14 +83,7 @@ GMAT TDRSS5.Attitude = CoordinateSystemFixed;
 GMAT TDRSS5.AttitudeDisplayStateType = 'Quaternion';
 GMAT TDRSS5.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT TDRSS5.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT TDRSS5.Q1 = 0;
-GMAT TDRSS5.Q2 = 0;
-GMAT TDRSS5.Q3 = 0;
-GMAT TDRSS5.Q4 = 1;
-GMAT TDRSS5.EulerAngleSequence = '312';
-GMAT TDRSS5.AngularVelocityX = 0;
-GMAT TDRSS5.AngularVelocityY = 0;
-GMAT TDRSS5.AngularVelocityZ = 0;
+
 
 %----------------------------------------
 %---------- Hardware Components

@@ -217,7 +217,7 @@ Target 'Raise Apogee' DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
 EndTarget;  % For targeter DC
 
 Propagate 'Prop to Perigee' DefaultProp(geoSat) {geoSat.Earth.Periapsis};
-Propagate 'Prop to Plane Crossing' DefaultProp(geoSat) {geoSat.Z = 0};
+Propagate 'Prop to Plane Crossing' DefaultProp(geoSat) {geoSat.Z = 0, StopTolerance = 1e-5};
 
 Target 'Change Plane/Perigee' DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
    Vary 'Vary MCC.V' DC(MCC.Element1 = 0.1, {Perturbation = .0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.5});

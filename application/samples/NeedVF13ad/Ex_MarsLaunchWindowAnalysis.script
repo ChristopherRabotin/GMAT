@@ -1,12 +1,12 @@
-%  This sample mission uses a patched conic approximation to optimize 
-%  a 20 day launch window for a mars transfer.   An optimal trajectory
-%  is created for each of the 20 launch days.
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2012-05-25 07:23:08
+
 
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
 
-Create Spacecraft satForward satForwardInit;
+Create Spacecraft satForward;
 GMAT satForward.DateFormat = TAIModJulian;
 GMAT satForward.Epoch = '21545';
 GMAT satForward.CoordinateSystem = EarthSunRot;
@@ -36,10 +36,47 @@ GMAT satForward.ModelRotationZ = 0;
 GMAT satForward.ModelScale = 3;
 GMAT satForward.AttitudeDisplayStateType = 'Quaternion';
 GMAT satForward.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT satForward.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT satForward.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satForward.EulerAngleSequence = '321';
 
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
 
-Create Spacecraft satBackward satBackwardInit;
+Create Spacecraft satForwardInit;
+GMAT satForwardInit.DateFormat = TAIModJulian;
+GMAT satForwardInit.Epoch = '21545';
+GMAT satForwardInit.CoordinateSystem = EarthMJ2000Eq;
+GMAT satForwardInit.DisplayStateType = Cartesian;
+GMAT satForwardInit.X = 7100;
+GMAT satForwardInit.Y = 0;
+GMAT satForwardInit.Z = 1300;
+GMAT satForwardInit.VX = 0;
+GMAT satForwardInit.VY = 7.35;
+GMAT satForwardInit.VZ = 1;
+GMAT satForwardInit.DryMass = 850;
+GMAT satForwardInit.Cd = 2.2;
+GMAT satForwardInit.Cr = 1.8;
+GMAT satForwardInit.DragArea = 15;
+GMAT satForwardInit.SRPArea = 1;
+GMAT satForwardInit.NAIFId = -123456789;
+GMAT satForwardInit.NAIFIdReferenceFrame = -123456789;
+GMAT satForwardInit.Id = 'SatId';
+GMAT satForwardInit.Attitude = CoordinateSystemFixed;
+GMAT satForwardInit.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT satForwardInit.ModelOffsetX = 0;
+GMAT satForwardInit.ModelOffsetY = 0;
+GMAT satForwardInit.ModelOffsetZ = 0;
+GMAT satForwardInit.ModelRotationX = 0;
+GMAT satForwardInit.ModelRotationY = 0;
+GMAT satForwardInit.ModelRotationZ = 0;
+GMAT satForwardInit.ModelScale = 3;
+GMAT satForwardInit.AttitudeDisplayStateType = 'Quaternion';
+GMAT satForwardInit.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT satForwardInit.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satForwardInit.EulerAngleSequence = '321';
+
+Create Spacecraft satBackward;
 GMAT satBackward.DateFormat = TAIModJulian;
 GMAT satBackward.Epoch = '21545';
 GMAT satBackward.CoordinateSystem = MarsSunRot;
@@ -69,7 +106,41 @@ GMAT satBackward.ModelRotationZ = 0;
 GMAT satBackward.ModelScale = 3;
 GMAT satBackward.AttitudeDisplayStateType = 'Quaternion';
 GMAT satBackward.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT satBackward.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT satBackward.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satBackward.EulerAngleSequence = '321';
+
+Create Spacecraft satBackwardInit;
+GMAT satBackwardInit.DateFormat = TAIModJulian;
+GMAT satBackwardInit.Epoch = '21545';
+GMAT satBackwardInit.CoordinateSystem = EarthMJ2000Eq;
+GMAT satBackwardInit.DisplayStateType = Cartesian;
+GMAT satBackwardInit.X = 7100;
+GMAT satBackwardInit.Y = 0;
+GMAT satBackwardInit.Z = 1300;
+GMAT satBackwardInit.VX = 0;
+GMAT satBackwardInit.VY = 7.35;
+GMAT satBackwardInit.VZ = 1;
+GMAT satBackwardInit.DryMass = 850;
+GMAT satBackwardInit.Cd = 2.2;
+GMAT satBackwardInit.Cr = 1.8;
+GMAT satBackwardInit.DragArea = 15;
+GMAT satBackwardInit.SRPArea = 1;
+GMAT satBackwardInit.NAIFId = -123456789;
+GMAT satBackwardInit.NAIFIdReferenceFrame = -123456789;
+GMAT satBackwardInit.Id = 'SatId';
+GMAT satBackwardInit.Attitude = CoordinateSystemFixed;
+GMAT satBackwardInit.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT satBackwardInit.ModelOffsetX = 0;
+GMAT satBackwardInit.ModelOffsetY = 0;
+GMAT satBackwardInit.ModelOffsetZ = 0;
+GMAT satBackwardInit.ModelRotationX = 0;
+GMAT satBackwardInit.ModelRotationY = 0;
+GMAT satBackwardInit.ModelRotationZ = 0;
+GMAT satBackwardInit.ModelScale = 3;
+GMAT satBackwardInit.AttitudeDisplayStateType = 'Quaternion';
+GMAT satBackwardInit.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT satBackwardInit.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satBackwardInit.EulerAngleSequence = '321';
 
 
 
@@ -117,14 +188,6 @@ GMAT aDeltaV.Element3 = 0;
 GMAT aDeltaV.DecrementMass = false;
 GMAT aDeltaV.Isp = 300;
 GMAT aDeltaV.GravitationalAccel = 9.810000000000001;
-
-%----------------------------------------
-%---------- Arrays, Variables, Strings
-%----------------------------------------
-Create Variable launchEpoch arrivalEpoch patchEpoch cost loopCount tofConstraint tofValue I;
-GMAT loopCount = 1;
-GMAT tofConstraint = 270;
-GMAT tofValue = 1;
 
 
 
@@ -180,6 +243,7 @@ GMAT SunInertialView.SolverIterations = Current;
 GMAT SunInertialView.UpperLeft = [ 0.5481132075471699 0.05973025048169557 ];
 GMAT SunInertialView.Size = [ 0.4292452830188679 0.9036608863198459 ];
 GMAT SunInertialView.RelativeZOrder = 312;
+GMAT SunInertialView.Maximized = false;
 GMAT SunInertialView.Add = {satForward, satBackward, Earth, Sun, Mars};
 GMAT SunInertialView.CoordinateSystem = SunMJ2000Ec;
 GMAT SunInertialView.DrawObject = [ true true true true true ];
@@ -211,6 +275,7 @@ GMAT EarthSunRotView.SolverIterations = Current;
 GMAT EarthSunRotView.UpperLeft = [ -0.007547169811320755 0.01303538175046555 ];
 GMAT EarthSunRotView.Size = [ 1.016037735849057 1.080074487895717 ];
 GMAT EarthSunRotView.RelativeZOrder = 796;
+GMAT EarthSunRotView.Maximized = false;
 GMAT EarthSunRotView.Add = {satForward, satBackward, Earth, Sun, Mars};
 GMAT EarthSunRotView.CoordinateSystem = EarthSunRot;
 GMAT EarthSunRotView.DrawObject = [ true true true true true ];
@@ -242,6 +307,7 @@ GMAT XYPlot1.SolverIterations = All;
 GMAT XYPlot1.UpperLeft = [ 0.05377358490566038 0.1734104046242775 ];
 GMAT XYPlot1.Size = [ 0.4877358490566038 0.4990366088631985 ];
 GMAT XYPlot1.RelativeZOrder = 415;
+GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = loopCount;
 GMAT XYPlot1.YVariables = {cost};
 GMAT XYPlot1.ShowGrid = true;
@@ -252,6 +318,7 @@ GMAT XYPlot2.SolverIterations = All;
 GMAT XYPlot2.UpperLeft = [ 0.04528301886792453 0.007707129094412331 ];
 GMAT XYPlot2.Size = [ 0.4811320754716981 0.5144508670520231 ];
 GMAT XYPlot2.RelativeZOrder = 399;
+GMAT XYPlot2.Maximized = false;
 GMAT XYPlot2.XVariable = loopCount;
 GMAT XYPlot2.YVariables = {launchEpoch, arrivalEpoch};
 GMAT XYPlot2.ShowGrid = true;
@@ -262,12 +329,22 @@ GMAT rf.SolverIterations = Current;
 GMAT rf.UpperLeft = [ 0 0 ];
 GMAT rf.Size = [ 0 0 ];
 GMAT rf.RelativeZOrder = 0;
+GMAT rf.Maximized = false;
 GMAT rf.Precision = 16;
-GMAT rf.WriteHeaders = On;
+GMAT rf.WriteHeaders = true;
 GMAT rf.LeftJustify = On;
 GMAT rf.ZeroFill = Off;
 GMAT rf.ColumnWidth = 20;
 GMAT rf.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable launchEpoch arrivalEpoch patchEpoch cost loopCount tofConstraint tofValue I;
+GMAT loopCount = 1;
+GMAT tofConstraint = 270;
+GMAT tofValue = 1;
+
 
 %----------------------------------------
 %---------- Mission Sequence
@@ -275,7 +352,7 @@ GMAT rf.WriteReport = true;
 
 BeginMissionSequence;
 BeginScript
-
+   
    GMAT satForward.DateFormat = 'TAIModJulian';
    GMAT satBackward.DateFormat = 'TAIModJulian';
    GMAT launchEpoch = 29087;
@@ -288,25 +365,25 @@ BeginScript
    
    GMAT arrivalEpoch = launchEpoch +  258.9234;  % Add hohmann transfer TOF to launchEpoch
    GMAT patchEpoch = launchEpoch + (arrivalEpoch - launchEpoch)/2;
-   launchEpoch = 27357.0637387
-   arrivalEpoch = 27722.2678134
-   satForward.VX = 1.24242326859
-   satForward.VY = 0.857493964283
-   satForward.VZ = -7.31156188552
-   satBackward.VX = -4.24323514703
-   satBackward.VY = -0.238185150576
-   satBackward.VZ = -5.58416575838
-
-   satForwardInit = satForward
-   satBackwardInit = satBackward
+   GMAT launchEpoch = 27357.0637387;
+   GMAT arrivalEpoch = 27722.2678134;
+   GMAT satForward.VX = 1.24242326859;
+   GMAT satForward.VY = 0.857493964283;
+   GMAT satForward.VZ = -7.31156188552;
+   GMAT satBackward.VX = -4.24323514703;
+   GMAT satBackward.VY = -0.238185150576;
+   GMAT satBackward.VZ = -5.58416575838;
+   
+   GMAT satForwardInit = satForward;
+   GMAT satBackwardInit = satBackward;
    
 EndScript;
 
-For I = 1:20
-
-   launchEpoch = 27357.0637387 - 11 + I*2;
-   satForward = satForwardInit;
-   satBackward = satBackwardInit;
+For I = 1:1:20;
+   
+   GMAT launchEpoch = 27357.0637387 - 11 + I*2;
+   GMAT satForward = satForwardInit;
+   GMAT satBackward = satBackwardInit;
    
    Optimize NLP {SolveMode = Solve, ExitMode = SaveAndContinue};
       GMAT loopCount = loopCount + 1;
@@ -328,13 +405,13 @@ For I = 1:20
       Vary NLP(satBackward.VY = satBackward.MarsSunRot.VY, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
       Vary NLP(satBackward.VZ = satBackward.MarsSunRot.VZ, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
       
-      PenUp SunInertialView EarthSunRotView
-      Propagate sunProp(satForward){satForward.ElapsedSecs = 5};
-      PenDown SunInertialView EarthSunRotView
+      PenUp SunInertialView EarthSunRotView;
+      Propagate sunProp(satForward) {satForward.ElapsedSecs = 5};
+      PenDown SunInertialView EarthSunRotView;
       Propagate sunProp(satForward) {satForward.TAIModJulian = patchEpoch};
-      PenUp SunInertialView EarthSunRotView
-      Propagate BackProp sunProp(satBackward){satBackward.ElapsedSecs = -5};
-      PenDown SunInertialView EarthSunRotView
+      PenUp SunInertialView EarthSunRotView;
+      Propagate BackProp sunProp(satBackward) {satBackward.ElapsedSecs = -5};
+      PenDown SunInertialView EarthSunRotView;
       Propagate BackProp sunProp(satBackward) {satBackward.TAIModJulian = patchEpoch};
       
       NonlinearConstraint NLP(satForward.SunMJ2000Ec.X=satBackward.SunMJ2000Ec.X);
@@ -346,10 +423,10 @@ For I = 1:20
       
       GMAT cost = sqrt(satForward.EarthSunRot.VX^2 + satForward.EarthSunRot.VY^2 + satForward.EarthSunRot.VZ^2) + sqrt(satBackward.MarsSunRot.VX^2 + satBackward.MarsSunRot.VY^2 + satBackward.MarsSunRot.VZ^2);
       
-     % Report rf cost satForward.EarthSunRot.VX satForward.EarthSunRot.VY satForward.EarthSunRot.VZ satBackward.MarsSunRot.VX satBackward.MarsSunRot.VY satBackward.MarsSunRot.VZ;
+      % Report rf cost satForward.EarthSunRot.VX satForward.EarthSunRot.VY satForward.EarthSunRot.VZ satBackward.MarsSunRot.VX satBackward.MarsSunRot.VY satBackward.MarsSunRot.VZ;
       Minimize NLP(cost);
-
-
+   
+   
    EndOptimize;  % For optimizer NLP
-   Report rf launchEpoch cost
-EndFor
+   Report rf launchEpoch cost;
+EndFor;

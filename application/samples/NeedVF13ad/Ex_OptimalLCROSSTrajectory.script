@@ -775,7 +775,7 @@ BeginScript
    GMAT ImpactSat_MoonFixed.Z = -1730.522;
    
    %---- Define the initial conditions for ImpactSat
-   GMAT ImpactSat.Epoch = ImpactSat_MoonFixed.Epoch;
+   GMAT ImpactSat.Epoch.TAIModJulian = ImpactSat_MoonFixed.Epoch.TAIModJulian;
    GMAT ImpactSat.X = ImpactSat_MoonFixed.EarthMJ2000Eq.X;
    GMAT ImpactSat.Y = ImpactSat_MoonFixed.EarthMJ2000Eq.Y;
    GMAT ImpactSat.Z = ImpactSat_MoonFixed.EarthMJ2000Eq.Z;

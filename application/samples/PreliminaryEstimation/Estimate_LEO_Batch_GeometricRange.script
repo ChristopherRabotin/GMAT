@@ -1,10 +1,4 @@
-% Script Test Case for Build 0.1
-
-
-%----------------------------------------
-%---------- Solar System User-Modified Values
-%----------------------------------------
-
+%  Note:  You must first run Simulate_LEO_Geometric_Range.script to generate the measurement file.
 
 %----------------------------------------
 %---------- Spacecraft
@@ -34,14 +28,7 @@ GMAT ODSat.Attitude = CoordinateSystemFixed;
 GMAT ODSat.AttitudeDisplayStateType = 'Quaternion';
 GMAT ODSat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT ODSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-GMAT ODSat.Q1 = 0;
-GMAT ODSat.Q2 = 0;
-GMAT ODSat.Q3 = 0;
-GMAT ODSat.Q4 = 1;
-GMAT ODSat.EulerAngleSequence = '312';
-GMAT ODSat.AngularVelocityX = 0;
-GMAT ODSat.AngularVelocityY = 0;
-GMAT ODSat.AngularVelocityZ = 0;
+
 
 ODSat.Covariance.CartesianState = [1e12 1e12 1e12 1e6 1e6 1e6];
 
