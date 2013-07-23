@@ -83,7 +83,7 @@ EphemerisFilePanel::EphemerisFilePanel(wxWindow *parent, const wxString &name)
 EphemerisFilePanel::~EphemerisFilePanel()
 {
    // Unregister automatically registered ComboBoxes
-   std::map<wxString, wxComboBox *>::iterator iter;
+   std::multimap<wxString, wxComboBox *>::iterator iter;
    for (iter = managedComboBoxMap.begin(); iter != managedComboBoxMap.end();
          ++iter)
       theGuiManager->UnregisterComboBox(iter->first, iter->second);
