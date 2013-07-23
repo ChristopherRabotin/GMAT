@@ -1182,6 +1182,7 @@ void GuiItemManager::UpdatePropagator(bool updateObjectArray)
    #endif
    
    UpdatePropagatorList();
+   UpdateForceModelList();
    if (updateObjectArray)
       RefreshAllObjectArray();
 }
