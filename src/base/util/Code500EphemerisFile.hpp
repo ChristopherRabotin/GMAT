@@ -217,6 +217,7 @@ protected:
    double         mInputTimeSystem;  // 1 = A1, 2 = UTC
    double         mOutputTimeSystem; // 1 = A1, 2 = UTC
    double         mCentralBodyIndicator; 
+   double         mPrecNutIndicator; // hardcoded to 1
    std::string    mProductId;
    std::string    mTapeId;
    std::string    mSourceId;

@@ -69,6 +69,7 @@
 //#define DBGLVL_EPHEMFILE_MANEUVER 1
 //#define DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE 1
 //#define DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE 1
+//#define DEBUG_EPHEMFILE_CONVERT_STATE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -880,7 +881,7 @@ bool EphemerisFile::Initialize()
    // Determine output coordinate system, set to boolean to avoid string comparison
    // We don't need conversion for SPK_ORBIT. SpiceOrbitKernelWriter assumes it is in
    // J2000Eq frame for now
-   if (fileType == CCSDS_OEM &&
+   if ((fileType == CCSDS_OEM || fileType == CODE500_EPHEM) &&
        theDataCoordSystem->GetName() != outCoordSystemName)
       writeDataInDataCS = false;
    

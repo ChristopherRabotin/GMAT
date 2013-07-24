@@ -99,11 +99,11 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
       ("   fileMode=%d, fileFormat=%d, yearFormat=%d\n", fileMode, fileFormat, yearFormat);
    #endif
    
-   mSatId = satId;
-   mTimeSystem = timeSystem;
-   mSourceId = sourceId;
+   mSatId       = satId;
+   mTimeSystem  = timeSystem;
+   mSourceId    = sourceId;
    mCentralBody = centralBody;
-   mFileMode = fileMode;
+   mFileMode    = fileMode;
    
    if (mFileMode == 1)
    {
@@ -118,10 +118,12 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
       mOutputYearFormat = yearFormat;
       
       // Just for testing
-      mInputYearFormat = 2;
-      mOutputYearFormat = 2;
+//      mInputYearFormat = 2;
+//      mOutputYearFormat = 2;
    }
    
+   mPrecNutIndicator = 1.0; // hardcoded
+
    Initialize();
    
    #ifdef DEBUG_INIT
@@ -964,7 +966,7 @@ int Code500EphemerisFile::SwapIntegerEndian(int value)
 //------------------------------------------------------------------------------
 void Code500EphemerisFile::InitializeHeaderRecord1()
 {
-   #ifdef DEBUG_HEADRES
+   #ifdef DEBUG_HEADERS
    MessageInterface::ShowMessage
       ("InitializeHeaderRecord1() entered, mSwapOutputEndian=%d\n", mSwapOutputEndian);
    #endif
@@ -996,7 +998,7 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    WriteIntegerField(&mEphemHeader1.coordSystemIndicator2, 4); // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
    
    std::string str;
-   #ifdef DEBUG_HEADRES
+   #ifdef DEBUG_HEADERS
    str = mEphemHeader1.tapeId;
    MessageInterface::ShowMessage("tapeId = '%s'\n", str.substr(0,8).c_str());
    str = mEphemHeader1.sourceId;
@@ -1008,12 +1010,15 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    CopyString(mEphemHeader1.orbitTheory, str, 8);
    
    // Set leap second info
-   WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 1); // 1 = no leap sec occurrs, 2 = leap second occurrs
+   WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 1); // 1 = no leap second occurs, 2 = leap second occurs
    WriteDoubleField(&mEphemHeader1.dateOfLeapSeconds_YYYMMDD, 0.0);
    WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS, 0.0);
    WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC, 0.0);
    
-   #ifdef DEBUG_HEADRES   
+   // Write precession-nutation info
+   WriteDoubleField(&mEphemHeader1.precessionNutationIndicator, mPrecNutIndicator);
+
+   #ifdef DEBUG_HEADERS
    MessageInterface::ShowMessage("InitializeHeaderRecord1() leaving\n");
    #endif
 }
@@ -1024,13 +1029,13 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
 //------------------------------------------------------------------------------
 void Code500EphemerisFile::InitializeHeaderRecord2()
 {
-   #ifdef DEBUG_HEADRES
+   #ifdef DEBUG_HEADERS
    MessageInterface::ShowMessage("InitializeHeaderRecord2() entered\n");
    #endif
    
    BlankOut(mEphemHeader2.harmonicsWithTitles2, RECORD_SIZE);
    
-   #ifdef DEBUG_HEADRES
+   #ifdef DEBUG_HEADERS
    MessageInterface::ShowMessage("InitializeHeaderRecord2() leaving\n");
    #endif
 }
