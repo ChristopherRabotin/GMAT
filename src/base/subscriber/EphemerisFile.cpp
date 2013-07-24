@@ -848,6 +848,9 @@ bool EphemerisFile::Initialize()
    InitializeData();
    maneuversHandled.clear();
    
+   // Get correct file name including file extension
+   fileName = GetFileName();
+   
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("   fileType=%d, spacecraft=<%p>'%s', outCoordSystem=<%p>'%s'\n", fileType,
@@ -936,15 +939,12 @@ bool EphemerisFile::Initialize()
    if (createInterpolator)
       CreateInterpolator();
    
-   
    // Set solver iteration option to none. We only writes solutions to a file
    mSolverIterOption = SI_NONE;
    
-   // Create SpiceOrbitKernelWriter
-   if (fileType == SPK_ORBIT)
-      CreateSpiceKernelWriter();
-   else if (fileType == CODE500_EPHEM)
-      CreateCode500EphemerisFile();
+   // Create ephemeris file
+   if (writeEphemeris)
+      CreateEphemerisFile();
    
    // Clear maneuvers handled array
    maneuversHandled.clear();
@@ -1026,6 +1026,9 @@ bool EphemerisFile::TakeAction(const std::string &action,
    }
    else if (action == "ToggleOn")
    {
+      // Create ephemeris file in case it was initially turned off and toggled on
+      CreateEphemerisFile();
+      
       // If it was last toggled off
       if (fileType == CODE500_EPHEM && toggleStatus == 2 && !firstTimeWriting)
          checkForLargeTimeGap = true;
@@ -1734,6 +1737,18 @@ void EphemerisFile::CreateInterpolator()
       ("EphemerisFile::CreateInterpolator() leaving, interpolator=<%p>'%s'\n",
        interpolator, interpolator ? interpolator->GetName().c_str() : "NULL");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void EphemerisFile::CreateEphemerisFile()
+//------------------------------------------------------------------------------
+void EphemerisFile::CreateEphemerisFile()
+{
+   if (fileType == SPK_ORBIT)
+      CreateSpiceKernelWriter();
+   else if (fileType == CODE500_EPHEM)
+      CreateCode500EphemerisFile();
 }
 
 
@@ -2847,7 +2862,8 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
-      ("EphemerisFile::FinishUpWritingCCSDS() entered, canFinalize=%d\n", canFinalize);
+      ("EphemerisFile::FinishUpWritingCCSDS() entered, canFinalize=%d, interpolatorStatus=%d\n",
+       canFinalize, interpolatorStatus);
    #endif
    
    if (interpolator != NULL && useFixedStepSize)
@@ -2866,16 +2882,22 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
          
          // Clear last MetaData with COMMENT
          ClearLastCcsdsOemMetaData
-            ("There is not enough data available to generate spacecraft "
-             "ephemeris data at the requested interpolation order. "
+            ("There is not enough data available to generate the current block of "
+             "ephemeris at the requested interpolation order. "
              "There should be at least one data point more than interpolation order.");
          
          // Throw an exception
          std::stringstream ss("");
-         ss << "There is not enough data to generate ephmeris data to "
+         ss << "There is not enough data to generate the current block of ephemeris to "
             "EphemerisFile: \"" << fileName << "\". Number of required points is "
             << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
          ss << ".  There should be at least one data point more than interpolation order.";
+         
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage
+            ("EphemerisFile::FinishUpWritingCCSDS() throwing exception, a1MjdArray.size()=%d\n",
+             a1MjdArray.size());
+         #endif
          
          SubscriberException se;
          se.SetDetails(ss.str());
@@ -2991,7 +3013,7 @@ void EphemerisFile::FinishUpWritingCode500(bool canFinalize)
          
          // Throw an exception
          std::stringstream ss("");
-         ss << "There is not enough data to generate ephmeris data to "
+         ss << "There is not enough data to generate the current block of ephmeris to "
             "EphemerisFile: \"" << fileName << "\". Number of required points is "
             << interpolationOrder + 1 << ", but received " << interpolator->GetPointCount();
          ss << ".  There should be at least one data point more than interpolation order.";
@@ -3111,6 +3133,10 @@ void EphemerisFile::ProcessFinalDataOnWaiting(bool canFinalize)
          }
       }
    }
+   #ifdef DEBUG_INTERPOLATOR_TRACE
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ProcessFinalDataOnWaiting() leaving\n");
+   #endif
 }
 
 
@@ -4829,59 +4855,6 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       return true;
    }
    
-   //======================================================================
-   // Do not write block if EndOfReceive and EndOfDataBlock received
-   // (LOJ: 2013.04.04 GMT-3745 FIX)
-   #if 0
-   /**
-   if (isEndOfReceive && isEndOfDataBlock)
-   {
-      #ifdef DEBUG_EPHEMFILE_FINISH
-      std::string lastEpochWroteStr = ToUtcGregorian(lastEpochWrote);
-      std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
-      std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
-      MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() Calling FinishUpWriting(), isEndOfReceive=%d, "
-          "isEndOfDataBlock=%d, isEndOfRun=%d, len=%d\n   lastEpochWrote=%s, "
-          "currEpochInSecs=%s, prevEpochInSecs=%s\n   a1MjdArray.size()=%d\n",
-          isEndOfReceive, isEndOfDataBlock, isEndOfRun, len, lastEpochWroteStr.c_str(),
-          currEpochStr.c_str(), prevEpochStr.c_str(), a1MjdArray.size());
-      #endif
-      
-      FinishUpWriting();
-      
-      std::string comment;
-      if (!isEndOfRun)
-      {
-         if (runstate == Gmat::SOLVEDPASS && currEpochInSecs != -999.999)
-         {
-            comment = "This block begins after final target sequence at ";
-            comment = comment + currEpochStr;
-         }
-         
-         #ifdef DEBUG_EPHEMFILE_FINISH
-         MessageInterface::ShowMessage
-            ("=====> End of block, restarting the interpolation at %s, a1MjdArray.size()=%d\n",
-             currEpochStr.c_str(), a1MjdArray.size());
-         #endif
-         
-         RestartInterpolation(comment, true);
-      }
-      else
-      {
-         // End of run, blank out the last comment if needed
-         #ifdef DEBUG_EPHEMFILE_FINISH
-         MessageInterface::ShowMessage("=====> End of run\n");
-         #endif
-      }
-      
-      return true;
-   }
-   */
-   #endif
-   //======================================================================
-   
-   
    if (len == 0)
    {
       #if DBGLVL_EPHEMFILE_DATA
@@ -4990,6 +4963,35 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
           "= prevEpochInSecs (%.15f)\n", currEpochInSecs, prevEpochInSecs);
       #endif
       return true;
+   }
+   
+   // Check for time going backwards (GMT-4066 FIX)
+   if (currEpochInSecs < prevEpochInSecs)
+   {
+      if (!firstTimeWriting && !a1MjdArray.empty())
+      {
+         #ifdef DEBUG_EPHEMFILE_FINISH
+         MessageInterface::ShowMessage
+            ("EphemerisFile::Distribute() currentEpoch < previousEpoch, calling FinishUpWriting()\n");
+         #endif
+         FinishUpWriting();
+      }
+      
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("EphemerisFile::Distribute() throwing exception, backwards propagation "
+          "is not allowed, currEpochInSecs (%.15f) < prevEpochInSecs (%.15f)\n",
+          currEpochInSecs, prevEpochInSecs);
+      #endif
+      
+      std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
+      std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
+      SubscriberException se;
+      se.SetDetails("Cannot continue ephemeris file generation for \"%s\"; "
+                    "Backwards propagation is not allowed.\n   "
+                    "current epoch: %s, previous epoch: %s\n", GetName().c_str(),
+                    currTimeStr.c_str(), prevTimeStr.c_str());
+      throw se;
    }
    
    //Hold this for now to complete GMT-4066(LOJ: 2013.07.19)

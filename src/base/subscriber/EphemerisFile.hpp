@@ -225,6 +225,7 @@ protected:
    // Initialization
    void         InitializeData();
    void         CreateInterpolator();
+   void         CreateEphemerisFile();
    void         CreateSpiceKernelWriter();
    void         CreateCode500EphemerisFile();
    bool         OpenTextEphemerisFile();
