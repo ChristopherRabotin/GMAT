@@ -74,14 +74,19 @@
 
         <tbody>
           <row>
-            <entry><guilabel>CoordinateSystem</guilabel></entry>
+            <entry>
+              <guilabel>CoordinateSystem</guilabel>
+            </entry>
 
-            <entry><para>Allows you to set the interpolation order for the
-            available interpolator methods (<guilabel>Lagrange</guilabel> or
-            <guilabel>Hermite</guilabel>) for either
-            <guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK</guilabel> or
-            <guilabel>Code 500</guilabel> file formats. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows you to set the interpolation order for the
+              available interpolator methods (<guilabel>Lagrange</guilabel> or
+              <guilabel>Hermite</guilabel>) for either
+              <guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK</guilabel> or
+              <guilabel>Code 500</guilabel> file formats. This field cannot be
+              modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -133,19 +138,25 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>EpochFormat</guilabel></entry>
+            <entry>
+              <guilabel>EpochFormat</guilabel>
+            </entry>
 
-            <entry><para> The ephemeris file is generated at the step size
-            that is specified for <guilabel>StepSize</guilabel> field. The
-            user can generate ephemeris file at default Integration step size
-            (using raw integrator steps) or by defining a fixed step size
-            provided by user. For Code-500 ephemeris, only fixed step size is
-            supported This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            <entry>
+              <para>The ephemeris file is generated at the step size that is
+              specified for <guilabel>StepSize</guilabel> field. The user can
+              generate ephemeris file at default Integration step size (using
+              raw integrator steps) or by defining a fixed step size provided
+              by user. For Code-500 ephemeris, only fixed step size is
+              supported This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -201,15 +212,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>FileFormat</guilabel></entry>
+            <entry>
+              <guilabel>FileFormat</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to generate ephemeris file in two
-            available file formats: CCSDS-OEM or SPK. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows the user to generate ephemeris file in two
+              available file formats: CCSDS-OEM or SPK. This field cannot be
+              modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -223,7 +240,8 @@
 
                   <listitem>
                     <para><guilabel>CCSDS-OEM</guilabel>,
-                    <guilabel>SPK</guilabel>, <guilabel>Code-500</guilabel></para>
+                    <guilabel>SPK</guilabel>,
+                    <guilabel>Code-500</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -260,15 +278,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>FileName</guilabel></entry>
+            <entry>
+              <guilabel>FileName</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to generate ephemeris file in three
-            available file formats: CCSDS-OEM, SPK and Code-500. This field
-            cannot be modified in the Mission Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows the user to generate ephemeris file in three
+              available file formats: CCSDS-OEM, SPK and Code-500. This field
+              cannot be modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -318,16 +342,22 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>FinalEpoch</guilabel></entry>
+            <entry>
+              <guilabel>FinalEpoch</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to specify the time span of an
-            ephemeris file. Ephemeris file is generated up to final epoch that
-            is specified in <guilabel>FinalEpoch</guilabel> field. This field
-            cannot be modified in the Mission Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows the user to specify the time span of an ephemeris
+              file. Ephemeris file is generated up to final epoch that is
+              specified in <guilabel>FinalEpoch</guilabel> field. This field
+              cannot be modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -377,17 +407,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>InitialEpoch</guilabel></entry>
+            <entry>
+              <guilabel>InitialEpoch</guilabel>
+            </entry>
 
-            <entry><para> Allows the user to specify the starting epoch of the
-            ephemeris file. Ephemeris file is generated starting from the
-            epoch that is defined in <guilabel>InitialEpoch</guilabel> field.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry>
+              <para>Allows the user to specify the starting epoch of the
+              ephemeris file. Ephemeris file is generated starting from the
+              epoch that is defined in <guilabel>InitialEpoch</guilabel>
+              field. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -437,18 +473,24 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>InterpolationOrder</guilabel></entry>
+            <entry>
+              <guilabel>InterpolationOrder</guilabel>
+            </entry>
 
-            <entry><para>Allows you to set the interpolation order for the
-            available interpolator methods (<guilabel>Lagrange</guilabel> or
-            <guilabel>Hermite</guilabel>) for either
-            <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
-            formats. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows you to set the interpolation order for the
+              available interpolator methods (<guilabel>Lagrange</guilabel> or
+              <guilabel>Hermite</guilabel>) for either
+              <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
+              formats. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -496,18 +538,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>Interpolator</guilabel></entry>
+            <entry>
+              <guilabel>Interpolator</guilabel>
+            </entry>
 
-            <entry><para> This field defines the available interpolator method
-            that was used to generate ephemeris file. Available
-            <guilabel>Interpolators</guilabel> are
-            <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry>
+              <para>This field defines the available interpolator method that
+              was used to generate ephemeris file. Available
+              <guilabel>Interpolators</guilabel> are
+              <guilabel>Lagrange</guilabel> or <guilabel>Hermite</guilabel>.
+              This field cannot be modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -559,15 +606,21 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>Maximized</guilabel></entry>
+            <entry>
+              <guilabel>Maximized</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to maximize the generated ephemeris
-            file window. This field cannot be modified in the Mission
-            Sequence. </para> <variablelist>
+            <entry>
+              <para>Allows the user to maximize the generated ephemeris file
+              window. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -615,15 +668,22 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
-		            <row>
-            <entry><guilabel>OutputFormat</guilabel></entry>
+          <row>
+            <entry>
+              <guilabel>OutputFormat</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to specify what type of format they want GSFC Code-500 ephmeris to be generated in. 
-			GSFC Code-500 ephemeris can be generated in the PC or UNIX version. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows the user to specify what type of format they want
+              GSFC Code-500 ephmeris to be generated in. GSFC Code-500
+              ephemeris can be generated in the PC or UNIX version. This field
+              cannot be modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -674,20 +734,26 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
-		  
-          <row>
-            <entry><guilabel>RelativeZOrder</guilabel></entry>
 
-            <entry><para>Allows the user to select which generated ephemeris
-            file display window is to displayed first on the screen. The
-            <guilabel>EphemerisFile</guilabel> resource with lowest
-            <guilabel>RelativeZOrder</guilabel> value will be displayed last
-            while <guilabel>EphemerisFile</guilabel> resource with highest
-            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+          <row>
+            <entry>
+              <guilabel>RelativeZOrder</guilabel>
+            </entry>
+
+            <entry>
+              <para>Allows the user to select which generated ephemeris file
+              display window is to displayed first on the screen. The
+              <guilabel>EphemerisFile</guilabel> resource with lowest
+              <guilabel>RelativeZOrder</guilabel> value will be displayed last
+              while <guilabel>EphemerisFile</guilabel> resource with highest
+              <guilabel>RelativeZOrder</guilabel> value will be displayed
+              first. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -735,17 +801,23 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>Size</guilabel></entry>
+            <entry>
+              <guilabel>Size</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to control the display size of
-            generated ephemeris file panel. First value in [0 0] matrix
-            controls horizonal size and second value controls vertical size of
-            ephemeris file display window. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
+            <entry>
+              <para>Allows the user to control the display size of generated
+              ephemeris file panel. First value in [0 0] matrix controls
+              horizonal size and second value controls vertical size of
+              ephemeris file display window. This field cannot be modified in
+              the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -793,16 +865,22 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>Spacecraft</guilabel></entry>
+            <entry>
+              <guilabel>Spacecraft</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to generate ephemeris data of
-            spacecraft(s) that are defined in <guilabel>Spacecraft</guilabel>
-            field. This field cannot be modified in the Mission Sequence.
-            </para> <variablelist>
+            <entry>
+              <para>Allows the user to generate ephemeris data of
+              spacecraft(s) that are defined in
+              <guilabel>Spacecraft</guilabel> field. This field cannot be
+              modified in the Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -853,18 +931,24 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>StepSize</guilabel></entry>
+            <entry>
+              <guilabel>StepSize</guilabel>
+            </entry>
 
-            <entry><para> The ephemeris file is generated at the step size
-            that is specified for <guilabel>StepSize</guilabel> field. The
-            user can generate ephemeris file at default Integration step size
-            (using raw integrator steps) or by defining a fixed step size
-            provided by user. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            <entry>
+              <para>The ephemeris file is generated at the step size that is
+              specified for <guilabel>StepSize</guilabel> field. The user can
+              generate ephemeris file at default Integration step size (using
+              raw integrator steps) or by defining a fixed step size provided
+              by user. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -914,17 +998,23 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>UpperLeft</guilabel></entry>
+            <entry>
+              <guilabel>UpperLeft</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to pan the generated ephemeris file
-            display window in any direction. First value in [0 0] matrix helps
-            to pan the window horizontally and second value helps to pan the
-            window vertically. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            <entry>
+              <para>Allows the user to pan the generated ephemeris file
+              display window in any direction. First value in [0 0] matrix
+              helps to pan the window horizontally and second value helps to
+              pan the window vertically. This field cannot be modified in the
+              Mission Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -972,16 +1062,22 @@
                     <para>script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
 
           <row>
-            <entry><guilabel>WriteEphemeris</guilabel></entry>
+            <entry>
+              <guilabel>WriteEphemeris</guilabel>
+            </entry>
 
-            <entry><para>Allows the user to optionally calculate/write or not
-            calculate/write an ephemeris that has been created and configured.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry>
+              <para>Allows the user to optionally calculate/write or not
+              calculate/write an ephemeris that has been created and
+              configured. This field cannot be modified in the Mission
+              Sequence.</para>
+
+              <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1029,7 +1125,8 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
-              </variablelist></entry>
+              </variablelist>
+            </entry>
           </row>
         </tbody>
       </tgroup>
@@ -1242,10 +1339,660 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       events that may occur between initial and final epochs of ephemeris
       file. Furthermore, when a mission sequence employs iterative processes
       such as differential correction or optimization, GMAT will only write
-      the ephemeris for the final solution from the iterative
-      processes.</para>
+      the ephemeris for the final solution from the iterative processes. Code
+      500 ephemeris does not allow non-monotonic ephemeris generation and an
+      exception will be thrown if propagation direction changes. Furthermore,
+      any discontinuities created by assignments may result in invalid code
+      500 files.</para>
     </refsection>
+
+    <refsection>
+      <title>Code 500 Ephemeris Header Records</title>
+
+      <para>The standard format for Code 500 ephemeris files has a logical
+      record length of 2800 bytes. Code 500 files have two header records,
+      ephemeris header record 1 and ephemeris record 2, followed by as many
+      ephemeris data records as required for the file timespan. Many
+      parameters in ephemeris file's header records are mandatory while some
+      fields are optional. GMAT's Code 500 ephemeris header records only
+      specifies fields that are mandatory and optional fields have not been
+      included. Code 500's ephemeris header record 1 is mandatory while
+      ephemeris record 2 is optional. Complete description of ephemeris format
+      and list of mandatory and optional ephemeris header record parameters is
+      defined in <emphasis>Flight Dynamics Division (FDD) Generic Data Product
+      Formats Interface Control Document</emphasis>. In GMAT, only required
+      fields have been written in header record 1 while header record 2 is
+      left blank. Table below lists header record 1's required fields and any
+      additional comments pertaining to that field.</para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1" colwidth="3.5*"/>
+
+          <colspec colnum="2" colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Required Fields</entry>
+
+              <entry>Comments</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>
+                <guilabel>productId</guilabel>
+              </entry>
+
+              <entry>
+                <para>'EPHEM '</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>satId</guilabel>
+              </entry>
+
+              <entry>
+                <para>123.000000</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>timeSystemIndicator</guilabel>
+              </entry>
+
+              <entry>
+                <para>2.000000</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>StartDateOfEphem_YYYMMDD</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>startDayCountOfYear</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>startSecondsOfDay</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>endDateOfEphem_YYYMMDD</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>endDayCountOfYear</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>endSecondsOfDay</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>stepSize_SEC</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>startYYYYMMDDHHMMSSsss.</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>endYYYYMMDDHHMMSSsss.</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>tapeId</guilabel>
+              </entry>
+
+              <entry>
+                <para>'STANDARD'</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>sourceId</guilabel>
+              </entry>
+
+              <entry>
+                <para>'GTDS '</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>headerTitle</guilabel>
+              </entry>
+
+              <entry>
+                <para>'</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>centralBodyIndicator</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>refTimeForDUT_YYMMDD</guilabel>
+              </entry>
+
+              <entry>
+                <para>570918.000000</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>coordSystemIndicator1</guilabel>
+              </entry>
+
+              <entry>
+                <para>'2000'</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>coordSystemIndicator2</guilabel>
+              </entry>
+
+              <entry>
+                <para>4</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>orbitTheory</guilabel>
+              </entry>
+
+              <entry>
+                <para>'COWELL '</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>timeIntervalBetweenPoints_DUT</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>timeIntervalBetweenPoints_SEC</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>outputIntervalIndicator</guilabel>
+              </entry>
+
+              <entry>
+                <para>1</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>epochTimeOfElements_DUT</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>epochTimeOfElements_DAY.</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>epochA1Greg.</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>epochUtcGreg.</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>yearOfEpoch_YYY</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>monthOfEpoch_MM</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>dayOfEpoch_DD</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>hourOfEpoch_HH</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>minuteOfEpoch_MM</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>secondsOfEpoch_MILSEC</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[0]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[1]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[2]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[3]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[4]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>keplerianElementsAtEpoch_RAD[5]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[0]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[1]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[2]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[3]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[4]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>cartesianElementsAtEpoch_DULT[5]</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>startTimeOfEphemeris_DUT</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>endTimeOfEphemeris_DUT</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>timeIntervalBetweenPoints_DUT</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>dateOfInitiationOfEphemComp_YYYMMDD</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>timeOfInitiationOfEphemComp_HHMMSS</guilabel>
+              </entry>
+
+              <entry>
+                <para>value depends on run time</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>utcTimeAdjustment_SEC</guilabel>
+              </entry>
+
+              <entry>
+                <para>0.000000</para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>
+                <guilabel>Pecession/Nutation indicator</guilabel>
+              </entry>
+
+              <entry>
+                <para>1</para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+	  
+	  
+  <para>For ephemeris header record 1, there are some required fields that
+  have not been tabulated in GMAT's Code 500 ephemeris header record 1. These
+  fields that have not been tabulated in header record 1 are listed in the
+  table below.</para>
+	  
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="3.5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Required Fields</entry>
+
+            <entry>Comments</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>
+              <guilabel>Zonal and tesseral harmonics indicator</guilabel>
+            </entry>
+
+            <entry>
+              <para>0.0 or 1.0</para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Lunar gravitation perturbation indicator</guilabel>
+            </entry>
+
+            <entry>
+              <para>0.0 or 1.0</para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Solar radiation perturbation indicator</guilabel>
+            </entry>
+
+            <entry>
+              <para>0.0 or 1.0</para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Solar gravitation perturbation indicator</guilabel>
+            </entry>
+
+            <entry>
+              <para>0.0 or 1.0</para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Atmospheric drag perturbation indicator</guilabel>
+            </entry>
+
+            <entry>
+              <para>0.0 or 1.0</para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>
+              <guilabel>Greenwich hour angle at epoch</guilabel>
+            </entry>
+
+            <entry>
+              <para>'</para>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>  
+    </refsection>
+	
   </refsection>
+
+
+
+
 
   <refsection xml:id="EphemerisFile_Examples">
     <title>Examples</title>
