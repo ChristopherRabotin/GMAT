@@ -2046,6 +2046,12 @@ void EphemerisFile::CloseEphemerisFile()
 //------------------------------------------------------------------------------
 Real EphemerisFile::ConvertInitialAndFinalEpoch()
 {
+   #ifdef DEBUG_CONVERT_INITIAL_FINAL_EPOCH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' entered\n",
+       this, GetName().c_str());
+   #endif
+   
    // Convert initial and final epoch to A1ModJulian format if needed.
    // Currently spacecraft uses A1ModJulian as output epoch
    Real dummyA1Mjd = -999.999;
@@ -2085,6 +2091,12 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
       }
    }
    
+   #ifdef DEBUG_CONVERT_INITIAL_FINAL_EPOCH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' returning "
+       "initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f, satInitialEpoch=%.15f\n",
+       this, GetName().c_str(), initialEpochA1Mjd, finalEpochA1Mjd, satInitialEpoch);
+   #endif
    return satInitialEpoch;
 }
 
@@ -2096,9 +2108,9 @@ bool EphemerisFile::CheckInitialAndFinalEpoch()
 {
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
-      ("\nEphemerisFile::CheckInitialAndFinalEpoch() entered, initialEpochA1Mjd=%f, "
-       "finalEpochA1Mjd=%f, finalEpochReached=%d, finalEpochProcessed=%d\n",
-       initialEpochA1Mjd, finalEpochA1Mjd, finalEpochReached, finalEpochProcessed);
+      ("\nEphemerisFile::CheckInitialAndFinalEpoch() entered, currEpochInDays=%.15f, "
+       "initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f, finalEpochReached=%d, finalEpochProcessed=%d\n",
+       currEpochInDays, initialEpochA1Mjd, finalEpochA1Mjd, finalEpochReached, finalEpochProcessed);
    #endif
    
    // Check initial and final epoch for writing, dat[0] is epoch
@@ -2128,7 +2140,10 @@ bool EphemerisFile::CheckInitialAndFinalEpoch()
    // From user specified initial epoch to user specified final epoch
    else
    {
-      if (currEpochInDays >= initialEpochA1Mjd && currEpochInDays <= finalEpochA1Mjd)
+      // Use tolerance of -1.0e-11 when checking for time to write (GMT-4079 fix)
+      //if ((currEpochInDays >= initialEpochA1Mjd) && (currEpochInDays <= finalEpochA1Mjd))
+      if (((currEpochInDays - initialEpochA1Mjd) >= -1.0e-11) &&
+          (finalEpochA1Mjd - currEpochInDays) >= -1.0e-11)
          writeData = true;
       
       if (currEpochInDays > finalEpochA1Mjd)
