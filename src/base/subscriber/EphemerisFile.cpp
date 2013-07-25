@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "EphemerisFile.hpp"
+#include "CelestialBody.hpp"
 #include "Publisher.hpp"             // for Instance()
 #include "FileManager.hpp"           // for GetPathname()
 #include "SubscriberException.hpp"   // for exception
@@ -1878,9 +1879,17 @@ void EphemerisFile::CreateCode500EphemerisFile()
       code500EphemFile =
          new Code500EphemerisFile(fileName, satId, timeSystem, sourceId, centralBody, 2, ephemOutputFormat);
       
-      // @todo Set origin mu to code500 ephem so that it can do conversion
-      // @note Do I need to get outCoorSystem->GetOriginMu()?
-      //code500EphemFile->SetCentralBodyMu(spacecraft->GetOriginMu());
+      // Set origin mu to code500 ephem so that it can do conversion
+      SpacePoint *origin = outCoordSystem->GetOrigin();
+      if (!origin->IsOfType("CelestialBody"))
+      {
+         SubscriberException se;
+         se.SetDetails("Output coordinate system for Code500 ephemeris file must"
+                       "have a celestial body origin\n");
+         throw se;
+      }
+      Real cbMu = ((CelestialBody*) origin)->GetGravitationalConstant();
+      code500EphemFile->SetCentralBodyMu(cbMu);
       code500EphemFile->SetTimeIntervalBetweenPoints(stepSizeInSecs);
    }
    catch (BaseException &e)
