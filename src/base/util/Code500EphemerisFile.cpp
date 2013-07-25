@@ -1095,6 +1095,7 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    
    double yyymmdd, hhmmss;
    ToYYYMMDDHHMMSS(startMjd, yyymmdd, hhmmss);
+   hhmmss = 200000;   // hard-code this
    
    double doy = ToDayOfYear(startMjd);
    double secsOfDay = ToSecondsOfDay(startMjd);
@@ -1329,12 +1330,16 @@ void Code500EphemerisFile::SetInitialKeplerianState(const Rvector6 &kepState)
    #endif
    
    Rvector6 kepStateRad = kepState;
+
    // Keplerian elements:
    // [SMA, ECC, INC, RAAN, AOP, TA]
-   // @todo It should write MA instead of TA
    for (int i = 2; i < 6; i++)
       kepStateRad[i] = kepState[i] * GmatMathConstants::RAD_PER_DEG;
-   
+
+   // It should write MA instead of TA
+   Real ma = StateConversionUtil::TrueToMeanAnomaly(kepStateRad[5], kepState[1], true);
+   kepStateRad[5] = ma;
+
    for (int i = 0; i < 6; i++)
    {
       //mEphemHeader1.keplerianElementsAtEpoch_RAD[i] = kepStateRad[i];
@@ -1690,6 +1695,7 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("minuteOfEpoch_MM                    = % f\n", mEphemHeader1.minuteOfEpoch_MM, swap);
    DebugDouble("secondsOfEpoch_MILSEC               = % f\n", mEphemHeader1.secondsOfEpoch_MILSEC, swap);
    
+   // SMA is not angular
    DebugDouble("keplerianElementsAtEpoch_RAD[0]     = % 1.15e\n",
                mEphemHeader1.keplerianElementsAtEpoch_RAD[0], swap);
    for (int i = 1; i < 6; i++)
@@ -1720,6 +1726,7 @@ void Code500EphemerisFile::UnpackHeader1()
    rval = ReadDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT);
    DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", rval, false);
    DebugDouble("timeIntervalBetweenPoints_SEC.      = % f\n", rval * DUT_TO_SEC, false);
+   DebugDouble("precessionNutationIndicator         = % f\n", mEphemHeader1.precessionNutationIndicator, swap);
    DebugDouble("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, swap);
    DebugDouble("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, swap);
    DebugDouble("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);

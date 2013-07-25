@@ -1857,7 +1857,7 @@ void EphemerisFile::CreateCode500EphemerisFile()
       code500EphemFile = NULL;
    }
    
-   Real        satId       = 123.0;   // dummy for now
+   Real        satId       = 101.0;   // dummy for now
    std::string timeSystem  = "UTC";   // Figure out time system here
    std::string sourceId    = "GTDS";
    //std::string centralBody = spacecraft->GetOriginName();
