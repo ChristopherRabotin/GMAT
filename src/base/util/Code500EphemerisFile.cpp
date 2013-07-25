@@ -1340,12 +1340,14 @@ void Code500EphemerisFile::SetInitialKeplerianState(const Rvector6 &kepState)
    Real ma = StateConversionUtil::TrueToMeanAnomaly(kepStateRad[5], kepState[1], true);
    kepStateRad[5] = ma;
 
-   for (int i = 0; i < 6; i++)
-   {
-      //mEphemHeader1.keplerianElementsAtEpoch_RAD[i] = kepStateRad[i];
-      WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[i], kepStateRad[i]);
-   }
-   
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[0], kepStateRad[0]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[1], kepStateRad[1]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[2], kepStateRad[2]);
+   // file stores RAAN and AOP in reverse order
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[4], kepStateRad[4]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[3], kepStateRad[3]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[5], kepStateRad[5]);
+
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("SetKeplerianElements() leaving, kepStateRad[2]=%f\n", kepStateRad[2]);
