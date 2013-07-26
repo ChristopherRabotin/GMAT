@@ -4992,6 +4992,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    // Check for time going backwards (GMT-4066 FIX)
    if (currEpochInSecs < prevEpochInSecs)
    {
+      std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
+      std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
+      
+      // Throw an exception
       if (!firstTimeWriting && !a1MjdArray.empty())
       {
          #ifdef DEBUG_EPHEMFILE_FINISH
@@ -5001,6 +5005,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
          FinishUpWriting();
       }
       
+      //==========================================
+      #ifdef THROW_EXCEPTION_ON_BACKWARDS_PROP
+      //==========================================
+      
       #if DBGLVL_EPHEMFILE_DATA
       MessageInterface::ShowMessage
          ("EphemerisFile::Distribute() throwing exception, backwards propagation "
@@ -5008,14 +5016,32 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
           currEpochInSecs, prevEpochInSecs);
       #endif
       
-      std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
-      std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
       SubscriberException se;
       se.SetDetails("Cannot continue ephemeris file generation for \"%s\"; "
                     "Backwards propagation is not allowed.\n   "
                     "current epoch: %s, previous epoch: %s\n", GetName().c_str(),
                     currTimeStr.c_str(), prevTimeStr.c_str());
       throw se;
+      
+      //==========================================
+      #else
+      //==========================================
+      
+      static bool firstTimeWarning = true;
+      
+      // Write first warning and continue
+      if (firstTimeWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The user has generated non-monotonic invalid ephemeris file "
+             "\"%s\" starting at %s; previous time is %s.\n", GetName().c_str(),
+             currTimeStr.c_str(), prevTimeStr.c_str());
+         firstTimeWarning = false;
+      }
+      
+      //==========================================
+      #endif
+      //==========================================
    }
    
    //Hold this for now to complete GMT-4066(LOJ: 2013.07.19)
