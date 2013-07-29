@@ -1012,11 +1012,18 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    // Set leap second info
    WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 1); // 1 = no leap second occurs, 2 = leap second occurs
    WriteDoubleField(&mEphemHeader1.dateOfLeapSeconds_YYYMMDD, 0.0);
-   WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS, 0.0);
-   WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC, 0.0);
+   WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS,  0.0);
+   WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC,     0.0);
    
    // Write precession-nutation info
    WriteDoubleField(&mEphemHeader1.precessionNutationIndicator, mPrecNutIndicator);
+
+   // Write other indicators
+   WriteDoubleField(&mEphemHeader1.zonalTesseralHarmonicsIndicator, 1.0);
+   WriteDoubleField(&mEphemHeader1.lunarGravPerturbIndicator,       1.0);
+   WriteDoubleField(&mEphemHeader1.solarRadiationPerturbIndicator,  1.0);
+   WriteDoubleField(&mEphemHeader1.solarGravPerturbIndicator,       1.0);
+   WriteDoubleField(&mEphemHeader1.atmosphericDragPerturbIndicator, 1.0);
 
    #ifdef DEBUG_HEADERS
    MessageInterface::ShowMessage("InitializeHeaderRecord1() leaving\n");
@@ -1729,6 +1736,11 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", rval, false);
    DebugDouble("timeIntervalBetweenPoints_SEC.      = % f\n", rval * DUT_TO_SEC, false);
    DebugDouble("precessionNutationIndicator         = % f\n", mEphemHeader1.precessionNutationIndicator, swap);
+   DebugDouble("zonalTesseralHarmonicsIndicator     = % f\n", mEphemHeader1.zonalTesseralHarmonicsIndicator, swap);
+   DebugDouble("lunarGravPerturbIndicator           = % f\n", mEphemHeader1.lunarGravPerturbIndicator, swap);
+   DebugDouble("solarRadiationPerturbIndicator      = % f\n", mEphemHeader1.solarRadiationPerturbIndicator, swap);
+   DebugDouble("solarGravPerturbIndicator           = % f\n", mEphemHeader1.solarGravPerturbIndicator, swap);
+   DebugDouble("atmosphericDragPerturbIndicator     = % f\n", mEphemHeader1.atmosphericDragPerturbIndicator, swap);
    DebugDouble("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, swap);
    DebugDouble("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, swap);
    DebugDouble("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
