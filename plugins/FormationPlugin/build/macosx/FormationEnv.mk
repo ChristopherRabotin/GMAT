@@ -7,6 +7,7 @@ DEBUG_BUILD = 0
 
 # Select the base library
 BASE_LIBRARY = GmatBase
+BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
 
 SAMPLE_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
 SAMPLE_LINK_FLAGS = -fPIC -arch i386 -fno-rtti

@@ -1,7 +1,11 @@
 # $Id$
+
+# 32-bit only for now
+GMAT_BIN_DIR = bin
+
 # Environment settings for the Verner plugin
-GMAT_CODE_LOCATION = /Users/djc/gsfccode/GMAT_Development/src
-GMAT_BIN_LOCATION  = /Users/djc/gsfccode/GMAT_Development/application/bin
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION = ../../../../application/$(GMAT_BIN_DIR)
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 1
@@ -14,7 +18,8 @@ DEBUG_BUILD = 0
 # Select the base library
 BASE_LIBRARY = GmatBase
 # BASE_LIB_LOCATION is only used on Mac
-BASE_LIB_LOCATION = GMAT.app/Contents/Frameworks/
+#BASE_LIB_LOCATION = GMAT.app/Contents/Frameworks/
+BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
 
 EXTRA_PROPAGATOR_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
 EXTRA_PROPAGATOR_LINK_FLAGS = -fPIC -arch i386 -fno-rtti

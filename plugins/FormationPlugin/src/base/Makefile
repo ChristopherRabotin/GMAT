@@ -70,7 +70,7 @@ ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET): $(OBJECTS)
 	mkdir -p ../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
-	install_name_tool -change lib/libGmatBase.dylib ../bin/libGmatBase.dylib $(TARGET)
+	install_name_tool -change lib/libGmatBase.dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
 	mv $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 else
 $(TARGET) : $(OBJECTS)
