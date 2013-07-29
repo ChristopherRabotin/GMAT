@@ -1344,8 +1344,8 @@ void Code500EphemerisFile::SetInitialKeplerianState(const Rvector6 &kepState)
    WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[1], kepStateRad[1]);
    WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[2], kepStateRad[2]);
    // file stores RAAN and AOP in reverse order
-   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[4], kepStateRad[4]);
-   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[3], kepStateRad[3]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[3], kepStateRad[4]);
+   WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[4], kepStateRad[3]);
    WriteDoubleField(&mEphemHeader1.keplerianElementsAtEpoch_RAD[5], kepStateRad[5]);
 
    #ifdef DEBUG_SET
