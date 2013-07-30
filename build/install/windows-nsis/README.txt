@@ -8,6 +8,7 @@ Prerequisites
 To build the installer, you need:
 
 1. MSYS (http://sf.net/projects/mingw)
+2. zip: in MSYS, run "mingw-get msys-zip"
 2. Subversion command-line tools (svn.exe) in your system path
 3. NSIS in your system path
 

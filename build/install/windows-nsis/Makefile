@@ -24,6 +24,10 @@ maintainer-clean: clean
 # Public targets
 #
 
+internal: installer-internal zip-internal
+
+public: installer-public zip-public
+
 assemble: assemble-internal assemble-public
 
 assemble-internal: gmat-internal/GMAT/bin/GMAT.exe
