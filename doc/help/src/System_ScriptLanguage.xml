@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
@@ -177,8 +175,9 @@
         </listitem>
       </itemizedlist>
 
-      <para>When loading a script with tab characters into the GUI, all tabs
-      are converted to spaces internally.</para>
+      <para>Horizontal tab characters are preserved in string literals, but
+      are replaced by spaces in some other contexts (e.g. equations,
+      comments).</para>
     </refsection>
 
     <refsection xml:id="ScriptLanguage_Comments">
