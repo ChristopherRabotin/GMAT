@@ -4395,8 +4395,9 @@ void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_CODE500
    MessageInterface::ShowMessage
-      ("=====> WriteCode500OrbitDataSegment() entered, a1MjdArray.size()=%d, "
-       "stateArray.size()=%d\n", a1MjdArray.size(), stateArray.size());
+      ("=====> WriteCode500OrbitDataSegment() entered, canFinalize=%d, isEndOfRun=%d, "
+       "a1MjdArray.size()=%d, stateArray.size()=%d\n", canFinalize, isEndOfRun,
+       a1MjdArray.size(), stateArray.size());
    #endif
    
    if (a1MjdArray.size() > 0)
@@ -4434,9 +4435,15 @@ void EphemerisFile::WriteCode500OrbitDataSegment(bool canFinalize)
       try
       {
          #ifdef DEBUG_EPHEMFILE_CODE500
-         MessageInterface::ShowMessage("Calling code500EphemFile->WriteDataSegment()\n");
+         MessageInterface::ShowMessage
+            (".....Calling code500EphemFile->WriteDataSegment() isEndOfRun=%d, "
+             "epochsOnWaiting.size()=%d\n", isEndOfRun, epochsOnWaiting.size());
+         DebugWriteTime("   ", epochsOnWaiting.back());
          #endif
-         code500EphemFile->WriteDataSegment(a1MjdArray, stateArray, isEndOfRun);
+         // Check if Code500 ephemeris file can be finalized (GMT-4060 fix)
+         bool finalize = isEndOfRun && canFinalize;
+         //code500EphemFile->WriteDataSegment(a1MjdArray, stateArray, isEndOfRun);
+         code500EphemFile->WriteDataSegment(a1MjdArray, stateArray, finalize);
          ClearOrbitData();
       }
       catch (BaseException &e)
@@ -4486,7 +4493,7 @@ void EphemerisFile::FinalizeCode500Ephemeris()
       bool swapByteOrder = false;
       if (outputFormat == "UNIX")
          swapByteOrder = true;
-      code500EphemFile->OpenForRead(fileName);
+      code500EphemFile->OpenForRead(fileName, 1, 1);
       code500EphemFile->SetSwapEndian(swapByteOrder, 1);
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);

@@ -45,6 +45,7 @@
 
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_SUBSCRIBER_PARAM
+//#define DEBUG_SUBSCRIBER_LABELS
 //#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
 //#define DEBUG_WRAPPER_CODE
@@ -415,7 +416,7 @@ bool Subscriber::ReceiveData(const double *datastream, const int len)
    {
       return false;
    }
-
+   
    return true;
 }
 
@@ -652,9 +653,9 @@ void Subscriber::SetProvider(GmatBase *provider)
 //------------------------------------------------------------------------------
 void Subscriber::SetDataLabels(const StringArray& elements)
 {
-   #ifdef DEBUG_SUBSCRIBER_SET_LABELS
+   #ifdef DEBUG_SUBSCRIBER_LABELS
    MessageInterface::ShowMessage
-      ("==> Subscriber::SetDataLabels() Using new Publisher code\n");
+      ("==> Subscriber::SetDataLabels() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
    
    // Publisher new code always sets current labels
@@ -663,10 +664,10 @@ void Subscriber::SetDataLabels(const StringArray& elements)
    else
       theDataLabels[0] = elements;
    
-   #ifdef DEBUG_SUBSCRIBER_DATA
+   #ifdef DEBUG_SUBSCRIBER_LABELS
    MessageInterface::ShowMessage
-      ("Subscriber::SetDataLabels() <%s> leaving, theDataLabels.size()=%d, "
-       "first label is '%s'\n", GetName().c_str(), theDataLabels.size(),
+      ("Subscriber::SetDataLabels() <%p>'%s' leaving, theDataLabels.size()=%d, "
+       "first label is '%s'\n", this, GetName().c_str(), theDataLabels.size(),
        elements[0].c_str());
    #endif
 }
@@ -677,8 +678,9 @@ void Subscriber::SetDataLabels(const StringArray& elements)
 //------------------------------------------------------------------------------
 void Subscriber::ClearDataLabels()
 {
-   #ifdef DEBUG_SUBSCRIBER_DATA
-   MessageInterface::ShowMessage("Subscriber::ClearDataLabels() entered\n");
+   #ifdef DEBUG_SUBSCRIBER_LABELS
+   MessageInterface::ShowMessage
+      ("Subscriber::ClearDataLabels() <%p>'%s'entered\n", this, GetName().c_str());
    #endif
    
    theDataLabels.clear();

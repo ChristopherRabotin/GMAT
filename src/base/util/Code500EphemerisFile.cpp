@@ -223,8 +223,8 @@ void Code500EphemerisFile::Initialize()
    mTapeId = "STANDARD";
    
    // Set central body indicator
-   // 1.0 = Earth,  2.0 = Moon,    3.0 = Sun,     4.0 = Mars,     5.0 = Jupiter, 6.0 = Saturn
-   // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
+   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
+   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
    if (mCentralBody == "Earth")
       mCentralBodyIndicator = 1.0;
    else if (mCentralBody == "Luna")
@@ -280,13 +280,6 @@ void Code500EphemerisFile::Initialize()
    mSwapInputEndian = false;
    mSwapOutputEndian = false;
    
-   #if 0
-   if (mFileMode == 1 && mInputFileFormat == 2)
-      mSwapInputEndian = true;
-   if (mFileMode == 2 && mOutputFileFormat == 2)
-      mSwapOutputEndian = true;
-   #endif
-   
    // Open file
    if (mFileMode == 1)
       OpenForRead(mInputFileName, mInputFileFormat);
@@ -329,20 +322,23 @@ void Code500EphemerisFile::Validate()
 
 
 //------------------------------------------------------------------------------
-// bool OpenForRead(const std::string &fileName, int fileFormat = 1)
+// bool OpenForRead(const std::string &fileName, int fileFormat = 1, logOption = 0)
 //------------------------------------------------------------------------------
 /**
  * Opens ephemeris file for reading.
  *
  * @param  fileName  File name to be open for reading
  * @param  fileFormat  Input file format (1 = PC, 2 = UNIX)
+ * @param  logOption  0 = no debug, 1 = write file size in bytes
  */
 //------------------------------------------------------------------------------
-bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileFormat)
+bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileFormat,
+                                       int logOption)
 {
    #ifdef DEBUG_OPEN
    MessageInterface::ShowMessage
-      ("OpenForRead() entered, fileName='%s', fileFormat=%d\n", fileName.c_str(), fileFormat);
+      ("OpenForRead() entered, fileName='%s', fileFormat=%d, logOption=%d\n",
+       fileName.c_str(), fileFormat, logOption);
    #endif
    
    if (fileName == "")
@@ -369,13 +365,17 @@ bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileForm
          mSwapInputEndian = true;
    }
    
-   #ifdef DEBUG_OPEN
-   std::streampos fsize = mEphemFileIn.tellg();
-   mEphemFileIn.seekg(0, std::ios::end);
-   fsize = mEphemFileIn.tellg() - fsize;
-   mEphemFileIn.seekg(std::ios_base::beg);
-   MessageInterface::ShowMessage("OpenForRead() returning true, fsize=%d\n", fsize);
-   #endif
+   if (logOption == 1)
+   {
+      // Write out size of the file
+      std::streampos fsize = mEphemFileIn.tellg();
+      mEphemFileIn.seekg(0, std::ios::end);
+      fsize = mEphemFileIn.tellg() - fsize;
+      mEphemFileIn.seekg(std::ios_base::beg);
+      MessageInterface::ShowMessage
+         ("Code500EphemerisFile::OpenForRead() \n   ephem file: '%s'\n"
+          "   size in bytes = %d\n", fileName.c_str(), fsize);
+   }
    
    #ifdef DEBUG_OPEN
    MessageInterface::ShowMessage
@@ -615,7 +615,8 @@ bool Code500EphemerisFile::ReadDataRecords(int numRecordsToRead, int logOption)
    
    // Read the data until eof or 10 sentinels found, or numRecordsToRead reached
    bool continueRead = true;
-   while (continueRead && !mSentinelsFound)
+   //while (continueRead && !mSentinelsFound)
+   while (continueRead)
    {
       if (mEphemFileIn.eof())
       {
@@ -861,7 +862,7 @@ bool Code500EphemerisFile::WriteDataSegment(const EpochArray &epochArray,
       mA1MjdArray.push_back(epochArray[i]->Clone());
       mStateArray.push_back(stateArray[i]->Clone());
       
-      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      #ifdef DEBUG_WRITE_DATA_SEGMENT_INDEX
       MessageInterface::ShowMessage("i=%2d, mA1MjdArray.size()=%2d\n", i, mA1MjdArray.size());
       #endif
       // If buffer is full, write data
@@ -1467,7 +1468,7 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       #ifdef DEBUG_WRITE_DATA_SEGMENT_MORE
       MessageInterface::ShowMessage("----- State vector %d\n", i+1);
       DebugWriteState(mStateArray[i], stateDULT, 2);
-      DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i-1], i-1, 1, swap);
+      DebugWriteStateVector(mEphemData.stateVector2Thru50_DULT[i-1], i-1, 1);
       #endif
    }
    
@@ -2046,7 +2047,7 @@ std::string Code500EphemerisFile::ToYearMonthDayHourMinSec(double yyymmdd, doubl
    double sec;
    ToYearMonthDayHourMinSec(yyymmdd, secsOfDay, year, month, day, hour, min, sec);
    char buffer[30];
-   sprintf(buffer, "%d-%02d-%02d %02d:%02d:%f", year, month, day, hour, min, sec);
+   sprintf(buffer, "%d-%02d-%02d %02d:%02d:%09.6f", year, month, day, hour, min, sec);
    return std::string(buffer);
 }
 
@@ -2247,12 +2248,6 @@ A1Mjd Code500EphemerisFile::ToA1Mjd(double dutTime, bool forOutput)
    #endif
    
    Real timeOffset = 0.0;
-   
-   #if 0
-   if (!forOutput && mInputTimeSystem == 2)
-      timeOffset = 21.0 / GmatTimeConstants::SECS_PER_DAY;
-   #endif
-   
    double a1MjdReal = (dutTime * DUT_TO_DAY) + mMjdOfDUTRef + timeOffset;
    A1Mjd a1Mjd = A1Mjd(a1MjdReal);
    

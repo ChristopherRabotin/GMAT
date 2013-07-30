@@ -28,7 +28,8 @@ public:
    // methods for this class
    void Initialize();
    void Validate();
-   bool OpenForRead(const std::string &filename, int fileFormat = 1);
+   bool OpenForRead(const std::string &filename, int fileFormat = 1,
+                    int logOption = 0);
    bool OpenForWrite(const std::string &filename, int fileFormat = 1);
    void CloseForRead();
    void CloseForWrite();
