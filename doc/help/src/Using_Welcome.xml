@@ -95,7 +95,7 @@
         </listitem>
 
         <listitem>
-          <para>CCSDS and SPK ephemeris generation</para>
+          <para>CCSDS, SPK, and Code-500 ephemeris generation</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -175,6 +175,11 @@
           calculations</para>
         </listitem>
 
+		<listitem>
+          <para>File interface for the TCOPS Vector Hold File format, for
+		  loading of initial spacecraft data</para>
+        </listitem>
+		
         <listitem>
           <para>Command line interface for batch analysis</para>
         </listitem>
@@ -196,7 +201,7 @@
     script engine and over 4000 test cases for the GUI interface.</para>
 
     <para>While the system is routinely built on Mac and Linux, we consider
-    the software to be in alpha form on those plaforms. For release R2013a, we
+    the software to be in alpha form on those plaforms. For release R2013b, we
     have only addressed issues on Mac and Linux that also occur on the Windows
     7 platform. Part of our planning effort for the next release will be to
     assess the future of GMAT on Mac and Linux.</para>
@@ -210,7 +215,7 @@
     software. Historically, solutions from GMAT have been verified in other
     operational systems. However, with release R2013a, the GMAT team will
     perform final operational certifications testing of the system be
-    completed in the summer of 2013. After completion of operarational
+    completed in the summer of 2013. After completion of operational
     certification, GMAT will be used for operational support of flight
     projects.</para>
 
@@ -234,7 +239,7 @@
     design, and testing. The Ground Software Systems Branch performs design,
     implementation, and integration testing. Commecial particpants contribute
     to design, implementation, testing and documentation. Commercial
-    participants for R2013a include:</para>
+    participants for R2013b include:</para>
 
     <itemizedlist>
       <listitem>

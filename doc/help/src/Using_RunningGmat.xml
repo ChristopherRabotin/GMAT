@@ -14,7 +14,7 @@
 
     <para>On Microsoft Windows platforms there are several ways to start a
     GMAT session. If you used the GMAT installer, you can click the
-    <guimenuitem>GMAT R2013a</guimenuitem> item in the
+    <guimenuitem>GMAT R2013b</guimenuitem> item in the
     <guimenu>Start</guimenu> menu. If you installed GMAT from a
     <filename>.zip</filename> file or by compiling the system, locate the GMAT
     <filename>bin</filename> directory double-click

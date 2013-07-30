@@ -14,7 +14,7 @@
       <phrase condition="ug">User Guide</phrase>
       <phrase condition="tm">Training Manual</phrase>
     </subtitle>
-    <edition>R2013a</edition>
+    <edition>R2013b</edition>
     <author>
       <personname>The GMAT Development Team</personname>
     </author>
@@ -31,7 +31,8 @@
   <appendix condition="ug"
             xml:id="ReleaseNotes">
     <title>Release Notes</title>
-	<xi:include href="ReleaseNotes_R2013a.xml" />
+    <xi:include href="ReleaseNotes_R2013b.xml" />
+    <xi:include href="ReleaseNotes_R2013a.xml" />
     <xi:include href="ReleaseNotes_R2012a.xml" />
     <xi:include href="ReleaseNotes_R2011a.xml" />
   </appendix>
