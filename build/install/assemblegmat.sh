@@ -122,8 +122,11 @@ fi
 # bin, data, matlab
 svn export --force "$apppath" "$dest"
 
+# remove debug directory
+rm -rf "$dest/debug"
+
 # Mars-GRAM 2005 data
-if [ $TYPE = 'full' ]
+if [ $TYPE = 'full' -o $TYPE = 'full-release' ]
 then
     mgpath="$jazzrepo/trunk/code/MarsGRAMPlugin/data"
     if [ $user ]
@@ -138,11 +141,8 @@ then
 fi
 
 # libCInterface MATLAB files
-if [ $TYPE = 'full' ]
-then
-    cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
-    svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
-fi
+cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
+svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
 
 # Remove proprietary plugins if necessary
 if [ $TYPE = 'public' -o $TYPE = 'public-release' ]
