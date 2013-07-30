@@ -1,0 +1,31 @@
+% This script is a simple example of reading spacecraft initial state date from a
+% data file instead of setting it in the script.
+
+% Create default resources
+Create Spacecraft sc
+Create Propagator prop
+
+% Link to the data file
+Create FileInterface tvhf
+tvhf.Filename = '../samples/SupportFiles/Ex_FileInterface_TVHF.sv'
+tvhf.Format = 'TVHF_ASCII'
+
+% Set up the visualization
+Create OrbitView ov
+ov.Add = {sc, Earth}
+ov.CoordinateSystem = EarthMJ2000Eq
+ov.ViewPointReference = Earth
+ov.ViewPointVector = [ 0 0 2e5 ]
+ov.ViewDirection = Earth
+ov.ViewScaleFactor = 1
+ov.ViewUpCoordinateSystem = EarthMJ2000Eq
+ov.ViewUpAxis = 'Z'
+
+% The Mission Sequence
+BeginMissionSequence
+
+% Populate sc with data from file
+Set 'Read initial state' sc tvhf
+
+% Propagate
+Propagate 'Propagate 2 days' prop(sc) {sc.ElapsedDays = 2}
