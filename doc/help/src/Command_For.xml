@@ -19,8 +19,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -205,9 +203,13 @@
                 <mathphrase><emphasis role="bold">Start</emphasis> +
                 i*</mathphrase>
               </inlineequation><emphasis role="bold">
+                 
+
                 <inlineequation>
                   <mathphrase>Increment</mathphrase>
                 </inlineequation>
+
+                 
               </emphasis> if the resulting value satisfies the constraint
             defined by <guilabel>End</guilabel>. </para> <variablelist>
                 <varlistentry>
@@ -365,6 +367,9 @@
           <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
         </listitem>
       </itemizedlist></para>
+
+    <para>with the extra requirement that if a Resource parameter is used for
+    <guilabel>Index</guilabel>, the parameter must be settable.</para>
 
     <para>The index specification cannot contain mathematical operators or
     parentheses. After execution of the <guilabel>For</guilabel> loop, the
