@@ -1228,6 +1228,19 @@
       for ephemeris file to be generated backwards as well. Currently in GMAT,
       when you propagate a spacecraft backwards in time, then the ephemeris is
       also generated backwards.</para>
+	  
+	        <warning>
+        <para>The Code500 ephemeris file requires fixed time steps and has a
+        pre-defined format for handling chunks of ephemeris data. The format
+        does not allow chunking to stop and start at state discontinuities
+        that occur at impulsive maneuvers. GMAT's current behavior is to
+        interpolate across those discontinuities as the code 500 format does
+        not elegantly support ephemerides with discontinuities. This is
+        acceptable for small maneuvers but becomes less accurate as the
+        maneuvers grow in magnitude. We recommend using more modern ephemeris
+        file formats for this reasson.</para>
+      </warning>
+	  
     </refsection>
 
     <refsection>
