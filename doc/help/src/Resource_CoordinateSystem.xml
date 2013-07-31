@@ -66,6 +66,195 @@
 
         <tbody>
           <row>
+            <entry><guilabel>AlignmentVectorX</guilabel></entry>
+
+            <entry><para>The x component of the
+            <guibutton>AlignmentVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>AlignmentVector </guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AlignmentVectorY</guilabel></entry>
+
+            <entry><para>The y component of the
+            <guibutton>AlignmentVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>AlignmentVector</guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AlignmentVectorZ</guilabel></entry>
+
+            <entry><para>The z component of the
+            <guibutton>AlignmentVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>AlignmentVector</guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Axes </guilabel></entry>
 
             <entry><para> The axes of the
@@ -130,6 +319,446 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintVectorX</guilabel></entry>
+
+            <entry><para>The x component of the
+            <guibutton>ConstraintVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintVector</guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintVectorY</guilabel></entry>
+
+            <entry><para>The y component of the
+            <guibutton>ConstraintVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintVector</guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintVectorZ</guilabel></entry>
+
+            <entry><para>The z component of the
+            <guibutton>ConstraintVector</guibutton> expressed in the local
+            frame (for example, expressed in the
+            <guibutton>LocalAlignedConstrained</guibutton> frame). Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintVector</guibutton>&gt;= 1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintReferenceVectorX</guilabel></entry>
+
+            <entry><para>The x component of the
+            <guibutton>ConstraintReferenceVector</guibutton> expressed in
+            the<guibutton> ConstraintCoordinateSystem</guibutton>. Used for
+            the following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintReferenceVector</guibutton>&gt;=
+                    1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintReferenceVectorY</guilabel></entry>
+
+            <entry><para>The y component of the
+            <guibutton>ConstraintReferenceVector</guibutton> expressed in the
+            <guibutton>ConstraintCoordinateSystem</guibutton>. Used for the
+            following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintReferenceVector</guibutton>&gt;=
+                    1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ConstraintReferenceVectorZ</guilabel></entry>
+
+            <entry><para>The z component of the
+            <guibutton>ConstraintReferenceVector</guibutton> expressed in the
+            <guibutton>ConstraintCoordinateSystem</guibutton>. Used for the
+            following axis systems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞ (norm of
+                    <guibutton>ConstraintReferenceVector</guibutton>&gt;=
+                    1e-9)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Constraint Coordinate System</guilabel></entry>
+
+            <entry><para>The coordinate system for the
+            <guibutton>ConstraintReferenceVector</guibutton>. Used for the
+            following axis sytems:
+            <guibutton>LocalAlignedConstrained</guibutton>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Resource</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      <guibutton>CoordinateSystem</guibutton>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>EarthMJ2000Eq</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -316,6 +945,74 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ReferenceObject</guilabel></entry>
+
+            <entry><para>The reference object for a
+            <guibutton>LocalAlignedConstrained </guibutton>axis system. The
+            axes are computed such that the
+            <guibutton>AlignmentVector</guibutton> in the body frame is
+            aligned with the vector pointing from the
+            <guibutton>Origin</guibutton> to the
+            <guibutton>ReferenceObject</guibutton>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Resource</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>A Resource that has coordinates. For example:
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>Spacecraft</guilabel>,
+                    <guilabel>LibrationPoint</guilabel>,
+                    <guilabel>Barycenter</guilabel>,
+                    <guilabel>SolarSystemBarycenter</guilabel>,
+                    <guilabel>GroundStation.</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Luna</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>gui,script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -661,6 +1358,21 @@
     Epoch</guilabel> field is activated. Use the <guilabel>A1MJd</guilabel>
     <guilabel>Epoch</guilabel> field to define the reference epoch of the
     coordinate system.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_CoordinateSystems_GUI_LocalAlignedConstrained.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>If you select <guilabel>LocalAlignedConstrained</guilabel> as the
+    axes <guilabel>Type</guilabel>, then <guilabel>CoordinateSystem</guilabel>
+    dialog displays the fields illustrated above for configuring the
+    axes.</para>
   </refsection>
 
   <refsection>
@@ -969,6 +1681,35 @@
               between them is time varying. This axis system is computed using
               IAU-2000A theory with 2006 update for precession.
               </para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>LocalAlignedConstrained</guilabel></entry>
+
+              <entry>None</entry>
+
+              <entry>IAU-1976 FK5</entry>
+
+              <entry><para>The <guilabel>LocalAlignedConstrained</guilabel>
+              axis system is an aligned constrained system based on the
+              position of the <guilabel>ReferenceObject</guilabel> with
+              respect to the <guilabel>Origin</guilabel> and is computed using
+              the well known Triad algorithm. The axes are computed such that
+              the <guilabel>AlignmentVector</guilabel>, defined as the
+              components of the alignment vector expressed in the
+              <guilabel>LocalAlignedConstrained</guilabel> system, is aligned
+              with the position of the <guilabel>ReferenceBody</guilabel>
+              w/r/t the origin. The rotation about the
+              <guilabel>AlignmentVector</guilabel> is resolved by minimizing
+              the angle between the <guilabel>ContraintVector</guilabel>,
+              defined as the constraint vector expressed in the
+              <guilabel>LocalAlignedConstrained</guilabel> system, and the
+              <guilabel>ConstraintReferenceVector</guilabel>, defined as the
+              constraint reference vector expressed in the
+              <guilabel>ConstraintCoordinateSystem</guilabel>. The alignment
+              vectors and the constraint vectors cannot have zero length.
+              Similarly, the cross products of the constraint vector and
+              alignment vector cannot have zero length. </para></entry>
             </row>
 
             <row>
