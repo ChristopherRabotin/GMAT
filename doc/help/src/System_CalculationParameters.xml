@@ -278,6 +278,225 @@
 
           <tbody>
             <row>
+              <entry><guilabel>Acceleration</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The total acceleration with respect to the inertial
+              system computed using the <guilabel>ForceModel</guilabel>
+              selected for the dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real </para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s^2</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>AccelerationX</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para> The x-component of acceleration with respect to
+              the inertial system computed using the
+              <guilabel>ForceModel</guilabel> selected for the
+              dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s^2</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>AccelerationY</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para> The y-component of acceleration with respect to
+              the inertial system computed using the
+              <guilabel>ForceModel</guilabel> selected for the
+              dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s^2</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>AccelerationZ</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para> The z-component of acceleration with respect to
+              the inertial system computed using the
+              <guilabel>ForceModel</guilabel> selected for the
+              dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s^2</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>AtmosDensity</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para> The atmospheric density at the current
+              <guilabel>Spacecraft</guilabel> epoch and location computed
+              using the <guilabel>ForceModel</guilabel> selected for the
+              dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>kg/m^3</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>A1Gregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Spacecraft epoch in the A.1 system and the
+              Gregorian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>A1Gregorian</guilabel></entry>
 
               <entry>Y</entry>
@@ -5831,6 +6050,33 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
     <refsection>
       <title>ImpulsiveBurn</title>
 
+      <para>To compute <guilabel>ImpulsiveBurn</guilabel> parameters, GMAT
+      requires that an <guilabel>ImpulsiveBurn</guilabel> has been executed
+      using a <guilabel>Maneuver</guilabel> command like this:</para>
+
+      <para><programlisting><code>Maneuver myImpulsiveBurn(mySat)  </code></programlisting></para>
+
+      <para>In the case that an <guilabel>ImpulsiveBurn</guilabel> has not
+      been applied, GMAT will output zeros for the
+      <guilabel>ImpulsiveBurn</guilabel> components and issue a
+      warning.</para>
+
+      <para>We recommended that you evaluate
+      <guilabel>ImpulsiveBurn</guilabel> parameters immediately after the
+      <guilabel>ImpulsiveBurn</guilabel> is applied using the
+      <guilabel>Maneuver</guilabel> command like this:</para>
+
+      <para><programlisting><code>Maneuver myImpulsiveBurn(mySat) 
+myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
+
+      <para>The above usage avoids issues that may occur if the
+      <guilabel>ImpulsiveBurn</guilabel> coordinate system is time varying,
+      and the <guilabel>ImpulsiveBurn</guilabel> parameters are requested
+      after further manipulation of the participants using other commands
+      (such as <guilabel>Propagate</guilabel>). In that case, it is possible
+      that the participants are no longer at the epoch of the maneuver, and
+      unexpected results can occur due to epoch mismatches.</para>
+
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
           <colspec colnum="1" colwidth="1.5in"/>
@@ -5910,7 +6156,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
                     <term>Dependency</term>
 
                     <listitem>
-                      <para>(None)</para>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -5945,7 +6191,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
                     <term>Dependency</term>
 
                     <listitem>
-                      <para>(None)</para>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -5980,7 +6226,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
                     <term>Dependency</term>
 
                     <listitem>
-                      <para>(None)</para>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
                     </listitem>
                   </varlistentry>
 
