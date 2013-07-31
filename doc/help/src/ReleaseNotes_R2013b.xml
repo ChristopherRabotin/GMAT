@@ -224,7 +224,7 @@ ACECoordSys.ConstraintReferenceVectorZ = 1</code></programlisting>
 
 BeginMissionSequence
 
-Luna.Epoch = 21545
+Luna.Epoch.A1ModJulian = 21545
 Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
     Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></programlisting>
     </section>
@@ -289,6 +289,111 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
       the <link
       xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11913">"Known
       Issues in R2013b" report</link> in JIRA.</para>
+
+      <para>There are several known issues in this release that we consider to
+      be significant:<informaltable frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth="0.2*"/>
+
+            <thead>
+              <row>
+                <entry align="left">ID</entry>
+
+                <entry align="left">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-2561">GMT-2561</link></entry>
+
+                <entry>UTC Epoch Entry and Reporting During Leap Second is
+                incorrect.</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3043">GMT-3043</link></entry>
+
+                <entry>Inconsistent validation when creating variables that
+                shadow built-in math functions</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3108">GMT-3108</link></entry>
+
+                <entry>OrbitView with STM and Propagate Synchronized does not
+                show spacecraft in correct locations</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3289">GMT-3289</link></entry>
+
+                <entry>First step algorithm fails for backwards propagation
+                using SPK propagator</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-4097">GMT-4097</link></entry>
+
+                <entry>Ephemeris File is Not Chunking File At Some
+                Discontinuty Types</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3350">GMT-3350</link></entry>
+
+                <entry>Single-quote requirements are not consistent across
+                objects and modes</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3556">GMT-3556</link></entry>
+
+                <entry>Unable to associate tank with thruster in command
+                mode</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3629">GMT-3629</link></entry>
+
+                <entry>GUI starts in bad state when started with
+                --minimize</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3669">GMT-3669</link></entry>
+
+                <entry>Planets not drawn during optimization in
+                OrbitView</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3738">GMT-3738</link></entry>
+
+                <entry>Cannot set standalone FuelTank, Thruster fields in
+                CallMatlabFunction</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3745">GMT-3745</link></entry>
+
+                <entry>SPICE ephemeris stress tests are not writing out
+                ephemeris for the entire mission sequence</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable></para>
     </section>
   </section>
 </section>
