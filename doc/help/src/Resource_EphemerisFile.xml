@@ -1907,7 +1907,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
   <para>For ephemeris header record 1, there are some required fields that
   have not been tabulated in GMAT's Code 500 ephemeris header record 1. These
   fields that have not been tabulated in header record 1 are listed in the
-  table below.</para>
+  table below. 0.0 indicates "used" and 1.0 means "not used".</para>
 	  
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
@@ -1930,7 +1930,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>0.0 or 1.0</para>
+              <para>1.0</para>
             </entry>
           </row>
 
@@ -1940,7 +1940,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>0.0 or 1.0</para>
+              <para>1.0</para>
             </entry>
           </row>
 
@@ -1950,7 +1950,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>0.0 or 1.0</para>
+              <para>1.0</para>
             </entry>
           </row>
 
@@ -1960,7 +1960,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>0.0 or 1.0</para>
+              <para>1.0</para>
             </entry>
           </row>
 
@@ -1970,7 +1970,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>0.0 or 1.0</para>
+              <para>1.0</para>
             </entry>
           </row>
 
@@ -1980,7 +1980,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
             </entry>
 
             <entry>
-              <para>'</para>
+              <para>1.0</para>
             </entry>
           </row>
         </tbody>
