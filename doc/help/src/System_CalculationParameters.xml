@@ -291,7 +291,7 @@
                     <term>Data Type</term>
 
                     <listitem>
-                      <para>Real </para>
+                      <para>Real</para>
                     </listitem>
                   </varlistentry>
 
@@ -456,41 +456,6 @@
 
                     <listitem>
                       <para>kg/m^3</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>A1Gregorian</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>N</entry>
-
-              <entry><para>Spacecraft epoch in the A.1 system and the
-              Gregorian format.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>String</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(N/A)</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -4667,6 +4632,670 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
 
                     <listitem>
                       <para>m<superscript>3</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Space Point Parameters</title>
+
+      <para>All Resources that have coordinates in space have Cartesian
+      position and velocity parameters, so you can access ephemeris
+      information. This includes all built-in solar system bodies and other
+      Resources such as
+      <guilabel>CelestialBody</guilabel>,<guilabel>Planet</guilabel>,
+      <guilabel>Moon</guilabel>, <guilabel>Asteroid</guilabel>,
+      <guilabel>Comet</guilabel>, <guilabel>Barycenter</guilabel>,
+      <guilabel>LibrationPoint</guilabel>, and
+      <guilabel>GroundStation</guilabel> :</para>
+
+      <itemizedlist spacing="compact">
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.X</literal></para>
+        </listitem>
+
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.Y</literal></para>
+        </listitem>
+
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.Z</literal></para>
+        </listitem>
+
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VX</literal></para>
+        </listitem>
+
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VY</literal></para>
+        </listitem>
+
+        <listitem>
+          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VZ</literal></para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Note that to use these parameters, you must first set the epoch of
+      the Resource to the desired epoch at which you want the data. See the
+      following example:</para>
+
+      <programlisting><code>Create ReportFile rf
+
+BeginMissionSequence
+
+Luna.Epoch.A1ModJulian = 21545
+Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
+       Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></programlisting>
+
+      <note>
+        <para>Spacecraft parameters are treated slightly different than Space
+        Point parameters primarly because <guilabel>Spacecraft</guilabel>
+        Cartesian state parameters are settable, and all other Space Point
+        Cartesian parameters are only gettable. When requesting state
+        information for Space Points other than
+        <guilabel>Spacecraft</guilabel>, the coordinates are computed based on
+        the model configured for that Resource. Additionally, not all epoch
+        configuration options supported for <guilabel>Spacecraft
+        </guilabel>are supported for Space Points (i.e.
+        <guilabel>Epoch</guilabel> and
+        <guilabel>DateFormat</guilabel>).</para>
+      </note>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="4">
+          <colspec colnum="1" colwidth="1.5in"/>
+
+          <colspec colnum="2" colwidth=".75in"/>
+
+          <colspec colnum="3" colwidth=".75in"/>
+
+          <colspec colnum="4"/>
+
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+
+              <entry>Settable</entry>
+
+              <entry>Plottable</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>A1Gregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Resource epoch in the A.1 system and the Gregorian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>A1ModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Resource epoch in the A.1 system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TAIGregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Resource epoch in the TAI system and the Gregorian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TAIModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Resource epoch in the TAI system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TDBGregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Resource epoch in the TDB system and the Gregorian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TDBModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Resource epoch in the TDB system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TTGregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Resource epoch in the TT system and the Gregorian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TTModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Resource epoch in the TT system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>UTCGregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Resource epoch in the UTC system and the Gregorian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>UTCModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Resource epoch in the UTC system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>VX</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The x-component of velocity with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>VY</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The y-component of velocity with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>VZ</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The z-component of velocity with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>X</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The x-component of position with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Y</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The y-component of position with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Z</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The z-component of position with respect to the
+              <guilabel>CoordinateSystem</guilabel> chosen as the dependency.
+              When no dependency is selected,
+              <guilabel>EarthMJ2000Eq</guilabel> is used. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>

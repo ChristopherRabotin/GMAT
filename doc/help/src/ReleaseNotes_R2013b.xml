@@ -180,15 +180,17 @@ ACECoordSys.ConstraintReferenceVectorZ = 1</code></programlisting>
     </section>
 
     <section>
-      <title>CelestialBody Parameters</title>
+      <title>Space Point Parameters</title>
 
-      <para>All <guilabel>CelestialBody</guilabel> resources (i.e.
-      <guilabel>Planet</guilabel>, <guilabel>Moon</guilabel>,
-      <guilabel>Asteroid</guilabel>, <guilabel>Comet</guilabel>,
-      <guilabel>Barycenter</guilabel>, <guilabel>LibrationPoint</guilabel>)
-      now have Cartesian position and velocity parameters, so you can access
-      ephemeris information. This includes all built-in solar system bodies.
-      The new parameters are:</para>
+      <para>All Resources that have coordinates in space now have Cartesian
+      position and velocity parameters, so you can access ephemeris
+      information. This includes all built-in solar system bodies and other
+      Resources such as
+      <guilabel>CelestialBody</guilabel>,<guilabel>Planet</guilabel>,
+      <guilabel>Moon</guilabel>, <guilabel>Asteroid</guilabel>,
+      <guilabel>Comet</guilabel>, <guilabel>Barycenter</guilabel>,
+      <guilabel>LibrationPoint</guilabel>, and
+      <guilabel>GroundStation</guilabel> :</para>
 
       <itemizedlist spacing="compact">
         <listitem>
@@ -217,8 +219,8 @@ ACECoordSys.ConstraintReferenceVectorZ = 1</code></programlisting>
       </itemizedlist>
 
       <para>Note that to use these parameters, you must first set the epoch of
-      the <guilabel>CelestialBody</guilabel> to the desired epoch at which you
-      want the data. See the following example:</para>
+      the Resource to the desired epoch at which you want the data. See the
+      following example:</para>
 
       <programlisting><code>Create ReportFile rf
 
@@ -226,7 +228,7 @@ BeginMissionSequence
 
 Luna.Epoch.A1ModJulian = 21545
 Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
-    Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></programlisting>
+       Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></programlisting>
     </section>
   </section>
 
