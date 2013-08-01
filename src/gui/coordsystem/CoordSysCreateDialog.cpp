@@ -130,8 +130,8 @@ void CoordSysCreateDialog::LoadData()
       typeComboBox         = mCoordPanel->GetTypeComboBox();
       primaryComboBox      = mCoordPanel->GetPrimaryComboBox();
       secondaryComboBox    = mCoordPanel->GetSecondaryComboBox();
-      refObjectComboBox    = mCoordPanel->GetSecondaryComboBox();
-      constraintCSComboBox = mCoordPanel->GetSecondaryComboBox();
+      refObjectComboBox    = mCoordPanel->GetReferenceObjectComboBox();
+      constraintCSComboBox = mCoordPanel->GetConstraintCSComboBox();
 
       xComboBox = mCoordPanel->GetXComboBox();
       yComboBox = mCoordPanel->GetYComboBox();
