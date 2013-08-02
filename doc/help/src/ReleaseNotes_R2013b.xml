@@ -249,9 +249,9 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
         <literal><replaceable>EphemerisFile</replaceable>.FileFormat</literal>
         is set to <literal>'SPK'</literal>,
         <literal><replaceable>EphemerisFile</replaceable>.CoordinateSystem</literal>
-        must be <literal>EarthMJ2000Eq</literal>. Other coordinate systems are
-        no longer allowed with this ephemeris format. See the <link
-        linkend="EphemerisFile">EphemerisFile</link> reference for
+        must have <literal>MJ2000Eq</literal> as the axis system. Other axis
+        systems are no longer allowed with this ephemeris format. See the
+        <link linkend="EphemerisFile">EphemerisFile</link> reference for
         details.</para>
       </listitem>
 
