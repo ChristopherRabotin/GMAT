@@ -53,14 +53,16 @@ protected:
    Integer beginIndex;
    /// Ending index used in finding center point
    Integer endIndex;
+   /// Index of nearest data point of requested data
+   Integer dataIndex;
    /// Starting index of interpolation range
    Integer startPoint;
    /// Value of the last point, to determine if the data buffer need updating
    Real  lastX;
    /// Array of ordered independent variables used
-   Real  x[MAX_BUFFER_SIZE];
+   Real  *x;
    /// Array of ordered dependent variables used
-   Real  *y[MAX_BUFFER_SIZE];
+   Real  **y;
    
    // Inherited methods that need some revision for LagrangeInterpolator
    virtual void AllocateArrays();
@@ -68,8 +70,8 @@ protected:
    virtual void CopyArrays(const LagrangeInterpolator &i);
    
    void    BuildDataPoints(Real ind);
-   void    UpdateBeginAndEndIndex(Real ind);
-   bool    IsDataNearCenter();
+   bool    UpdateBeginAndEndIndex(Real ind);
+   bool    IsDataNearCenter(Real ind);
    Integer FindStartingPoint(Real ind);
 };
 
