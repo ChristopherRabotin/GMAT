@@ -350,12 +350,16 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
    // Update index and check if it is inside a range
    if (!UpdateBeginAndEndIndex(ind))
    {
-      #ifdef DEBUG_LAGRANGE_INTERPOLATE
-      MessageInterface::ShowMessage
-         ("Lagrange::Interpolate() returnnig false, end index (%d) is out of "
-          "bounds, beginIndex=%d\n", endIndex, beginIndex);
-      #endif
-      return false;
+      // Check if not forcing interpolation (GMT-4110 fix)
+      if (!forceInterpolation)
+      {
+         #ifdef DEBUG_LAGRANGE_INTERPOLATE
+         MessageInterface::ShowMessage
+            ("Lagrange::Interpolate() returnnig false, end index (%d) is out of "
+             "bounds, beginIndex=%d\n", endIndex, beginIndex);
+         #endif
+         return false;
+      }
    }
    
    // If not forcing interpolation, perfome more checking
@@ -374,11 +378,11 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
    
    // Find starting point that will put ind in the center
    FindStartingPoint(ind);
-
+   
    // Now interpolate using the alorithm in the Math Spec.
    Real *products = new Real[dimension];
    Real *estimates = new Real[dimension];
-
+   
    #ifdef DUMP_DATA_POINT_20
       if (!dataDumped)
       {
@@ -404,16 +408,30 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
       estimates[dim] = 0.0;
    
    Integer endPoint = startPoint + order;
+   #ifdef DEBUG_LAGRANGE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("   endPoint(%d) is computed from startPoint(%d) + order(%d)\n",
+       endPoint, startPoint, order);
+   #endif
    if (endPoint > actualSize - 1)
    {
       #ifdef DEBUG_LAGRANGE_INTERPOLATE
       MessageInterface::ShowMessage
-         ("   endPoint is greater than actualSize so, decrementing start and end points\n");
+         ("   endPoint(%d) is greater than lastIndex(%d), so decrementing start and end points\n",
+          endPoint, actualSize-1);
       #endif
       startPoint--;
-      endPoint --;
+      endPoint--;
+      for (Integer i = endPoint; i >= startPoint; i--)
+      {
+         if (x[i] == -9.9999e75)
+            endPoint--;
+      }
    }
    
+   #ifdef DEBUG_LAGRANGE_INTERPOLATE
+   MessageInterface::ShowMessage("   new startPoint=%d, endPoint=%d\n", startPoint, endPoint);
+   #endif
    for (Integer i = startPoint; i <= endPoint; i++)
    {
       #ifdef DEBUG_LAGRANGE_INTERPOLATE
@@ -736,7 +754,8 @@ bool LagrangeInterpolator::UpdateBeginAndEndIndex(Real ind)
    
    if (endIndex >= actualSize)
    {
-      //beginIndex = actualSize - order;
+      endIndex = actualSize - 1;
+      beginIndex = endIndex - order;
       isIndexValid = false;
    }
    
@@ -826,6 +845,10 @@ Integer LagrangeInterpolator::FindStartingPoint(Real ind)
    // Assign to starting point
    startPoint = qMin;
    
+   #ifdef DEBUG_LAGRANGE_BUILD
+   MessageInterface::ShowMessage("   startPoint set to qMin (%d)\n", qMin);
+   #endif
+   
    // We don't want start point to pass the actual data size, so adjust
    //if (qMin + order > actualSize - 1)
    if (qMin + requiredPoints > actualSize - 1)
@@ -833,8 +856,8 @@ Integer LagrangeInterpolator::FindStartingPoint(Real ind)
       startPoint = actualSize - order;
       #ifdef DEBUG_LAGRANGE_BUILD
       MessageInterface::ShowMessage
-         ("   qMin + requiredPoints = %d passed the actualSize %d, so adjusted "
-          "startPoint to %d\n", qMin+order, actualSize, startPoint);
+         ("   qMin + requiredPoints = %d passed the last index %d, so adjusted "
+          "startPoint to %d\n", qMin+requiredPoints, actualSize-1, startPoint);
       #endif
    }
    
