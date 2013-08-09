@@ -1951,7 +1951,9 @@ void ODEModel::UpdateInitialData(bool dynamicOnly)
       psm->GetStateObjects(stateObjects, Gmat::SPACEOBJECT);
       
       if (dynamicOnly)
+      {
          UpdateDynamicSpacecraftData(&stateObjects, 0);
+      }
       else
       {
          current = (*i);
@@ -2460,8 +2462,9 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             dynamicObjects[i]->SetRealParameter(dynamicIDs[i],
                   state[dynamicsIndex[i]]);
       }
-      UpdateInitialData(true);
+//      UpdateInitialData(true);
    }
+   UpdateInitialData(true);
 
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage("Initializing derivative array\n");
