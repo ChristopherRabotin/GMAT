@@ -1,1 +1,1 @@
-GMAT Build has started.  It should finish in 30-60 minutes.
+GMAT Build has started.  It should finish in approximately 1 hour.
