@@ -137,7 +137,7 @@ then
     then
         pwstring="--password $pw"
     fi
-    svn export $ustring $pwstring --force "$mgpath" "$dest/data"
+    svn export $ustring $pwstring --force "$mgpath" "$dest/data/atmosphere"
 fi
 
 # libCInterface MATLAB files
