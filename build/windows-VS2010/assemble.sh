@@ -72,7 +72,7 @@ find "$dest" -iname thumbs.db -delete
 
 # Mars-GRAM 2005 data
 mgpath="$jazz/MarsGRAMPlugin/data"
-cp -av "$mgpath/"* "$dest/data"
+cp -av "$mgpath/"* "$dest/data/atmosphere"
 
 # libCInterface MATLAB files
 cifacepath=${cur}/../../plugins/CInterfacePlugin
