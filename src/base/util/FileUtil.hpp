@@ -28,7 +28,7 @@
 namespace GmatFileUtil
 {
    const Integer BUFFER_SIZE = 4096;
-   static Real CompareAbsTol = 1.0e-4;
+   static Real   COMPARE_TOLERANCE = 1.0e-9;
    
    std::string GMAT_API GetPathSeparator();
    std::string GMAT_API GetWorkingDirectory();
@@ -67,20 +67,7 @@ namespace GmatFileUtil
    
    bool GMAT_API        CompareLines(const std::string &line1,
                            const std::string &line2, Real &diff,
-                           Real tol = CompareAbsTol);
-   
-   StringArray GMAT_API &Compare(const std::string &filename1,
-                           const std::string &filename2,
-                           const StringArray &colTitles,
-                           Real tol = CompareAbsTol);
-   
-   StringArray GMAT_API &Compare(Integer numDirsToCompare,
-                           const std::string &basefilename,
-                           const std::string &filename1,
-                           const std::string &filename2,
-                           const std::string &filename3,
-                           const StringArray &colTitles,
-                           Real tol = CompareAbsTol);
+                           Real tol = COMPARE_TOLERANCE);
    
    StringArray GMAT_API &CompareTextLines(Integer numDirsToCompare,
                            const std::string &basefilename,
@@ -96,9 +83,19 @@ namespace GmatFileUtil
                            const std::string &filename2,
                            const std::string &filename3,
                            int &file1DiffCount, int &file2DiffCount,
-                           int &file3DiffCount, Real tol = CompareAbsTol);
+                           int &file3DiffCount, Real tol = COMPARE_TOLERANCE);
    
-   bool GMAT_API SkipHeaderLines(std::ifstream &in, StringArray &tokens);
+   StringArray GMAT_API &CompareNumericColumns(Integer numDirsToCompare,
+                           const std::string &basefilename,
+                           const std::string &filename1,
+                           const std::string &filename2,
+                           const std::string &filename3,
+                           Real tol = COMPARE_TOLERANCE);
+   
+   bool GMAT_API SkipHeaderLines(std::ifstream &in, RealArray &realArray,
+                                 const std::string &filename);
+   bool GMAT_API IsAsciiFile(std::ifstream &file, const std::string &filename);
+   bool GMAT_API GetRealColumns(const std::string &line, RealArray &cols);
    
    static StringArray textBuffer;
    

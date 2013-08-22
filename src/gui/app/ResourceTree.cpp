@@ -116,7 +116,7 @@
 #include "ViewTextDialog.hpp"
 #include "Function.hpp"               // for SetNewFunction()
 #include "FileManager.hpp"            // for GetFullPathname()
-#include "FileUtil.hpp"               // for Compare()
+#include "FileUtil.hpp"               // for CompareTextLines()
 #include "GmatGlobal.hpp"             // for SetBatchMode()
 #include "StringUtil.hpp"             // for GmatStringUtil::
 #include "SolarSystem.hpp"
@@ -4263,8 +4263,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    int startNum = 1;
    int runCount = numScripts;
    int repeatCount = 1;
-
-   Real absTol = GmatFileUtil::CompareAbsTol;
+   
+   Real absTol = GmatFileUtil::COMPARE_TOLERANCE;
    wxString compareDir1  = ((GmatTreeItemData*)GetItemData(itemId))->GetName();
 
    RunScriptFolderDialog dlg(this, numScripts, absTol, compareDir1);
@@ -4272,7 +4272,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
 
    if (!dlg.RunScripts())
       return;
-
+   
    startNum = dlg.GetStartingScriptNumber();
    runCount = dlg.GetNumScriptsToRun() + startNum - 1;
    repeatCount = dlg.GetNumTimesToRun();
@@ -5543,7 +5543,6 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
       theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
    int size = itemNames.size();
    std::string objName;
-   //ReportFile *reportFile;
    GmatBase *reportFile;
    int reportCount = 0;
 
@@ -5551,7 +5550,7 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
    {
       GmatBase *sub = GetObject(itemNames[i]);
       objName = itemNames[i];
-
+      
       if (sub->GetTypeName() == "ReportFile")
       {
          reportFile = GetObject(objName);
@@ -5563,20 +5562,20 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
                 objName.c_str());
             return;
          }
-
-         std::string filename1 = reportFile->GetStringParameter("Filename");
+         
+         std::string basefilename = reportFile->GetStringParameter("Filename");
          StringArray colTitles = reportFile->GetRefObjectNameArray(Gmat::PARAMETER);
-         //MessageInterface::ShowMessage("===> colTitles.size=%d\n", colTitles.size());
-
+         
          #ifdef DEBUG_COMPARE_REPORT
-         MessageInterface::ShowMessage("   filename1=%s\n", filename1.c_str());
+         MessageInterface::ShowMessage("   colTitles.size=%d\n", colTitles.size());
+         MessageInterface::ShowMessage("   basefilename=%s\n", basefilename.c_str());
          #endif
-
-         wxString filename2 = filename1.c_str();
-         wxFileName fname(filename2);
+         
+         wxString filename1 = basefilename.c_str();
+         wxFileName fname(filename1);
          wxString name2 = fname.GetFullName();
          size_t numReplaced = name2.Replace("GMAT", replaceStr.c_str());
-
+         
          if (numReplaced == 0)
          {
             textCtrl->AppendText
@@ -5598,16 +5597,22 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
             return;
          }
 
-         // set filename2
-         filename2 = dir2 + "/" + name2;
+         // set filename1
+         filename1 = dir2 + "/" + name2;
 
          #ifdef DEBUG_COMPARE_REPORT
-         MessageInterface::ShowMessage("   filename2=%s\n", filename2.c_str());
+         MessageInterface::ShowMessage("   filename1=%s\n", filename1.c_str());
          #endif
-
+         
+         int file1DiffCount = 0;
+         int file2DiffCount = 0;
+         int file3DiffCount = 0;
+         
          StringArray output =
-            GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, absTol);
-
+            GmatFileUtil::CompareTextLines(
+               0, basefilename.c_str(), filename1.c_str(), "", "", file1DiffCount,
+               file2DiffCount, file3DiffCount);
+         
          // append text
          for (unsigned int i=0; i<output.size(); i++)
             textCtrl->AppendText(wxString(output[i].c_str()));

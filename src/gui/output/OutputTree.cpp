@@ -39,7 +39,7 @@
 #include "GuiInterpreter.hpp"
 #include "Subscriber.hpp"
 #include "ReportFile.hpp"
-#include "FileUtil.hpp"       // for GmatFileUtil::Compare()
+#include "FileUtil.hpp"       // for GmatFileUtil::CompareTextLines()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OUTPUT_TREE 1
@@ -53,8 +53,9 @@ BEGIN_EVENT_TABLE(OutputTree, wxTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, OutputTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, OutputTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, OutputTree::OnEndLabelEdit)
-   EVT_MENU(POPUP_COMPARE_NUMERIC_VALUES, OutputTree::OnCompareNumericValues)
    EVT_MENU(POPUP_COMPARE_TEXT_LINES, OutputTree::OnCompareTextLines)
+   EVT_MENU(POPUP_COMPARE_NUMERIC_LINES, OutputTree::OnCompareNumericLines)
+   EVT_MENU(POPUP_COMPARE_NUMERIC_COLUMNS, OutputTree::OnCompareNumericColumns)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -479,8 +480,9 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    {
 	   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
 	   {
-		  menu.Append(POPUP_COMPARE_NUMERIC_VALUES, wxT("Compare Numeric Values"));
 		  menu.Append(POPUP_COMPARE_TEXT_LINES, wxT("Compare Text Lines"));
+		  menu.Append(POPUP_COMPARE_NUMERIC_LINES, wxT("Compare Lines Numerically"));
+		  menu.Append(POPUP_COMPARE_NUMERIC_COLUMNS, wxT("Compare Columns Numerically"));
 	   }
    }
    
@@ -778,86 +780,20 @@ void OutputTree::OnAddOrbitView(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnCompareNumericValues(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-/**
- * Compare reports.
- *
- * @param <event> command event
- */
-//------------------------------------------------------------------------------
-void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
-{
-   //MessageInterface::ShowMessage("OutputTree::OnCompareNumericValues() entered\n");
-
-   ReportFile *theReport =
-      (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
-
-   if (!theReport)
-   {
-      MessageInterface::ShowMessage
-         ("OutputTree::OnCompareNumericValues() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
-      return;
-   }
-   
-   std::string filename1 = theReport->GetPathAndFileName();
-   StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
-   wxString filename2 =
-      wxFileSelector("Choose a file to open", "", "", "report",
-                     "Report files (*.report)|*.report|"
-                     "Text files (*.txt)|*.txt|All files (*.*)|*.*");
-   
-   if (filename2.empty())
-      return;
-   
-   Real tol = GmatFileUtil::CompareAbsTol;
-   wxString tolStr;
-   tolStr.Printf("%e", tol);
-   tolStr = wxGetTextFromUser("Enter absolute tolerance to be used in flagging: ",
-                              "Tolerance", tolStr, this);
-   
-   if (!tolStr.ToDouble(&tol))
-   {
-      wxMessageBox("Entered Invalid Tolerance", "Error", wxOK, this);
-      return;
-   }
-   
-   StringArray output =
-      GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, tol);
-   
-   ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
-   if (compWindow == NULL)
-   {
-      compWindow = 
-         new ViewTextFrame(GmatAppData::Instance()->GetMainFrame(),
-                           _T("Compare Utility"), 50, 50, 800, 500, "Permanent");
-      GmatAppData::Instance()->SetCompareWindow(compWindow);
-      wxString msg;
-      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);  
-      compWindow->AppendText(msg);
-   }
-   
-   compWindow->Show(true);
-   
-   for (unsigned int i=0; i<output.size(); i++)
-      compWindow->AppendText(wxString(output[i].c_str()));
-}
-
-
-//------------------------------------------------------------------------------
 // void OnCompareTextLines(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
- * Compare reports.
+ * Compare reports as text.
  *
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
 void OutputTree::OnCompareTextLines(wxCommandEvent &event)
 {
-   //MessageInterface::ShowMessage("OutputTree::OnCompareTextLines() entered\n");
-
+   #ifdef DEBUG_COMPARE
+   MessageInterface::ShowMessage("OutputTree::OnCompareTextLines() entered\n");
+   #endif
+   
    ReportFile *theReport =
       (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
    
@@ -869,14 +805,16 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       return;
    }
    
-   std::string filename1 = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetPathAndFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
-   wxString filename2 =
+   wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report",
                      "Report files (*.report)|*.report|"
-                     "Text files (*.txt)|*.txt|All files (*.*)|*.*");
+                     "Text files (*.txt)|*.txt|"
+                     "Text ephemeris files (*.eph)|*.eph|"
+                     "All files (*.*)|*.*");
    
-   if (filename2.empty())
+   if (filename1.empty())
       return;
    
    int file1DiffCount = 0;
@@ -884,7 +822,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    int file3DiffCount = 0;
    
    StringArray output =
-      GmatFileUtil::CompareTextLines(1, filename1.c_str(), filename2.c_str(), "", "",
+      GmatFileUtil::CompareTextLines(1, basefilename.c_str(), filename1.c_str(), "", "",
                                  file1DiffCount, file2DiffCount, file3DiffCount);
    
    ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
@@ -904,3 +842,161 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    for (unsigned int i=0; i<output.size(); i++)
       compWindow->AppendText(wxString(output[i].c_str()));
 }
+
+
+//------------------------------------------------------------------------------
+// void OnCompareNumericLines(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Compare reports numerically using tolerance.
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void OutputTree::OnCompareNumericLines(wxCommandEvent &event)
+{
+   #ifdef DEBUG_COMPARE
+   MessageInterface::ShowMessage("OutputTree::OnCompareNumericLines() entered\n");
+   #endif
+   
+   ReportFile *theReport =
+      (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
+
+   if (!theReport)
+   {
+      MessageInterface::ShowMessage
+         ("OutputTree::OnCompareNumericLines() The ReportFile: %s is NULL.\n",
+          theSubscriberName.c_str());
+      return;
+   }
+   
+   std::string basefilename = theReport->GetPathAndFileName();
+   StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
+   wxString filename1 =
+      wxFileSelector("Choose a file to open", "", "", "report|eph|txt",
+                     "Report files (*.report)|*.report|"
+                     "Text files (*.txt)|*.txt|"
+                     "Text ephemeris files (*.eph)|*.eph|"
+                     "All files (*.*)|*.*");
+   
+   if (filename1.empty())
+      return;
+   
+   Real tol = GmatFileUtil::COMPARE_TOLERANCE;
+   wxString tolStr;
+   tolStr.Printf("%e", tol);
+   tolStr = wxGetTextFromUser("Enter absolute tolerance to be used in flagging: ",
+                              "Tolerance", tolStr, this);
+   
+   if (!tolStr.ToDouble(&tol))
+   {
+      wxMessageBox("Entered Invalid Tolerance", "Error", wxOK, this);
+      return;
+   }
+   
+   int file1DiffCount = 0;
+   int file2DiffCount = 0;
+   int file3DiffCount = 0;
+   
+   StringArray output =
+      GmatFileUtil::CompareNumericLines(1, basefilename.c_str(), filename1.c_str(), "", "",
+                                        file1DiffCount, file2DiffCount, file3DiffCount, tol);
+   
+   ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
+   if (compWindow == NULL)
+   {
+      compWindow = 
+         new ViewTextFrame(GmatAppData::Instance()->GetMainFrame(),
+                           _T("Compare Utility"), 50, 50, 800, 500, "Permanent");
+      GmatAppData::Instance()->SetCompareWindow(compWindow);
+      wxString msg;
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);  
+      compWindow->AppendText(msg);
+   }
+   
+   compWindow->Show(true);
+   
+   for (unsigned int i=0; i<output.size(); i++)
+   {
+      compWindow->AppendText(wxString(output[i].c_str()));
+      MessageInterface::ShowMessage(output[i].c_str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCompareNumericColumns(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Compare report columns numerically using tolerance.
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void OutputTree::OnCompareNumericColumns(wxCommandEvent &event)
+{
+   #ifdef DEBUG_COMPARE
+   MessageInterface::ShowMessage("OutputTree::OnCompareNumericColumns() entered\n");
+   #endif
+   
+   ReportFile *theReport =
+      (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
+   
+   if (!theReport)
+   {
+      MessageInterface::ShowMessage
+         ("OutputTree::OnCompareNumericColumns() The ReportFile: %s is NULL.\n",
+          theSubscriberName.c_str());
+      return;
+   }
+   
+   std::string basefilename = theReport->GetPathAndFileName();
+   StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
+   wxString filename1 =
+      wxFileSelector("Choose a file to open", "", "", "report|eph|txt",
+                     "Report files (*.report)|*.report|"
+                     "Text files (*.txt)|*.txt|"
+                     "Text ephemeris files (*.eph)|*.eph|"
+                     "All files (*.*)|*.*");
+   
+   if (filename1.empty())
+      return;
+   
+   Real tol = GmatFileUtil::COMPARE_TOLERANCE;
+   wxString tolStr;
+   tolStr.Printf("%e", tol);
+   tolStr = wxGetTextFromUser("Enter absolute tolerance to be used in flagging: ",
+                              "Tolerance", tolStr, this);
+   
+   if (!tolStr.ToDouble(&tol))
+   {
+      wxMessageBox("Entered Invalid Tolerance", "Error", wxOK, this);
+      return;
+   }
+    
+   StringArray output =
+      GmatFileUtil::CompareNumericColumns(1, basefilename.c_str(), filename1.c_str(), "", "",
+                                          tol);
+   
+   ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
+   if (compWindow == NULL)
+   {
+      compWindow = 
+         new ViewTextFrame(GmatAppData::Instance()->GetMainFrame(),
+                           _T("Compare Utility"), 50, 50, 800, 500, "Permanent");
+      GmatAppData::Instance()->SetCompareWindow(compWindow);
+      wxString msg;
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);  
+      compWindow->AppendText(msg);
+   }
+   
+   compWindow->Show(true);
+   
+   for (unsigned int i=0; i<output.size(); i++)
+   {
+      compWindow->AppendText(wxString(output[i].c_str()));
+      MessageInterface::ShowMessage(output[i].c_str());
+   }
+}
+
+

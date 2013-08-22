@@ -31,14 +31,16 @@ public:
    
    bool CompareFiles() { return mCompareFiles; }
    bool SaveCompareResults() { return mSaveCompareResults; }
+   Real GetCompareTolerance() { return mTolerance; }
+   Integer GetCompareOption() { return mCompareOption; }
    Integer GetNumDirsToCompare() { return mNumDirsToCompare; }
    Integer GetNumFilesToCompare() { return mNumFilesToCompare; }
-   Real GetAbsTolerance() { return mAbsTol; }
-   wxString GetBaseString() { return mBaseString; }
    wxString GetBaseDirectory() { return mBaseDirectory; }
-   wxArrayString GetCompareStrings() { return mCompareStrings; }
-   wxArrayString GetCompareDirectories() { return mCompareDirs; }
+   wxString GetBaseString() { return mBaseString; }
    wxString GetSaveFilename() { return mSaveFileName; }
+   wxArrayString GetCompareDirectories() { return mCompareDirs; }
+   wxArrayString GetCompareStrings() { return mCompareStrings; }
+   
 protected:
    
    // override methods from GmatDialog
@@ -55,12 +57,13 @@ protected:
    wxTextCtrl *mNumFilesToCompareTextCtrl;
    wxTextCtrl *mBaseStrTextCtrl;
    wxTextCtrl *mCompareStrTextCtrl;
-   wxTextCtrl *mAbsTolTextCtrl;
+   wxTextCtrl *mToleranceTextCtrl;
    wxTextCtrl *mSaveFileTextCtrl;
    
+   wxRadioBox *mCompareOptionRadioBox;
    wxComboBox *mCompareDirsComboBox;
    wxCheckBox *mSaveResultCheckBox;
-
+   
    wxButton *mBaseDirButton;
    wxButton *mCompareDirButton;
    wxButton *mBaseUpdateButton;
@@ -69,6 +72,7 @@ protected:
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
+   void OnRadioButtonClick(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);   
    void OnComboBoxChange(wxCommandEvent& event);
    void OnTextEnterPress(wxCommandEvent& event);   
@@ -83,6 +87,7 @@ protected:
       ID_BUTTON,
       ID_COMBOBOX,
       ID_CHECKBOX,
+      ID_RADIOBOX,
    };
    
 private:
@@ -92,16 +97,17 @@ private:
    bool mHasDir1;
    bool mHasDir2;
    bool mHasDir3;
+   Real mTolerance;
+   Integer mCompareOption;
    Integer mNumFilesInBaseDir;
    Integer mNumFilesInCompareDir;
    Integer mNumFilesToCompare;
    Integer mNumDirsToCompare;
-   Real mAbsTol;
    wxString mBaseString;
    wxString mBaseDirectory;
+   wxString mSaveFileName;
    wxArrayString mCompareStrings;
    wxArrayString mCompareDirs;
-   wxString mSaveFileName;
    wxArrayString mFileNamesInBaseDir;
    wxArrayString mFileNamesInCompareDir;
 

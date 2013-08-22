@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Allison Greene
 // Created: 2006/05/09
 /**
@@ -85,9 +83,7 @@ namespace GmatMenu
       MENU_SCRIPT_RUN,
       MENU_SCRIPT_BUILD_AND_RUN,
       
-      MENU_TOOLS_FILE_COMPARE_NUMERIC_COLUMNS = 13000,
-      MENU_TOOLS_FILE_COMPARE_NUMERIC_LINES,
-      MENU_TOOLS_FILE_COMPARE_TEXT_LINES,
+      MENU_TOOLS_FILE_COMPARE = 13000,
       MENU_TOOLS_GEN_TEXT_EPHEM_FILE,
       
       TOOL_RUN = 14000,

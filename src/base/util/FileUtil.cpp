@@ -23,6 +23,7 @@
 #include "FileUtil.hpp"
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
+#include "TimeTypes.hpp"           // for GmatTimeUtil::
 #include "RealUtilities.hpp"       // for Abs()
 #include "StringUtil.hpp"          // for ToString()
 #include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
@@ -51,7 +52,9 @@
 
 using namespace GmatStringUtil;
 
-//#define DBGLVL_COMPARE_REPORT 1
+//#define DEBUG_FIRST_10_LINES
+//#define DEBUG_REAL_COLUMNS
+//#define DBGLVL_COMPARE_FILES 3
 //#define DBGLVL_FUNCTION_OUTPUT 2
 
 //------------------------------------------------------------------------------
@@ -1161,8 +1164,8 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    if (numDirsToCompare >= 3)
       textBuffer.push_back("filename3=" + filename3 + "\n");
    
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage("\n======================================== PrepareCompare() entered\n");
    MessageInterface::ShowMessage("numDirsToCompare=%d\n", numDirsToCompare);
    MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
    MessageInterface::ShowMessage("filename1=%s\nfilename2=%s\nfilename3=%s\n",
@@ -1173,34 +1176,40 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    in1.open(filename1.c_str());
    in2.open(filename2.c_str());
    in3.open(filename3.c_str());
-   std::string truthFile;
+   std::string newfilename1, newfilename2, newfilename3;
    
    if (!in1 && filename1 != "")
    {
-      truthFile = filename1.substr(0, filename1.find("."));
-      truthFile = truthFile + ".truth";
-      in1.open(truthFile.c_str());
+      newfilename1 = filename1.substr(0, filename1.find("."));
+      newfilename1 = newfilename1 + ".truth";
+      in1.open(newfilename1.c_str());
       if (in1)
-         textBuffer.push_back("new filename1=" + truthFile + "\n");
+         textBuffer.push_back("new filename1=" + newfilename1 + "\n");
    }
+   else
+      newfilename1 = filename1;
    
    if (!in2 && filename2 != "")
    {
-      truthFile = filename2.substr(0, filename2.find("."));
-      truthFile = truthFile + ".truth";
-      in2.open(truthFile.c_str());
+      newfilename2 = filename2.substr(0, filename2.find("."));
+      newfilename2 = newfilename2 + ".truth";
+      in2.open(newfilename2.c_str());
       if (in2)
-         textBuffer.push_back("new filename2=" + truthFile + "\n");
+         textBuffer.push_back("new filename2=" + newfilename2 + "\n");
    }
+   else
+      newfilename2 = filename2;
    
    if (!in3 && filename3 != "")
    {
-      truthFile = filename3.substr(0, filename3.find("."));
-      truthFile = truthFile + ".truth";
-      in3.open(truthFile.c_str());
+      newfilename3 = filename3.substr(0, filename3.find("."));
+      newfilename3 = newfilename3 + ".truth";
+      in3.open(newfilename3.c_str());
       if (in3)
-         textBuffer.push_back("new filename3=" + truthFile + "\n");
+         textBuffer.push_back("new filename3=" + newfilename3 + "\n");
    }
+   else
+      newfilename3 = filename3;
    
    if (!baseIn)
    {
@@ -1208,26 +1217,59 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
       return false;
    }
    
+   // Check if base file is ascii file
+   if (!IsAsciiFile(baseIn, basefilename))
+   {
+      textBuffer.push_back("Base file: " +  basefilename + " is not an ascii file\n");
+      return false;
+   }
+   
    if (!in1)
    {
-      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
+      textBuffer.push_back("Cannot open first file: " + newfilename1 + "\n");
+      return false;
+   }
+   
+   // Check if file1 is an ascii file
+   if (!IsAsciiFile(in1, newfilename1))
+   {
+      textBuffer.push_back("First file: " +  newfilename1 + " is not an ascii file\n");
       return false;
    }
    
    if (numDirsToCompare >= 2)
+   {
       if (!in2)
       {
-         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
+         textBuffer.push_back("Cannot open second file: " + newfilename2 + "\n");
          return false;
       }
+      // Check if file2 is an ascii file
+      if (!IsAsciiFile(in2, newfilename2))
+      {
+         textBuffer.push_back("Second file: " +  newfilename2 + " is not an ascii file\n");
+         return false;
+      }
+   }
    
    if (numDirsToCompare >= 3)
+   {
       if (!in3)
       {
-         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
+         textBuffer.push_back("Cannot open third file: " + newfilename3 + "\n");
          return false;
       }
+      // Check if file3 is an ascii file
+      if (!IsAsciiFile(in3, newfilename3))
+      {
+         textBuffer.push_back("Third file: " +  newfilename3 + " is not an ascii file\n");
+         return false;
+      }
+   }
    
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage("PrepareCompare() returning true\n");
+   #endif
    return true;
 }
 
@@ -1236,14 +1278,27 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
 // bool CompareLines(const std::string &line1, const std::string &line2, ...)
 //------------------------------------------------------------------------------
 /**
- * Compares numeric values in lines. It ignores strings embeded in the lines.
+ * Compares numeric values in lines. It skips strings embeded in the lines.
+ *
+ * @return true if all items are numerically same within tolerance
+ *         false if number of items between two lines are different or
+ *               if all items are not numerically same within tolerance
  */
 //------------------------------------------------------------------------------
 bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &line2,
                                 Real &diff, Real tol)
 {
-   StringArray items1 = GmatStringUtil::SeparateBy(line1, " ,", true);
-   StringArray items2 = GmatStringUtil::SeparateBy(line2, " ,", true);
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareLines() entered\n   line1='%s'\n   line2='%s', tol=%f\n",
+       line1.c_str(), line2.c_str(), tol);
+   #endif
+   
+   // Remove inline comment (get string upto % sign)
+   std::string newline1 = GmatStringUtil::RemoveInlineComment(line1, "%");
+   std::string newline2 = GmatStringUtil::RemoveInlineComment(line2, "%");
+   StringArray items1 = GmatStringUtil::SeparateBy(newline1, " ,", true);
+   StringArray items2 = GmatStringUtil::SeparateBy(newline2, " ,", true);
    std::string item1, item2;
    Integer size1 = items1.size();
    Integer size2 = items2.size();
@@ -1252,16 +1307,24 @@ bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &lin
    diff = 999.999;
    
    if (size1 != size2)
+   {
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::CompareLines() returning false, it has different number of items\n");
+      #endif
       return false;
+   }
    
    for (Integer i = 0; i < size1; i++)
    {
       item1 = items1[i];
       item2 = items2[i];
+      
+      // Compare if item is a real number
       if (GmatStringUtil::ToReal(item1, real1) && GmatStringUtil::ToReal(item2, real2))
       {
          diff = real1 - real2;
-         if (diff > tol)
+         if (GmatMathUtil::Abs(diff) > tol)
             return false;
          else
          {
@@ -1272,279 +1335,38 @@ bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &lin
    }
    
    diff = prevDiff;
+   
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareLines() returning true, diff=%f\n", diff);
+   #endif
    return true;
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& Compare(const std::string &filename1, const std::string &filename2,
-//                      Real tol = 1.0e-4)
-//------------------------------------------------------------------------------
-StringArray& GmatFileUtil::Compare(const std::string &filename1,
-                                   const std::string &filename2,
-                                   const StringArray &colTitles,
-                                   Real tol)
-{
-   textBuffer.clear();
-   textBuffer.push_back("\n======================================== Compare Utility\n");
-   textBuffer.push_back("filename1=" + filename1 + "\n");
-   textBuffer.push_back("filename2=" + filename2 + "\n");
-
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
-   MessageInterface::ShowMessage("filename1=%s\n");
-   MessageInterface::ShowMessage("filename2=%s\n");
-   #endif
-   
-   // open file
-   std::ifstream in1(filename1.c_str());
-   std::ifstream in2(filename2.c_str());
-   
-   if (!in1)
-   {
-      textBuffer.push_back("Cannot open first file: " +  filename1 + "\n\n");
-      return textBuffer;
-   }
-   
-   if (!in2)
-   {
-      textBuffer.push_back("Cannot open second file: " + filename2 + "\n\n");
-      return textBuffer;
-   }
-   
-   char buffer[BUFFER_SIZE];
-   Real item1, item2, diff;
-   std::string line;
-   int count = 1;
-   int file1Cols = 0, file2Cols = 0;
-   StringTokenizer stk;
-   StringArray tokens1, tokens2;
-   
-   //------------------------------------------
-   // if files have header lines, skip
-   //------------------------------------------
-   if (!GmatFileUtil::SkipHeaderLines(in1, tokens1))
-   {
-      textBuffer.push_back("***Cannot compare files: Data record not found on file 1.\n");
-      return textBuffer;
-   }
-   
-   if (!GmatFileUtil::SkipHeaderLines(in2, tokens2))
-   {
-      textBuffer.push_back("***Cannot compare files: Data record not found on file 2.\n");
-      return textBuffer;
-   }
-   
-   //------------------------------------------
-   // check number of columns
-   //------------------------------------------
-   file1Cols = tokens1.size();
-   file2Cols = tokens2.size();
-   Integer numCols = file1Cols<file2Cols ? file1Cols : file2Cols;
-   
-   if (file1Cols != file2Cols)
-   {
-      textBuffer.push_back
-         ("*** Number of colmuns are different. file1:" + ToString(file1Cols) +
-          ",  file2:" + ToString(file2Cols) + "\n*** Will compare up to" +
-          ToString(numCols) + " columns\n");
-   }
-
-   // compare first data line
-   RealArray minDiffs, maxDiffs;
-   IntegerArray minLines, maxLines;
-   
-   for (int i=0; i<numCols; i++)
-   {
-      item1 = atof(tokens1[i].c_str());
-      item2 = atof(tokens2[i].c_str());
-      diff = GmatMathUtil::Abs(item1 - item2);
-      minDiffs.push_back(diff);
-      maxDiffs.push_back(diff);
-      minLines.push_back(1);
-      maxLines.push_back(1);
-      
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage
-         ("column=%3d, item1=% e, item2=% e, diff=% e, minDiff=% e, maxDiff=% e\n",
-          i, item1, item1, diff, minDiffs[i], maxDiffs[i]);
-      #endif
-   }
-   
-   //------------------------------------------
-   // now start compare
-   //------------------------------------------
-   #if DBGLVL_COMPARE_REPORT > 2
-   for (int i=0; i<10; i++)
-   {
-      if (in1.eof() || in2.eof())
-         break;
-   #else
-   while (!in1.eof() && !in2.eof())
-   {
-   #endif
-
-      count++;
-      
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage("============================== line # = %d\n", count);
-      #endif
-      
-      // file 1
-      in1.getline(buffer, BUFFER_SIZE-1);
-      line = buffer;
-      
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
-      #endif
-      
-      stk.Set(line, " ");
-      tokens1 = stk.GetAllTokens();
-
-      // check for blank lines in file1
-      if ((Integer)(tokens1.size()) != file1Cols)
-         break;
-      
-      #if DBGLVL_COMPARE_REPORT > 2
-      for (int i=0; i<numCols; i++)
-         MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
-      #endif
-      
-      // file 2
-      in2.getline(buffer, BUFFER_SIZE-1);
-      line = buffer;
-      
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
-      #endif
-      
-      stk.Set(line, " ");
-      tokens2 = stk.GetAllTokens();
-      
-      // check for blank lines in file1
-      if ((Integer)(tokens2.size()) != file1Cols)
-         break;
-      
-      #if DBGLVL_COMPARE_REPORT > 2
-      for (int i=0; i<file1Cols; i++)
-         MessageInterface::ShowMessage("tokens2[%d] = %s\n", i, tokens2[i].c_str());
-      #endif
-      
-      for (int i=0; i<numCols; i++)
-      {
-         item1 = atof(tokens1[i].c_str());
-         item2 = atof(tokens2[i].c_str());
-         diff = GmatMathUtil::Abs(item1 - item2);
-            
-         if (diff < minDiffs[i])
-         {
-            minDiffs[i] = diff;
-            minLines[i] = count;
-         }
-            
-         if (diff > maxDiffs[i])
-         {
-            maxDiffs[i] = diff;
-            maxLines[i] = count;
-         }
-            
-         #if DBGLVL_COMPARE_REPORT > 1
-         MessageInterface::ShowMessage
-            ("column=%3d, item1=% e, item2=% e, diff=% e, minDiff=% e, maxDiff=% e\n",
-             i, item1, item2, diff, minDiffs[i], maxDiffs[i]);
-         #endif
-      }
-         
-   }
-   
-   // report the difference summary
-   std::string outLine;
-   outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
-      ToString(tol, false, true, true, 7, 6) + "\n\n";
-   textBuffer.push_back(outLine);
-
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("%s", outLine.c_str());
-   #endif
-
-   if (colTitles.size() == 0)
-   {
-      outLine =
-         "Column   Minimum Diff.   Line#   Maximum Diff.   Line#   Min>Tol   "
-         "Max>Tol\n"
-         "------   -------------   -----   -------------   -----   -------   "
-         "-------\n";
-   }
-   else
-   {
-      outLine =
-         "Column   Column Title                     Minimum Diff.   Line#   "
-         "Maximum Diff.   Line#   Min>Tol   Max>Tol\n"
-         "------   ------------                     -------------   -----   "
-         "-------------   -----   -------   -------\n";
-   }
-   textBuffer.push_back(outLine);
-   
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("%s", outLine.c_str());
-   #endif
-   
-   char minGtTol, maxGtTol;
-   char title[30] = "";
-   
-   for (int i=0; i<numCols; i++)
-   {
-      minGtTol = ' ';
-      maxGtTol = ' ';
-      
-      if (minDiffs[i] > tol)
-         minGtTol = '*';
-      
-      if (maxDiffs[i] > tol)
-         maxGtTol = '*';
-
-      if (colTitles.size() == 0)
-      {
-         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], false, true, true, 7, 6) +
-            "   " + ToString(minLines[i]) + "    " +
-            ToString(maxDiffs[i], false, true, true, 7, 6) + "   " + ToString(maxLines[i]) +
-            "       " + minGtTol + "         " + maxGtTol + "\n";
-      }
-      else
-      {
-         sprintf(title, "%-30.30s", colTitles[i].c_str());
-         outLine = ToString(i+1) + "     " + title + "   " +
-            ToString(minDiffs[i], false, true, true, 7, 6) + "   " + ToString(minLines[i]) +
-            "    " + ToString(maxDiffs[i], false, true, true, 7, 6) + "   " +
-            ToString(maxLines[i]) + "       " + minGtTol + "         " +
-            maxGtTol + "\n";
-      }
-      
-      textBuffer.push_back(outLine);
-      
-      #if DBGLVL_COMPARE_REPORT
-      MessageInterface::ShowMessage("%s", outLine.c_str());
-      #endif
-   }
-   
-   in1.close();
-   in2.close();
-
-   return textBuffer;
-}
-   
-   
-//------------------------------------------------------------------------------
-// StringArray& Compare(Integer numDirsToCompare, const std::string &basefilename,
+// StringArray& CompareNumericColumns(Integer numDirsToCompare, const std::string &basefilename,
 //                      const std::string &filename1, const std::string &filename2,
-//                      const std::string &filename3,  const StringArray &colTitles,
-//                      Real tol = CompareAbsTol);
+//                      const std::string &filename3, Real tol = COMPARE_TOLERANCE);
 //------------------------------------------------------------------------------
-StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &basefilename,
+/**
+ * Numerically compares base file with up to three other files. It will compare
+ * the smallest number of columns among compare files.
+ */
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareNumericColumns(Integer numDirsToCompare,
+                                   const std::string &basefilename,
                                    const std::string &filename1, const std::string &filename2,
-                                   const std::string &filename3, const StringArray &colTitles,
-                                   Real tol)
-{   
+                                   const std::string &filename3, Real tol)
+{
+   #if DBGLVL_COMPARE_FILES > 0
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareNumericColumns() entered, numDirsToCompare=%d, tol=%f\n"
+       "   basefilename='%s'\n   filename1='%s'\n   filename2='%s'\n   filename3='%s'\n",
+       numDirsToCompare, tol, basefilename.c_str(), filename1.c_str(), filename2.c_str(),
+       filename3.c_str());
+   #endif
+   
    std::ifstream baseIn;
    std::ifstream in1;
    std::ifstream in2;
@@ -1556,140 +1378,185 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    if (!ok)
       return textBuffer;
    
-
-   
    char buffer[BUFFER_SIZE];
    Real baseItem, item, diff;
    std::string line;
-   int count = 1;
+   int lineCount = 1;
    int baseCols = 99, file1Cols = 99, file2Cols = 99, file3Cols = 99;
    StringTokenizer stk;
-   StringArray baseTokens, tokens1, tokens2, tokens3;
+   RealArray baseRealArray, file1RealArray, file2RealArray, file3RealArray;
    
    //------------------------------------------
    // if files have header lines, skip
    //------------------------------------------
-   if (!GmatFileUtil::SkipHeaderLines(baseIn, baseTokens))
+   if (!SkipHeaderLines(baseIn, baseRealArray, basefilename))
    {
-      textBuffer.push_back("***Cannot compare files: Data record not found on base file.\n");
+      textBuffer.push_back("***Cannot compare files: Data record not found in the base file.\n");
       return textBuffer;
    }
    
-   if (!GmatFileUtil::SkipHeaderLines(in1, tokens1))
+   if (!SkipHeaderLines(in1, file1RealArray, filename1))
    {
-      textBuffer.push_back("***Cannot compare files: Data record not found on file 1.\n");
+      textBuffer.push_back("***Cannot compare files: Data record not found in the file 1.\n");
       return textBuffer;
    }
    
-   if (!GmatFileUtil::SkipHeaderLines(in2, tokens2))
-   {
-      textBuffer.push_back("***Cannot compare files: Data record not found on file 2.\n");
-      return textBuffer;
-   }
+   if (numDirsToCompare >= 2)
+      if (!SkipHeaderLines(in2, file2RealArray, filename2))
+      {
+         textBuffer.push_back("***Cannot compare files: Data record not found in the file 2.\n");
+         return textBuffer;
+      }
    
    if (numDirsToCompare == 3)
-      if (!GmatFileUtil::SkipHeaderLines(in3, tokens3))
+      if (!SkipHeaderLines(in3, file3RealArray, filename3))
       {
-         textBuffer.push_back("***Cannot compare files: Data record not found on file 3.\n");
+         textBuffer.push_back("***Cannot compare files: Data record not found in the file 3.\n");
          return textBuffer;
       }
    
    //------------------------------------------
-   // check number of columns
+   // Check number of columns
    //------------------------------------------
-   baseCols = baseTokens.size();
-   file1Cols = tokens1.size();
-   file2Cols = tokens2.size();
+   baseCols = baseRealArray.size();
+   file1Cols = file1RealArray.size();
+   
+   if (numDirsToCompare >= 2)
+      file2Cols = file2RealArray.size();
    
    if (numDirsToCompare == 3)
-      file3Cols = tokens3.size();
+      file3Cols = file3RealArray.size();
    
-   Integer numCols = baseCols<file1Cols ? baseCols : file1Cols;
-   numCols = numCols<file2Cols ? numCols : file2Cols;
-   //MessageInterface::ShowMessage("===> numCols=%d\n", numCols);
+   Integer numCols = baseCols < file1Cols ? baseCols : file1Cols;
+   
+   if (numDirsToCompare >= 2)
+      numCols = numCols < file2Cols ? numCols : file2Cols;
    
    if (numDirsToCompare == 3)
-      numCols = numCols<file3Cols ? numCols : file3Cols;
+      numCols = numCols < file3Cols ? numCols : file3Cols;
+   
+   #if DBGLVL_COMPARE_FILES > 0
+   MessageInterface::ShowMessage
+      ("baseCols=%d, file1Cols=%d, file2Cols=%d, file3Cols=%d\n",
+       baseCols, file1Cols, file2Cols, file3Cols);
+   MessageInterface::ShowMessage("Minimum number of columns found : %d\n", numCols);
+   #endif
+   
+   bool numColsDifferent = false;
    
    if (baseCols != file1Cols)
+      numColsDifferent = true;
+   else if (file2Cols != 99 && baseCols != file2Cols)
+      numColsDifferent = true;
+   else if (file3Cols != 99 && baseCols != file3Cols)
+      numColsDifferent = true;
+   
+   if (numColsDifferent)
    {
+      textBuffer.push_back("*** Number of colmuns are different.\n");
+      textBuffer.push_back("basefile: " + ToString(baseCols) + ", file1: " + ToString(file1Cols));
+      if (file2Cols != 99)
+         textBuffer.push_back(", file2: " + ToString(file2Cols,1));
+      if (file3Cols != 99)
+         textBuffer.push_back(", file3: " + ToString(file3Cols,1));
+      
       textBuffer.push_back
-         ("*** Number of colmuns are different. file1:" + ToString(baseCols) +
-          ",  file2:" + ToString(file1Cols) + "\n*** Will compare up to" +
-          ToString(numCols) + " columns\n");
+         ("\nIt will compare up to " + ToString(numCols,1) + " columns.\n");
    }
    
-   // compare first data line
+   // Compare first data line
    RealArray maxDiffs1, maxDiffs2, maxDiffs3;
+   
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage("============================== line #: %d\n", lineCount);
+   #endif
+   
    
    for (int i=0; i<numCols; i++)
    {
-      baseItem = atof(baseTokens[i].c_str());
-      item = atof(tokens1[i].c_str());
+      baseItem = baseRealArray[i];
+      item = file1RealArray[i];
+      
       diff = GmatMathUtil::Abs(item - baseItem);
       maxDiffs1.push_back(diff);
       
-      item = atof(tokens2[i].c_str());
-      diff = GmatMathUtil::Abs(item - baseItem);
-      maxDiffs2.push_back(diff);
+      if (numDirsToCompare >= 2)
+      {
+         item = file2RealArray[i];
+         diff = GmatMathUtil::Abs(item - baseItem);
+         maxDiffs2.push_back(diff);
+      }
       
       if (numDirsToCompare == 3)
       {
-         item = atof(tokens3[i].c_str());
+         item = file3RealArray[i];
          diff = GmatMathUtil::Abs(item - baseItem);
          maxDiffs3.push_back(diff);
       }
       
-      #if DBGLVL_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_FILES > 1
       MessageInterface::ShowMessage
-         ("column=%3d, baseItem=% e, item=% e, diff=% e, maxDiff=% e\n",
+         ("column =%3d, baseItem = %e, item = %e, diff = %e, maxDiff = %e\n",
           i, baseItem, baseItem, diff, maxDiffs1[i]);
       #endif
    }
    
+   
    //------------------------------------------
-   // now start compare
+   // Now start compare line by line until eof
    //------------------------------------------
-   #if DBGLVL_COMPARE_REPORT > 2
+   #ifdef DEBUG_FIRST_10_LINES
    for (int i=0; i<10; i++)
    {
       if (baseIn.eof() || in1.eof())
          break;
    #else
-      while (!baseIn.eof() && !in1.eof() && !in2.eof())  
+      while (!baseIn.eof() && !in1.eof())
    {
    #endif
-
+      
+      if (numDirsToCompare >= 2)
+         if (in2.eof())
+            break;
+      
       if (numDirsToCompare == 3)
          if (in3.eof())
             break;
       
-      count++;
-      
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage("============================== line # = %d\n", count);
-      #endif
-
       //----------------------------------------------------
       // base file
       //----------------------------------------------------
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
+      if (line == "")
+         continue;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
+      GetRealColumns(line, baseRealArray);
+      
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===> base file line:\n   '%s'\n", buffer);
+      MessageInterface::ShowMessage("   baseRealArray.size()=%d\n", baseRealArray.size());
       #endif
       
-      stk.Set(line, " ");
-      baseTokens = stk.GetAllTokens();
-
-      // check for blank lines in base file
-      if ((Integer)(baseTokens.size()) != baseCols)
-         break;
+      // Check for number of columns in base file
+      if ((Integer)(baseRealArray.size()) < numCols)
+      {
+         // Skip blank line
+         if (baseRealArray.size() == 1)
+         {
+            #if DBGLVL_COMPARE_FILES > 1
+            MessageInterface::ShowMessage("first item of base file = %f\n", baseRealArray[0]);
+            #endif
+            textBuffer.push_back
+               ("The base file has less than " + ToString(numCols,1) +
+                " columns; so stopping at line " + ToString(lineCount,1) + ".\n");
+            break;
+         }
+      }
       
-      #if DBGLVL_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_FILES > 2
       for (int i=0; i<numCols; i++)
-         MessageInterface::ShowMessage("baseTokens[%d] = %s\n", i, baseTokens[i].c_str());
+         MessageInterface::ShowMessage("baseRealArray[%2d] = %f\n", i, baseRealArray[i]);
       #endif
       
       //----------------------------------------------------
@@ -1697,34 +1564,65 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       //----------------------------------------------------
       in1.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
+      if (line == "")
+         continue;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
+      GetRealColumns(line, file1RealArray);
+      
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===>    file 1 line:\n   '%s'\n", buffer);
+      MessageInterface::ShowMessage("   file1RealArray.size()=%d\n", file1RealArray.size());
       #endif
       
-      stk.Set(line, " ");
-      tokens1 = stk.GetAllTokens();
-      
-      // check for blank lines in file1
-      if ((Integer)(tokens1.size()) != baseCols)
-         break;
+      // Check for number of columns in file1
+      if ((Integer)(file1RealArray.size()) < numCols)
+      {
+         // Skip blank line
+         if (file1RealArray.size() == 1)
+         {
+            #if DBGLVL_COMPARE_FILES > 1
+            MessageInterface::ShowMessage("first item of file 1 = %f\n", file1RealArray[0]);
+            #endif
+            textBuffer.push_back
+               ("The base file has less than " + ToString(numCols,1) +
+                " columns; so stopping at line " + ToString(lineCount,1) + ".\n");
+            break;
+         }
+      }
       
       //----------------------------------------------------
       // file 2
-      //----------------------------------------------------      
-      in2.getline(buffer, BUFFER_SIZE-1);
-      line = buffer;
-      
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
-      #endif
-      
-      stk.Set(line, " ");
-      tokens2 = stk.GetAllTokens();
-      
-      // check for blank lines in file2
-      if ((Integer)(tokens2.size()) != baseCols)
-         break;
+      //----------------------------------------------------
+      if (numDirsToCompare >= 2)
+      {
+         in2.getline(buffer, BUFFER_SIZE-1);
+         line = buffer;
+         if (line == "")
+            continue;
+         
+         GetRealColumns(line, file2RealArray);
+         
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 2 line:\n   '%s'\n", buffer);
+         MessageInterface::ShowMessage("   file2RealArray.size()=%d\n", file2RealArray.size());
+         #endif
+         
+         // Check for number of columns in file2
+         if ((Integer)(file2RealArray.size()) < numCols)
+         {
+            // Skip blank line
+            if (file2RealArray.size() == 1)
+            {
+               #if DBGLVL_COMPARE_FILES > 1
+               MessageInterface::ShowMessage("first item of file 2 = %f\n", file2RealArray[0]);
+               #endif
+               textBuffer.push_back
+                  ("The base file has less than " + ToString(numCols,1) +
+                   " columns; so stopping at line " + ToString(lineCount,1) + ".\n");
+               break;
+            }
+         }
+      }
       
       //----------------------------------------------------
       // file 3
@@ -1733,66 +1631,88 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       {
          in3.getline(buffer, BUFFER_SIZE-1);
          line = buffer;
-      
-         #if DBGLVL_COMPARE_REPORT > 2
-         MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
+         if (line == "")
+            continue;
+         
+         GetRealColumns(line, file3RealArray);
+         
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 3 line:\n   '%s'\n", buffer);
+         MessageInterface::ShowMessage("   file3RealArray.size()=%d\n", file3RealArray.size());
          #endif
-      
-         stk.Set(line, " ");
-         tokens3 = stk.GetAllTokens();
-      
-         // check for blank lines in file2
-         if ((Integer)(tokens3.size()) != baseCols)
-            break;
+         
+         // Check for number of columns in file3
+         if ((Integer)(file3RealArray.size()) < numCols)
+         {
+            // Skip blank line
+            if (file3RealArray.size() == 1)
+            {
+               #if DBGLVL_COMPARE_FILES > 1
+               MessageInterface::ShowMessage("first item of file 3 = %f\n", file3RealArray[0]);
+               #endif
+               textBuffer.push_back
+                  ("The base file has less than " + ToString(numCols,1) +
+                   " columns; so stopping at line " + ToString(lineCount,1) + ".\n");
+               break;
+            }
+         }
       }
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      for (int i=0; i<baseCols; i++)
-         MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
+      lineCount++;
+      
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("============================== line # = %d\n", lineCount);
       #endif
       
       for (int i=0; i<numCols; i++)
       {
-         baseItem = atof(baseTokens[i].c_str());
-         item = atof(tokens1[i].c_str());
+         baseItem = baseRealArray[i];
+         item = file1RealArray[i];
          diff = GmatMathUtil::Abs(item - baseItem);
          if (diff > maxDiffs1[i])
             maxDiffs1[i] = diff;
          
-         item = atof(tokens2[i].c_str());
-         diff = GmatMathUtil::Abs(item - baseItem);
-         if (diff > maxDiffs2[i])
-            maxDiffs2[i] = diff;
+         if (numDirsToCompare >= 2)
+         {
+            item = file2RealArray[i];
+            diff = GmatMathUtil::Abs(item - baseItem);
+            if (diff > maxDiffs2[i])
+               maxDiffs2[i] = diff;
+         }
          
          if (numDirsToCompare == 3)
          {
-            item = atof(tokens3[i].c_str());
+            item = file3RealArray[i];
             diff = GmatMathUtil::Abs(item - baseItem);
             if (diff > maxDiffs3[i])
                maxDiffs3[i] = diff;
          }
          
-         #if DBGLVL_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_FILES > 1
          MessageInterface::ShowMessage
-            ("column=%3d, baseItem=% e, item=% e, diff=% e, maxDiff1=% e\n",
+            ("column=%3d, baseItem = %e, item = %e, diff = %e, maxDiffs1 = %e\n",
              i, baseItem, item, diff, maxDiffs1[i]);
          #endif
       }
-      
    }
    
    // report the difference summary
    std::string outLine;
-   outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
+   outLine = "Total lines compared: " + ToString(lineCount) + ",   Tolerance: " +
       ToString(tol, false, true, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
-
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("%s", outLine.c_str());
-   #endif
-
    
-   if (numDirsToCompare == 2)
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage("---> %s", outLine.c_str());
+   #endif
+   
+   if (numDirsToCompare == 1)
+   {
+      outLine =
+         "Column   Maximum Diff1   Max1>Tol\n"
+         "------   -------------   ------- \n";
+   }
+   else if (numDirsToCompare == 2)
    {
       outLine =
          "Column   Maximum Diff1   Max1>Tol   Maximum Diff2   Max2>Tol\n"
@@ -1807,8 +1727,8 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    
    textBuffer.push_back(outLine);
    
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage("---> %s", outLine.c_str());
    #endif
    
    char maxGtTol1, maxGtTol2, maxGtTol3;
@@ -1821,15 +1741,21 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       
       if (maxDiffs1[i] > tol)
          maxGtTol1 = '*';
-
-      if (maxDiffs2[i] > tol)
-         maxGtTol2 = '*';
-
+      
+      if (numDirsToCompare >= 2)
+         if (maxDiffs2[i] > tol)
+            maxGtTol2 = '*';
+      
       if (numDirsToCompare == 3)
          if (maxDiffs3[i] > tol)
             maxGtTol3 = '*';
       
-      if (numDirsToCompare == 2)
+      if (numDirsToCompare == 1)
+      {
+         outLine = ToString(i+1) + "     " +
+            ToString(maxDiffs1[i], false, true, true, 7, 6) + "      " + maxGtTol1 + "\n";
+      }
+      else if (numDirsToCompare == 2)
       {
          outLine = ToString(i+1) + "     " +
             ToString(maxDiffs1[i], false, true, true, 7, 6) + "      " + maxGtTol1 + "       " +
@@ -1845,8 +1771,8 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       
       textBuffer.push_back(outLine);
       
-      #if DBGLVL_COMPARE_REPORT
-      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("---> %s", outLine.c_str());
       #endif
    }
    
@@ -1858,9 +1784,13 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    return textBuffer;
 }
    
-   
+
 //------------------------------------------------------------------------------
 // StringArray& CompareTextLines(Integer numDirsToCompare, ...)
+//------------------------------------------------------------------------------
+/**
+ * Compares ascii files line by line with the same file name in different directory.
+ */
 //------------------------------------------------------------------------------
 StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
                                         const std::string &basefilename,
@@ -1870,6 +1800,10 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
                                         int &file1DiffCount, int &file2DiffCount,
                                         int &file3DiffCount)
 {
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareTextLines() entered, numDirsToCompare=%d\n", numDirsToCompare);
+   #endif
    std::ifstream baseIn;
    std::ifstream in1;
    std::ifstream in2;
@@ -1887,7 +1821,7 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
    file1DiffCount = 0;
    file2DiffCount = 0;
    file3DiffCount = 0;
-   int count = 1;
+   int lineCount = 1;
    std::stringstream diffLines1("");
    std::stringstream diffLines2("");
    std::stringstream diffLines3("");
@@ -1905,10 +1839,10 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
          if (in3.eof())
             break;
       
-      count++;
+      lineCount++;
       
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage("============================== line # = %d\n", count);
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("============================== line # = %d\n", lineCount);
       #endif
       
       //----------------------------------------------------
@@ -1917,8 +1851,8 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line0 = buffer;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===> base file: line = %s\n", buffer);
       #endif
       
       //----------------------------------------------------
@@ -1927,8 +1861,8 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       in1.getline(buffer, BUFFER_SIZE-1);
       line1 = buffer;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===>    file 1: line = %s\n", buffer);
       #endif
       
       if (line0 != line1)
@@ -1945,8 +1879,8 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
          in2.getline(buffer, BUFFER_SIZE-1);
          line2 = buffer;
       
-         #if DBGLVL_COMPARE_REPORT > 2
-         MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 2: line = %s\n", buffer);
          #endif
          
          if (line0 != line2)
@@ -1964,8 +1898,8 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
          in3.getline(buffer, BUFFER_SIZE-1);
          line3 = buffer;
       
-         #if DBGLVL_COMPARE_REPORT > 2
-         MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 3: line = %s\n", buffer);
          #endif
          
          if (line0 != line3)
@@ -1978,10 +1912,10 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
    
    // report the difference summary
    std::string outLine;
-   outLine = "Total lines compared: " + ToString(count) + "\n\n";
+   outLine = "Total lines compared: " + ToString(lineCount) + "\n\n";
    textBuffer.push_back(outLine);
 
-   #if DBGLVL_COMPARE_REPORT
+   #if DBGLVL_COMPARE_FILES
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -1990,7 +1924,7 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
    if (file1DiffCount > 0)
       textBuffer.push_back(diffLines1.str());
    
-   #if DBGLVL_COMPARE_REPORT
+   #if DBGLVL_COMPARE_FILES
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -2001,7 +1935,7 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       if (file2DiffCount > 0)
          textBuffer.push_back(diffLines2.str());
       
-      #if DBGLVL_COMPARE_REPORT
+      #if DBGLVL_COMPARE_FILES
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -2013,7 +1947,7 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       if (file3DiffCount > 0)
          textBuffer.push_back(diffLines3.str());
       
-      #if DBGLVL_COMPARE_REPORT
+      #if DBGLVL_COMPARE_FILES
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -2030,7 +1964,13 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
 
 
 //------------------------------------------------------------------------------
-// StringArray &CompareNumericLines(Integer numDirsToCompare, ... )
+// StringArray& CompareNumericLines(Integer numDirsToCompare, ... )
+//------------------------------------------------------------------------------
+/**
+ * Compares files line by line numerically using tolerance. String embeded in
+ * a text line or blank line is ignored and continued with next item in the line.
+ * 
+ */
 //------------------------------------------------------------------------------
 StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
                                                const std::string &basefilename,
@@ -2040,6 +1980,12 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
                                                int &file1DiffCount, int &file2DiffCount,
                                                int &file3DiffCount, Real tol)
 {
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareNumericLines() entered, numDirsToCompare=%d, tol=%f\n",
+       numDirsToCompare, tol);
+   #endif
+   
    std::ifstream baseIn;
    std::ifstream in1;
    std::ifstream in2;
@@ -2049,9 +1995,13 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
                             filename2, filename3, baseIn, in1, in2, in3);
    
    if (!ok)
+   {
+      #if DBGLVL_COMPARE_FILES
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::CompareNumericLines() returning, failed during compare prep\n");
+      #endif
       return textBuffer;
-   
-   
+   }
    
    // Now compare numeric lines
    char buffer[BUFFER_SIZE];
@@ -2059,11 +2009,25 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
    file1DiffCount = 0;
    file2DiffCount = 0;
    file3DiffCount = 0;
-   int count = 1;
+   int compareCount = 0;
    std::stringstream diffLines1("");
    std::stringstream diffLines2("");
    std::stringstream diffLines3("");
    Real diff = 999.999;
+   
+   if (baseIn.eof())
+   {
+      #if DBGLVL_COMPARE_FILES
+      MessageInterface::ShowMessage("===> end of base file encountered\n");
+      #endif
+   }
+   
+   if (in1.eof())
+   {
+      #if DBGLVL_COMPARE_FILES
+      MessageInterface::ShowMessage("===> end of file 1 encountered\n");
+      #endif
+   }
    
    //------------------------------------------
    // now start compare
@@ -2071,17 +2035,28 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
    while (!baseIn.eof() && !in1.eof())
    {
       if (numDirsToCompare >= 2)
+      {
          if (in2.eof())
+         {
+            #if DBGLVL_COMPARE_FILES
+            MessageInterface::ShowMessage("===> end of file 2 encountered\n");
+            #endif
             break;
-      
+         }
+      }
       if (numDirsToCompare >= 3)
          if (in3.eof())
+         {
+            #if DBGLVL_COMPARE_FILES
+            MessageInterface::ShowMessage("===> end of file e encountered\n");
+            #endif
             break;
+         }
       
-      count++;
+      compareCount++;
       
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage("============================== line # = %d\n", count);
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("============================== compare count # = %d\n", compareCount);
       #endif
       
       //----------------------------------------------------
@@ -2090,8 +2065,23 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line0 = buffer;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
+      // Get next non-blank line
+      if (line0 == "")
+      {
+         while (!baseIn.eof())
+         {
+            baseIn.getline(buffer, BUFFER_SIZE-1);
+            line0 = buffer;
+            
+            if (line0 == "")
+               continue;
+            else
+               break;
+         }
+      }
+      
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===> base file: line = '%s'\n", line0.c_str());
       #endif
       
       //----------------------------------------------------
@@ -2100,11 +2090,26 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
       in1.getline(buffer, BUFFER_SIZE-1);
       line1 = buffer;
       
-      #if DBGLVL_COMPARE_REPORT > 2
-      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
+      // Get next non-blank line
+      if (line1 == "")
+      {
+         while (!in1.eof())
+         {
+            in1.getline(buffer, BUFFER_SIZE-1);
+            line1 = buffer;
+            
+            if (line1 == "")
+               continue;
+            else
+               break;
+         }
+      }
+      
+      #if DBGLVL_COMPARE_FILES > 2
+      MessageInterface::ShowMessage("===>    file 1: line = '%s'\n", line1.c_str());
       #endif
       
-      if (!CompareLines(line0, line1, diff))
+      if (!CompareLines(line0, line1, diff, tol))
       {
          diffLines1 << " 0: " << line0 << "\n" << " 1: " << line1 << "\n";
          file1DiffCount++;
@@ -2118,12 +2123,27 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
       {
          in2.getline(buffer, BUFFER_SIZE-1);
          line2 = buffer;
-      
-         #if DBGLVL_COMPARE_REPORT > 2
-         MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
+         
+         // Get next non-blank line
+         if (line2 == "")
+         {
+            while (!in2.eof())
+            {
+               in2.getline(buffer, BUFFER_SIZE-1);
+               line2 = buffer;
+               
+               if (line2 == "")
+                  continue;
+               else
+                  break;
+            }
+         }
+         
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 2: line = %s\n", line2.c_str());
          #endif
          
-         if (!CompareLines(line0, line2, diff))
+         if (!CompareLines(line0, line2, diff, tol))
          {
             diffLines2 << " 0: " << line0 << "\n" << " 2: " << line2 << "\n";
             file2DiffCount++;
@@ -2139,11 +2159,26 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
          in3.getline(buffer, BUFFER_SIZE-1);
          line3 = buffer;
       
-         #if DBGLVL_COMPARE_REPORT > 2
-         MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
+         // Get next non-blank line
+         if (line3 == "")
+         {
+            while (!in3.eof())
+            {
+               in3.getline(buffer, BUFFER_SIZE-1);
+               line3 = buffer;
+               
+               if (line3 == "")
+                  continue;
+               else
+                  break;
+            }
+         }
+         
+         #if DBGLVL_COMPARE_FILES > 2
+         MessageInterface::ShowMessage("===>    file 3: line = %s\n", line3.c_str());
          #endif
          
-         if (!CompareLines(line0, line3, diff))
+         if (!CompareLines(line0, line3, diff, tol))
          {
             diffLines3 << " 0: " << line0 << "\n" << " 3: " << line3 << "\n";
             file3DiffCount++;
@@ -2153,10 +2188,10 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
    
    // report the difference summary
    std::string outLine;
-   outLine = "Total lines compared: " + ToString(count) + "\n\n";
+   outLine = "Total lines compared: " + ToString(compareCount) + "\n\n";
    textBuffer.push_back(outLine);
-
-   #if DBGLVL_COMPARE_REPORT
+   
+   #if DBGLVL_COMPARE_FILES
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -2165,7 +2200,7 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
    if (file1DiffCount > 0)
       textBuffer.push_back(diffLines1.str());
    
-   #if DBGLVL_COMPARE_REPORT
+   #if DBGLVL_COMPARE_FILES
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -2176,7 +2211,7 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
       if (file2DiffCount > 0)
          textBuffer.push_back(diffLines2.str());
       
-      #if DBGLVL_COMPARE_REPORT
+      #if DBGLVL_COMPARE_FILES
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -2188,14 +2223,10 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
       if (file3DiffCount > 0)
          textBuffer.push_back(diffLines3.str());
       
-      #if DBGLVL_COMPARE_REPORT
+      #if DBGLVL_COMPARE_FILES
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
-
-
-
-
    
    textBuffer.push_back("\n");
    
@@ -2203,15 +2234,26 @@ StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
    in1.close();
    in2.close();
    in3.close();
+   
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::CompareNumericLines() returning, %d lines\n", textBuffer.size());
+   #endif
    return textBuffer;
 }
 
 
 //------------------------------------------------------------------------------
-// bool SkipHeaderLines(ifstream &in, StringArray &tokens)
+// bool SkipHeaderLines(ifstream &in, StringArray &tokens, ...)
 //------------------------------------------------------------------------------
-bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, StringArray &tokens)
+bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
+                                   const std::string &filename)
 {
+   #if DBGLVL_COMPARE_FILES > 0
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::SkipHeaderLines() entered, filename='%s'\n", filename.c_str());
+   #endif
+      
    char buffer[BUFFER_SIZE];
    bool dataFound = false;
    bool alphaFound = false;
@@ -2229,13 +2271,27 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, StringArray &tokens)
       in.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DBGLVL_COMPARE_REPORT > 1
-      MessageInterface::ShowMessage("file length=%d, line = %s\n",
-                                    line.length(), line.c_str());
+      #if DBGLVL_COMPARE_FILES > 3
+      MessageInterface::ShowMessage
+         ("length=%d, line = %s\n", line.length(), line.c_str());
       #endif
       
       if (line.length() == 0)
+      {
+         #if DBGLVL_COMPARE_FILES > 3
+         MessageInterface::ShowMessage("   zero length, so continue\n");
+         #endif
          continue;
+      }
+      
+      // skip blank spaces
+      if (GmatStringUtil::Strip(line) == "")
+      {
+         #if DBGLVL_COMPARE_FILES > 3
+         MessageInterface::ShowMessage("   blank spaces found, so continue\n");
+         #endif
+         continue;
+      }
       
       alphaFound = false;
       
@@ -2243,48 +2299,207 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, StringArray &tokens)
       {
          ch = line[i];
          
-         #if DBGLVL_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_FILES > 3
          MessageInterface::ShowMessage("%c", ch);
          #endif
          
          if (!isdigit(ch) && ch != '.' && ch != 'e' && ch != 'E' && ch != '-' &&
-             ch != ' ')
+             ch != '+' && ch != ' ')
          {
             alphaFound = true;
             break;
          }
       }
       
-      #if DBGLVL_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_FILES > 3
       MessageInterface::ShowMessage("\n");
       #endif
       
       if (alphaFound)
-         continue;
-
-      if (line.find("--") != line.npos)
-         continue;
-      
-      stk.Set(line, " ");
-      tokens = stk.GetAllTokens();
-      fileCols = tokens.size();
-
-      colCount = 0;
-      for (int i=0; i<fileCols; i++)
       {
-         rval = atof(tokens[i].c_str());
-         colCount++;
-         
-         #if DBGLVL_COMPARE_REPORT > 1
-         MessageInterface::ShowMessage("rval=%f\n", rval);
-         #endif
+         // Skip ":" for UTC time format
+         if (line.find(":") == line.npos)
+         {
+            #if DBGLVL_COMPARE_FILES > 3
+            MessageInterface::ShowMessage("   non-numeric found, so continue\n");
+            #endif
+            continue;
+         }
       }
-
-      if (colCount == fileCols)
-         dataFound = true;
+      
+      if (line.find("--") != line.npos)
+      {
+         #if DBGLVL_COMPARE_FILES > 3
+         MessageInterface::ShowMessage("   -- found, so continue\n");
+         #endif
+         continue;
+      }
+      
+      dataFound = GetRealColumns(line, realArray);
+      
+      #if DBGLVL_COMPARE_FILES > 0
+      int numCols = realArray.size();
+      for (int i=0; i<numCols; i++)
+         MessageInterface::ShowMessage("   realArray[%d]=%f\n", i, realArray[i]);
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::SkipHeaderLines() returning dataFound=%d\n", dataFound);
+      #endif
    }
-
+   
    return dataFound;
+}
+
+//------------------------------------------------------------------------------
+// bool IsAsciiFile(std::ifstream &file, const std::string &filename)
+//------------------------------------------------------------------------------
+/**
+ * Checks if file is an ascii file.
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsAsciiFile(std::ifstream &file, const std::string &filename)
+{
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::IsAsciiFile() entered, filename='%s'\n", filename.c_str());
+   #endif
+   
+   // Get length of file
+   file.seekg (0, file.end);
+   long int length = file.tellg();
+   file.seekg (0, file.beg);
+   char *buffer = new char [length];
+   
+   #if DBGLVL_COMPARE_FILES > 1
+   MessageInterface::ShowMessage("   Reading %d characters\n", length);
+   #endif
+   
+   // read data as a block:
+   file.read (buffer, length);
+   
+   if (file)
+   {
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("   all characters read successfully\n");
+      #endif
+   }
+   else
+   {
+      length = file.gcount();
+      #if DBGLVL_COMPARE_FILES > 1
+      MessageInterface::ShowMessage("   error: only %d could be read\n", length);
+      #endif
+   }
+   
+   bool isAscii = true;
+   // Check if file is an ascii file
+   for (long int i = 0; i < length; i++)
+   {
+      #if DBGLVL_COMPARE_FILES > 3
+      MessageInterface::ShowMessage("   buffer[%4d]='%c'\n", i, buffer[i]);
+      #endif
+      if (!isprint(buffer[i]) && !isspace(buffer[i]))
+      {
+         isAscii = false;
+         break;
+      }
+   }
+   
+   delete[] buffer;
+   
+   // Clear the stream state and position to beginning of the stream
+   file.clear();
+   //file.seekg (0, std::ios::beg);
+   file.seekg (0, file.beg);
+   
+   #if DBGLVL_COMPARE_FILES
+   MessageInterface::ShowMessage("GmatFileUtil::IsAsciiFile() returning %d\n", isAscii);
+   #endif
+   return isAscii;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetRealColumns(const std::string &line, StringArray &cols)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::GetRealColumns(const std::string &line, RealArray &cols)
+{
+   #ifdef DEBUG_REAL_COLUMNS
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetRealColumns() entered, line:\n   '%s'\n", line.c_str());
+   #endif
+   
+   StringTokenizer stk;
+   //@note ":" is for separating UTC format time
+   stk.Set(line, " :");
+   StringArray tokens = stk.GetAllTokens();
+   Integer numCols = tokens.size();
+   Real rval;
+   std::string item;
+   bool realColFound = true;
+   
+   #ifdef DEBUG_REAL_COLUMNS
+   MessageInterface::ShowMessage("   numCols=%2d, cols.size()=%2d\n", numCols, cols.size());
+   #endif
+   
+   cols.clear();
+   for (int i=0; i<numCols; i++)
+   {
+      item = tokens[i];
+      if (GmatStringUtil::ToReal(item, rval))
+         cols.push_back(rval);
+      else
+      {
+         // Try UTC time format in "DD MMM YYYY HH"
+         // Just convert month name to month number
+         Integer month = GmatTimeUtil::GetMonth(item);
+         if (month != -1)
+         {
+            cols.push_back((Real)month);
+            continue;
+         }
+         
+         // Try Time format in YYYY-MM-DDTHH
+         // Store time in "DD MMM YYYY HH" format for compare
+         StringTokenizer stk1;
+         stk1.Set(item, "-T");
+         StringArray tokens1 = stk1.GetAllTokens();
+         if (tokens1.size() == 4)
+         {
+            if (GmatStringUtil::ToReal(tokens1[2], rval))
+               cols.push_back(rval);
+            else
+               realColFound = false;
+            
+            if (GmatStringUtil::ToReal(tokens1[1], rval))
+               cols.push_back(rval);
+            else
+               realColFound = false;
+            
+            if (GmatStringUtil::ToReal(tokens1[0], rval))
+               cols.push_back(rval);
+            else
+               realColFound = false;
+            
+            if (GmatStringUtil::ToReal(tokens1[3], rval))
+               cols.push_back(rval);
+            else
+               realColFound = false;
+         }
+         else
+            realColFound = false;
+         
+         if (!realColFound)
+            break;
+      }
+   }
+   
+   #ifdef DEBUG_REAL_COLUMNS
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetRealColumns() returning %d, cols.size()=%d\n",
+       realColFound, cols.size());
+   #endif
+   
+   return realColFound;
 }
 
 

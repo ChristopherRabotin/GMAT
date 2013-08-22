@@ -26,18 +26,19 @@ class CompareTextDialog : public GmatDialog
 {
 public:
    
-   CompareTextDialog(wxWindow *parent);
+   CompareTextDialog(wxWindow *parent, bool compareNumeric = false);
    ~CompareTextDialog();
    
    bool CompareFiles() { return mCompareFiles; }
    bool SaveCompareResults() { return mSaveCompareResults; }
+   Real GetCompareTolerance() { return mTolerance; }
    Integer GetNumDirsToCompare() { return mNumDirsToCompare; }
    Integer GetNumFilesToCompare() { return mNumFilesToCompare; }
    wxString GetBaseDirectory() { return mBaseDirectory; }
-   wxString GetBasePrefix() { return mBasePrefix; }
+   wxString GetBaseString() { return mBaseString; }
    wxString GetSaveFilename() { return mSaveFileName; }
    wxArrayString GetCompareDirectories() { return mCompareDirs; }
-   wxArrayString GetComparePrefixes() { return mComparePrefixes; }
+   wxArrayString GetCompareStrings() { return mCompareStrings; }
    
 protected:
    
@@ -48,20 +49,21 @@ protected:
    virtual void ResetData();
    
    wxTextCtrl *mBaseDirTextCtrl;
-   wxTextCtrl *mBasePrefixTextCtrl;
+   wxTextCtrl *mBaseStringTextCtrl;
    wxTextCtrl *mCompareDirTextCtrl;
    wxTextCtrl *mComparePrefixTextCtrl;
    wxTextCtrl *mNumFilesInBaseDirTextCtrl;
    wxTextCtrl *mNumFilesInCompareDirTextCtrl;
    wxTextCtrl *mNumDirsToCompareTextCtrl;
    wxTextCtrl *mNumFilesToCompareTextCtrl;
+   wxTextCtrl *mToleranceTextCtrl;
    wxTextCtrl *mSaveFileTextCtrl;
    
    wxComboBox *mCompareDirsComboBox;
    wxCheckBox *mSaveResultCheckBox;
    
    wxButton *mBaseDirButton;
-   wxButton *mBasePrefixButton;
+   wxButton *mBaseStringButton;
    wxButton *mCompareDirButton;
    wxButton *mComparePrefixButton;
    wxButton *mSaveBrowseButton;
@@ -86,6 +88,8 @@ protected:
    
 private:
 
+   Real mTolerance;
+   bool mIsNumericCompare;
    bool mCompareFiles;
    bool mSaveCompareResults;
    bool mHasDir1;
@@ -96,10 +100,10 @@ private:
    Integer mNumFilesToCompare;
    Integer mNumDirsToCompare;
    wxString mBaseDirectory;
-   wxString mBasePrefix;
+   wxString mBaseString;
    wxString mSaveFileName;
    wxArrayString mCompareDirs;
-   wxArrayString mComparePrefixes;
+   wxArrayString mCompareStrings;
    wxArrayString mFileNamesInBaseDir;
    wxArrayString mFileNamesInCompareDir;
    

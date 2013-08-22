@@ -70,16 +70,18 @@ private:
    void OnAddXyPlot(wxCommandEvent &event);
    void OnAddOrbitView(wxCommandEvent &event);
    
-   void OnCompareNumericValues(wxCommandEvent &event);
    void OnCompareTextLines(wxCommandEvent &event);
+   void OnCompareNumericLines(wxCommandEvent &event);
+   void OnCompareNumericColumns(wxCommandEvent &event);
    
    DECLARE_EVENT_TABLE();
    
    // for popup menu
    enum
    {
-      POPUP_COMPARE_NUMERIC_VALUES = 200,
-      POPUP_COMPARE_TEXT_LINES
+      POPUP_COMPARE_TEXT_LINES = 200,
+      POPUP_COMPARE_NUMERIC_LINES,
+      POPUP_COMPARE_NUMERIC_COLUMNS,
    };
 };
 

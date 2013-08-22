@@ -202,9 +202,7 @@ public:
    void OnMatlabServerStart(wxCommandEvent& event);
    void OnMatlabServerStop(wxCommandEvent& event);
    
-   void OnFileCompareNumericColumns(wxCommandEvent& event);
-   void OnFileCompareTextLines(wxCommandEvent& event);
-   void OnFileCompareNumericLines(wxCommandEvent& event);
+   void OnFileCompare(wxCommandEvent& event);
    void OnGenerateTextEphemFile(wxCommandEvent& event);
    
    void OnSashDrag(wxSashEvent &event);
@@ -302,7 +300,7 @@ private:
    void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec,
                               bool slower);
    
-   void CompareFiles(Integer compareType);
+   void CompareFiles();
    void GetBaseFilesToCompare(Integer compareType, const wxString &baseDir,
                               const wxString &basePrefix, wxArrayString &baseFileNameArray,
                               wxArrayString &noPrefixNameArray);

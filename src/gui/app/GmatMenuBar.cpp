@@ -153,9 +153,7 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    if (runMode == GmatGlobal::TESTING || runMode == GmatGlobal::TESTING_NO_PLOTS)
    {
       wxMenu *toolsMenu = new wxMenu;
-      toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_NUMERIC_COLUMNS, wxT("Compare Numeric Columns"), wxT(""));
-      toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_NUMERIC_LINES, wxT("Compare Nemeric Lines"), wxT(""));
-      toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_TEXT_LINES, wxT("Compare Text Lines"), wxT(""));
+      toolsMenu->Append(MENU_TOOLS_FILE_COMPARE, wxT("Compare Files"), wxT(""));
       
       #ifdef __SHOW_EPHEM_FILE__
       toolsMenu->Append(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, wxT("Generate Text Ephemeris File"), wxT(""));
