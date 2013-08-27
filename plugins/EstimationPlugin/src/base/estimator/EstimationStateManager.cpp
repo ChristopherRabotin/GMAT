@@ -33,7 +33,8 @@
 //#define DUMP_STATE
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CLONING
-
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_ESM_LOADING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -207,6 +208,12 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
       }
    }
 
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Current Object List:\n");
+      for (UnsignedInt i = 0; i < chunks.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", chunks[i].c_str());
+   #endif
+
    return chunks;
 }
 
@@ -245,25 +252,34 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
       StringArray *objectProps = new StringArray;
       elements[current] = objectProps;
 
-      try
+      if (obj->IsOfType(Gmat::FORMATION))
       {
-         if (obj->IsOfType(Gmat::FORMATION))
+         Integer id = obj->GetParameterID("A1Epoch");
+         epochIDs.push_back(id);
+      }
+      else
+      {
+         #ifdef DEBUG_PARTICIPANTS
+            MessageInterface::ShowMessage("Getting Epoch parameter for a %s "
+                  "<%p> named %s\n", obj->GetTypeName().c_str(), obj,
+                  obj->GetName().c_str());
+         #endif
+         Integer id;
+         try
          {
-            Integer id = obj->GetParameterID("A1Epoch");
-            epochIDs.push_back(id);
+            id = obj->GetParameterID("Epoch");
          }
-         else
+         catch (...)
          {
-            Integer id = obj->GetParameterID("Epoch");
+            id = -1;
+         }
+         if (id != -1)
+         {
             if (obj->GetParameterType(id) != Gmat::REAL_TYPE)
                id = obj->GetParameterID("A1Epoch");
-            epochIDs.push_back(id);
          }
-      }
-      catch (BaseException&)
-      {
-         // Epoch is not a valid parameter
-         epochIDs.push_back(-1);
+
+         epochIDs.push_back(id);
       }
    }
 
