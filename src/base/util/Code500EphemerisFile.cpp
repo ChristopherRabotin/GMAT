@@ -1293,7 +1293,7 @@ void Code500EphemerisFile::SetInitialState(Rvector6 *kmsec)
    SetInitialCartesianState(cartState);
    
    Rvector6 kepState =
-      StateConversionUtil::Convert(mCentralBodyMu, cartState, "Cartesian", "Keplerian", "TA");
+      StateConversionUtil::Convert(cartState, "Cartesian", "Keplerian", mCentralBodyMu);  // flat, radius, "TA");
    SetInitialKeplerianState(kepState);
 }
 

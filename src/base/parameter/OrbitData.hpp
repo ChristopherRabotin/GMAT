@@ -126,6 +126,8 @@ protected:
    
    Real mCartEpoch;
    Real mGravConst;
+   Real mFlattening;
+   Real mEqRadius;
    
    Integer stateTypeId;
    

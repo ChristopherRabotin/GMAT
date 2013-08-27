@@ -1,4 +1,4 @@
-//$Id: $
+//$Id$
 //------------------------------------------------------------------------------
 //                         StateConversionUtil
 //------------------------------------------------------------------------------
@@ -31,6 +31,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatConstants.hpp"
+#include "GmatDefaults.hpp"
 #include "Rmatrix33.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
@@ -64,11 +65,24 @@ enum AnomalyType
 //------------------------------------------------------------------------------
 // general state conversion methods
 //------------------------------------------------------------------------------
-static Rvector6 Convert(Real mu,                     const Rvector6 &state,
+//static Rvector6 Convert(Real mu,                     const Rvector6 &state,
+//                        const std::string &fromType, const std::string &toType,
+//                        const std::string &anomalyType = "TA");
+//static Rvector6 Convert(Real mu,                     const Real *state,
+//                        const std::string &fromType, const std::string &toType,
+//                        const std::string &anomalyType = "TA");
+
+static Rvector6 Convert(const Rvector6 &state,
                         const std::string &fromType, const std::string &toType,
+                        Real mu         = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH],
+                        Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH],
+                        Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
                         const std::string &anomalyType = "TA");
-static Rvector6 Convert(Real mu,                     const Real *state,
+static Rvector6 Convert(const Real *state,
                         const std::string &fromType, const std::string &toType,
+                        Real mu         = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH],
+                        Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH],
+                        Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
                         const std::string &anomalyType = "TA");
 
 

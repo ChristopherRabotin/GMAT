@@ -137,7 +137,7 @@ private:
    bool CheckAnomaly(Rvector6 &state);
    bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
    
-   Real GetOriginMu(GmatBase *fromObject);
+   Real GetOriginData(GmatBase *fromObject, const std::string &whichData = "mu");
 
    GmatPanel *theScPanel;
    

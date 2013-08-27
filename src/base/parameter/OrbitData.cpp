@@ -111,6 +111,8 @@ OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType)
    mSphAzFpaState = Rvector6::RVECTOR6_UNDEFINED;
    mCartEpoch     = 0.0;
    mGravConst     = 0.0;
+   mFlattening    = 0.0;
+   mEqRadius      = 0.0;
    
    mSpacecraft           = NULL;
    mSpacePoint           = NULL;
@@ -142,13 +144,15 @@ OrbitData::OrbitData(const OrbitData &data)
       ("OrbitData::OrbitData copy constructor called\n");
    #endif
    
-   mCartState = data.mCartState;
-   mKepState = data.mKepState;
-   mModKepState = data.mModKepState;
+   mCartState     = data.mCartState;
+   mKepState      = data.mKepState;
+   mModKepState   = data.mModKepState;
    mSphRaDecState = data.mSphRaDecState;
    mSphAzFpaState = data.mSphAzFpaState;
-   mCartEpoch = data.mCartEpoch;
-   mGravConst = data.mGravConst;
+   mCartEpoch     = data.mCartEpoch;
+   mGravConst     = data.mGravConst;
+   mFlattening    = data.mFlattening;
+   mEqRadius      = data.mEqRadius;
    
    mSpacecraft = data.mSpacecraft;
    mSpacePoint = data.mSpacePoint;
@@ -179,13 +183,15 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    
    RefData::operator=(right);
    
-   mCartState = right.mCartState;
-   mKepState = right.mKepState;
-   mModKepState = right.mModKepState;
+   mCartState     = right.mCartState;
+   mKepState      = right.mKepState;
+   mModKepState   = right.mModKepState;
    mSphRaDecState = right.mSphRaDecState;
    mSphAzFpaState = right.mSphAzFpaState;
-   mCartEpoch = right.mCartEpoch;
-   mGravConst = right.mGravConst;
+   mCartEpoch     = right.mCartEpoch;
+   mGravConst     = right.mGravConst;
+   mFlattening    = right.mFlattening;
+   mEqRadius      = right.mEqRadius;
    
    mSpacecraft = right.mSpacecraft;
    mSpacePoint = right.mSpacePoint;
@@ -695,7 +701,8 @@ Rvector6 OrbitData::GetSphRaDecState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   mSphRaDecState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "SphericalRADEC");
+   mSphRaDecState = StateConversionUtil::Convert(state, "Cartesian", "SphericalRADEC",
+                    mGravConst, mFlattening, mEqRadius);
 
    #ifdef DEBUG_ORBITDATA_STATE
    MessageInterface::ShowMessage
@@ -717,7 +724,8 @@ Rvector6 OrbitData::GetSphAzFpaState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   mSphAzFpaState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "SphericalAZFPA");
+   mSphAzFpaState = StateConversionUtil::Convert(state, "Cartesian", "SphericalAZFPA",
+                    mGravConst, mFlattening, mEqRadius);
 
    
    return mSphAzFpaState;
@@ -734,7 +742,8 @@ Rvector6 OrbitData::GetEquinState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   Rvector6 mEquinState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "Equinoctial");
+   Rvector6 mEquinState = StateConversionUtil::Convert(state, "Cartesian", "Equinoctial",
+                          mGravConst, mFlattening, mEqRadius);
    
    return mEquinState;
 }
@@ -1578,7 +1587,9 @@ void OrbitData::InitializeRefObjects()
       // override gravity constant if origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
       {
-         mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+         mGravConst  = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+         mFlattening = ((CelestialBody*)mOrigin)->GetFlattening();
+         mEqRadius   = ((CelestialBody*)mOrigin)->GetEquatorialRadius();
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
             ("OrbitData::InitializeRefObjects() Setting grav constant to %le (for origin %s)\n",
@@ -1629,12 +1640,16 @@ void OrbitData::InitializeRefObjects()
       
       // get gravity constant if out coord system origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-         mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
-         #ifdef DEBUG_ORBITDATA_INIT
-         MessageInterface::ShowMessage
-            ("OrbitData::InitializeRefObjects() Now setting grav constant to %le (for origin %s)\n",
-                  mGravConst, (mOrigin->GetName()).c_str());
-         #endif
+      {
+         mGravConst  = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+         mFlattening = ((CelestialBody*)mOrigin)->GetFlattening();
+         mEqRadius   = ((CelestialBody*)mOrigin)->GetEquatorialRadius();
+      }
+      #ifdef DEBUG_ORBITDATA_INIT
+      MessageInterface::ShowMessage
+         ("OrbitData::InitializeRefObjects() Now setting grav constant to %le (for origin %s)\n",
+               mGravConst, (mOrigin->GetName()).c_str());
+      #endif
    }
    
    #ifdef DEBUG_ORBITDATA_INIT

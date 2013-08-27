@@ -112,29 +112,45 @@ const std::string StateConversionUtil::ANOMALY_SHORT_TEXT[AnomalyTypeCount] =
 
 
 //---------------------------------------------------------------------------
-//  Rvector6 Convert(Real mu,
-//                   const Rvector6 &state,
+//  Rvector6 Convert(const Rvector6 &state,
 //                   const std::string &fromType,
 //                   const std::string &toType,
+//                   const std::string &fromType,
+//                   const std::string &toType,
+//                   Real mu         = GmatSolarSystemDefaults::PLANET_MU[
+//                                     GmatSolarSystemDefaults::EARTH],
+//                   Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[
+//                                     GmatSolarSystemDefaults::EARTH],
+//                   Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[
+//                                     GmatSolarSystemDefaults::EARTH],
+//                   const std::string &anomalyType = "TA")
 //                   const std::string &anomalyType = "TA")
 //---------------------------------------------------------------------------
 /**
  * Converts state from fromType to toType.
  *
- * @param <mu>          gravitational constant for the central body
  * @param <state>       state to convert
  * @param <fromType>    state type to convert from
  * @param <toType>      state type to convert to
+ * @param <mu>          gravitational constant for the central body
+ * @param <flattening>  flattening coefficient for the central body
+ * @param <eqRadius>    equatorial radius for the central body
  * @param <anomalyType> anomaly type string if toType is Mod/Keplerian
  *
  * @return Converted states from the specific element type
  */
 //---------------------------------------------------------------------------
-Rvector6 StateConversionUtil::Convert(Real              mu,
-                                      const Rvector6    &state,
-                                      const std::string &fromType,
-                                      const std::string &toType,
-                                      const std::string &anomalyType)
+//Rvector6 StateConversionUtil::Convert(Real              mu,
+//                                      const Rvector6    &state,
+//                                      const std::string &fromType,
+//                                      const std::string &toType,
+//                                      const std::string &anomalyType)
+Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
+                              const std::string &fromType, const std::string &toType,
+                              Real mu,
+                              Real flattening,
+                              Real eqRadius,
+                              const std::string &anomalyType)
 {
    #ifdef DEBUG_STATE_CONVERSION
    MessageInterface::ShowMessage
@@ -370,29 +386,42 @@ Rvector6 StateConversionUtil::Convert(Real              mu,
 
 
 //---------------------------------------------------------------------------
-//  Rvector6 Convert(Real mu,
-//                   Real *state,
+//  Rvector6 Convert(Real *state,
 //                   const std::string &fromType,
 //                   const std::string &toType,
+//                   Real mu         = GmatSolarSystemDefaults::PLANET_MU[
+//                                     GmatSolarSystemDefaults::EARTH],
+//                   Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[
+//                                     GmatSolarSystemDefaults::EARTH],
+//                   Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[
+//                                     GmatSolarSystemDefaults::EARTH],
 //                   const std::string &anomalyType = "TA")
 //---------------------------------------------------------------------------
 /**
  * Converts from fromType to toType.
  *
- * @param <mu>            Gravitational constant for the central body
- * @param <state>         Element states
- * @param <fromType>      Element Type converted from
- * @param <toType>        Element Type converted to
- * @param <anomalyType>   Anomaly type
+ * @param <state>       state to convert
+ * @param <fromType>    state type to convert from
+ * @param <toType>      state type to convert to
+ * @param <mu>          gravitational constant for the central body
+ * @param <flattening>  flattening coefficient for the central body
+ * @param <eqRadius>    equatorial radius for the central body
+ * @param <anomalyType> anomaly type string if toType is Mod/Keplerian
  *
  * @return Converted states from the specific element type
  */
 //---------------------------------------------------------------------------
-Rvector6 StateConversionUtil::Convert(Real mu,
-                                      const Real *state,
-                                      const std::string &fromType,
-                                      const std::string &toType,
-                                      const std::string &anomalyType)
+//Rvector6 StateConversionUtil::Convert(Real mu,
+//                                      const Real *state,
+//                                      const std::string &fromType,
+//                                      const std::string &toType,
+//                                      const std::string &anomalyType)
+Rvector6 StateConversionUtil::Convert(const Real *state,
+                              const std::string &fromType, const std::string &toType,
+                              Real mu,
+                              Real flattening,
+                              Real eqRadius,
+                              const std::string &anomalyType)
 {
    Rvector6 newState;
    newState.Set(state[0], state[1], state[2], state[3], state[4], state[5]);
@@ -400,7 +429,7 @@ Rvector6 StateConversionUtil::Convert(Real mu,
    if (fromType == toType)
       return newState;
 
-   return Convert(mu, newState, fromType, toType, anomalyType);
+   return Convert(newState, fromType, toType, mu, flattening, eqRadius, anomalyType);
 }
 
 //------------------------------------------------------------------------------

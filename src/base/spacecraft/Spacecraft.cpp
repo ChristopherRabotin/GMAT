@@ -273,6 +273,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    coordinateSystem     (NULL),
    coordSysName         ("EarthMJ2000Eq"),
    originMu             (0.0),
+   originFlattening     (0.0),
+   originEqRadius       (0.0),
    coordSysSet          (false),
    epochSet             (false),
    spacecraftId         ("SatId"),
@@ -461,6 +463,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordinateSystem     (a.coordinateSystem),      // need to copy
    coordSysName         (a.coordSysName),
    originMu             (a.originMu),
+   originFlattening     (a.originFlattening),
+   originEqRadius       (a.originEqRadius),
    defaultCartesian     (a.defaultCartesian),
    possibleInputTypes   (a.possibleInputTypes),
    coordSysSet          (a.coordSysSet),
@@ -561,6 +565,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
    originMu             = a.originMu;
+   originFlattening     = a.originFlattening;
+   originEqRadius       = a.originEqRadius;
    defaultCartesian     = a.defaultCartesian;
    possibleInputTypes   = a.possibleInputTypes;
    coordSysSet          = a.coordSysSet;
@@ -735,8 +741,8 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
    if (elementType != "Cartesian")
    {
       stateType = "Cartesian";
-      newState = StateConversionUtil::Convert(originMu, instate, elementType,
-         stateType, anomalyType);
+      newState = StateConversionUtil::Convert(instate, elementType,
+         stateType, originMu, originFlattening, originEqRadius, anomalyType);
    }
 
    SetState(newState.Get(0),newState.Get(1),newState.Get(2),
@@ -1559,7 +1565,11 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          origin   = (SpacePoint*)obj;
          if (origin->IsOfType("CelestialBody"))
-            originMu = ((CelestialBody*) origin)->GetGravitationalConstant();
+         {
+            originMu         = ((CelestialBody*) origin)->GetGravitationalConstant();
+            originFlattening = ((CelestialBody*) origin)->GetFlattening();
+            originEqRadius   = ((CelestialBody*) origin)->GetEquatorialRadius();
+         }
       }
    }
 
@@ -1723,7 +1733,11 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          originName = coordinateSystem->GetOriginName();
          origin     = coordinateSystem->GetOrigin();
          if (origin->IsOfType("CelestialBody"))
-            originMu = ((CelestialBody*) origin)->GetGravitationalConstant();
+         {
+            originMu         = ((CelestialBody*) origin)->GetGravitationalConstant();
+            originFlattening = ((CelestialBody*) origin)->GetFlattening();
+            originEqRadius   = ((CelestialBody*) origin)->GetEquatorialRadius();
+         }
 
          try
          {
@@ -5883,7 +5897,8 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCa
             rep.c_str());
          MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using originMu = %12.10f\n", originMu);
       #endif
-      finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian", rep, anomalyType);
+      finalState = StateConversionUtil::Convert(csState, "Cartesian", rep,
+                   originMu, originFlattening, originEqRadius, anomalyType);
    }
 
    #ifdef DEBUG_STATE_INTERFACE
@@ -5938,7 +5953,8 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
       MessageInterface::ShowMessage
          ("   rep is not Cartesian, so calling StateConversionUtil::Convert()\n");
       #endif
-      csState = StateConversionUtil::Convert(originMu, st, rep, "Cartesian", anomalyType);
+      csState = StateConversionUtil::Convert(st, rep, "Cartesian",
+                originMu, originFlattening, originEqRadius, anomalyType);
    }
 
    #ifdef DEBUG_STATE_INTERFACE

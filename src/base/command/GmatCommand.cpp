@@ -2380,9 +2380,12 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
             kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
-            modKepState     = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "ModifiedKeplerian");
-            sphStateAZFPA   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalAZFPA");
-            sphStateRADEC   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalRADEC");
+            modKepState     = StateConversionUtil::Convert(cartState, "Cartesian", "ModifiedKeplerian",
+                              originMu, originFlattening, originEqRad);
+            sphStateAZFPA   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalAZFPA",
+                              originMu, originFlattening, originEqRad);
+            sphStateRADEC   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalRADEC",
+                              originMu, originFlattening, originEqRad);
 
             #ifdef DEBUG_COMMAND_SUMMARY_STATE
                MessageInterface::ShowMessage("keplerian state in summary CS = %s\n", kepState.ToString().c_str());

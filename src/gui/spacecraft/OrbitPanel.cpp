@@ -890,8 +890,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          {
             try
             {
-               Real mu = GetOriginMu(theSpacecraft->GetOrigin()); //  ********** OR get from coord system?
-               Rvector6 st = StateConversionUtil::Convert(mu, mCartState, mFromStateTypeStr, "Keplerian", "TA");
+               Real mu      = GetOriginData(theSpacecraft->GetOrigin(), "mu");
+               Real flat    = GetOriginData(theSpacecraft->GetOrigin(), "flattening");
+               Real radius  = GetOriginData(theSpacecraft->GetOrigin(), "radius");
+               Rvector6 st  = StateConversionUtil::Convert(mCartState, mFromStateTypeStr,
+                              "Keplerian", mu, flat, radius, "TA");
                mTrueAnomaly = st[5];
                mAnomaly = mTrueAnomaly;
                mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
@@ -1120,9 +1123,12 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
       textCtrl[i]->SetValue(keplerianElements[i]);
 
    Rvector6 kepState = orbitDlg.GetElementsDouble();
-   Real mu = GetOriginMu(theSpacecraft->GetOrigin());   // is this right?
-   mCartState = StateConversionUtil::Convert(mu, kepState, "Keplerian", "Cartesian", "TA");
-   mOutState = mCartState;
+   Real mu      = GetOriginData(theSpacecraft->GetOrigin(), "mu");
+   Real flat    = GetOriginData(theSpacecraft->GetOrigin(), "flattening");
+   Real radius  = GetOriginData(theSpacecraft->GetOrigin(), "radius");
+   mCartState   = StateConversionUtil::Convert(kepState, "Keplerian",
+                  "Cartesian", mu, flat, radius, "TA");
+   mOutState    = mCartState;
 
    dataChanged = true;
    theScPanel->EnableUpdate(true);
@@ -1649,8 +1655,11 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
          #endif
          
          // Convert input state to the Cartesian representation
-         Real mu = GetOriginMu(mFromCoord);
-         midState = StateConversionUtil::Convert(mu, inputState, mFromStateTypeStr,"Cartesian", mAnomalyType);
+         Real mu      = GetOriginData(mFromCoord, "mu");
+         Real flat    = GetOriginData(mFromCoord, "flattening");
+         Real radius  = GetOriginData(mFromCoord, "radius");
+         midState     = StateConversionUtil::Convert(inputState,
+                        mFromStateTypeStr,"Cartesian", mu, flat, radius, mAnomalyType);
          
          // Transform to internal coordinates
          mCoordConverter.Convert(A1Mjd(mEpoch), midState, mFromCoord, mCartState, 
@@ -1679,8 +1688,11 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       #endif
       
       // and convert to the desired representation
-      Real mu = GetOriginMu(mOutCoord);
-      mOutState = StateConversionUtil::Convert(mu, midState, "Cartesian", stateTypeStr, mAnomalyType);
+      Real mu      = GetOriginData(mOutCoord, "mu");
+      Real flat    = GetOriginData(mOutCoord, "flattening");
+      Real radius  = GetOriginData(mOutCoord, "radius");
+      mOutState    = StateConversionUtil::Convert(midState, "Cartesian",
+                     stateTypeStr, mu, flat, radius, mAnomalyType);
       
       #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
@@ -2539,8 +2551,11 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
                               mOutCoord);
       
       // and convert to the desired representation
-      Real mu = GetOriginMu(mOutCoord);
-      outState = StateConversionUtil::Convert(mu, midState, "Cartesian", stateTypeStr, "True Anomaly");
+      Real mu      = GetOriginData(mOutCoord, "mu");
+      Real flat    = GetOriginData(mOutCoord, "flattening");
+      Real radius  = GetOriginData(mOutCoord, "radius");
+      outState     = StateConversionUtil::Convert(midState, "Cartesian",
+                     stateTypeStr, mu, flat, radius, "True Anomaly");
    }
    else if ((stateTypeStr == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
             (stateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]))
@@ -2558,9 +2573,12 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
       // if state type is MOD_KEPLERIAN, compute sma and ecc
       if (stateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN])
       {
-         Real mu = GetOriginMu(theSpacecraft->GetOrigin());   // is this right?
+         Real mu     = GetOriginData(theSpacecraft->GetOrigin(), "mu");
+         Real flat   = GetOriginData(theSpacecraft->GetOrigin(), "flattening");
+         Real radius = GetOriginData(theSpacecraft->GetOrigin(), "radius");
          Rvector kepl = StateConversionUtil::Convert
-            (mu, state, "Cartesian", mStateTypeNames[StateConversionUtil::KEPLERIAN], mAnomalyType);
+                        (state, "Cartesian", mStateTypeNames[StateConversionUtil::KEPLERIAN],
+                        mu, flat, radius, mAnomalyType);
          sma = kepl[0];
          ecc = kepl[1];
          anomaly = kepl[5];         
@@ -2586,7 +2604,7 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
 }
 
 //------------------------------------------------------------------------------
-// Real GetOriginMu(GmatBase *fromObject)
+// Real GetOriginData(GmatBase *fromObject, const std::string &whichData = "mu");
 //------------------------------------------------------------------------------
 /*
  * Gets the origin mu from the object.
@@ -2596,9 +2614,9 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
  * @return fromObject's mu value
  */
 //------------------------------------------------------------------------------
-Real OrbitPanel::GetOriginMu(GmatBase *fromObject)
+Real OrbitPanel::GetOriginData(GmatBase *fromObject, const std::string &whichData)
 {
-   Real mu = 0.0;
+   Real result = 0.0;
 
    if (fromObject != NULL)
    {
@@ -2609,19 +2627,31 @@ Real OrbitPanel::GetOriginMu(GmatBase *fromObject)
          // Check if it is Celestial Body then get the mu;
          // Otherwise, it sets mu to zero
          if (origin->IsOfType("CelestialBody"))
-            mu = ((CelestialBody *)origin)->GetGravitationalConstant();
+         {
+            if (whichData == "mu")
+               result = ((CelestialBody*) origin)->GetGravitationalConstant();
+            else if (whichData == "flattening")
+               result = ((CelestialBody*) origin)->GetFlattening();
+            else if (whichData == "radius")
+               result = ((CelestialBody*) origin)->GetEquatorialRadius();
+         }
          else
-            mu = 0.0;
+            result = 0.0;
       }
       else if (fromObject->IsOfType("CelestialBody"))
       {
-         mu = ((CelestialBody *)fromObject)->GetGravitationalConstant();
+         if (whichData == "mu")
+            result = ((CelestialBody*) fromObject)->GetGravitationalConstant();
+         else if (whichData == "flattening")
+            result = ((CelestialBody*) fromObject)->GetFlattening();
+         else if (whichData == "radius")
+            result = ((CelestialBody*) fromObject)->GetEquatorialRadius();
       }
       else
       {
-         mu = 0.0;
+         result = 0.0;
       }
 
    }
-   return mu;
+   return result;
 }

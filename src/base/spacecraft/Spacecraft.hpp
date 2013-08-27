@@ -397,6 +397,10 @@ protected:
 
    /// Gravitational constant for the central body (origin)
    Real              originMu;
+   /// GFlattening coefficient for the central body (origin)
+   Real              originFlattening;
+   /// Equatorial radius for the central body (origin)
+   Real              originEqRadius;
    /// Default cartesian state
    Rvector6          defaultCartesian;
    /// Current list of possible input state types
