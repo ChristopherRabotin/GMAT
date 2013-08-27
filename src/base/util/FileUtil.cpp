@@ -1297,8 +1297,8 @@ bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &lin
    // Remove inline comment (get string upto % sign)
    std::string newline1 = GmatStringUtil::RemoveInlineComment(line1, "%");
    std::string newline2 = GmatStringUtil::RemoveInlineComment(line2, "%");
-   StringArray items1 = GmatStringUtil::SeparateBy(newline1, " ,", true);
-   StringArray items2 = GmatStringUtil::SeparateBy(newline2, " ,", true);
+   StringArray items1 = GmatStringUtil::SeparateBy(newline1, " ,:\t", true);
+   StringArray items2 = GmatStringUtil::SeparateBy(newline2, " ,:\t", true);
    std::string item1, item2;
    Integer size1 = items1.size();
    Integer size2 = items2.size();
@@ -2253,7 +2253,7 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
    MessageInterface::ShowMessage
       ("GmatFileUtil::SkipHeaderLines() entered, filename='%s'\n", filename.c_str());
    #endif
-      
+   
    char buffer[BUFFER_SIZE];
    bool dataFound = false;
    bool alphaFound = false;
@@ -2266,14 +2266,19 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
    while (!dataFound)
    {
       if (in.eof())
+      {
+         #if DBGLVL_COMPARE_FILES > 3
+         MessageInterface::ShowMessage("   end-of-file encountered, exiting while loop\n");
+         #endif
          break;
+      }
       
       in.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
       #if DBGLVL_COMPARE_FILES > 3
       MessageInterface::ShowMessage
-         ("length=%d, line = %s\n", line.length(), line.c_str());
+         ("   length=%d, line = %s\n", line.length(), line.c_str());
       #endif
       
       if (line.length() == 0)
@@ -2304,7 +2309,7 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
          #endif
          
          if (!isdigit(ch) && ch != '.' && ch != 'e' && ch != 'E' && ch != '-' &&
-             ch != '+' && ch != ' ')
+             ch != '+' && ch != ' ' && !isspace(ch))
          {
             alphaFound = true;
             break;
@@ -2336,15 +2341,16 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
       }
       
       dataFound = GetRealColumns(line, realArray);
-      
-      #if DBGLVL_COMPARE_FILES > 0
-      int numCols = realArray.size();
-      for (int i=0; i<numCols; i++)
-         MessageInterface::ShowMessage("   realArray[%d]=%f\n", i, realArray[i]);
-      MessageInterface::ShowMessage
-         ("GmatFileUtil::SkipHeaderLines() returning dataFound=%d\n", dataFound);
-      #endif
    }
+   
+   #if DBGLVL_COMPARE_FILES > 0
+   int numCols = realArray.size();
+   MessageInterface::ShowMessage("   number of columns = %d\n", numCols);
+   for (int i=0; i<numCols; i++)
+      MessageInterface::ShowMessage("   realArray[%d]=%f\n", i, realArray[i]);
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::SkipHeaderLines() returning dataFound=%d\n", dataFound);
+   #endif
    
    return dataFound;
 }
@@ -2430,7 +2436,8 @@ bool GmatFileUtil::GetRealColumns(const std::string &line, RealArray &cols)
    
    StringTokenizer stk;
    //@note ":" is for separating UTC format time
-   stk.Set(line, " :");
+   // Added horizontal tab (\t) to delimiter
+   stk.Set(line, " :\t");
    StringArray tokens = stk.GetAllTokens();
    Integer numCols = tokens.size();
    Real rval;
