@@ -25,6 +25,8 @@
 #include "Attitude.hpp"   // for Attitude class
 #include "CSFixed.hpp"
 #include "Spinner.hpp"
+#include "PrecessingSpinner.hpp"
+#include "NadirPointing.hpp"
 #ifdef __USE_SPICE__
    #include "SpiceAttitude.hpp"
 #endif
@@ -53,6 +55,10 @@ Attitude* AttitudeFactory::CreateAttitude(const std::string &ofType,
       return new CSFixed(withName);
    else if (ofType == "Spinner")
       return new Spinner(withName);
+   else if (ofType == "PrecessingSpinner")
+      return new PrecessingSpinner(withName);
+   else if (ofType == "NadirPointing")
+      return new NadirPointing(withName);
 //   //else if (ofType == "ThreeAxis")   // TBD
 //   //   return new ThreeAxis(withName);
    #ifdef __USE_SPICE__
@@ -84,6 +90,8 @@ Factory(Gmat::ATTITUDE)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      creatables.push_back("PrecessingSpinner");
+      creatables.push_back("NadirPointing");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -112,6 +120,8 @@ Factory(createList,Gmat::ATTITUDE)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      creatables.push_back("PrecessingSpinner");
+      creatables.push_back("NadirPointing");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -138,6 +148,8 @@ Factory(fact)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      creatables.push_back("PrecessingSpinner");
+      creatables.push_back("NadirPointing");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -167,6 +179,8 @@ AttitudeFactory& AttitudeFactory::operator= (const AttitudeFactory& fact)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      creatables.push_back("PrecessingSpinner");
+      creatables.push_back("NadirPointing");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif

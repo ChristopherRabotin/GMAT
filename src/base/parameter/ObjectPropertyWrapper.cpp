@@ -287,7 +287,7 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
       {
          #ifdef DEBUG_OPW
          MessageInterface::ShowMessage
-            ("   For parameter '%s', propID not found, so trying owined object\n", propIDNames[0].c_str());
+            ("   For parameter '%s', propID not found, so trying owned object\n", propIDNames[0].c_str());
          #endif
          // Handle the Propagator inside a PropSetup
          if (obj->IsOfType(Gmat::PROP_SETUP))

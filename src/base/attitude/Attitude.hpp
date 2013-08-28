@@ -26,6 +26,10 @@
  * @note Methods called to set/get parameter values will require/return angle
  *       values in degrees and rate values in degrees/sec.  All other methods 
  *       assume/expect radians and radians/sec.
+ * @note Due to the fact that Attitude objects are not YET configured objects,
+ *       and because we want Attitude model changes to work properly in
+ *       Command Mode, all data used by any child class of this base Attitude
+ *       class must be declared and handled here.
  */
 //------------------------------------------------------------------------------
 
@@ -65,7 +69,9 @@ class GMAT_API Attitude : public GmatBase
 {
 public:
 
+   // --------------------------------------------------------------------------
    // BEGIN static methods for conversion
+   // --------------------------------------------------------------------------
    static Rmatrix33 ToCosineMatrix(const Rvector &quat1);
    static Rmatrix33 ToCosineMatrix(const Rvector3 &eulerAngles, 
                                    Integer seq1, Integer seq2, 
@@ -95,6 +101,7 @@ public:
    static StringArray       GetEulerSequenceStrings();
    static UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
 
+   static StringArray       GetModesOfConstraint();
 
    // method to convert an euler axis and angle to a cosine matrix
    static Rmatrix33 EulerAxisAndAngleToDCM(
@@ -102,8 +109,9 @@ public:
    // method to convert a cosine matrix to an euler axis and angle
    static void      DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
                                             Rvector3 &eAxis, Real &eAngle);
+   // --------------------------------------------------------------------------
    // END static methods for conversion
-
+   // --------------------------------------------------------------------------
 
    // constructor
    Attitude(const std::string &typeStr, const std::string &itsName = "");
@@ -126,8 +134,9 @@ public:
 
    virtual void       SetOwningSpacecraft(GmatBase *theSC);
 
-   virtual bool       SetReferenceCoordinateSystemName(
-                         const std::string &refName);
+//   virtual bool       SetReferenceCoordinateSystemName(
+//                         const std::string &refName);
+
    /// Method to get the Euler sequence list (as strings)
    const StringArray&         GetEulerSequenceList() const;
    /// Method to get the attitude as a Quaternion
@@ -161,6 +170,8 @@ public:
 
    /// methods to access object parameters
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
@@ -170,6 +181,9 @@ public:
                                     const std::string &name);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
+   virtual bool        HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
                                     
    /// methods to get/set parameter values
    virtual std::string GetParameterText(const Integer id) const;
@@ -270,6 +284,39 @@ protected:
        ANGULAR_VELOCITY_X,
        ANGULAR_VELOCITY_Y,
        ANGULAR_VELOCITY_Z, 
+       // Add additional CSFixed fields here
+       // none at this time
+       // Add additional Spinner fields here
+       // none at this time
+       // Add additional SpiceAttitude fields here
+       // none at this time
+       // Add additional PrecessingSpinner fields here
+       NUTATION_REFERENCE_VECTOR_X,
+       NUTATION_REFERENCE_VECTOR_Y,
+       NUTATION_REFERENCE_VECTOR_Z,
+       BODY_SPIN_AXIS_X,
+       BODY_SPIN_AXIS_Y,
+       BODY_SPIN_AXIS_Z,
+       INITIAL_PRECESSION_ANGLE,
+       PRECESSION_RATE,
+       NUTATION_ANGLE,
+       INITIAL_SPIN_ANGLE,
+       SPIN_RATE,
+       // Add additional NadirPointing fields here
+       ATTITUDE_REFERENCE_BODY,
+       MODE_OF_CONSTRAINT,
+       REFERENCE_VECTOR_X,
+       REFERENCE_VECTOR_Y,
+       REFERENCE_VECTOR_Z,
+       CONSTRAINT_VECTOR_X,
+       CONSTRAINT_VECTOR_Y,
+       CONSTRAINT_VECTOR_Z,
+       BODY_ALIGNMENT_VECTOR_X,
+       BODY_ALIGNMENT_VECTOR_Y,
+       BODY_ALIGNMENT_VECTOR_Z,
+       BODY_CONSTRAINT_VECTOR_X,
+       BODY_CONSTRAINT_VECTOR_Y,
+       BODY_CONSTRAINT_VECTOR_Z,
        AttitudeParamCount
    };
    
@@ -306,6 +353,7 @@ protected:
    static const Real        DCM_ORTHONORMALITY_TOLERANCE;
    static const Integer     OTHER_REPS_OFFSET;
 
+   static const std::string MODE_OF_CONSTRAINT_LIST[2];
 
    
    GmatAttitude::AttitudeStateType     inputAttitudeType;
@@ -372,6 +420,32 @@ protected:
    /// been written?
    bool                  warnNoAttitudeWritten;
 
+   /// Additional data for CSFixed
+   /// none at this time
+   /// Additional data for Spinner
+   /// none at this time
+   /// Additional data for SpiceAttitude
+   /// none at this time
+
+   /// Additional data for PrecessingSpinner
+   Rvector3              nutationReferenceVector;
+   Rvector3              bodySpinAxis;
+   Real                  initialPrecessionAngle;
+   Real                  precessionRate;
+   Real                  nutationAngle;
+   Real                  initialSpinAngle;
+   Real                  spinRate;
+
+   /// Additional data for NadirPointing
+   std::string           refBodyName;
+   CelestialBody         *refBody;
+   std::string           modeOfConstraint;
+   Rvector3              referenceVector;
+   Rvector3              constraintVector;
+   Rvector3              bodyAlignmentVector;
+   Rvector3              bodyConstraintVector;
+
+
    //------------------------------------------------------------------------------
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
    //------------------------------------------------------------------------------
@@ -392,15 +466,19 @@ private:
    // default constructor - not implemented
    Attitude();
 
-   bool      ValidateCosineMatrix(const Rmatrix33 &mat);
-   bool      ValidateEulerAngles(const Rvector &eAngles, const UnsignedIntArray &eulSeq);
-   bool      ValidateEulerSequence(const std::string &seq);
-   bool      ValidateEulerSequence(const UnsignedIntArray &eulAng);
-   bool      ValidateQuaternion(const Rvector &quat);
-   bool      ValidateMRPs(const Rvector &mrps);		// Dunn Added
-   void      UpdateState(const std::string &rep);
-   void      SetRealArrayFromString(Integer id, const std::string &sval);
+   bool        ValidateCosineMatrix(const Rmatrix33 &mat);
+   bool        ValidateEulerAngles(const Rvector &eAngles, const UnsignedIntArray &eulSeq);
+   bool        ValidateEulerSequence(const std::string &seq);
+   bool        ValidateEulerSequence(const UnsignedIntArray &eulAng);
+   bool        ValidateQuaternion(const Rvector &quat);
+   bool        ValidateMRPs(const Rvector &mrps);		// Dunn Added
+   void        UpdateState(const std::string &rep);
+   void        SetRealArrayFromString(Integer id, const std::string &sval);
+   Real        GetPrecessingSpinnerRealParameter(const Integer id) const;
+   Real        SetPrecessingSpinnerRealParameter(const Integer id, const Real value);
+   Real        GetNadirPointingRealParameter(const Integer id) const;
+   Real        SetNadirPointingRealParameter(const Integer id, const Real value);
 
-   bool      IsInitialAttitudeParameter(Integer id, std::string ofType = "Any") const;
+   bool        IsInitialAttitudeParameter(Integer id, std::string ofType = "Any") const;
 };
 #endif /*Attitude_hpp*/

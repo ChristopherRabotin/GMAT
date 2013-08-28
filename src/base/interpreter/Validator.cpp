@@ -2904,7 +2904,7 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
       ; // do nothing here
    }
    
-   // if not checking owend object property
+   // if not checking owned object property
    if (!checkSubProp)
    {
       #if DBGLVL_WRAPPERS > 1
@@ -2959,22 +2959,22 @@ ElementWrapper* Validator::CreateSubPropertyWrapper(GmatBase *obj,
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("   Object can have owend objects, so check owend object property\n");
+      ("   Object can have owned objects, so check owned object property\n");
    #endif
    
    Integer ownedId = -1;
-   Gmat::ParameterType owendType;
+   Gmat::ParameterType ownedType;
    GmatBase *ownedObj = NULL;
    
    if (theInterpreter)
    {
       theInterpreter->FindPropertyID(obj, theDescription, &ownedObj,
-                                     ownedId, owendType);
+                                     ownedId, ownedType);
       
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
-         ("   ownedObj=<%p>, ownedId=%d, owendType=%d\n",
-          ownedObj, ownedId, owendType);
+         ("   ownedObj=<%p>, ownedId=%d, ownedType=%d\n",
+          ownedObj, ownedId, ownedType);
       #endif
       
       if (ownedId != -1)

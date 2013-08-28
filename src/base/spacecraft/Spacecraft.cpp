@@ -34,6 +34,8 @@
 #include "TimeTypes.hpp"
 #include "CSFixed.hpp"               // for default and command mode attitude creation
 #include "Spinner.hpp"               // for command mode attitude creation
+#include "PrecessingSpinner.hpp"
+#include "NadirPointing.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
@@ -273,8 +275,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    coordinateSystem     (NULL),
    coordSysName         ("EarthMJ2000Eq"),
    originMu             (0.0),
-   originFlattening     (0.0),
-   originEqRadius       (0.0),
    coordSysSet          (false),
    epochSet             (false),
    spacecraftId         ("SatId"),
@@ -463,8 +463,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordinateSystem     (a.coordinateSystem),      // need to copy
    coordSysName         (a.coordSysName),
    originMu             (a.originMu),
-   originFlattening     (a.originFlattening),
-   originEqRadius       (a.originEqRadius),
    defaultCartesian     (a.defaultCartesian),
    possibleInputTypes   (a.possibleInputTypes),
    coordSysSet          (a.coordSysSet),
@@ -565,8 +563,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
    originMu             = a.originMu;
-   originFlattening     = a.originFlattening;
-   originEqRadius       = a.originEqRadius;
    defaultCartesian     = a.defaultCartesian;
    possibleInputTypes   = a.possibleInputTypes;
    coordSysSet          = a.coordSysSet;
@@ -1345,9 +1341,16 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
       fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
 
       // Add Attitude's ref. object names
-      std::string attRefObjName = attitude->GetRefObjectName(type);
-      if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
-         fullList.push_back(attRefObjName);
+//      std::string attRefObjName = attitude->GetRefObjectName(type);
+//      if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
+//         fullList.push_back(attRefObjName);
+      // Add Attitude's ref. object name
+      StringArray attRefObjNames = attitude->GetRefObjectNameArray(type);
+      for (StringArray::iterator j = attRefObjNames.begin(); j != attRefObjNames.end(); ++j)
+      {
+         if (find(fullList.begin(), fullList.end(), (*j)) == fullList.end())
+            fullList.push_back(*j);
+      }
 
       #ifdef DEBUG_SC_REF_OBJECT
       MessageInterface::ShowMessage
@@ -1360,17 +1363,50 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
    }
    else
    {
+      #ifdef DEBUG_SC_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("Spacecraft::GetRefObjectNameArray() NOT UNNOWN_OBJECT, type='%s' (%d)\n",
+          GmatBase::GetObjectTypeString(type).c_str(), type);
+      #endif
       if (type == Gmat::ATTITUDE)
       {
+         #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+            ("Spacecraft::GetRefObjectNameArray() Asking attitude for its Attitude name????\n");
+         #endif
          fullList.push_back(attitude->GetRefObjectName(type)); // makes no sense
          return fullList;
       }
-      else if (type == Gmat::CELESTIAL_BODY)
+      if (type == Gmat::CELESTIAL_BODY)
       {
          // Add Attitude's ref. object names
-         std::string attRefObjName = attitude->GetRefObjectName(type);
-         if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
-            fullList.push_back(attRefObjName);
+         #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+            ("Spacecraft::GetRefObjectNameArray() Asking attitude for its CelestialBody name\n");
+         #endif
+//         std::string attRefObjName = attitude->GetRefObjectName(type);
+//         #ifdef DEBUG_SC_REF_OBJECT
+//            MessageInterface::ShowMessage
+//            ("Spacecraft::GetRefObjectNameArray() Adding attitude celestial body %s to the list\n",
+//                  attRefObjName.c_str());
+//         #endif
+//         if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
+//            fullList.push_back(attRefObjName);
+         // Add Attitude's ref. object name
+         StringArray attRefObjNames = attitude->GetRefObjectNameArray(type);
+         for (StringArray::iterator j = attRefObjNames.begin(); j != attRefObjNames.end(); ++j)
+         {
+            if (find(fullList.begin(), fullList.end(), (*j)) == fullList.end())
+            {
+               #ifdef DEBUG_SC_REF_OBJECT
+                  MessageInterface::ShowMessage
+                  ("Spacecraft::GetRefObjectNameArray() Adding attitude celestial body %s to the list\n",
+                        (*j).c_str());
+               #endif
+               fullList.push_back(*j);
+            }
+         }
+         return fullList;
       }
 
       if (type == Gmat::FUEL_TANK)
@@ -1964,9 +2000,9 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       {
          if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
          {
-            #ifdef DEBUG_SPACECRAFT_SET
+            #ifdef DEBUG_GET_REAL
             MessageInterface::ShowMessage(
-            "In SC::GetParameterID, setting id to %d for str = %s\n ",
+            "In SC::GetParameterID, getting id %d for str = %s\n ",
             i, str.c_str());
             #endif
             return i;
@@ -2480,9 +2516,13 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          // We have to set the epoch on the attitude each time we set a
          // state element
          bool attOK = false;
-         attOK =  attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
+         //LOJ: To fix compile warning from MSVC++
+         //'Real' : forcing value to bool 'true' or 'false' (performance warning)
+         //attOK = attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
+         attOK = (attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value) == value);
          if (attOK)  attitude->SetEpoch(state.GetEpoch());
-         return attOK;
+         //return attOK; //LOJ: To return real value
+         return value;
       }
 
    if (id == CARTESIAN_X )
@@ -2628,9 +2668,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
          // We have to set the epoch on the attitude each time we set a
          // state element
          bool attOK = false;
-         attOK =  attitude->SetRealParameter(label, value);
+         //LOJ: To fix compile warning from MSVC++
+         //'Real' : forcing value to bool 'true' or 'false' (performance warning)
+         //attOK = attitude->SetRealParameter(label, value);
+         attOK = (attitude->SetRealParameter(label, value) == value);
          if (attOK)  attitude->SetEpoch(state.GetEpoch());
-         return attOK;
+         //return attOK; //LOJ: To return real value
+         return value;
       }
 
    // We are currently not allowing users to set anomaly other than the True
@@ -3058,6 +3102,10 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             newAtt = new Spinner();
          else if (newAttType == "CoordinateSystemFixed")
             newAtt = new CSFixed();
+         else if (newAttType == "PrecessingSpinner")
+            newAtt = new PrecessingSpinner();
+         else if (newAttType == "NadirPointing")
+            newAtt = new NadirPointing();
          #ifdef __USE_SPICE__
          else if (newAttType == "SpiceAttitude")
             newAtt = new SpiceAttitude();
@@ -3078,10 +3126,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             errmsg += value + "\n";
             throw SpaceObjectException(errmsg);
          }
-         // Get reference coordinate system from old attitude object
-         std::string oldAttCSName    = "";
-         GmatBase    *oldAttCS       = NULL;
-         bool        oldAttCSFound   = false;
+         // Get reference objects from old attitude object
+         std::string oldAttCSName      = "";
+         std::string oldAttBodyName    = "";
+         GmatBase    *oldAttCS         = NULL;
+         GmatBase    *oldAttBody       = NULL;
+         bool        oldAttFound       = false;
          if (attitude != NULL)
          {
             #ifdef DEBUG_SC_ATTITUDE
@@ -3089,9 +3139,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
                      newAtt->GetAttitudeModelName().c_str());
             #endif
             // Get reference coordinate system from old attitude object
-            oldAttCSName  = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-            oldAttCS      = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-            oldAttCSFound = true;
+            oldAttCSName    = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+            oldAttCS        = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+            //oldAttBodyName  = attitude->GetRefObjectName(Gmat::CELESTIAL_BODY);
+            //oldAttBody      = attitude->GetRefObject(Gmat::CELESTIAL_BODY, oldAttBodyName);
+            oldAttFound = true;
             delete attitude;
             ownedObjectCount--;
          }
@@ -3114,10 +3166,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          newAtt->SetEpoch(state.GetEpoch()); // correct? do we want to do this?  for Spinner?
          newAtt->NeedsReinitialization();
          newAtt->SetOwningSpacecraft(this);
-         if (oldAttCSFound)
+         if (oldAttFound)
          {
             newAtt->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
             newAtt->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
+            //newAtt->SetRefObjectName(Gmat::CELESTIAL_BODY, oldAttBodyName);
+            //newAtt->SetRefObject(oldAttCS, Gmat::CELESTIAL_BODY, oldAttBodyName);
          }
          attitude = newAtt;
          ownedObjectCount++;
@@ -3580,9 +3634,13 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
                ", index = %d,  and value = %12.10f\n", id, index, value);
             #endif
             bool attOK = false;
-            attOK =  attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index);
+            //LOJ: To fix compile warning from MSVC++
+            //'Real' : forcing value to bool 'true' or 'false' (performance warning)
+            //attOK = attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index);
+            attOK = (attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index) == value);
             if (attOK)  attitude->SetEpoch(state.GetEpoch());
-            return attOK;
+            //return attOK; //LOJ: To return real value
+            return value;
          }
       }
    }
@@ -4686,15 +4744,19 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
    if (obj->IsOfType(Gmat::ATTITUDE))
    {
       // Get reference coordinate system from old attitude object
-      std::string oldAttCSName  = "";
-      GmatBase    *oldAttCS     = NULL;
-      bool        oldAttCSFound = false;
+      std::string oldAttCSName    = "";
+      std::string oldAttBodyName  = "";
+      GmatBase    *oldAttCS       = NULL;
+      GmatBase    *oldAttBody     = NULL;
+      bool        oldAttFound     = false;
       if (attitude != NULL)
       {
          // Get reference coordinate system from old attitude object
-         oldAttCSName  = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-         oldAttCS      = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-         oldAttCSFound = true;
+         oldAttCSName    = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+         oldAttCS        = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+         //oldAttBodyName  = attitude->GetRefObjectName(Gmat::CELESTIAL_BODY);
+         //oldAttBody      = attitude->GetRefObject(Gmat::CELESTIAL_BODY, oldAttBodyName);
+         oldAttFound = true;
          delete attitude;
          --ownedObjectCount;
       }
@@ -4702,10 +4764,16 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       ++ownedObjectCount;
       attitude->SetEpoch(state.GetEpoch());
       attitude->SetOwningSpacecraft(this);
-      if (oldAttCSFound)
+
+      MessageInterface::ShowMessage
+         ("LOJ==> oldAttFound=%d, oldAttCS=<%p>, oldAttBody=<%p>\n", oldAttFound, oldAttCS, oldAttBody);
+      
+      if (oldAttFound)
       {
          attitude->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
          attitude->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
+         //attitude->SetRefObjectName(Gmat::CELESTIAL_BODY, oldAttBodyName);
+         //attitude->SetRefObject(oldAttBody, Gmat::CELESTIAL_BODY, oldAttBodyName);
       }
       isInitialized = false;
    }

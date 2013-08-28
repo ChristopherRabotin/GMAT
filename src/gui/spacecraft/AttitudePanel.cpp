@@ -45,6 +45,8 @@
 //#define DEBUG_ATTITUDE_RATE
 //#define DEBUG_ATTITUDE_ANG_VEL
 //#define DEBUG_ATTITUDE_PANEL_DCM
+//#define DEBUG_PRECESSING_SPINNER
+//#define DEBUG_NADIR_POINTING
 
 //------------------------------------------------------------------------------
 // static data
@@ -78,13 +80,26 @@ const Real    AttitudePanel::DCM_ORTHONORMALITY_TOLERANCE      = 1.0e-14;
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
-   EVT_TEXT(ID_TEXTCTRL_STATE,      AttitudePanel::OnStateTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_STATE_RATE, AttitudePanel::OnStateRateTextUpdate)
-   EVT_COMBOBOX(ID_CB_STATE,        AttitudePanel::OnStateTypeSelection)
-   EVT_COMBOBOX(ID_CB_STATE_RATE,   AttitudePanel::OnStateTypeRateSelection)
-   EVT_COMBOBOX(ID_CB_SEQ,          AttitudePanel::OnEulerSequenceSelection)
-   EVT_COMBOBOX(ID_CB_COORDSYS,     AttitudePanel::OnCoordinateSystemSelection)
-   EVT_COMBOBOX(ID_CB_MODEL,        AttitudePanel::OnAttitudeModelSelection)
+   EVT_TEXT(ID_TEXTCTRL_STATE,            AttitudePanel::OnStateTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_STATE_RATE,       AttitudePanel::OnStateRateTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_SPIN_AXIS,        AttitudePanel::OnSpinAxisTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_NUT_REF_VEC,      AttitudePanel::OnNutationRefVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_INIT_PREC_ANGLE,  AttitudePanel::OnInitialPrecessionAngleTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_PRECESSION_RATE,  AttitudePanel::OnPrecessionRateTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_NUTATION_ANGLE,   AttitudePanel::OnNutationAngleTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_INIT_SPIN_ANGLE,  AttitudePanel::OnInitialSpinAngleTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_SPIN_RATE,        AttitudePanel::OnSpinRateTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_REFERENCE_VECTOR,        AttitudePanel::OnReferenceVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_CONSTRAINT_VECTOR,       AttitudePanel::OnConstraintVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,   AttitudePanel::OnBodyAlignmentVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR,  AttitudePanel::OnBodyConstraintVectorTextUpdate)
+   EVT_COMBOBOX(ID_CB_STATE,              AttitudePanel::OnStateTypeSelection)
+   EVT_COMBOBOX(ID_CB_STATE_RATE,         AttitudePanel::OnStateTypeRateSelection)
+   EVT_COMBOBOX(ID_CB_SEQ,                AttitudePanel::OnEulerSequenceSelection)
+   EVT_COMBOBOX(ID_CB_COORDSYS,           AttitudePanel::OnCoordinateSystemSelection)
+   EVT_COMBOBOX(ID_CB_MODEL,              AttitudePanel::OnAttitudeModelSelection)
+   EVT_COMBOBOX(ID_CB_REFERENCE_BODY,     AttitudePanel::OnReferenceBodySelection)
+   EVT_COMBOBOX(ID_CB_MODE_OF_CONSTRAINT, AttitudePanel::OnModeOfConstraintSelection)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -142,6 +157,23 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    modelModified         = false;
    
    ResetStateFlags("Both");   
+   
+   precessingSpinnerDataLoaded  = false;  // LOJ: Added, this flag tells whether data is loaded or not
+   spinAxisModified             = false;  // LOJ: Added, this flag is for all 3 components
+   nutRefVecModified            = false;  // LOJ: Added, this flag is for all 3 components
+   initPrecAngleModified        = false;
+   precessionRateModified       = false;
+   nutationAngleModified        = false;
+   initSpinAngleModified        = false;
+   spinRateModified             = false;
+
+   nadirPointingDataLoaded      = false;  // WCS: Added, this flag tells whether data is loaded or not
+   attRefBodyModified           = false;
+   modeOfConstraintModified     = false;
+   refVectorModified            = false;
+   constraintVectorModified     = false;
+   bodyAlignVectorModified      = false;
+   bodyConstraintVectorModified = false;
 
    dataChanged = false;
    canClose    = true;
@@ -158,6 +190,7 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 AttitudePanel::~AttitudePanel()
 {
    theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
+   theGuiManager->UnregisterComboBox("CelestialBody", referenceBodyComboBox);
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
@@ -212,10 +245,19 @@ void AttitudePanel::Create()
    // get list of models and put them into the combo box
    modelArray = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATTITUDE);
    unsigned int modelSz = modelArray.size();
+   
+   //======================================================================
+   //LOJ: Just for testing
+   // It should appear automatically when new model is added to factory
+   // @todo - Remove this when you integrate with new attitude model
+//   modelArray.push_back("PrecessingSpinner");
+//   modelSz++;
+   //======================================================================
    attitudeModelArray = new wxString[modelSz];
    for (x = 0; x < modelSz; ++x)
       attitudeModelArray[x] = wxT(modelArray[x].c_str());
-
+   
+   
    config1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Model"),
                         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
@@ -375,26 +417,304 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Set data on the SPICE tab."),
                         wxDefaultPosition, wxSize(staticTextWidth,20), 0); //wxDefaultSize, 0);
 
+   //======================================================================
+   //LOJ: Shows how to create text label and text ctrl
+   //======================================================================
+   // Create body spin axis text label
+   spinAxisLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Body Spin Axis"), wxDefaultPosition, wxDefaultSize, 0);
+   // Create body spin axis text ctrl
+   spinAxis1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   spinAxis2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   spinAxis3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   
+   // Create nutation reference vector text label
+   nutRefVecLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Nutation Reference Vector"), wxDefaultPosition, wxDefaultSize, 0);
+   // Create nutation reference vector text ctrl
+   nutRefVec1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   nutRefVec2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   nutRefVec3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   
+   //LOJ: @todo - Add angles/rates data here
+   //======================================================================
+   // Create labels and text ctrls for other angles and rates
+   initPrecAngleLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Initial Precession Angle"), wxDefaultPosition, wxDefaultSize, 0);
+   initPrecAngleUnits =
+      new wxStaticText(this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
 
-   #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage
-         ("AttitudePanel::Create() Creating wxString objects\n");
-   #endif
-      
-      
+   initPrecAngleTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_INIT_PREC_ANGLE, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   precessionRateLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Precession Rate"), wxDefaultPosition, wxDefaultSize, 0);
+   precessionRateUnits =
+      new wxStaticText(this, ID_TEXT, wxT("deg/sec"), wxDefaultPosition, wxDefaultSize, 0);
+   precessionRateTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_PRECESSION_RATE, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   nutationAngleLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Nutation Angle"), wxDefaultPosition, wxDefaultSize, 0);
+   nutationAngleUnits =
+      new wxStaticText(this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+   nutationAngleTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_NUTATION_ANGLE, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   initSpinAngleLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Initial Spin Angle"), wxDefaultPosition, wxDefaultSize, 0);
+   initSpinAngleUnits =
+      new wxStaticText(this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+   initSpinAngleTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_INIT_SPIN_ANGLE, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   spinRateLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Spin Rate"), wxDefaultPosition, wxDefaultSize, 0);
+   spinRateUnits =
+      new wxStaticText(this, ID_TEXT, wxT("deg/sec"), wxDefaultPosition, wxDefaultSize, 0);
+   spinRateTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_SPIN_RATE, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   // Now add the NadirPointing widgets
+   referenceVectorLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Reference Vector"), wxDefaultPosition, wxDefaultSize, 0);
+   refVectorXTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   refVectorYTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   refVectorZTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   constraintVectorLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Constraint Vector"), wxDefaultPosition, wxDefaultSize, 0);
+   constraintVectorXTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   constraintVectorYTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   constraintVectorZTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyAlignVectorLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Body Alignment Vector"), wxDefaultPosition, wxDefaultSize, 0);
+   bodyAlignVectorXTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyAlignVectorYTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyAlignVectorZTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyConstraintVectorLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Body Constraint Vector"), wxDefaultPosition, wxDefaultSize, 0);
+   bodyConstraintVectorXTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyConstraintVectorYTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   bodyConstraintVectorZTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   // Reference Body must be a Celestial Body
+   attRefBodyLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Reference Body"),
+         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
+   referenceBodyComboBox =  theGuiManager->GetCelestialBodyComboBox(this, ID_CB_REFERENCE_BODY,
+      wxDefaultSize);
+   referenceBodyComboBox->SetToolTip(pConfig->Read(_T("ReferenceBodyHint")));
+
+   StringArray modes = Attitude::GetModesOfConstraint();
+   unsigned int modesSz = modes.size();
+   modeOfConstraintArray = new wxString[modesSz];
+   for (x = 0; x < modesSz; ++x)
+      modeOfConstraintArray[x] = wxT(modes[x].c_str());
+
+   modeOfConstraintLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mode of Constraint"),
+         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
+   modeOfConstraintComboBox =
+         new wxComboBox( this, ID_CB_MODE_OF_CONSTRAINT, wxT(modeOfConstraintArray[0]),
+            wxDefaultPosition, wxDefaultSize, modesSz, modeOfConstraintArray,
+            wxCB_DROPDOWN|wxCB_READONLY );
+   modeOfConstraintComboBox->SetToolTip(pConfig->Read(_T("ModeOfConstraintHint")));
+
+
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage(
          "AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
    
    Integer bsize = 2; // border size
-   // wx*Sizers   
+   
+   // wx*Sizers
    wxBoxSizer *boxSizer1 = new wxBoxSizer(wxHORIZONTAL);
-
    //GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
    GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-//   GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   //GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
    boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   
+   
+   //======================================================================
+   //LOJ: Shows how to create sizers and add controls
+   //======================================================================   
+   // Create 3 column flex grid sizer for body spin axis text ctrl
+   wxFlexGridSizer *spinAxisTCSizer = new wxFlexGridSizer(3);
+   spinAxisTCSizer->Add(spinAxis1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   spinAxisTCSizer->Add(spinAxis2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   spinAxisTCSizer->Add(spinAxis3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   // Create 3 column flex grid sizer for nutation reference vector text ctrl
+   wxFlexGridSizer *nutRefVecTCSizer = new wxFlexGridSizer(3);
+   nutRefVecTCSizer->Add(nutRefVec1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nutRefVecTCSizer->Add(nutRefVec2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nutRefVecTCSizer->Add(nutRefVec3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   // Create vertical box sizer for body spin axis label and text ctrl
+   wxBoxSizer *spinAxisSizer = new wxBoxSizer(wxVERTICAL);
+   spinAxisSizer->Add(spinAxisLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   spinAxisSizer->Add(spinAxisTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   // Create vertical box sizer for nutation reference vector
+   wxBoxSizer *nutRefVecSizer = new wxBoxSizer(wxVERTICAL);
+   nutRefVecSizer->Add(nutRefVecLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   nutRefVecSizer->Add(nutRefVecTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   // Create static box sizer for all body spin axis items
+   GmatStaticBoxSizer *spinAxisGroupSizer
+      = new GmatStaticBoxSizer(wxVERTICAL, this, "Vectors");
+   spinAxisGroupSizer->Add(spinAxisSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   spinAxisGroupSizer->Add(nutRefVecSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   wxFlexGridSizer *precSpinAnglesRatesSizer = new wxFlexGridSizer(3,5);
+   precSpinAnglesRatesSizer->Add(initPrecAngleLabel, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(initPrecAngleTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(initPrecAngleUnits, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(precessionRateLabel, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(precessionRateTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(precessionRateUnits, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(nutationAngleLabel, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(nutationAngleTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(nutationAngleUnits, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(initSpinAngleLabel, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(initSpinAngleTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(initSpinAngleUnits, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(spinRateLabel, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(spinRateTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   precSpinAnglesRatesSizer->Add(spinRateUnits, 0, wxALIGN_LEFT|wxALL, bsize );
+
+   // Create static box sizer for all precessing spinner angles and rates
+   GmatStaticBoxSizer *precSpinAnglesRatesGroupSizer
+      = new GmatStaticBoxSizer(wxVERTICAL, this, "Angles and Rates");
+   precSpinAnglesRatesGroupSizer->Add(precSpinAnglesRatesSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create precessing spinner sizer for spin axis and angles/rates
+   precessingSpinnerSizer = new wxBoxSizer(wxVERTICAL);
+   precessingSpinnerSizer->Add(spinAxisGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   precessingSpinnerSizer->Add(precSpinAnglesRatesGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   //LOJ: - Add nutRefVecGroupSizer here
+   //precessingSpinnerSizer->Add(nutRefVecGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   // Create 3 column flex grid sizer for reference vector
+   wxFlexGridSizer *refVectorTCSizer = new wxFlexGridSizer(3);
+   refVectorTCSizer->Add(refVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   refVectorTCSizer->Add(refVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   refVectorTCSizer->Add(refVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create 3 column flex grid sizer for constraint vector
+   wxFlexGridSizer *conVectorTCSizer = new wxFlexGridSizer(3);
+   conVectorTCSizer->Add(constraintVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   conVectorTCSizer->Add(constraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   conVectorTCSizer->Add(constraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create 3 column flex grid sizer for body alignment vector
+   wxFlexGridSizer *bodyAlignVectorTCSizer = new wxFlexGridSizer(3);
+   bodyAlignVectorTCSizer->Add(bodyAlignVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   bodyAlignVectorTCSizer->Add(bodyAlignVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   bodyAlignVectorTCSizer->Add(bodyAlignVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create 3 column flex grid sizer for body constraint vector
+   wxFlexGridSizer *bodyConstraintVectorTCSizer = new wxFlexGridSizer(3);
+   bodyConstraintVectorTCSizer->Add(bodyConstraintVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   bodyConstraintVectorTCSizer->Add(bodyConstraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   bodyConstraintVectorTCSizer->Add(bodyConstraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create vertical box sizer for reference vector label and text ctrl
+   wxBoxSizer *refVectorSizer = new wxBoxSizer(wxVERTICAL);
+   refVectorSizer->Add(referenceVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   refVectorSizer->Add(refVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create vertical box sizer for constraint vector label and text ctrl
+   wxBoxSizer *conVectorSizer = new wxBoxSizer(wxVERTICAL);
+   conVectorSizer->Add(constraintVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   conVectorSizer->Add(conVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create vertical box sizer for body alignment vector label and text ctrl
+   wxBoxSizer *bodyAlignVectorSizer = new wxBoxSizer(wxVERTICAL);
+   bodyAlignVectorSizer->Add(bodyAlignVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   bodyAlignVectorSizer->Add(bodyAlignVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Create vertical box sizer for body alignment vector label and text ctrl
+   wxBoxSizer *bodyConstraintVectorSizer = new wxBoxSizer(wxVERTICAL);
+   bodyConstraintVectorSizer->Add(bodyConstraintVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   bodyConstraintVectorSizer->Add(bodyConstraintVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create horizontal box sizer for reference body label and combobox
+   wxBoxSizer *referenceBodySizer = new wxBoxSizer(wxHORIZONTAL);
+   referenceBodySizer->Add(attRefBodyLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   referenceBodySizer->Add(referenceBodyComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create horizontal box sizer for mode of constraint label and combobox
+   wxBoxSizer *modeOfConstraintSizer = new wxBoxSizer(wxHORIZONTAL);
+   modeOfConstraintSizer->Add(modeOfConstraintLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   modeOfConstraintSizer->Add(modeOfConstraintComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create static box sizer for nadir pointing reference body and mode of constraint
+   GmatStaticBoxSizer *nadirPtBodyAndModeGroupSizer
+      = new GmatStaticBoxSizer(wxVERTICAL, this, "Body and Mode");
+   nadirPtBodyAndModeGroupSizer->Add(referenceBodySizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtBodyAndModeGroupSizer->Add(modeOfConstraintSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create static box sizer for all nadir pointing vector items
+   GmatStaticBoxSizer *nadirPtVectorsGroupSizer
+      = new GmatStaticBoxSizer(wxVERTICAL, this, "Vectors");
+   nadirPtVectorsGroupSizer->Add(refVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtVectorsGroupSizer->Add(conVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtVectorsGroupSizer->Add(bodyAlignVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtVectorsGroupSizer->Add(bodyConstraintVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Create nadir pointing sizer for vectors
+   nadirPointingSizer = new wxBoxSizer(wxVERTICAL);
+   nadirPointingSizer->Add(nadirPtBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPointingSizer->Add(nadirPtVectorsGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//   nadirPointingSizer->Add(nadirPtRefBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // Add to right box sizer
+   boxSizer3->Add(precessingSpinnerSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Hide(precessingSpinnerSizer);
+   // Add to right box sizer
+   boxSizer3->Add(nadirPointingSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Hide(nadirPointingSizer);
+   //======================================================================
+   
+   
+   
    attitudeSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Initial Conditions" );
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
@@ -544,9 +864,20 @@ void AttitudePanel::LoadData()
       coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
-
-//      DisplayDataForModel(attitudeModel);
       
+      //DisplayDataForModel(attitudeModel);
+      
+      //LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
+      if (attitudeModel == "PrecessingSpinner")
+         LoadPrecessingSpinnerData();
+      else if (attitudeModel == "NadirPointing")
+      {
+         LoadNadirPointingData();
+         #ifdef DEBUG_ATTITUDE_PANEL
+            MessageInterface::ShowMessage("   NadirPointing data loaded\n");
+         #endif
+      }
+
       if (attStateType == "EulerAngles")
       {
          Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
@@ -610,7 +941,13 @@ void AttitudePanel::LoadData()
          DisplayAngularVelocity();
       }
 
+      #ifdef DEBUG_ATTITUDE_PANEL
+         MessageInterface::ShowMessage("   calling DisplayDataForModel\n");
+      #endif
       DisplayDataForModel(attitudeModel);
+      #ifdef DEBUG_ATTITUDE_PANEL
+         MessageInterface::ShowMessage("   AFTER DisplayDataForModel\n");
+      #endif
 
       dataChanged = false;
    }
@@ -646,7 +983,7 @@ void AttitudePanel::SaveData()
             (stateRateModified? "true" : "false"));
       MessageInterface::ShowMessage("   attStateType = %s\n", attStateType.c_str());
    #endif
-   
+
    if (!ValidateState("Both"))
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, +
@@ -691,7 +1028,22 @@ void AttitudePanel::SaveData()
       if (!useAttitude)
         MessageInterface::ShowMessage("   Attitude pointer is NULL\n");
    #endif
-
+      
+   //LOJ: Save data to the base attitude object
+   if (attitudeModel == "PrecessingSpinner")
+   {
+      SavePrecessingSpinnerData(useAttitude);
+      if (canClose) 
+         dataChanged = false;
+//      return;
+   }
+   else if (attitudeModel == "NadirPointing")
+   {
+      SaveNadirPointingData(useAttitude);
+      if (canClose)
+         dataChanged = false;
+   }
+   
    bool canModifyCS    = useAttitude->CSModifyAllowed();
    bool canSetAttitude = useAttitude->SetInitialAttitudeAllowed();
    try
@@ -1279,6 +1631,10 @@ void AttitudePanel::HideInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 void AttitudePanel::ShowInitialAttitudeAndRate()
 {
+   //LOJ: Added to hide precessing spinner data
+   boxSizer3->Hide(precessingSpinnerSizer);
+   boxSizer3->Hide(nadirPointingSizer);
+   
    boxSizer3->Show(attitudeSizer, true);
    boxSizer3->Show(attRateSizer, true);
 
@@ -1387,6 +1743,32 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
 
    boxSizer3->Layout();
    Refresh();
+}
+
+//LOJ: Added
+//------------------------------------------------------------------------------
+// void ShowPrecessingSpinnerData()
+//------------------------------------------------------------------------------
+void AttitudePanel::ShowPrecessingSpinnerData()
+{
+   //MessageInterface::ShowMessage("AttitudePanel::ShowPrecessingSpinnerData() entered\n");
+   // Hide initial attitude and rate
+   HideInitialAttitudeAndRate();
+   boxSizer3->Hide(nadirPointingSizer);
+   boxSizer3->Show(precessingSpinnerSizer);
+   boxSizer3->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowNadirPointingData()
+//------------------------------------------------------------------------------
+void AttitudePanel::ShowNadirPointingData()
+{
+   // Hide initial attitude and rate
+   HideInitialAttitudeAndRate();
+   boxSizer3->Hide(precessingSpinnerSizer);
+   boxSizer3->Show(nadirPointingSizer);
+   boxSizer3->Layout();
 }
 
 //------------------------------------------------------------------------------
@@ -1499,9 +1881,25 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
                            CreateObject(modelType, "", 0);
 
-   // Show everything that should be shown, then enable it all
-   ShowInitialAttitudeAndRate();
-   EnableAll();
+   //LOJ: Modified to show precessing spinner data
+   if (modelType == "PrecessingSpinner")
+   {
+      if (!precessingSpinnerDataLoaded)
+         LoadPrecessingSpinnerData();
+      ShowPrecessingSpinnerData();
+   }
+   else if (modelType == "NadirPointing")
+   {
+      if (!nadirPointingDataLoaded)
+         LoadNadirPointingData();
+      ShowNadirPointingData();
+   }
+   else
+   {
+      // Show everything that should be shown, then enable it all
+      ShowInitialAttitudeAndRate();
+      EnableAll();
+   }
    if (!tmpAttitude->CSModifyAllowed())
    {
       coordSysComboBox->Disable();
@@ -1667,6 +2065,127 @@ void AttitudePanel::OnStateRateTextUpdate(wxCommandEvent &event)
    }
 }
 
+//LOJ: Added to trigger new value
+//------------------------------------------------------------------------------
+// void AttitudePanel::OnSpinAxisTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnSpinAxisTextUpdate(wxCommandEvent &event)
+{
+   spinAxisModified = true;
+   dataChanged      = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//LOJ: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnNutationRefVectorTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnNutationRefVectorTextUpdate(wxCommandEvent &event)
+{
+   nutRefVecModified = true;
+   dataChanged       = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnInitialPrecessionAngleTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnInitialPrecessionAngleTextUpdate(wxCommandEvent &event)
+{
+   initPrecAngleModified = true;
+   dataChanged           = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnPrecessionRateTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnPrecessionRateTextUpdate(wxCommandEvent &event)
+{
+   precessionRateModified = true;
+   dataChanged            = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnNutationAngleTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnNutationAngleTextUpdate(wxCommandEvent &event)
+{
+   nutationAngleModified = true;
+   dataChanged           = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnInitialSpinAngleTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnInitialSpinAngleTextUpdate(wxCommandEvent &event)
+{
+   initSpinAngleModified = true;
+   dataChanged           = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnSpinRateTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnSpinRateTextUpdate(wxCommandEvent &event)
+{
+   spinRateModified = true;
+   dataChanged      = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnReferenceVectorTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnReferenceVectorTextUpdate(wxCommandEvent &event)
+{
+   refVectorModified = true;
+   dataChanged       = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnConstraintVectorTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnConstraintVectorTextUpdate(wxCommandEvent &event)
+{
+   constraintVectorModified = true;
+   dataChanged              = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnBodyAlignmentVectorTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnBodyAlignmentVectorTextUpdate(wxCommandEvent &event)
+{
+   bodyAlignVectorModified = true;
+   dataChanged             = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//WCS: Added to trigger new value
+//------------------------------------------------------------------------------
+// void OnBodyConstraintVectorTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnBodyConstraintVectorTextUpdate(wxCommandEvent &event)
+{
+   bodyConstraintVectorModified = true;
+   dataChanged                  = true;
+   theScPanel->EnableUpdate(true);
+}
+
 //------------------------------------------------------------------------------
 // void OnCoordinateSystemSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -1739,6 +2258,48 @@ void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
     }
 
     DisplayDataForModel(newModel);
+}
+
+//------------------------------------------------------------------------------
+// void OnReferenceBodySelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user updates the reference body.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
+void AttitudePanel::OnReferenceBodySelection(wxCommandEvent &event)
+{
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::OnReferenceBodySelection() entered\n");
+   #endif
+//    std::string newBody   = referenceBodyComboBox->GetValue().c_str();
+    attRefBodyModified    = true;
+    dataChanged           = true;
+    theScPanel->EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnModeOfConstraintSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles case when user updates the mode of constraint.
+ *
+ * @param event  the wxCommandEvent to be handled
+ *
+ */
+//------------------------------------------------------------------------------
+void AttitudePanel::OnModeOfConstraintSelection(wxCommandEvent &event)
+{
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::OnModeOfConstraintSelection() entered\n");
+   #endif
+//   std::string newMode      = modeOfConstraintComboBox->GetValue().c_str();
+   modeOfConstraintModified = true;
+   dataChanged              = true;
+   theScPanel->EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -2299,6 +2860,328 @@ bool AttitudePanel::DisplayAngularVelocity()
    return retval;
 }
 
+//LOJ: Addded
+//------------------------------------------------------------------------------
+// void LoadPrecessingSpinnerData()
+//------------------------------------------------------------------------------
+void AttitudePanel::LoadPrecessingSpinnerData()
+{
+   #ifdef DEBUG_PRECESSING_SPINNER
+      MessageInterface::ShowMessage("AttitudePanel::LoadPrecessingSpinnerData() entered\n");
+   #endif
+   try
+   {
+      //LOJ: @todo
+      // Use theAttitude->GetRealParameter() to get value and set to spin axis text ctrl
+      // For example
+      //spinAxis1TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("SpinAxis1"));
+      
+      // Just for testing
+      spinAxis1TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisX")));
+      spinAxis2TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisY")));
+      spinAxis3TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisZ")));
+
+      nutRefVec1TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("NutationReferenceVectorX")));
+      nutRefVec2TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("NutationReferenceVectorY")));
+      nutRefVec3TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("NutationReferenceVectorZ")));
+
+      initPrecAngleTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("InitialPrecessionAngle")));
+      precessionRateTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("PrecessionRate")));
+      nutationAngleTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("NutationAngle")));
+      initSpinAngleTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("InitialSpinAngle")));
+      spinRateTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("SpinRate")));
+
+      precessingSpinnerDataLoaded = true;
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SavePrecessingSpinnerData(Attitude *useAttitude)
+//------------------------------------------------------------------------------
+void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
+{
+   #ifdef DEBUG_PRECESSING_SPINNER
+      MessageInterface::ShowMessage("AttitudePanel::SavePrecessingSpinnerData() entered\n");
+   #endif
+   canClose = true;
+   
+   //LOJ: @todo
+   // Use theAttitude->SetRealParameter() to set value to attitude object
+   // In PrecessingSpinner::SetRealParameter(), do the range checking
+   //    if range checking failed, throw an exception so that it can be
+   //    caught here
+   try
+   {
+      bool        success = true;
+      std::string strVal, strValX, strValY, strValZ;
+      Real        theReal, theX, theY, theZ;
+      // Set new spin axis value
+      if (spinAxisModified)
+      {
+         strValX = (spinAxis1TextCtrl->GetValue()).c_str();
+         strValY = (spinAxis2TextCtrl->GetValue()).c_str();
+         strValZ = (spinAxis3TextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "BodySpinAxisX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "BodySpinAxisY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "BodySpinAxisZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("BodySpinAxisX", theX);
+            useAttitude->SetRealParameter("BodySpinAxisY", theY);
+            useAttitude->SetRealParameter("BodySpinAxisZ", theZ);
+            spinAxisModified       = false;
+         }
+         else
+            success = false;
+      }
+
+      if (nutRefVecModified)
+      {
+         strValX = (nutRefVec1TextCtrl->GetValue()).c_str();
+         strValY = (nutRefVec2TextCtrl->GetValue()).c_str();
+         strValZ = (nutRefVec3TextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "NutationReferenceVectorX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "NutationReferenceVectorY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "NutationReferenceVectorZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("NutationReferenceVectorX", theX);
+            useAttitude->SetRealParameter("NutationReferenceVectorY", theY);
+            useAttitude->SetRealParameter("NutationReferenceVectorZ", theZ);
+            nutRefVecModified      = false;
+         }
+         else
+            success = false;
+      }
+
+      if (initPrecAngleModified)
+      {
+         strVal = (initPrecAngleTextCtrl->GetValue()).c_str();
+         if (theScPanel->CheckReal(theReal, strVal, "InitialPrecessionAngle", "Real Number"))
+         {
+            useAttitude->SetRealParameter("InitialPrecessionAngle", theReal);
+            initPrecAngleModified  = false;
+         }
+         else
+            success = false;
+      }
+
+      if (precessionRateModified)
+      {
+         strVal = (precessionRateTextCtrl->GetValue()).c_str();
+         if (theScPanel->CheckReal(theReal, strVal, "PrecessionRate", "Real Number"))
+         {
+            useAttitude->SetRealParameter("PrecessionRate", theReal);
+            precessionRateModified = false;
+         }
+         else
+            success = false;
+      }
+
+      if (nutationAngleModified)
+      {
+         strVal = (nutationAngleTextCtrl->GetValue()).c_str();
+         if (theScPanel->CheckReal(theReal, strVal, "NutationAngle", "Real Number"))
+         {
+            useAttitude->SetRealParameter("NutationAngle", theReal);
+            nutationAngleModified  = false;
+         }
+         else
+            success = false;
+      }
+
+      if (initSpinAngleModified)
+      {
+         strVal = (initSpinAngleTextCtrl->GetValue()).c_str();
+         if (theScPanel->CheckReal(theReal, strVal, "InitialSpinAngle", "Real Number"))
+         {
+            useAttitude->SetRealParameter("InitialSpinAngle", theReal);
+            initSpinAngleModified  = false;
+         }
+         else
+            success = false;
+      }
+
+      if (spinRateModified)
+      {
+         strVal = (spinRateTextCtrl->GetValue()).c_str();
+         if (theScPanel->CheckReal(theReal, strVal, "SpinRate", "Real Number"))
+         {
+            useAttitude->SetRealParameter("SpinRate", theReal);
+            spinRateModified       = false;
+         }
+         else
+            success = false;
+      }
+
+      if (success)
+      {
+         // do I need to do something here?
+      }
+   }
+   catch (BaseException &ex)
+   {
+      canClose    = false;
+      dataChanged = true;
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void LoadNadirPointingData()
+//------------------------------------------------------------------------------
+void AttitudePanel::LoadNadirPointingData()
+{
+   #ifdef DEBUG_NADIR_POINTING
+      MessageInterface::ShowMessage("AttitudePanel::LoadNadirPointingData() entered\n");
+   #endif
+   try
+   {
+      refVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorX")));
+      refVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorY")));
+      refVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorZ")));
+      constraintVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorX")));
+      constraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorY")));
+      constraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorZ")));
+      bodyAlignVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorX")));
+      bodyAlignVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorY")));
+      bodyAlignVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorZ")));
+      bodyConstraintVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorX")));
+      bodyConstraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorY")));
+      bodyConstraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorZ")));
+
+      std::string referenceBody  = theAttitude->GetStringParameter("AttitudeReferenceBody");
+      referenceBodyComboBox->SetValue(wxT(referenceBody.c_str()));
+      std::string theMode  = theAttitude->GetStringParameter("ModeOfConstraint");
+      modeOfConstraintComboBox->SetValue(wxT(theMode.c_str()));
+
+      nadirPointingDataLoaded = true;
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SaveNadirPointingData(Attitude *useAttitude)
+//------------------------------------------------------------------------------
+void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
+{
+   #ifdef DEBUG_NADIR_POINTING
+      MessageInterface::ShowMessage("AttitudePanel::SaveNadirPointingData() entered\n");
+   #endif
+   canClose = true;
+
+   try
+   {
+      bool        success = true;
+      std::string strValX, strValY, strValZ;
+      Real        theX, theY, theZ;
+      if (refVectorModified)
+      {
+         strValX = (refVectorXTextCtrl->GetValue()).c_str();
+         strValY = (refVectorYTextCtrl->GetValue()).c_str();
+         strValZ = (refVectorZTextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "ReferenceVectorX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "ReferenceVectorY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "ReferenceVectorZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("ReferenceVectorX", theX);
+            useAttitude->SetRealParameter("ReferenceVectorY", theY);
+            useAttitude->SetRealParameter("ReferenceVectorZ", theZ);
+            refVectorModified      = false;
+         }
+         else
+            success = false;
+      }
+      if (constraintVectorModified)
+      {
+         strValX = (constraintVectorXTextCtrl->GetValue()).c_str();
+         strValY = (constraintVectorYTextCtrl->GetValue()).c_str();
+         strValZ = (constraintVectorZTextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "ConstraintVectorX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "ConstraintVectorY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "ConstraintVectorZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("ConstraintVectorX", theX);
+            useAttitude->SetRealParameter("ConstraintVectorY", theY);
+            useAttitude->SetRealParameter("ConstraintVectorZ", theZ);
+            constraintVectorModified      = false;
+         }
+         else
+            success = false;
+      }
+      if (bodyAlignVectorModified)
+      {
+         strValX = (bodyAlignVectorXTextCtrl->GetValue()).c_str();
+         strValY = (bodyAlignVectorYTextCtrl->GetValue()).c_str();
+         strValZ = (bodyAlignVectorZTextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "BodyAlignmentVectorX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "BodyAlignmentVectorY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "BodyAlignmentVectorZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("BodyAlignmentVectorX", theX);
+            useAttitude->SetRealParameter("BodyAlignmentVectorY", theY);
+            useAttitude->SetRealParameter("BodyAlignmentVectorZ", theZ);
+            bodyAlignVectorModified      = false;
+         }
+         else
+            success = false;
+      }
+      if (bodyConstraintVectorModified)
+      {
+         strValX = (bodyConstraintVectorXTextCtrl->GetValue()).c_str();
+         strValY = (bodyConstraintVectorYTextCtrl->GetValue()).c_str();
+         strValZ = (bodyConstraintVectorZTextCtrl->GetValue()).c_str();
+         // Check if strings are real numbers and convert wxString to Real
+         if ((theScPanel->CheckReal(theX, strValX, "BodyConstraintVectorX", "Real Number")) &&
+             (theScPanel->CheckReal(theY, strValY, "BodyConstraintVectorY", "Real Number")) &&
+             (theScPanel->CheckReal(theZ, strValZ, "BodyConstraintVectorZ", "Real Number")))
+         {
+            useAttitude->SetRealParameter("BodyConstraintVectorX", theX);
+            useAttitude->SetRealParameter("BodyConstraintVectorY", theY);
+            useAttitude->SetRealParameter("BodyConstraintVectorZ", theZ);
+            bodyConstraintVectorModified      = false;
+         }
+         else
+            success = false;
+      }
+
+      if (attRefBodyModified)
+      {
+         std::string newBody = referenceBodyComboBox->GetValue().c_str();
+         useAttitude->SetStringParameter("AttitudeReferenceBody", newBody);
+         attRefBodyModified = false;
+      }
+
+      if (modeOfConstraintModified)
+      {
+         std::string newMode = modeOfConstraintComboBox->GetValue().c_str();
+         useAttitude->SetStringParameter("ModeOfConstraint", newMode);
+         modeOfConstraintModified = false;
+      }
+
+      if (success)
+      {
+         // do I need to do something here?
+      }
+   }
+   catch (BaseException &ex)
+   {
+      canClose    = false;
+      dataChanged = true;
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+   }
+
+}
 
 //------------------------------------------------------------------------------
 // bool UpdateCosineMatrix()

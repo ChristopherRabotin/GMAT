@@ -165,6 +165,8 @@ OBJECTS = \
     attitude/AttitudeException.o \
     attitude/CSFixed.o \
     attitude/Kinematic.o \
+    attitude/NadirPointing.o \
+    attitude/PrecessingSpinner.o \
     attitude/Spinner.o \
     burn/BurnException.o \
     burn/Burn.o \
