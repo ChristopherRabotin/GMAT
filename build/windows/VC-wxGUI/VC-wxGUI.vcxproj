@@ -209,6 +209,8 @@
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\SpiceAttitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Spinner.cpp" />
     <ClCompile Include="..\..\..\src\base\burn\Burn.cpp" />
@@ -847,6 +849,8 @@
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\SpiceAttitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Spinner.hpp" />
     <ClInclude Include="..\..\..\src\base\burn\Burn.hpp" />

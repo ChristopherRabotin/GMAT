@@ -2130,6 +2130,12 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp">
       <Filter>Source Files\base\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4105,6 +4111,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp">
       <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp">
+      <Filter>Source Files\base\attitude</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
