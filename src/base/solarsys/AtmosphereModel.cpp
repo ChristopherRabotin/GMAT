@@ -91,6 +91,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
+   useGeodetic          (false),							// made changes by TUAN NGUYEN
    gha                  (0.0),
    ghaEpoch             (0.0)
 {
@@ -159,6 +160,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
+   useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
    gha                  (0.0),
    ghaEpoch             (0.0)
 {
@@ -209,6 +211,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    geoHeight            = 0.0;
    geoLat               = 0.0;
    geoLong              = 0.0;
+   useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
    gha                  = 0.0;
    ghaEpoch             = 0.0;
 

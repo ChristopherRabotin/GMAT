@@ -174,6 +174,8 @@ protected:
    Real                    geoLat;
    /// Most recent geodetic longitude calculated
    Real                    geoLong;
+   /// Specify geodetic coordinate system or gecentric to be used for calculation		// made changes by TUAN NGUYEN
+   bool                    useGeodetic;													// made changes by TUAN NGUYEN
    /// Most recent GHA calculated
    Real                    gha;
    /// GHA epoch
