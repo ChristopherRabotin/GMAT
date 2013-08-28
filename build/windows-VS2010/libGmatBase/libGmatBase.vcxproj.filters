@@ -1278,6 +1278,12 @@
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp">
+      <Filter>Source Files\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp">
+      <Filter>Source Files\attitude</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2512,6 +2518,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp">
+      <Filter>Source Files\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp">
+      <Filter>Source Files\attitude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
