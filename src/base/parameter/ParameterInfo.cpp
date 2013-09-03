@@ -223,6 +223,18 @@ bool ParameterInfo::IsTimeParameter(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// bool RequiresBodyFixedCS(const std::string &name)
+//------------------------------------------------------------------------------
+bool ParameterInfo::RequiresBodyFixedCS(const std::string &name)
+{
+   if (mRequiresBodyFixedCSMap.find(name) != mRequiresBodyFixedCSMap.end())
+      return mRequiresBodyFixedCSMap[name];
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsForOwnedObject(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsForOwnedObject(const std::string &name)
@@ -339,6 +351,9 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
    // Add time Parameters
    if (isTimeParam)
       mIsTimeParamMap[type] = isTimeParam;
+
+   // Set Requires BodyFixed CS flag to false
+   mRequiresBodyFixedCSMap[type] = false;
    
    // Add owned object dep paramters
    if (depType == GmatParam::OWNED_OBJ)
@@ -371,5 +386,13 @@ void ParameterInfo::Remove(const std::string &name)
 {
    mDepObjMap.erase(name);
    mNumParams = mDepObjMap.size();
+}
+
+//------------------------------------------------------------------------------
+// void SetRequiresBodyFixedCS(const std::string &type, bool flag)
+//------------------------------------------------------------------------------
+void ParameterInfo::SetRequiresBodyFixedCS(const std::string &type, bool flag)
+{
+   mRequiresBodyFixedCSMap[type] = flag;
 }
 

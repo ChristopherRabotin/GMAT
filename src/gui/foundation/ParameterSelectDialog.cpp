@@ -110,6 +110,8 @@ ParameterSelectDialog::ParameterSelectDialog
 
    // Set initial flag for allowing selecting whole object
    mAllowWholeObject = false;
+   // Set initial flag indicating last CoordinateSystem ComboBox has Fixed CS only
+   mLastCSHasFixedOnly = false;
    
    mNumRow = -1;
    mNumCol = -1;
@@ -947,7 +949,7 @@ void ParameterSelectDialog::AddParameter(const wxString &param)
    #endif
    
    // if the parameter string wasn't found in the selected list, insert it
-   if (mSelectedListBox->FindString(param) == wxNOT_FOUND)
+   if (mSelectedListBox->FindString(param, true) == wxNOT_FOUND)
    {
       if (!mAllowMultiSelect)
          mSelectedListBox->Clear();
@@ -958,7 +960,9 @@ void ParameterSelectDialog::AddParameter(const wxString &param)
    else
    {
       mSelectedListBox->SetStringSelection(param);
-      //DisplayWarning("\"" + param + "\"" + " is already selected");
+      #ifdef DEBUG_PARAMETER
+      DisplayWarning("\"" + param + "\"" + " is already selected");
+      #endif
    }
    
    #ifdef DEBUG_PARAMETER
@@ -1576,6 +1580,43 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
       }
       else
       {
+         // Parameter object has not been created at this point,
+         // so query ParameterInfo if it requires BodyFixed CS only
+         bool reqFixedCS = ParameterInfo::Instance()->RequiresBodyFixedCS(property);
+         #ifdef DEBUG_CS
+         MessageInterface::ShowMessage
+            ("   reqFixedCS=%d, mLastCSHasFixedOnly=%d\n   mPreviousCoordSysName='%s', "
+             "mLastCoordSysName='%s\n", reqFixedCS, mLastCSHasFixedOnly,  mPreviousCoordSysName.c_str(),
+             mLastCoordSysName.c_str());
+         #endif
+         if (reqFixedCS)
+         {
+            if (!mLastCSHasFixedOnly)
+            {
+               // Planetodetic Parameters should only show BodyFixed coordinate system
+               // So get the list from the GuiItemManager
+               mCoordSysComboBox->Clear();
+               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
+               // If last coordinate system name used is not in the new list, select first one
+               if (mCoordSysComboBox->FindString(mLastCoordSysName, true) == wxNOT_FOUND)
+               {
+                  mCoordSysComboBox->SetSelection(0);
+                  mLastCoordSysName = mCoordSysComboBox->GetValue();
+               }
+            }
+            mLastCSHasFixedOnly = true;
+         }
+         else
+         {
+            if (mLastCSHasFixedOnly)
+            {
+               // Show all coordinate systems
+               mCoordSysComboBox->Clear();
+               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf(""));
+            }
+            mLastCSHasFixedOnly = false;
+         }
+         
          int blankPos = mCoordSysComboBox->FindString("");
          if (blankPos != wxNOT_FOUND)  mCoordSysComboBox->Delete((unsigned int) blankPos);
          if (mLastCoordSysName == "")

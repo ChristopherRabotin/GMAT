@@ -42,6 +42,7 @@ public:
    bool IsReportable(const std::string &type);
    bool IsSettable(const std::string &type);
    bool IsTimeParameter(const std::string &type);
+   bool RequiresBodyFixedCS(const std::string &type);
    bool IsForOwnedObject(const std::string &type);
    bool IsForAttachedObject(const std::string &type);
    
@@ -51,6 +52,8 @@ public:
             bool isReportable, bool isSettable, bool isTimeParam,
             const std::string &desc);
    void Remove(const std::string &name);
+   
+   void SetRequiresBodyFixedCS(const std::string &type, bool flag);
    
 protected:
 private:
@@ -64,6 +67,7 @@ private:
    std::map<std::string, bool> mIsReportableMap;
    std::map<std::string, bool> mIsSettableMap;
    std::map<std::string, bool> mIsTimeParamMap;
+   std::map<std::string, bool> mRequiresBodyFixedCSMap;
    std::map<std::string, bool> mIsForOwnedObjMap;
    std::map<std::string, bool> mIsForAttachedObjMap;
    StringArray mParamTypes;

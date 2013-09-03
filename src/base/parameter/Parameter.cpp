@@ -159,11 +159,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mIsSettable = isSettable;
    mIsPlottable = isPlottable;
    mIsReportable = isReportable;
+   mRequiresBodyFixedCS = false;
    
    // register parameter names with info
    ParameterInfo::Instance()->
-      Add(typeName, mOwnerType, mOwnedObjectType, instanceName,
-          mDepObj, isPlottable, isReportable, isSettable, isTimeParam, mDesc);
+      Add(typeName, mOwnerType, mOwnedObjectType, instanceName, mDepObj,
+          isPlottable, isReportable, isSettable, isTimeParam, mDesc);
    
    // set parameter count
    parameterCount = ParameterParamCount;
@@ -445,6 +446,23 @@ bool Parameter::IsOwnedObjectDependent() const
 bool Parameter::NeedCoordSystem() const
 {
    return mNeedCoordSystem;
+}
+
+//------------------------------------------------------------------------------
+// bool RequiresBodyFixedCS() const
+//------------------------------------------------------------------------------
+bool Parameter::RequiresBodyFixedCS() const
+{
+   return mRequiresBodyFixedCS;
+}
+
+//------------------------------------------------------------------------------
+// void SetRequiresBodyFixedCS(bool flag)
+//------------------------------------------------------------------------------
+void Parameter::SetRequiresBodyFixedCS(bool flag)
+{
+   mRequiresBodyFixedCS = flag;
+   ParameterInfo::Instance()->SetRequiresBodyFixedCS(typeName, flag);
 }
 
 //------------------------------------------------------------------------------
