@@ -397,6 +397,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\BurnParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BurnReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\CartesianParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp" />
@@ -405,6 +406,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\HardwareParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\HardwareReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\KeplerianParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\NumberWrapper.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ObjectWrapper.cpp" />
@@ -421,6 +423,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\ParameterInfo.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ParameterWrapper.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\PlanetData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\PlanetParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\PlanetReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\RealVar.cpp" />
@@ -799,6 +802,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\BurnParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BurnReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\CartesianParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp" />
@@ -807,6 +811,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\HardwareParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\HardwareReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\KeplerianParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\NumberWrapper.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ObjectWrapper.hpp" />
@@ -826,6 +831,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\ParameterInfo.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ParameterWrapper.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\PlanetData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\PlanetParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\PlanetReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\RealVar.hpp" />
