@@ -266,7 +266,7 @@ void ReportFileSetupPanel::Create()
    //-------------------------------------------------------
    mSelectedListBox =
       new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(200, 150),
-                    emptyList, wxLB_SINGLE);
+                    emptyList, wxLB_SINGLE|wxLB_HSCROLL);
    
    mViewButton = new wxButton( this, ID_BUTTON, wxT("Edit"), 
                                 wxDefaultPosition, wxDefaultSize, 0 );

@@ -147,15 +147,17 @@ public:
    wxArrayString GetAutoGlobalObjectList() { return theAutoGlobalObjectList; }
    
    wxArrayString GetSpacePointList(bool excludeSC = false);
-
+   
    wxArrayString GetAttachedHardwareList(const wxString &scName);
    wxArrayString GetPropertyList(const wxString &objName,
                                  const wxString &ownedObjName = "",
                                  int showOption = SHOW_PLOTTABLE,
                                  bool showSettableOnly = false,
                                  bool forStopCondition = false);
-   
    int GetNumProperty(const wxString &objType);
+   
+   wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType);
+   
    
    //-----------------------------------------------------------------
    //Note: To enables automatic updates when new object is added to

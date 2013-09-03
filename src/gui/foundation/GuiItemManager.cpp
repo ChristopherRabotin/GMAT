@@ -13,6 +13,9 @@
 // Author: Linda Jun
 // Created: 2004/02/06
 //
+// Modified:
+// 2013.08.29 Linda Jun - Changed all wxListBox to show horizontal scrollbar if
+//                        contents are too wide (It works on Windows only). 
 /**
  * Implements GuiItemManager class.
  */
@@ -1891,6 +1894,55 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 
 
 //------------------------------------------------------------------------------
+// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType)
+//------------------------------------------------------------------------------
+/**
+ * Constructs array with CoordinateSystem names with given axes type only.
+ *
+ * @param axesType  Axes type for the coordinate system
+ *                  Use blank "" for retrieving all CoordinateSystem
+ */
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType)
+{
+   #ifdef DEBUG_CS_WITH_AXES
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetCoordSystemWithAxesOf() entered, axesType='%s'\n", axesType.c_str());
+   #endif
+   
+   wxArrayString csList;
+   for (int i=0; i<theNumCoordSys; i++)
+   {
+      std::string csName = theCoordSysList[i].c_str();
+      if (axesType == "")
+      {
+         csList.Add(csName.c_str());
+      }
+      else
+      {
+         // check for axis type
+         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
+         if (cs)
+         {
+            GmatBase *axis = cs->GetOwnedObject(0);
+            if (axis && axis->IsOfType(axesType))
+               csList.Add(csName.c_str());
+         }
+      }
+   }
+   
+   #ifdef DEBUG_CS_WITH_AXES
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetCoordSystemWithAxesOf() returning %d CoordinateSystems\n", csList.size());
+   for (unsigned int i = 0; i < csList.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", csList[i].c_str());
+   #endif
+   
+   return csList;
+}
+
+
+//------------------------------------------------------------------------------
 //  wxComboBox* GetObjectTypeComboBox(wxWindow *parent, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
@@ -2096,10 +2148,13 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
 {
    // combo box for avaliable coordinate system
    
+   // LOJ: numCs is not used in this method
+   #if 0
    int numCs = theNumCoordSys;
    
    if (theNumCoordSys == 0)
       numCs = 3; //loj: ComboBox is too small if 1
+   #endif
    
    wxComboBox *coordSysComboBox;
    if (getMJ2000EqOnly)
@@ -2954,7 +3009,7 @@ wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
    wxArrayString emptyList;
    wxListBox *spacePointListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (addVector)
       spacePointListBox->Append("Vector");
@@ -2999,7 +3054,7 @@ wxListBox* GuiItemManager::GetCelestialPointListBox(wxWindow *parent, wxWindowID
    wxArrayString emptyList;
    wxListBox *celesPointListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -3048,7 +3103,7 @@ wxListBox* GuiItemManager::GetCelestialBodyListBox(wxWindow *parent, wxWindowID 
 {
    wxArrayString emptyList;
    wxListBox *celesBodyListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, emptyList, wxLB_SINGLE | wxLB_SORT);
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -3109,7 +3164,7 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    wxArrayString emptyList;
    wxListBox *spaceObjectListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
 
    // get Formation list
    StringArray fmList =
@@ -3185,12 +3240,12 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
    if (multiSelect)
    {
       spacecraftListBox = new wxListBox(parent, id, wxDefaultPosition, size, 
-                                        emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                        emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       spacecraftListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                        emptyList, wxLB_SINGLE|wxLB_SORT);
+                                        emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    if (excList != NULL && excList->GetCount() > 0)
@@ -3257,12 +3312,12 @@ wxListBox* GuiItemManager::GetImpBurnListBox(wxWindow *parent, wxWindowID id,
    if (multiSelect)
    {
       impBurnListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                     emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                     emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       impBurnListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                     emptyList, wxLB_SINGLE|wxLB_SORT);
+                                     emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    if (excList != NULL && excList->GetCount() > 0)
@@ -3323,12 +3378,12 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    if (multiSelect)
    {
       propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 
-                                      emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                      emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 
-                                      emptyList, wxLB_SINGLE|wxLB_SORT);
+                                      emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    // now append properties
@@ -3469,7 +3524,7 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
    
    wxListBox *plottableParamListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (nameToExclude != "")
    {
@@ -3528,7 +3583,7 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
       
       allUserParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, allUserParamCount,
-                       allUserParamList, wxLB_SINGLE|wxLB_SORT);
+                       allUserParamList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
       
       delete [] allUserParamList;
    }
@@ -3538,7 +3593,7 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
       
       allUserParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                       wxLB_SINGLE|wxLB_SORT);
+                       wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    return allUserParamListBox;
@@ -3564,12 +3619,12 @@ wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID i
    if (multiSelect)
    {
       userVariableListBox = new wxListBox(parent, id, wxDefaultPosition, size, 
-                                          emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                          emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {      
       userVariableListBox = new wxListBox(parent, id, wxDefaultPosition, size, 
-                                          emptyList, wxLB_SINGLE|wxLB_SORT);
+                                          emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    // add to ListBox
@@ -3611,12 +3666,12 @@ wxListBox* GuiItemManager::GetUserStringListBox(wxWindow *parent, wxWindowID id,
    if (multiSelect)
    {
       userStringListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                        emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                        emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       userStringListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                        emptyList, wxLB_SINGLE|wxLB_SORT);
+                                        emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    // add to ListBox
@@ -3658,12 +3713,12 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
    if (multiSelect)
    {
       userArrayListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                       emptyList, wxLB_EXTENDED|wxLB_SORT);
+                                       emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       userArrayListBox = new wxListBox(parent, id, wxDefaultPosition, size,
-                                       emptyList, wxLB_SINGLE|wxLB_SORT);
+                                       emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    // add to ListBox
@@ -3704,13 +3759,13 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
    {       
       userParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, theUserParamList,
-                       wxLB_SINGLE|wxLB_SORT);
+                       wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {       
       userParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                       wxLB_SINGLE|wxLB_SORT);
+                       wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    
    return userParamListBox;
@@ -3730,7 +3785,7 @@ wxListBox* GuiItemManager::GetAttachedHardwareListBox(wxWindow *parent, wxWindow
    wxArrayString emptyList;
    wxListBox *hardwareListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE);
+                    wxLB_SINGLE|wxLB_HSCROLL);
 
    wxArrayString hardwareList = GetAttachedHardwareList(scName);
    
@@ -3765,7 +3820,7 @@ wxListBox* GuiItemManager::GetFuelTankListBox(wxWindow *parent, wxWindowID id,
    wxArrayString emptyList;
    wxListBox *fuelTankListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
 
    //----------------------------------------------------------------------
    #ifdef __EXCLUDE_FUELTANKS_IN_USE__
@@ -3836,7 +3891,7 @@ wxListBox* GuiItemManager::GetThrusterListBox(wxWindow *parent, wxWindowID id,
    wxArrayString emptyList;
    wxListBox *thrusterListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    // It's ok to have the same Thruster in more than one spacecraft isince
    // the Sandbox will clone it
@@ -3874,7 +3929,7 @@ wxListBox* GuiItemManager::GetSensorListBox(wxWindow *parent, wxWindowID id,
    wxArrayString emptyList;
    wxListBox *sensorListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
-                    wxLB_SINGLE|wxLB_SORT);
+                    wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    // It's ok to have the same Sensor in more than one spacecraft isince
    // the Sandbox will clone it
@@ -4234,9 +4289,10 @@ wxSizer* GuiItemManager::CreateParameterSizer
    wxArrayString emptyList;
    
    // make single selection so we can do move up and down
+   // LOJ: Changed to show horizontal scrollbar if contents are too wide (It works on Windows only). 
    *selectedListBox =
       new wxListBox(parent, -1, wxDefaultPosition, wxSize(200, 270), emptyList,
-                    wxLB_SINGLE);
+                    wxLB_SINGLE|wxLB_HSCROLL);
    (*selectedListBox)->SetToolTip(pConfig->Read(_T("SelectedListHint")));
    
    //----- selectedSizer
