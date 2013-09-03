@@ -82,17 +82,38 @@ const std::string  StateConversionUtil::STATE_TYPE_TEXT[StateTypeCount] =
    "SphericalAZFPA",
    "SphericalRADEC",
    "Equinoctial",
+   "ModifiedEquinoctial", // Modified by M.H.
+   "Delaunay",
+   "Planetodetic"
 };
 
 const bool         StateConversionUtil::REQUIRES_CB_ORIGIN[StateTypeCount] =
 {
-      false,
-      true,
-      true,
-      false,
-      false,
-      true,
+   false,
+   true,
+   true,
+   false,
+   false,
+   true,
+   // Modified by M.H.
+   true,
+   true,
+   true
 };
+
+const bool         StateConversionUtil::REQUIRES_FIXED_CS[StateTypeCount] =
+{
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true
+};
+
 
 const std::string StateConversionUtil::ANOMALY_LONG_TEXT[AnomalyTypeCount] =
 {
@@ -190,6 +211,19 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             outState = CartesianToEquinoctial(state, mu);
          }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(state, mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType); 
+            outState = KeplerianToDelaunay(kepl, mu); 
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState = CartesianToPlanetodetic(state);
+         }
          else
          {
             throw UtilityException
@@ -222,6 +256,20 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
             outState           = CartesianToEquinoctial(cartesian, mu);
+         }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToModEquinoctial(cartesian, mu);
+         }
+         else if ( toType == "Delaunay" )// Modified by M.H.
+         {
+            outState = KeplerianToDelaunay(state, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToPlanetodetic(cartesian);
          }
          else
          {
@@ -257,6 +305,20 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
             Rvector6 cartesian = KeplerianToCartesian(mu, keplerian, anomalyType);
             outState           = CartesianToEquinoctial(cartesian, mu);
          }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, keplerian, anomalyType);
+            outState = CartesianToModEquinoctial(cartesian, mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            outState = KeplerianToDelaunay(keplerian, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, keplerian, anomalyType);
+            outState           = CartesianToPlanetodetic(cartesian);
+         }
          else
          {
             throw UtilityException
@@ -267,7 +329,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "SphericalAZFPA")
       {
          Rvector6 cartesian = SphericalAZFPAToCartesian(state);
-
+         
          if (toType == "Cartesian")
          {
             outState = cartesian;
@@ -289,6 +351,19 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             outState           = CartesianToEquinoctial(cartesian, mu);
          }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(cartesian,mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 keplerian = CartesianToKeplerian(mu, cartesian, anomalyType);
+            outState           = KeplerianToDelaunay(keplerian,mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState           = CartesianToPlanetodetic(cartesian);
+         }
          else
          {
             throw UtilityException
@@ -299,7 +374,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "SphericalRADEC")
       {
          Rvector6 cartesian = SphericalRADECToCartesian(state);
-
+         
          if (toType == "Cartesian")
          {
             outState = cartesian;
@@ -320,6 +395,19 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Equinoctial")
          {
             outState           = CartesianToEquinoctial(cartesian, mu);
+         }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(cartesian,mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 keplerian = CartesianToKeplerian(mu, cartesian, anomalyType);
+            outState = KeplerianToDelaunay(keplerian, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState           = CartesianToPlanetodetic(cartesian);
          }
          else
          {
@@ -353,14 +441,159 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             outState = CartesianToSphericalRADEC(cartState);
          }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(cartState, mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 keplerian = CartesianToKeplerian(mu, cartState, anomalyType);
+            outState = KeplerianToDelaunay(keplerian, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState           = CartesianToPlanetodetic(cartState);
+         }
          else
          {
             throw UtilityException
                ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
                 "\". \"" + toType + " is Unknown State Type\n");
          }
-
       }  // fromType == "Equinoctial"
+      else if (fromType == "ModifiedEquinoctial") // Modified by M.H.
+      {
+         Rvector6 cartState = ModEquinoctialToCartesian(state, mu);
+         
+         if (toType == "Cartesian")
+         {
+            outState = cartState;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cartState);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cartState);
+         }
+         else if (toType == "Equinoctial") 
+         {
+            outState = CartesianToEquinoctial(cartState, mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 keplerian = CartesianToKeplerian(mu, cartState, anomalyType);
+            outState = KeplerianToDelaunay(keplerian, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState = CartesianToPlanetodetic(cartState);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "ModifiedEquinoctial"
+      else if (fromType == "Delaunay") // Modified by M.H.
+      {
+         Rvector6 kepl = DelaunayToKeplerian(state, mu);
+         Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         if (toType == "Cartesian")
+         {
+            outState = cart;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cart);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cart);
+         }
+         else if (toType == "Equinoctial") 
+         {
+            outState = CartesianToEquinoctial(cart, mu);
+         }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(cart, mu);
+         }
+         else if (toType == "Planetodetic") // Modified by M.H.
+         {
+            outState = CartesianToPlanetodetic(cart);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Delaunay\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "Delaunay"
+      
+      else if (fromType == "Planetodetic") // Modified by M.H.
+      {
+         Rvector6 cart = PlanetodeticToCartesian(state);
+         
+         if (toType == "Cartesian")
+         {
+            outState = cart;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, cart, anomalyType);
+            
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cart);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cart);
+         }
+         else if (toType == "Equinoctial") 
+         {
+            outState = CartesianToEquinoctial(cart, mu);
+         }
+         else if (toType == "ModifiedEquinoctial") // Modified by M.H.
+         {
+            outState = CartesianToModEquinoctial(cart, mu);
+         }
+         else if (toType == "Delaunay") // Modified by M.H.
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, cart, anomalyType);
+            outState = KeplerianToDelaunay(kepl, mu);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Planetodetic\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "Planetodetic"
       else
       {
          throw UtilityException
@@ -373,20 +606,488 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
    {
       throw ue;
    }
-
+   
    #ifdef DEBUG_STATE_CONVERSION
    MessageInterface::ShowMessage
       ("StateConversionUtil::Convert() returning \n   %s\n", outState.ToString(13).c_str());
    #endif
-
+   
    return outState;
 }
 
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToModEquinoctial(const Rvector6& cartesian, const Real& mu)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Cartesian to ModifiedEquinoctial.
+ *
+ * @param <cartesian>     Cartesian state
+ * @param <mu>            Gravitational constant for the central body
+ *
+ * @return Spacecraft orbit state converted from Cartesian to ModifiedEquinoctial
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesian, const Real& mu)
+{
+   //#ifdef DEBUG_MODEQUINOCTIAL
+      //MessageInterface::ShowMessage("Converting from Cartesian to ModEquinoctial: \n");
+      //MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
+      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   //#endif
+   
+   Real p_mee, f_mee, g_mee, h_mee, k_mee, L_mee; // modequinoctial elements
+   Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
+   Rvector3 vel(cartesian[3], cartesian[4], cartesian[5]);
+   Real rMag = pos.GetMagnitude();
+   Real vMag = vel.GetMagnitude();
+   
+   if (rMag <= 0.0)
+   {
+      throw UtilityException("Cannot convert from Cartesian to Modified Equinoctial - position vector is zero vector.\n");
+   }
+   
+   if (mu < MU_TOL)
+   {
+      throw UtilityException("Cannot convert from Cartesian to Modified Equinoctial - gravitational constant is zero.\n");
+   }
+   
+   Rvector3 hVec = Cross(pos, vel);
+   Real hMag = hVec.GetMagnitude();
+   
+   Rvector3 rHat, vHat, hHat;
+   if ( rMag == 0 )
+   {
+      rHat[0] = 0; rHat[1] = 0; rHat[2] = 0;
+   }
+   else 
+   {
+      rHat = pos.GetUnitVector();
+   }
+   
+   if ( hMag == 0 )
+   {
+      hHat[0] = 0; hHat[1] = 0; hHat[2] = 0;
+      vHat[0] = 0; vHat[1] = 0; vHat[2] = 0;
+   }
+   else
+   {
+      hHat = hVec.GetUnitVector();
+      Real dotpv = pos[0]*vel[0] + pos[1]*vel[1] + pos[2]*vel[2];
+      vHat = ( rMag*vel - dotpv/rMag*pos )/hMag;
+   }
+   
+   Rvector3 eVec=   CartesianToEccVector(mu, pos, vel);
+   
+   p_mee = (hMag * hMag) /mu;
+   
+   if ( p_mee < 0 )
+   {
+      throw UtilityException("Semi-latus rectum has to be greater than 0.\n");
+   }
+   
+   Real j = 1;
+   Real denom = ( 1 + hHat[2]*j );
 
+   if ( Abs(denom) < 1.0E-7 )
+   {
+      std::string warn = "Warning: Singularity may occur during calculate Modified Equinoctial element h and k.";
+      MessageInterface::PopupMessage(Gmat::WARNING_, warn);
+   }
+   else if ( Abs(denom ) < 1.0E-16 )
+   {
+      throw UtilityException("Singularity occurs during calculate Modified Equinoctial element h and k.\n");
+   }
+   
+   // Define modequinoctial coordinate system
+   Rvector3 f;
+   f[0]      =   1.0 - ((hHat[0] * hHat[0]) / denom);
+   f[1]      = - (hHat[0] * hHat[1]) / denom;
+   f[2]      = - hHat[0]*j ;
+   f         = f.GetUnitVector();
+   
+   Rvector3 g = Cross(hHat,f).GetUnitVector();
+   
+   f_mee =   eVec * f;
+   g_mee =   eVec * g;
+   k_mee =   hHat[0] / denom ;
+   h_mee = - hHat[1] / denom ;
 
+   // Calculate True longitude
+   Real sinl = rHat[1] - vHat[0];
+   Real cosl = rHat[0] + vHat[1];
+
+   L_mee = atan2(sinl,cosl);
+   
+   while ( L_mee > TWO_PI )
+   {
+      L_mee -= TWO_PI;
+   }
+   while ( L_mee < 0 )
+   {
+      L_mee += TWO_PI;
+   }
+   
+   L_mee = L_mee * DEG_PER_RAD;
+   
+   return Rvector6(p_mee, f_mee, g_mee, h_mee, k_mee, L_mee);
+   
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu)
+//------------------------------------------------------------------------------
+/**
+ * Converts from ModifiedEquinoctial to Cartesian.
+ *
+ * @param <modequinoctial>     Modified Equinoctial state
+ * @param <mu>              Gravitational constant for the central body
+ *
+ * @return Spacecraft orbit state converted from Modified Equinoctial to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu)
+{
+   //#ifdef DEBUG_MODEQUINOCTIAL
+      //MessageInterface::ShowMessage("Converting from Modified Equinoctial to Cartesian: \n");
+      //MessageInterface::ShowMessage("   input Modified Equinoctial is: %s\n", modequinoctial.ToString().c_str());
+      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   //#endif
+   Rvector3 pos;
+   Rvector3 vel; // Cartesian elements
+
+   Real p_mee= modequinoctial[0];   // Semi-latus rectum
+   Real f_mee= modequinoctial[1];   // projection of eccentricity vector onto x
+   Real g_mee= modequinoctial[2];   // projection of eccentricity vector onto y
+   Real h_mee= modequinoctial[3];   // projection of N onto x
+   Real k_mee= modequinoctial[4];   // projection of N onto y
+   Real L_mee= modequinoctial[5]*RAD_PER_DEG;// True longitude
+
+   Real j = 1; // regrograde factor
+
+   if (mu < MU_TOL)
+   {
+      throw UtilityException("Cannot convert from Modified Equinoctial to Cartesian - gravitational constant is zero.\n");
+   }
+   
+   if ( p_mee < 0 )
+   {
+      throw UtilityException("Cannot convert from Modified Equinoctial to Cartesian: Semi-latus rectum has to be greater than 0");
+   }
+   
+   Real r= p_mee / (1 + f_mee*Cos(L_mee) + g_mee * Sin(L_mee));
+   Real X1= r * Cos(L_mee);
+   Real Y1= r * Sin(L_mee);
+   
+   Real dotX1, dotY1;
+   if ( p_mee == 0)
+   {
+      dotX1= 0;
+      dotY1= 0;
+   }
+   else
+   {
+      dotX1= -Sqrt(mu/p_mee) * ( g_mee + Sin(L_mee) );
+      dotY1= Sqrt(mu/p_mee) * ( f_mee + Cos(L_mee) );
+   }
+   
+   Real alpha2= h_mee*h_mee - k_mee*k_mee;
+   Real s2= 1 + h_mee*h_mee + k_mee*k_mee;
+   
+   Rvector3 f_hat, g_hat;
+   f_hat[0] = (1 + alpha2)/s2;
+   f_hat[1] = (2 * k_mee * h_mee)/s2;
+   f_hat[2] = (-2 * k_mee * j)/s2;
+   
+   g_hat[0] = ( 2 * k_mee * h_mee * j ) /s2;
+   g_hat[1] = ( (1 - alpha2) * j )/s2;
+   g_hat[2] = ( 2 * h_mee ) /s2;
+   
+   pos = X1 * f_hat + Y1 * g_hat;
+   vel = dotX1 * f_hat + dotY1 * g_hat;
+   
+   return Rvector6(pos[0], pos[1], pos[2], vel[0], vel[1], vel[2] );
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 KeplerianToDelaunay(const Rvector6& keplerian, const Real& mu)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Keplerian to Delaunay
+ *
+ * @param <keplerian>Keplerian state
+ * @param <mu>              Gravitational constant for the central body
+ *
+ * @return Spacecraft orbit state converted from Keplerian to Delaunay
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::KeplerianToDelaunay(const Rvector6& keplerian, const Real& mu)
+{
+	Real sma= keplerian[0];
+	Real ecc= keplerian[1];
+	Real inc= keplerian[2]*RAD_PER_DEG;
+	Real ta= keplerian[5]*RAD_PER_DEG;
+
+	if ( ecc < 0.0)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(16);
+      errmsg << "*** Warning *** Eccentricity (" << ecc << ") cannot be less than 0.0.";
+      errmsg << " The sign of the eccentricity has been changed.\n";
+      MessageInterface::ShowMessage(errmsg.str());
+
+      ecc *= -1.0;
+	}
+
+   if ((sma > 0.0) && (ecc > 1.0))
+   {
+      std::stringstream errmsg("");
+      errmsg.precision(16);
+      errmsg << "*** Warning *** Semimajor axis (" << sma << ") cannot be positive if"; 
+      errmsg << " eccentricity (" << ecc << ") is greater than 1.0.";
+      errmsg << " The sign of the semimajor axis has been changed.";
+      errmsg << " If changing orbit from hyperbolic to elliptic, set eccentricity first.\n" << std::endl;
+      MessageInterface::ShowMessage(errmsg.str());
+      sma *= -1.0;
+   }
+   
+   if ((sma < 0.0) && (ecc < 1.0))
+   {
+      std::stringstream errmsg("");
+      errmsg.precision(16);
+      errmsg << "*** Warning *** Semimajor axis (" << sma << ") cannot be negative if ";
+      errmsg << " eccentricity (" << ecc << ") is less than 1.0.";
+      errmsg << " The sign of the semimajor axis has been changed.";
+      errmsg << " If changing orbit from elliptic to hyperbolic, set eccentricity first.\n" << std::endl;
+      MessageInterface::ShowMessage(errmsg.str());
+      
+      sma *= -1.0;
+   }
+   
+   if (mu < MU_TOL)
+   {
+      std::stringstream errmsg("");
+      errmsg.precision(16);
+      errmsg << "Gravitational constant (" << mu << ") is too small to convert"; 
+      errmsg << " from Keplerian to Cartesian state." << std::endl;
+      throw UtilityException(errmsg.str());
+   }
+   else
+   {
+      // Test that radius of periapsis is not too small.
+      Real absA1E = Abs(sma * (1.0 - ecc));
+      if (absA1E < SINGULAR_TOL)
+      {
+         std::stringstream errmsg("");
+         errmsg.precision(16);
+         errmsg << "A nearly singular conic section was encountered while converting from" ;
+         errmsg << "  the Keplerian elements to the Cartesian state. The radius of periapsis(" ;
+         errmsg << absA1E << ") must be greater than 1 meter." << std::endl;
+         throw UtilityException(errmsg.str());
+      }
+      //  Verify that orbit is not too close to a parabola which results in undefined SMA
+      Real oneMinusE = Abs(1.0 - ecc);
+      if (oneMinusE < PARABOLIC_TOL)
+      {
+         std::stringstream errmsg("");
+         errmsg.precision(16);
+         errmsg << "A nearly parabolic orbit";
+         errmsg << " (ECC = " << ecc << ") was encountered";
+         errmsg << " while converting from the Keplerian elements to" ;
+         errmsg << " the Cartesian state.";
+         errmsg << " The Keplerian elements are";
+         errmsg << " undefined for a parabolic orbit." << std::endl;
+         throw UtilityException(errmsg.str());
+      }
+   }
+   
+   if ( ecc > 1.0 )
+   {
+      #ifdef DEBUG_CONVERT_ERRORS
+      MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", ecc);
+      #endif
+      
+      Real possible = PI - ACos(1.0/ecc);
+      
+      while ( ta > PI )ta -= TWO_PI;
+      while ( ta < PI)ta += TWO_PI;
+      
+      if ( Abs(ta ) >= possible )
+      {
+         possible *= DEG_PER_RAD;
+         std::stringstream errmsg;
+           errmsg.precision(12);
+           errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
+           errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
+           errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
+           errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
+           throw UtilityException(errmsg.str());
+      }
+   }
+   
+   Real L_dela= Sqrt(mu * sma);
+   Real G_dela= L_dela * Sqrt(1 - ecc*ecc);
+   Real H_dela= G_dela * Cos(inc);
+   Real ll_dela= TrueToMeanAnomaly(ta,ecc) * DEG_PER_RAD;
+   Real gg_dela= keplerian[4];
+   Real hh_dela= keplerian[3];
+
+   return Rvector6( ll_dela, gg_dela, hh_dela, L_dela, G_dela, H_dela );
+
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 DelaunayToKeplerian(const Rvector6& delaunay, const Real& mu)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Delaunay to Keplerian
+ *
+ * @param <keplerian>Delaunay state
+ * @param <mu>              Gravitational constant for the central body
+ *
+ * @return Spacecraft orbit state converted from Delaunay to Keplerian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::DelaunayToKeplerian(const Rvector6& delaunay, const Real& mu)
+{
+   Real L_dela= delaunay[3];
+   Real G_dela= delaunay[4];
+   Real H_dela= delaunay[5];
+   Real ll_dela= delaunay[0]*RAD_PER_DEG;
+   
+   Real sma= L_dela*L_dela / mu;
+   Real ecc= Sqrt ( 1 - (G_dela/L_dela)*(G_dela/L_dela) );
+   Real inc= ACos(H_dela / G_dela) * DEG_PER_RAD;
+   Real aop= delaunay[1];
+   Real raan= delaunay[2];
+   Real ta= MeanToTrueAnomaly(ll_dela, ecc) * DEG_PER_RAD;
+   
+   return Rvector6( sma, ecc, inc, raan, aop, ta );
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Planetocentric to Cartesian.
+ *
+ * @param <cartesian>     Cartesian state
+ *
+ * @return Spacecraft orbit state converted from Cartesian to Planetodetic
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian)
+{
+   // Convert Cartesian state to Planetocentric state
+   Rvector6 planetocentric= CartesianToSphericalAZFPA(cartesian);
+   
+   Real Req = 6378.1363; // equatorial radius
+   Real f = 0.0033527; // flattening coefficients
+   
+   //Real Req = GetCentralBody()->GetEquatorialRadius();
+   //Real f = GetCentralBody()->GetFlattening();
+   
+   Real rMag = planetocentric[0];
+   Real lon = planetocentric[1]; // longitude
+   Real latg = planetocentric[2] * RAD_PER_DEG; // planetocentric latitude
+   Real vMag = planetocentric[3];
+   Real azi = planetocentric[4];
+   Real vfpa = planetocentric[5]; // vertical flight path angle
+   Real hfpa = 90 - vfpa;// horizontal flight path angle
+   
+   
+   // Convert planetocentric latitude to Planetodetic latitude
+   Real r_z = cartesian[2];
+   Real r_xy = Sqrt(cartesian[0]*cartesian[0] + cartesian[1]*cartesian[1]);
+   Real latd = latg;
+   Real e2 = 2*f - f*f;
+   Real tol = 1;
+   
+   while( tol >= 1e-13)
+   {
+      Real latd_old = latd;
+      Real C = Req / Sqrt( 1 - e2*Sin(latd_old)*Sin(latd_old) );
+      latd = ATan( (r_z + C*e2*Sin(latd_old))/r_xy );
+      
+      tol = Abs(latd - latd_old);
+   }
+   
+   return Rvector6(rMag, lon, latd * DEG_PER_RAD, vMag, azi, hfpa);
+   
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Planetodetic to Cartesian.
+ *
+ * @param <planetodetic>     Planetodetic state
+ *
+ * @return Spacecraft orbit state converted from Planetodetic to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodetic)
+{
+   Real Req = 6378.1363;
+   Real f = 0.0033527;
+   
+   Real rMag = planetodetic[0];
+   Real lon = planetodetic[1] * RAD_PER_DEG;
+   Real latd = planetodetic[2] * RAD_PER_DEG;
+   Real vMag = planetodetic[3];
+   Real azi = planetodetic[4];
+   Real hfpa = planetodetic[5];
+   
+   Real vfpa = 90 - hfpa;
+   
+// convert plantodetic latitude to planetocentric latitude
+   Real e2 = 2*f - f*f;
+   Real tol = 1;
+   Real latg = latd;
+   
+   while(tol >= 1e-13)
+   {
+      Real latg_old = latg;
+      
+      Real x = rMag * Cos(latg_old) * Cos(lon);
+      Real y = rMag * cos(latg_old) * Sin(lon);
+      
+      Real r_xy = Sqrt(x*x + y*y);
+      Real alt = r_xy/Cos(latd) - Req/Sqrt(1-e2*Sin(latd)*Sin(latd));
+      
+      Real Sin2 = Sin(2*latd);
+      Real Sin4 = Sin(4*latd);
+      Real h_hat = alt/Req;
+      Real denom = ( h_hat + 1);
+      
+      latg = latd + (-Sin2/denom)*f + ( (-Sin2)/(2*denom*denom) + (1/(4*denom*denom) + 1/(4*denom))*Sin4 )*f*f;
+      
+      tol = Abs(latg - latg_old);
+   }
+   
+   Rvector6 planetocentric;
+   planetocentric[0] =  rMag; 
+   planetocentric[1] = lon*DEG_PER_RAD;
+   planetocentric[2] = latg*DEG_PER_RAD;
+   planetocentric[3] = vMag;
+   planetocentric[4] = azi;
+   planetocentric[5] = vfpa;
+   
+   // convert planetocentric to cartesian state
+   Rvector6 cartesian = SphericalAZFPAToCartesian(planetocentric);
+   
+   return cartesian;
+}
 
 //---------------------------------------------------------------------------
-//  Rvector6 Convert(Real *state,
+//  Rvector6 Convert(Real mu,
+//                   Real *state,
 //                   const std::string &fromType,
 //                   const std::string &toType,
 //                   Real mu         = GmatSolarSystemDefaults::PLANET_MU[
@@ -1804,7 +2505,7 @@ Real StateConversionUtil::ConvertToTrueAnomaly(const std::string fromType, Real 
  * @return  true anomaly
  */
 //---------------------------------------------------------------------------
-Real StateConversionUtil::ConvertToTrueAnomaly(AnomalyType fromType,       Real taRadians, Real ecc, bool modBy2Pi)
+Real StateConversionUtil::ConvertToTrueAnomaly(AnomalyType fromType, Real taRadians, Real ecc, bool modBy2Pi)
 {
    switch (fromType)
    {
@@ -2405,9 +3106,6 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
 }
 
 
-
-
-
 //------------------------------------------------------------------------------
 // Rvector3 CartesianToEccVector(Real mu, const Rvector3 &pos,
 //                                      const Rvector3 &vel)
@@ -2822,6 +3520,28 @@ bool StateConversionUtil::RequiresCelestialBodyOrigin(const std::string &type)
    for (unsigned int ii = 0; ii < StateTypeCount; ii++)
    {
       if (type == STATE_TYPE_TEXT[ii])  return REQUIRES_CB_ORIGIN[ii];
+   }
+   return false;  // by default
+}
+
+//------------------------------------------------------------------------------
+// bool RequiresFixedCoordinateSystem(const std::string &type)
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the specified state type
+ * requires a fixed coordinate system
+ *
+ * @param <type> State type
+ *
+ * @return flag indicating whether or not the specified state type
+ * requires a fixed coordinate system
+ */
+//------------------------------------------------------------------------------
+bool StateConversionUtil::RequiresFixedCoordinateSystem(const std::string &type)
+{
+   for (unsigned int ii = 0; ii < StateTypeCount; ii++)
+   {
+      if (type == STATE_TYPE_TEXT[ii])  return REQUIRES_FIXED_CS[ii];
    }
    return false;  // by default
 }

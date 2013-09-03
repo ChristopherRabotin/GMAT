@@ -7793,6 +7793,40 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default equinoctial parameters created\n");
    #endif
    
+   // Modified by M.H.
+   // ModEquinoctial parameters
+   CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   CreateParameter("ModEquinoctialF", "DefaultSC.EarthMJ2000Eq.ModEquinoctialF");
+   CreateParameter("ModEquinoctialG", "DefaultSC.EarthMJ2000Eq.ModEquinoctialG");
+   CreateParameter("ModEquinoctialH", "DefaultSC.EarthMJ2000Eq.ModEquinoctialH");
+   CreateParameter("ModEquinoctialK", "DefaultSC.EarthMJ2000Eq.ModEquinoctialK");
+   CreateParameter("TLONG", "DefaultSC.EarthMJ2000Eq.TLONG");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default modequinoctial parameters created\n");
+   #endif
+
+   // Delaunay parameters
+   CreateParameter("Delaunayl", "DefaultSC.EarthMJ2000Eq.Delaunayl");
+   CreateParameter("Delaunayg", "DefaultSC.EarthMJ2000Eq.Delaunayg");
+   CreateParameter("Delaunayh", "DefaultSC.EarthMJ2000Eq.Delaunayh");
+   CreateParameter("DelaunayL", "DefaultSC.EarthMJ2000Eq.DelaunayL");
+   CreateParameter("DelaunayG", "DefaultSC.EarthMJ2000Eq.DelaunayG");
+   CreateParameter("DelaunayH", "DefaultSC.EarthMJ2000Eq.DelaunayH");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default delaunay parameters created\n");
+   #endif
+
+   // Planetodetic parameters
+   CreateParameter("PlanetodeticRMAG", "DefaultSC.EarthMJ2000Eq.PlanetodeticRMAG");
+   CreateParameter("PlanetodeticLON", "DefaultSC.EarthMJ2000Eq.PlanetodeticLON");
+   CreateParameter("PlanetodeticLAT", "DefaultSC.EarthMJ2000Eq.PlanetodeticLAT");
+   CreateParameter("PlanetodeticVMAG", "DefaultSC.EarthMJ2000Eq.PlanetodeticVMAG");
+   CreateParameter("PlanetodeticAZI", "DefaultSC.EarthMJ2000Eq.PlanetodeticAZI");
+   CreateParameter("PlanetodeticHFPA", "DefaultSC.EarthMJ2000Eq.PlanetodeticHFPA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
+   #endif
+
    // Orbital parameters
    CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
    CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");

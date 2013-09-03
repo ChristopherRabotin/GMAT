@@ -439,7 +439,67 @@ void OrbitData::SetReal(Integer item, Real rval)
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MLONG"), rval);
       break;
       
+   // ModifiedEquinoctial;Modified by M.H.
+   case MOD_EQ_P:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemiLatusRectum"), rval);
+      break;
+   case MOD_EQ_F:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialF"), rval);
+      break;
+   case MOD_EQ_G:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialG"), rval);
+      break;
+   case MOD_EQ_H:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialH"), rval);
+      break;
+   case MOD_EQ_K:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialK"), rval);
+      break;
+   case MOD_EQ_TLONG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TLONG"), rval);
+      break;
+
+// Delaunay;Modified by M.H.
+   case DEL_DELA_SL:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayl"), rval);
+      break;
+   case DEL_DELA_SG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayg"), rval);
+      break;
+   case DEL_DELA_SH:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayh"), rval);
+      break;
+   case DEL_DELA_L:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayL"), rval);
+      break;
+   case DEL_DELA_G:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayG"), rval);
+      break;
+   case DEL_DELA_H:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayH"), rval);
+      break;
       
+// Planetodetic;Modified by M.H.
+   case PLD_RMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticRMAG"), rval);
+      break;
+   case PLD_LON:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticLON"), rval);
+      break;
+   case PLD_LAT:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticLAT"), rval);
+      break;
+   case PLD_VMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticVMAG"), rval);
+      break;
+   case PLD_AZI:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticAZI"), rval);
+      break;
+   case PLD_HFPA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticHFPA"), rval);
+      break;
+
+
    default:
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
@@ -673,6 +733,70 @@ Rvector6 OrbitData::GetKepState()
    return mKepState;
 }
 
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetModEquinState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetModEquinState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mModEquinState =
+      StateConversionUtil::Convert(state, "Cartesian", "ModifiedEquinoctial",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   return mModEquinState;
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetDelaState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetDelaState()
+{
+   #ifdef DEBUG_DELAUNAY_STATE
+   MessageInterface::ShowMessage
+      ("OrbitData::GetDelaState() entered, mActualParamName='%s'\n", mActualParamName.c_str());
+   #endif
+   
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mDelaState =
+      StateConversionUtil::Convert(state, "Cartesian", "Delaunay",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   #ifdef DEBUG_DELAUNAY_STATE
+   MessageInterface::ShowMessage
+      ("OrbitData::GetDelaState() returning mDelaState='%s'", mDelaState.ToString().c_str());
+   #endif
+   
+   return mDelaState;
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetPlanetodeticState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetPlanetodeticState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   // Call GetPlanetodeticState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mPlanetodeticState =
+      StateConversionUtil::Convert(state, "Cartesian", "Planetodetic",
+                                   mGravConst, mFlattening, mEqRadius );
+   
+   return mPlanetodeticState;
+}
+
 
 //------------------------------------------------------------------------------
 // Rvector6 GetModKepState()
@@ -747,6 +871,203 @@ Rvector6 OrbitData::GetEquinState()
    
    return mEquinState;
 }
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Real GetModEquinReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves ModifiedEquinoctial element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetModEquinReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetModEquinReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to ModifiedEquinoctial because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case MOD_EQ_P:
+{
+Rvector6 modequiState = GetModEquinState();
+         return modequiState[0];
+}
+   case MOD_EQ_F:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[1];
+      }
+   case MOD_EQ_G:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[2];
+      }
+   case MOD_EQ_H:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[3];
+      }
+   case MOD_EQ_K:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[4];
+      }
+   case MOD_EQ_TLONG:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetModEquinReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Real GetDelaReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Delaunay element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetDelaReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetDelaReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to Delaunay because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case DEL_DELA_SL:
+{
+Rvector6 delaState = GetDelaState();
+         return delaState[0];
+}
+   case DEL_DELA_SG:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[1];
+      }
+   case DEL_DELA_SH:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[2];
+      }
+   case DEL_DELA_L:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[3];
+      }
+   case DEL_DELA_G:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[4];
+      }
+   case DEL_DELA_H:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetDelaReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by M.H. ??
+//------------------------------------------------------------------------------
+// Real GetPlanetodeticReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Planetodetic element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetPlanetodeticReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetPlanetodeticReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetPlanetodeticState();
+
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetPlanetodeticReal() item=%s state=%s\n",
+       item, state.ToString().c_str());
+   #endif
+   
+   switch (item)
+   {
+   case PLD_RMAG:
+{
+Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[0];
+}
+   case PLD_LON:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[1];
+      }
+   case PLD_LAT:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[2];
+      }
+   case PLD_VMAG:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[3];
+      }
+   case PLD_AZI:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[4];
+      }
+   case PLD_HFPA:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetPlanetodeticReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
 
 
 //------------------------------------------------------------------------------

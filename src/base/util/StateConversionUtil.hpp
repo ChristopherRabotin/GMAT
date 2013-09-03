@@ -50,6 +50,9 @@ enum StateType
    SPH_AZFPA,
    SPH_RADEC,
    EQUINOCTIAL,
+   MOD_EQUINOCTIAL, // Modifed by M.H.
+   DELAUNAY,
+   PLANETODETIC,
    StateTypeCount
 };
 
@@ -119,6 +122,15 @@ static Rvector6 SphericalRADECToCartesian(const Rvector6& spherical);
 static Rvector6 KeplerianToModKeplerian(const Rvector6& keplerian);
 static Rvector6 ModKeplerianToKeplerian(const Rvector6& modKeplerian);
 
+static Rvector6 CartesianToModEquinoctial(const Rvector6& cartesian,   const Real& mu); // MODIFIED BY M.H.
+static Rvector6 ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu);
+
+static Rvector6 KeplerianToDelaunay(const Rvector6& keplerian, const Real& mu); // MODIFIED BY M.H.
+static Rvector6 DelaunayToKeplerian(const Rvector6& delaunay, const Real& mu);
+
+static Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian); // MODIFIED BY M.H.
+static Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic);
+
 //------------------------------------------------------------------------------
 // anomaly conversion methods
 //------------------------------------------------------------------------------
@@ -174,6 +186,7 @@ static bool               ValidateValue(const std::string &label,          Real 
 static Integer            GetTypeCount() { return StateTypeCount; }
 static const std::string* GetStateTypeList();
 static bool               RequiresCelestialBodyOrigin(const std::string &type);
+static bool               RequiresFixedCoordinateSystem(const std::string &type);
 static AnomalyType        GetAnomalyType(const std::string &typeStr);
 static bool               IsValidAnomalyType(const std::string &anomType);
 static bool               IsRvValid(Real *r, Real *v);
@@ -209,6 +222,7 @@ static const Integer      MAX_ITERATIONS; // 75
 static const Real         DEFAULT_MU;  // km^3/s^2
 static const std::string  STATE_TYPE_TEXT[StateTypeCount];
 static const bool         REQUIRES_CB_ORIGIN[StateTypeCount];
+static const bool         REQUIRES_FIXED_CS[StateTypeCount];
 
 static const std::string  ANOMALY_LONG_TEXT[AnomalyTypeCount];
 static const std::string  ANOMALY_SHORT_TEXT[AnomalyTypeCount];

@@ -679,7 +679,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 1
    description1 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[0] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, 
                      wxT(""), wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit1"), 
@@ -687,7 +687,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 2
    description2 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[1] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit2"), 
@@ -695,7 +695,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 3
    description3 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[2] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit3"), 
@@ -703,7 +703,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 4
    description4 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[3] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit4"), 
@@ -711,7 +711,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 5    
    description5 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[4] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                                  wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit5"), 
@@ -719,7 +719,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 6
    description6 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(75,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    textCtrl[5] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""),
                                 wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit6"), 
@@ -1529,6 +1529,7 @@ void OrbitPanel::BuildValidStateTypes()
    #endif
 }
 
+
 //------------------------------------------------------------------------------
 // void BuildValidCoordinateSystemList(const std::string &forStateType)
 //------------------------------------------------------------------------------
@@ -1544,19 +1545,21 @@ void OrbitPanel::BuildValidStateTypes()
 void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
 {
    bool reqCBOnly = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
+   bool reqFixedCSOnly = StateConversionUtil::RequiresFixedCoordinateSystem(forStateType);
    #ifdef DEBUG_ORBIT_PANEL_REFRESH
       MessageInterface::ShowMessage("Entering BuildValidCoordinateSystemList with stateType = %s\n",
             forStateType.c_str());
-      MessageInterface::ShowMessage("reqCBOnly      = %s\n", (reqCBOnly? "true" : "false"));
+      MessageInterface::ShowMessage("   reqCBOnly      = %s\n   reqFixedCsOnly = %s\n",
+                                    (reqCBOnly? "true" : "false"), (reqFixedCSOnly? "true" : "false"));
    #endif
-
+      
    // get the names of the coordinate systems (the list may have been updated)
    coordSystemNames.clear();
    wxArrayString csNames = theGuiManager->GetCoordSysList();
    for (Integer ii = 0; ii < (Integer) csNames.GetCount(); ii++)
    {
       #ifdef DEBUG_ORBIT_PANEL_REFRESH
-         MessageInterface::ShowMessage("adding %s to list of coordSystemNames\n", (csNames.Item(ii)).c_str());
+         MessageInterface::ShowMessage("   adding %s to list of coordSystemNames\n", (csNames.Item(ii)).c_str());
       #endif
       coordSystemNames.push_back((csNames.Item(ii)).c_str());
    }
@@ -1568,7 +1571,22 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
    std::string      newCS     = currentCS;
    mCoordSysComboBox->Clear();
 
-   if (reqCBOnly)
+   #ifdef DEBUG_ORBIT_PANEL_REFRESH
+   MessageInterface::ShowMessage("   currentCS = '%s'\n", currentCS.c_str());
+   #endif
+   
+   if (reqFixedCSOnly)
+   {
+      // If current selection is BodyFixed CS, show it; otherwise show the
+      // first BodyFixed CS from the list
+      mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
+      if (mCoordSysComboBox->FindString(currentCS, true) == wxNOT_FOUND)
+         newCS = mCoordSysComboBox->GetString(0);
+      else
+         newCS = currentCS;
+      mCoordSysComboBox->SetValue(newCS.c_str());
+   }
+   else if (reqCBOnly)
    {
       for (Integer ii = 0; ii < (Integer) coordSystemNames.size(); ii++)
       {
@@ -1593,6 +1611,10 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
       mCoordSysComboBox->SetValue(currentCS.c_str());
    }
 
+   #ifdef DEBUG_ORBIT_PANEL_REFRESH
+      MessageInterface::ShowMessage("Leaving BuildValidCoordinateSystemList with stateType = %s\n",
+            forStateType.c_str());
+   #endif
 }
 
 

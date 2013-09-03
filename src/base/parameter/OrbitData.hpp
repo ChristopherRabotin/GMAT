@@ -49,6 +49,10 @@ public:
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
    Rvector6 GetEquinState();
+    // Modified by M.H.
+   Rvector6 GetModEquinState();
+   Rvector6 GetDelaState();
+   Rvector6 GetPlanetodeticState();
    
    void SetReal(Integer item, Real rval);
    void SetRvector6(const Rvector6 &val);
@@ -80,6 +84,16 @@ public:
    Real GetEquinReal(Integer item);
    Real GetEquinReal(const std::string &str);
    
+   // Modified by M.H.
+   Real GetModEquinReal(Integer item);
+   Real GetModEquinReal(const std::string &str);
+
+   Real GetDelaReal(Integer item);
+   Real GetDelaReal(const std::string &str);
+
+   Real GetPlanetodeticReal(Integer item);
+   Real GetPlanetodeticReal(const std::string &str);
+
    const Rmatrix66& GetStmRmat66(Integer item);
    const Rmatrix33& GetStmRmat33(Integer item);
    
@@ -120,7 +134,11 @@ protected:
    Rvector6 mModKepState;
    Rvector6 mSphRaDecState;
    Rvector6 mSphAzFpaState;
-   
+   // Modified by M.H.
+   Rvector6 mModEquinState;
+   Rvector6 mDelaState;
+   Rvector6 mPlanetodeticState;
+
    Rmatrix66  mSTM;
    Rmatrix33  mSTMSubset;
    
@@ -175,7 +193,18 @@ protected:
    // Orbit STM items
    enum {ORBIT_STM = Item7Count, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D,
          Item8Count};
+   // Modified by M.H.
+   // ModifiedEquinoctial items
+   enum {MOD_EQ_P = Item8Count, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, Item9Count};
    
+   // Modified by M.H.
+   // Delaunay items
+   enum {DEL_DELA_SL = Item9Count, DEL_DELA_SG, DEL_DELA_SH, DEL_DELA_L, DEL_DELA_G, DEL_DELA_H, Item10Count};
+
+   // Modified by M.H.
+   // Planetodetic items
+   enum {PLD_RMAG = Item10Count, PLD_LON, PLD_LAT, PLD_VMAG, PLD_AZI, PLD_HFPA, Item11Count};
+
    enum
    {
       SPACECRAFT = 0,

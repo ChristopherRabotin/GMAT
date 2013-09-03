@@ -33,6 +33,11 @@
 #include "KeplerianParameters.hpp"
 #include "SphericalParameters.hpp"
 #include "EquinoctialParameters.hpp"
+// Modified by M.H.
+#include "ModEquinoctialParameters.hpp"
+#include "DelaunayParameters.hpp"
+#include "PlanetodeticParameters.hpp"
+//
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 #include "EnvParameters.hpp"
@@ -182,6 +187,54 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new EquinMlong(withName);
    if (ofType == "Equinoctial")
       return new EquinState(withName);
+
+   // ModifiedEquinoctial parameters; Modified by M.H.
+   if (ofType == "SemiLatusRectum")
+      return new ModEquinP(withName);
+   if (ofType == "ModEquinoctialF")
+      return new ModEquinF(withName);
+   if (ofType == "ModEquinoctialG")
+      return new ModEquinG(withName);
+   if (ofType == "ModEquinoctialH")
+      return new ModEquinH(withName);
+   if (ofType == "ModEquinoctialK")
+      return new ModEquinK(withName);
+   if (ofType == "TLONG")
+      return new ModEquinTLONG(withName);
+   if (ofType == "ModifiedEquinoctial")
+      return new ModEquinState(withName);
+
+   // Delaunay parameters; Modified by M.H.
+   if (ofType == "Delaunayl")
+      return new Delal(withName);
+   if (ofType == "Delaunayg")
+      return new Delag(withName);
+   if (ofType == "Delaunayh")
+      return new Delah(withName);
+   if (ofType == "DelaunayL")
+      return new DelaL(withName);
+   if (ofType == "DelaunayG")
+      return new DelaG(withName);
+   if (ofType == "DelaunayH")
+      return new DelaH(withName);
+   if (ofType == "Delaunay")
+      return new DelaState(withName);
+
+   // Planetodetic parameters; Modified by M.H.
+   if (ofType == "PlanetodeticRMAG")
+      return new PldRMAG(withName);
+   if (ofType == "PlanetodeticLON")
+      return new PldLON(withName);
+   if (ofType == "PlanetodeticLAT")
+      return new PldLAT(withName);
+   if (ofType == "PlanetodeticVMAG")
+      return new PldVMAG(withName);
+   if (ofType == "PlanetodeticAZI")
+      return new PldAZI(withName);
+   if (ofType == "PlanetodeticHFPA")
+      return new PldHFPA(withName);
+   if (ofType == "Planetodetic")
+      return new PldState(withName);
 
    // Orbital parameters
    if (ofType == "VelApoapsis")
@@ -467,6 +520,33 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("EquinoctialQ");
       creatables.push_back("MLONG");
       creatables.push_back("Equinoctial");
+
+	  // ModifedEquinoctial parameters ; Modified by M.H.
+	  creatables.push_back("SemiLatusRectum");
+      creatables.push_back("ModEquinoctialF");
+      creatables.push_back("ModEquinoctialG");
+      creatables.push_back("ModEquinoctialH");
+	  creatables.push_back("ModEquinoctialK");
+      creatables.push_back("TLONG");
+      creatables.push_back("ModEquinoctial");
+
+	  // Delaunay parameters ; Modified by M.H.
+	  creatables.push_back("Delaunayl");
+      creatables.push_back("Delaunayg");
+      creatables.push_back("Delaunayh");
+      creatables.push_back("DelaunayL");
+	  creatables.push_back("DelaunayG");
+      creatables.push_back("DelaunayH");
+      creatables.push_back("Delaunay");
+	  
+	  // Planetodetic parameters ; Modified by M.H.
+	  creatables.push_back("PlanetodeticRMAG");
+      creatables.push_back("PlanetodeticLON");
+      creatables.push_back("PlanetodeticLAT");
+      creatables.push_back("PlanetodeticVMAG");
+	  creatables.push_back("PlanetodeticAZI");
+      creatables.push_back("PlanetodeticHFPA");
+      creatables.push_back("Planetodetic");
 
       // Orbital parameters
       creatables.push_back("VelApoapsis");

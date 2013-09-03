@@ -322,6 +322,24 @@ protected:
       EQ_PNY,
       EQ_PNX,
       EQ_MLONG,
+      MOD_EQ_P,		// Modified Equinoctial (Semi-latus rectum); Modified by M.H.
+      MOD_EQ_F,		
+      MOD_EQ_G,		
+      MOD_EQ_H,		
+      MOD_EQ_K,		
+      MOD_EQ_TLONG,
+      DEL_DELA_l,	// Delaunay; Modified by M.H.
+      DEL_DELA_g,
+      DEL_DELA_h,
+      DEL_DELA_L,
+      DEL_DELA_G,
+      DEL_DELA_H,
+      PLD_RMAG,		// Planetodetic; Modified by M.H.
+      PLD_LON,
+      PLD_LAT,
+      PLD_VMAG,
+      PLD_AZI,
+      PLD_HFPA,
       EndMultipleReps
    };
    // these are the corresponding strings
@@ -341,7 +359,10 @@ protected:
       MODIFIED_KEPLERIAN_ID,
       SPHERICAL_AZFPA_ID,
       SPHERICAL_RADEC_ID,
-      EQUINOCTIAL_ID
+      EQUINOCTIAL_ID,
+      MODIFIED_EQUINOCTIAL_ID,	// Modified by M.H.
+      DELAUNAY_ID,				// Modified by M.H.
+      PLANETODETIC_ID		// Modified by M.H.
    };
    
    static const Integer ATTITUDE_ID_OFFSET;
