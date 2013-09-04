@@ -106,6 +106,8 @@
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Spinner.cpp" />
     <ClCompile Include="..\..\..\src\base\burn\Burn.cpp" />
     <ClCompile Include="..\..\..\src\base\burn\BurnException.cpp" />
@@ -183,6 +185,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.cpp" />
@@ -314,6 +317,9 @@
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp" />
@@ -440,6 +446,7 @@
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -490,6 +497,8 @@
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Spinner.hpp" />
     <ClInclude Include="..\..\..\src\base\burn\Burn.hpp" />
     <ClInclude Include="..\..\..\src\base\burn\BurnException.hpp" />
@@ -567,6 +576,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.hpp" />
@@ -698,6 +708,9 @@
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp" />
@@ -837,6 +850,7 @@
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />

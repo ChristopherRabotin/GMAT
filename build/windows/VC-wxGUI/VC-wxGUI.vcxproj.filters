@@ -2136,6 +2136,15 @@
     <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp">
       <Filter>Source Files\base\attitude</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4117,6 +4126,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp">
       <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

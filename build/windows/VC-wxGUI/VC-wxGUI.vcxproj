@@ -419,6 +419,9 @@
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp" />
@@ -1059,6 +1062,9 @@
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp" />
