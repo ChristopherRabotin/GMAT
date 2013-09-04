@@ -1580,7 +1580,7 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
       // If current selection is BodyFixed CS, show it; otherwise show the
       // first BodyFixed CS from the list
       mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
-      if (mCoordSysComboBox->FindString(currentCS, true) == wxNOT_FOUND)
+      if (mCoordSysComboBox->FindString(currentCS.c_str(), true) == wxNOT_FOUND)
          newCS = mCoordSysComboBox->GetString(0);
       else
          newCS = currentCS;
