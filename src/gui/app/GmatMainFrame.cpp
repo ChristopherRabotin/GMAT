@@ -541,6 +541,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theHelpController = new wxCHMHelpController;
    theHelpController->Initialize(helpFileName);
    #else
+      #ifdef __WXMAC__
+      theHelpController = NULL;
+      // @todo when wxHTML is linked in, this will map to a wx
+//      theHelpController = new wxHelpController(wxHF_DEFAULT_STYLE);
+      #endif
    #endif
    
    #ifdef DEBUG_MAINFRAME
@@ -3770,7 +3775,11 @@ void GmatMainFrame::OnHelpOnline(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnHelpTutorial(wxCommandEvent& WXUNUSED(event))
 {
    wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
-   config->SetPath("/GettingStarted/Tutorials");
+   #ifdef __WXMAC__
+      config->SetPath("/GettingStarted/Tutorials/Online");
+   #else
+      config->SetPath("/GettingStarted/Tutorials");
+   #endif
    wxString url = config->Read("Step By Step Text Tutorials","http://gmat.sourceforge.net/docs/latest/html/Tutorials.html");
    #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage

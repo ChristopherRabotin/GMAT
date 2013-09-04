@@ -34,6 +34,7 @@
 
 //#define DEBUG_FILL_GROUP
 //#define DEBUG_SAMPLE_SCRIPT
+//#define DEBUG_WELCOME_HELP
 
 //------------------------------
 // event tables for wxWindows
@@ -164,7 +165,11 @@ void WelcomePanel::Create()
    resourcesSizer->AddSpacer(bsize*2);
    // now Links
    pConfig = (wxFileConfig *) wxConfigBase::Get();
-   resourcesSizer->Add(FillGroup(pConfig, "/Welcome/Links", "", 3, ID_HELP, false),
+   wxString configLocWelcome = "/Welcome/Links";
+   #ifdef __WXMAC__
+      configLocWelcome = configLocWelcome + "/Online";
+   #endif
+   resourcesSizer->Add(FillGroup(pConfig, configLocWelcome, "", 3, ID_HELP, false),
                        0, wxALIGN_LEFT|wxALL, bsize*2);
 
    //-----------------------------------------------------------------
@@ -183,7 +188,11 @@ void WelcomePanel::Create()
    wxBoxSizer *gettingStartedSizer = new wxBoxSizer(wxVERTICAL);
    gettingStartedSizer->Add(getStartedText, 0, wxALIGN_LEFT|wxALL, bsize);
    gettingStartedSizer->AddSpacer(bsize*2);
-   gettingStartedSizer->Add(FillGroup(pConfig, "/GettingStarted/Tutorials", "/GettingStarted/Tutorials/Icons",
+   wxString configLoc = "/GettingStarted/Tutorials";
+   #ifdef __WXMAC__
+      configLoc = configLoc + "/Online";
+   #endif
+   gettingStartedSizer->Add(FillGroup(pConfig, configLoc, "/GettingStarted/Tutorials/Icons",
                                       1, ID_HELP, false), 0, wxALIGN_LEFT|wxALL, bsize*2);
    //gettingStartedSizer->AddSpacer(bsize*2);
 
@@ -500,6 +509,10 @@ void WelcomePanel::OnOpenHelpLink(wxHyperlinkEvent& event)
    // if link is a keyword (no slashes or periods), use help controller
    // otherwise, assume it is a URL and use the default browser
    wxString link = event.GetURL();
+   #ifdef DEBUG_WELCOME_HELP
+      MessageInterface::ShowMessage("WelcomePanel::OnOpenHelpLink, url = %s\n",
+            link.c_str());
+   #endif
    if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
 	   link.Contains("\\") || link.Contains("/") || link.Contains(":") )
 	   ::wxLaunchDefaultBrowser(link);
