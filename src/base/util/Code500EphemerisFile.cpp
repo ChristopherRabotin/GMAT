@@ -374,7 +374,7 @@ bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileForm
       mEphemFileIn.seekg(std::ios_base::beg);
       MessageInterface::ShowMessage
          ("Code500EphemerisFile::OpenForRead() \n   ephem file: '%s'\n"
-          "   size in bytes = %d\n", fileName.c_str(), fsize);
+          "   size in bytes = %lu\n", fileName.c_str(), (unsigned long)fsize);
    }
    
    #ifdef DEBUG_OPEN
