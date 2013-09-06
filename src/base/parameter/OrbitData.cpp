@@ -111,15 +111,13 @@ OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType)
    mSphAzFpaState = Rvector6::RVECTOR6_UNDEFINED;
    mCartEpoch     = 0.0;
    mGravConst     = 0.0;
-   mFlattening    = 0.0;
-   mEqRadius      = 0.0;
    
-   mSpacecraft           = NULL;
-   mSpacePoint           = NULL;
-   mSolarSystem          = NULL;
-   mOrigin               = NULL;
-   mInternalCoordSystem  = NULL;
-   mOutCoordSystem       = NULL;
+   mSpacecraft    = NULL;
+   mSpacePoint    = NULL;
+   mSolarSystem   = NULL;
+   mOrigin        = NULL;
+   mInternalCS    = NULL;
+   mParameterCS   = NULL;
    
    mIsParamOriginDep     = false;
    firstTimeEpochWarning = false;
@@ -158,8 +156,8 @@ OrbitData::OrbitData(const OrbitData &data)
    mSpacePoint = data.mSpacePoint;
    mSolarSystem = data.mSolarSystem;
    mOrigin = data.mOrigin;
-   mInternalCoordSystem = data.mInternalCoordSystem;
-   mOutCoordSystem = data.mOutCoordSystem;
+   mInternalCS = data.mInternalCS;
+   mParameterCS = data.mParameterCS;
 
    firstTimeEpochWarning = data.firstTimeEpochWarning;
 }
@@ -197,8 +195,8 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    mSpacePoint = right.mSpacePoint;
    mSolarSystem = right.mSolarSystem;
    mOrigin = right.mOrigin;
-   mInternalCoordSystem = right.mInternalCoordSystem;
-   mOutCoordSystem = right.mOutCoordSystem;
+   mInternalCS = right.mInternalCS;
+   mParameterCS = right.mParameterCS;
    
    stateTypeId = right.stateTypeId;
    
@@ -260,20 +258,20 @@ void OrbitData::SetReal(Integer item, Real rval)
    }
    else
    {
-      paramOwnerCS = mInternalCoordSystem;
+      paramOwnerCS = mInternalCS;
    }
    
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("   Parameter CS         = <%p>'%s'\n", mOutCoordSystem,
-       mOutCoordSystem ? mOutCoordSystem->GetName().c_str() : "NULL");
+      ("   Parameter CS         = <%p>'%s'\n", mParameterCS,
+       mParameterCS ? mParameterCS->GetName().c_str() : "NULL");
    MessageInterface::ShowMessage
       ("   ParamOwner CS        = <%p>'%s'\n", paramOwnerCS,
        paramOwnerCS ? paramOwnerCS->GetName().c_str() : "NULL");
    MessageInterface::ShowMessage
-      ("   Parameter CS Origin  = <%p>'%s'\n", mOutCoordSystem,
-       mOutCoordSystem ? mOutCoordSystem->GetOriginName().c_str() : "NULL");
+      ("   Parameter CS Origin  = <%p>'%s'\n", mParameterCS,
+       mParameterCS ? mParameterCS->GetOriginName().c_str() : "NULL");
    MessageInterface::ShowMessage
       ("   ParamOwner CS Origin = <%p>'%s'\n", paramOwnerCS,
        paramOwnerCS ? paramOwnerCS->GetOriginName().c_str() : "NULL");
@@ -293,13 +291,18 @@ void OrbitData::SetReal(Integer item, Real rval)
          throw pe;
       }
    }
+
+   //bool convertBeforeSet = false;
    
    // Check for different coordinate system (2013.03.28)
-   //if (mOutCoordSystem != NULL && mOutCoordSystem != paramOwnerCS)
-   if (!mIsParamOriginDep && mOutCoordSystem != NULL && paramOwnerCS != NULL)
+   //if (mParameterCS != NULL && mParameterCS != paramOwnerCS)
+   if (!mIsParamOriginDep && mParameterCS != NULL && paramOwnerCS != NULL)
    {
-      if (mOutCoordSystem->GetName() != paramOwnerCS->GetName())
+      if (mParameterCS->GetName() != paramOwnerCS->GetName())
       {
+         // Now allow setting value to Parameter that has different
+         // coordinate system (GMT-4020 Fix)
+         //#if 1
          ParameterException pe;
          pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
                        "requires values to be in the '%s' coordinate system (setting "
@@ -307,6 +310,9 @@ void OrbitData::SetReal(Integer item, Real rval)
                        "future builds)",  mActualParamName.c_str(),
                        mSpacecraft->GetName().c_str(), paramOwnerCS->GetName().c_str());
          throw pe;
+         //#else
+         //convertBeforeSet = true;
+         //#endif
       }
    }
    
@@ -320,6 +326,59 @@ void OrbitData::SetReal(Integer item, Real rval)
          ("OrbitData::SetReal() Cannot set Parameter " + GmatRealUtil::ToString(item) +
           ". SpacePoint object is NULL\n");
    
+   #if 0
+   //=================================================================
+   //@note This part of code will be continued later for GMT-4020 fix
+   //=================================================================
+   if (convertBeforeSet)
+   {
+      Real tempEpoch = mSpacePoint->GetEpoch();
+      Rvector6 tempState1 = mSpacePoint->GetLastState();
+      Rvector6 tempState2;
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Setting new value %f to Parameter that has different CS than Parameter Owner CS\n"
+          "   currEpoch = %f\n   currState = %s", rval, tempEpoch, tempState1.ToString().c_str());
+      #endif
+      
+      if (item >= CART_X && item <= CART_VZ)
+      {
+         // Convert to parameterCS
+         mCoordConverter.Convert(A1Mjd(tempEpoch), tempState1, mInternalCS,
+                                 tempState2, mParameterCS, false);
+         
+         #ifdef DEBUG_ORBITDATA_SET
+         MessageInterface::ShowMessage
+            ("   from internalCS to paramCS = %s", tempState2.ToString().c_str());
+         #endif
+         
+         // Now set new value to state
+         tempState2(item) = rval;
+         
+         // Convert to internal CS
+         mCoordConverter.Convert(A1Mjd(tempEpoch), tempState2, mParameterCS,
+                                 tempState1, mInternalCS, false);
+         
+         #ifdef DEBUG_ORBITDATA_SET
+         MessageInterface::ShowMessage
+            ("   from paramCS to internalCS = %s", tempState1.ToString().c_str());
+         #endif
+         
+         // Need to set whole state in internal CS
+         mSpacecraft->SetState(tempState1);
+         
+         #ifdef DEBUG_ORBITDATA_SET
+         MessageInterface::ShowMessage
+            ("OrbitData::SetReal() leaving, item set to non-ParameterOwner CS, item=%d, rval=%f\n", item, rval);
+         #endif
+         return;
+      }
+   }
+   //=================================================================
+   #endif
+   
+   // Do the direct setting
    switch (item)
    {
       // Cartesian
@@ -597,10 +656,10 @@ Rvector6 OrbitData::GetCartState()
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() '%s' mCartState=\n   %s\n",
        mSpacePoint->GetName().c_str(), mCartState.ToString().c_str());
-   MessageInterface::ShowMessage("   mInternalCoordSystem is %s, mOutCoordSystem is %s\n",
-         (mInternalCoordSystem? "NOT NULL" : "NULL"),  (mOutCoordSystem? "NOT NULL" : "NULL"));
+   MessageInterface::ShowMessage("   mInternalCS is %s, mParameterCS is %s\n",
+         (mInternalCS? "NOT NULL" : "NULL"),  (mParameterCS? "NOT NULL" : "NULL"));
    MessageInterface::ShowMessage("   mInternalCS = <%p>, mOutCS = <%p>\n",
-         mInternalCoordSystem, mOutCoordSystem);
+         mInternalCS, mParameterCS);
    #endif
    
    // if origin dependent parameter, the relative position/velocity is computed in
@@ -608,7 +667,7 @@ Rvector6 OrbitData::GetCartState()
    if (mIsParamOriginDep)
       return mCartState;
    
-   if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
+   if (mInternalCS == NULL || mParameterCS == NULL)
    {
       MessageInterface::ShowMessage
          ("OrbitData::GetCartState() Internal CoordSystem or Output CoordSystem is NULL.\n");
@@ -620,20 +679,20 @@ Rvector6 OrbitData::GetCartState()
    //-----------------------------------------------------------------
    // convert to output CoordinateSystem
    //-----------------------------------------------------------------
-   if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
+   if (mInternalCS->GetName() != mParameterCS->GetName())
    {
       #ifdef DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() mOutCoordSystem:%s(%s), Axis addr=%d\n",
-             mOutCoordSystem->GetName().c_str(),
-             mOutCoordSystem->GetTypeName().c_str(),
-             mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, ""));
-         if (mOutCoordSystem->AreAxesOfType("ObjectReferencedAxes"))
+            ("OrbitData::GetCartState() mParameterCS:%s(%s), Axis addr=%d\n",
+             mParameterCS->GetName().c_str(),
+             mParameterCS->GetTypeName().c_str(),
+             mParameterCS->GetRefObject(Gmat::AXIS_SYSTEM, ""));
+         if (mParameterCS->AreAxesOfType("ObjectReferencedAxes"))
                MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
-                     "mOutCoordSystem IS of type ObjectReferencedAxes!!!\n");
+                     "mParameterCS IS of type ObjectReferencedAxes!!!\n");
          else
             MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
-                  "mOutCoordSystem IS NOT of type ObjectReferencedAxes!!!\n");
+                  "mParameterCS IS NOT of type ObjectReferencedAxes!!!\n");
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\n"
                   "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
@@ -643,9 +702,9 @@ Rvector6 OrbitData::GetCartState()
 
       #endif
 
-      if ((mOutCoordSystem->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
+      if ((mParameterCS->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
       {
-         GmatBase *objRefOrigin = mOutCoordSystem->GetOrigin();
+         GmatBase *objRefOrigin = mParameterCS->GetOrigin();
          if (objRefOrigin->IsOfType("Spacecraft"))
          {
             std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
@@ -663,7 +722,7 @@ Rvector6 OrbitData::GetCartState()
                if (!GmatMathUtil::IsEqual(scEpoch, origEpoch, ORBIT_DATA_TOLERANCE))
                {
                   std::string errmsg = "Warning:  In Coordinate System \"";
-                  errmsg += mOutCoordSystem->GetName() + "\", \"";
+                  errmsg += mParameterCS->GetName() + "\", \"";
 //                  errmsg += mSpacecraft->GetName() + "\" and \"";
                   errmsg += mSpacePoint->GetName() + "\" and \"";
                   errmsg += objRefScName + "\" have different epochs.\n";
@@ -679,11 +738,11 @@ Rvector6 OrbitData::GetCartState()
       {
          #ifdef DEBUG_ORBITDATA_CONVERT
             MessageInterface::ShowMessage("    --> Converting from %s to %s\n\n",
-                  mInternalCoordSystem->GetName().c_str(),
-                  mOutCoordSystem->GetName().c_str());
+                  mInternalCS->GetName().c_str(),
+                  mParameterCS->GetName().c_str());
          #endif
-         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
-                                 mCartState, mOutCoordSystem, true);
+         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCS,
+                                 mCartState, mParameterCS, true);
          #ifdef DEBUG_ORBITDATA_CONVERT
             MessageInterface::ShowMessage
                ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
@@ -694,9 +753,9 @@ Rvector6 OrbitData::GetCartState()
       {
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
-             mOutCoordSystem->GetName().c_str(), e.GetFullMessage().c_str());
+             mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
          std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
-         errmsg += mOutCoordSystem->GetName() + " coordinate system.\n";
+         errmsg += mParameterCS->GetName() + " coordinate system.\n";
          errmsg += "Message: " + e.GetFullMessage() + "\n";
          throw ParameterException(errmsg);
       }
@@ -1712,7 +1771,7 @@ SolarSystem* OrbitData::GetSolarSystem()
 //------------------------------------------------------------------------------
 CoordinateSystem* OrbitData::GetInternalCoordSys()
 {
-   return mInternalCoordSystem;
+   return mInternalCS;
 }
 
 
@@ -1725,7 +1784,7 @@ CoordinateSystem* OrbitData::GetInternalCoordSys()
 //------------------------------------------------------------------------------ 
 void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 {
-   mInternalCoordSystem = cs;
+   mInternalCS = cs;
 }
 
 
@@ -1853,7 +1912,7 @@ void OrbitData::InitializeRefObjects()
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
-   if (mInternalCoordSystem == NULL)
+   if (mInternalCS == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find internal "
           "CoordinateSystem object\n");
@@ -1926,10 +1985,10 @@ void OrbitData::InitializeRefObjects()
    //-----------------------------------------------------------------
    else
    {
-      mOutCoordSystem =
+      mParameterCS =
          (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
       
-      if (mOutCoordSystem == NULL)
+      if (mParameterCS == NULL)
       {
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
@@ -1944,19 +2003,19 @@ void OrbitData::InitializeRefObjects()
       
       // Set origin to out coordinate system origin for CoordinateSystem
       // dependent parameter
-      mOrigin = mOutCoordSystem->GetOrigin();
+      mOrigin = mParameterCS->GetOrigin();
       
       if (!mOrigin)
       {
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
             ("OrbitData::InitializeRefObjects() origin not found: " +
-             mOutCoordSystem->GetOriginName() + "\n");
+             mParameterCS->GetOriginName() + "\n");
          #endif
       
          throw ParameterException
             ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
-             mOutCoordSystem->GetOriginName() + "\" is NULL");
+             mParameterCS->GetOriginName() + "\" is NULL");
       }
       
       // get gravity constant if out coord system origin is CelestialBody
@@ -1978,8 +2037,8 @@ void OrbitData::InitializeRefObjects()
       ("OrbitData::InitializeRefObjects() exiting, mOrigin.Name=%s, mGravConst=%f, "
        "mIsParamOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mIsParamOriginDep);
    MessageInterface::ShowMessage
-      ("   mSpacePoint=<%p> '%s', mSolarSystem=<%p>, mOutCoordSystem=<%p>, mOrigin=<%p>\n",
-       mSpacecraft, mSpacePoint->GetName().c_str(),mSolarSystem, mOutCoordSystem, mOrigin);
+      ("   mSpacePoint=<%p> '%s', mSolarSystem=<%p>, mParameterCS=<%p>, mOrigin=<%p>\n",
+       mSpacecraft, mSpacePoint->GetName().c_str(),mSolarSystem, mParameterCS, mOrigin);
    #endif
 }
 
