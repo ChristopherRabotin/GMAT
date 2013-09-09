@@ -210,7 +210,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          menu.Append(ID_PLOT_DETAILS, "Set Plot Options...");
          menu.AppendSeparator();
       }
-      menu.Append(ID_PLOT_SAVE, "Save Plot...");
+      menu.Append(ID_PLOT_SAVE, "Export Data...");
 
       menu.Check(ID_TOGGLE_GRID, hasGrid);
       menu.Check(ID_TOGGLE_LEGEND, hasLegend);
