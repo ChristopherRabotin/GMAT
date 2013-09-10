@@ -35,6 +35,8 @@
 //#define CHECK_KP2AP
 //#define DEBUG_ANGVEL
 //#define DEBUG_COORDINATE_TRANSFORMS
+//#define DEBUG_CALCULATE_GEOCENTRICS
+//#define DEBUG_CALCULATE_GEODETICS
 
 //------------------------------------------------------------------------------
 // static data
@@ -1019,6 +1021,14 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
 
    CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
 
+#ifdef DEBUG_CALCULATE_GEODETICS
+   if (cbJ2000 == NULL)
+	   MessageInterface::ShowMessage("cbJ2000 == NULL, mInternalCoordSystem <%p,%s>\n", mInternalCoordSystem, mInternalCoordSystem->GetName().c_str());
+   else
+	   MessageInterface::ShowMessage("cbJ2000 <%p,%s>\n", cbJ2000, cbJ2000->GetName().c_str());
+   MessageInterface::ShowMessage("j2000ToUse cs<%p,%s>: origin = %s    axes = %s\n", j2000ToUse, j2000ToUse->GetName().c_str(), j2000ToUse->GetOrigin()->GetName().c_str(), j2000ToUse->GetStringParameter("Axes").c_str());
+#endif
+
    if (when == -1.0)
       when = wUpdateEpoch;
 
@@ -1110,6 +1120,14 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    Rvector6 instate(position), state;
 
    CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
+
+#ifdef DEBUG_CALCULATE_GEOCENTRICS
+   if (cbJ2000 == NULL)
+	   MessageInterface::ShowMessage("cbJ2000 == NULL, mInternalCoordSystem <%p,%s>\n", mInternalCoordSystem, mInternalCoordSystem->GetName().c_str());
+   else
+	   MessageInterface::ShowMessage("cbJ2000 <%p,%s>\n", cbJ2000, cbJ2000->GetName().c_str());
+   MessageInterface::ShowMessage("j2000ToUse cs<%p,%s>: origin = %s    axes = %s\n", j2000ToUse, j2000ToUse->GetName().c_str(), j2000ToUse->GetOrigin()->GetName().c_str(), j2000ToUse->GetStringParameter("Axes").c_str());
+#endif
 
    if (when == -1.0)
       when = wUpdateEpoch;
