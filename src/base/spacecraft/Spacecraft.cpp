@@ -237,12 +237,12 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "ModEquinoctialK",
    "TLONG",
    // Delaunay				 ; Modified by M.H.
-   "Delaunalyl",
-   "Delaunalyg",
-   "Delaunalyh",
-   "DelaunalyL",
-   "DelaunalyG",
-   "DelaunalyH",
+   "Delaunayl",
+   "Delaunayg",
+   "Delaunayh",
+   "DelaunayL",
+   "DelaunayG",
+   "DelaunayH",
    // Planetodetic			; Modified by M.H.
    "PlanetodeticRMAG",
    "PlanetodeticLON",
@@ -1963,8 +1963,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       MessageInterface::ShowMessage("Spacecraft::GetParameterID(%s)\n", str.c_str());
    #endif
    #ifdef DEBUG_GET_REAL
-   MessageInterface::ShowMessage("In SC::GetParameterID, str = %s\n ",
-   str.c_str());
+   MessageInterface::ShowMessage("In SC::GetParameterID, str = %s\n", str.c_str());
    #endif
 
    try
@@ -1988,31 +1987,34 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "RMAG")
+          str == "RMAG" || str == "Delaunayl" || str == "PlanetodeticRMAG")
          retval =  ELEMENT1_ID;
 
       else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
-               str == "RA" || str == "PEY" || str == "EquinoctialH")
-//            str == "RA" || str == "PECCY")
+               str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
+               str == "Delaunayg" || str == "PlanetodeticLON")
          retval =  ELEMENT2_ID;
 
       else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
-               str == "PEX" || str == "EquinoctialK")
-//            str == "PECCX")
+               str == "PEX" || str == "EquinoctialK" || str == "ModEquinoctialG" ||
+               str == "Delaunayh" || str == "PlanetodeticLAT")
          retval =  ELEMENT3_ID;
 
       else if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
-          str == "PNY" || str == "EquinoctialP")
+               str == "PNY" || str == "EquinoctialP" || str == "ModEquinoctialH" ||
+               str == "DelaunayL" || str == "PlanetodeticVMAG")
          retval =  ELEMENT4_ID;
 
       else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
-          str == "RAV" || str == "PNX" || str == "EquinoctialQ")
+               str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
+               str == "ModEquinoctialH" || str == "DelaunayL" || str == "PlanetodeticVMAG")
          retval =  ELEMENT5_ID;
 
       else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-          str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG")
+               str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG" ||
+               str == "DelaunayH" || str == "PlanetodeticHFPA")
          retval =  ELEMENT6_ID;
-
+      
       #ifdef DEBUG_GET_REAL
       MessageInterface::ShowMessage(
       "In SC::GetParameterID, after checking for elements, id = %d\n ",
@@ -6229,8 +6231,8 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
 
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
       MessageInterface::ShowMessage
-         (" ************ In SC::SetElement, after LookUpLabel, ELEMENT1_ID = %d, id = %d, rep = %s\n",
-               ELEMENT1_ID, id, rep.c_str());
+         (" ************ In SC::SetElement, after LookUpLabel, ELEMENT1_ID = %d, id = %d, rep = %s, stateType = %s\n",
+          ELEMENT1_ID, id, rep.c_str(), stateType.c_str());
    #endif
 
    // Determine if type really changed
@@ -6447,21 +6449,23 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       retval = ELEMENT2_ID;
 
    else if (label == "Z" || label == "INC" || label == "DEC" || label == "PEX" ||
-            label == "EquinoctialK" || label == "ModEquinoctialG" || label == "Delaunayh" || label == "PlanetodeticLAT")
+            label == "EquinoctialK" || label == "ModEquinoctialG" || label == "Delaunayh" ||
+            label == "PlanetodeticLAT")
       retval = ELEMENT3_ID;
 
    else if (label == "VX" || label == "RAAN" || label == "VMAG" || label == "PNY" ||
-            label == "EquinoctialP" || label == "ModEquinoctialH" || label == "DelaunayL" || label == "PlanetodeticVMAG")
+            label == "EquinoctialP" || label == "ModEquinoctialH" || label == "DelaunayL" ||
+            label == "PlanetodeticVMAG")
       retval = ELEMENT4_ID;
 
    else if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV" ||
             label == "PNX" || label == "EquinoctialQ" || label == "ModEquinoctialK" ||
-			label == "DelaunayG" || label == "PlanetodeticAZI")
+            label == "DelaunayG" || label == "PlanetodeticAZI")
       retval = ELEMENT5_ID;
 
    else if (label == "VZ" || StateConversionUtil::IsValidAnomalyType(label) ||
-        label == "FPA" || label == "DECV" || label == "MLONG" || label == "TLONG" ||
-		label == "DelaunayH" || label == "PlanetodeticHFPA")
+            label == "FPA" || label == "DECV" || label == "MLONG" || label == "TLONG" ||
+            label == "DelaunayH" || label == "PlanetodeticHFPA")
       retval = ELEMENT6_ID;
 
    rep = elementLabelMap[label];
@@ -6485,9 +6489,9 @@ void Spacecraft::BuildElementLabelMap()
 {
    if (elementLabelMap.size() == 0)
    {
-      elementLabelMap["X"] = "Cartesian";
-      elementLabelMap["Y"] = "Cartesian";
-      elementLabelMap["Z"] = "Cartesian";
+      elementLabelMap["X"]  = "Cartesian";
+      elementLabelMap["Y"]  = "Cartesian";
+      elementLabelMap["Z"]  = "Cartesian";
       elementLabelMap["VX"] = "Cartesian";
       elementLabelMap["VY"] = "Cartesian";
       elementLabelMap["VZ"] = "Cartesian";
@@ -6515,33 +6519,33 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["RAV"]  = "SphericalRADEC";
       elementLabelMap["DECV"] = "SphericalRADEC";
 
-      elementLabelMap["EquinoctialH"]    = "Equinoctial";
-      elementLabelMap["EquinoctialK"]    = "Equinoctial";
-      elementLabelMap["EquinoctialP"]    = "Equinoctial";
-      elementLabelMap["EquinoctialQ"]    = "Equinoctial";
-      elementLabelMap["MLONG"]  = "Equinoctial";
+      elementLabelMap["EquinoctialH"] = "Equinoctial";
+      elementLabelMap["EquinoctialK"] = "Equinoctial";
+      elementLabelMap["EquinoctialP"] = "Equinoctial";
+      elementLabelMap["EquinoctialQ"] = "Equinoctial";
+      elementLabelMap["MLONG"]        = "Equinoctial";
 
-	  // Modified by M.H.
-	  elementLabelMap["SemiLatusRectum"]    = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialF"]    = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialG"]    = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialH"]    = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialK"]    = "ModifiedEquinoctial";
-	  elementLabelMap["TLONG"]    = "ModifiedEquinoctial";
+      // Modified by M.H.
+      elementLabelMap["SemiLatusRectum"] = "ModifiedEquinoctial";
+      elementLabelMap["ModEquinoctialF"] = "ModifiedEquinoctial";
+      elementLabelMap["ModEquinoctialG"] = "ModifiedEquinoctial";
+      elementLabelMap["ModEquinoctialH"] = "ModifiedEquinoctial";
+      elementLabelMap["ModEquinoctialK"] = "ModifiedEquinoctial";
+      elementLabelMap["TLONG"]           = "ModifiedEquinoctial";
 
-	  elementLabelMap["Delaunayl"]		= "Delaunay";
-      elementLabelMap["Delaunayg"]		= "Delaunay";
-      elementLabelMap["Delaunayh"]	    = "Delaunay";
-	  elementLabelMap["DelaunayL"]	    = "Delaunay";
-	  elementLabelMap["DelaunayG"]	    = "Delaunay";
-	  elementLabelMap["DelaunayH"]	    = "Delaunay";
-
-	  elementLabelMap["PlanetodeticRMAG"]		= "Planetodetic";
-      elementLabelMap["PlanetodeticLON"]		= "Planetodetic";
-      elementLabelMap["PlanetodeticLAT"]	    = "Planetodetic";
-	  elementLabelMap["PlanetodeticVMAG"]	    = "Planetodetic";
-	  elementLabelMap["PlanetodeticAZI"]	    = "Planetodetic";
-	  elementLabelMap["PlanetodeticHFPA"]	    = "Planetodetic";
+      elementLabelMap["Delaunayl"] = "Delaunay";
+      elementLabelMap["Delaunayg"] = "Delaunay";
+      elementLabelMap["Delaunayh"] = "Delaunay";
+      elementLabelMap["DelaunayL"] = "Delaunay";
+      elementLabelMap["DelaunayG"] = "Delaunay";
+      elementLabelMap["DelaunayH"] = "Delaunay";
+      
+      elementLabelMap["PlanetodeticRMAG"] = "Planetodetic";
+      elementLabelMap["PlanetodeticLON"]  = "Planetodetic";
+      elementLabelMap["PlanetodeticLAT"]  = "Planetodetic";
+      elementLabelMap["PlanetodeticVMAG"] = "Planetodetic";
+      elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
+      elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
    }
 }
 
@@ -6758,13 +6762,13 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
        (label == "RAV")          || (label == "DECV") ||
        (label == "EquinoctialH") || (label == "EquinoctialK") || (label == "EquinoctialP") ||
        (label == "EquinoctialQ") || (label == "MLONG") ||
-	   ( label == "SemiLatusRectum") ||
-	   (label == "ModEquinoctialF") || (label == "ModEquinoctialG") || (label == "ModEquinoctialH") ||
-	   (label == "ModEquinoctialK") || (label == "TLONG") || (label == "Delaunayl") ||
-	   (label == "Delaunayg") || (label == "Delaunayh") || (label == "DelaunayL") ||
-	   (label == "DelaunayG") || (label == "DelaunayH") || (label == "PlanetodeticRMAG") ||
-	   (label == "PlanetodeticLON") || (label == "PlanetodeticLAT") || (label == "PlanetodeticVMAG") ||
-	   (label == "PlanetodeticAZI") || (label == "PlanetodeticHFPA") )
+       (label == "SemiLatusRectum") ||
+       (label == "ModEquinoctialF") || (label == "ModEquinoctialG") || (label == "ModEquinoctialH") ||
+       (label == "ModEquinoctialK") || (label == "TLONG") || (label == "Delaunayl") ||
+       (label == "Delaunayg") || (label == "Delaunayh") || (label == "DelaunayL") ||
+       (label == "DelaunayG") || (label == "DelaunayH") || (label == "PlanetodeticRMAG") ||
+       (label == "PlanetodeticLON") || (label == "PlanetodeticLAT") || (label == "PlanetodeticVMAG") ||
+       (label == "PlanetodeticAZI") || (label == "PlanetodeticHFPA") )
    {
       possibleInputTypes.clear();
       possibleInputTypes.push_back(rep);
@@ -6834,7 +6838,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    if (!checkCoupled)
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         MessageInterface::ShowMessage("In SC::SetElement, about to validate (no coupled element check) %s with value %le\n", label.c_str(), value);
+         MessageInterface::ShowMessage("In SC::SetElement, about to validate (no coupled element check) %s with value %le\n", withLabel.c_str(), andValue);
       #endif
       return StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
    }
@@ -6845,7 +6849,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    if ((forRep == "ModifiedKeplerian") && (withLabel == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le when RadPer already set\n", label.c_str(), value);
+         MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le when RadPer already set\n", withLabel.c_str(), andValue);
       #endif
          validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "RadPer", state[0]);
    }
@@ -6874,7 +6878,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    else
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le\n", label.c_str(), value);
+         MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le\n", withLabel.c_str(), andValue);
       #endif
          validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
    }
