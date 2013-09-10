@@ -798,6 +798,12 @@ bool DragForce::Initialize()
                atmos->SetRealParameter(F107AID, fluxF107A);
                atmos->SetRealParameter(KPID, kp);
             }
+
+			if (cbFixed != NULL)										// made changes by TUAN NGUYEN
+               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
+            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
+               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
+			atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
          }
          else
          {
