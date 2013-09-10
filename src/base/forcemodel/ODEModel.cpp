@@ -1095,7 +1095,8 @@ void ODEModel::UpdateFromSpaceObject()
    memcpy(rawState, state->GetState(), state->GetSize() * sizeof(Real));
 
     // Transform to the force model origin
-    MoveToOrigin();
+    // MoveToOrigin();					// made changes by TUAN NGUYEN: Notice that: without epoch, it will get wrong state of center body
+   MoveToOrigin(state->GetEpoch());		// made changes by TUAN NGUYEN
 }
 
 
