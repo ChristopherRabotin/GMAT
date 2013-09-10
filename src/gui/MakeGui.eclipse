@@ -357,7 +357,7 @@ macrez:
 
 macosx: 
 	@echo "building Mac application bundle ......."
-	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET)
+	$(SETFILE) -a C $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET)
 	mkdir -p $(CONTENTS_DIR)
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)

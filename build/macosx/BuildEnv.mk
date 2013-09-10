@@ -26,12 +26,14 @@ PROFILE_BUILD = 0
 
 # ------> TOP DIRECTORY
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here .... make sure not to have trailing blanks!!!
-TOP_DIR = /Users/wshoan/Documents/workspace/trunk
+TOP_DIR = <path-to-your-GMAT-directory>
 
 # ------> WXWIDGETS
 # *** EDIT THIS *** -  this is where you installed wxWidgets ('sudo make install' of wxMac will put things in /usr/local directories)
-WX_INSTALLED = /usr/local/bin
-WX_LIB_LOC = /usr/local/lib
+#WX_INSTALLED = /usr/local/bin
+#WX_LIB_LOC = /usr/local/lib
+WX_INSTALLED = /Applications/wxMac-2.8.12/shared
+WX_LIB_LOC = $(WX_INSTALLED)/lib
 WX_LIB = wx_mac_gl-2.8
 # WX_VERSION must be in this format
 WX_VERSION = 2_8_12
@@ -178,7 +180,8 @@ MAC_CPP_FLAGS=-current_version 0.5 -compatibility_version 0.5 -fvisibility=defau
 
 
 # Define macros for linking the Carbon and wx resource files
-REZ = /Developer/Tools/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(MAC_ARCHITECTURE_FLAGS)
+REZ = /usr/bin/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(MAC_ARCHITECTURE_FLAGS)
+SETFILE = /usr/bin/SetFile
 
 # Set options for debugging and profiling
 ifeq ($(DEBUG_BUILD), 1)
