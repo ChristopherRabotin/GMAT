@@ -1162,11 +1162,6 @@ bool Assignment::Execute()
          
          retval = ElementWrapper::SetValue(lhsWrapper, rhsWrapper, solarSys, objectMap,
                                            globalObjectMap, setRefObj);
-         
-         // Check if setting spacecraft property
-         if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT ||
-             lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
-            HandleScPropertyChange(lhsWrapper);
       }
       else
       {
@@ -1178,6 +1173,11 @@ bool Assignment::Execute()
          retval = ElementWrapper::SetValue(lhsWrapper, outWrapper, solarSys, objectMap,
                                            globalObjectMap, setRefObj);
       }
+      
+      // Check if setting spacecraft property
+      if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT ||
+          lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+         HandleScPropertyChange(lhsWrapper);
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage("   ElementWrapper::SetValue() returned %d\n", retval);
