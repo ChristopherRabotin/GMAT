@@ -174,7 +174,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    
    // View control
    mUseInitialViewPoint = true;
-   mAxisLength = 30000.0;
+   mCurrViewDistance = 30000.0;
    
    // Animation
    mIsAnimationRunning = false;
@@ -796,6 +796,8 @@ void ViewCanvas::TakeAction(const std::string &action)
       mSolverAllPosX.clear();
       mSolverAllPosY.clear();
       mSolverAllPosZ.clear();
+      mSolverIterColorArray.clear();
+      mSolverIterScNameArray.clear();
    }
    else if (action == "ClearObjects")
    {
@@ -885,7 +887,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    // separately here since it will be shown temporarily during the run
    //-----------------------------------------------------------------
    if (solverOption == 1)
-      UpdateSolverData(posX, posY, posZ, scColors, solving);
+      UpdateSolverData(scNames, posX, posY, posZ, scColors, solving);
    
    // If drawing solver's current iteration and no run data has been
    // buffered up, save up to 2 points so that it will still go through
@@ -2020,11 +2022,11 @@ void ViewCanvas::SetupProjection()
 
 
 //------------------------------------------------------------------------------
-// void UpdateSolverData(RealArray posX, RealArray posY, RealArray posZ, ...)
+// void UpdateSolverData(const StringArray &scNames, const RealArray posX, ...)
 //------------------------------------------------------------------------------
-void ViewCanvas::UpdateSolverData(const RealArray &posX, const RealArray &posY,
-                       const RealArray &posZ, const UnsignedIntArray &scColors,
-                       bool solving)
+void ViewCanvas::UpdateSolverData(const StringArray &scNames, const RealArray &posX,
+                       const RealArray &posY, const RealArray &posZ,
+                       const UnsignedIntArray &scColors, bool solving)
 {
    #if DEBUG_SOLVER_DATA
    MessageInterface::ShowMessage
@@ -2039,7 +2041,7 @@ void ViewCanvas::UpdateSolverData(const RealArray &posX, const RealArray &posY,
    {
       mDrawSolverData = true;
       RealArray tempSolverX, tempSolverY, tempSolverZ;
-      
+      StringArray tempScName;
       for (int sc=0; sc<mScCount; sc++)
       {
          int satId = GetObjectId(mScNameArray[sc].c_str());
@@ -2059,12 +2061,15 @@ void ViewCanvas::UpdateSolverData(const RealArray &posX, const RealArray &posY,
       mSolverAllPosY.push_back(tempSolverY);
       mSolverAllPosZ.push_back(tempSolverZ);
       mSolverIterColorArray = scColors;
+      mSolverIterScNameArray = scNames;
    }
    else
    {
       mSolverAllPosX.clear();
       mSolverAllPosY.clear();
       mSolverAllPosZ.clear();
+      mSolverIterColorArray.clear();
+      mSolverIterScNameArray.clear();
    }
    
    #if DEBUG_SOLVER_DATA
@@ -2810,7 +2815,8 @@ void ViewCanvas::DrawSolverData()
    
    #if DEBUG_SOLVER_DATA
    MessageInterface::ShowMessage
-      ("==========> DrawSolverData() entered, solver points = %d\n", numPoints);
+      ("==========> DrawSolverData() '%s' entered, solver points = %d\n",
+       mPlotName.c_str(), numPoints);
    #endif
    
    if (numPoints == 0)
@@ -2831,16 +2837,25 @@ void ViewCanvas::DrawSolverData()
       //---------------------------------------------------------
       for (int sc=0; sc<numSc; sc++)
       {
-         *sIntColor = mSolverIterColorArray[sc];         
+         *sIntColor = mSolverIterColorArray[sc];
+         wxString scName = mSolverIterScNameArray[sc].c_str();
+         
          // Dunn took out old minus signs to make attitude correct.
          // Examining GMAT functionality in the debugger, this is only to show
          // the current solver iteration.  Somewhere else the multiple iterations 
          // are drawn.
-         start.Set(mSolverAllPosX[i-1][sc],mSolverAllPosY[i-1][sc],mSolverAllPosZ[i-1][sc]);
-         end.Set  (mSolverAllPosX[i]  [sc],mSolverAllPosY[i]  [sc],mSolverAllPosZ[i]  [sc]);
+         start.Set(mSolverAllPosX[i-1][sc], mSolverAllPosY[i-1][sc], mSolverAllPosZ[i-1][sc]);
+         end.Set  (mSolverAllPosX[i]  [sc], mSolverAllPosY[i]  [sc], mSolverAllPosZ[i]  [sc]);
          
          // PS - See Rendering.cpp
          DrawLine(sGlColor, start, end);
+         
+         // Draw space object name at the last point(LOJ: 2013.09.12 GMT-3854)
+         if (i == numPoints - 1)
+         {
+            glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+            DrawStringAt(scName, end);
+         }
       }
    }
    

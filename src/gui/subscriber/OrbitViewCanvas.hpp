@@ -117,7 +117,7 @@ private:
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
    static const Real MAX_ZOOM_IN;// = 3700.0;
    static const Real RADIUS_ZOOM_RATIO;// = 2.2;
-   static const Real DEFAULT_DIST;// = 30000.0;
+   static const Real DEFAULT_DISTANCE;// = 30000.0;
    
    // stars and options
    GLStars *mStars;
@@ -148,7 +148,7 @@ private:
    GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
    
    // drawing options
-   float mAxisLength;
+   //float mAxisLength;
    bool mDrawXyPlane;
    bool mDrawEclipticPlane;
    bool mDrawSunLine;
@@ -213,11 +213,10 @@ private:
    float mDefaultRotXAngle;
    float mDefaultRotYAngle;
    float mDefaultRotZAngle;
-   float mDefaultViewDist;
+   float mDefaultViewDistance;
    float mCurrRotXAngle;
    float mCurrRotYAngle;
    float mCurrRotZAngle;
-   float mCurrViewDist;
    
    // view point
    void SetDefaultViewPoint();

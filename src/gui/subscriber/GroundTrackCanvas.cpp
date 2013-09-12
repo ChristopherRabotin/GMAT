@@ -538,15 +538,15 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
       return;
    
    glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
-   mAxisLength = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));
+   mCurrViewDistance = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));
    
    Refresh(false);
    Update();
    
    #ifdef DEBUG_ONSIZE
    MessageInterface::ShowMessage
-      ("GroundTrackCanvas::OnSize() leaving, w = %d, h = %d, mAxisLength = %f\n",
-       nWidth, nHeight, mAxisLength);
+      ("GroundTrackCanvas::OnSize() leaving, w = %d, h = %d, mCurrViewDistance = %f\n",
+       nWidth, nHeight, mCurrViewDistance);
    #endif
 }
 
@@ -1709,7 +1709,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    
    // Use defaultCanvasAxis to draw spacecraft image and label in proper position
    float defaultCanvasAxis = 1800.0;
-   float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
+   float imagePos = 2.0 * (defaultCanvasAxis / mCurrViewDistance);
    
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage
@@ -1779,7 +1779,7 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
    
    // Use defaultCanvasAxis to draw spacecraft image and label in proper position
    float defaultCanvasAxis = 1800.0;
-   float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
+   float imagePos = 2.0 * (defaultCanvasAxis / mCurrViewDistance);
    
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage

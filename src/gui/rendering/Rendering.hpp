@@ -39,7 +39,7 @@ void DrawLine(GlColorType *color, const Rvector3 &start, const Rvector3 &end);
 void DrawLine(float red, float green, float blue, const Rvector3 &start, const Rvector3 &end);
 void DrawLine(double x1, double y1, double x2, double y2);
 void DrawCube(float x, float y, float z);
-void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2);
+void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2, bool drawSphere = true);
 void DrawEquatorialPlanes();
 void DrawCircle(GLUquadricObj *qobj, Real radius);
 void DrawCircle(double x1, double y1, double radius, bool fill = true);

@@ -79,13 +79,13 @@ public:
    virtual CoordinateSystem* GetViewCoordSystem() { return pViewCoordSystem; }
    
    // view distance
-   virtual float GetDistance() { return mAxisLength; }
-   virtual void SetDistance(float dist) { mAxisLength = dist; }
+   virtual float GetCurrentViewDistance() { return mCurrViewDistance; }
+   virtual void SetCurrentViewDistance(float dist) { mCurrViewDistance = dist; }
    
    // mission run
    virtual void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
    virtual void SetEndOfRun(bool flag = true);   
-
+   
    
    // actions
    virtual void ClearPlot() = 0;
@@ -231,7 +231,7 @@ protected:
    
    // View control
    bool mUseInitialViewPoint;
-   float mAxisLength;
+   float mCurrViewDistance;
    
    // Animation
    bool mIsAnimationRunning;
@@ -328,6 +328,7 @@ protected:
    std::vector<RealArray> mSolverAllPosY; // [numPoints][numSC]
    std::vector<RealArray> mSolverAllPosZ; // [numPoints][numSC]
    UnsignedIntArray mSolverIterColorArray;
+   StringArray mSolverIterScNameArray;
    
    // Viewing
    // Coordinate Transformation Matrices
@@ -388,9 +389,9 @@ protected:
    bool CreateObjectArrays();
    
    // For data update
-   void UpdateSolverData(const RealArray &posX, const RealArray &posY,
-                        const RealArray &posZ, const UnsignedIntArray &scColors,
-                        bool solving);
+   void UpdateSolverData(const StringArray &scNames, const RealArray &posX,
+                        const RealArray &posY, const RealArray &posZ,
+                        const UnsignedIntArray &scColors, bool solving);
    void UpdateSpacecraftData(const Real &time,
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,

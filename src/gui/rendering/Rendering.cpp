@@ -168,14 +168,24 @@ void DrawCube(float x, float y, float z)
 }
 
 //------------------------------------------------------------------------------
-// void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2)
+// void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2,
+//                     bool drawSphere = true)
 //------------------------------------------------------------------------------
-void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2)
+void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2,
+                    bool drawSphere)
 {
-   glColor3ub(color1->red, color1->green, color1->blue);
-   DrawCube(radius, radius, radius*2);
-   glColor3ub(color2->red, color2->green, color2->blue);
-   DrawCube(radius/4, radius*4, radius*1.5);
+   if (drawSphere)
+   {
+      glColor3ub(color1->red, color1->green, color1->blue);
+      DrawSphere(radius, 50, 50, GLU_FILL);
+   }
+   else
+   {
+      glColor3ub(color1->red, color1->green, color1->blue);
+      DrawCube(radius, radius, radius*2);
+      glColor3ub(color2->red, color2->green, color2->blue);
+      DrawCube(radius/4, radius*4, radius*1.5);
+   }
 }
 
 //------------------------------------------------------------------------------

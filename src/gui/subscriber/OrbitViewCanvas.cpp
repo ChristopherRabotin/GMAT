@@ -134,8 +134,7 @@ const int OrbitViewCanvas::LAST_STD_BODY_ID = 10;
 const int OrbitViewCanvas::MAX_COORD_SYS = 10;
 const Real OrbitViewCanvas::MAX_ZOOM_IN = 3700.0;
 const Real OrbitViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
-const Real OrbitViewCanvas::DEFAULT_DIST = 30000.0;
-//const int OrbitViewCanvas::UNKNOWN_OBJ_ID = -999;
+const Real OrbitViewCanvas::DEFAULT_DISTANCE = 30000.0;
 
 // color
 static int *sIntColor = new int;
@@ -181,7 +180,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mStars->SetDesiredStarCount(mStarCount);
    
    mCamera.Reset();
-   mCamera.Relocate(DEFAULT_DIST, 0.0, 0.0, 0.0, 0.0, 0.0);
+   mCamera.Relocate(DEFAULT_DISTANCE, 0.0, 0.0, 0.0, 0.0, 0.0);
    
    mGlList = 0;
    mIsFirstRun = true;
@@ -201,9 +200,9 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mDefaultRotXAngle = 90.0;
    mDefaultRotYAngle = 0.0;
    mDefaultRotZAngle = 0.0;
-   mDefaultViewDist = DEFAULT_DIST;
+   mDefaultViewDistance = DEFAULT_DISTANCE;
    
-   mAxisLength = DEFAULT_DIST;
+   mCurrViewDistance = DEFAULT_DISTANCE;
    
    mOriginName = "";
    mOriginId = 0;
@@ -212,7 +211,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mZoomAmount = 300.0;
    
    // projection
-   ChangeProjection(size.x, size.y, mAxisLength);
+   ChangeProjection(size.x, size.y, mCurrViewDistance);
    
    // Note from Dunn.  Size of space object vs. spacecraft models will take lots of
    // work in the future.  Models need to be drawn in meters.  Cameras need to
@@ -362,12 +361,12 @@ void OrbitViewCanvas::RedrawPlot(bool viewAnimation)
       ("OrbitViewCanvas::RedrawPlot() entered, viewAnimation=%d\n", viewAnimation);
    #endif
    
-   if (mAxisLength < mMaxZoomIn)
+   if (mCurrViewDistance < mMaxZoomIn)
    {
-      mAxisLength = mMaxZoomIn;
+      mCurrViewDistance = mMaxZoomIn;
       MessageInterface::ShowMessage
          ("OrbitViewCanvas::RedrawPlot() distance < max zoom in. distance set to %f\n",
-          mAxisLength);
+          mCurrViewDistance);
    }
    
    if (viewAnimation)
@@ -392,7 +391,7 @@ void OrbitViewCanvas::ShowDefaultView()
 
    SetDefaultView();
    ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
-   ChangeProjection(clientWidth, clientHeight, mAxisLength);
+   ChangeProjection(clientWidth, clientHeight, mCurrViewDistance);
    Refresh(false);
 }
 
@@ -527,27 +526,27 @@ void OrbitViewCanvas::GotoObject(const wxString &objName)
    // otherwise, set to final position of the object
    if (objName == mViewObjName)
    {
-      mAxisLength = mMaxZoomIn;
+      mCurrViewDistance = mMaxZoomIn;
    }
    else
    {
       //int index = objId * MAX_DATA * 3 + (mNumData-1) * 3;
       int index = objId * MAX_DATA * 3 + mLastIndex * 3;
 
-      // compute mAxisLength
+      // compute mCurrViewDistance
       Rvector3 pos(mObjectViewPos[index+0], mObjectViewPos[index+1],
                    mObjectViewPos[index+2]);
       
-      mAxisLength = pos.GetMagnitude();
+      mCurrViewDistance = pos.GetMagnitude();
       
-      if (mAxisLength == 0.0)
-         mAxisLength = mMaxZoomIn;
+      if (mCurrViewDistance == 0.0)
+         mCurrViewDistance = mMaxZoomIn;
    }
    
    #ifdef DEBUG_OBJECT
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::GotoObject() objName=%s, mViewObjId=%d, mMaxZoomIn=%f\n"
-       "   mAxisLength=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mAxisLength);
+       "   mCurrViewDistance=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mCurrViewDistance);
    #endif
 
    mIsEndOfData = true;
@@ -651,7 +650,7 @@ void OrbitViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
    mMaxZoomIn = mObjMaxZoomIn[mOriginId];
    
    if (mUseInitialViewPoint)
-      mAxisLength = mMaxZoomIn;
+      mCurrViewDistance = mMaxZoomIn;
    
    UpdateRotateFlags();
    
@@ -956,7 +955,7 @@ void OrbitViewCanvas::OnSize(wxSizeEvent& event)
       return;
    
    // Need this to make picture not to stretch to canvas
-   ChangeProjection(nWidth, nHeight, mAxisLength);
+   ChangeProjection(nWidth, nHeight, mCurrViewDistance);
    glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    
    Refresh(false);
@@ -1200,7 +1199,7 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
    theStatusBar->SetStatusText(mousePosStr, 2);
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
-   //            event.GetX(), event.GetY(), mfStartX, mfStartY, mZoomAmount, mAxisLength);
+   //            event.GetX(), event.GetY(), mfStartX, mfStartY, mZoomAmount, mCurrViewDistance);
    #endif
    
    event.Skip();
@@ -1293,10 +1292,10 @@ void OrbitViewCanvas::SetDefaultViewPoint()
    pViewDirectionObj = NULL;
    
    mViewPointRefVector.Set(0.0, 0.0, 0.0);
-   mViewPointVector.Set(DEFAULT_DIST, 0.0, 0.0);
+   mViewPointVector.Set(DEFAULT_DISTANCE, 0.0, 0.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    //mCamera.Reset();
-   //mCamera.Relocate(DEFAULT_DIST, 0.0, 0.0, 0.0, 0.0, 0.0);
+   //mCamera.Relocate(DEFAULT_DISTANCE, 0.0, 0.0, 0.0, 0.0, 0.0);
    
    mViewScaleFactor = 1.0;
    mUseViewPointRefVector = true;
@@ -1429,8 +1428,8 @@ void OrbitViewCanvas::SetDefaultView()
    mCurrRotXAngle = mDefaultRotXAngle;
    mCurrRotYAngle = mDefaultRotYAngle;
    mCurrRotZAngle = mDefaultRotZAngle;
-   mCurrViewDist = mDefaultViewDist;
-   mAxisLength = mCurrViewDist;
+   mCurrViewDistance = mDefaultViewDistance;
+   mCurrViewDistance = mCurrViewDistance;
    mfCamTransX = 0;
    mfCamTransY = 0;
    mfCamTransZ = 0;
@@ -1804,8 +1803,8 @@ void OrbitViewCanvas::DrawPlot()
    #if DEBUG_DRAW > 1
    MessageInterface::ShowMessage
       ("   mRedrawLastPointsOnly=%d, mNumPointsToRedraw=%d, mViewCsIsInternalCs=%d, "
-       "mUseInitialViewPoint=%d, mAxisLength=%f\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
-       mViewCsIsInternalCs, mUseInitialViewPoint, mAxisLength);
+       "mUseInitialViewPoint=%d, mCurrViewDistance=%f\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
+       mViewCsIsInternalCs, mUseInitialViewPoint, mCurrViewDistance);
    MessageInterface::ShowMessage
       ("   mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d, mIsAnimationRunning=%d\n",
        mIsEndOfData, mIsEndOfRun, mDrawSolverData, mIsAnimationRunning);
@@ -1838,7 +1837,7 @@ void OrbitViewCanvas::DrawPlot()
       return;
    }
    
-   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mCurrViewDistance);
    
    glDisable(GL_LIGHTING);
    
@@ -1971,6 +1970,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    
    int frame = mObjLastFrame[objId];
    int index1 = objId * MAX_DATA * 3 + frame * 3;
+   bool drawingSpacecraft = false;
    
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
@@ -1995,6 +1995,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    // Draw spacecraft
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
    {
+      drawingSpacecraft = true;
       // If drawing at current position is on
       if (mIsDrawing[frame])
       {
@@ -2021,7 +2022,8 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
             *sIntColor = mObjectOrbitColor[objId * MAX_DATA + mObjLastFrame[objId]];
             // We want to differenciate spacecraft by orbit color so pass sGlColor (LOJ: 2011.02.16)
             //DrawSpacecraft(mScRadius, yellow, red);
-            DrawSpacecraft(mScRadius, yellow, sGlColor);
+            
+            DrawSpacecraft(mScRadius, yellow, sGlColor, false);
          }
       }
    }
@@ -2042,6 +2044,23 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glDisable(GL_LIGHTING);
       glDisable(GL_LIGHT0);
    }
+   
+   //============================================================
+   // Draw space object name (GMT-3854)
+   // Disable lighting before rendering text
+   glPushMatrix();
+   glDisable(GL_LIGHTING);
+   glDisable(GL_LIGHT0);
+   
+   if (drawingSpacecraft)
+      *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
+   else
+      *sIntColor = mObjectColorMap[objName].GetIntColor();
+   
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   DrawStringAt(objName, 0, 0, 0, 1);
+   glPopMatrix();
+   //============================================================
    
    glPopMatrix();
    
@@ -2428,7 +2447,7 @@ void OrbitViewCanvas::DrawSunLine()
       return;
    
    Rvector3 originPos, sunPos;
-   Real distance = (Real)mAxisLength;
+   Real distance = (Real)mCurrViewDistance;
    Real mag;
    
    //--------------------------------
@@ -2482,7 +2501,9 @@ void OrbitViewCanvas::DrawAxes()
    if (mCanRotateAxes)
       RotateUsingOriginAttitude();
    
-   GLfloat viewDist = mAxisLength;
+   float distance = (mCamera.position - mCamera.view_center).GetMagnitude();
+   //GLfloat viewDist = mCurrViewDistance;
+   GLfloat viewDist = mCurrViewDistance + distance * 0.3;
    Rvector3 xAxis(viewDist, 0.0, 0.0);
    Rvector3 yAxis(0.0, viewDist, 0.0);
    Rvector3 zAxis(0.0, 0.0, viewDist);
@@ -2491,7 +2512,8 @@ void OrbitViewCanvas::DrawAxes()
    glDisable(GL_LIGHT0);
    wxString axisLabel;
    
-   glLineWidth(2.0);
+   //glLineWidth(2.0f);
+   glLineWidth(1.0f);
    
    //-----------------------------------
    // draw axes
