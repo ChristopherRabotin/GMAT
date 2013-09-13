@@ -18,6 +18,10 @@
 #include "MessageInterface.hpp"
 #include "TsPlotOptionsDialog.hpp"
 
+#include <wx/dcmemory.h>
+#include <wx/dcprint.h>
+#include <wx/bitmap.h>
+
 #include <cmath>
 #include <fstream>
 #include <algorithm>
@@ -41,6 +45,7 @@ BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_MENU          (ID_TOGGLE_LEGEND, TsPlotCanvas::ToggleLegend)
    EVT_MENU          (ID_PLOT_DETAILS, TsPlotCanvas::SetOptions)
    EVT_MENU          (ID_PLOT_SAVE, TsPlotCanvas::SaveData)
+   EVT_MENU          (ID_PLOT_SAVEIMAGE, TsPlotCanvas::SaveImage)
 END_EVENT_TABLE()
 
 
@@ -211,6 +216,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          menu.AppendSeparator();
       }
       menu.Append(ID_PLOT_SAVE, "Export Data...");
+      menu.Append(ID_PLOT_SAVEIMAGE, "Save Image...");
 
       menu.Check(ID_TOGGLE_GRID, hasGrid);
       menu.Check(ID_TOGGLE_LEGEND, hasLegend);
@@ -1200,7 +1206,6 @@ void TsPlotCanvas::ResetRanges()
       plotYMax = userYMax;
 }
 
-
 void TsPlotCanvas::SaveData(wxCommandEvent& event)
 {
    wxFileDialog dlg(this, "Select save file name", "", "PlotData.txt", "*.*",
@@ -1215,6 +1220,35 @@ void TsPlotCanvas::SaveData(wxCommandEvent& event)
             filename.c_str());
       #endif
       DumpData(filename);
+   }
+}
+
+void TsPlotCanvas::SaveImage(wxCommandEvent& event)
+{
+   wxFileDialog dlg(this, "Select save file name", "", "PlotImage.bmp", "*.*",
+      wxFILE_SAVE_FLAG | wxFILE_OVERWRITE_FLAG);
+
+   if (dlg.ShowModal() == wxID_OK)
+   {
+      std::string filename;
+      filename = dlg.GetPath().c_str();
+      #ifdef DEBUG_INTERFACE
+         MessageInterface::ShowMessage("Selected file name: %s",
+            filename.c_str());
+      #endif
+	  // Create a memory DC
+	  wxMemoryDC temp_dc;
+	  wxCoord w, h;
+	  GetSize(&w, &h);
+	  wxBitmap test_bitmap(w*2, h*2);
+	  temp_dc.SelectObject(test_bitmap);
+	  bool titleVisible = showTitle;
+	  showTitle = true;
+	  // draw to memory dc bitmap
+	  Refresh(temp_dc, true);
+	  showTitle = titleVisible;
+	  // save bitmap
+	  test_bitmap.SaveFile(filename, wxBITMAP_TYPE_BMP); 
    }
 }
 

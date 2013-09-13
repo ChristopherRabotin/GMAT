@@ -39,7 +39,8 @@ public:
       ID_TOGGLE_GRID,
       ID_TOGGLE_LEGEND,
       ID_PLOT_DETAILS,
-      ID_PLOT_SAVE
+      ID_PLOT_SAVE,
+	  ID_PLOT_SAVEIMAGE
    };
 
 public:
@@ -201,6 +202,7 @@ protected:
    virtual void SetOptions(wxCommandEvent& event);
    virtual void ResetRanges();
    void SaveData(wxCommandEvent& event);
+   void SaveImage(wxCommandEvent& event);
 
    virtual void Zoom(wxRect &region);
    virtual void UnZoom();
