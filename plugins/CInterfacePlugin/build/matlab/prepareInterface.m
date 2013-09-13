@@ -19,5 +19,5 @@ movefile('interfacewrapper.m', matlabdir);
 % thunk library
 d = dir(['libCInterface_thunk_' computer() '*']);
 for i = 1:length(d)
-    movefile(d(1).name, matlabdir);
+    movefile(d(i).name, matlabdir);
 end
