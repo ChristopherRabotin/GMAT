@@ -45,7 +45,7 @@ clean:
 	msbuild.exe GmatPlugins.sln //p:Configuration=Release //fl //target:Clean;
 	cd $(GMAT_BIN_DIR) && rm -rf *.dll
 	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
-	cd $(GMAT_PROPRIETARY_BIN_DIR) && rm -rf *.dll
+	rm -f $(GMAT_PROPRIETARY_BIN_DIR)/*.dll
 	cd $(GMAT_HELP_BUILD_DIR) && $(MAKE) clean
 
 # checks out the repositories
