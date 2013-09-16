@@ -1,0 +1,14 @@
+.DS_Store
+*.o
+*.obj
+*.dylib
+*.so
+*.dll
+*.exe
+*.app
+.project
+.cproject
+GmatLog.txt
+language.settings.xml
+GMAT
+
