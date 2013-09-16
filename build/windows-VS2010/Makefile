@@ -50,7 +50,7 @@ clean:
 
 # checks out the repositories
 checkout:
-	cd $(GMAT_DIR); svn cleanup; svn update; 
+	cd $(GMAT_DIR); git pull 
 	cd $(GMAT_PLUGIN_DIR); svn cleanup; svn update; 
 
 # assembles the latest build, including user help
