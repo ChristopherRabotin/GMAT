@@ -1248,7 +1248,7 @@ void TsPlotCanvas::SaveImage(wxCommandEvent& event)
 	  Refresh(temp_dc, true);
 	  showTitle = titleVisible;
 	  // save bitmap
-	  test_bitmap.SaveFile(filename, wxBITMAP_TYPE_BMP); 
+	  test_bitmap.SaveFile(filename.c_str(), wxBITMAP_TYPE_BMP);
    }
 }
 
