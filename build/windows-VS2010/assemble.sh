@@ -54,7 +54,7 @@ then
 fi
 
 # Copy static application files
-svn export --force ${cur}/../../application "$dest"
+cp -av ${cur}/../../application/* "$dest"
 
 # Copy bin files
 cp -av "$binfiles"/* "$dest"
@@ -67,8 +67,6 @@ cp -av \
     "$netpath"/Builds/windows/vc_lib/*.dll \
     "$dest"/bin
 
-# Remove any Windows hidden files
-find "$dest" -iname thumbs.db -delete
 
 # Mars-GRAM 2005 data
 mgpath="$jazz/MarsGRAMPlugin/data"
@@ -77,5 +75,9 @@ cp -av "$mgpath/"* "$dest/data/atmosphere"
 # libCInterface MATLAB files
 cifacepath=${cur}/../../plugins/CInterfacePlugin
 cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
+
+# Remove any Windows hidden files, git files
+find "$dest" -iname thumbs.db -delete
+find "$dest" -iname .gitignore -delete
 
 echo "Finished assembling latest complete version"

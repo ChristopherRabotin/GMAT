@@ -48,9 +48,9 @@ END
 }
 
 # File sources
-sfrepo='svn://svn.code.sf.net/p/gmat/code'
+devrepo='../..'
 jazzrepo='https://gs580s-jazz.ndc.nasa.gov/svn/GMAT' 
-apppath="$sfrepo/trunk/application"
+apppath="$devrepo/application"
 
 # Argument handling
 while getopts b:d:lmp:t:u:w o
@@ -120,7 +120,7 @@ then
 fi
 
 # bin, data, matlab
-svn export --force "$apppath" "$dest"
+cp -av "$apppath"/* "$dest"
 
 # remove debug directory
 rm -rf "$dest/debug"
@@ -141,8 +141,8 @@ then
 fi
 
 # libCInterface MATLAB files
-cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
-svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
+cifacepath="$devrepo/plugins/CInterfacePlugin"
+cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
 
 # Remove proprietary plugins if necessary
 if [ $TYPE = 'public' -o $TYPE = 'public-release' ]
@@ -153,3 +153,5 @@ then
     unix2dos "$dest"/bin/gmat_startup_file.txt
 fi
 
+# Remove git files
+find "$dest" -iname .gitignore -delete
