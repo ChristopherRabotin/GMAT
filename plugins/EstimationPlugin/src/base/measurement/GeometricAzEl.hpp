@@ -24,9 +24,9 @@
 #define GeometricAzEl_hpp
 
 #include "estimation_defs.hpp"
-#include "GeometricMeasurement.hpp"
+#include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricAzEl: public GeometricMeasurement
+class ESTIMATION_API GeometricAzEl: public CoreMeasurement
 {
 public:
    GeometricAzEl(const std::string &name = "");

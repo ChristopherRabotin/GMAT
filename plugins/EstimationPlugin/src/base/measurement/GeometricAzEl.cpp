@@ -33,7 +33,7 @@ using namespace GmatMathUtil;
 
 
 GeometricAzEl::GeometricAzEl(const std::string &name) :
-   GeometricMeasurement          ("GeometricAzEl", name)
+   CoreMeasurement          ("GeometricAzEl", name)
 {
    objectTypeNames.push_back("GeometricAzEl");
 
@@ -55,7 +55,7 @@ GeometricAzEl::~GeometricAzEl()
 
 
 GeometricAzEl::GeometricAzEl(const GeometricAzEl &meas) :
-   GeometricMeasurement          (meas)
+   CoreMeasurement          (meas)
 {
    currentMeasurement.value.push_back(0.0);
    currentMeasurement.value.push_back(0.0);
@@ -73,7 +73,7 @@ GeometricAzEl& GeometricAzEl::operator=(const GeometricAzEl &meas)
 {
    if (&meas != this)
    {
-      GeometricMeasurement::operator=(meas);
+      CoreMeasurement::operator=(meas);
 
       // Allocate exactly one value in current measurement for range
       currentMeasurement.value.clear();
@@ -113,7 +113,7 @@ bool GeometricAzEl::Initialize()
    
    bool retval = false;
    
-   if (GeometricMeasurement::Initialize())
+   if (CoreMeasurement::Initialize())
       retval = true;
    
    #ifdef DEBUG_AZ_EL_CALC
