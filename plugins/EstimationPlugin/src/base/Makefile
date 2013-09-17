@@ -174,7 +174,6 @@ CPP_OBJECTS = \
     measurementfile/DataFileAdapter.o \
     measurement/CoreMeasurement.o \
     measurement/MediaCorrection.o \
-    measurement/GeometricMeasurement.o \
     measurement/MeasurementData.o \
     measurement/MeasurementManager.o \
     measurement/MeasurementModel.o \
