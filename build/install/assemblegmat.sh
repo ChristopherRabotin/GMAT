@@ -48,7 +48,7 @@ END
 }
 
 # File sources
-devrepo='../..'
+devrepo=`dirname $0`'/../..'
 jazzrepo='https://gs580s-jazz.ndc.nasa.gov/svn/GMAT' 
 apppath="$devrepo/application"
 
