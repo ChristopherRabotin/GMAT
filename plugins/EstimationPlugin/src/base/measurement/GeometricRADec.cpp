@@ -109,6 +109,15 @@ GmatBase* GeometricRADec::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the measurement for use in the estimation process
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool GeometricRADec::Initialize()
 {
    #ifdef DEBUG_RA_DEC_CALC
