@@ -97,6 +97,9 @@ GmatGrav::GravityFileType GravityFileUtil::GetFileType(const std::string &filena
    while (!inStream.eof())
    {
       getline(inStream, line);
+       
+      // if the line is blank, skip it
+      if (GmatStringUtil::IsBlank(line, true)) continue;
 
       // Make upper case, so we can check for certain keyword
       line = GmatStringUtil::ToUpper(line);
@@ -113,7 +116,8 @@ GmatGrav::GravityFileType GravityFileUtil::GetFileType(const std::string &filena
             gft = GmatGrav::GFT_COF;
             break;
          }
-         else if (line.find("STK.V.") != line.npos)
+         else if ((line.find("STK.V.") != line.npos) ||
+                  (line.find("stk.v.") != line.npos))
          {
             gft = GmatGrav::GFT_GRV;
             break;
