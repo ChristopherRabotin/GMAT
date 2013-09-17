@@ -1,6 +1,6 @@
 # Makefile for the GMAT User Guide and Training Manual.
 # On Windows, requires an MSYS environment.
-# This file generally follows the rules of the GNU Makefile Conventions
+# This file generally follows the rules of the GNU Makefile Conventions.
 
 # portability boilerplate
 SHELL = /bin/sh
@@ -193,7 +193,8 @@ html/index.html: help-pre.xml files/style.css
 	    $(ALL_XALANFLAGS)
 
 files/style.css: $(srcdir)/files/style.css
-	svn export --force src/files files
+	mkdir -p files
+	cp -av src/files/* files
 
 help.chm: help-pre.xml htmlhelp.titlepage.templates.xsl files/style.css
 	$(XALAN) \

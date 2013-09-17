@@ -10,9 +10,6 @@ and present on the system path for the current user:
 * Java
     (http://java.com)
 
-* Subversion command-line client
-    (http://www.collab.net or http://www.sliksvn.com)
-
 * HTML Help Workshop (for Windows Help output)
     (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=21138)
 
