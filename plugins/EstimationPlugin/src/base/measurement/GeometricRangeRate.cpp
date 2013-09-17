@@ -33,7 +33,7 @@
 
 
 GeometricRangeRate::GeometricRangeRate(const std::string &name) :
-   CoreMeasurement          ("GeometricRangeRate", name)
+   GeometricMeasurement          ("GeometricRangeRate", name)
 {
    objectTypeNames.push_back("GeometricRangeRate");
 
@@ -51,7 +51,7 @@ GeometricRangeRate::~GeometricRangeRate()
 
 
 GeometricRangeRate::GeometricRangeRate(const GeometricRangeRate &rrm) :
-   CoreMeasurement          (rrm)
+   GeometricMeasurement          (rrm)
 {
    currentMeasurement.value.push_back(0.0);
    currentMeasurement.typeName = "RangeRate";
@@ -67,7 +67,7 @@ GeometricRangeRate& GeometricRangeRate::operator=(const GeometricRangeRate &rrm)
 {
    if (&rrm != this)
    {
-      CoreMeasurement::operator=(rrm);
+      GeometricMeasurement::operator=(rrm);
 
       // Allocate exactly one value in current measurement for range
       currentMeasurement.value.clear();
@@ -104,7 +104,7 @@ bool GeometricRangeRate::Initialize()
 
 bool retval = false;
 
-if (CoreMeasurement::Initialize())
+if (GeometricMeasurement::Initialize())
    retval = true;
 
 #ifdef DEBUG_RANGE_RATE_CALC

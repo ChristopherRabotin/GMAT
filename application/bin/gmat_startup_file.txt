@@ -45,24 +45,24 @@
 PLUGIN                 = ../plugins/libEphemPropagator
 PLUGIN                 = ../plugins/libFormation
 PLUGIN                 = ../plugins/libStation
-#PLUGIN                 = ../plugins/libMatlabInterface
-#PLUGIN                 = ../plugins/libFminconOptimizer
+PLUGIN                 = ../plugins/libMatlabInterface
+PLUGIN                 = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libDataInterface
 
 # Alpha plugins
 #PLUGIN                = ./libCInterface
-PLUGIN                = ../plugins/libEventLocator
-PLUGIN                = ../plugins/libExtraPropagators
-PLUGIN                = ../plugins/libGmatEstimation
-PLUGIN                = ../plugins/libGmatFunction
-PLUGIN                = ../plugins/libSaveCommand
+#PLUGIN                = ../plugins/libEventLocator
+#PLUGIN                = ../plugins/libExtraPropagators
+#PLUGIN                = ../plugins/libGmatEstimation
+#PLUGIN                = ../plugins/libGmatFunction
+#PLUGIN                = ../plugins/libSaveCommand
 
 # Internal-only plugins
-#PLUGIN                 = ../plugins/proprietary/libMarsGRAM
-#PLUGIN                 = ../plugins/proprietary/libMsise86
-#PLUGIN                 = ../plugins/proprietary/libNewParameters
-#PLUGIN                 = ../plugins/proprietary/libNRLMsise00
-#PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/proprietary/libMarsGRAM
+PLUGIN                 = ../plugins/proprietary/libMsise86
+PLUGIN                 = ../plugins/proprietary/libNewParameters
+PLUGIN                 = ../plugins/proprietary/libNRLMsise00
+PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
