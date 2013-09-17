@@ -24,9 +24,9 @@
 #define GeometricRADec_hpp
 
 #include "estimation_defs.hpp"
-#include "GeometricMeasurement.hpp"
+#include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricRADec: public GeometricMeasurement
+class ESTIMATION_API GeometricRADec: public CoreMeasurement
 {
 public:
    GeometricRADec(const std::string &name = "");

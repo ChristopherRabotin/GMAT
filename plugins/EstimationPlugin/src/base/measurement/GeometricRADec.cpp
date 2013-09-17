@@ -37,7 +37,7 @@ using namespace GmatMathUtil;
 
 
 GeometricRADec::GeometricRADec(const std::string &name) :
-   GeometricMeasurement          ("RADec", name)
+   CoreMeasurement          ("RADec", name)
 {
    objectTypeNames.push_back("GeometricRADec");
 
@@ -60,7 +60,7 @@ GeometricRADec::~GeometricRADec()
 
 
 GeometricRADec::GeometricRADec(const GeometricRADec &meas) :
-   GeometricMeasurement          (meas)
+   CoreMeasurement          (meas)
 {
    currentMeasurement.value.push_back(0.0);
    currentMeasurement.value.push_back(0.0);
@@ -78,7 +78,7 @@ GeometricRADec& GeometricRADec::operator=(const GeometricRADec &meas)
 {
    if (&meas != this)
    {
-      GeometricMeasurement::operator=(meas);
+      CoreMeasurement::operator=(meas);
 
       // Allocate exactly one value in current measurement for range
       currentMeasurement.value.clear();
@@ -118,7 +118,7 @@ bool GeometricRADec::Initialize()
    
    bool retval = false;
    
-   if (GeometricMeasurement::Initialize())
+   if (CoreMeasurement::Initialize())
       retval = true;
    
    #ifdef DEBUG_RA_DEC_CALC
@@ -508,7 +508,7 @@ void GeometricRADec::InitializeMeasurement()
       MessageInterface::ShowMessage("Entering RADEC::InitializeMeasurement\n");
    #endif
    
-   GeometricMeasurement::InitializeMeasurement();
+   CoreMeasurement::InitializeMeasurement();
    if (Fo) delete Fo;  // replace with a different, correct, specific one
  
    Rvector6   dummyIn(1.0,2.0,3.0,  4.0,5.0,6.0);
