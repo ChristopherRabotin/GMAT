@@ -33,7 +33,7 @@
 
 
 GeometricRange::GeometricRange(const std::string &name) :
-   GeometricMeasurement          ("GeometricRange", name)
+   CoreMeasurement          ("GeometricRange", name)
 {
    objectTypeNames.push_back("GeometricRange");
 
@@ -54,7 +54,7 @@ GeometricRange::~GeometricRange()
 
 
 GeometricRange::GeometricRange(const GeometricRange &rm) :
-   GeometricMeasurement          (rm)
+   CoreMeasurement          (rm)
 {
    currentMeasurement.value.push_back(0.0);
    currentMeasurement.typeName = "GeometricRange";
@@ -71,7 +71,7 @@ GeometricRange& GeometricRange::operator=(const GeometricRange &rm)
 {
    if (&rm != this)
    {
-      GeometricMeasurement::operator=(rm);
+      CoreMeasurement::operator=(rm);
 
       // Allocate exactly one value in current measurement for range
       currentMeasurement.value.clear();
@@ -110,7 +110,7 @@ bool GeometricRange::Initialize()
 
    bool retval = false;
 
-   if (GeometricMeasurement::Initialize())
+   if (CoreMeasurement::Initialize())
       retval = true;
 
    #ifdef DEBUG_RANGE_CALC
