@@ -6,7 +6,8 @@ GMAT_CODE_LOCATION = ../../../../src
 GMAT_BIN_LOCATION = ../../../../application/bin
 GMAT_PLUGIN_LOCATION = ../../../../application/plugins
 
-WX_INSTALLED = /usr/local/bin
+#WX_INSTALLED = /usr/local/bin
+WX_INSTALLED = /Applications/wxMac-2.8.12/shared
 
 # location of MATLAB headers and libraries
 # **** use these lines to point to your MATLAB (2009b) installation ****
