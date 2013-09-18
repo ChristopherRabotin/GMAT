@@ -4,7 +4,7 @@
 #
 # This file builds the plug-in base code
 
-include ../OdEnv.mk
+include ../GeoMeasEnv.mk
 
 # handle different bin and lib directories here; for now, set to bin and lib for non-Mac platforms
 ifeq ($(PLATFORM), mac)
@@ -37,44 +37,7 @@ SHARED_LIB_FLAGS = -shared --out-implib $(LINK_FLAGS) -L$(GMAT_Code_Location)/ba
 
 endif
 
-TARGET = ../../$(GMAT_LIB_DIR)/libGmatEstimation$(SHARED_EXTENSION)
-
-
-ifeq ($(USE_DATAFILE_PLUGIN), 0)
-DATAFILE_INCLUDES = -Imeasurementfile
-
-DATAFILE_OBJECTS = measurementfile/B3_obtype.o \
-                   measurementfile/DataFile.o \
-                   measurementfile/ObservationData.o \
-                   measurementfile/ObType.o \
-                   measurementfile/GmatObType.o \
-                   factory/DataFileFactory.o \
-                   factory/ObTypeFactory.o
-else
-DATAFILE_INCLUDES = -I$(GMAT_DataFile_Location)/base/datafile \
-          -I$(GMAT_DataFile_Location)/base/datafile/CCSDS \
-          -I$(GMAT_DataFile_Location)/base/datafile/CCSDS/CCSDSData \
-          -I$(GMAT_DataFile_Location)/base/datafile/CCSDS/CCSDSMetaData \
-          -I$(GMAT_DataFile_Location)/base/datafile/CCSDS/CCSDSObTypes
-
-DATAFILE_OBJECTS = 
-endif
-
-
-ifeq ($(INCLUDE_IONOSPHERE), 1)
-IONOSPHERE_C_OBJECTS = \
-	measurement/Ionosphere/cira.o \
-	measurement/Ionosphere/igrf.o \
-	measurement/Ionosphere/iridreg.o \
-	measurement/Ionosphere/irifun.o \
-	measurement/Ionosphere/iritec.o \
-	measurement/Ionosphere/irisub.o
-IONOSPHERE_CPP_OBJECTS = \
-	measurement/Ionosphere/Ionosphere.o 
-else
-IONOSPHERE_C_OBJECTS = 
-IONOSPHERE_CPP_OBJECTS = 
-endif
+TARGET = ../../$(GMAT_LIB_DIR)/libGeometricMeasurements$(SHARED_EXTENSION)
 
 
 all: prep $(TARGET)
@@ -83,17 +46,13 @@ prep:
 	rm -rf $(TARGET)
 
 HEADERS = -Iinclude \
-          -Icommand \
-          -Iestimator \
-          -Ievent \
           -Ifactory \
-          -Ihardware \
           -Iplugin \
           -Imeasurement \
-          -Imeasurement/Ionosphere \
-          -Imeasurement/Troposphere \
-          -Itrackingsystem \
-          $(DATAFILE_INCLUDES) \
+          -I$(GMAT_Estimation_Location)/include \
+          -I$(GMAT_Estimation_Location)/measurement \
+          -I$(GMAT_Estimation_Location)/hardware \
+          -I$(GMAT_Estimation_Location)/event \
           -I$(GMAT_Code_Location)/base/include \
           -I$(GMAT_Code_Location)/base/foundation \
           -I$(GMAT_Code_Location)/base/event \
@@ -127,8 +86,6 @@ clean : archclean
 
 archclean :
 	rm -rf */*.o
-	rm -rf measurement/Ionosphere/*.o
-	rm -rf measurement/Troposphere/*.o
 	rm -rf $(TARGET)
 	rm -rf */*~
 	rm -rf core
@@ -139,63 +96,11 @@ C_OBJECTS = \
 
 CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
-    command/RunEstimator.o \
-    command/RunSimulator.o \
-    estimator/Estimator.o \
-    estimator/BatchEstimator.o \
-    estimator/BatchEstimatorInv.o \
-    estimator/BatchEstimatorSVD.o \
-    estimator/SequentialEstimator.o \
-    estimator/ExtendedKalmanInv.o \
-    estimator/EstimationStateManager.o \
-    estimator/EstimatorException.o \
-    estimator/Simulator.o \
-    event/Event.o \
-    event/EventException.o \
-    event/EventData.o \
-    event/EventManager.o \
-    event/LightTimeCorrection.o \
-    event/EstimationRootFinder.o \
-    factory/EstimationCommandFactory.o \
-    factory/EstimatorFactory.o \
-    factory/EventFactory.o \
-    factory/EstimatorHardwareFactory.o \
     factory/MeasurementFactory.o \
-    factory/MeasurementModelFactory.o \
-    factory/TrackingDataFactory.o \
-    factory/TrackingSystemFactory.o \
-    hardware/Sensor.o \
-    hardware/Signal.o \
-    hardware/RFHardware.o \
-    hardware/Transmitter.o \
-    hardware/Antenna.o \
-    hardware/Receiver.o \
-    hardware/Transponder.o \
-    measurementfile/DataFileAdapter.o \
-    measurement/CoreMeasurement.o \
-    measurement/MediaCorrection.o \
-    measurement/MeasurementData.o \
-    measurement/MeasurementManager.o \
-    measurement/MeasurementModel.o \
-    measurement/PhysicalMeasurement.o \
-    measurement/SnTwoWayRange.o \
-    measurement/TwoWayRange.o \
-    measurement/AveragedDoppler.o \
-    measurement/TrackingData.o \
-    measurement/DSNTwoWayRange.o \
-    measurement/DSNTwoWayDoppler.o \
-    measurement/TDRSSTwoWayRange.o \
-    measurement/USNTwoWayRange.o \
-    measurement/OpticalAngles.o \
-    measurement/OpticalAzEl.o \
-    measurement/Troposphere/Troposphere.o \
-    $(IONOSPHERE_CPP_OBJECTS) \
-    $(DATAFILE_OBJECTS) \
-    trackingsystem/TrackingSystem.o \
-    trackingsystem/DSNTrackingSystem.o \
-    trackingsystem/OpticalTrackingSystem.o \
-    trackingsystem/TDRSSTrackingSystem.o \
-    trackingsystem/USNTrackingSystem.o
+    measurement/GeometricAzEl.o \
+    measurement/GeometricRADec.o \
+    measurement/GeometricRange.o \
+    measurement/GeometricRangeRate.o
 
 ifeq ($(PLATFORM), mac)
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
