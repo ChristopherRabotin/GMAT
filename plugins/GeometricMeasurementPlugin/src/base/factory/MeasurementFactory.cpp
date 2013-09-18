@@ -24,13 +24,10 @@
 #include "MessageInterface.hpp"
 
 // Specific types supported
-
-// "Real world" measurements
-#include "DSNTwoWayRange.hpp"
-#include "DSNTwoWayDoppler.hpp"
-#include "USNTwoWayRange.hpp"
-#include "TDRSSTwoWayRange.hpp"
-#include "OpticalAzEl.hpp"
+#include "GeometricRange.hpp"
+#include "GeometricRangeRate.hpp"
+#include "GeometricAzEl.hpp"
+#include "GeometricRADec.hpp"
 
 
 //-----------------------------------------------------------------------------
@@ -49,16 +46,14 @@
 CoreMeasurement *MeasurementFactory::CreateMeasurement(
       const std::string & ofType, const std::string & withName)
 {
-   if (ofType == "DSNTwoWayRange")
-      return new DSNTwoWayRange(withName);
-   if (ofType == "DSNTwoWayDoppler")
-      return new DSNTwoWayDoppler(withName);
-   if (ofType == "USNTwoWayRange")
-      return new USNTwoWayRange(withName);
-   if (ofType == "TDRSSTwoWayRange")
-      return new TDRSSTwoWayRange(withName);
-   if (ofType == "OpticalAzEl")
-      return new OpticalAzEl(withName);
+   if (ofType == "GeometricRange")
+      return new GeometricRange(withName);
+   if (ofType == "GeometricRangeRate")
+      return new GeometricRangeRate(withName);
+   if (ofType == "GeometricAzEl")
+      return new GeometricAzEl(withName);
+   if (ofType == "GeometricRADec")
+      return new GeometricRADec(withName);
 
    return NULL;
 }
@@ -76,11 +71,10 @@ MeasurementFactory::MeasurementFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      creatables.push_back("GeometricRange");
+      creatables.push_back("GeometricRangeRate");
+      creatables.push_back("GeometricAzEl");
+      creatables.push_back("GeometricRADec");
    }
 }
 
@@ -115,11 +109,10 @@ MeasurementFactory& MeasurementFactory::operator=(
    if (creatables.empty())
 
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      creatables.push_back("GeometricRange");
+      creatables.push_back("GeometricRangeRate");
+      creatables.push_back("GeometricAzEl");
+      creatables.push_back("GeometricRADec");
    }
 
    return *this;
@@ -140,11 +133,10 @@ MeasurementFactory::MeasurementFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      creatables.push_back("GeometricRange");
+      creatables.push_back("GeometricRangeRate");
+      creatables.push_back("GeometricAzEl");
+      creatables.push_back("GeometricRADec");
    }
 }
 
@@ -164,10 +156,9 @@ MeasurementFactory::MeasurementFactory(const MeasurementFactory& fact) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      creatables.push_back("GeometricRange");
+      creatables.push_back("GeometricRangeRate");
+      creatables.push_back("GeometricAzEl");
+      creatables.push_back("GeometricRADec");
    }
 }

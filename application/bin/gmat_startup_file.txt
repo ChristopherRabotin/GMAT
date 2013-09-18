@@ -54,6 +54,7 @@ PLUGIN                 = ../plugins/libDataInterface
 #PLUGIN                = ../plugins/libEventLocator
 #PLUGIN                = ../plugins/libExtraPropagators
 #PLUGIN                = ../plugins/libGmatEstimation
+#PLUGIN                = ../plugins/libGeometricMeasurements
 #PLUGIN                = ../plugins/libGmatFunction
 #PLUGIN                = ../plugins/libSaveCommand
 
