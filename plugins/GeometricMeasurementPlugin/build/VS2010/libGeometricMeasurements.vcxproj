@@ -16,12 +16,12 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -36,14 +36,27 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\..\application\debug\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\measurement;..\..\src\base\plugin;..\..\..\EstimationPlugin\src\base\include;..\..\..\EstimationPlugin\src\base\measurement;..\..\..\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\EstimationPlugin\src\base\event;..\..\..\EstimationPlugin\src\base\hardware;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GEOMETRICMEAS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\application\debug;..\..\..\..\application\debug\plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;libGmatEstimation.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -52,14 +65,35 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\measurement;..\..\src\base\plugin;..\..\..\EstimationPlugin\src\base\include;..\..\..\EstimationPlugin\src\base\measurement;..\..\..\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\EstimationPlugin\src\base\event;..\..\..\EstimationPlugin\src\base\hardware;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GEOMETRICMEAS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\application\plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;libGmatEstimation.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\base\factory\MeasurementFactory.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\GeometricAzEl.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\GeometricRADec.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\GeometricRange.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\GeometricRangeRate.cpp" />
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\factory\MeasurementFactory.hpp" />
+    <ClInclude Include="..\..\src\base\include\geometricmeasurement_defs.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\GeometricAzEl.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\GeometricRADec.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\GeometricRange.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\GeometricRangeRate.hpp" />
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -23,10 +23,10 @@
 #ifndef GeometricRADec_hpp
 #define GeometricRADec_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricRADec: public CoreMeasurement
+class GEOMETRICMEAS_API GeometricRADec: public CoreMeasurement
 {
 public:
    GeometricRADec(const std::string &name = "");

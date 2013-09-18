@@ -23,10 +23,10 @@
 #ifndef GeometricRangeRate_hpp
 #define GeometricRangeRate_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricRangeRate: public CoreMeasurement
+class GEOMETRICMEAS_API GeometricRangeRate: public CoreMeasurement
 {
 public:
    GeometricRangeRate(const std::string &name = "");

@@ -29,3 +29,6 @@
 /libStation.dll
 /libStation.exp
 /libStation.lib
+/libGeometricMeasurements.exp
+/libGeometricMeasurements.lib
+/libGeometricMeasurements.pdb

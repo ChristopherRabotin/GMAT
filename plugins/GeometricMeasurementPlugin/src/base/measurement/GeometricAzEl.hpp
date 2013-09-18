@@ -23,10 +23,10 @@
 #ifndef GeometricAzEl_hpp
 #define GeometricAzEl_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricAzEl: public CoreMeasurement
+class GEOMETRICMEAS_API GeometricAzEl: public CoreMeasurement
 {
 public:
    GeometricAzEl(const std::string &name = "");
