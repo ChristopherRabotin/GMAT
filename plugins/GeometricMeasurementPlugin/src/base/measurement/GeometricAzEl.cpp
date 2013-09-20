@@ -32,6 +32,15 @@ using namespace GmatMathUtil;
 //#define SHOW_AZEL_CALC
 
 
+//------------------------------------------------------------------------------
+// GeometricAzEl(const std::string &name) :
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ *
+ * @param name The new object's name
+ */
+//------------------------------------------------------------------------------
 GeometricAzEl::GeometricAzEl(const std::string &name) :
    CoreMeasurement          ("GeometricAzEl", name)
 {
