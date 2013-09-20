@@ -67,6 +67,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libDataInterface", "..\..\p
 		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libGeometricMeasurements", "..\..\plugins\GeometricMeasurementPlugin\build\VS2010\libGeometricMeasurements.vcxproj", "{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FFE4C440-926F-498C-8B75-C29DF159782A} = {FFE4C440-926F-498C-8B75-C29DF159782A}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -179,6 +184,12 @@ Global
 		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|Win32.ActiveCfg = Release|Win32
 		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|Win32.Build.0 = Release|Win32
 		{030C5159-3113-47EC-A060-E1E7D1E7AA61}.Release|x64.ActiveCfg = Release|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Debug|Win32.Build.0 = Debug|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Debug|x64.ActiveCfg = Debug|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Release|Win32.ActiveCfg = Release|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Release|Win32.Build.0 = Release|Win32
+		{711CA3A9-8C57-4F56-9D56-AB09BA023ED2}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

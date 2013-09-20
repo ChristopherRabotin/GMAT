@@ -1,6 +1,6 @@
-//$Id: GeometricRangeRate.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: GeometricAzEl.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
 //------------------------------------------------------------------------------
-//                         GeometricRangeRate
+//                         GeometricAzEl
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -11,28 +11,31 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
 //
-// Author: Darrel J. Conway, Thinking Systems, Inc./Wendy Shoan, GSFC/GSSB
+// Author: Darrel J. Conway, Thinking Systems, Inc./ Wendy Shoan, GSFC/GSSB
 // Created: 2009.08.11
 //
 /**
- * Definition of the geometric range rate measurement.
+ * Definition of the geometric azimuth/elevation measurement.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef GeometricRangeRate_hpp
-#define GeometricRangeRate_hpp
+#ifndef GeometricAzEl_hpp
+#define GeometricAzEl_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricRangeRate: public CoreMeasurement
+/**
+ * Class for instantaneous Azimuth/Elevation measurements
+ */
+class GEOMETRICMEAS_API GeometricAzEl: public CoreMeasurement
 {
 public:
-   GeometricRangeRate(const std::string &name = "");
-   virtual ~GeometricRangeRate();
-   GeometricRangeRate(const GeometricRangeRate &rrm);
-   GeometricRangeRate& operator=(const GeometricRangeRate &rrm);
+   GeometricAzEl(const std::string &name = "");
+   virtual ~GeometricAzEl();
+   GeometricAzEl(const GeometricAzEl &aem);
+   GeometricAzEl& operator=(const GeometricAzEl &aem);
 
    virtual GmatBase*       Clone() const;
    virtual bool            Initialize();
@@ -43,4 +46,4 @@ protected:
    bool                    Evaluate(bool withEvents = false);
 };
 
-#endif /* GeometricRangeRate_hpp */
+#endif /* GeometricAzEl_hpp */

@@ -1,6 +1,6 @@
-//$Id: GeometricAzEl.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: GeometricRADec.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
 //------------------------------------------------------------------------------
-//                         GeometricAzEl
+//                         GeometricRADec
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -12,27 +12,27 @@
 // number NNG06CA54C
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc./ Wendy Shoan, GSFC/GSSB
-// Created: 2009.08.11
+// Created: 2009.10.01
 //
 /**
- * Definition of the geometric azimuth/elevation measurement.
+ * Definition of the geometric right ascensiotn/declination measurement.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef GeometricAzEl_hpp
-#define GeometricAzEl_hpp
+#ifndef GeometricRADec_hpp
+#define GeometricRADec_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricAzEl: public CoreMeasurement
+class GEOMETRICMEAS_API GeometricRADec: public CoreMeasurement
 {
 public:
-   GeometricAzEl(const std::string &name = "");
-   virtual ~GeometricAzEl();
-   GeometricAzEl(const GeometricAzEl &aem);
-   GeometricAzEl& operator=(const GeometricAzEl &aem);
+   GeometricRADec(const std::string &name = "");
+   virtual ~GeometricRADec();
+   GeometricRADec(const GeometricRADec &aem);
+   GeometricRADec& operator=(const GeometricRADec &aem);
 
    virtual GmatBase*       Clone() const;
    virtual bool            Initialize();
@@ -41,6 +41,9 @@ public:
 
 protected:
    bool                    Evaluate(bool withEvents = false);
+   
+   void                    InitializeMeasurement();
+
 };
 
-#endif /* GeometricAzEl_hpp */
+#endif /* GeometricRADec_hpp */

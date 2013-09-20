@@ -207,21 +207,6 @@
     <ClInclude Include="..\..\src\base\measurement\EstimationDefs.hpp">
       <Filter>Source Files\measurement</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\GeometricAzEl.hpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\GeometricMeasurement.hpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\GeometricRADec.hpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\GeometricRange.hpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\GeometricRangeRate.hpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\measurement\Troposphere\Troposphere.hpp">
       <Filter>Source Files\measurement\Troposphere</Filter>
     </ClInclude>
@@ -432,21 +417,6 @@
       <Filter>Source Files\measurement</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\DSNTwoWayRange.cpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\GeometricAzEl.cpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\GeometricMeasurement.cpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\GeometricRADec.cpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\GeometricRange.cpp">
-      <Filter>Source Files\measurement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\GeometricRangeRate.cpp">
       <Filter>Source Files\measurement</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\MeasurementData.cpp">

@@ -1,6 +1,6 @@
-//$Id: GeometricRADec.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: GeometricRangeRate.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
 //------------------------------------------------------------------------------
-//                         GeometricRADec
+//                         GeometricRangeRate
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -11,28 +11,28 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
 //
-// Author: Darrel J. Conway, Thinking Systems, Inc./ Wendy Shoan, GSFC/GSSB
-// Created: 2009.10.01
+// Author: Darrel J. Conway, Thinking Systems, Inc./Wendy Shoan, GSFC/GSSB
+// Created: 2009.08.11
 //
 /**
- * Definition of the geometric right ascensiotn/declination measurement.
+ * Definition of the geometric range rate measurement.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef GeometricRADec_hpp
-#define GeometricRADec_hpp
+#ifndef GeometricRangeRate_hpp
+#define GeometricRangeRate_hpp
 
-#include "estimation_defs.hpp"
+#include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
-class ESTIMATION_API GeometricRADec: public CoreMeasurement
+class GEOMETRICMEAS_API GeometricRangeRate: public CoreMeasurement
 {
 public:
-   GeometricRADec(const std::string &name = "");
-   virtual ~GeometricRADec();
-   GeometricRADec(const GeometricRADec &aem);
-   GeometricRADec& operator=(const GeometricRADec &aem);
+   GeometricRangeRate(const std::string &name = "");
+   virtual ~GeometricRangeRate();
+   GeometricRangeRate(const GeometricRangeRate &rrm);
+   GeometricRangeRate& operator=(const GeometricRangeRate &rrm);
 
    virtual GmatBase*       Clone() const;
    virtual bool            Initialize();
@@ -41,9 +41,6 @@ public:
 
 protected:
    bool                    Evaluate(bool withEvents = false);
-   
-   void                    InitializeMeasurement();
-
 };
 
-#endif /* GeometricRADec_hpp */
+#endif /* GeometricRangeRate_hpp */

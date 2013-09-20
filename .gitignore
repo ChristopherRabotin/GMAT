@@ -12,3 +12,5 @@ GmatLog.txt
 language.settings.xml
 GMAT
 
+*.user
+/.settings/

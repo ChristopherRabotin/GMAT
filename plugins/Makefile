@@ -15,6 +15,7 @@ all:
 	cd CInterfacePlugin; make all;
 	cd EphemPropagatorPlugin; make all;
 	cd EstimationPlugin; make all;
+	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
 	cd GmatFunctionPlugin; make all;
@@ -27,6 +28,7 @@ rebuild:
 	cd CInterfacePlugin; make rebuild;
 	cd EphemPropagatorPlugin; make rebuild;
 	cd EstimationPlugin; make rebuild;
+	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuild;
 	cd ExtraPropagatorsPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
@@ -39,6 +41,7 @@ clean:
 	cd CInterfacePlugin; make clean;
 	cd EphemPropagatorPlugin; make clean;
 	cd EstimationPlugin; make clean;
+	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
@@ -55,6 +58,7 @@ all:
 	cd CInterfacePlugin; make all;
 	cd EphemPropagatorPlugin; make all;
 	cd EstimationPlugin; make all;
+	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
 	cd GmatFunctionPlugin; make all;
@@ -69,6 +73,7 @@ rebuild:
 	cd CInterfacePlugin; make rebuild;
 	cd EphemPropagatorPlugin; make rebuild;
 	cd EstimationPlugin; make rebuild;
+	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuld;
 	cd ExtraPropagatorsPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
@@ -83,6 +88,7 @@ clean:
 	cd CInterfacePlugin; make clean;
 	cd EphemPropagatorPlugin; make clean;
 	cd EstimationPlugin; make clean;
+	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
@@ -99,6 +105,7 @@ all:
 	cd CInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd EphemPropagatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd EstimationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd GeometricMeasurementPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
@@ -112,6 +119,7 @@ rebuild:
 	cd CInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd EphemPropagatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd EstimationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd GeometricMeasurementPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -124,6 +132,7 @@ rebuild:
 clean:
 	cd CInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd EstimationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd GeometricMeasurementPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd EphemPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);

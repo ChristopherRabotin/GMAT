@@ -183,11 +183,6 @@
     <ClInclude Include="..\..\src\base\measurement\DSNTwoWayDoppler.hpp" />
     <ClInclude Include="..\..\src\base\measurement\DSNTwoWayRange.hpp" />
     <ClInclude Include="..\..\src\base\measurement\EstimationDefs.hpp" />
-    <ClInclude Include="..\..\src\base\measurement\GeometricAzEl.hpp" />
-    <ClInclude Include="..\..\src\base\measurement\GeometricMeasurement.hpp" />
-    <ClInclude Include="..\..\src\base\measurement\GeometricRADec.hpp" />
-    <ClInclude Include="..\..\src\base\measurement\GeometricRange.hpp" />
-    <ClInclude Include="..\..\src\base\measurement\GeometricRangeRate.hpp" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\cira.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\igrf.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\Ionosphere.hpp" />
@@ -262,11 +257,6 @@
     <ClCompile Include="..\..\src\base\measurement\CoreMeasurement.cpp" />
     <ClCompile Include="..\..\src\base\measurement\DSNTwoWayDoppler.cpp" />
     <ClCompile Include="..\..\src\base\measurement\DSNTwoWayRange.cpp" />
-    <ClCompile Include="..\..\src\base\measurement\GeometricAzEl.cpp" />
-    <ClCompile Include="..\..\src\base\measurement\GeometricMeasurement.cpp" />
-    <ClCompile Include="..\..\src\base\measurement\GeometricRADec.cpp" />
-    <ClCompile Include="..\..\src\base\measurement\GeometricRange.cpp" />
-    <ClCompile Include="..\..\src\base\measurement\GeometricRangeRate.cpp" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\cira.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\igrf.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\Ionosphere.cpp" />
