@@ -26,6 +26,9 @@
 #include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
+/**
+ * Class for instantaneous Azimuth/Elevation measurements
+ */
 class GEOMETRICMEAS_API GeometricAzEl: public CoreMeasurement
 {
 public:
