@@ -15,10 +15,10 @@ MAC_ARCHITECTURE_FLAGS = -arch i386
 endif
 
 # Environment settings for the estimation plugin
-GMAT_Code_Location = ../../../../../trunk/src
-GMAT_Bin_Location = ../../../../../trunk/application/$(GMAT_BIN_DIR)
-GMAT_Plugin_Location = ../../../../../trunk/application/$(GMAT_PLUGIN_DIR)
-GMAT_DataFile_Location = ./../../DataFilePlugin/src  # TBD #
+GMAT_Code_Location = ../../../../src
+GMAT_Bin_Location = ../../../../application/$(GMAT_BIN_DIR)
+GMAT_Plugin_Location = ../../../../application/$(GMAT_PLUGIN_DIR)
+#GMAT_DataFile_Location = ./../../DataFilePlugin/src  # TBD #
 
 # Toggle for using the older datafile code or the plugin code
 USE_DATAFILE_PLUGIN = 0
