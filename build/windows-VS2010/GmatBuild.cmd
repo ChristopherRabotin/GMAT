@@ -15,7 +15,7 @@ IF ERRORLEVEL 0 echo      Cleanup was successful
 echo    * Checking out the code (%time%)...
 %SH% -c "make checkout > GmatCheckout.log 2> GmatCheckout.err"
 IF ERRORLEVEL 2 GOTO CheckoutError
-IF ERRORLEVEL 0 echo      Checkout from svn was successful
+IF ERRORLEVEL 0 echo      Checkout was successful
 
 echo    * Compiling GMAT (%time%)...
 %SH% -c "make all > GmatBuild.log 2> GmatBuild.err"
@@ -45,7 +45,7 @@ IF ERRORLEVEL 0 echo      Latest developer documentation distributable was succe
 GOTO End
 
 :CheckoutError
-echo There was an error checking out the code from svn
+echo There was an error checking out the code
 GOTO End
 
 :BuildError
