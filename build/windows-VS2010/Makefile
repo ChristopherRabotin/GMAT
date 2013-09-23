@@ -50,7 +50,7 @@ clean:
 
 # checks out the repositories
 checkout:
-	cd $(GMAT_DIR); git pull 
+	cd $(GMAT_DIR); git checkout master; git pull 
 	cd $(GMAT_PLUGIN_DIR); svn cleanup; svn update; 
 
 # assembles the latest build, including user help
@@ -70,23 +70,9 @@ dist:
 	cd $(GMAT_MATLAB_CINTF_DIR); \
 	cp interfacewrapper.m $(DAILY_MATLAB_CINTF_DEST_DIR); 
 	cd $(GMAT_PLUGIN_BIN_DIR); \
-	cp libMatlabInterface.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libFminconOptimizer.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libGmatEstimation.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libDataInterface.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libEphemPropagator.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libEventLocator.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libExtraPropagators.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libFormation.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libGmatFunction.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libSaveCommand.dll $(DAILY_PLUGINS_DEST_DIR); \
-	cp libStation.dll $(DAILY_PLUGINS_DEST_DIR);
+	cp *.dll $(DAILY_PLUGINS_DEST_DIR);
 	cd $(GMAT_PROPRIETARY_BIN_DIR); \
-	cp libMsise86.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libNewParameters.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libNRLMsise00.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libMarsGRAM.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libVF13Optimizer.dll $(DAILY_PROPRIETARY_DEST_DIR); 
+	cp *.dll $(DAILY_PROPRIETARY_DEST_DIR);
 	cd $(GMAT_HELP_BUILD_DIR); \
 	cp help-a4.pdf $(DAILY_HELP_DEST_DIR); \
 	cp help-letter.pdf $(DAILY_HELP_DEST_DIR); \
