@@ -32,6 +32,15 @@
 //#define DEBUG_DERIVATIVES
 
 
+//------------------------------------------------------------------------------
+// GeometricRange(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ *
+ * @param name The name (if any) for the new measurement
+ */
+//------------------------------------------------------------------------------
 GeometricRange::GeometricRange(const std::string &name) :
    CoreMeasurement          ("GeometricRange", name)
 {
