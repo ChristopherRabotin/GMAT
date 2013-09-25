@@ -162,6 +162,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // drawing options
    mDrawWireFrame = false;
    mDrawGrid = false;
+   mShowLabels = false;
    
    // Light source
    // The base subscriber OrbitView always adds Sun to the object list
@@ -603,11 +604,11 @@ void ViewCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
 
 
 //---------------------------------------------------------------------------
-// void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane, ...)
+// void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane, bool drawXyPlane, ...)
 //---------------------------------------------------------------------------
-void ViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                                      bool drawWireFrame, bool drawAxes,
-                                      bool drawGrid, bool drawSunLine,
+void ViewCanvas::SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                                      bool drawXyPlane, bool drawWireFrame,
+                                      bool drawAxes, bool drawGrid, bool drawSunLine,
                                       bool usevpInfo, bool drawStars,
                                       bool drawConstellations,
                                       Integer starCount)
@@ -2851,10 +2852,13 @@ void ViewCanvas::DrawSolverData()
          DrawLine(sGlColor, start, end);
          
          // Draw space object name at the last point(LOJ: 2013.09.12 GMT-3854)
-         if (i == numPoints - 1)
+         if (mShowLabels)
          {
-            glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-            DrawStringAt(scName, end);
+            if (i == numPoints - 1)
+            {
+               glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+               DrawStringAt(scName, end);
+            }
          }
       }
    }

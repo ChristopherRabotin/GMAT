@@ -446,8 +446,10 @@ bool GroundTrackPlot::RenameRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 bool GroundTrackPlot::IsParameterReadOnly(const Integer id) const
 {
-   if (id == COORD_SYSTEM || id == DRAW_OBJECT || id == ORBIT_COLOR ||
-       id == TARGET_COLOR || id == SHOW_FOOT_PRINTS)
+   // Now GroundTrackPlot can configure orbit and target colors (LOJ: 2013.09.20)
+   //if (id == COORD_SYSTEM || id == DRAW_OBJECT || id == ORBIT_COLOR ||
+   //    id == TARGET_COLOR || id == SHOW_FOOT_PRINTS)
+   if (id == COORD_SYSTEM || id == DRAW_OBJECT || id == SHOW_FOOT_PRINTS)
       return true;
    
    return OrbitPlot::IsParameterReadOnly(id);

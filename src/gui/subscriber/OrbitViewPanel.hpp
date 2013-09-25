@@ -79,6 +79,7 @@ protected:
    wxStaticText *mFovMaxStaticText;
    
    wxCheckBox *mShowPlotCheckBox;
+   wxCheckBox *mShowLabelsCheckBox;
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mEclipticPlaneCheckBox;
    wxCheckBox *mXYPlaneCheckBox;

@@ -84,9 +84,9 @@ public:
                          CoordinateSystem *viewUpCs);
    
    // drawing options
-   void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                             bool drawWireFrame, bool drawAxes,
-                             bool drawGrid, bool drawSunLine,
+   void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                             bool drawXyPlane, bool drawWireFrame,
+                             bool drawAxes, bool drawGrid, bool drawSunLine,
                              bool usevpInfo, bool drawStars,
                              bool drawConstellations, Integer starCount);
    
@@ -148,7 +148,6 @@ private:
    GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
    
    // drawing options
-   //float mAxisLength;
    bool mDrawXyPlane;
    bool mDrawEclipticPlane;
    bool mDrawSunLine;

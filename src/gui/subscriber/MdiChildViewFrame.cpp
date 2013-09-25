@@ -771,11 +771,11 @@ void MdiChildViewFrame::SetGl2dDrawingOption(const std::string &centralBodyName,
 
 
 //------------------------------------------------------------------------------
-// void SetGl3dDrawingOption(const std::string &plotName, ...)
+// void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane, ...)
 //------------------------------------------------------------------------------
-void MdiChildViewFrame::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                                             bool drawWireFrame, bool drawAxes,
-                                             bool drawGrid, bool drawSunLine,
+void MdiChildViewFrame::SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                                             bool drawXyPlane, bool drawWireFrame,
+                                             bool drawAxes, bool drawGrid, bool drawSunLine,
                                              bool overlapPlot, bool usevpInfo,
                                              bool drawStars, bool drawConstellations,
                                              Integer starCount)

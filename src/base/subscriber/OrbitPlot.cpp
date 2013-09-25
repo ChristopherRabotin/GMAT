@@ -32,6 +32,7 @@
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
+//#define DEBUG_COLOR
 //#define DBGLVL_INIT 2
 //#define DBGLVL_DATA 2
 //#define DBGLVL_DATA_LABELS 1
@@ -344,11 +345,13 @@ UnsignedInt OrbitPlot::GetColor(const std::string &item,
 bool OrbitPlot::SetColor(const std::string &item, const std::string &name,
                          UnsignedInt value)
 {
-   #if DBGLVL_PARAM
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
       ("OrbitPlot::SetColor() item=%s, name=%s, value=%u\n",
        item.c_str(), name.c_str(), value);
    #endif
+   
+   bool retval = false;
    
    if (item == "Orbit")
    {
@@ -357,10 +360,29 @@ bool OrbitPlot::SetColor(const std::string &item, const std::string &name,
          mOrbitColorMap[name] = value;
          
          for (int i=0; i<mAllSpCount; i++)
+         {
+            #ifdef DEBUG_COLOR
+            MessageInterface::ShowMessage
+               ("   mAllSpNameArray[%d] = '%s'\n", i, mAllSpNameArray[i].c_str());
+            #endif
+            // Assuming objects and colors are inserted in the same order
             if (mAllSpNameArray[i] == name)
+            {
+               #ifdef DEBUG_COLOR
+               MessageInterface::ShowMessage
+                  ("   Setting color of mAllSpNameArray[%d]:'%s' to %u\n", i,
+                   mAllSpNameArray[i].c_str(), value);
+               #endif
                mOrbitColorArray[i] = value;
-         
-         return true;
+            }
+         }
+         retval = true;
+      }
+      else
+      {
+         #ifdef DEBUG_COLOR
+         MessageInterface::ShowMessage("   ==> name: '%s' not found in the map\n", name.c_str());
+         #endif
       }
    }
    else if (item == "Target")
@@ -372,12 +394,15 @@ bool OrbitPlot::SetColor(const std::string &item, const std::string &name,
          for (int i=0; i<mAllSpCount; i++)
             if (mAllSpNameArray[i] == name)
                mTargetColorArray[i] = value;
-         
-         return true;
+
+         retval = true;
       }
    }
    
-   return false;
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage("OrbitPlot::SetColor() returning %d\n", retval);
+   #endif
+    return retval;
 }
 
 
@@ -1159,6 +1184,15 @@ const StringArray& OrbitPlot::GetStringArrayParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& OrbitPlot::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool OrbitPlot::GetBooleanParameter(const Integer id) const
@@ -1876,8 +1910,8 @@ void OrbitPlot::BuildDynamicArrays()
    {
       #if DBGLVL_INIT > 1
       MessageInterface::ShowMessage
-         ("OrbitPlot::BuildDynamicArrays() mAllSpNameArray[%d]=%s, addr=%d\n",
-          i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
+         ("   mAllSpNameArray[%d]=%s, addr=%d\n", i, mAllSpNameArray[i].c_str(),
+          mAllSpArray[i]);
       #endif
       
       if (mAllSpArray[i])
@@ -1937,60 +1971,65 @@ void OrbitPlot::BuildDynamicArrays()
    mScCount = mScNameArray.size();
    mObjectCount = mObjectNameArray.size();
    
-   // Since we don't know the type of objects until object is initialized,
-   // change to use the same default spacecraft orbit color for OrbitView and
-   // GroundTrackPlot.  If GroundStation is added for GroundTrackPlot, its color
-   // is set to the first default color, which makes color different from OrbitView.
-   // (LOJ: 2012.09.13)
-   if (groundStationFound)
-   {
-      #if DBGLVL_INIT
-      MessageInterface::ShowMessage
-         ("   Now changing colors for spacecraft to use default colors\n");
-      #endif
+   // Now orbit and target colors are configurable in GroundTrackPlot
+   // so commented out (LOJ: 2013.09.20)
+   
+   // // Since we don't know the type of objects until object is initialized,
+   // // change to use the same default spacecraft orbit color for OrbitView and
+   // // GroundTrackPlot.  If GroundStation is added for GroundTrackPlot, its color
+   // // is set to the first default color, which makes color different from OrbitView.
+   // // (LOJ: 2012.09.13)
+   // if (groundStationFound)
+   // {
+   //    #if DBGLVL_INIT
+   //    MessageInterface::ShowMessage
+   //       ("   Now changing colors for spacecraft to use defined colors\n");
+   //    #endif
       
-      UnsignedIntArray colorArray;
+   //    UnsignedIntArray colorArray;
       
-      for (Integer i = 0; i < mObjectCount; i++)
-      {
-         if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT) ||
-             mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
-            colorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-      }
+   //    for (Integer i = 0; i < mObjectCount; i++)
+   //    {
+   //       if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT) ||
+   //           mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
+   //          colorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+   //    }
       
-      #if DBGLVL_INIT
-      MessageInterface::ShowMessage("   colorArray.size() = %d\n", colorArray.size());
-      for (UnsignedInt i = 0; i < colorArray.size(); i++)
-         MessageInterface::ShowMessage("      color[%d] = %u\n", i, colorArray[i]);
-      #endif
+   //    #if DBGLVL_INIT
+   //    MessageInterface::ShowMessage("   colorArray.size() = %d\n", colorArray.size());
+   //    for (UnsignedInt i = 0; i < colorArray.size(); i++)
+   //       MessageInterface::ShowMessage("      color[%d] = %u\n", i, colorArray[i]);
+   //    #endif
       
-      Integer colorIndex = 0;
-      for (Integer i = 0; i < mObjectCount; i++)
-      {
-         if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-         {
-            mOrbitColorArray[i] = colorArray[colorIndex];
-            colorIndex++;
-         }
-      }
+   //    Integer colorIndex = 0;
+   //    for (Integer i = 0; i < mObjectCount; i++)
+   //    {
+   //       if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+   //       {
+   //          mOrbitColorArray[i] = colorArray[colorIndex];
+   //          colorIndex++;
+   //       }
+   //    }
       
-      for (Integer i = 0; i < mObjectCount; i++)
-      {
-         if (mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
-         {
-            mOrbitColorArray[i] = colorArray[colorIndex];
-            colorIndex++;
-         }
-      }
+   //    for (Integer i = 0; i < mObjectCount; i++)
+   //    {
+   //       if (mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
+   //       {
+   //          mOrbitColorArray[i] = colorArray[colorIndex];
+   //          colorIndex++;
+   //       }
+   //    }
       
-      // Now change mScOrbitColorArray
-      colorIndex = 0;
-      for (Integer i = 0; i < mScCount; i++)
-      {
-         mScOrbitColorArray[i] = colorArray[colorIndex];
-         colorIndex++;
-      }
-   }
+   //    // Now change mScOrbitColorArray
+   //    colorIndex = 0;
+   //    for (Integer i = 0; i < mScCount; i++)
+   //    {
+   //       mScOrbitColorArray[i] = colorArray[colorIndex];
+   //       colorIndex++;
+   //    }
+   // }
+   
+   
    
    #if DBGLVL_INIT
    MessageInterface::ShowMessage("OrbitPlot::BuildDynamicArrays() leaving\n");

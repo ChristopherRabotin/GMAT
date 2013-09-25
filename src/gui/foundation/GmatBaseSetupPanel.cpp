@@ -755,7 +755,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
             // in the destructor
             wxCheckListBox *clbControl =
                theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX+clbNumber,
-                                                        wxSize(200,100));
+                                                        wxSize(200,100), true, true, true, false);
             managedCheckListBoxMap.insert(std::make_pair("CelestialBody", clbControl));
             control = clbControl;
             clbNumber++;
@@ -775,7 +775,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                }
             }
             control = new wxCheckListBox(parent, ID_CHECKLISTBOX+clbNumber, wxDefaultPosition,
-                                         wxSize(200,100), theList, wxLB_SINGLE|wxLB_SORT);
+                                         wxSize(200,100), theList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
             clbNumber++;
          }
       }

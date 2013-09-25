@@ -1478,10 +1478,8 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
 
 //------------------------------------------------------------------------------
 // void UnregisterCheckListBox(const wxString &type, wxCheckListBox *lb)
-//                             wxArrayString *excList)
 //------------------------------------------------------------------------------
-void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb,
-                                            wxArrayString *excList)
+void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb)
 {
    #if DBGLVL_GUI_ITEM_UNREG
    MessageInterface::ShowMessage
@@ -1496,11 +1494,13 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       if (pos1 != mSubscriberCLBList.end())
          mSubscriberCLBList.erase(pos1);
       
+      #if 0
       std::vector<wxArrayString*>::iterator pos2 =
          find(mSubscriberExcList.begin(), mSubscriberExcList.end(), excList);
       
       if (pos2 != mSubscriberExcList.end())
          mSubscriberExcList.erase(pos2);
+      #endif
    }
    else if (type == "XYPlot")
    {
@@ -1510,11 +1510,13 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       if (pos1 != mXyPlotCLBList.end())
          mXyPlotCLBList.erase(pos1);
       
+      #if 0
       std::vector<wxArrayString*>::iterator pos2 =
          find(mXyPlotExcList.begin(), mXyPlotExcList.end(), excList);
       
       if (pos2 != mXyPlotExcList.end())
          mXyPlotExcList.erase(pos2);
+      #endif
    }
    else if (type == "Spacecraft")
    {
@@ -1524,11 +1526,29 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       if (pos1 != mSpacecraftCLBList.end())
          mSpacecraftCLBList.erase(pos1);
       
+      #if 0
       std::vector<wxArrayString*>::iterator pos2 =
          find(mSpacecraftExcList.begin(), mSpacecraftExcList.end(), excList);
       
       if (pos2 != mSpacecraftExcList.end())
          mSpacecraftExcList.erase(pos2);
+      #endif
+   }
+   else if (type == "SpacePoint")
+   {
+      std::vector<wxCheckListBox*>::iterator pos1 =
+         find(mSpacePointCLBList.begin(), mSpacePointCLBList.end(), clb);
+      
+      if (pos1 != mSpacePointCLBList.end())
+         mSpacePointCLBList.erase(pos1);
+      
+      #if 0
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mSpacecraftExcList.begin(), mSpacecraftExcList.end(), excList);
+      
+      if (pos2 != mSpacecraftExcList.end())
+         mSpacecraftExcList.erase(pos2);
+      #endif
    }
    else if (type == "AllObject")
    {
@@ -1538,11 +1558,13 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       if (pos1 != mAllObjectCLBList.end())
          mAllObjectCLBList.erase(pos1);
       
+      #if 0
       std::vector<wxArrayString*>::iterator pos2 =
          find(mAllObjectExcList.begin(), mAllObjectExcList.end(), excList);
       
       if (pos2 != mAllObjectExcList.end())
          mAllObjectExcList.erase(pos2);
+      #endif
    }
 }
 
@@ -2146,16 +2168,6 @@ wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
 wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID id,
                                                    const wxSize &size, bool getMJ2000EqOnly)
 {
-   // combo box for avaliable coordinate system
-   
-   // LOJ: numCs is not used in this method
-   #if 0
-   int numCs = theNumCoordSys;
-   
-   if (theNumCoordSys == 0)
-      numCs = 3; //loj: ComboBox is too small if 1
-   #endif
-   
    wxComboBox *coordSysComboBox;
    if (getMJ2000EqOnly)
    {
@@ -2641,7 +2653,7 @@ wxComboBox* GuiItemManager::GetOptimizerComboBox(wxWindow *parent, wxWindowID id
 // CheckListBox
 //------------------------------------------------------------------------------
 // wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
-//                 const wxSize &size, wxArrayString &excList = NULL)
+//                 const wxSize &size, bool isForPen)
 //------------------------------------------------------------------------------
 /**
  * @return Available Subscriber ListBox pointer
@@ -2654,7 +2666,7 @@ wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWi
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (isForPen)
    {
@@ -2698,7 +2710,7 @@ wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWi
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -2740,7 +2752,7 @@ wxCheckListBox* GuiItemManager::GetXyPlotCheckListBox(wxWindow *parent, wxWindow
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -2775,72 +2787,35 @@ wxCheckListBox* GuiItemManager::GetXyPlotCheckListBox(wxWindow *parent, wxWindow
  */
 //------------------------------------------------------------------------------
 wxCheckListBox*
-GuiItemManager::GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id,
-                                          const wxSize &size, wxArrayString *excList,
-                                          bool includeCelesBodies, bool includeCalPoints,
-                                          bool excludeSC)
+GuiItemManager::GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
+                                          bool includeCelestialBodies, bool includeCalculatedPoints,
+                                          bool includeSpacecraft, bool includeGroundStation)
 {
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
-   GmatBase *obj = NULL;
-   if (excList != NULL && excList->GetCount() > 0)
-   {
-      for (int i=0; i<theNumSpacePoint; i++)
-      {
-         if (excList->Index(theSpacePointList[i]) == wxNOT_FOUND)
-         {
-            obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
-            if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-            {
-               if (includeCelesBodies)
-                  checkListBox->Append(theSpacePointList[i]);
-            }
-            else if (obj->IsOfType(Gmat::CALCULATED_POINT))
-            {
-               if (includeCalPoints)
-                  checkListBox->Append(theSpacePointList[i]);
-            }
-            else if (obj->IsOfType(Gmat::SPACECRAFT))
-            {
-               if (!excludeSC)
-                  checkListBox->Append(theSpacePointList[i]);
-            }
-            else
-            {
-               checkListBox->Append(theSpacePointList[i]);
-            }
-         }
-      }
-   }
-   else
-   {
-      for (int i=0; i<theNumSpacePoint; i++)
-      {
-         obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
-         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-         {
-            if (includeCelesBodies)
-               checkListBox->Append(theSpacePointList[i]);
-         }
-         else if (obj->IsOfType(Gmat::CALCULATED_POINT))
-         {
-            if (includeCalPoints)
-               checkListBox->Append(theSpacePointList[i]);
-         }
-         else
-         {
-            checkListBox->Append(theSpacePointList[i]);
-         }
-      }
-   }
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
+   
+   // Set CheckListBox name so that it can be updated appropriately when new
+   // SpacePoint resource is created
+   wxString clbName;
+   if (includeCelestialBodies)
+      clbName = "CelestialBody";
+   if (includeCalculatedPoints)
+      clbName = clbName + "+CalculatedPoint";
+   if (includeSpacecraft)
+      clbName = clbName + "+Spacecraft";
+   if (includeGroundStation)
+      clbName = clbName + "+GroundStation";
+   
+   // Set name to CheckListBox and build SpacePoint list
+   checkListBox->SetName(clbName);
+   checkListBox->Append(BuildSpacePointList(clbName));
    
    //---------------------------------------------
    // register to update list
    //---------------------------------------------
    mSpacePointCLBList.push_back(checkListBox);
-   mSpacePointExcList.push_back(excList);
    
    return checkListBox;
 }
@@ -2861,7 +2836,7 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -2911,7 +2886,7 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
-                         wxLB_SINGLE|wxLB_SORT);
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    
    //---------------------------------------------
    // Get all object list
@@ -4385,6 +4360,59 @@ wxSizer* GuiItemManager::CreateUserVarSizer
 //-------------------------------
 
 //------------------------------------------------------------------------------
+// wxArrayString BuildSpacePointList(const wxString &spTypeNames)
+//------------------------------------------------------------------------------
+/**
+ * Builds SpacePoint list by parsing input space point type names.
+ *
+ * @param spTypeNames  String contain space point type names to include in the
+ *                     build array (e.g. "Spacecraft+GroundStation")
+ */
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
+{
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::BuildSpacePointList() entered, spTypeNames='%s'\n", spTypeNames.c_str());
+   #endif
+   
+   wxArrayString spacePointArray;
+   std::string typeNames = spTypeNames.c_str();
+   StringArray objTypes = GmatStringUtil::SeparateBy(typeNames, "+", false, false, false);
+   
+   #if DBGLVL_GUI_ITEM_SP > 1
+   for (unsigned int i = 0; i < objTypes.size(); i++)
+      MessageInterface::ShowMessage("   objTypes[%2d] = '%s'\n", i, objTypes[i].c_str());
+   #endif
+   
+   GmatBase *obj = NULL;
+   for (int i = 0; i < theNumSpacePoint; i++)
+   {
+      obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+      #if DBGLVL_GUI_ITEM_SP > 1
+      MessageInterface::ShowMessage("   objNames[%2d] = '%s'\n", i, theSpacePointList[i].c_str());
+      #endif
+      for (unsigned int j = 0; j < objTypes.size(); j++)
+      {
+         if (obj->IsOfType(objTypes[j]))
+         {
+            spacePointArray.Add(theSpacePointList[i]);
+            break;
+         }
+      }
+   }
+   
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::BuildSpacePointList() returning %d SpacePoints\n", spacePointArray.size());
+   for (unsigned int i = 0; i < spacePointArray.size(); i++)
+      MessageInterface::ShowMessage("   '%s'\n", spacePointArray[i].c_str());
+   #endif
+   
+   return spacePointArray;
+}
+
+//------------------------------------------------------------------------------
 // wxArrayString GetSpacecraftProperties(int showOption, bool showSettableOnly)
 //------------------------------------------------------------------------------
 wxArrayString GuiItemManager::GetSpacecraftProperties(int showOption,
@@ -5182,7 +5210,7 @@ void GuiItemManager::UpdateCelestialPointList()
    
    #if DBGLVL_GUI_ITEM_SP
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateCelestialPointList() theNumCelesBody=%d, "
+      ("GuiItemManager::UpdateCelestialPointList() entered, theNumCelesBody=%d, "
        "theNumCalPoint=%d, theNumCelesPoint=%d\n", theNumCelesBody, theNumCalPoint,
        theNumCelesPoint);
    #endif
@@ -5234,10 +5262,7 @@ void GuiItemManager::UpdateCelestialPointList()
    }
    
    #if DBGLVL_GUI_ITEM_SP
-   MessageInterface::ShowMessage
-      ("theNumCelesPoint=%d\n"
-       "<==========GuiItemManager::UpdateCelestialPointList() exiting\n",
-       theNumCelesPoint);
+   MessageInterface::ShowMessage("GuiItemManager::UpdateCelestialPointList() leaving\n");
    #endif
 } //UpdateCelestialPointList()
 
@@ -5246,7 +5271,8 @@ void GuiItemManager::UpdateCelestialPointList()
 // void UpdateSpacePointList()
 //------------------------------------------------------------------------------
 /**
- * Updates configured SpacePoint list (Spacecraft, CelestialBody, CalculatedPoint)
+ * Updates configured SpacePoint list:
+ *    Spacecraft, CelestialBody, CalculatedPoint, GroundStation
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateSpacePointList()
@@ -5256,7 +5282,8 @@ void GuiItemManager::UpdateSpacePointList()
    
    #if DBGLVL_GUI_ITEM_SP
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSpacePointList() theNumSpacePoint=%d\n", theNumSpacePoint);
+      ("GuiItemManager::UpdateSpacePointList() entered, theNumSpacePoint=%d\n",
+       theNumSpacePoint);
    #endif
    
    theSpacePointList.Clear();
@@ -5267,8 +5294,7 @@ void GuiItemManager::UpdateSpacePointList()
       
       #if DBGLVL_GUI_ITEM_SP > 1
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateSpacePointList() theSpacePointList[%d]=%s\n",
-          i, theSpacePointList[i].c_str());
+         ("   theSpacePointList[%d]=%s\n", i, theSpacePointList[i].c_str());
       #endif
    }
    
@@ -5293,6 +5319,45 @@ void GuiItemManager::UpdateSpacePointList()
       (*pos)->Append(theSpacePointList);
       (*pos)->SetStringSelection(str);
    }
+   
+   //-------------------------------------------------------
+   // update registered SpacePoint CheckListBox (LOJ: added 2013.09.17)
+   //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage("   About to update registered CheckListbox\n");
+   #endif
+   wxArrayString itemCheckedArray;
+   for (std::vector<wxCheckListBox*>::iterator pos = mSpacePointCLBList.begin();
+        pos != mSpacePointCLBList.end(); ++pos)
+   {
+      if ((*pos) == NULL)
+         continue;
+      
+      itemCheckedArray.Clear();
+      
+      // save checked item
+      int count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if ((*pos)->IsChecked(i))
+            itemCheckedArray.Add((*pos)->GetString(i));
+      
+      (*pos)->Clear();
+      // Build new space point list (LOJ: 2013.09.18)
+      //(*pos)->Append(theSpacePointList);
+      wxArrayString newSpacePointList = BuildSpacePointList((*pos)->GetName());
+      (*pos)->Append(newSpacePointList);
+      
+      // restore checked item
+      count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if (itemCheckedArray.Index((*pos)->GetString(i)) != wxNOT_FOUND)
+            (*pos)->Check(i);
+   }
+   
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateSpacePointList() leaving\n");
+   #endif
+  
 }
 
 

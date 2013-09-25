@@ -306,9 +306,13 @@ void OrbitViewPanel::Create()
    mShowPlotCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
                      wxDefaultPosition, wxSize(-1, -1), bsize);
+   mShowLabelsCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Show Labels"),
+                     wxDefaultPosition, wxSize(-1, -1), bsize);
    
    plotOptionSizer->AddSpacer(10);
    plotOptionSizer->Add(mShowPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionSizer->Add(mShowLabelsCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    GmatStaticBoxSizer *plotOptionStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Plot Option");
@@ -513,13 +517,13 @@ void OrbitViewPanel::Create()
    wxStaticText *orbitColorLabel =
       new wxStaticText(this, -1, wxT("Orbit Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
-                                     wxDefaultPosition, wxSize(colorW, 20), 0);
+   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
+                                    wxDefaultPosition, wxSize(colorW, 20), 0);
    mTargetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
-                                    wxDefaultPosition, wxSize(colorW, 20), 0);
+   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
+                                     wxDefaultPosition, wxSize(colorW, 20), 0);
    
    wxFlexGridSizer *scOptionSizer1 = new wxFlexGridSizer(1, 0, 0);
    scOptionSizer1->Add(mDrawObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -741,6 +745,7 @@ void OrbitViewPanel::LoadData()
       mStarCountTextCtrl->SetValue(str);
       
       mShowPlotCheckBox->SetValue(mOrbitView->GetBooleanParameter("ShowPlot"));
+      mShowLabelsCheckBox->SetValue(mOrbitView->GetBooleanParameter("ShowLabels"));
       mXYPlaneCheckBox->
          SetValue(mOrbitView->GetOnOffParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
@@ -1241,6 +1246,7 @@ void OrbitViewPanel::SaveData()
          
          mOrbitView->SetBooleanParameter("ShowPlot", mShowPlotCheckBox->IsChecked());
          //mOrbitView->Activate(mShowPlotCheckBox->IsChecked());
+         mOrbitView->SetBooleanParameter("ShowLabels", mShowLabelsCheckBox->IsChecked());
          
          if (mXYPlaneCheckBox->IsChecked())
             mOrbitView->SetOnOffParameter("XYPlane", "On");

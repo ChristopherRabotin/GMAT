@@ -103,6 +103,13 @@ public:
    virtual bool         SetOnOffParameter(const std::string &label, 
                                           const std::string &value);
    
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+   
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
@@ -121,6 +128,8 @@ protected:
                              const std::string &sval, Integer index = -1);
    void     WriteDeprecatedMessage(Integer id) const;
    bool     UpdateSolverData();
+   
+   bool       mShowLabels;
    
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
@@ -165,7 +174,8 @@ protected:
    
    enum
    {
-      VIEWPOINT_REF = OrbitPlotParamCount,
+      SHOW_LABELS = OrbitPlotParamCount,
+      VIEWPOINT_REF,
       VIEWPOINT_REFERENCE,
       VIEWPOINT_REF_TYPE,
       VIEWPOINT_REF_VECTOR,

@@ -279,6 +279,7 @@ OBJECTS = \
     spacecraft/VisualModelCanvas.o \
     spacecraft/VisualModelPanel.o \
     subscriber/EphemerisFilePanel.o \
+    subscriber/GroundTrackPlotPanel.o \
     subscriber/MdiChildViewFrame.o \
     subscriber/MdiChild3DViewFrame.o \
     subscriber/MdiChildGroundTrackFrame.o \

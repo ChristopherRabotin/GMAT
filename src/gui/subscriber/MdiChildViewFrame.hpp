@@ -122,11 +122,10 @@ public:
                         const std::string &textureMap,
                         Integer footPrintOption);
    
-   virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                        bool drawWireFrame, bool drawAxes,
-                        bool drawGrid, bool drawSunLine,
-                        bool overlapPlot, bool usevpInfo,
-                        bool drawStars, bool drawConstellations,
+   virtual void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                        bool drawXyPlane, bool drawWireFrame, bool drawAxes,
+                        bool drawGrid, bool drawSunLine, bool overlapPlot,
+                        bool usevpInfo, bool drawStars, bool drawConstellations,
                         Integer starCount);
    
    virtual void SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,

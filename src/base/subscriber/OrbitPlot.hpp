@@ -97,6 +97,8 @@ public:
                         GetUnsignedIntArrayParameter(const Integer id) const;   
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         GetBooleanParameter(const std::string &label) const;

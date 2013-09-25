@@ -63,11 +63,11 @@ MdiChild3DViewFrame::~MdiChild3DViewFrame()
 
 
 //------------------------------------------------------------------------------
-// void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane, ...)
+// void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane, bool drawXyPlane, ...)
 //------------------------------------------------------------------------------
-void MdiChild3DViewFrame::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                                               bool drawWireFrame, bool drawAxes,
-                                               bool drawGrid, bool drawSunLine,
+void MdiChild3DViewFrame::SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                                               bool drawXyPlane, bool drawWireFrame,
+                                               bool drawAxes, bool drawGrid, bool drawSunLine,
                                                bool overlapPlot, bool usevpInfo,
                                                bool drawStars, bool drawConstellations,
                                                Integer starCount)
@@ -75,9 +75,9 @@ void MdiChild3DViewFrame::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlan
    if (mCanvas)
    {
       SetOverlapPlot(overlapPlot);
-      mCanvas->SetGl3dDrawingOption(drawEcPlane, drawXyPlane, drawWireFrame,
-                                    drawAxes, drawGrid, drawSunLine, usevpInfo,
-                                    drawStars, drawConstellations, starCount);
+      mCanvas->SetGl3dDrawingOption(showLabels, drawEcPlane, drawXyPlane,
+                                    drawWireFrame, drawAxes, drawGrid, drawSunLine,
+                                    usevpInfo, drawStars, drawConstellations, starCount);
    }
 }
 

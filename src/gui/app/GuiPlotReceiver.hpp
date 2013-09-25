@@ -62,9 +62,9 @@ public:
                         Integer footPrintOption);
    
    virtual void SetGl3dDrawingOption(const std::string &plotName,
-                        bool drawEcPlane, bool drawXyPlane,
-                        bool drawWireFrame, bool drawAxes,
-                        bool drawGrid, bool drawSunLine,
+                        bool showLabels, bool drawEcPlane,
+                        bool drawXyPlane, bool drawWireFrame,
+                        bool drawAxes, bool drawGrid, bool drawSunLine,
                         bool overlapPlot, bool usevpInfo,
                         bool drawStars, bool drawConstellations,
                         Integer starCount);

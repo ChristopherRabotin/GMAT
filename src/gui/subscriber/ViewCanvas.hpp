@@ -115,9 +115,9 @@ public:
    virtual void SetGl2dDrawingOption(const std::string &centralBodyName,
                         const std::string &textureMap,
                         Integer footPrintOption);
-   virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                        bool drawWireFrame, bool drawAxes,
-                        bool drawGrid, bool drawSunLine,
+   virtual void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                        bool drawXyPlane, bool drawWireFrame,
+                        bool drawAxes, bool drawGrid, bool drawSunLine,
                         bool usevpInfo, bool drawStars,
                         bool drawConstellations,
                         Integer starCount);
@@ -219,6 +219,7 @@ protected:
    // Drawing option
    bool mDrawWireFrame;
    bool mDrawGrid;   
+   bool mShowLabels;
    
    // Light source
    bool mSunPresent;

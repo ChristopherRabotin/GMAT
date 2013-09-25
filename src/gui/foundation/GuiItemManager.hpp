@@ -105,8 +105,7 @@ public:
                                const wxString &newName);
    void UnregisterListBox(const wxString &type, wxListBox *lb,
                           wxArrayString *excList = NULL);
-   void UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb,
-                               wxArrayString *excList = NULL);
+   void UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb);
    void UnregisterComboBox(const wxString &type, wxComboBox *cb);
    
    // For resource counters
@@ -243,10 +242,10 @@ public:
                                          wxArrayString *excList = NULL);   
    wxCheckListBox* GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
-                                             wxArrayString *excList = NULL,
-                                             bool includeCelesBodies = false,
-                                             bool includeCalPoints = false,
-                                             bool excludeSC = false);
+                                             bool includeCelestialBodies,
+                                             bool includeCalculatedPoints,
+                                             bool includeSpacecrafts,
+                                             bool includeGroundStations);
    wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);      
@@ -376,7 +375,9 @@ private:
    virtual ~GuiItemManager();
    GuiItemManager(const GuiItemManager&);
    GuiItemManager& operator=(const GuiItemManager&);
-
+   
+   wxArrayString BuildSpacePointList(const wxString &spTypeNames);
+   
    wxArrayString GetSpacecraftProperties(int showOption, bool showSettableOnly);
    wxArrayString GetSpacePointProperties(int showOption, bool showSettableOnly);
    

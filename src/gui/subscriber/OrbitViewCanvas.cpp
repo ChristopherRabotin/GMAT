@@ -663,24 +663,25 @@ void OrbitViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
 
 
 //------------------------------------------------------------------------------
-// void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane, ...)
+// void SetGl3dDrawingOption(bool showLabels, bool drawEcPlane, bool drawXyPlane, ...)
 //------------------------------------------------------------------------------
-void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
-                                           bool drawWireFrame, bool drawAxes,
-                                           bool drawGrid, bool drawSunLine,
+void OrbitViewCanvas::SetGl3dDrawingOption(bool showLabels, bool drawEcPlane,
+                                           bool drawXyPlane, bool drawWireFrame,
+                                           bool drawAxes, bool drawGrid, bool drawSunLine,
                                            bool usevpInfo, bool drawStars,
                                            bool drawConstellations,
                                            Integer starCount)
 {
    #ifdef DEBUG_DRAWING_OPTIONS
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGl3dDrawingOption() entered, drawEcPlane=%d, "
+      ("OrbitViewCanvas::SetGl3dDrawingOption() entered, showLabels=%d, drawEcPlane=%d, "
        "drawXyPlane=%d, drawWireFrame=%d\n   drawAxes=%d, drawGrid=%d, drawSunLine=%d, "
-       "usevpInfo=%d, drawStars=%d, drawConstellations=%d, starCount=%d\n",
+       "usevpInfo=%d, drawStars=%d, drawConstellations=%d, starCount=%d\n", showLabels,
        drawEcPlane, drawXyPlane, drawWireFrame, drawAxes, drawGrid, drawSunLine,
        usevpInfo, drawStars, drawConstellations, starCount);
    #endif
    
+   mShowLabels = showLabels;
    mDrawEclipticPlane = drawEcPlane;
    mDrawXyPlane = drawXyPlane;
    mDrawWireFrame = drawWireFrame;
@@ -2048,18 +2049,21 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    //============================================================
    // Draw space object name (GMT-3854)
    // Disable lighting before rendering text
-   glPushMatrix();
-   glDisable(GL_LIGHTING);
-   glDisable(GL_LIGHT0);
-   
-   if (drawingSpacecraft)
-      *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
-   else
-      *sIntColor = mObjectColorMap[objName].GetIntColor();
-   
-   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-   DrawStringAt(objName, 0, 0, 0, 1);
-   glPopMatrix();
+   if (mShowLabels)
+   {
+      glPushMatrix();
+      glDisable(GL_LIGHTING);
+      glDisable(GL_LIGHT0);
+      
+      if (drawingSpacecraft)
+         *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
+      else
+         *sIntColor = mObjectColorMap[objName].GetIntColor();
+      
+      glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+      DrawStringAt(objName, 0, 0, 0, 1);
+      glPopMatrix();
+   }
    //============================================================
    
    glPopMatrix();

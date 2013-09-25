@@ -394,12 +394,12 @@ void GuiPlotReceiver::SetGl2dDrawingOption(const std::string &plotName,
 // void SetGl3dDrawingOption(const std::string &plotName, ...)
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGl3dDrawingOption(const std::string &plotName,
-                                         bool drawEcPlane, bool drawXyPlane,
-                                         bool drawWireFrame, bool drawAxes,
-                                         bool drawGrid, bool drawSunLine,
-                                         bool overlapPlot, bool usevpInfo,
-                                         bool drawStars, bool drawConstellations,
-                                         Integer starCount)
+                                           bool showLabels, bool drawEcPlane,
+                                           bool drawXyPlane, bool drawWireFrame,
+                                           bool drawAxes, bool drawGrid, bool drawSunLine,
+                                           bool overlapPlot, bool usevpInfo,
+                                           bool drawStars, bool drawConstellations,
+                                           Integer starCount)
 {
    wxString owner = wxString(plotName.c_str());
    MdiChildViewFrame *frame = NULL;
@@ -410,7 +410,7 @@ void GuiPlotReceiver::SetGl3dDrawingOption(const std::string &plotName,
       
       if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->SetGl3dDrawingOption(drawEcPlane, drawXyPlane, drawWireFrame,
+         frame->SetGl3dDrawingOption(showLabels, drawEcPlane, drawXyPlane, drawWireFrame,
                                      drawAxes, drawGrid, drawSunLine, overlapPlot,
                                      usevpInfo, drawStars, drawConstellations,
                                      starCount);

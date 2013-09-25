@@ -172,18 +172,19 @@ void PlotInterface::SetGl2dDrawingOption(const std::string &plotName,
 // void SetGl3dDrawingOption(const std::string &plotName, bool drawEcPlane, ...)
 //------------------------------------------------------------------------------
 void PlotInterface::SetGl3dDrawingOption(const std::string &plotName,
-                                         bool drawEcPlane, bool drawXyPlane,
-                                         bool drawWireFrame, bool drawAxes,
-                                         bool drawGrid, bool drawSunLine,
+                                         bool showLabels, bool drawEcPlane,
+                                         bool drawXyPlane, bool drawWireFrame,
+                                         bool drawAxes, bool drawGrid, bool drawSunLine,
                                          bool overlapPlot, bool usevpInfo,
                                          bool drawStars, bool drawConstellations,
                                          Integer starCount)
 {
    if (thePlotReceiver != NULL)
       thePlotReceiver->
-         SetGl3dDrawingOption(plotName, drawEcPlane, drawXyPlane, drawWireFrame,
-                              drawAxes, drawGrid, drawSunLine, overlapPlot, usevpInfo,
-                              drawStars, drawConstellations, starCount);
+         SetGl3dDrawingOption(plotName, showLabels, drawEcPlane, drawXyPlane,
+                              drawWireFrame, drawAxes, drawGrid, drawSunLine,
+                              overlapPlot, usevpInfo, drawStars, drawConstellations,
+                              starCount);
 }
 
 

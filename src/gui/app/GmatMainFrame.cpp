@@ -60,6 +60,7 @@
 #include "EndFiniteBurnPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OrbitViewPanel.hpp"
+#include "GroundTrackPlotPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
 #include "SubscriberSetupPanel.hpp"
@@ -4019,8 +4020,10 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       break;
    case GmatTree::GROUND_TRACK_PLOT:
 		// Set reload values on ComboBox change to true here
-      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name, true), 0, wxGROW|wxALL, 0);
-      break;
+      //sizer->Add(new GmatBaseSetupPanel(scrolledWin, name, true), 0, wxGROW|wxALL, 0);
+      // Try custom panel (LOJ: 2013.09.17)
+      sizer->Add(new GroundTrackPlotPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+     break;
    case GmatTree::SUBSCRIBER:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;

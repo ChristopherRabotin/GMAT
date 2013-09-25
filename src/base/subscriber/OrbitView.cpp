@@ -49,6 +49,7 @@
 const std::string
 OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 {
+   "ShowLabels",
    "ViewPointRef",
    "ViewPointReference",
    "ViewPointRefType",
@@ -84,6 +85,7 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 const Gmat::ParameterType
 OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
 {
+   Gmat::BOOLEAN_TYPE,           //"ShowLabels"
    Gmat::OBJECT_TYPE,            //"ViewPointRef", - deprecated
    Gmat::OBJECT_TYPE,            //"ViewPointReference",
    Gmat::STRING_TYPE,            //"ViewPointRefType"
@@ -107,7 +109,7 @@ OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
    Gmat::ON_OFF_TYPE,            //"EarthSunLines" - deprecated
    Gmat::ON_OFF_TYPE,            //"SunLine"   
    Gmat::ON_OFF_TYPE,            //"Overlap"
-   Gmat::ON_OFF_TYPE,            //"LockView"
+   Gmat::ON_OFF_TYPE,            //"UseInitialView"
    
    Gmat::INTEGER_TYPE,           //"StarCount"
    Gmat::ON_OFF_TYPE,            //"EnableStars"
@@ -134,6 +136,7 @@ OrbitView::OrbitView(const std::string &name)
    objectTypes.push_back(Gmat::ORBIT_VIEW);
    objectTypeNames.push_back("OrbitView");
    
+   mShowLabels = true;
    mEclipticPlane = "Off";
    mXYPlane = "On";
    mWireFrame = "Off";
@@ -187,6 +190,7 @@ OrbitView::OrbitView(const std::string &name)
 OrbitView::OrbitView(const OrbitView &ov)
    : OrbitPlot(ov)
 {
+   mShowLabels = ov.mShowLabels;
    mEclipticPlane = ov.mEclipticPlane;
    mXYPlane = ov.mXYPlane;
    mWireFrame = ov.mWireFrame;
@@ -237,7 +241,8 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
       return *this;
    
    OrbitPlot::operator=(ov);
-   
+
+   mShowLabels = ov.mShowLabels;
    mEclipticPlane = ov.mEclipticPlane;
    mXYPlane = ov.mXYPlane;
    mWireFrame = ov.mWireFrame;
@@ -545,7 +550,7 @@ bool OrbitView::Initialize()
          #endif
          
          PlotInterface::SetGl3dDrawingOption
-            (instanceName, (mEclipticPlane == "On"), (mXYPlane == "On"),
+            (instanceName, mShowLabels, (mEclipticPlane == "On"), (mXYPlane == "On"),
              (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
              (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
              (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount);
@@ -1448,6 +1453,50 @@ bool OrbitView::SetOnOffParameter(const std::string &label,
                                   const std::string &value)
 {
    return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+bool OrbitView::GetBooleanParameter(const Integer id) const
+{
+   if (id == SHOW_LABELS)
+      return mShowLabels;
+   return OrbitPlot::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+bool OrbitView::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+bool OrbitView::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == SHOW_LABELS)
+   {
+      mShowLabels = value;
+      return value;
+   }
+   
+   return OrbitPlot::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+bool OrbitView::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 
