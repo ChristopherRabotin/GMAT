@@ -26,6 +26,14 @@
 #include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
+/**
+ * A basic, simple range measurement
+ *
+ * The GeometricRange Measurement evaluates the instantaneous displacement
+ * between two participants, taking into account a potentially obscuring body
+ * between them.  This measurement does not evaluate light transit time between
+ * the participants, nor does it include any corrections to the transit path.
+ */
 class GEOMETRICMEAS_API GeometricRange: public CoreMeasurement
 {
 public:
