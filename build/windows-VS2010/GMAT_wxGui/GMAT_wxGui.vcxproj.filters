@@ -522,6 +522,9 @@
     <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -982,6 +985,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
       <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
