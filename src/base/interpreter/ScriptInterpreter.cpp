@@ -46,6 +46,7 @@
 //#define DBGLVL_SCRIPT_READING 1
 //#define DBGLVL_GMAT_FUNCTION 1
 //#define DEBUG_COMMAND_MODE_TOGGLE
+//#define DEBUG_ENCODING_CHAR
 
 
 //#ifndef DEBUG_MEMORY
@@ -57,6 +58,7 @@
 #endif
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
+
 
 //------------------------------------------------------------------------------
 // ScriptInterpreter* Instance()
@@ -82,7 +84,8 @@ ScriptInterpreter* ScriptInterpreter::Instance()
  * Default constructor.
  */
 //------------------------------------------------------------------------------
-ScriptInterpreter::ScriptInterpreter() : Interpreter()
+ScriptInterpreter::ScriptInterpreter() :
+   Interpreter()
 {
    logicalBlockCount = 0;
    functionDefined = false;
@@ -346,11 +349,15 @@ bool ScriptInterpreter::CheckEncoding()
 {
    bool retval = true;
 
-   // Check each character
-   char theChar;
-   std::stringstream badCharMsg, currentLine;
+   // Check each character - need wide characters for this to work on Mac
+   wchar_t theChar;
+   std::wstringstream badCharMsg, currentLine;
    Integer i = 0, firstFound = -1;
    theChar = inStream->get();
+
+   #ifdef DEBUG_ENCODING_CHAR
+      MessageInterface::ShowMessage("In CheckEncoding, char = %lc\n", theChar);
+   #endif
 
    // Only do this if the file is not empty
    if (inStream->good())
@@ -363,7 +370,7 @@ bool ScriptInterpreter::CheckEncoding()
          {
             if (badCharInLine)
                badCharMsg << "in the line\n\"" << currentLine.str() <<"\"\n";
-            currentLine.str("");
+            currentLine.str(L"");
             badCharInLine = false;
             i = 0;
          }
@@ -371,24 +378,27 @@ bool ScriptInterpreter::CheckEncoding()
             currentLine << theChar;
 
          ++i;
-         #ifdef DEBUG_ENCODING
-            MessageInterface::ShowMessage("%c", theChar);
+         #ifdef DEBUG_ENCODING_
+            MessageInterface::ShowMessage("%lc", theChar);
          #endif
-         if ((theChar < 0x00) || (theChar > 0x7f))
+         if ((theChar < (wchar_t) 0x00) || (theChar > (wchar_t) 0x7f))
          {
             badCharInLine = true;
             badCharMsg << "***ERROR*** Non-ASCII character \"" << theChar
                        << "\" found at column " << i
                        << " (non-ASCII value "
-                       << (int)((unsigned char)theChar) << ") ";
+                       << ((int)(wchar_t)theChar) << ") ";
             if (firstFound == -1)
                firstFound = i;
          }
          theChar = inStream->get();
+         #ifdef DEBUG_ENCODING_CHAR
+            if (inStream->good()) MessageInterface::ShowMessage("In CheckEncoding, char = %lc\n", theChar);
+         #endif
       } while (inStream->good());
 
       #ifdef DEBUG_ENCODING
-         MessageInterface::ShowMessage("%s\nTotal read %d\n", bad.str().c_str(), i);
+         MessageInterface::ShowMessage("%ls\nTotal read %d\n", badCharMsg.str().c_str(), i);
       #endif
    }
 
@@ -398,7 +408,7 @@ bool ScriptInterpreter::CheckEncoding()
       try
       {
          if (badCharMsg.str().length() < 32160)
-            MessageInterface::ShowMessage("%s\n", badCharMsg.str().c_str());
+            MessageInterface::ShowMessage("%ls\n", badCharMsg.str().c_str());
          else
             MessageInterface::ShowMessage("The script error is not "
                   "displayable\n");
