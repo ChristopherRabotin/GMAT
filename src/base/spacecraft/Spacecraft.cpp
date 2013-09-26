@@ -5947,7 +5947,7 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
    {
       stateElementLabel[0] = "Delaunayl";
       stateElementLabel[1] = "Delaunayg";
-      stateElementLabel[2] = "DelaunayH";
+      stateElementLabel[2] = "Delaunayh";
       stateElementLabel[3] = "DelaunayL";
       stateElementLabel[4] = "DelaunayG";
       stateElementLabel[5] = "DelaunayH";
