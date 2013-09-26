@@ -795,7 +795,7 @@ void GroundTrackPlotPanel::OnTextChange(wxCommandEvent& event)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void ShowSpacePointColor(const wxString &name, UnsignedInt color = GmatColor::RED32)
+// void ShowSpacePointColor(const wxString &name, UnsignedInt color = GmatColor::RED)
 //------------------------------------------------------------------------------
 void GroundTrackPlotPanel::ShowSpacePointColor(const wxString &name, UnsignedInt color)
 {
@@ -817,7 +817,7 @@ void GroundTrackPlotPanel::ShowSpacePointColor(const wxString &name, UnsignedInt
          #endif
          
          mOrbitColorMap[selObjName] = RgbColor(color);
-         mTargetColorMap[selObjName] = RgbColor(GmatColor::ORANGE32);
+         mTargetColorMap[selObjName] = RgbColor(GmatColor::ORANGE);
       }
       
       RgbColor orbColor = mOrbitColorMap[selObjName];

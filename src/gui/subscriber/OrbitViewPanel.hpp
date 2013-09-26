@@ -183,7 +183,7 @@ protected:
 private:
    void ShowSpacePointOption(const wxString &name,
                              bool show = true, bool isSc = true,
-                             UnsignedInt color = GmatColor::RED32);
+                             UnsignedInt color = GmatColor::RED);
    
 };
 #endif

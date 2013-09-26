@@ -107,7 +107,7 @@ protected:
    
 private:
    void ShowSpacePointColor(const wxString &name,
-                            UnsignedInt color = GmatColor::RED32);
+                            UnsignedInt color = GmatColor::RED);
    void SaveObjectColors(const wxString &which,
                          std::map<std::string, RgbColor> &colorMap);
 };
