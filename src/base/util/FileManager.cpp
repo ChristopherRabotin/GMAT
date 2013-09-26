@@ -18,7 +18,7 @@
  * list of file paths and names.
  */
 //------------------------------------------------------------------------------
-
+ 
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 #include "UtilityException.hpp"
@@ -363,6 +363,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             throw ue;
          }
       }
+	  else
+	  {
+		  tmpStartupFilePath = newPath;
+	  }
    }
    
    tmpStartupDir = GmatFileUtil::ParsePathName(tmpStartupFilePath);

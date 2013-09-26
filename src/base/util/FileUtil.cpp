@@ -19,7 +19,7 @@
  * is written to the log file.
  */
 //------------------------------------------------------------------------------
-
+ 
 #include "FileUtil.hpp"
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
@@ -575,12 +575,16 @@ bool GmatFileUtil::DoesFileExist(const std::string &filename)
        filename.c_str());
    #endif
    
-   FILE * pFile;
-   pFile = fopen (filename.c_str(), "rt+");
+   //FILE * pFile;
+   //pFile = fopen (filename.c_str(), "rt+");
+   std::ifstream aFile(filename.c_str());
+
    bool fileExist = false;
-   if (pFile!=NULL)
+   //if (pFile!=NULL)
+   if (aFile)
    {
-      fclose (pFile);
+	  aFile.close();
+      //fclose (pFile);
       fileExist = true;
    }
    
