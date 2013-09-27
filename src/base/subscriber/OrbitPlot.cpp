@@ -82,11 +82,11 @@ OrbitPlot::PARAMETER_TYPE[OrbitPlotParamCount - SubscriberParamCount] =
 const UnsignedInt
 OrbitPlot::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
 {
-   GmatColor::RED32,       GmatColor::LIME32,    GmatColor::YELLOW32,
-   GmatColor::AQUA32,      GmatColor::PINK32,    GmatColor::L_BLUE32,
-   GmatColor::L_GRAY32,    GmatColor::BLUE32,    GmatColor::FUCHSIA32,
-   GmatColor::BEIGE32,     GmatColor::RED32,     GmatColor::LIME32,
-   GmatColor::YELLOW32,    GmatColor::AQUA32,    GmatColor::PINK32
+   GmatColor::RED,         GmatColor::LIME,      GmatColor::YELLOW,  
+   GmatColor::AQUA,        GmatColor::PINK,      GmatColor::L_BLUE,  
+   GmatColor::L_GRAY,      GmatColor::BLUE,      GmatColor::FUCHSIA,  
+   GmatColor::BEIGE,       GmatColor::RED,       GmatColor::LIME,  
+   GmatColor::YELLOW,      GmatColor::AQUA,      GmatColor::PINK
 };
 
 
@@ -146,17 +146,17 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mNonStdBodyCount = 0;
    
    // default planet color
-   mOrbitColorMap["Earth"] = GmatColor::GREEN32;
-   mOrbitColorMap["Luna"] = GmatColor::SILVER32;
-   mOrbitColorMap["Sun"] = GmatColor::ORANGE32;
-   mOrbitColorMap["Mercury"] = GmatColor::GRAY32;
-   mOrbitColorMap["Venus"] = GmatColor::BEIGE32;
-   mOrbitColorMap["Mars"] = GmatColor::L_GRAY32;
-   mOrbitColorMap["Jupiter"] = GmatColor::L_BROWN32;
-   mOrbitColorMap["Saturn"] = GmatColor::D_BROWN32;
-   mOrbitColorMap["Uranus"] = GmatColor::BLUE32;
-   mOrbitColorMap["Neptune"] = GmatColor::NAVY32;
-   mOrbitColorMap["Pluto"] = GmatColor::PURPLE32;
+   mOrbitColorMap["Earth"] = GmatColor::GREEN;
+   mOrbitColorMap["Luna"] = GmatColor::SILVER;
+   mOrbitColorMap["Sun"] = GmatColor::ORANGE;
+   mOrbitColorMap["Mercury"] = GmatColor::GRAY;
+   mOrbitColorMap["Venus"] = GmatColor::BEIGE;
+   mOrbitColorMap["Mars"] = GmatColor::L_GRAY;
+   mOrbitColorMap["Jupiter"] = GmatColor::L_BROWN;
+   mOrbitColorMap["Saturn"] = GmatColor::D_BROWN;
+   mOrbitColorMap["Uranus"] = GmatColor::BLUE;
+   mOrbitColorMap["Neptune"] = GmatColor::NAVY;
+   mOrbitColorMap["Pluto"] = GmatColor::PURPLE;
    
 }
 
@@ -1586,10 +1586,10 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
          if (mDrawObjectArray.size() < mShowObjectMap.size())
             mDrawObjectArray.push_back(true); //added (LOJ: 2011.01.13 for bug 2215 fix)
          
-         UnsignedInt targetColor = GmatColor::TEAL32;
+         UnsignedInt targetColor = GmatColor::TEAL;
          // Make lighter target color for ground track plot since it draws on the texture map
          if (GetTypeName() == "GroundTrackPlot")
-            targetColor = GmatColor::WHITE32;
+            targetColor = GmatColor::WHITE;
          
          if (mAllSpCount < MAX_SP_COLOR)
          {
@@ -1611,9 +1611,9 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
          }
          else
          {
-            mOrbitColorMap[name] = GmatColor::RED32;
+            mOrbitColorMap[name] = GmatColor::RED;
             mTargetColorMap[name] = targetColor;
-            mOrbitColorArray.push_back(GmatColor::RED32);
+            mOrbitColorArray.push_back(GmatColor::RED);
             mTargetColorArray.push_back(targetColor);
          }
       }

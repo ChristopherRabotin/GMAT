@@ -918,7 +918,7 @@ void GroundTrackCanvas::DrawPlot()
    if (mDrawSolverData)
       DrawSolverData();
    
-   DrawStatus("", GmatColor::RED32, "  Epoch: ", mTime[mLastIndex], 0, 5, false);   
+   DrawStatus("", GmatColor::RED, "  Epoch: ", mTime[mLastIndex], 0, 5, false);   
    
    glFlush();
    SwapBuffers();
@@ -973,14 +973,14 @@ void GroundTrackCanvas::DrawObjectOrbit()
       #endif
       
       #if DEBUG_DRAW_DEBUG
-      DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED32, 0, 100);
+      DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED, 0, 100);
       #endif
       
       // always draw spacecraft orbit trajectory
       DrawOrbit(objName, obj, objId);
       
       #if DEBUG_DRAW_DEBUG
-      DrawDebugMessage(" After DrawOrbit  --- ", GmatColor::RED32, 0, 120);
+      DrawDebugMessage(" After DrawOrbit  --- ", GmatColor::RED, 0, 120);
       #endif
       
       //---------------------------------------------------------
@@ -1187,7 +1187,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
                                        int objId)
 {
    #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED32, 0, 300);
+   DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED, 0, 300);
    #endif
    
    #ifdef DEBUG_ORBIT_LINES
@@ -1313,7 +1313,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    #endif
    
    #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Leaving DrawOrbitLines  --- ", GmatColor::RED32, 0, 420);
+   DrawDebugMessage(" Leaving DrawOrbitLines  --- ", GmatColor::RED, 0, 420);
    #endif
 }
 
@@ -1329,7 +1329,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    #endif
    
    #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Entered DrawGroundTrackLines --- ", GmatColor::RED32, 0, 500);
+   DrawDebugMessage(" Entered DrawGroundTrackLines --- ", GmatColor::RED, 0, 500);
    #endif
    
    // Compute latitude and longitude
@@ -1420,7 +1420,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    glDisable(GL_TEXTURE_2D);
    
    #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Leaving DrawGroundTrackLines --- ", GmatColor::RED32, 0, 500);
+   DrawDebugMessage(" Leaving DrawGroundTrackLines --- ", GmatColor::RED, 0, 500);
    #endif
    
    #if DEBUG_DRAW_LINE
@@ -1801,8 +1801,8 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
       #endif
       
       // Set color to yellow
-      GlColorType *objColor = (GlColorType*)&GmatColor::YELLOW32;
-      //GlColorType *objColor = (GlColorType*)&GmatColor::RED32;
+      GlColorType *objColor = (GlColorType*)&GmatColor::YELLOW;
+      //GlColorType *objColor = (GlColorType*)&GmatColor::RED;
       
       // Make the color transparent before drawing, set alpha value to 128
       glColor4ub(objColor->red, objColor->green, objColor->blue, 128);

@@ -189,8 +189,8 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    // Draw the model
    if (currentSpacecraft->modelID == -1)
    {
-      GlColorType *red = (GlColorType*)&GmatColor::RED32,
-         *yellow = (GlColorType*)&GmatColor::YELLOW32;
+      GlColorType *red = (GlColorType*)&GmatColor::RED,
+         *yellow = (GlColorType*)&GmatColor::YELLOW;
       DrawSpacecraft(198, red, yellow);
    }
    else

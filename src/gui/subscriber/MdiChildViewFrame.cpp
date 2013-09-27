@@ -58,7 +58,7 @@ MdiChildViewFrame::MdiChildViewFrame(wxMDIParentFrame *parent,
    
    // add Earth as default body
    mBodyNames.Add("Earth");
-   mBodyColors.push_back(GmatColor::GREEN32);
+   mBodyColors.push_back(GmatColor::GREEN);
    
    MdiGlPlot::mdiChildren.Append(this);
    

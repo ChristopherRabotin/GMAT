@@ -110,12 +110,20 @@ CelestialBodyOrbitPanel::CelestialBodyOrbitPanel(GmatPanel *cbPanel,
    guiManager     = GuiItemManager::GetInstance();
    guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    ss             = guiInterpreter->GetSolarSystemInUse();
+
+   #if 1
    
 #ifdef __USE_SPICE__
    spiceAvailable = true;
 #else
    spiceAvailable = false;
 #endif
+   
+   #else
+   
+   spiceAvailable = false;
+   
+   #endif
    Create();
 }
 
