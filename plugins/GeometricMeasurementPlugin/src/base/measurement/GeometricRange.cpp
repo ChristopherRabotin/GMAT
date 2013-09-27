@@ -69,6 +69,15 @@ GeometricRange::~GeometricRange()
 }
 
 
+//------------------------------------------------------------------------------
+// GeometricRange(const GeometricRange &rm)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param rm The measurement copied into this one
+ */
+//------------------------------------------------------------------------------
 GeometricRange::GeometricRange(const GeometricRange &rm) :
    CoreMeasurement          (rm)
 {
