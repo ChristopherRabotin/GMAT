@@ -146,6 +146,15 @@ GmatBase* GeometricRange::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the measurement for use in the mission control sequence.
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool GeometricRange::Initialize()
 {
    #ifdef DEBUG_RANGE_CALC
