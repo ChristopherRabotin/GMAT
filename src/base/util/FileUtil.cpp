@@ -132,7 +132,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
 /*
  * Sets current working directory to newDir
  *
- * @return  true if current working is successfully set to newDir, flase otherwise
+ * @return  true if current working is successfully set to newDir, false otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatFileUtil::SetWorkingDirectory(const std::string &newDir)
