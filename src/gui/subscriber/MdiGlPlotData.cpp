@@ -42,11 +42,11 @@ wxString GmatPlot::BodyInfo::WX_BODY_NAME[GmatPlot::MAX_BODIES] =
 
 unsigned int GmatPlot::BodyInfo::BODY_COLOR[GmatPlot::MAX_BODIES] =
 {
-   GmatColor::YELLOW32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::GREEN32,
-   GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
-   GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::L_BROWN32, GmatColor::SILVER32,
-   GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
-   GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
+   GmatColor::YELLOW, GmatColor::SILVER, GmatColor::SILVER, GmatColor::GREEN,
+   GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER,
+   GmatColor::SILVER, GmatColor::SILVER, GmatColor::L_BROWN, GmatColor::SILVER,
+   GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER,
+   GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER, GmatColor::SILVER,
 };
 
 //------------------------------------------------------------------------------

@@ -225,9 +225,9 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mDrawAxes = false;
    mPolygonMode = GL_FILL;
    
-   mXyPlaneColor = GmatColor::NAVY32;
+   mXyPlaneColor = GmatColor::NAVY;
    mEcPlaneColor = 0x00002266; //dark red
-   mSunLineColor = GmatColor::YELLOW32;
+   mSunLineColor = GmatColor::YELLOW;
    
    // animation
    mIsAnimationRunning = false;
@@ -1821,13 +1821,13 @@ void OrbitViewCanvas::DrawPlot()
    
    #if DEBUG_SOLVER_STATUS
    if (mIsSolving && !mIsEndOfRun)
-      DrawDebugMessage(" Solving", GmatColor::YELLOW32, 0, 100);
+      DrawDebugMessage(" Solving", GmatColor::YELLOW, 0, 100);
    else
-      DrawDebugMessage("        ", GmatColor::YELLOW32, 0, 100);
+      DrawDebugMessage("        ", GmatColor::YELLOW, 0, 100);
    #endif
    
    // Draw epoch at the bottom of the screen
-   DrawStatus("", GmatColor::YELLOW32, "  Epoch: ", mTime[mLastIndex], 0, 5);
+   DrawStatus("", GmatColor::YELLOW, "  Epoch: ", mTime[mLastIndex], 0, 5);
    
    // Plot is not refreshed when another panel is opened, so add glFlush()
    // and SwapBuffers() 
@@ -2018,8 +2018,8 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
             glTranslatef(mObjectViewPos[index1+0],
                          mObjectViewPos[index1+1],
                          mObjectViewPos[index1+2]);
-            GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
-            //GlColorType *red = (GlColorType*)&GmatColor::RED32;
+            GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW;
+            //GlColorType *red = (GlColorType*)&GmatColor::RED;
             *sIntColor = mObjectOrbitColor[objId * MAX_DATA + mObjLastFrame[objId]];
             // We want to differenciate spacecraft by orbit color so pass sGlColor (LOJ: 2011.02.16)
             //DrawSpacecraft(mScRadius, yellow, red);

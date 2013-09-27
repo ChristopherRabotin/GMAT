@@ -1594,7 +1594,7 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          mExcludedScList.Add(str);
          
          mDrawObjectMap[str.c_str()] = true;
-         ShowSpacePointOption(str, true, true, GmatColor::RED32);
+         ShowSpacePointOption(str, true, true, GmatColor::RED);
          mHasSpChanged = true;
          EnableUpdate(true);
       }
@@ -1633,7 +1633,7 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          mExcludedCelesPointList.Add(str);
          
          mDrawObjectMap[str.c_str()] = true;
-         ShowSpacePointOption(str, true, false, GmatColor::L_BROWN32);
+         ShowSpacePointOption(str, true, false, GmatColor::L_BROWN);
          mHasSpChanged = true;
          EnableUpdate(true);
       }
@@ -2081,7 +2081,7 @@ void OrbitViewPanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void ShowSpacePointOption(const wxString &name, bool show = true,
 //                           bool isSc = true,
-//                           UnsignedInt color = GmatColor::RED32)
+//                           UnsignedInt color = GmatColor::RED)
 //------------------------------------------------------------------------------
 void OrbitViewPanel::ShowSpacePointOption(const wxString &name, bool show,
                                           bool isSc, UnsignedInt color)
@@ -2105,7 +2105,7 @@ void OrbitViewPanel::ShowSpacePointOption(const wxString &name, bool show,
          #endif
          
          mOrbitColorMap[mSelSpName] = RgbColor(color);
-         mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE32);
+         mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE);
       }
       
       RgbColor orbColor = mOrbitColorMap[mSelSpName];

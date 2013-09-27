@@ -33,7 +33,7 @@ namespace GmatPlot
    static const int MAX_BODIES = 20;
    static const int MAX_SCS = 30;
    static const int UNKNOWN_BODY = -1;
-   static const int UNKNOWN_COLOR = GmatColor::WHITE32;
+   static const int UNKNOWN_COLOR = GmatColor::WHITE;
    static const unsigned int UNINIT_TEXTURE = 999;
 
    enum BodyId

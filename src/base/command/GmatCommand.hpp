@@ -236,6 +236,7 @@ protected:
    static const Integer MAX_NUM_TANKS;
 
    static const std::string MISSION_CHANGE_MESSAGE;
+   static const std::string UNDEFINED_KEPLERIAN_ELEMENTS;
 
 
    /// Map containing names and associated types
