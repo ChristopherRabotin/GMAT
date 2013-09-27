@@ -75,7 +75,7 @@ GeometricRange::~GeometricRange()
 /**
  * Copy constructor
  *
- * @param rm The measurement copied into this one
+ * @param rm The measurement copied into the new one
  */
 //------------------------------------------------------------------------------
 GeometricRange::GeometricRange(const GeometricRange &rm) :
@@ -92,6 +92,17 @@ GeometricRange::GeometricRange(const GeometricRange &rm) :
 }
 
 
+//------------------------------------------------------------------------------
+// GeometricRange& operator=(const GeometricRange &rm)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param rm The measurement copied into this one
+ *
+ * @return this measurement set to look like rm.
+ */
+//------------------------------------------------------------------------------
 GeometricRange& GeometricRange::operator=(const GeometricRange &rm)
 {
    if (&rm != this)
