@@ -58,6 +58,7 @@ public:
    
    static std::string GetQueuedMessage();
    static void PutMessage(const std::string &msg);
+   static void PutMessage(const char *msg, ...);
    static void ClearMessageQueue();
    
 private:

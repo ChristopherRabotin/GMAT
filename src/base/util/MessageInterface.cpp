@@ -397,6 +397,54 @@ void MessageInterface::PutMessage(const std::string &msg)
 }
 
 //------------------------------------------------------------------------------
+// void PutMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Tells the MessageReceiver to push the message into queue
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::PutMessage(const char *msg, ...)
+{
+   if (theMessageReceiver != NULL)
+   {
+      short    ret;
+      short    size;
+      va_list  marker;
+      char     *msgBuffer = NULL;
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
+      
+      // msg is vsprintf format
+      // actual max message length is MAX_MESSAGE_LENGTH
+      size = strlen(msg) + MAX_MESSAGE_LENGTH;
+      //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
+      
+      if( (msgBuffer = (char *)malloc(size)) != NULL )
+      {
+         for (int i=0; i<size; i++)
+            msgBuffer[i] = '\0';
+         va_start(marker, msg);
+         ret = vsprintf(msgBuffer, msg, marker);
+         if (ret < 0) // vsprintf failed
+            theMessageReceiver->PutMessage("Unable to complete messaging\n");
+         else
+         {
+            va_end(marker);
+            theMessageReceiver->PutMessage(std::string(msgBuffer));
+         }
+      }
+      else
+      {
+         theMessageReceiver->PutMessage(msgStr);
+//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
+//            "the message.\n";
+      }
+      
+//      theMessageReceiver->LogMessage(std::string(msgBuffer));
+      free(msgBuffer);
+   }
+}
+
+//------------------------------------------------------------------------------
 // void ClearMessageQueue()
 //------------------------------------------------------------------------------
 /**
