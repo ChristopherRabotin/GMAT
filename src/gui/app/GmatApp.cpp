@@ -143,6 +143,9 @@ bool GmatApp::OnInit()
       theModerator = Moderator::Instance();
       
       // initialize the moderator
+	  // save current working directory... moderator can change it
+	  // but we need it when reading command line arguments
+	  std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
       if (theModerator->Initialize(startupFile, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
@@ -225,9 +228,19 @@ bool GmatApp::OnInit()
          #ifdef __WXMAC__
             size = wxSize(235,900);
          #endif
-            
          
-         if (!ProcessCommandLineOptions())
+         std::string wd = GmatFileUtil::GetWorkingDirectory();
+         GmatFileUtil::SetWorkingDirectory(cur_dir);
+    	 // save current working directory... moderator may have changed it in
+         // ReadStartupFile
+	     // but we need old one when reading command line arguments
+         bool pclo = ProcessCommandLineOptions();
+         GmatFileUtil::SetWorkingDirectory(wd);
+         if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&
+             (GmatFileUtil::DoesFileExist(cur_dir+'/'+scriptToRun)))
+            scriptToRun = cur_dir+'/'+scriptToRun;
+         
+         if (!pclo)
             return false;
          
          if (!showMainFrame)
@@ -494,7 +507,7 @@ void GmatApp::OnAssertFailure(const wxChar *file, int line, const wxChar *func,
 bool GmatApp::ProcessCommandLineOptions()
 {
    #ifdef DEBUG_CMD_LINE
-   MessageInterface::ShowMessage("GmatApp::ProcessCommandLineOptions() entered\n");
+   MessageInterface::PutMessage("GmatApp::ProcessCommandLineOptions() entered\n");
    #endif
    
    bool retval = true;
@@ -527,7 +540,7 @@ bool GmatApp::ProcessCommandLineOptions()
    wxString commandLineOptions = wxT(gmatHelp.c_str());
 
    #ifdef DEBUG_CMD_LINE
-   MessageInterface::ShowMessage("argc = %d\n", argc);
+   MessageInterface::PutMessage("argc = %d\n", argc);
    #endif
    
    // Handle any command line arguments
@@ -537,7 +550,7 @@ bool GmatApp::ProcessCommandLineOptions()
       {
          std::string arg = argv[i];
          #ifdef DEBUG_CMD_LINE
-         MessageInterface::ShowMessage("arg = %s\n", arg.c_str());
+         MessageInterface::PutMessage("arg = %s\n", arg.c_str());
          #endif
          if ((arg == "--version") || (arg == "-v"))
          {
@@ -545,7 +558,7 @@ bool GmatApp::ProcessCommandLineOptions()
             buildDate.Printf("Build Date: %s %s\n\n", __DATE__, __TIME__);
             startupMessageBuffer += buildDate;
             #ifdef DEBUG_CMD_LINE
-            MessageInterface::ShowMessage(buildDate.c_str());
+            MessageInterface::PutMessage(buildDate.c_str());
             #endif
          }
          #ifdef __ADD_GMAT_SERVER__
@@ -614,14 +627,14 @@ bool GmatApp::ProcessCommandLineOptions()
                
                ++i;
                #ifdef DEBUG_CMD_LINE
-                  MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
+                  MessageInterface::PutMessage("%s\n", scriptToRun.c_str());
                #endif
             }
          }
          else
          {
             #ifdef DEBUG_CMD_LINE
-            MessageInterface::ShowMessage("Checking if arg is script name, arg=<%s>\n", arg.c_str());
+            MessageInterface::PutMessage("Checking if arg is script name, arg=<%s>\n", arg.c_str());
             #endif
             
             bool isArgValid = false;
@@ -629,7 +642,7 @@ bool GmatApp::ProcessCommandLineOptions()
             std::string tempfile = GmatStringUtil::Replace(arg, "'", "");
             
             #ifdef DEBUG_CMD_LINE
-            MessageInterface::ShowMessage("tempfile=<%s>\n", tempfile.c_str());
+            MessageInterface::PutMessage("tempfile=<%s>\n", tempfile.c_str());
             #endif
             
             // Check for file type association with GMAT on Windows
@@ -639,16 +652,37 @@ bool GmatApp::ProcessCommandLineOptions()
             // appear after script name such as, 'BplaneTarget.script' -- run
             // So removed #ifdef __WIN32__
             //#ifdef __WIN32__
-            if (GmatFileUtil::DoesFileExist(tempfile))
+			if (GmatFileUtil::DoesFileExist(tempfile))
             {
                // Set this as script to run
                scriptToRun = tempfile;
                buildScript = true;
                isArgValid = true;
                #ifdef DEBUG_CMD_LINE
-               MessageInterface::ShowMessage("scriptToRun=<%s>\n", scriptToRun.c_str());
+               MessageInterface::PutMessage("scriptToRun=<%s>\n", scriptToRun.c_str());
                #endif
             }
+			else
+			{
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::PutMessage("File not found, checking working directory=<%s>\n", tempfile.c_str());
+               #endif
+
+			   std::string currPath = GmatFileUtil::GetWorkingDirectory();
+			   tempfile = currPath + '\\'+ tempfile;
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::PutMessage("new file name=<%s>\n", tempfile.c_str());
+               #endif
+			   if (GmatFileUtil::DoesFileExist(tempfile))
+			   {
+				  // set current directory to new path
+				  GmatFileUtil::SetWorkingDirectory(tempfile);
+				  // Set this as script to run
+				  scriptToRun = tempfile;
+				  buildScript = true;
+				  isArgValid = true;
+			   }
+			}
             //#endif
             //@todo Implement this for Mac and Linux?
             
@@ -663,8 +697,8 @@ bool GmatApp::ProcessCommandLineOptions()
    }
    
    #ifdef DEBUG_CMD_LINE
-   MessageInterface::ShowMessage
-      ("GmatApp::ProcessCommandLineOptions() returning %d, runScript=%d\n", retval, runScript);
+   MessageInterface::PutMessage
+      ("GmatApp::ProcessCommandLineOptions() returning %d, buildScript=%d runScript=%d\n", retval, buildScript, runScript);
    #endif
    return retval;
 }

@@ -2441,7 +2441,7 @@ bool GmatMainFrame::BuildScript(const wxString &filename, bool addToResourceTree
    bool builtOk = false;
    
    // Check if file exist first
-   if (wxFileName::FileExists(filename))
+   if (GmatFileUtil::DoesFileExist(filename.c_str()))
    {
       if (addToResourceTree)
          GmatAppData::Instance()->GetResourceTree()->AddScriptItem(filename);
