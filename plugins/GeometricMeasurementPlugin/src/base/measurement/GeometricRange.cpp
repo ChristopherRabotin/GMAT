@@ -123,6 +123,15 @@ GeometricRange& GeometricRange::operator=(const GeometricRange &rm)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Produces a clone of this measurement
+ *
+ * @return A clone created by the copy constructor
+ */
+//------------------------------------------------------------------------------
 GmatBase* GeometricRange::Clone() const
 {
    #ifdef DEBUG_RANGE_CALC
