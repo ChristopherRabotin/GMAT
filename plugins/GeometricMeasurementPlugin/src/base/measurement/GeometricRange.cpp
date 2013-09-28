@@ -177,6 +177,18 @@ bool GeometricRange::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+// bool Evaluate(bool withEvents)
+//------------------------------------------------------------------------------
+/**
+ * Method used to evaluate the geometric range measurement
+ *
+ * @param withEvents Specifies if events should be included in the calculation.
+ *                   This flag has no effect for geometric range.
+ *
+ * @return true if the measurement was calculated, false if not
+ */
+//------------------------------------------------------------------------------
 bool GeometricRange::Evaluate(bool withEvents)
 {
    #ifdef DEBUG_RANGE_CALC
