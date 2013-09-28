@@ -32,6 +32,15 @@
 //#define DEBUG_DERIVATIVES
 
 
+//------------------------------------------------------------------------------
+// GeometricRangeRate(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ *
+ * @param name Name of the measurement (if any)
+ */
+//------------------------------------------------------------------------------
 GeometricRangeRate::GeometricRangeRate(const std::string &name) :
    CoreMeasurement          ("GeometricRangeRate", name)
 {
