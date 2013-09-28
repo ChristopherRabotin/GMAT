@@ -26,6 +26,10 @@
 #include "geometricmeasurement_defs.hpp"
 #include "CoreMeasurement.hpp"
 
+
+/**
+ * Measurement model for the geometric range rate (an instantaneous measurement)
+ */
 class GEOMETRICMEAS_API GeometricRangeRate: public CoreMeasurement
 {
 public:
