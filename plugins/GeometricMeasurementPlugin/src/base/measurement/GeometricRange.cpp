@@ -250,6 +250,19 @@ bool GeometricRange::Evaluate(bool withEvents)
 }
 
 
+//------------------------------------------------------------------------------
+// const std::vector<RealArray>& CalculateMeasurementDerivatives(
+//                      GmatBase *obj, Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the derivatives with respect to the measurement state vector
+ *
+ * @param obj The object providing the state data
+ * @param id The id of the vector component
+ *
+ * @return The resulting Jacobian matrix
+ */
+//------------------------------------------------------------------------------
 const std::vector<RealArray>& GeometricRange::CalculateMeasurementDerivatives(
                      GmatBase *obj, Integer id)
 {
