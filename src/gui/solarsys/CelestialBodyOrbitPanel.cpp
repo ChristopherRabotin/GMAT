@@ -726,7 +726,7 @@ void CelestialBodyOrbitPanel::Create()
    else
    {
       GmatStaticBoxSizer  *boxSizer2 = new GmatStaticBoxSizer(wxVERTICAL, this, "Initial Two Body State");
-      boxSizer2->Add(initialStateFlexGridSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bSize);
+      boxSizer2->Add(initialStateFlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
       mainBoxSizer->Add(boxSizer1, 0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
       mainBoxSizer->Add(boxSizer2, 1, wxGROW|wxALIGN_CENTRE|wxALL, bSize); 
    }
@@ -744,7 +744,10 @@ void CelestialBodyOrbitPanel::Create()
    
    // Added #if in case if we want to add another layer of lined box for consistency.
    // I like without another layer, too many lines, so set to 0 (LOJ: 2009.11.18)
-   #if 1
+   // Looks bad to have the extra layer on the Mac - it shifts everything over
+   // to the right too much (WCS: 2013.09.30)
+//   #if 1
+   #ifndef __WXMAC__
    
    GmatStaticBoxSizer *mainStaticBoxSizer = new GmatStaticBoxSizer(wxHORIZONTAL, this, "");
    mainStaticBoxSizer->Add(mainBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
