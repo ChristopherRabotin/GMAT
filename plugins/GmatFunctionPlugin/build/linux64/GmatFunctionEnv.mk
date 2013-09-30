@@ -1,7 +1,7 @@
 # $Id$
-# Environment settings for the extra propagator plugin
+# Environment settings for the GmatFunction plugin
 GMAT_CODE_LOCATION = ../../../../src
-GMAT_BIN_LOCATION = ../../../../application/bin
+GMAT_BIN_LOCATION  = ../../../../application/bin
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 1
