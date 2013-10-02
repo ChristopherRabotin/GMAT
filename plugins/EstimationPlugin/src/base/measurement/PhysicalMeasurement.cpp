@@ -25,6 +25,8 @@
 #include "GmatConstants.hpp"
 #include "GroundstationInterface.hpp"
 #include "MeasurementException.hpp"
+// TBD: Is sstream used?  Commented out to see
+//#include <sstream>
 
 #ifdef IONOSPHERE
 #include "CoordinateConverter.hpp"
@@ -34,8 +36,10 @@
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define DEBUG_MEDIA_CORRECTION
+//#define DEBUG_TROPOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
-
+//#define DEBUG_SET_RELATIVITY_CORRECTION
+//#define DEBUG_SET_ETMINUSTAI_CORRECTION
 //------------------------------------------------------------------------------
 // PhysicalMeasurement(const std::string &type, const std::string &nomme)
 //------------------------------------------------------------------------------
@@ -49,7 +53,15 @@
 PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
 			const std::string &nomme) :
    CoreMeasurement      (type, nomme),
-   frequency            (2090659968.0)
+//   frequency            (2090659968.0),			// made changes by TUAN NGUYEN
+   frequency            (0.0),						// made changes by TUAN NGUYEN
+   freqBand             (0),						// made changes by TUAN NGUYEN
+///// TBD: Determine if there is a more generic way to add these
+   rangeModulo          (1.0e6),					// made changes by TUAN NGUYEN
+   rampTB               (NULL),						// made changes by TUAN NGUYEN
+   obsData              (NULL),						// made changes by TUAN NGUYEN
+   useRelativityCorrection (false),					// made changes by TUAN NGUYEN
+   useETminusTAICorrection (false)					// made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("PhysicalMeasurement");
 
@@ -90,7 +102,13 @@ PhysicalMeasurement::~PhysicalMeasurement()
 //------------------------------------------------------------------------------
 PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
    CoreMeasurement      (pm),
-   frequency            (pm.frequency)
+   frequency            (pm.frequency),
+   freqBand             (pm.freqBand),						// made changes by TUAN NGUYEN
+   rangeModulo          (pm.rangeModulo),					// made changes by TUAN NGUYEN
+   rampTB               (pm.rampTB),						// made changes by TUAN NGUYEN
+   obsData              (pm.obsData),						// made changes by TUAN NGUYEN
+   useRelativityCorrection (pm.useRelativityCorrection),	// made changes by TUAN NGUYEN
+   useETminusTAICorrection (pm.useETminusTAICorrection)		// made changes by TUAN NGUYEN
 {
    if (pm.troposphere != NULL)
       troposphere = new Troposphere(*(pm.troposphere));
@@ -125,6 +143,12 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
       CoreMeasurement::operator=(pm);
 
       frequency = pm.frequency;
+	  freqBand  = pm.freqBand;					// made changes by TUAN NGUYEN
+	  rangeModulo = pm.rangeModulo;				// made changes by TUAN NGUYEN
+	  rampTB      = pm.rampTB;					// made changes by TUAN NGUYEN
+	  obsData     = pm.obsData;					// made changes by TUAN NGUYEN
+	  useRelativityCorrection = pm.useRelativityCorrection; // made changes by TUAN NGUYEN
+	  useETminusTAICorrection = pm.useETminusTAICorrection; // made changes by TUAN NGUYEN
 
       // Rebuild the correction models
       if (troposphere != NULL)
@@ -159,10 +183,17 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
  * @param newFreq The new frequency value
  */
 //------------------------------------------------------------------------------
-void PhysicalMeasurement::SetConstantFrequency(Real newFreq)
+void PhysicalMeasurement::SetConstantFrequency(Real newFreq, Integer index)
 {
    if (newFreq > 0.0)
-      frequency = newFreq;
+   {
+      if (index == 0)
+         frequency = frequencyE = newFreq;
+	  else
+         frequencyE = newFreq;
+   }
+   else
+	  throw MeasurementException("Error: Frequency was set to a non-positive value.\n"); 
 }
 
 
@@ -175,11 +206,103 @@ void PhysicalMeasurement::SetConstantFrequency(Real newFreq)
  * @return The frequency
  */
 //------------------------------------------------------------------------------
-Real PhysicalMeasurement::GetConstantFrequency()
+Real PhysicalMeasurement::GetConstantFrequency(Integer index)
 {
-   return frequency;
+   return ((index == 0) ? frequency : frequencyE);
 }
 
+
+///// TBD: Determine if there is a more generic way to add these
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetFrequencyBand(Integer frequencyBand, Integer index)
+{
+	if (index == 0)
+		freqBand = freqBandE = frequencyBand;
+	else
+		freqBandE = frequencyBand;
+}
+
+// made changes by TUAN NGUYEN
+Integer PhysicalMeasurement::GetFrequencyBand(Integer index)
+{
+   return ((index == 0) ? freqBand : freqBandE);
+}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetRangeModulo(Real rangeMod)
+{
+	rangeModulo = rangeMod;
+}
+
+
+// made changes by TUAN NGUYEN
+Real PhysicalMeasurement::GetRangeModulo()
+{
+	return rangeModulo;
+}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetObsValue(const RealArray& value)
+{
+	obsValue = value;
+}
+
+// made changes by TUAN NGUYEN
+RealArray PhysicalMeasurement::GetObsValue()
+{
+	return obsValue;
+}
+
+// made changes by TUAN NGUYEN
+//void PhysicalMeasurement::SetFlagToReadFromObservationData(bool isFromObservationData)
+//{
+//	isFromObsData = isFromObservationData;
+//}
+
+// made changes by TUAN NGUYEN
+//bool PhysicalMeasurement::GetFlagToReadFromObservationData()
+//{
+//	return isFromObsData;
+//}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetObservationDataRecord(ObservationData* data)
+{
+	obsData = data;
+}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetRampTable(std::vector<RampTableData>* rt)
+{
+   rampTB = rt;
+}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetRelativityCorrection(bool useCorr)
+{
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Start PhysicalMeasurement::SetRelativityCorrection(%s)\n", (useCorr ? "true":"false"));
+#endif
+   useRelativityCorrection = useCorr;
+
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetRelativityCorrection()\n");
+#endif
+}
+
+// made changes by TUAN NGUYEN
+void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
+{
+#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+	MessageInterface::ShowMessage("Start PhysicalMeasurement::SetETMinusTAICorrection(%s)\n", (useCorr ? "true":"false"));
+#endif
+
+	useETminusTAICorrection = useCorr;
+
+#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+	MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetETMinusTAICorrection()\n");
+#endif
+}
 
 //----------------------------------------------------------------------
 // void AddCorrection(std::string& modelName)
@@ -216,7 +339,8 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName)
          MessageInterface::ShowMessage("   Set as ionosphere model\n");
       #endif
 
-		// Create IRI2007 ionosphere correction model
+///// TBD: Determine if there is a more generic way to add these
+	  // Create IRI2007 ionosphere correction model
       #ifdef IONOSPHERE
 		   ionosphere = new Ionosphere(modelName);
       #else
@@ -239,6 +363,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName)
 	}
 }
 
+
 //------------------------------------------------------------------------
 //RealArray TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix Ro_j2k)
 //------------------------------------------------------------------------
@@ -252,7 +377,8 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName)
  *
  */
 //------------------------------------------------------------------------
-RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix Ro_j2k)
+/*
+RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix33 Ro_j2k)
 {
    RealArray tropoCorrection;
 
@@ -260,14 +386,64 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
    {
    	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
    	troposphere->SetWaveLength(wavelength);
-   	Real elevationAngle = asin((Ro_j2k*rVec.GetUnitVector()).GetElement(2));
+	Rvector3 signal_direction = Ro_j2k *rVec.GetUnitVector(); 
+   	Real elevationAngle = asin(signal_direction.GetElement(2));
    	troposphere->SetElevationAngle(elevationAngle);
    	troposphere->SetRange(rVec.GetMagnitude()*GmatMathConstants::KM_TO_M);
    	tropoCorrection = troposphere->Correction();
 //   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
 
-		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-			MessageInterface::ShowMessage("       Apply Troposphere media correction:\n");
+		#ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
+			MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
+			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
+			MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
+			MessageInterface::ShowMessage("         .Range correction = %.12lf m\n", tropoCorrection[0]);
+		#endif
+   }
+   else
+   {
+   	tropoCorrection.push_back(0.0);
+   	tropoCorrection.push_back(0.0);
+   	tropoCorrection.push_back(0.0);
+   }
+
+   return tropoCorrection;
+}
+*/
+
+
+
+//------------------------------------------------------------------------
+//RealArray TroposphereCorrection(Real freq, Real distance, Real elevationAngle)
+//------------------------------------------------------------------------
+/**
+ * This function is used to calculate Troposphere correction.
+ *
+ * @param freq				The frequency of signal	(unit: MHz)
+ * @param distance			Distance from ground station to spacecraft (unit: km)
+ * @param elevationAngle    The elevation angle from ground station to spacecraft (unit: radian)
+ *                 
+ * return Troposphere correction vector
+ */
+//------------------------------------------------------------------------
+RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, Real elevationAngle)
+{
+   RealArray tropoCorrection;
+
+   if (troposphere != NULL)
+   {
+    // Set troposphere's ref objects						// made changes by TUAN NGUYEN
+	troposphere->SetSolarSystem(solarSystem);				// made changes by TUAN NGUYEN
+
+   	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
+   	troposphere->SetWaveLength(wavelength);
+   	troposphere->SetElevationAngle(elevationAngle);
+   	troposphere->SetRange(distance*GmatMathConstants::KM_TO_M);
+   	tropoCorrection = troposphere->Correction();
+//   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
+
+		#ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
+			MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
 			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
 			MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
 			MessageInterface::ShowMessage("         .Range correction = %.12lf m\n", tropoCorrection[0]);
@@ -304,6 +480,9 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 
    if (ionosphere != NULL)
    {
+    // 0. Set ionosphere's ref objects						// made changes by TUAN NGUYEN
+    ionosphere->SetSolarSystem(solarSystem);				// made changes by TUAN NGUYEN
+
    	// 1. Set wave length:
    	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);		// unit: meter
    	ionosphere->SetWaveLength(wavelength);
@@ -323,12 +502,13 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 	CoordinateSystem* fk5cs = Moderator::Instance()->GetCoordinateSystem("EarthMJ2000Eq");
 	cv->Convert(time, inState, cs, outState, fk5cs);				// convert EarthFK5 coordinate system to EarthBodyFixed coordinate system
 	Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix().Transpose();
-//   	MessageInterface::ShowMessage("[ %f  %f  %f\n", R_g_j2k.GetElement(0,0), R_g_j2k.GetElement(0,1), R_g_j2k.GetElement(0,2));
-//   	MessageInterface::ShowMessage("  %f  %f  %f\n", R_g_j2k.GetElement(1,0), R_g_j2k.GetElement(1,1), R_g_j2k.GetElement(1,2));
-//   	MessageInterface::ShowMessage("  %f  %f  %f]\n", R_g_j2k.GetElement(2,0), R_g_j2k.GetElement(2,1), R_g_j2k.GetElement(2,2));
+	Rvector3 r1_ebf = R_g_j2k*r1;
+	Rvector3 r2_ebf = R_g_j2k*r2;
 
-   	ionosphere->SetStationPosition(R_g_j2k*r1);											// unit: km
-   	ionosphere->SetSpacecraftPosition(R_g_j2k*r2);										// unit: km
+//	ionosphere->SetStationPosition(R_g_j2k*r1);											// unit: km
+// 	ionosphere->SetSpacecraftPosition(R_g_j2k*r2);										// unit: km
+	ionosphere->SetStationPosition(r1_ebf);											// unit: km
+   	ionosphere->SetSpacecraftPosition(r2_ebf);										// unit: km
 
    	// 4. Set earth radius:
 	SpacePoint* earth 	= (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
@@ -340,10 +520,8 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 	MessageInterface::ShowMessage("         +Earth radius = %lf km\n", earthRadius);
 	MessageInterface::ShowMessage("         +Wave length = %.12lf m\n", wavelength);
 	MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch);
-	MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km):\n"
-		                          "            (%s)", (R_g_j2k*r1).ToString().c_str()); 
-	MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km):\n"
-		                          "            (%s)", (R_g_j2k*r2).ToString().c_str());
+	MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km)   : (%.12lf,  %.12lf,   %.12lf)\n", r1_ebf[0], r1_ebf[1], r1_ebf[2]); 
+	MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km): (%.12lf,  %.12lf,   %.12lf)\n", r2_ebf[0], r2_ebf[1], r2_ebf[2]);
 #endif
 
 	// 5. Run ionosphere correction:
@@ -351,7 +529,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
    	Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;				// unit: meter
 
 #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
-	MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
+//	MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
 	MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);
 #endif
    }
@@ -375,7 +553,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
  * @param freq		The frequency of signal	(unit: MHz)
  * @param r1		Position of ground station
  * @param r2		Position of spacecraft
- * @param epoch	The time at which signal is transmitted or received from ground station
+ * @param epoch	    The time at which signal is transmitted from or received at ground station
  */
 //------------------------------------------------------------------------
 RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
@@ -388,8 +566,11 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, 
 
    // 1. Run Troposphere correction:
    UpdateRotationMatrix(epoch, "o_j2k");
-   Rvector3 rangeVector = r2 - r1;
-   mediaCorrection = TroposphereCorrection(freq, rangeVector, R_o_j2k);
+   Rvector3 rangeVector = r2 - r1;										           // vector pointing from ground station to spacecraft
+   Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2)); 
+//   Real elevationAngle = GmatMathConstants::PI/2 - acos(rangeVector.GetUnitVector() * r1.GetUnitVector()); 
+   //mediaCorrection = TroposphereCorrection(freq, rangeVector, R_o_j2k);
+   mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
 
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%s')km\n", freq, epoch, (r2-r1).ToString().c_str());
@@ -500,6 +681,7 @@ void PhysicalMeasurement::GetRangeDerivative(Event &ev, const Rmatrix &stmInv,
    }
 
       #ifdef DEBUG_DERIVATIVES
+         MessageInterface::ShowMessage("Range unit vector = %s\n",unitRange.ToString()); 
          MessageInterface::ShowMessage("   Derivative = [");
          for (Integer i = 0; i < deriv.GetSize(); ++i)
             MessageInterface::ShowMessage(" %.12lf ", deriv[i]);
@@ -542,8 +724,21 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
 
    EventData p1Data = ev.GetEventData(participants[p1Index]);
    EventData p2Data = ev.GetEventData(participants[p2Index]);
+   
+   /// Calculate range vector in Solar System Barycenter coordinate system:
+   // rangeVec = p2Data.position - p1Data.position;												// made changes by TUAN NGUYEN
+   CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;										// made changes by TUAN NGUYEN
+   CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;										// made changes by TUAN NGUYEN
+   Real t1 = p1Data.epoch;																		// made changes by TUAN NGUYEN
+   Real t2 = p2Data.epoch;																		// made changes by TUAN NGUYEN
+   SpecialCelestialPoint* ssb = (SpecialCelestialPoint*)solarSystem->GetSpecialPoint("SolarSystemBarycenter");		// made changes by TUAN NGUYEN
 
-   rangeVec = p2Data.position - p1Data.position;
+   // vector from SSB to the central body at time t1 and t2										// made changes by TUAN NGUYEN
+   Rvector3 BE1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);						// made changes by TUAN NGUYEN
+   Rvector3 BE2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);						// made changes by TUAN NGUYEN
+   Rvector3 p1B = BE1 + p1Data.position;														// made changes by TUAN NGUYEN
+   Rvector3 p2B = BE2 + p2Data.position;														// made changes by TUAN NGUYEN
+   rangeVec = p2B - p1B;																		// made changes by TUAN NGUYEN
 
    // Be sure to use the correct rotation matrices, etc
    EventData dataToUse = (wrtP1 ? p1Data : p2Data);
@@ -552,10 +747,10 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
 
 
    #ifdef DEBUG_DERIVATIVES
-      MessageInterface::ShowMessage("p1Position: %s\n", p1Data.position.ToString().c_str());
-      MessageInterface::ShowMessage("p2Position: %s\n", p2Data.position.ToString().c_str());
+      MessageInterface::ShowMessage("p1Position in Solar System Barycenter coordinate system: %s\n", p1B.ToString().c_str());
+      MessageInterface::ShowMessage("p2Position in Solar System Barycenter coordinate system: %s\n", p2B.ToString().c_str());
 
-      MessageInterface::ShowMessage("   Range vector: [%.12lf %.12lf %.12lf]\n",
+      MessageInterface::ShowMessage("   Range vector = P2B - P1B = : [%.12lf %.12lf %.12lf]\n",
             rangeVec[0], rangeVec[1], rangeVec[2]);
    #endif
 
@@ -579,9 +774,12 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
       MessageInterface::ShowMessage("  B: %s\n", B.ToString().c_str());
    #endif
 
+   Rmatrix33 body2FK5_matrix = dataToUse.rInertial2obj.Transpose();		// made change by TUAN NGUYEN:  get rotation matrix from object frame to inertial frame
+
    if (wrtR)
    {
-      temp = dataToUse.rInertial2obj * A;
+      // temp = dataToUse.rInertial2obj * A;
+	  temp = body2FK5_matrix * A;		// made change by TUAN NGUYEN
 
       for (Integer i = 0; i < 3; ++i)
          for (Integer j = 0; j < 3; ++j)
@@ -589,7 +787,8 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    }
    if (wrtV)
    {
-      temp = dataToUse.rInertial2obj * B;
+      // temp = dataToUse.rInertial2obj * B;
+	  temp = body2FK5_matrix * B;		// made change by TUAN NGUYEN
 
       Integer offset = (wrtR ? 3 : 0);
       for (Integer i = 0; i < 3; ++i)
@@ -598,14 +797,14 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    }
 
    #ifdef DEBUG_DERIVATIVES
-      MessageInterface::ShowMessage("   Rotation matrix for %s:\n",
+      MessageInterface::ShowMessage("   Rotation matrix from body to FK5 for %s:\n",
             participants[p2Index]->GetName().c_str());
       for (Integer i = 0; i < 3; ++i)
       {
          MessageInterface::ShowMessage("         [");
          for (Integer j = 0; j < 3; ++j)
             MessageInterface::ShowMessage(" %.12lf ",
-                  p2Data.rInertial2obj(i,j));
+                  body2FK5_matrix(i,j));
          MessageInterface::ShowMessage("]\n");
       }
    #endif
@@ -689,3 +888,306 @@ void PhysicalMeasurement::GetInverseSTM(GmatBase *forObject, Rmatrix &stmInv)
 void PhysicalMeasurement::SetHardwareDelays(bool loadEvents)
 {
 }
+
+
+///// TBD: Determine if there is a more generic way to add these
+///// These methods need to be documented
+Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
+{
+   // search for interval which contains time t:
+   Real upBand = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t < (*rampTB)[i].epoch)
+	  {
+         upBand = (*rampTB)[i-1].uplinkBand;      
+		 break;
+	  }
+   }
+
+   return upBand;
+}
+
+Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
+{
+   // search for interval which contains time t:
+   UnsignedInt interval_index = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t < (*rampTB)[i].epoch)
+	  {
+         interval_index = i-1;      
+		 break;
+	  }
+   }
+
+   // specify frequency at time t:
+   Real t_start = (*rampTB)[interval_index].epoch;
+   Real f0 = (*rampTB)[interval_index].rampFrequency;
+   Real f_dot = (*rampTB)[interval_index].rampRate;
+	   
+   Real f = f0 + f_dot*(t - t_start);
+
+   return f;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetFrequencyBand(Real frequency)
+//------------------------------------------------------------------------------
+/**
+ * Get frequency band corresponding to a given frequency
+ *
+ * @param frequency   frequency in Hz
+ *
+ * @return an integer corresponding to frequency band
+ */
+//------------------------------------------------------------------------------
+Integer PhysicalMeasurement::FrequencyBand(Real frequency)
+{
+   Integer freqBand = 0;
+
+   // S-band
+   if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
+	  freqBand = 1;					// 1 for S-band
+
+   // X-band (Band values from Wikipedia; check them!
+   if ((frequency >= 7900000000.0) && (frequency <= 8400000000.0))
+      freqBand = 2;					// 2 for X-band
+
+   if (freqBand == 0)
+   {
+	  std::stringstream strs;
+	  strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
+	  throw MeasurementException(strs.str());
+   }
+
+   return freqBand;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Real RampedFrequencyIntergration(Real t0, Real t1)
+//------------------------------------------------------------------------------
+/**
+ * Calculate the tetegration of ramped frequency in range from time t0 to time t1
+ *
+ * @param t1         The end time for integration (unit: A1Mjd)
+ * @param delta_t    Elapse time (unit: second)
+ *
+ * @return The integration of ramped frequency.
+ * Assumptions: ramp table had been sorted by epoch 
+ */
+//------------------------------------------------------------------------------
+//#define DEBUG_INTEGRAL_RAMPED_FREQUENCY
+Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
+{
+#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+   MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
+#endif
+
+   if (delta_t < 0)
+      throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+
+   if (rampTB == NULL)
+	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   else if ((*rampTB).size() == 0)
+	  throw MeasurementException("Error: No data in ramp table\n");
+   
+
+   Real time_min = (*rampTB)[0].epoch;
+   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   if ((t1 < time_min)||(t1 > time_max))
+   {
+	  char s[200];
+	  sprintf(&s[0], "Error: End time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t1, time_min, time_max);
+	  std::string st(&s[0]);
+
+	  throw MeasurementException(st);
+   }
+
+   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
+   if ((t0 < time_min)||(t0 > time_max))
+   {
+	  char s[200];
+	  sprintf(&s[0], "Error: Start time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t0, time_min, time_max);
+	  std::string st(&s[0]);
+
+	  throw MeasurementException(st);
+   }
+
+#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+   MessageInterface::ShowMessage(" Start time t0 = %.12lf A1Mjd\n", t0);
+   MessageInterface::ShowMessage(" End time t1   = %.12lf A1Mjd\n", t1);
+   MessageInterface::ShowMessage(" elapse time   = %.12lf s\n", delta_t);
+#endif
+   // search for end interval:
+   UnsignedInt end_interval = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t1 < (*rampTB)[i].epoch)
+	  {
+         end_interval = i-1;      
+		 break;
+	  }
+   }
+
+#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+   MessageInterface::ShowMessage("\n End interval: i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n", end_interval, (*rampTB)[end_interval].epoch, (*rampTB)[end_interval].rampFrequency, (*rampTB)[end_interval].rampRate);
+   MessageInterface::ShowMessage("               i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n\n", end_interval+1, (*rampTB)[end_interval+1].epoch, (*rampTB)[end_interval+1].rampFrequency, (*rampTB)[end_interval+1].rampRate);
+#endif
+
+   // search for end interval:
+   Real f0, f1, f_dot;
+   Real value1;
+   Real interval_len;
+
+   Real value = 0.0;
+   Real dt = delta_t;
+   Integer i = end_interval;
+   while (dt > 0)
+   {
+      f_dot = (*rampTB)[i].rampRate;
+
+	  // Specify lenght of the current interval
+	  if (i == end_interval)
+		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+	  else
+		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+
+      f0 = (*rampTB)[i].rampFrequency;
+      if (dt < interval_len)
+      {
+         f0 = f0 + f_dot*(interval_len - dt);
+         interval_len = dt;
+      }
+      // Specify frequency at the end of the current interval
+	  f1 = f0 + f_dot*interval_len;
+
+	  // Take integral for the current interval
+	  value1 = (f0 + f1) * interval_len / 2;
+	  value  = value + value1;
+
+#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
+      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+#endif
+
+      // Specify dt 
+ 	  dt = dt - interval_len;
+
+	  i--;
+   }
+
+#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+   MessageInterface::ShowMessage("value = %.12lf\n", value);
+   MessageInterface::ShowMessage("Exit PhysicalMeasurement::IntegralRampedFrequency()\n");
+#endif
+
+   return value;
+
+}
+
+/*
+Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
+{
+
+   if (delta_t < 0)
+      throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+
+   if (rampTB == NULL)
+	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   else if ((*rampTB).size() == 0)
+	  throw MeasurementException("Error: No data in ramp table\n");
+   
+
+   Real time_min = (*rampTB)[0].epoch;
+   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   if ((t1 < time_min)||(t1 > time_max))
+   {
+	  char s[200];
+	  sprintf(&s[0], "Error: End time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t1, time_min, time_max);
+	  std::string st(&s[0]);
+
+	  throw MeasurementException(st);
+   }
+
+   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
+   if ((t0 < time_min)||(t0 > time_max))
+   {
+	  char s[200];
+	  sprintf(&s[0], "Error: Start time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t0, time_min, time_max);
+	  std::string st(&s[0]);
+
+	  throw MeasurementException(st);
+   }
+
+   // search for end interval:
+   UnsignedInt end_interval = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t1 < (*rampTB)[i].epoch)
+	  {
+         end_interval = i-1;      
+		 break;
+	  }
+   }
+
+   // search for end interval:
+   Real f0, f1, f_dot;
+   Real value1;
+   Real interval_len;
+
+   Real value = 0.0;
+   Real dt = delta_t;
+   Integer i = end_interval;
+   while (dt > 0)
+   {
+      f_dot = (*rampTB)[i].rampRate;
+
+	  if (i == end_interval)
+	  {
+		 // Specify lenght of the current interval
+		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+		 if (dt < interval_len)
+            interval_len = dt;
+
+         // Specify frequency at the begin of the current interval
+		 f0 = (*rampTB)[i].rampFrequency;
+      }
+	  else
+	  {
+		 // Specify lenght of the current interval 
+		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+		 f0 = (*rampTB)[i].rampFrequency;
+		 if (dt < interval_len)
+		 {
+			f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
+			interval_len = dt;
+		 }
+	  }
+      // Specify frequency at the end of the current interval
+	  f1 = f0 + f_dot*interval_len;
+
+	  // Take integral for the current interval
+	  value1 = (f0 + f1) * interval_len / 2;
+	  value  = value + value1;
+
+//	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
+//      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+//	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+
+
+      // Specify dt 
+ 	  dt = dt - interval_len;
+
+	  i--;
+   }
+
+//   MessageInterface::ShowMessage("value = %.12lf\n", value);
+
+   return value;
+
+}
+*/
