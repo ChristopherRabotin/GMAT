@@ -119,6 +119,9 @@ protected:
    /// Turnaround ratio at the target spacecraft
    Real turnaround;
 
+   /// Turnaround ratio which is built in on station's tracking system
+   Real M2R;						// M2R maybe equal the value of turnaround; sometime it is set to 0
+
    // Light time events
    /// Uplink leg for the start signal
    LightTimeCorrection  uplinkLegS;
@@ -137,6 +140,7 @@ protected:
    enum
    {
        AveragingInterval = PhysicalMeasurementParamCount,
+	   BuildInTurnAroundRatio,									// made changes by TUAN NGUYEN
        AveragedDopplerParamCount
    };
 

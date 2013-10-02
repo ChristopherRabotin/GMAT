@@ -76,10 +76,19 @@ public:
    void                    SetStreamObject(DataFile *newStream);
    bool                    WriteMeasurement(const Integer measurementToWrite);
 
+///// TBD: Do we want something more generic here?
+   const StringArray&      GetRampTableDataStreamList();						// made changes by TUAN NGUYEN
+   void                    SetRampTableDataStreamObject(DataFile *newStream);	// made changes by TUAN NGUYEN
+
    IntegerArray&           GetValidMeasurementList();
 
    // Observation reader methods needed for estimation
    void                    LoadObservations();
+   
+///// TBD: Do we want something more generic here?
+   // Ramp tables reader method needed for simulator							// made changes by TUAN NGUYEN
+   void					   LoadRampTables();									// made changes by TUAN NGUYEN
+
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
@@ -114,6 +123,20 @@ protected:
    StringArray                      streamNames;
    /// Measurement stream objects
    std::vector<DataFile*>           streamList;
+
+
+///// TBD: Do we want something more generic here?
+   /// ramp table data stream names												// made changes by TUAN NGUYEN
+   StringArray                      rampTableDataStreamNames;					// made changes by TUAN NGUYEN
+   /// Ramp table data stream objects											// made changes by TUAN NGUYEN
+   std::vector<DataFile*>           rampTableDataStreamList;					// made changes by TUAN NGUYEN
+   /// Maping between unique IDs and the associated data files					// made changes by TUAN NGUYEN
+   std::map<Integer,DataFile*>      idToRampTableStreamMap;						// made changes by TUAN NGUYEN
+   /// Association between name of DataFile objects and frequency ramp tables	// made changes by TUAN NGUYEN
+   std::map<std::string,std::vector<RampTableData>>								// made changes by TUAN NGUYEN
+	                                rampTables;									// made changes by TUAN NGUYEN
+
+
    /// Temporary element used to manage events that are ready for processing
    ObjectArray                      activeEvents;
    /// Association between Events and the MeasurementModels that provided them

@@ -28,6 +28,9 @@
 #include "MeasurementData.hpp"
 #include "CoreMeasurement.hpp"
 #include "Hardware.hpp"
+///// TBD: Do we want something more generic here?
+#include "ObservationData.hpp"					// made changes by TUAN NGUYEN
+#include "RampTableData.hpp"					// made changes by TUAN NGUYEN
 
 /**
  * Container class that wraps CoreMeasurement objects for use in estimation and
@@ -82,6 +85,10 @@ public:
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value, const Integer row,
                                          const Integer col);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
+                                         const std::string &value);						// made changes by TUAN NGUYEN
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -154,8 +161,12 @@ public:
    Integer              GetModelTypeID();
    void                 SetModelID(Integer newID);
 
+//   virtual const MeasurementData&
+//                        CalculateMeasurement(bool withEvents = false);										// made changes by TUAN NGUYEN
+///// TBD: Do we want something more generic here?
    virtual const MeasurementData&
-                        CalculateMeasurement(bool withEvents = false);
+                        CalculateMeasurement(bool withEvents = false, 
+						     ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL);		// made changes by TUAN NGUYEN
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);
@@ -183,6 +194,11 @@ public:
 protected:
    /// Name of the observation stream that supplied or receives data
    StringArray          observationStreamName;
+
+///// TBD: Do we want something more generic here?
+   /// Name of the frequency ramp table stream that supplied or receives data			// made changes by TUAN NGUYEN
+   StringArray          rampTableStreamName;											// made changes by TUAN NGUYEN
+
    /// List of participants used in the contained measurement
    StringArray          participantNames;
    /// Pointers to the participants
@@ -220,16 +236,29 @@ protected:
    /// Flag that is set if participants need to be passed in later
    bool measurementNeedsObjects;
 
+///// TBD: Do we want something more generic here?
+   /// Flag indicate whether Measurement model using relativity correction or not		// made changes by TUAN NGUYEN
+   bool useRelativityCorrection;														// made changes by TUAN NGUYEN
+
+   /// Flag indicate whether Measurement model using ET-TAI correction or not			// made changes by TUAN NGUYEN
+   bool useETminusTAICorrection;														// made changes by TUAN NGUYEN
+
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
-       ObservationData = GmatBaseParamCount,
+///// I don't understand why a name change was needed, but whatever
+//       ObservationData = GmatBaseParamCount,				// made changes by TUAN NGUYEN
+	   ObsData = GmatBaseParamCount,						// made changes by TUAN NGUYEN
+	   RampTables,											// made changes by TUAN NGUYEN
        MeasurementType,
        Participants,
        Bias,
        NoiseSigma,
        TimeConstant,
        Frequency,
+	   RangeModuloConstant,									// made changes by TUAN NGUYEN
+	   RelativityCorrection,								// made changes by TUAN NGUYEN
+	   ETminusTAICorrection,								// made changes by TUAN NGUYEN
        MeasurementModelParamCount
    };
 
