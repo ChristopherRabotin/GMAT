@@ -40,8 +40,15 @@ ObservationData::ObservationData() :
    uniqueID          (-1),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
-   noiseCovariance   (NULL)
+   noiseCovariance   (NULL),
+///// TBD: Determine if there is a more generic way to add these, and if they go here
+   uplinkBand        (0),					// made changes by TUAN NGUYEN
+   uplinkFreq        (0.0),					// made changes by TUAN NGUYEN
+   rangeModulo       (1.0),					// made changes by TUAN NGUYEN
+   dopplerCountInterval   (1.0e-10)			// made changes by TUAN NGUYEN
 {
+///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
+   dataFormat = "GMATInternal";				// made changes by TUAN NGUYEN
 }
 
 
@@ -77,8 +84,14 @@ ObservationData::ObservationData(const ObservationData& od):
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
-   extraData               (od.extraData)
+   extraData               (od.extraData),
+//   dataFormat              (od.dataFormat),			// made changes by TUAN NGUYEN
+   uplinkBand              (od.uplinkBand),				// made changes by TUAN NGUYEN
+   uplinkFreq              (od.uplinkFreq),				// made changes by TUAN NGUYEN
+   rangeModulo             (od.rangeModulo),			// made changes by TUAN NGUYEN
+   dopplerCountInterval	   (od.dopplerCountInterval)	// made changes by TUAN NGUYEN
 {
+   dataFormat = od.dataFormat;							// made changes by TUAN NGUYEN
 }
 
 
@@ -108,6 +121,11 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;
       extraData               = od.extraData;
+	  dataFormat              = od.dataFormat;		// made changes by TUAN NGUYEN
+	  uplinkBand              = od.uplinkBand;		// made changes by TUAN NGUYEN
+	  uplinkFreq              = od.uplinkFreq;		// made changes by TUAN NGUYEN
+	  rangeModulo             = od.rangeModulo;		// made changes by TUAN NGUYEN
+	  dopplerCountInterval    = od.dopplerCountInterval;	// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -132,4 +150,9 @@ void ObservationData::Clear()
    extraDataDescriptions.clear();
    extraTypes.clear();
    extraData.clear();
+///// TBD: Determine if there is a more generic way to add these
+   uplinkBand              = 0;						// made changes by TUAN NGUYEN
+   uplinkFreq              = 0.0;					// made changes by TUAN NGUYEN
+   rangeModulo             = 1.0;					// made changes by TUAN NGUYEN
+   dopplerCountInterval    = 1.0e-10;				// made changes by TUAN NGUYEN
 }

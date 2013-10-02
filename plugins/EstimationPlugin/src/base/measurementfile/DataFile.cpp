@@ -26,9 +26,12 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_FILE_WRITE
+//#define DEBUG_FILE_ACCESS
+//#define DEBUG_INITIALIZATION
 //#define DEBUG_OBSERVATION_READ
-
+//#define DEBUG_OBSERVATION_DATA
+//#define DEBUG_RAMP_TABLE_READ
+//#define DEBUG_RAMP_TABLE_DATA
 
 //------------------------------------------------------------------------------
 // static data
@@ -43,7 +46,7 @@ const std::string DataFile::PARAMETER_TEXT[] =
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
-   Gmat::OBJECT_TYPE
+   Gmat::STRING_TYPE			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
 };
 
 
@@ -162,11 +165,20 @@ GmatBase* DataFile::Clone() const
 //------------------------------------------------------------------------------
 bool DataFile::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+	MessageInterface::ShowMessage("DataFile<%s>::Initialize()\n", GetName().c_str());
+#endif
+
    bool retval = false;
 
    if (theDatastream)
    {
       retval = theDatastream->Initialize();
+	  obsType = theDatastream->GetTypeName();			// made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZATION
+	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
+      #endif
+
    }
 
    return retval;
@@ -484,10 +496,10 @@ bool DataFile::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool DataFile::SetStream(ObType *thisStream)
 {
-//   #ifdef DEBUG_FILE_WRITE
+   #ifdef DEBUG_FILE_ACCESS
       MessageInterface::ShowMessage("Setting ObType to a %s object\n",
             thisStream->GetTypeName().c_str());
-//   #endif
+   #endif
 
    bool retval = false;
 
@@ -500,18 +512,21 @@ bool DataFile::SetStream(ObType *thisStream)
 }
 
 
+///// TBD: This method needs to be documented
 bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_FILE_ACCESS
+      MessageInterface::ShowMessage("DataFile<'%s'>::SetRefObject: Setting object of "
+		  "type %s <%d> named '%s'\n", GetName().c_str(), obj->GetTypeName().c_str(), type,
+            obj->GetName().c_str());
+   #endif
+
    if (obj->IsOfType(Gmat::OBTYPE))
    {
       theDatastream = (ObType*)obj;
       return true;
    }
-
-   MessageInterface::ShowMessage("DataFile::SetRefObject: Setting object of "
-            "type %s <%d> named '%s'\n", obj->GetTypeName().c_str(), type,
-            obj->GetName().c_str());
 
    return GmatBase::SetRefObject(obj, type, name);
 }
@@ -532,9 +547,8 @@ bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 bool DataFile::OpenStream(bool simulate)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage(
-            "Entered DataFile::OpenStream(%s)\n",
-            (simulate ? "true" : "false"));
+      MessageInterface::ShowMessage("Entered DataFile<%s>::OpenStream(%s)\n", 
+		  GetName().c_str(), (simulate ? "true" : "false"));
    #endif
 
    bool retval = false;
@@ -542,13 +556,38 @@ bool DataFile::OpenStream(bool simulate)
    if (theDatastream)
    {
       theDatastream->SetStreamName(streamName);
-
+	  obsType = theDatastream->GetTypeName();							// made changes by TUAN NGUYEN
+	  #ifdef DEBUG_INITIALIZATION
+		    MessageInterface::ShowMessage("DataFile::OpenStream():   obsType = '%s'\n", obsType.c_str());
+      #endif
       // todo: Currently opens either to simulate or to estimate, but not both
       // at the same time.
-      if (simulate)
-         retval = theDatastream->Open(false, true);
-      else
-         retval = theDatastream->Open(true, false);
+	  // For ramp table, it is opened for read only
+///// TBD: Determine if there is a more generic way to add this
+	  if (obsType == "GMAT_RampTable")									// made changes by TUAN NGUYEN
+	  {
+         #ifdef DEBUG_INITIALIZATION
+		    MessageInterface::ShowMessage("DataFile::OpenStream():   open ramp table '%s' for reading\n", GetName().c_str());
+         #endif
+	     retval = theDatastream->Open(true, false);						// made changes by TUAN NGUYEN
+	  }
+	  else																// made changes by TUAN NGUYEN
+	  {
+         if (simulate)
+		 {
+            #ifdef DEBUG_INITIALIZATION
+		       MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for writing\n", GetName().c_str());
+            #endif
+            retval = theDatastream->Open(false, true);
+		 }
+         else
+		 {
+            #ifdef DEBUG_INITIALIZATION
+		       MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for reading\n", GetName().c_str());
+            #endif
+            retval = theDatastream->Open(true, false);
+		 }
+	  }
    }
 
    return retval;
@@ -605,12 +644,16 @@ void DataFile::WriteMeasurement(MeasurementData* theMeas)
 //------------------------------------------------------------------------------
 ObservationData* DataFile::ReadObservation()
 {
+   #ifdef DEBUG_OBSERVATION_READ
+	  MessageInterface::ShowMessage("Entered DataFile<%s>::ReadObservation()\n", GetName().c_str());
+   #endif
+
    ObservationData *theObs = NULL;
    if (theDatastream)
    {
       theObs = theDatastream->ReadObservation();
 
-      #ifdef DEBUG_OBSERVATION_READ
+      #ifdef DEBUG_OBSERVATION_DATA
          if (theObs)
          {
             MessageInterface::ShowMessage("Observation:\n");
@@ -640,7 +683,64 @@ ObservationData* DataFile::ReadObservation()
       #endif
    }
 
+   #ifdef DEBUG_OBSERVATION_READ
+	  MessageInterface::ShowMessage("Exit DataFile::ReadObservation()\n");
+   #endif
+
    return theObs;
+}
+
+
+///// TBD: Determine if there is a more generic way to add these
+//------------------------------------------------------------------------------
+// RampTableData* ReadRampTableData()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a frequency ramp table data from a data stream so it can be processed
+ *
+ * This method is used during simualation to simulate a frequency ramp measurement.
+ *
+ * @return The frequency ramp table data from the file, or NULL if no more
+ *         ramp table data are available
+ */
+//------------------------------------------------------------------------------
+RampTableData* DataFile::ReadRampTableData()
+{
+   #ifdef DEBUG_RAMP_TABLE_READ
+	  MessageInterface::ShowMessage("Entered DataFile<%s>::ReadRampTableData()\n", GetName().c_str());
+   #endif
+
+   RampTableData *theData = NULL;
+   if (theDatastream)
+   {
+      theData = theDatastream->ReadRampTableData();
+
+      #ifdef DEBUG_RAMP_TABLE_DATA
+         if (theData)
+         {
+            MessageInterface::ShowMessage("Ramp table data:\n");
+            MessageInterface::ShowMessage("   Epoch:          %.12lf\n",
+                  theData->epoch);
+            MessageInterface::ShowMessage("   Type:           %s\n",
+                  theData->typeName.c_str());
+            MessageInterface::ShowMessage("   TypeID:         %d\n",
+                  theData->type);
+            for (UnsignedInt i = 0; i < theData->participantIDs.size(); ++i)
+               MessageInterface::ShowMessage("   Participant %d: %s\n", i,
+                     theData->participantIDs[i].c_str());
+            MessageInterface::ShowMessage("ramp type = %d     ramp frequency = %.12le    ramp rate = %.12le\n",
+				theData->rampType, theData->rampFrequency, theData->rampRate);
+         }
+         else
+            MessageInterface::ShowMessage("*** Reached End of ramp table data\n");
+      #endif
+   }
+
+   #ifdef DEBUG_RAMP_TABLE_READ
+	  MessageInterface::ShowMessage("Exit DataFile::ReadRampTableData()\n");
+   #endif
+
+   return theData;
 }
 
 
@@ -655,10 +755,18 @@ ObservationData* DataFile::ReadObservation()
 //------------------------------------------------------------------------------
 bool DataFile::CloseStream()
 {
+   #ifdef DEBUG_FILE_ACCESS
+	  MessageInterface::ShowMessage("Enetered DataFile::CloseStream()\n");
+   #endif
+
    bool retval = false;
 
    if (theDatastream)
       retval = theDatastream->Close();
+
+   #ifdef DEBUG_FILE_ACCESS
+	  MessageInterface::ShowMessage("Exit DataFile::CloseStream()\n");
+   #endif
 
    return retval;
 }
