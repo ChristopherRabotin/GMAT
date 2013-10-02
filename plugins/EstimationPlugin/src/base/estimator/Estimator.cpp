@@ -25,6 +25,8 @@
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
 #include "TimeSystemConverter.hpp"
+///// Is this needed?  (Commented out because I don't see a ref; check on compile)
+//#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -131,6 +133,7 @@ Estimator::~Estimator()
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
    measurementNames     (est.measurementNames),
+   modelNames           (est.modelNames),
    solveForStrings      (est.solveForStrings),
    absoluteTolerance    (est.absoluteTolerance),
    relativeTolerance    (est.relativeTolerance),
@@ -181,6 +184,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       Solver::operator=(est);
 
       measurementNames = est.measurementNames;
+      modelNames       = est.modelNames;
       solveForStrings  = est.solveForStrings;
 
       absoluteTolerance = est.absoluteTolerance;
@@ -962,9 +966,42 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
+          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
+         modelNames.push_back(obj->GetName());
          measManager.AddMeasurement((MeasurementModel *)obj);
+         return true;
+      }
+      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
+      {
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Loading the measurement manager\n");
+         #endif
+
+         MeasurementModel *meas;
+         // Retrieve each measurement model from the tracking system ...
+         for (UnsignedInt i = 0;
+                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
+         {
+            #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+               MessageInterface::ShowMessage("   Measurement %d\n", i);
+            #endif
+
+            // ...and pass them to the measurement manager
+            meas = ((TrackingSystem*)obj)->GetMeasurement(i);
+            if (meas == NULL)
+            {
+               MessageInterface::ShowMessage("Estimator cannot initialize "
+                        "because an expected MeasurementModel is NULL\n");
+               throw SolverException("In Estimator::SetRefObject, a "
+                        "measurement in the tracking system " + obj->GetName() +
+                        " is NULL\n");
+            }
+
+            modelNames.push_back(meas->GetName());
+            measManager.AddMeasurement(meas);
+         }
          return true;
       }
    }
@@ -1424,4 +1461,66 @@ Integer Estimator::SetSolverResults(Real*, const std::string&,
 //------------------------------------------------------------------------------
 void Estimator::SetResultValue(Integer, Real, const std::string&)
 {
+}
+
+
+///// These methods need to be commented
+// made changes by TUAN NGUYEN
+bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
+{
+
+   (*outputStateElement) = inputStateElement;
+
+   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
+   {
+      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))
+	  {
+         SpaceObject* obj = (SpaceObject*) (infor->object);
+         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+         if (cs == NULL)
+            throw GmatBaseException("Coordinate system for "+obj->GetName()+" is not set\n");
+
+         SpacePoint* sp = obj->GetJ2000Body();
+         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
+			"MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());
+		
+         CoordinateConverter* cv = new CoordinateConverter();
+         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);
+		 Integer index;
+		 if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))
+            index = infor->subelement-1;
+		 else if (infor->elementName == "Velocity")
+			index = infor->subelement+2;
+		 else
+            throw GmatBaseException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
+
+         inState.SetElement(index, inputStateElement);
+         Rvector6 outState;
+		
+         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
+
+         (*outputStateElement) = outState[index]; 
+//		 (*outputStateElement) = inState[index]; 
+         delete cv;
+	  }
+   }
+
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+void Estimator::GetEstimationState(GmatState& outputState)
+{
+	const std::vector<ListItem*> *map = esm.GetStateMap();
+
+	Real outputStateElement;
+	outputState.SetSize(map->size());
+
+	for (UnsignedInt i = 0; i < map->size(); ++i)
+	{
+		ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+		outputState[i] = outputStateElement;
+	}
 }

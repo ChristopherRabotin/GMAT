@@ -118,8 +118,11 @@ public:
    virtual void UpdateClonedObject(GmatBase *obj);
 
 protected:
-   /// Names of the measurement objects used in the estimation
+///// TBD: Do we need to separate TS and MM like this going forward?
+   /// Names of measurements and tracking systems used in the estimation
    StringArray             measurementNames;
+   /// Names of the measurement models used in the estimation
+   StringArray             modelNames;
    /// The solve for parameters in the estimation problem
    StringArray             solveForStrings;
    /// The consider parameters in the estimation problem
@@ -247,6 +250,11 @@ protected:
    virtual Integer         SetSolverResults(Real*, const std::string&,
                                             const std::string&);
    virtual void            SetResultValue(Integer, Real, const std::string&);
+
+///// TBD: Do simulators need this too?  If so, move to base class
+   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
+   virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
+
 };
 
 #endif /* Estimator_hpp */
