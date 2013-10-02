@@ -296,7 +296,7 @@ bool RunSimulator::Initialize()
 
    theSimulator = (Simulator*)(simObj->Clone());
 
-   // Set the streams for the measurement manager
+   // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
    StringArray streamList = measman->GetStreamList();
    for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
@@ -314,6 +314,29 @@ bool RunSimulator::Initialize()
          throw CommandException("Did not find the object named " +
                streamList[ms]);
    }
+
+///// Check for generic approach here   
+   // Set the ramp table data streams for the measurement manager				// made changes by TUAN NGUYEN
+   streamList = measman->GetRampTableDataStreamList();							// made changes by TUAN NGUYEN
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)						// made changes by TUAN NGUYEN
+   {																			// made changes by TUAN NGUYEN
+      GmatBase *obj = FindObject(streamList[ms]);								// made changes by TUAN NGUYEN
+      if (obj != NULL)															// made changes by TUAN NGUYEN
+      {																			// made changes by TUAN NGUYEN
+         if (obj->IsOfType(Gmat::DATASTREAM))									// made changes by TUAN NGUYEN
+         {																		// made changes by TUAN NGUYEN
+            DataFile *df = (DataFile*)obj;										// made changes by TUAN NGUYEN
+            measman->SetRampTableDataStreamObject(df);							// made changes by TUAN NGUYEN
+         }																		// made changes by TUAN NGUYEN
+		 else
+			MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
+      }																			// made changes by TUAN NGUYEN
+      else																		// made changes by TUAN NGUYEN
+	  {
+         throw CommandException("Error: Did not find the object named " +				// made changes by TUAN NGUYEN
+               streamList[ms]);													// made changes by TUAN NGUYEN
+	  }
+   }																			// made changes by TUAN NGUYEN
 
    // Find the event manager and store its pointer
    if (triggerManagers == NULL)
@@ -459,6 +482,7 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
 bool RunSimulator::Execute()
 {
    #ifdef DEBUG_SIMULATOR_EXECUTION
+	  MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
    #endif
@@ -481,26 +505,44 @@ bool RunSimulator::Execute()
    switch (state)
    {
       case Solver::INITIALIZING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): INITIALIZING state\n");
+         #endif
          PrepareToSimulate();
          break;
 
       case Solver::PROPAGATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): PROPAGATING state\n");
+         #endif
          Propagate();
          break;
 
       case Solver::CALCULATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): CALCULATING state\n");
+         #endif
          Calculate();
          break;
 
       case Solver::LOCATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): LOCATING state\n");
+         #endif
          LocateEvent();
          break;
 
       case Solver::SIMULATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): SIMULATING state\n");
+         #endif
          Simulate();
          break;
 
       case Solver::FINISHED:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): FINSIHED state\n");
+         #endif
          Finalize();
          break;
 
@@ -510,6 +552,10 @@ bool RunSimulator::Execute()
    }
 
    state = theSimulator->AdvanceState();
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Execute()\n");
+   #endif
 
    return true;
 }
@@ -530,6 +576,10 @@ void RunSimulator::RunComplete()
    commandRunning = false;
 
    RunSolver::RunComplete();
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::RunComplete()\n");
+   #endif
 }
 
 
@@ -641,10 +691,15 @@ void RunSimulator::PrepareToSimulate()
             "Measurement Manager was unable to prepare for processing");
 
    PrepareToPropagate();  // ?? Test return value here?
+   measman->LoadRampTables();											// made changes by TUAN NGUYEN
 
    theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
    commandRunning  = true;
    commandComplete = false;
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::PrepareToSimulate()\n");
+   #endif
 }
 
 
@@ -664,6 +719,10 @@ void RunSimulator::Propagate()
       MessageInterface::ShowMessage("Entered RunSimulator::Propagate()\n");
    #endif
    Real dt = theSimulator->GetTimeStep();
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("dt = %.15lf\n", dt);
+   #endif
 
    #ifdef DEBUG_EVENT_STATE
       Integer dim = fm[0]->GetDimension();
@@ -698,6 +757,10 @@ void RunSimulator::Propagate()
          MessageInterface::ShowMessage("   %.12lf", odeState[i]);
       MessageInterface::ShowMessage("\n");
    #endif
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Propagate()\n");
+   #endif
 }
 
 
@@ -715,6 +778,10 @@ void RunSimulator::Calculate()
 #endif
 
    bufferFilled = false;
+
+#ifdef DEBUG_SIMULATOR_EXECUTION
+   MessageInterface::ShowMessage("Exit RunSimulator::Calculate()\n");
+#endif
 }
 
 
@@ -883,6 +950,11 @@ void RunSimulator::LocateEvent()
    BufferSatelliteStates(false);
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::LocateEvent()\n   ");
+   #endif
+
 }
 
 
@@ -941,6 +1013,11 @@ void RunSimulator::Simulate()
                (*i)->GetRealParameter("Z"));
       }
    #endif
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Simulate()\n");
+   #endif
+
 }
 
 
@@ -966,4 +1043,8 @@ void RunSimulator::Finalize()
 
    commandComplete = true;
    commandRunning  = false;
+
+#ifdef DEBUG_SIMULATOR_EXECUTION
+   MessageInterface::ShowMessage("Exit RunSimulator::Finalize()\n");
+#endif
 }
