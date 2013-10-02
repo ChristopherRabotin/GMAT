@@ -34,6 +34,7 @@ EventData::EventData() :
    participantName      (""),
    participantIndex     (-1),
    fixedState           (false),
+   cs_origin            (NULL),						// made changes by TUAN NGUYEN
    epoch                (-1.0),
    position             (7000.0, 0.0, 0.0),
    velocity             (0.0, 0.0, 7.2)
@@ -74,6 +75,7 @@ EventData::EventData(const EventData & ed) :
    participantName      (ed.participantName),
    participantIndex     (ed.participantIndex),
    fixedState           (ed.fixedState),
+   cs_origin            (ed.cs_origin),						// made changes by TUAN NGUYEN
    epoch                (ed.epoch),
    position             (ed.position),
    velocity             (ed.velocity),
@@ -101,6 +103,7 @@ EventData & EventData::operator =(const EventData & ed)
       participantName   = ed.participantName;
       participantIndex  = ed.participantIndex;
       fixedState        = ed.fixedState;
+	  cs_origin         = ed.cs_origin;					// made changes by TUAN NGUYEN
       epoch             = ed.epoch;
       position          = ed.position;
       velocity          = ed.velocity;
