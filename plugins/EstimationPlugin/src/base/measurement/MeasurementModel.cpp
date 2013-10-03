@@ -1969,7 +1969,10 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
 	        MessageInterface::ShowMessage("#### Set uplink band: %d doppler count interval = %lf from Observation Data  ####\n", forObservation->uplinkBand, ((DSNDopplerObsData*)forObservation)->dopplerCountInterval);
          #endif
 	  }
-	  ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);					// made changes by TUAN NGUYEN
+	   if (measurement->IsOfType("PhysicalMeasurement"))
+      {
+         ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);					// made changes by TUAN NGUYEN
+      }
    }
 //   else
 //      ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(false);			// set flag off when observation data is not used 
