@@ -133,7 +133,7 @@ protected:
    /// Maping between unique IDs and the associated data files					// made changes by TUAN NGUYEN
    std::map<Integer,DataFile*>      idToRampTableStreamMap;						// made changes by TUAN NGUYEN
    /// Association between name of DataFile objects and frequency ramp tables	// made changes by TUAN NGUYEN
-   std::map<std::string,std::vector<RampTableData>>								// made changes by TUAN NGUYEN
+   std::map<std::string,std::vector<RampTableData> >								// made changes by TUAN NGUYEN
 	                                rampTables;									// made changes by TUAN NGUYEN
 
 

@@ -25,8 +25,7 @@
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
 #include "TimeSystemConverter.hpp"
-///// Is this needed?  (Commented out because I don't see a ref; check on compile)
-//#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
+#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
 #include <sstream>
 

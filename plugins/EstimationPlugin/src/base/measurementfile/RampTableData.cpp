@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 RampTableData::RampTableData() :
    typeName          (""),
-   type              (Gmat::MeasurementType::UNKNOWN_MEASUREMENT),
+   type              (Gmat::UNKNOWN_MEASUREMENT),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
    uplinkBand        (0),
@@ -126,7 +126,7 @@ void RampTableData::Clear()
 {
    dataFormat              = "";
    typeName                = "";
-   type                    = Gmat::MeasurementType::UNKNOWN_MEASUREMENT;
+   type                    = Gmat::UNKNOWN_MEASUREMENT;
    epochSystem             = TimeConverterUtil::A1MJD;
    epoch                   = 0.0;
    participantIDs.clear();

@@ -26,6 +26,9 @@
 #include "PhysicalMeasurement.hpp"  // For parameters that only apply to
                                     // real world physical models
 
+// Moved here from inline location; includes should always be at the top in GMAT
+#include "AveragedDoppler.hpp"
+
 
 //#define TEST_FIRE_MEASUREMENT
 //#define DEBUG_MEASUREMENT_INITIALIZATION
@@ -1921,8 +1924,6 @@ void MeasurementModel::SetModelID(Integer newID)
  */
 //------------------------------------------------------------------------------
 // const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)					// made changes by TUAN NGUYEN
-//!!!!! NEVER NEVER NEVER DO AN INCLUDE HERE IN GMAT CODE!!!!!  INTENTIONALLLY BROKES SO I CAN FIX IT.
-#inc_lude "AveragedDoppler.hpp"
 const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents, 
 			ObservationData* forObservation, std::vector<RampTableData>* rampTB)					// made changes by TUAN NGUYEN
 {
@@ -1930,18 +1931,22 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p)\n", this, (withEvents?"true":"false"), forObservation, rampTB);
    #endif
 
-   // Passing ramp table to measurement object
-   ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);										// made changes by TUAN NGUYEN
+   // Handle the physical model settings for physical model classes only
+   if (measurement->IsOfType("PhysicalMeasurement"))
+   {
+      // Passing ramp table to measurement object
+      ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);										// made changes by TUAN NGUYEN
 
-   // Passing observation data to measurement object 
-   ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);					// made changes by TUAN NGUYEN
+      // Passing observation data to measurement object
+      ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);					// made changes by TUAN NGUYEN
+   }
 
    if (forObservation != NULL)
    {
 	  if (forObservation->dataFormat == "GMATInternal")												// made changes by TUAN NGUYEN
 	  {
+//// What goes here???
 //         ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(true);				// made changes by TUAN NGUYEN
-		    
 	  }
 	  else if (forObservation->dataFormat == "GMAT_OD")												// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	

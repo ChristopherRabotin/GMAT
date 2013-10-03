@@ -24,6 +24,9 @@
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
+// Moved here from inline location; includes should always be at the top in GMAT
+#include "MeasurementException.hpp"
+
 
 //#define DEBUG_HARDWARE_DELAYS
 //#define DEBUG_EVENT
@@ -211,9 +214,6 @@ bool TwoWayRange::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if initialization succeeded, false on failure
  */
 //------------------------------------------------------------------------------
-///// NEVER NEVER NEVER ADD INCLUDES MID FILE LIKE THIS IN GMAT!!!!!
-#include "Measu rementException.hpp"
-#include "Spacec raft.hpp"
 bool TwoWayRange::Initialize()
 {
 #ifdef DEBUG_INITIALIZE

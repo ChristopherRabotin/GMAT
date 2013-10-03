@@ -28,6 +28,9 @@
 #include "Rmatrix33.hpp"
 #include "Rvector3.hpp"
 
+// Forward reference
+class SpacePoint;
+
 /**
  * A structure used to store data calculated in events that is used when
  * computing measurements and their derivatives.
