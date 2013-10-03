@@ -177,8 +177,8 @@ std::string GmatFileUtil::GetApplicationPath()
    char buffer[GmatFile::MAX_PATH_LEN];
    char szTmp[32];
    sprintf(szTmp, "/proc/%d/exe", getpid());
-   int bytes = std::min(readlink(szTmp, buffer, GmatFile::MAX_PATH_LEN),
-                   GmatFile::MAX_PATH_LEN - 1);
+   int bytes = std::min((readlink(szTmp, buffer, GmatFile::MAX_PATH_LEN)),
+                 (ssize_t)GmatFile::MAX_PATH_LEN - 1);
    if(bytes >= 0)
    {
       buffer[bytes] = '\0';
