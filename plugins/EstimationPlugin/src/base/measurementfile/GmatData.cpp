@@ -33,8 +33,8 @@
  * Default constructor
  */
 //-----------------------------------------------------------------------------
-GmatData::GmatData():
-   dataFormat   ("")
+GmatData::GmatData(const std::string &format):
+   dataFormat   (format)
 {
 }
 

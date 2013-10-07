@@ -36,7 +36,7 @@
 class ESTIMATION_API GmatData
 {
 public:
-   GmatData();
+   GmatData(const std::string &format = "");
    virtual ~GmatData();
    GmatData(const GmatData& od);
    GmatData&  operator=(const GmatData& od);
