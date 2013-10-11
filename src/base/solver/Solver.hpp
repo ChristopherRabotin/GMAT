@@ -103,6 +103,7 @@ public:
       RUN,
       CONVERGED,
       EXCEEDED_ITERATIONS,
+      FAILED,                    // Catch-all setting
       UNKNOWN_STATUS
    };
 
