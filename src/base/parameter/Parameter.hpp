@@ -95,6 +95,9 @@ public:
    bool  IsOriginDependent() const;
    bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
+   bool  NeedExternalClone() const;
+   virtual const std::string GetExternalCloneName(Integer whichOne = 0);
+   virtual void SetExternalClone(GmatBase *clone);
    
    virtual bool RequiresBodyFixedCS() const;
    virtual void SetRequiresBodyFixedCS(bool flag);
@@ -211,6 +214,7 @@ protected:
    bool mIsOriginDependent;
    bool mIsOwnedObjDependent;
    bool mNeedCoordSystem;
+   bool mNeedExternalClone;
    bool mRequiresBodyFixedCS;
    bool mIsCommentFromCreate;
    
