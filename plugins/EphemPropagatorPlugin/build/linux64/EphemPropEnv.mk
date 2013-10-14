@@ -22,7 +22,7 @@ USE_SPICE = 1
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
 # *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /home/djc/gsfcgit/Gmat3rdParty
+SPICE_DIR = ../../../../../Gmat3rdParty
 SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
 SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
 SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
