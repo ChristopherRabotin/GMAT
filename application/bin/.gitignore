@@ -6,3 +6,5 @@
 /libGmatBase.exp
 /libGmatBase.lib
 /lib/
+/*.sh*
+/gmat_startup_file.txt~

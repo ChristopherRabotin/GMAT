@@ -5,7 +5,7 @@ GMAT_CODE_LOCATION = ../../../../src
 GMAT_BIN_LOCATION = ../../../../application/bin
 
 # location of MATLAB headers and libraries
-MATLAB_DIR = /opt/matlab/R2009b
+MATLAB_DIR = /opt/MATLAB/R2013b
 MATLAB_CPP_FLAGS = -D__USE_MATLAB__=1 -I$(MATLAB_DIR)/extern/include
 MATLAB_LIB_DIR = -L$(MATLAB_DIR)/bin/glnxa64
 MATLAB_LIBRARIES = $(MATLAB_LIB_DIR) -leng -lmx -lmat
@@ -35,7 +35,7 @@ PROFILE_FLAGS =
 endif
 
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl --out-implib
+SHARED_LIB_FLAGS = -shared
 
 DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
                  -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \

@@ -32,7 +32,7 @@ endif
 
 
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl \
+SHARED_LIB_FLAGS = -shared \
                    -L$(GMAT_CODE_LOCATION)/base/lib -l$(BASE_LIBRARY) \
                    $(F2C_LIB)
                    
