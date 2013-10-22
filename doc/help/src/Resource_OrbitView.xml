@@ -920,6 +920,67 @@
               </variablelist></entry>
           </row>
 
+
+ 
+          <row>
+            <entry><guilabel>ShowLabels</guilabel></entry>
+
+            <entry><para>Allows the user to turn on or off spacecraft and celestial body Object labels. 
+            If you select true, then spacecraft and celestial body object labels will
+            show up in orbit view plot. If user selects false, then spacecraft and celestial body 
+            labels will not be shown in the orbit plot. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>True, False</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>True</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+  
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
@@ -1952,7 +2013,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_OrbitView_GUI_2.png"
+                     fileref="files/images/Resource_OrbitView_GUI_3.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
