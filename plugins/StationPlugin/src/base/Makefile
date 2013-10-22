@@ -30,7 +30,7 @@ TARGET = ../lib/libStation$(SHARED_EXTENSION)
 
 
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
-           -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
+           -ffriend-injection $(MAC_ARCHITECTURE_FLAGS) $(STATION_CPP_FLAGS)
 
 all: $(TARGET)
 

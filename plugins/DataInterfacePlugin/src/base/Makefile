@@ -23,14 +23,16 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    -L$(GMAT_BIN_LOCATION) -lGmatBase $(PLATFORM_FLAGS)\
                    $(MAC_ARCHITECTURE_FLAGS)
 TARGET = ../lib/libDataInterface.dylib
-else
-TARGET = ../lib/libDataInterface$(SHARED_EXTENSION)
-endif
-                   
-                   
+
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall \
            -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
-
+else
+TARGET = ../lib/libDataInterface$(SHARED_EXTENSION)
+CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall \
+           -ffriend-injection -fPIC
+endif
+                 
+                   
 all: $(TARGET)
 
 clean:

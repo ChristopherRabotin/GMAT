@@ -26,8 +26,9 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_loo
 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared
-# No longer in gcc 4.6:  --out-implib
+SHARED_LIB_FLAGS = -shared -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) \
+                   -lGmatBase -L$(GMAT_Estimation_Location)/../../lib \
+                   -lGmatEstimation
 endif
 
 else

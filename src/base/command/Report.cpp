@@ -843,8 +843,37 @@ bool Report::Initialize()
       // Check if it is reportable Parameter
       Parameter *param = (Parameter *)mapObj;
       if (!param->IsReportable())
-         throw CommandException("Parameter \"" + mapObj->GetName() + "\" is not reportable");
+         throw CommandException("Parameter \"" + mapObj->GetName() +
+               "\" is not reportable");
       
+      // Handle references to clones
+      if (param->NeedExternalClone())
+      {
+         // For now, there is only one external clone
+         std::string cloneName = param->GetExternalCloneName(0);
+         GmatCommand *cmd = GetPrevious();
+         while (cmd != NULL)
+         {
+            Integer count = cmd->GetCloneCount();
+
+            for (Integer index = 0; index < count; ++index)
+            {
+               GmatBase *obj = cmd->GetClone(index);
+               if (obj != NULL)
+               {
+                  if (obj->GetName() == cloneName)
+                  {
+                     param->SetExternalClone(obj);
+                     cmd = NULL;
+                     break;
+                  }
+               }
+            }
+            if (cmd != NULL)
+               cmd = cmd->GetPrevious();
+         }
+      }
+
       parms.push_back((Parameter *)mapObj);
    }
    
