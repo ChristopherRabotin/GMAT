@@ -71,6 +71,14 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
 //------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(std::string name) :
    Solver                  ("DifferentialCorrector", name),
+// KARI additions
+   dcType                  ("NewtonRaphson"),
+   dcTypeId                (1),
+	savedNominal            (NULL),
+//	std::vector<Real> savedVariable;
+	savedJacobian           (NULL),
+   savedInverseJacobian    (NULL),
+
    goalCount               (0),
    goal                    (NULL),
    tolerance               (NULL),
