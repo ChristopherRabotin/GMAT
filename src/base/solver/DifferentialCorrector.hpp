@@ -143,6 +143,7 @@ protected:
    {
       goalNamesID = SolverParamCount,
       derivativeMethodID,
+      searchTypeID,
       DifferentialCorrectorParamCount
    };
 

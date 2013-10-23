@@ -50,7 +50,8 @@ DifferentialCorrector::PARAMETER_TEXT[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
    "Goals",
-   "DerivativeMethod"
+   "DerivativeMethod",
+   "Algorithm"					// searchTypeID
 };
 
 const Gmat::ParameterType
@@ -58,6 +59,7 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
+   Gmat::ENUMERATION_TYPE,
    Gmat::ENUMERATION_TYPE
 };
 
@@ -255,8 +257,8 @@ Integer DifferentialCorrector::GetParameterID(const std::string &str) const
       if (writeDeprecatedMsg)
       {
          MessageInterface::ShowMessage
-            (deprecatedMessageFormat.c_str(), "UseCentralDifferences", GetName().c_str(),
-             "DerivativeMethod");
+            (deprecatedMessageFormat.c_str(), "UseCentralDifferences", 
+            GetName().c_str(), "DerivativeMethod");
          writeDeprecatedMsg = false;
       }
       return derivativeMethodID;
@@ -487,6 +489,37 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
       //  All other values are not allowed!
       else
          retval = false;
+
+      return retval;
+   }
+
+   if (id == searchTypeID)
+   {
+      bool retval = true;
+
+      if (value == "NewtonRaphson" || value == "Broyden" ||
+          value == "GeneralizedBroyden")
+      {
+         dcType = value;
+         if (dcType == "NewtonRaphson")
+         {
+            dcTypeId = 1;
+         }
+         else if(dcType == "Broyden")
+         {
+            dcTypeId = 2;
+         }
+         else if(dcType == "GeneralizedBroyden")
+         {
+            dcTypeId = 3;
+         }
+      }
+      //  All other values are not allowed!
+      else
+      {
+         // Warn here?  or throw?
+         retval = false;
+      }
 
       return retval;
    }
