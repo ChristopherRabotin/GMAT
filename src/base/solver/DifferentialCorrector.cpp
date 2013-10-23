@@ -433,6 +433,9 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
    if (id == derivativeMethodID)
       return derivativeMethod;
 
+   if (id == searchTypeID)
+      return dcType;
+
    return Solver::GetStringParameter(id);
 }
 
@@ -1053,9 +1056,81 @@ void DifferentialCorrector::RunPerturbation()
 //------------------------------------------------------------------------------
 void DifferentialCorrector::CalculateParameters()
 {
-   // Build and invert the sensitivity matrix
-   CalculateJacobian();
-   InvertJacobian();
+//   // Build and invert the sensitivity matrix
+//   CalculateJacobian();
+//   InvertJacobian();
+   // Modified by MH
+
+   switch (dcTypeId)
+   {
+      case 1:
+         // Build and invert the sensitivity matrix
+         CalculateJacobian();
+         InvertJacobian();
+         break;
+
+      case 2:
+         if ( iterationsTaken == 0 )
+         {
+            CalculateJacobian();
+            InvertJacobian();
+         }
+         else
+         {
+            std::vector<Real> s, y;
+            for ( Integer i = 0; i < variableCount; ++i )
+               s[i] = variable[i] - savedVariable[i];
+
+            for ( Integer j = 0; j < goalCount; ++j )
+               y[j] = -nominal[j] + savedNominal[j];
+            // F(x) = goal - nominal = 0 -> F(xk+1)-F(xk) = -nominal(k+1) + nominal(k)
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               for ( Integer j = 0; j < goalCount; ++j )
+                  jacobian[i][j] = savedJacobian[i][j] +
+                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
+            }
+            InvertJacobian();
+         }
+         break;
+
+      case 3:
+         if ( iterationsTaken == 0 )
+         {
+            CalculateJacobian();
+            InvertJacobian();
+         }
+         else
+         {
+            std::vector<Real> s, y;
+            for ( Integer i = 0; i < variableCount; ++i )
+               s[i] = variable[i] - savedVariable[i];
+            for ( Integer j = 0; j < goalCount; ++j )
+               y[j] = -nominal[j] + savedNominal[j];
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               for ( Integer j = 0; j < goalCount; ++j )
+                  inverseJacobian[i][j] = savedInverseJacobian[i][j] - ((savedInverseJacobian[i][j]*y[i]-s[i])*(s[i]*savedInverseJacobian[i][j]))/(s[i]*savedInverseJacobian[i][j]*y[i]);
+            }
+         }
+         break;
+
+      default:
+         throw SolverException("Undefined DifferentialCorrector algorithm");
+   }
+
+   if ( dcTypeId != 1 )
+   {
+      savedNominal = nominal;
+      savedVariable = variable;
+
+      if ( dcTypeId == 2 )
+         savedJacobian = jacobian;
+      else // dctype = GeneralizedBroyden
+         savedInverseJacobian = inverseJacobian;
+   }
 
    std::vector<Real> delta;
 
