@@ -71,12 +71,11 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
 //------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(std::string name) :
    Solver                  ("DifferentialCorrector", name),
-// KARI additions
+   // KARI additions
    dcType                  ("NewtonRaphson"),
    dcTypeId                (1),
-	savedNominal            (NULL),
-//	std::vector<Real> savedVariable;
-	savedJacobian           (NULL),
+   savedNominal            (NULL),
+   savedJacobian           (NULL),
    savedInverseJacobian    (NULL),
 
    goalCount               (0),
@@ -118,6 +117,13 @@ DifferentialCorrector::~DifferentialCorrector()
 //------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    Solver                  (dc),
+   // KARI additions
+   dcType                  (dc.dcType),
+   dcTypeId                (dc.dcTypeId),
+   savedNominal            (NULL),
+   savedJacobian           (NULL),
+   savedInverseJacobian    (NULL),
+
    goalCount               (dc.goalCount),
    goal                    (NULL),
    tolerance               (NULL),
@@ -138,7 +144,8 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
       ("DifferentialCorrector::DC(COPY constructor) entered\n");
    #endif
    goalNames.clear();
-
+   savedVariable.clear();
+   
    parameterCount = dc.parameterCount;
 }
 
@@ -149,20 +156,28 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
 DifferentialCorrector&
 DifferentialCorrector::operator=(const DifferentialCorrector& dc)
 {
-   if (&dc == this)
-      return *this;
+   if (&dc != this)
+   {
+      Solver::operator=(dc);
 
-   Solver::operator=(dc);
+      FreeArrays();
+      goalNames.clear();
 
-   FreeArrays();
-   goalNames.clear();
+      // KARI Enhancements
+      dcType = dc.dcType;
+      dcTypeId = dc.dcTypeId;
+      savedNominal = NULL;
+      savedJacobian = NULL;
+      savedInverseJacobian = NULL;
+      savedVariable.clear();
 
-   goalCount        = dc.goalCount;
-   derivativeMethod = dc.derivativeMethod;
-   diffMode         = dc.diffMode;
-   firstPert        = dc.firstPert;
-   incrementPert    = dc.incrementPert;
-
+      goalCount        = dc.goalCount;
+      derivativeMethod = dc.derivativeMethod;
+      diffMode         = dc.diffMode;
+      firstPert        = dc.firstPert;
+      incrementPert    = dc.incrementPert;
+   }
+   
    return *this;
 }
 
@@ -1293,6 +1308,28 @@ void DifferentialCorrector::FreeArrays()
          delete [] inverseJacobian[i];
       delete [] inverseJacobian;
       inverseJacobian = NULL;
+   }
+   
+   if (savedNominal)
+   {
+      delete [] savedNominal;
+      savedNominal = NULL;
+   }
+
+   if (savedJacobian)
+   {
+      for (Integer i = 0; i < variableCount; ++i)
+         delete [] savedJacobian[i];
+      delete [] savedJacobian;
+      savedJacobian = NULL;
+   }
+
+   if (savedInverseJacobian)
+   {
+      for (Integer i = 0; i < goalCount; ++i)
+         delete [] savedInverseJacobian[i];
+      delete [] savedInverseJacobian;
+      savedInverseJacobian = NULL;
    }
 
    if (indx)
