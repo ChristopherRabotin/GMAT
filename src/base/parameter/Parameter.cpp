@@ -143,6 +143,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mCycleType = GmatParam::NOT_CYCLIC;
    mColor = 0; // black
    mNeedCoordSystem = false;
+   mNeedExternalClone = false;
    mIsCoordSysDependent = false;
    mIsOriginDependent = false;
    mIsOwnedObjDependent = false;
@@ -207,7 +208,7 @@ Parameter::Parameter(const Parameter &copy)
    mIsOriginDependent = copy.mIsOriginDependent;
    mIsOwnedObjDependent = copy.mIsOwnedObjDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
-   
+   mNeedExternalClone = copy.mNeedExternalClone;
 }
 
 
@@ -251,6 +252,7 @@ Parameter& Parameter::operator= (const Parameter& right)
    mIsOriginDependent = right.mIsOriginDependent;
    mIsOwnedObjDependent = right.mIsOwnedObjDependent;
    mNeedCoordSystem = right.mNeedCoordSystem;
+   mNeedExternalClone = right.mNeedExternalClone;
 
    return *this;
 }
@@ -428,7 +430,7 @@ bool Parameter::IsOriginDependent() const
 // bool IsOwnedObjectDependent() const
 //------------------------------------------------------------------------------
 /**
- * @return true if parameter is origin dependent.
+ * @return true if parameter is owned object dependent.
  */
 //------------------------------------------------------------------------------
 bool Parameter::IsOwnedObjectDependent() const
@@ -446,6 +448,62 @@ bool Parameter::IsOwnedObjectDependent() const
 bool Parameter::NeedCoordSystem() const
 {
    return mNeedCoordSystem;
+}
+
+//------------------------------------------------------------------------------
+// bool NeedExternalClone() const
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if an external clone is needed
+ *
+ * This method was added so that parameters that need to reference local clones
+ * can indicate this requirement to the commands that use them.  An example of
+ * its usage is the SolverStatus parameter.  Solver branch commands use clones
+ * of the configured Solver objects during a run.  The SolverStatus parameter
+ * needs to access the "closest" clone that was used in the command in order
+ * to access the status of that clone in teh solution process.
+ *
+ * @return true if a clone external to the parameter is needed, false if not.
+ *         false is the default value, and must be overridden in parameters that
+ *         need an external clone.  The name of the clane is accessed using
+ *         GetExternalCloneName().
+ */
+//------------------------------------------------------------------------------
+bool Parameter::NeedExternalClone() const
+{
+   return mNeedExternalClone;
+}
+
+//------------------------------------------------------------------------------
+// const std::string& Parameter::GetExternalCloneName(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of an external clone if one is needed
+ *
+ * @param whichOne Index of the clone needed; the default is 0.
+ *
+ * @return The name of the needed clone, or the empty string if one is not
+ *         needed.
+ */
+//------------------------------------------------------------------------------
+const std::string Parameter::GetExternalCloneName(Integer whichOne)
+{
+   return "";
+}
+
+//------------------------------------------------------------------------------
+// void Parameter::SetExternalClone(GmatBase *clone)
+//------------------------------------------------------------------------------
+/**
+ * Sets the reference to an external clone
+ *
+ * @param clone The external clone
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetExternalClone(GmatBase *clone)
+{
+   // Users should never see this message!
+   throw ParameterException("The external clone is not used.");
 }
 
 //------------------------------------------------------------------------------

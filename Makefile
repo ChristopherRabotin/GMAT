@@ -14,12 +14,15 @@ ifeq ($(PLATFORM), nomatlab)
 
 all: 
 	cd src; make -f MakeGmat.eclipse all; \
+	cd ../plugins; make all; \
 
 rebuild: 
 	cd src; make -f MakeGmat.eclipse clean; make -f MakeGmat.eclipse all; \
+	cd ../plugins; make clean all; \
 
 clean:
 	cd src; make -f MakeGmat.eclipse clean; \
+	cd ../plugins; make clean; \
 
 else
 
