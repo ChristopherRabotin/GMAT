@@ -757,26 +757,31 @@ bool DifferentialCorrector::Initialize()
    FreeArrays();
 
    // Setup the goal data structures
-   goal      = new Real[localGoalCount];
-   tolerance = new Real[localGoalCount];
-   nominal   = new Real[localGoalCount];
+   goal         = new Real[localGoalCount];
+   tolerance    = new Real[localGoalCount];
+   nominal      = new Real[localGoalCount];
+   savedNominal = new Real[localGoalCount];
 
    // And the sensitivity matrix
    Integer i;
    achieved        = new Real*[localVariableCount];
    backAchieved    = new Real*[localVariableCount];
    jacobian        = new Real*[localVariableCount];
+   savedJacobian   = new Real*[localVariableCount];
    for (i = 0; i < localVariableCount; ++i)
    {
       jacobian[i]        = new Real[localGoalCount];
+      savedJacobian[i]   = new Real[localGoalCount];
       achieved[i]        = new Real[localGoalCount];
       backAchieved[i]    = new Real[localGoalCount];
    }
 
    inverseJacobian = new Real*[localGoalCount];
+   savedInverseJacobian = new Real*[localGoalCount];
    for (i = 0; i < localGoalCount; ++i)
    {
       inverseJacobian[i] = new Real[localVariableCount];
+      savedInverseJacobian[i] = new Real[localVariableCount];
    }
 
    Solver::Initialize();
@@ -1123,13 +1128,32 @@ void DifferentialCorrector::CalculateParameters()
 
    if ( dcTypeId != 1 )
    {
-      savedNominal = nominal;
+      Integer localVariableCount = variableNames.size();
+      Integer localGoalCount = goalNames.size();
+
+      // savedNominal = nominal;
+      for (Integer m = 0; m < localGoalCount; ++m)
+         savedNominal[m] = nominal[m];
       savedVariable = variable;
 
       if ( dcTypeId == 2 )
-         savedJacobian = jacobian;
+      {
+         // savedJacobian = jacobian;
+         for (Integer m = 0; m < localVariableCount; ++m)
+         {
+            for (Integer n = 0; n < localGoalCount; ++n)
+               savedJacobian[m][n] = jacobian[m][n];
+         }
+      }
       else // dctype = GeneralizedBroyden
-         savedInverseJacobian = inverseJacobian;
+      {
+         // savedInverseJacobian = inverseJacobian;
+         for (Integer m = 0; m < localGoalCount; ++m)
+         {
+            for (Integer n = 0; n < localVariableCount; ++n)
+               savedInverseJacobian[m][n] = inverseJacobian[m][n];
+         }
+      }
    }
 
    std::vector<Real> delta;
