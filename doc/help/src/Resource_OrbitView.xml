@@ -2213,27 +2213,31 @@ Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></p
       and viewing Orbit plots. You can choose many properties including the
       coordinate system of the orbit view plot and the view location and
       direction from where visualizations can be seen. The script snippet
-      below shows how to create <guilabel>OrbitView</guilabel> resource and
+      below shows how to create <guilabel>OrbitView</guilabel> resource that
       includes key view definition controls fields as well. Detailed
       definitions of all fields for <guilabel>OrbitView</guilabel> resource
       can be found in <xref linkend="Fields_Section"
       xrefstyle="select:title"/> section.</para>
 
       <programlisting><code>Create OrbitView PlotName
-PlotName.CoordinateSystenm    = CoordinateSystemName
-PlotName.Add                  = [SpacecraftName, BodyName, ... 
-                                LibrationPoint, Barycenter]
-PlotName.ViewPointReference   = [ObjectName, VectorName]
-PlotName.ViewPointVector      = [ObjectName, VectorName]
-PlotName.ViewDirection        = [ObjectName, VectorName]
-PlotName.ViewScaleFactor      = [Real Number]</code></programlisting>
+PlotName.CoordinateSystenm      = CoordinateSystemName
+PlotName.Add                    = [SpacecraftName, BodyName, ... 
+                                  LibrationPoint, Barycenter]
+PlotName.ViewPointReference     = [ObjectName, VectorName]
+PlotName.ViewPointVector        = [ObjectName, VectorName]
+PlotName.ViewDirection          = [ObjectName, VectorName]
+PlotName.ViewScaleFactor        = [Real Number]
+PlotName.ViewUpCoordinateSystem = CoordinateSystemName
+PlotName.ViewUpAxis             = [X,-X,Y,-Y,Z,-Z];</code></programlisting>
 
       <para>You can specify the view location and direction of
       <guilabel>OrbitView</guilabel> plot object by using the
       <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel> and
-      <guilabel>ViewDirection</guilabel> fields<guilabel/>. Figure below shows
-      a graphical definition of <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel>,
+      <guilabel>ViewDirection</guilabel>,
+      <guilabel>ViewUpCoordinateSystem</guilabel> and
+      <guilabel>ViewUpAxis</guilabel> fields. Figure below shows a graphical
+      definition of <guilabel>ViewPointReference</guilabel>,
       <guilabel>ViewPointVector</guilabel>, and
       <guilabel>ViewDirection</guilabel> fields and how they determine the
       actual view location and view direction. You can supply
@@ -2349,6 +2353,259 @@ MyOrbitViewPlot.ViewDiection         = ViewDirectionObject</code></programlistin
       <para>Note that ViewDirection vector
       <guilabel>r</guilabel><subscript>d</subscript> must not be zero vector
       [0 0 0].</para>
+
+      <para><guilabel>ViewUpCoordinateSystem</guilabel> and
+      <guilabel>ViewUpAxis</guilabel> fields are used to determine which
+      direction appears as up in an <guilabel>OrbitView</guilabel> plot. Most
+      of the time, coordinate system chosen under
+      <guilabel>ViewUpCoordinateSystem</guilabel> field will be the same as
+      the coordinate system selected under the
+      <guilabel>CoordinateSystem</guilabel> field.
+      <guilabel>ViewUpAxis</guilabel> field allows you to define which axis of
+      the <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as the
+      up direction in an orbit plot.</para>
+
+      <para>Below are some examples that show how to generate
+      <guilabel>OrbitView</guilabel> plots using different View Definition
+      Controls configurations:</para>
+
+      <para>Earth Inertial view with spacecraft: This example shows orbit view
+      plot with Earth and a spacecraft. Since
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      Earth), hence ViewPointRef vector in above figure is [0 0 0] in
+      EarthMJ2000Eq coordinate system. The
+      <guilabel>ViewPointVector</guilabel> field is set to a vector ( i.e. set
+      to [0 0 40000] ). This means that the view is from 40000 km above the
+      Earth's equatorial plane on the z-axis of the EarthMJ2000Eq coordinate
+      system. The view direction (specified in
+      <guilabel>ViewDirection</guilabel> field) is towards the earth.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
+
+anOrbitView.CoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewPointReference = Earth
+anOrbitView.ViewPointVector = [ 0 0 40000 ]
+anOrbitView.ViewDirection = Earth
+anOrbitView.ViewScaleFactor = 1
+anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewUpAxis = Z
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
+
+      <para>Earth Inertial view with spacecraft and Luna: This example shows
+      orbit view plot with Earth, spacecraft and Moon. Note
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      Earth), hence ViewPointRef vector in above figure = [0 0 0] in
+      EarthMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
+      field is still set to a vector ( i.e. set to [0 0 500000] ). This means
+      that the view is from 500000 km above the Earth's equatorial plane on
+      the z-axis of the EarthMJ2000Eq coordinate system.
+      <guilabel>ViewDirection</guilabel> field defines the view direction
+      which is set towards the earth.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth, Luna}
+
+anOrbitView.CoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewPointReference = Earth
+anOrbitView.ViewPointVector = [ 0 0 500000 ]
+anOrbitView.ViewDirection = Earth
+anOrbitView.ViewScaleFactor = 1
+anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewUpAxis = Z
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
+
+      <para>View of spacecraft from Luna in Earth inertial frame: This example
+      of an orbit view plot shows spacecraft as viewed from Luna orbiting
+      around Earth in an inertial reference frame.
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      Earth), hence ViewPointRef vector is [0 0 0] in EarthMJ2000Eq coordinate
+      system. This time <guilabel>ViewPointVector</guilabel> field is set to
+      an object (i.e. Luna ). This means that the spacecraft will be seen from
+      the vantage point of Luna. Note that <guilabel>ViewDirection</guilabel>
+      field is set to spacecraft (aSat). This means that view direction as
+      seen from Luna is towards the spacecraft. After you run this example,
+      re-run this example but this time with
+      <guilabel>ViewScaleFactor</guilabel> field set to 2 and see what
+      happens. You'll notice that <guilabel>ViewScaleFactor</guilabel> simply
+      scales <guilabel>ViewPointVector</guilabel> field.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth, Luna}
+
+anOrbitView.CoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewPointReference = Earth
+anOrbitView.ViewPointVector = Luna
+anOrbitView.ViewDirection = aSat
+anOrbitView.ViewScaleFactor = 1
+anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewUpAxis = Z
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
+
+      <para>View towards Luna from Earth as spacecraft orbits around Luna in
+      inertial frame: This example of an orbit view plot shows view of Luna
+      from vantage point of Earth as a spacecraft orbits around Luna.
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      Luna), hence ViewPointRef vector in above figure is [0 0 0] in
+      LunaMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
+      field is set to an object (i.e. Earth ). This means that the camera or
+      vantage point is located at Earth. <guilabel>ViewDirection</guilabel>
+      field is also set to an object (i.e. Luna). This means that view
+      direction as seen from Earth is towards Luna.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+
+Create CoordinateSystem LunaMJ2000Eq
+LunaMJ2000Eq.Origin = Luna
+LunaMJ2000Eq.Axes = MJ2000Eq
+
+aSat.CoordinateSystem = LunaMJ2000Eq
+aSat.SMA = 7300
+aSat.ECC = 0.4
+aSat.INC = 90
+aSat.RAAN = 270
+aSat.AOP = 315
+aSat.TA = 180
+
+Create ForceModel aFM
+aFM.CentralBody = Luna
+aFM.PointMasses = {Luna}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Luna, Earth}
+anOrbitView.CoordinateSystem = LunaMJ2000Eq
+anOrbitView.ViewPointReference = Luna
+anOrbitView.ViewPointVector = Earth
+anOrbitView.ViewDirection = Luna
+anOrbitView.ViewScaleFactor = 1;
+anOrbitView.ViewUpCoordinateSystem = LunaMJ2000Eq;
+anOrbitView.ViewUpAxis = Z;
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
+
+      <para>View towards spacecraft1 from spacecraft2 in inertial frame: This
+      example of an orbit view plot shows spacecraft1 (aSat1) being viewed
+      from spacecraft2 (aSat2) as they move in inertial reference frame.
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      Earth), hence ViewPointRef vector in above figure is [0 0 0] in
+      EarthMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
+      field is set to an object (i.e. aSat2 ) and
+      <guilabel>ViewDirection</guilabel> field is also set to an object (i.e.
+      aSat1). This means that aSat1 will be viewed from the vantage point of
+      aSat2.</para>
+
+      <programlisting><code>Create Spacecraft aSat aSat2
+
+aSat2.X = 19500
+aSat2.Z = 10000
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, aSat2, Earth,}
+
+anOrbitView.CoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewPointReference = Earth
+anOrbitView.ViewPointVector = aSat2
+anOrbitView.ViewDirection = aSat
+anOrbitView.ViewScaleFactor = 1.0
+anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
+anOrbitView.ViewUpAxis = Z
+
+BeginMissionSequence
+
+Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}</code></programlisting>
+
+      <para>Orbit view plot of Sun-Earth-Moon L1 Rotating System: This example
+      of an orbit view plot shows the Earth and spacecraft in the
+      Sun-Earth-Moon rotating coordinate system.
+      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
+      ESL1), hence ViewPointRef vector in above figure is [0 0 0] in
+      SunEarthMoonL1 rotating coordinate system.
+      <guilabel>ViewPointVector</guilabel> field is set to a vector (i.e. [0 0
+      30000] ). This means that the view is taken from 30000 km above the
+      SunEarthMoonL1 coordinate system's XY plane on the z-axis of the
+      SunEarthMoonL1 coordinate system. <guilabel>ViewDirection</guilabel>
+      field is also set to an object (i.e. ESL1). This means that view
+      direction as seen from 30000 km above the SunEarthMoonL1 coordinate
+      system's XY plane is towards ESL1. Note that in this example,
+      <guilabel>ViewScaleFactor</guilabel> is set to 25. This simply scales or
+      amplifies <guilabel>ViewPointVector</guilabel> field 25 times its
+      original value.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+
+GMAT aSat.DateFormat = UTCGregorian;
+GMAT aSat.Epoch = '01 Apr 2013 00:00:00.000' 
+GMAT aSat.CoordinateSystem = EarthMJ2000Eq
+GMAT aSat.DisplayStateType = Cartesian
+GMAT aSat.X = 1429457.8833484
+GMAT aSat.Y = 147717.32846679
+GMAT aSat.Z = -86529.655549364
+GMAT aSat.VX = -0.037489820883615                     
+GMAT aSat.VY = 0.32032521614858
+GMAT aSat.VZ = 0.15762889268226
+
+Create Barycenter EarthMoonBarycenter
+GMAT EarthMoonBarycenter.BodyNames = {Earth, Luna}
+
+Create LibrationPoint ESL1
+GMAT ESL1.Primary = Sun
+GMAT ESL1.Secondary = EarthMoonBarycenter
+GMAT ESL1.Point = L1
+
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Luna, Sun}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create CoordinateSystem SunEarthMoonL1
+GMAT SunEarthMoonL1.Origin = ESL1
+GMAT SunEarthMoonL1.Axes = ObjectReferenced
+GMAT SunEarthMoonL1.XAxis = R
+GMAT SunEarthMoonL1.ZAxis = N
+GMAT SunEarthMoonL1.Primary = Sun
+GMAT SunEarthMoonL1.Secondary = EarthMoonBarycenter
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth, Sun}
+anOrbitView.CoordinateSystem = SunEarthMoonL1
+anOrbitView.ViewPointReference = ESL1
+anOrbitView.ViewPointVector = [ 0 0 30000 ]
+anOrbitView.ViewDirection = ESL1
+anOrbitView.ViewScaleFactor = 25
+anOrbitView.ViewUpCoordinateSystem = SunEarthMoonL1
+anOrbitView.ViewUpAxis = Z
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 15}</code></programlisting>
     </refsection>
 
     <refsection>
