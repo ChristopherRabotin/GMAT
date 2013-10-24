@@ -57,7 +57,7 @@
     linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="Fields_Section">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -920,16 +920,15 @@
               </variablelist></entry>
           </row>
 
-
- 
           <row>
             <entry><guilabel>ShowLabels</guilabel></entry>
 
-            <entry><para>Allows the user to turn on or off spacecraft and celestial body Object labels. 
-            If you select true, then spacecraft and celestial body object labels will
-            show up in orbit view plot. If user selects false, then spacecraft and celestial body 
-            labels will not be shown in the orbit plot. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
+            <entry><para>Allows the user to turn on or off spacecraft and
+            celestial body Object labels. If you select true, then spacecraft
+            and celestial body object labels will show up in orbit view plot.
+            If user selects false, then spacecraft and celestial body labels
+            will not be shown in the orbit plot. This field cannot be modified
+            in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -980,7 +979,6 @@
               </variablelist></entry>
           </row>
 
-  
           <row>
             <entry><guilabel>Size</guilabel></entry>
 
@@ -2204,6 +2202,153 @@ anOrbitView2.Add = {aSat3, Earth}
 BeginMissionSequence
 
 Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
+    </refsection>
+
+    <refsection>
+      <title>OrbitView View Definition Controls</title>
+
+      <para>GMAT is capable of drawing orbit plots that allow the user to
+      visualize the motion of spacecraft and celestial bodies throughout the
+      mission sequence. Here we discuss the options you can use in setting up
+      and viewing Orbit plots. You can choose many properties including the
+      coordinate system of the orbit view plot and the view location and
+      direction from where visualizations can be seen. The script snippet
+      below shows how to create <guilabel>OrbitView</guilabel> resource and
+      includes key view definition controls fields as well. Detailed
+      definitions of all fields for <guilabel>OrbitView</guilabel> resource
+      can be found in <xref linkend="Fields_Section"
+      xrefstyle="select:title"/> section.</para>
+
+      <programlisting><code>Create OrbitView PlotName
+PlotName.CoordinateSystenm    = CoordinateSystemName
+PlotName.Add                  = [SpacecraftName, BodyName, ... 
+                                LibrationPoint, Barycenter]
+PlotName.ViewPointReference   = [ObjectName, VectorName]
+PlotName.ViewPointVector      = [ObjectName, VectorName]
+PlotName.ViewDirection        = [ObjectName, VectorName]
+PlotName.ViewScaleFactor      = [Real Number]</code></programlisting>
+
+      <para>You can specify the view location and direction of
+      <guilabel>OrbitView</guilabel> plot object by using the
+      <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel> and
+      <guilabel>ViewDirection</guilabel> fields<guilabel/>. Figure below shows
+      a graphical definition of <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel>, and
+      <guilabel>ViewDirection</guilabel> fields and how they determine the
+      actual view location and view direction. You can supply
+      <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel> and
+      <guilabel>ViewDirection</guilabel> fields by either giving a vector in
+      the format [x y z] or by specifying an object name. If a vector is given
+      for one of the quantities, then we simply use it in its appropriate
+      place in the computations below. If an object is given, we must
+      determine the vector associated with it. The rest of this section is
+      devoted in determining <guilabel>ViewPointReference</guilabel>,
+      <guilabel>ViewPointVector</guilabel> and
+      <guilabel>ViewDirection</guilabel> fields if the user specifies an
+      object.</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_OrbitView ViewDirection Diagram.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><guilabel>ViewPointReference</guilabel> field defines the point
+      from which <guilabel>ViewPointVector</guilabel> is measured. If an
+      object is given for <guilabel>ViewPointReference</guilabel> field, i.e.
+      the user has the following in the sample script:</para>
+
+      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
+MyOrbitViewPlot.ViewPointReference   = ViewRefObject</code></programlisting>
+
+      <para>then we need to determine
+      <guilabel>r</guilabel><subscript>r</subscript> as illustrated in above
+      figure. If ViewRefObject is the same as the origin of MyCoordSys, then
+      <guilabel>r</guilabel><subscript>r</subscript> = [0 0 0]. Otherwise
+      <guilabel>r</guilabel><subscript>r</subscript> is the cartesian position
+      of <guilabel>ViewPointReference</guilabel> in MyCoordSys.</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_OrbitView_Equation1.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><guilabel>ViewPointVector</guilabel> field points from
+      <guilabel>ViewPointReference</guilabel>
+      (<guilabel>r</guilabel><subscript>r</subscript>) in the direction of the
+      view point location. If an object is given for
+      <guilabel>ViewPointVector</guilabel> field, i.e. the user has the
+      following in the sample script:</para>
+
+      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
+MyOrbitViewPlot.ViewPointVector      = ViewPointObject</code></programlisting>
+
+      <para>then we need to determine
+      <guilabel>r</guilabel><subscript>v</subscript> as illustrated in above
+      figure by using the coordinate system conversion routine to calculate
+      the following:</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_OrbitView_Equation2.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>We now know everything to calculate the location of the view point
+      in the desired coordinate system. From inspection of the above figure,
+      we see that the relation is:</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_OrbitView_Equation4.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Now that we know the view point location, we need to determine the
+      ViewDirection: <guilabel>r</guilabel><subscript>d</subscript> as
+      illustrated in above figure. If a vector was specified for
+      <guilabel>ViewDirection</guilabel> field, then no computations are
+      required. However, if an object was given as shown in the following
+      sample script:</para>
+
+      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
+MyOrbitViewPlot.ViewDiection         = ViewDirectionObject</code></programlisting>
+
+      <para>then we calculate <guilabel>r</guilabel><subscript>d</subscript>
+      from the following:</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_OrbitView_Equation3.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Note that ViewDirection vector
+      <guilabel>r</guilabel><subscript>d</subscript> must not be zero vector
+      [0 0 0].</para>
     </refsection>
 
     <refsection>
