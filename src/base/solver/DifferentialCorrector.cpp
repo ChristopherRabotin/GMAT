@@ -32,7 +32,7 @@
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_DC_INIT 1
-//#define DEBUG_JACOBIAN
+#define DEBUG_JACOBIAN
 //#define DEBUG_VARIABLES_CALCS
 //#define DEBUG_TARGETING_MODES
 
@@ -1066,6 +1066,8 @@ void DifferentialCorrector::CalculateParameters()
 //   InvertJacobian();
    // Modified by MH
 
+   MessageInterface::ShowMessage("%d iterations of type %d\n", iterationsTaken, dcTypeId);
+
    switch (dcTypeId)
    {
       case 1:
@@ -1075,14 +1077,20 @@ void DifferentialCorrector::CalculateParameters()
          break;
 
       case 2:
-         if ( iterationsTaken == 0 )
+         if ( iterationsTaken == 1 )
          {
             CalculateJacobian();
             InvertJacobian();
          }
          else
          {
+            MessageInterface::ShowMessage("%d variables; %d saved variables\n",
+                  variable.size(), savedVariable.size());
+
             std::vector<Real> s, y;
+            s.reserve(variableCount);
+            y.reserve(goalCount);
+
             for ( Integer i = 0; i < variableCount; ++i )
                s[i] = variable[i] - savedVariable[i];
 
@@ -1101,7 +1109,7 @@ void DifferentialCorrector::CalculateParameters()
          break;
 
       case 3:
-         if ( iterationsTaken == 0 )
+         if ( iterationsTaken == 1 )
          {
             CalculateJacobian();
             InvertJacobian();
@@ -1109,6 +1117,9 @@ void DifferentialCorrector::CalculateParameters()
          else
          {
             std::vector<Real> s, y;
+            s.reserve(variableCount);
+            y.reserve(goalCount);
+
             for ( Integer i = 0; i < variableCount; ++i )
                s[i] = variable[i] - savedVariable[i];
             for ( Integer j = 0; j < goalCount; ++j )
@@ -1126,6 +1137,7 @@ void DifferentialCorrector::CalculateParameters()
          throw SolverException("Undefined DifferentialCorrector algorithm");
    }
 
+MessageInterface::ShowMessage("TypeID %d\n", dcTypeId);
    if ( dcTypeId != 1 )
    {
       Integer localVariableCount = variableNames.size();
@@ -1134,7 +1146,11 @@ void DifferentialCorrector::CalculateParameters()
       // savedNominal = nominal;
       for (Integer m = 0; m < localGoalCount; ++m)
          savedNominal[m] = nominal[m];
+
+      MessageInterface::ShowMessage("Saving variables; %d -> ",
+            savedVariable.size());
       savedVariable = variable;
+      MessageInterface::ShowMessage("%d\n", savedVariable.size());
 
       if ( dcTypeId == 2 )
       {
