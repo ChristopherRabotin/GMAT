@@ -203,8 +203,29 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
       
       // set J2000Body of origin
       if (origin != NULL)
-         origin->SetJ2000Body(solar->GetBody(origin->GetJ2000BodyName()));
-      
+          origin->SetJ2000Body(solar->GetBody(origin->GetJ2000BodyName()));
+
+      if (UsesPrimary())
+      {
+         SpacePoint* primaryObject = GetPrimaryObject();
+         if (primaryObject != NULL)
+             primaryObject->SetJ2000Body(solar->GetBody(primaryObject->GetJ2000BodyName()));
+      }
+
+      if (UsesSecondary())
+      {
+         SpacePoint* secondaryObject = GetSecondaryObject();
+         if (secondaryObject != NULL)
+            secondaryObject->SetJ2000Body(solar->GetBody(secondaryObject->GetJ2000BodyName()));
+      }
+
+      if (UsesReferenceObject())
+      {
+         SpacePoint* refObject = GetReferenceObject();
+         if (refObject != NULL)
+            refObject->SetJ2000Body(solar->GetBody(refObject->GetJ2000BodyName()));
+      }
+
       #ifdef DEBUG_SET_SS
       MessageInterface::ShowMessage
          ("CoordinateBase::SetSolarSystem() leaving, got new SolarSystem <%p>, "
@@ -833,7 +854,37 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (origin != NULL)
          if (name == origin->GetJ2000BodyName())
             origin->SetJ2000Body(sp);
-      
+
+      if (UsesPrimary())
+      {
+         SpacePoint* primaryObject = GetPrimaryObject();
+         if (primaryObject != NULL)
+         {
+            if (name == primaryObject->GetJ2000BodyName())
+               primaryObject->SetJ2000Body(sp);
+         }
+      }
+
+      if (UsesSecondary())
+      {
+         SpacePoint* secondaryObject = GetSecondaryObject();
+         if (secondaryObject != NULL)
+         {
+            if (name == secondaryObject->GetJ2000BodyName())
+               secondaryObject->SetJ2000Body(sp);
+         }
+      }
+
+      if (UsesReferenceObject())
+      {
+         SpacePoint* refObject = GetReferenceObject();
+         if (refObject != NULL)
+         {
+            if (name == refObject->GetJ2000BodyName())
+               refObject->SetJ2000Body(sp);
+         }
+      }
+
       return true;
    }
    
