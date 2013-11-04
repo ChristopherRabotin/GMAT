@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "ExtraPropagatorFactory.hpp"
 #include "BulirschStoer.hpp"
+#include "PrinceDormand853.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -46,7 +47,8 @@ Propagator* ExtraPropagatorFactory::CreatePropagator(const std::string &ofType,
 {
    if (ofType == "BulirschStoer")
       return new BulirschStoer(withName);
-
+   if (ofType == "PrinceDormand853")
+      return new PrinceDormand853(withName);
    return NULL;
 }
 
@@ -65,6 +67,7 @@ ExtraPropagatorFactory::ExtraPropagatorFactory() :
    if (creatables.empty())
    {
       creatables.push_back("BulirschStoer");
+      creatables.push_back("PrinceDormand853");
    }
 }
 
@@ -99,6 +102,7 @@ ExtraPropagatorFactory::ExtraPropagatorFactory(const ExtraPropagatorFactory& fac
    if (creatables.empty())
    {
       creatables.push_back("BulirschStoer");
+      creatables.push_back("PrinceDormand853");
    }
 }
 

@@ -44,7 +44,8 @@ archclean :
 OBJECTS = \
     plugin/GmatPluginFunctions.o \
     factory/ExtraPropagatorFactory.o \
-    propagator/BulirschStoer.o
+    propagator/BulirschStoer.o \
+    propagator/PrinceDormand853.o
    
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(OBJECTS)
