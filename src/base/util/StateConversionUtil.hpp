@@ -128,8 +128,8 @@ static Rvector6 ModEquinoctialToCartesian(const Rvector6& modequinoctial, const 
 static Rvector6 KeplerianToDelaunay(const Rvector6& keplerian, const Real& mu); // MODIFIED BY M.H.
 static Rvector6 DelaunayToKeplerian(const Rvector6& delaunay, const Real& mu);
 
-static Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian); // MODIFIED BY M.H.
-static Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic);
+static Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian, Real flattening, Real eqRadius); // MODIFIED BY M.H.
+static Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic, Real flattening, Real eqRadius);
 
 //------------------------------------------------------------------------------
 // anomaly conversion methods
