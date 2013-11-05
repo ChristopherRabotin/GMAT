@@ -718,7 +718,7 @@ void RunSimulator::Propagate()
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Entered RunSimulator::Propagate()\n");
    #endif
-   Real dt = theSimulator->GetTimeStep();
+   Real dt = theSimulator->GetTimeStep(currEpoch[0]);
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("dt = %.15lf\n", dt);

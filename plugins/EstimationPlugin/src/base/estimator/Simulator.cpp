@@ -326,8 +326,12 @@ void Simulator::WriteToTextFile(SolverState stateToUse)
  * Returns the time step of the simulator.
  */
 //------------------------------------------------------------------------------
-Real Simulator::GetTimeStep()
+Real Simulator::GetTimeStep(GmatEpoch fromEpoch)
 {
+   if (fromEpoch > 0.0)
+      timeStep = (nextSimulationEpoch - fromEpoch) *
+                             GmatTimeConstants::SECS_PER_DAY;
+
    return timeStep;
 }
 
@@ -1516,6 +1520,9 @@ void Simulator::FindNextSimulationEpoch()
 //         simulationStep / GmatTimeConstants::SECS_PER_DAY;
    nextSimulationEpoch = simulationStart + (simEpochCounter / GmatTimeConstants::SECS_PER_DAY) *
          simulationStep;
+
+MessageInterface::ShowMessage("%d: Start: %.12lf step: %.12lf Next:%.12lf\n",
+      simEpochCounter, simulationStart, simulationStep, nextSimulationEpoch);
 
    #ifdef DEBUG_STATE_MACHINE
       MessageInterface::ShowMessage("Current epoch = %.15lf; simulationStep = %.15lf;"

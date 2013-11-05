@@ -53,7 +53,7 @@ public:
    virtual SolverState  AdvanceState();
    virtual bool         Finalize();
 
-   Real                 GetTimeStep();
+   Real                 GetTimeStep(GmatEpoch fromEpoch);
    PropSetup*           GetPropagator();
    MeasurementManager*  GetMeasurementManager();
 
