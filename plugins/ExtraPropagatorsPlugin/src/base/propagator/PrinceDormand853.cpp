@@ -96,10 +96,13 @@ Propagator* PrinceDormand853::Clone() const
 // protected
 //---------------------------------
 
-//------------------------------------------------------------------------------
-// void PrinceDormand853::SetCoefficients()
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// void SetCoefficients()
+//------------------------------------------------------------------------------
+/**
+ * Sets up the Runge-Kutta coefficients
+ */
 //------------------------------------------------------------------------------
 void PrinceDormand853::SetCoefficients()
 {
@@ -122,7 +125,7 @@ void PrinceDormand853::SetCoefficients()
     ai[11] = 1.0; //0.0;      // Per Hairer, Norsett and Wanner, ai[11] = 1.0
                               // (eq 5.25b; their C_12 is GMAT's ai[11])
 
-    if (stages == 16)
+    if (stages == 16)         // Coefficients 12-15 are used in dense output
     {
        ai[12] =  0.0;
        ai[13] =  0.1;
