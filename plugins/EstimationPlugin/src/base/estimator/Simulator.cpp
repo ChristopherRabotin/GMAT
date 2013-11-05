@@ -1502,11 +1502,14 @@ void Simulator::FindNextSimulationEpoch()
    ++simEpochCounter;
 //   nextSimulationEpoch = simulationStart + simEpochCounter *
 //         simulationStep / GmatTimeConstants::SECS_PER_DAY;
-   nextSimulationEpoch = simulationStart + (simEpochCounter / GmatTimeConstants::SECS_PER_DAY) *
-         simulationStep;
+   nextSimulationEpoch = simulationStart + (simEpochCounter /
+         GmatTimeConstants::SECS_PER_DAY) * simulationStep;
 
-MessageInterface::ShowMessage("%d: Start: %.12lf step: %.12lf Next:%.12lf\n",
-      simEpochCounter, simulationStart, simulationStep, nextSimulationEpoch);
+   #ifdef DEBUG_TIMESTEP
+      MessageInterface::ShowMessage("%d: Start: %.12lf step: %.12lf "
+            "Next:%.12lf\n", simEpochCounter, simulationStart, simulationStep,
+            nextSimulationEpoch);
+   #endif
 
    #ifdef DEBUG_STATE_MACHINE
       MessageInterface::ShowMessage("Current epoch = %.12lf; "
