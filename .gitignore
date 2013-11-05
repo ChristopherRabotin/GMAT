@@ -11,6 +11,7 @@
 GmatLog.txt
 language.settings.xml
 GMAT
-
+Debug
+Release
 *.user
 /.settings/

@@ -1,4 +1,4 @@
-//$Id$
+//$Id: LeapSecsFileReader.cpp 10525 2012-05-24 14:42:59Z wendys-dev $
 //------------------------------------------------------------------------------
 //                              LeapSecsFileReader
 //------------------------------------------------------------------------------
@@ -212,12 +212,14 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
 
       // look up each entry in the table to see if value is greater then the
       // julian date
-      for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end()-1;
-                 i >= lookUpTable.begin(); i--)
+      std::vector<LeapSecondInformation>::iterator info;
+      for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end();
+                 i > lookUpTable.begin(); i--)
       {
-          if (jd > (*i).julianDate)
+          info = i-1;
+          if (jd > info->julianDate)
           {
-             return ((*i).offset1 + ((utcMjd - (*i).offset2) * (*i).offset3));
+             return (info->offset1 + ((utcMjd - info->offset2) * info->offset3));
           }
       }
 

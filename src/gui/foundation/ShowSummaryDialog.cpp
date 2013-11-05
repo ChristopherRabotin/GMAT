@@ -118,38 +118,54 @@ void ShowSummaryDialog::Create()
    BuildValidCoordinateSystemList();
 
    wxSize scriptPanelSize(500, 32);
-   if (theObject != NULL)
-   {
-      theObject->SetupSummary("EarthMJ2000Eq", summaryForEntireMission, physicsBasedOnly);
-      if (summaryForEntireMission)
-         text = theObject->GetStringParameter("MissionSummary").c_str();
-      else
-         text = theObject->GetStringParameter("Summary").c_str();
-
-      // This code is flaky -- text width is height dependent??? -- on Linux:
-//      GetTextExtent(text, &w, &h);
-//      w = (w + 200 > 1000 ? 1000 : w + 200);
-//      h = (h > 700 ? 700 : h);
-      #ifdef __WXMAC__
-         scriptPanelSize.Set(658, 735);
-      #else
-         scriptPanelSize.Set(775, 735);
-      #endif
-
-      SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
-   }
    
-   wxFlexGridSizer *coordSizer = new wxFlexGridSizer(2);
-   coordSizer->Add(coordSysStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
-   coordSizer->Add(coordSysComboBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
-
-   // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
-   // increase text size on Windows(loj: 2009.02.05)
-   theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
-                    wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
-   theSummary->SetFont(GmatAppData::Instance()->GetFont() );
-   theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
-   theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
+   try
+   {
+      if (theObject != NULL)
+      {
+         theObject->SetupSummary("EarthMJ2000Eq", summaryForEntireMission, physicsBasedOnly);
+         if (summaryForEntireMission)
+            text = theObject->GetStringParameter("MissionSummary").c_str();
+         else
+            text = theObject->GetStringParameter("Summary").c_str();
+         
+         // This code is flaky -- text width is height dependent??? -- on Linux:
+         //GetTextExtent(text, &w, &h);
+         //w = (w + 200 > 1000 ? 1000 : w + 200);
+         //h = (h > 700 ? 700 : h);
+         #ifdef __WXMAC__
+            scriptPanelSize.Set(658, 735);
+         #else
+            scriptPanelSize.Set(775, 735);
+         #endif
+            
+         SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
+      }
+      
+      wxFlexGridSizer *coordSizer = new wxFlexGridSizer(2);
+      coordSizer->Add(coordSysStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
+      coordSizer->Add(coordSysComboBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      
+      // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
+      // increase text size on Windows(loj: 2009.02.05)
+      theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
+                                  wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
+      theSummary->SetFont(GmatAppData::Instance()->GetFont() );
+      theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
+      theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
+   }
+   catch (BaseException &e)
+   {
+      #ifdef DEBUG_CMD_SUMMARY_DIALOG
+      std::string errmsg = e.GetFullMessage();
+      errmsg += "Current Coordinate System is " + currentCoordSysName;
+      MessageInterface::ShowMessage("%s\n", errmsg.c_str());      
+      #endif
+      
+      // Unregister ComboBox and rethrow the exception
+      theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
+      throw;
+   }
 }
 
 
