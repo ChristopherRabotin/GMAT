@@ -151,6 +151,8 @@ protected:
    GmatEpoch           simulationEnd;
    /// The epoch of the next measurement calculation
    GmatEpoch           nextSimulationEpoch;
+   /// Counter used to advance the simulation epoch
+   UnsignedInt         simEpochCounter;
    /// The current epoch (typically as determined via propagation)
    GmatEpoch           currentEpoch;
 

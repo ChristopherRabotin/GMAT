@@ -85,6 +85,7 @@ Simulator::Simulator(const std::string& name) :
    simulationStart     (GmatTimeConstants::MJD_OF_J2000),
    simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
    nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
+   simEpochCounter     (0),
    currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
    initialEpochFormat  ("TAIModJulian"),
    finalEpochFormat    ("TAIModJulian"),
@@ -118,6 +119,7 @@ Simulator::Simulator(const Simulator& sim) :
    simulationStart     (sim.simulationStart),
    simulationEnd       (sim.simulationEnd),
    nextSimulationEpoch (sim.nextSimulationEpoch),
+   simEpochCounter     (0),
    currentEpoch        (sim.currentEpoch),
    initialEpochFormat  (sim.initialEpochFormat),
    initialEpoch        (sim.initialEpoch),
@@ -162,6 +164,7 @@ Simulator& Simulator::operator =(const Simulator& sim)
       simulationStart     = sim.simulationStart;
       simulationEnd       = sim.simulationEnd;
       nextSimulationEpoch = sim.nextSimulationEpoch;
+      simEpochCounter     = sim.simEpochCounter;
       currentEpoch        = sim.currentEpoch;
       initialEpochFormat  = sim.initialEpochFormat;
       initialEpoch        = sim.initialEpoch;
@@ -1312,6 +1315,7 @@ void Simulator::CompleteInitialization()
             "MeasurementManager.\n");
 
    nextSimulationEpoch = simulationStart;
+   simEpochCounter     = 0;
    timeStep            = (nextSimulationEpoch - currentEpoch) *
                           GmatTimeConstants::SECS_PER_DAY;
 
@@ -1507,8 +1511,11 @@ void Simulator::RunComplete()
 void Simulator::FindNextSimulationEpoch()
 {
    // we are assuming that the simulationStep is always non-negative
-   nextSimulationEpoch = currentEpoch +
-         simulationStep / GmatTimeConstants::SECS_PER_DAY;
+   ++simEpochCounter;
+//   nextSimulationEpoch = simulationStart + simEpochCounter *
+//         simulationStep / GmatTimeConstants::SECS_PER_DAY;
+   nextSimulationEpoch = simulationStart + (simEpochCounter / GmatTimeConstants::SECS_PER_DAY) *
+         simulationStep;
 
    #ifdef DEBUG_STATE_MACHINE
       MessageInterface::ShowMessage("Current epoch = %.15lf; simulationStep = %.15lf;"
