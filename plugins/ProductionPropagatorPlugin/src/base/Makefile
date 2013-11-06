@@ -4,9 +4,9 @@
 #
 # This file builds the plug-in base code
 
-include ../ExtraPropagatorEnv.mk
+include ../ProductionPropagatorEnv.mk
 
-TARGET = ../../lib/libExtraPropagators$(SHARED_EXTENSION)
+TARGET = ../../lib/libProductionPropagators$(SHARED_EXTENSION)
 
 all: prep $(TARGET)
 
@@ -43,8 +43,8 @@ archclean :
 
 OBJECTS = \
     plugin/GmatPluginFunctions.o \
-    factory/ExtraPropagatorFactory.o \
-    propagator/BulirschStoer.o
+    factory/ProductionPropagatorFactory.o \
+    propagator/PrinceDormand853.o
    
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(OBJECTS)

@@ -17,7 +17,7 @@
 #ifndef PrinceDormand853_H
 #define PrinceDormand853_H
 
-#include "ExtraPropagatorDefs.hpp"
+#include "ProductionPropagatorDefs.hpp"
 #include "gmatdefs.hpp"
 #include "RungeKutta.hpp"
 
@@ -26,7 +26,7 @@
  * by Prince and Dormand.  This particular set of coefficients implements the
  * eighth order integrator with seventh order error control.  
  */
-class PROPAGATOR_API PrinceDormand853 :
+class PRODUCTIONPROPAGATOR_API PrinceDormand853 :
     public RungeKutta
 {
 public:

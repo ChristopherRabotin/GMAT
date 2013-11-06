@@ -1,16 +1,16 @@
-//$Id: ExtraPropagatorFactory.cpp,v 1.1 2008/07/03 19:15:33 djc Exp $
+//$Id: ProductionPropagatorFactory.cpp,v 1.1 2008/07/03 19:15:33 djc Exp $
 //------------------------------------------------------------------------------
-//                            ExtraPropagatorFactory
+//                            ProductionPropagatorFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
 // **Legal**
 //
 // Author: Darrel Conway
-// Created: May 3 2010
+// Created: Nov 6, 2013
 //
 /**
- * Implementation code for the ExtraPropagatorFactory class, which creates objects that
+ * Implementation code for the ProductionPropagatorFactory class, which creates objects that
  * extend the SRP model for solar sailing.
  *
  * This is sample code demonstrating GMAT's plug-in capabilities.
@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "gmatdefs.hpp"
-#include "ExtraPropagatorFactory.hpp"
-#include "BulirschStoer.hpp"
+#include "ProductionPropagatorFactory.hpp"
+#include "PrinceDormand853.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -29,7 +29,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  PhysicalModel* ExtraPropagatorFactory::(const std::string &ofType,
+//  PhysicalModel* ProductionPropagatorFactory::(const std::string &ofType,
 //                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**
@@ -41,63 +41,63 @@
  * @return A pointer to the created object.
  */
 //------------------------------------------------------------------------------
-Propagator* ExtraPropagatorFactory::CreatePropagator(const std::string &ofType,
+Propagator* ProductionPropagatorFactory::CreatePropagator(const std::string &ofType,
                                     const std::string &withName)
 {
-   if (ofType == "BulirschStoer")
-      return new BulirschStoer(withName);
+   if (ofType == "PrinceDormand853")
+      return new PrinceDormand853(withName);
    return NULL;
 }
 
 
 //------------------------------------------------------------------------------
-//  ExtraPropagatorFactory()
+//  ProductionPropagatorFactory()
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the class ExtraPropagatorFactory.
+ * This method creates an object of the class ProductionPropagatorFactory.
  * (default constructor)
  */
 //------------------------------------------------------------------------------
-ExtraPropagatorFactory::ExtraPropagatorFactory() :
+ProductionPropagatorFactory::ProductionPropagatorFactory() :
    Factory     (Gmat::PROPAGATOR)
 {
    if (creatables.empty())
    {
-      creatables.push_back("BulirschStoer");
+      creatables.push_back("PrinceDormand853");
    }
 }
 
 //------------------------------------------------------------------------------
-//  ExtraPropagatorFactory(StringArray createList)
+//  ProductionPropagatorFactory(StringArray createList)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the class ExtraPropagatorFactory.
+ * This method creates an object of the class ProductionPropagatorFactory.
  *
  * @param <createList> list of creatable solver objects
  *
  */
 //------------------------------------------------------------------------------
-ExtraPropagatorFactory::ExtraPropagatorFactory(StringArray createList) :
+ProductionPropagatorFactory::ProductionPropagatorFactory(StringArray createList) :
    Factory(createList, Gmat::PROPAGATOR)
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  ExtraPropagatorFactory(const ExtraPropagatorFactory& fact)
+//  ProductionPropagatorFactory(const ProductionPropagatorFactory& fact)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the class ExtraPropagatorFactory.  (copy constructor)
+ * This method creates an object of the class ProductionPropagatorFactory.  (copy constructor)
  *
  * @param <fact> the factory object to copy to "this" factory.
  */
 //------------------------------------------------------------------------------
-ExtraPropagatorFactory::ExtraPropagatorFactory(const ExtraPropagatorFactory& fact) :
+ProductionPropagatorFactory::ProductionPropagatorFactory(const ProductionPropagatorFactory& fact) :
     Factory     (fact)
 {
    if (creatables.empty())
    {
-      creatables.push_back("BulirschStoer");
+      creatables.push_back("PrinceDormand853");
    }
 }
 
@@ -106,14 +106,14 @@ ExtraPropagatorFactory::ExtraPropagatorFactory(const ExtraPropagatorFactory& fac
 //  CommandFactory& operator= (const CommandFactory& fact)
 //------------------------------------------------------------------------------
 /**
- * ExtraPropagatorFactory operator for the ExtraPropagatorFactory base class.
+ * ProductionPropagatorFactory operator for the ProductionPropagatorFactory base class.
  *
- * @param <fact> the ExtraPropagatorFactory object that is copied.
+ * @param <fact> the ProductionPropagatorFactory object that is copied.
  *
- * @return "this" ExtraPropagatorFactory with data set to match the input factory (fact).
+ * @return "this" ProductionPropagatorFactory with data set to match the input factory (fact).
  */
 //------------------------------------------------------------------------------
-ExtraPropagatorFactory& ExtraPropagatorFactory::operator=(const ExtraPropagatorFactory& fact)
+ProductionPropagatorFactory& ProductionPropagatorFactory::operator=(const ProductionPropagatorFactory& fact)
 {
    if (this != &fact)
    {
@@ -125,12 +125,12 @@ ExtraPropagatorFactory& ExtraPropagatorFactory::operator=(const ExtraPropagatorF
 
 
 //------------------------------------------------------------------------------
-// ~ExtraPropagatorFactory()
+// ~ProductionPropagatorFactory()
 //------------------------------------------------------------------------------
 /**
- * Destructor for the ExtraPropagatorFactory base class.
+ * Destructor for the ProductionPropagatorFactory base class.
  */
 //------------------------------------------------------------------------------
-ExtraPropagatorFactory::~ExtraPropagatorFactory()
+ProductionPropagatorFactory::~ProductionPropagatorFactory()
 {
 }
