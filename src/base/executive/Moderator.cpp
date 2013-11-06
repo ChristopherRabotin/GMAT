@@ -112,6 +112,11 @@
 //#define DEBUG_CREATE_PHYSICAL_MODEL
 //#define DEBUG_LIST_CALCULATED_POINT
 //#define DEBUG_SHOW_SYSTEM_EXCEPTIONS
+//#define DEBUG_MAC_ENVIRONMENT
+
+#ifdef DEBUG_MAC_ENVIRONMENT
+#include <stdlib.h>                 // for getenv (for Mac)
+#endif
 
 // Currently we can't use DataFile for 2011a release so commented out
 // Actually we want to put this flag in BuildEnv.mk but it is very close to
@@ -182,6 +187,12 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
+      #ifdef DEBUG_MAC_ENVIRONMENT
+         // On Mac, check the environment variable for DYLD_LIBRARY_PATH
+         char *dyldPath = getenv("DYLD_LIBRARY_PATH");
+         MessageInterface::ShowMessage("--- on Mac, DYLD_LIBRARY_PATH = %s\n", dyldPath);
+      #endif
+
       // Set trace flag globally
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->SetShowTrace(false);
