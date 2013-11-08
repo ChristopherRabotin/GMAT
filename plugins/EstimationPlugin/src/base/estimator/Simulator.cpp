@@ -33,7 +33,9 @@
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_SIMULATOR_WRITE
 //#define DEBUG_SIMULATOR_INITIALIZATION
-
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_TIMESTEP
+//#define DEBUG_EVENT
 
 //------------------------------------------------------------------------------
 // static data
@@ -490,6 +492,9 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
 {
    if (id == MEASUREMENT_TIME_STEP)
    {
+      #ifdef DEBUG_TIMESTEP
+	     MessageInterface::ShowMessage("simulationStep = %.15lf\n", value);
+      #endif
       simulationStep = value;
       return true;
    }
@@ -1164,6 +1169,10 @@ bool Simulator::Initialize()
 //------------------------------------------------------------------------------
 Solver::SolverState Simulator::AdvanceState()
 {
+   #ifdef DEBUG_STATE_MACHINE
+      MessageInterface::ShowMessage("Entered Simulator::AdvanceState()\n");
+   #endif
+   
    switch (currentState)
    {
       case INITIALIZING:
@@ -1233,6 +1242,10 @@ Solver::SolverState Simulator::AdvanceState()
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
    }
 
+   #ifdef DEBUG_STATE_MACHINE
+      MessageInterface::ShowMessage("Exit Simulator::AdvanceState()\n");
+   #endif
+   
    return currentState;
 
 }
@@ -1351,12 +1364,15 @@ void Simulator::FindTimeStep()
    {
       // Calculate the time step in seconds and stay in the PROPAGATING state;
       // timeStep could be positive or negative, and is good to 1 microsec
-      timeStep = ((Integer)((nextSimulationEpoch - currentEpoch) *
-               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
+//      timeStep = ((Integer)((nextSimulationEpoch - currentEpoch) *
+//               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
+
+      timeStep = (nextSimulationEpoch - currentEpoch) *
+               GmatTimeConstants::SECS_PER_DAY;					// made change by TUAN NGUYEN for Bug GMT-3700
 
       #ifdef DEBUG_TIMESTEP
-         MessageInterface::ShowMessage("Simulator time step = %.12lf based on "
-                  "current epoch = %.12lf and next epoch = %.12lf\n", timeStep,
+         MessageInterface::ShowMessage("Simulator time step = %.15lf based on "
+                  "current epoch = %.15lf and next epoch = %.15lf\n", timeStep,
                   currentEpoch, nextSimulationEpoch);
       #endif
 
@@ -1512,8 +1528,8 @@ void Simulator::FindNextSimulationEpoch()
    #endif
 
    #ifdef DEBUG_STATE_MACHINE
-      MessageInterface::ShowMessage("Current epoch = %.12lf; "
-            "next sim epoch = %.12lf, sim end = %.12lf\n", currentEpoch,
+      MessageInterface::ShowMessage("Current epoch = %.15lf; simulationStep = %.15lf;"
+            " next sim epoch = %.15lf, sim end = %.15lf\n", currentEpoch, simulationStep, 
             nextSimulationEpoch, simulationEnd);
    #endif
 }

@@ -28,8 +28,8 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_DATA_STORE
 //#define DEBUG_COORDINATE_SYSTEMS
-
-
+//#define DEBUG_SET_RELATIVITY_CORRECTION
+//#define DEBUG_SET_ETMINUSTAI_CORRECTION
 //------------------------------------------------------------------------------
 // Event::Event(const std::string &type, const std::string &name) :
 //------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ Event::Event(const std::string &type, const std::string &name) :
    GmatBase             (Gmat::EVENT, type, name),
    depth                (2),
    nyquist              (1.0e-99),
-   tolerance            (1.0e-7),
+   tolerance            (1.0e-5),		// (1.0e-7),		// made changes by TUAN NGUYEN: Notice that: when tolerance is small, the result of light time range may oscillate.
    maxAttempts          (50),
    estimatedEpoch       (0.0),
    status               (SEEKING),
@@ -54,7 +54,10 @@ Event::Event(const std::string &type, const std::string &name) :
    stepDirection        (-1.0),         // Step backwards by default
    bufferIndex          (0),
    bufferFillCount      (0),
-   j2k                  (NULL)
+   j2k                  (NULL),
+   useRelativityCorrection (false),							// made changes by TUAN NGUYEN
+   useETMinusTAICorrection (false),							// made changes by TUAN NGUYEN
+   solarSystem			(NULL)								// made changes by TUAN NGUYEN
 {
 }
 
@@ -96,7 +99,10 @@ Event::Event(const Event& ev) :
    stepDirection        (ev.stepDirection),
    bufferIndex          (0),
    bufferFillCount      (0),
-   j2k                  (NULL)
+   j2k                  (NULL),
+   useRelativityCorrection (ev.useRelativityCorrection),	// made changes by TUAN NGUYEN
+   useETMinusTAICorrection (ev.useETMinusTAICorrection),	// made changes by TUAN NGUYEN
+   solarSystem			(ev.solarSystem)					// made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < ev.participantCS.size(); ++i)
       participantCS.push_back(ev.participantCS[i]);
@@ -128,6 +134,9 @@ Event& Event::operator=(const Event& ev)
       bufferIndex          = 0;
       bufferFillCount      = 0;
       j2k                  = NULL;
+	  useRelativityCorrection = ev.useRelativityCorrection;		// made changes by TUAN NGUYEN
+	  useETMinusTAICorrection = ev.useETMinusTAICorrection;		// made changes by TUAN NGUYEN
+	  solarSystem          = ev.solarSystem;					// made changes by TUAN NGUYEN
       nyquist              = ev.nyquist;
       tolerance            = ev.tolerance;
       maxAttempts          = ev.maxAttempts;
@@ -183,6 +192,39 @@ bool Event::Initialize()
    return retval;
 }
 
+
+// made changes by TUAN NGUYEN
+void Event::SetSolarSystem(SolarSystem* ss)
+{
+	solarSystem = ss;
+}
+
+// made changes by TUAN NGUYEN
+void Event::SetRelativityCorrection(bool useCorr)
+{
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Start Event::SetRelativityCorrection(%s)\n", (useCorr?"true":"false"));
+#endif
+
+	useRelativityCorrection = useCorr;
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Exit Event::SetRelativityCorrection()\n");
+#endif
+}
+
+// made changes by TUAN NGUYEN
+void Event::SetETMinusTAICorrection(bool useCorr)
+{
+#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+	MessageInterface::ShowMessage("Start Event::SetETMinusTAICorrection(%s)\n", (useCorr?"true":"false"));
+#endif
+
+   useETMinusTAICorrection = useCorr;
+
+#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+	MessageInterface::ShowMessage("Exit Event::SetETMinusTAICorrection()\n");
+#endif
+}
 
 //------------------------------------------------------------------------------
 // void FixState(GmatBase* obj, bool lockState)
@@ -713,6 +755,7 @@ void Event::StoreParticipantData(Integer whichOne, SpacePoint *obj,
       MessageInterface::ShowMessage("Event(%s)::StoreParticipantData(%d, <%p>, "
             "%.12lf)\n", instanceName.c_str(), whichOne, obj, when);
    #endif
+   participantData[whichOne].cs_origin = obj->GetJ2000Body();				// made changes by TUAN NGUYEN
    participantData[whichOne].epoch = when;
    participantData[whichOne].position = obj->GetMJ2000Position(when);
    participantData[whichOne].velocity = obj->GetMJ2000Velocity(when);

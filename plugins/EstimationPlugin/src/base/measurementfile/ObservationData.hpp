@@ -28,6 +28,8 @@
 
 #include "estimation_defs.hpp"
 #include "EstimationDefs.hpp"
+///// TBD: Determine if there is a more generic way to add these
+#include "GmatData.hpp"										// made changes by TUAN NGUYEN
 #include "Covariance.hpp"
 #include "TimeSystemConverter.hpp"
 
@@ -35,7 +37,7 @@
 /**
  * Class used to set and retrieve observation data
  */
-class ESTIMATION_API ObservationData
+class ESTIMATION_API ObservationData : public GmatData		// made changes by TUAN NGUYEN
 {
 public:
    ObservationData();
@@ -43,7 +45,7 @@ public:
    ObservationData(const ObservationData& od);
    ObservationData&  operator=(const ObservationData& od);
 
-   void              Clear();
+   virtual void      Clear();									// made changes by TUAN NGUYEN
 
 // Explicitly public so that this class acts like a struct
 public:
@@ -73,6 +75,21 @@ public:
    IntegerArray      extraTypes;
    /// Ancillary data from the observation source, in string format
    StringArray       extraData;
+
+///// TBD: Determine if there is a more generic way to add these
+//   // This secsion added by TUAN NGUYEN
+//   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal" or "GMAT_OD"
+   /// Uplink band
+   Integer uplinkBand;
+   /// Uplink frequency
+   Real uplinkFreq;
+   /// Range modulo
+   Real rangeModulo;
+
+   // This section is added by TUAN NGUYEN for Gmat_ODDoppler observation data
+   /// Time difference between the reception time at station for start path and end path  
+   Real dopplerCountInterval;
+
 };
 
 #endif /* ObservationData_hpp */

@@ -38,6 +38,7 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
+//#define DEBUG_PROPAGATION
 
 // Macros for debugging of the state machine
 //#define WALK_STATE_MACHINE
@@ -696,11 +697,11 @@ void BatchEstimator::CompleteInitialization()
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
          plotMeasurements.clear();
-         plotMeasurements.push_back(measurementNames[i]);
-         std::string plotName = instanceName + "_" + measurementNames[i] +
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
          BuildResidualPlot(plotName, plotMeasurements);
       }
@@ -735,6 +736,8 @@ void BatchEstimator::CompleteInitialization()
       // Now load up the observations
       measManager.PrepareForProcessing();
       measManager.LoadObservations();
+///// Check for more generic approach
+	  measManager.LoadRampTables();											// made changes by TUAN NGUYEN
 
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
@@ -871,11 +874,18 @@ void BatchEstimator::FindTimeStep()
    {
       // Estimate and check for convergence after processing measurements
       currentState = ESTIMATING;
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
+   #endif
+
    }
    else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be CALCULATING\n");
+   #endif
    }
    else
    {
@@ -903,7 +913,7 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("BatchEstimator state is CALCULATING\n");
+	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
    #endif
 
    // Update the STM
@@ -929,6 +939,11 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
+
+   #ifdef WALK_STATE_MACHINE
+	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
+   #endif
+
 }
 
 
@@ -1036,7 +1051,8 @@ void BatchEstimator::CheckCompletion()
             for (UnsignedInt j = 0; j <  stateSize; ++j)
                information(i,j) = 0.0;
       }
-      measurementResiduals.clear();
+
+	  measurementResiduals.clear();
       measurementEpochs.clear();
       measurementResidualID.clear();
 
@@ -1046,6 +1062,7 @@ void BatchEstimator::CheckCompletion()
                (*stm)(i,j) = 1.0;
             else
                (*stm)(i,j) = 0.0;
+
       esm.MapSTMToObjects();
 
       for (Integer i = 0; i < information.GetNumRows(); ++i)
@@ -1128,6 +1145,8 @@ std::string BatchEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
+   GmatState outputEstimationState;											// made changes by TUAN NGUYEN
+
    if (isInitialized)
    {
       switch (currentState)
@@ -1154,13 +1173,16 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   Estimation Epoch (A.1 modified Julian): "
                            << estimationEpoch << "\n\n";
 
-               for (UnsignedInt i = 0; i < map->size(); ++i)
+			   GetEstimationState(outputEstimationState);
+               
+			   for (UnsignedInt i = 0; i < map->size(); ++i)
                {
                   progress << "   "
                            << (*map)[i]->objectName << "."
                            << (*map)[i]->elementName << "."
                            << (*map)[i]->subelement << " = "
-                           << (*estimationState)[i] << "\n";
+//                           << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
+                           << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
                };
 
                progress << "\n a priori covariance:\n\n";
@@ -1183,10 +1205,13 @@ std::string BatchEstimator::GetProgressString()
             progress << "   Estimation Epoch: "
                      << estimationEpoch << "\n";
 
+			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                progress << "   "
-                        << (*estimationState)[i];
+//                        << (*estimationState)[i];								// made changes by TUAN NGUYEN
+			              << outputEstimationState[i];							// made changes by TUAN NGUYEN
             }
 
             progress << "\n   RMS residuals: "
@@ -1211,13 +1236,16 @@ std::string BatchEstimator::GetProgressString()
                progress << "   Estimation Epoch (A.1 modified Julian): "
                         << estimationEpoch << "\n\n";
 
+			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                progress << "   "
                         << (*map)[i]->objectName << "."
                         << (*map)[i]->elementName << "."
                         << (*map)[i]->subelement << " = "
-                        << (*estimationState)[i] << "\n";
+//                        << (*estimationState)[i] << "\n";						// made changes by TUAN NGUYEN
+			            << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
             { // Switch statement scoping

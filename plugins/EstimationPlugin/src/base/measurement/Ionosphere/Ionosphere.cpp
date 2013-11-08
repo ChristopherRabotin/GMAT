@@ -24,8 +24,8 @@
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
 
-#define DEBUG_IONOSPHERE_ELECT_DENSITY
-#define DEBUG_IONOSPHERE_TEC
+//#define DEBUG_IONOSPHERE_ELECT_DENSITY
+//#define DEBUG_IONOSPHERE_TEC
 
 //------------------------------------------------------------------------------
 // static data

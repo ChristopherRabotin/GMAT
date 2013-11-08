@@ -24,12 +24,14 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
+#include "MeasurementException.hpp"
 #include <sstream>
 
 
 //#define DEBUG_OBTYPE_CREATION_INITIALIZATION
 //#define DEBUG_FILE_WRITE
-
+//#define DEBUG_FILE_READ
+//#define DEBUG_FILE_ACCESS
 
 //-----------------------------------------------------------------------------
 // GmatObType(const std::string withName)
@@ -169,7 +171,7 @@ bool GmatObType::Initialize()
 //-----------------------------------------------------------------------------
 bool GmatObType::Open(bool forRead, bool forWrite, bool append)
 {
-   #ifdef DEBUG_INITIALIZATION
+   #ifdef DEBUG_FILE_ACCESS
       MessageInterface::ShowMessage("GmatObType::Open(%s, %s, %s) Executing\n",
             (forRead ? "true" : "false"),
             (forWrite ? "true" : "false"),
@@ -237,9 +239,12 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
       theStream << header;
 
    if (retval == false)
-      MessageInterface::ShowMessage(
-            "GMATInternal Data File %s could not be opened\n",
-            streamName.c_str());
+   {
+//      MessageInterface::ShowMessage(																		// made changes by TUAN NGUYEN
+//            "GMATInternal Data File %s could not be opened\n",											// made changes by TUAN NGUYEN
+//            streamName.c_str());																			// made changes by TUAN NGUYEN
+	  throw MeasurementException("GMATInternal Data File " + streamName + " could not be opened\n");		// made changes by TUAN NGUYEN
+   }
    return retval;
 }
 
@@ -334,6 +339,10 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 //-----------------------------------------------------------------------------
 ObservationData* GmatObType::ReadObservation()
 {
+   #ifdef DEBUG_FILE_READ
+      MessageInterface::ShowMessage("GmatObType::ReadObservation() Executing\n");
+   #endif
+
    std::string str;
    std::stringstream theLine;
 
@@ -357,6 +366,7 @@ ObservationData* GmatObType::ReadObservation()
 
    theLine << str;
    currentObs.Clear();
+   currentObs.dataFormat = "GMATInternal";											// made changes by TUAN NGUYEN
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;
@@ -428,6 +438,19 @@ ObservationData* GmatObType::ReadObservation()
       (*noise)(i,i) = defaultNoiseCovariance;
    }
    currentObs.noiseCovariance = noise;
+
+   #ifdef DEBUG_FILE_READ
+      MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
+      for (Integer i = 0; i < participantSize; ++i)
+		  MessageInterface::ShowMessage("%s    ", currentObs.participantIDs.at(i).c_str());
+
+      for (Integer i = 0; i < dataSize; ++i)
+		  MessageInterface::ShowMessage("%.12lf    ", currentObs.value.at(i));
+
+	  MessageInterface::ShowMessage("\n");
+      MessageInterface::ShowMessage("GmatObType::ReadObservation() End\n");
+   #endif
+
 
    return &currentObs;
 }

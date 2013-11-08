@@ -28,7 +28,7 @@
 #include <sstream>                  // for stringstream
 
 #include "GroundstationInterface.hpp"				// made changes by TUAN NGUYEN
-#include "Spacecraft.hpp"					// made changes by TUAN NGUYEN
+#include "Spacecraft.hpp"							// made changes by TUAN NGUYEN
 
 
 //#define DEBUG_MEASUREMENT_INITIALIZATION
@@ -1080,10 +1080,10 @@ void CoreMeasurement::DumpParticipantStates(const std::string& ref)
             i, participants[i]->GetName().c_str());
       MessageInterface::ShowMessage("      Epoch: %.12lf\n", when);
       Rvector3 vec = participants[i]->GetMJ2000Position(when);
-      MessageInterface::ShowMessage("      J2000 Position:  [%.12lf  %.12lf  "
+      MessageInterface::ShowMessage("      EarthJ2000 Position:  [%.12lf  %.12lf  "
             "%.12lf]\n", vec[0], vec[1], vec[2]);
       vec = participants[i]->GetMJ2000Velocity(when);
-      MessageInterface::ShowMessage("      J2000 Velocity:  [%.12lf  "
+      MessageInterface::ShowMessage("      EarthJ2000 Velocity:  [%.12lf  "
             "%.12lf  %.12lf]\n", vec[0], vec[1], vec[2]);
    }
 }

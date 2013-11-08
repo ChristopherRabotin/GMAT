@@ -30,6 +30,7 @@
 //#define WALK_STATE_MACHINE
 //#define DEBUG_VERBOSE
 //#define DEBUG_WEIGHTS
+//#define DEBUG_O_MINUS_C
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -136,8 +137,8 @@ void  BatchEstimatorInv::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 void BatchEstimatorInv::Accumulate()
 {
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
    #endif
 
    // Measurements are possible!
@@ -178,7 +179,9 @@ void BatchEstimatorInv::Accumulate()
                      i, (*stateMap)[i]->elementName.c_str(),
                      (*stateMap)[i]->subelement, (*stateMap)[i]->length,
                      (*stateMap)[i]->elementID);
+			   MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
             #endif
+			
             stateDeriv = measManager.CalculateDerivatives(
                   (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                   modelsToAccess[0]);
@@ -254,6 +257,27 @@ void BatchEstimatorInv::Accumulate()
       for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
       {
          ocDiff = currentObs->value[k] - calculatedMeas->value[k];
+
+         #ifdef DEBUG_O_MINUS_C
+//		    if ((calculatedMeas->value[k] < 0)||(calculatedMeas->value[k] > currentObs->rangeModulo))
+//				MessageInterface::ShowMessage("!!!!! Error: Get incorrect calculated measurement value:   C =  %.12le\n", calculatedMeas->value[k]);
+//			MessageInterface::ShowMessage("Calculate O-C = %.12le:  O = %.12le    C = %.12le   k = %d  calculatedMeas = <%p>\n\n", ocDiff, currentObs->value[k], calculatedMeas->value[k], k, calculatedMeas);
+		    Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+		    MessageInterface::ShowMessage("Observation data: %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     M = %.12le  frequency = %.12le\n",
+				currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
+				calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
+				ocDiff, currentObs->rangeModulo, currentObs->uplinkFreq);
+         #endif
+//		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
+//                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+//                                      GmatTimeConstants::JD_JAN_5_1941);
+//		    MessageInterface::ShowMessage("%s    %.12lf   %.12le\n", currentObs->participantIDs[0].c_str(), C_Epoch,	ocDiff);
+
          measurementEpochs.push_back(currentEpoch);
          measurementResiduals.push_back(ocDiff);
          measurementResidualID.push_back(calculatedMeas->uniqueID);
@@ -358,6 +382,11 @@ void BatchEstimatorInv::Accumulate()
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;
+
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
+   #endif
+
 }
 
 
@@ -404,6 +433,24 @@ void BatchEstimatorInv::Estimate()
    #endif
 
    Rmatrix cov = information.Inverse();
+   
+   #ifdef DEBUG_VERBOSE
+      MessageInterface::ShowMessage(" residuals: [\n");
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
+      MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   covarian matrix:\n");
+      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
+      {
+         MessageInterface::ShowMessage("      [");
+         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)
+         {
+            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));
+         }
+         MessageInterface::ShowMessage("]\n");
+      }
+   #endif
 
    dx.clear();
    Real delta;
