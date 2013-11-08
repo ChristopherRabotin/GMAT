@@ -58,9 +58,14 @@ const std::string MeasurementModel::PARAMETER_TEXT[] =
    "Frequency",
 ///// TBD: Do we want something more generic here?
    "RangeModuloConstant",
+<<<<<<< HEAD
    "RelativityCorrection",			// made changes by TUAN NGUYEN
    "ETminusTAICorrection",			// made changes by TUAN NGUYEN
    "ResidualMax",					// made changes by TUAN NGUYEN
+=======
+   "RelativityCorrection",
+   "ETminusTAICorrection",
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 };
 
 
@@ -77,7 +82,10 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
+<<<<<<< HEAD
    Gmat::REAL_TYPE,					// made changes by TUAN NGUYEN
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 };
 
 //------------------------------------------------------------------------------
@@ -107,7 +115,10 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    timeConstant            (6000.0),
    useRelativityCorrection (false),									// made changes by TUAN NGUYEN
    useETminusTAICorrection (false),									// made changes by TUAN NGUYEN
+<<<<<<< HEAD
    residualMax			   (1.0e18),								// made changes by TUAN NGUYEN
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    modelID                 (-1),
    measurementNeedsObjects (false)
 {
@@ -153,7 +164,10 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    timeConstant            (mm.timeConstant),
    useRelativityCorrection (mm.useRelativityCorrection),		// made changes by TUAN NGUYEN
    useETminusTAICorrection (mm.useETminusTAICorrection),		// made changes by TUAN NGUYEN
+<<<<<<< HEAD
    residualMax			   (mm.residualMax),					// made changes by TUAN NGUYEN
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    modelID                 (mm.modelID),
    measurementNeedsObjects (false)
 {
@@ -207,7 +221,10 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       timeConstant            = mm.timeConstant;
 	  useRelativityCorrection = mm.useRelativityCorrection;			// made changes by TUAN NGUYEN
 	  useETminusTAICorrection = mm.useETminusTAICorrection;			// made changes by TUAN NGUYEN
+<<<<<<< HEAD
 	  residualMax             = mm.residualMax;						// made changes by TUAN NGUYEN
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
       modelID                 = mm.modelID;
 
       if (mm.measurement != NULL)
@@ -616,9 +633,12 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
          if (measurement->IsOfType("PhysicalMeasurement"))					// made changes by TUAN NGUYEN
             return ((PhysicalMeasurement*)measurement)->GetRangeModulo();	// made changes by TUAN NGUYEN
 
+<<<<<<< HEAD
    if (id == ResidualMaxLimit)												// made changes by TUAN NGUYEN
       return residualMax;													// made changes by TUAN NGUYEN
 
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
    {

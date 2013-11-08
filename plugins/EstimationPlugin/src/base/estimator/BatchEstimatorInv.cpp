@@ -139,6 +139,7 @@ void BatchEstimatorInv::Accumulate()
 {
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
+<<<<<<< HEAD
    #endif
 
    // Measurements are possible!
@@ -424,6 +425,8 @@ void BatchEstimatorInv::Accumulate1()
 {
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
+=======
+>>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    #endif
 
    // Measurements are possible!
