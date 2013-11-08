@@ -58,8 +58,9 @@ const std::string MeasurementModel::PARAMETER_TEXT[] =
    "Frequency",
 ///// TBD: Do we want something more generic here?
    "RangeModuloConstant",
-   "RelativityCorrection",
-   "ETminusTAICorrection",
+   "RelativityCorrection",			// made changes by TUAN NGUYEN
+   "ETminusTAICorrection",			// made changes by TUAN NGUYEN
+   "ResidualMax",					// made changes by TUAN NGUYEN
 };
 
 
@@ -76,6 +77,7 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,					// made changes by TUAN NGUYEN
 };
 
 //------------------------------------------------------------------------------
@@ -105,6 +107,7 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    timeConstant            (6000.0),
    useRelativityCorrection (false),									// made changes by TUAN NGUYEN
    useETminusTAICorrection (false),									// made changes by TUAN NGUYEN
+   residualMax			   (1.0e18),								// made changes by TUAN NGUYEN
    modelID                 (-1),
    measurementNeedsObjects (false)
 {
@@ -150,6 +153,7 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    timeConstant            (mm.timeConstant),
    useRelativityCorrection (mm.useRelativityCorrection),		// made changes by TUAN NGUYEN
    useETminusTAICorrection (mm.useETminusTAICorrection),		// made changes by TUAN NGUYEN
+   residualMax			   (mm.residualMax),					// made changes by TUAN NGUYEN
    modelID                 (mm.modelID),
    measurementNeedsObjects (false)
 {
@@ -203,6 +207,7 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       timeConstant            = mm.timeConstant;
 	  useRelativityCorrection = mm.useRelativityCorrection;			// made changes by TUAN NGUYEN
 	  useETminusTAICorrection = mm.useETminusTAICorrection;			// made changes by TUAN NGUYEN
+	  residualMax             = mm.residualMax;						// made changes by TUAN NGUYEN
       modelID                 = mm.modelID;
 
       if (mm.measurement != NULL)
@@ -611,6 +616,9 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
          if (measurement->IsOfType("PhysicalMeasurement"))					// made changes by TUAN NGUYEN
             return ((PhysicalMeasurement*)measurement)->GetRangeModulo();	// made changes by TUAN NGUYEN
 
+   if (id == ResidualMaxLimit)												// made changes by TUAN NGUYEN
+      return residualMax;													// made changes by TUAN NGUYEN
+
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
    {
@@ -691,6 +699,14 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
             return ((PhysicalMeasurement*)measurement)->GetConstantFrequency();
          }
       }
+   }
+
+   if (id == ResidualMaxLimit)
+   {
+      if (value <= 0.0)
+		  throw MeasurementException("Error: GMAT cannot accept a non positive value for measurement model's ResidualMaxLimit parameter.");
+      residualMax = value;
+	  return residualMax;
    }
 
    return GmatBase::SetRealParameter(id, value);

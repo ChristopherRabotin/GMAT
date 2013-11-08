@@ -842,6 +842,38 @@ const ObservationData *MeasurementManager::GetObsData(
 }
 
 
+// Made changes by TUAN NGUYEN
+//-----------------------------------------------------------------------------
+// ObservationData* GetObsDataObject(const Integer observationToGet)
+//-----------------------------------------------------------------------------
+/**
+ * This method is used to get an observation data object.  If the input parameter,
+ * observationToGet, is -1, the current observation data object is returned.  If it is set
+ * to a non-negative number, the observation data object at that index in the observations
+ * vector is returned.  If neither case is valid, a NULL pointer is returned.
+ *
+ * @param observationToGet Index of the desired observation data object, or -1 for the
+ *                         current observation data object.
+ *
+ * @return A pointer to the observation data object
+ */
+//-----------------------------------------------------------------------------
+ObservationData* MeasurementManager::GetObsDataObject(const Integer observationToGet)
+{
+   if (observationToGet == -1)
+   {
+      return &(*currentObs);
+   }
+
+   if ((observationToGet < 0) ||
+       (observationToGet >= (Integer)observations.size()))
+      return NULL;
+
+   return &(observations[observationToGet]);
+}
+
+
+
 //-----------------------------------------------------------------------------
 // void MeasurementManager::AdvanceObservation()
 //-----------------------------------------------------------------------------

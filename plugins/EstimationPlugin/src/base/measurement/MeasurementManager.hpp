@@ -92,6 +92,7 @@ public:
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
+   ObservationData*        GetObsDataObject(const Integer observationToGet = -1);	// made changes by TUAN NGUYEN
    void                    AdvanceObservation();
    void                    Reset();
 
