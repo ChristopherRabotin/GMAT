@@ -49,6 +49,9 @@ public:
 
 // Explicitly public so that this class acts like a struct
 public:
+   /// Flag to specify this data record is in used or not		// made changes by TUAN NGUYEN
+   bool inUsed;													// made changes by TUAN NGUYEN
+
    /// The text name of the data type, if available
    std::string       typeName;
    /// The type of measurement in this record

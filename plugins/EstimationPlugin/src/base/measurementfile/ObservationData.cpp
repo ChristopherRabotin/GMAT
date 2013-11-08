@@ -35,6 +35,7 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
+   inUsed            (true),				// made changes by TUAN NGUYEN
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
    uniqueID          (-1),
@@ -74,6 +75,7 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
+   inUsed                  (od.inUsed),					// made changes by TUAN NGUYEN
    typeName                (od.typeName),
    type                    (od.type),
    uniqueID                (od.uniqueID),
@@ -110,6 +112,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
+	   inUsed                 = od.inUsed;			// made changes by TUAN NGUYEN
       typeName                = od.typeName;
       type                    = od.type;
       uniqueID                = od.uniqueID;
@@ -141,6 +144,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
+   inUsed                  = true;					// made changes by TUAN NGUYEN
    typeName                = "";
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    uniqueID                = -1;
