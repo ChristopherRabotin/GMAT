@@ -781,9 +781,9 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-      if (useApriori)
-         x0bar[i] = (*estimationState)[i];
-      else
+//      if (useApriori)											// made changes by TUAN NGUYEN
+//         x0bar[i] = (*estimationState)[i];					// made changes by TUAN NGUYEN
+//      else													// made changes by TUAN NGUYEN			Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
          x0bar[i] = 0.0;
    }
 
