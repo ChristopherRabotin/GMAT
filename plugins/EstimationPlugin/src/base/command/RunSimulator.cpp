@@ -296,11 +296,7 @@ bool RunSimulator::Initialize()
 
    theSimulator = (Simulator*)(simObj->Clone());
 
-<<<<<<< HEAD
    // Set the observation data streams for the measurement manager
-=======
-   // Set the observation data streams for the measurement manager
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
    StringArray streamList = measman->GetStreamList();
    for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
@@ -319,7 +315,6 @@ bool RunSimulator::Initialize()
                streamList[ms]);
    }
 
-<<<<<<< HEAD
 ///// Check for generic approach here   
    // Set the ramp table data streams for the measurement manager				// made changes by TUAN NGUYEN
    streamList = measman->GetRampTableDataStreamList();							// made changes by TUAN NGUYEN
@@ -342,30 +337,6 @@ bool RunSimulator::Initialize()
                streamList[ms]);													// made changes by TUAN NGUYEN
 	  }
    }																			// made changes by TUAN NGUYEN
-=======
-///// Check for generic approach here   
-   // Set the ramp table data streams for the measurement manager				// made changes by TUAN NGUYEN
-   streamList = measman->GetRampTableDataStreamList();							// made changes by TUAN NGUYEN
-   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)						// made changes by TUAN NGUYEN
-   {																			// made changes by TUAN NGUYEN
-      GmatBase *obj = FindObject(streamList[ms]);								// made changes by TUAN NGUYEN
-      if (obj != NULL)															// made changes by TUAN NGUYEN
-      {																			// made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::DATASTREAM))									// made changes by TUAN NGUYEN
-         {																		// made changes by TUAN NGUYEN
-            DataFile *df = (DataFile*)obj;										// made changes by TUAN NGUYEN
-            measman->SetRampTableDataStreamObject(df);							// made changes by TUAN NGUYEN
-         }																		// made changes by TUAN NGUYEN
-		 else
-			MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
-      }																			// made changes by TUAN NGUYEN
-      else																		// made changes by TUAN NGUYEN
-	  {
-         throw CommandException("Error: Did not find the object named " +				// made changes by TUAN NGUYEN
-               streamList[ms]);													// made changes by TUAN NGUYEN
-	  }
-   }																			// made changes by TUAN NGUYEN
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 
    // Find the event manager and store its pointer
    if (triggerManagers == NULL)
@@ -511,11 +482,7 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
 bool RunSimulator::Execute()
 {
    #ifdef DEBUG_SIMULATOR_EXECUTION
-<<<<<<< HEAD
 	  MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
-=======
-	  MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
    #endif
@@ -538,80 +505,44 @@ bool RunSimulator::Execute()
    switch (state)
    {
       case Solver::INITIALIZING:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): INITIALIZING state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): INITIALIZING state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          PrepareToSimulate();
          break;
 
       case Solver::PROPAGATING:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): PROPAGATING state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): PROPAGATING state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          Propagate();
          break;
 
       case Solver::CALCULATING:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): CALCULATING state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): CALCULATING state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          Calculate();
          break;
 
       case Solver::LOCATING:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): LOCATING state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): LOCATING state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          LocateEvent();
          break;
 
       case Solver::SIMULATING:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): SIMULATING state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): SIMULATING state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          Simulate();
          break;
 
       case Solver::FINISHED:
-<<<<<<< HEAD
          #ifdef DEBUG_SIMULATOR_EXECUTION
             MessageInterface::ShowMessage("RunSimulator::Execute(): FINSIHED state\n");
          #endif
-=======
-         #ifdef DEBUG_SIMULATOR_EXECUTION
-            MessageInterface::ShowMessage("RunSimulator::Execute(): FINSIHED state\n");
-         #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
          Finalize();
          break;
 
@@ -622,17 +553,10 @@ bool RunSimulator::Execute()
 
    state = theSimulator->AdvanceState();
 
-<<<<<<< HEAD
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::Execute()\n");
    #endif
 
-=======
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::Execute()\n");
-   #endif
-
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
    return true;
 }
 
@@ -652,17 +576,10 @@ void RunSimulator::RunComplete()
    commandRunning = false;
 
    RunSolver::RunComplete();
-<<<<<<< HEAD
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::RunComplete()\n");
    #endif
-=======
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::RunComplete()\n");
-   #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -774,26 +691,15 @@ void RunSimulator::PrepareToSimulate()
             "Measurement Manager was unable to prepare for processing");
 
    PrepareToPropagate();  // ?? Test return value here?
-<<<<<<< HEAD
    measman->LoadRampTables();											// made changes by TUAN NGUYEN
-=======
-   measman->LoadRampTables();											// made changes by TUAN NGUYEN
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 
    theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
    commandRunning  = true;
    commandComplete = false;
-<<<<<<< HEAD
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::PrepareToSimulate()\n");
    #endif
-=======
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::PrepareToSimulate()\n");
-   #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -813,13 +719,6 @@ void RunSimulator::Propagate()
       MessageInterface::ShowMessage("Entered RunSimulator::Propagate()\n");
    #endif
    Real dt = theSimulator->GetTimeStep(currEpoch[0]);
-<<<<<<< HEAD
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("dt = %.15lf\n", dt);
-   #endif
-=======
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("dt = %.15lf\n", dt);
@@ -858,17 +757,10 @@ void RunSimulator::Propagate()
          MessageInterface::ShowMessage("   %.12lf", odeState[i]);
       MessageInterface::ShowMessage("\n");
    #endif
-<<<<<<< HEAD
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::Propagate()\n");
    #endif
-=======
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::Propagate()\n");
-   #endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -886,17 +778,10 @@ void RunSimulator::Calculate()
 #endif
 
    bufferFilled = false;
-<<<<<<< HEAD
 
 #ifdef DEBUG_SIMULATOR_EXECUTION
    MessageInterface::ShowMessage("Exit RunSimulator::Calculate()\n");
 #endif
-=======
-
-#ifdef DEBUG_SIMULATOR_EXECUTION
-   MessageInterface::ShowMessage("Exit RunSimulator::Calculate()\n");
-#endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -1065,19 +950,11 @@ void RunSimulator::LocateEvent()
    BufferSatelliteStates(false);
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
-<<<<<<< HEAD
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::LocateEvent()\n   ");
    #endif
 
-=======
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::LocateEvent()\n   ");
-   #endif
-
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -1136,19 +1013,11 @@ void RunSimulator::Simulate()
                (*i)->GetRealParameter("Z"));
       }
    #endif
-<<<<<<< HEAD
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::Simulate()\n");
    #endif
 
-=======
-
-   #ifdef DEBUG_SIMULATOR_EXECUTION
-      MessageInterface::ShowMessage("Exit RunSimulator::Simulate()\n");
-   #endif
-
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }
 
 
@@ -1174,15 +1043,8 @@ void RunSimulator::Finalize()
 
    commandComplete = true;
    commandRunning  = false;
-<<<<<<< HEAD
 
 #ifdef DEBUG_SIMULATOR_EXECUTION
    MessageInterface::ShowMessage("Exit RunSimulator::Finalize()\n");
 #endif
-=======
-
-#ifdef DEBUG_SIMULATOR_EXECUTION
-   MessageInterface::ShowMessage("Exit RunSimulator::Finalize()\n");
-#endif
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
 }

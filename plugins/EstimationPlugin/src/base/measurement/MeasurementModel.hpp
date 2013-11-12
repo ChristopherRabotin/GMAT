@@ -243,6 +243,9 @@ protected:
    /// Flag indicate whether Measurement model using ET-TAI correction or not			// made changes by TUAN NGUYEN
    bool useETminusTAICorrection;														// made changes by TUAN NGUYEN
 
+   /// Residual maximum
+   Real residualMax;
+
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
@@ -259,10 +262,7 @@ protected:
 	   RangeModuloConstant,									// made changes by TUAN NGUYEN
 	   RelativityCorrection,								// made changes by TUAN NGUYEN
 	   ETminusTAICorrection,								// made changes by TUAN NGUYEN
-<<<<<<< HEAD
 	   ResidualMaxLimit,									// made changes by TUAN NGUYEN
-=======
->>>>>>> f0436612407fcc5aed153d53da24f73134dcb657
        MeasurementModelParamCount
    };
 
