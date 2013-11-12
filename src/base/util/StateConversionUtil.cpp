@@ -218,6 +218,9 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Delaunay") // Modified by M.H.
          {
             Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+            #ifdef DEBUG_STATE_CONVERSION
+            MessageInterface::ShowMessage("   CartesianToKeplerian = %s", kepl.ToString().c_str());
+            #endif
             outState = KeplerianToDelaunay(kepl, mu); 
          }
          else if (toType == "Planetodetic") // Modified by M.H.
@@ -509,7 +512,12 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "Delaunay") // Modified by M.H.
       {
          Rvector6 kepl = DelaunayToKeplerian(state, mu);
-         Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         #ifdef DEBUG_STATE_CONVERSION
+         MessageInterface::ShowMessage("   DelaunayToKeplerian = %s", kepl.ToString().c_str());
+         #endif
+         //It should call KeplerianToCartesian() (LOJ: 2013.11.12)
+         //Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         Rvector6 cart = KeplerianToCartesian(mu, kepl, anomalyType);
          if (toType == "Cartesian")
          {
             outState = cart;
