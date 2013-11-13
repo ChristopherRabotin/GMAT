@@ -97,6 +97,7 @@ public:
    
    virtual SpacePoint*           GetPrimaryObject() const                = 0;
    virtual SpacePoint*           GetSecondaryObject() const              = 0;
+   virtual SpacePoint*           GetReferenceObject() const              = 0;
    virtual A1Mjd                 GetEpoch() const                        = 0;
    virtual std::string           GetXAxis() const                        = 0;
    virtual std::string           GetYAxis() const                        = 0;

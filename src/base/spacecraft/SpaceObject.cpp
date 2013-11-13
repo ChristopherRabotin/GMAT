@@ -337,10 +337,14 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          "SpaceObject::GetMJ2000State entered; epoch is %lf\n", atTime.Get());
    #endif
    if (j2000Body == NULL)
-      throw SpaceObjectException(
-         "SpaceObject::GetMJ2000State MJ2000 body not yet set for " +
-         instanceName + ".  Possible circular dependency in Spacecraft and "
-         "Coordinate System configuration.\n");
+   {
+      std::string errmsg = "SpaceObject::GetMJ2000State J2000 body ";
+      errmsg            += j2000BodyName + " not yet set for ";
+      errmsg            += instanceName;
+      errmsg            += ".  Possible circular dependency in Spacecraft and ";
+      errmsg            += "Coordinate System configuration.\n";
+      throw SpaceObjectException(errmsg);
+   }
          
    Real *st = state.GetState(); //ps.GetState();
 

@@ -217,12 +217,15 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Delaunay") // Modified by M.H.
          {
-            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType); 
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+            #ifdef DEBUG_STATE_CONVERSION
+            MessageInterface::ShowMessage("   CartesianToKeplerian = %s", kepl.ToString().c_str());
+            #endif
             outState = KeplerianToDelaunay(kepl, mu); 
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState = CartesianToPlanetodetic(state);
+            outState = CartesianToPlanetodetic(state, flattening, eqRadius);
          }
          else
          {
@@ -269,7 +272,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Planetodetic") // Modified by M.H.
          {
             Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
-            outState = CartesianToPlanetodetic(cartesian);
+            outState = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
          else
          {
@@ -317,7 +320,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Planetodetic") // Modified by M.H.
          {
             Rvector6 cartesian = KeplerianToCartesian(mu, keplerian, anomalyType);
-            outState           = CartesianToPlanetodetic(cartesian);
+            outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
          else
          {
@@ -362,7 +365,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState           = CartesianToPlanetodetic(cartesian);
+            outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
          else
          {
@@ -407,7 +410,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState           = CartesianToPlanetodetic(cartesian);
+            outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
          else
          {
@@ -452,7 +455,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState           = CartesianToPlanetodetic(cartState);
+            outState           = CartesianToPlanetodetic(cartState, flattening, eqRadius);
          }
          else
          {
@@ -497,7 +500,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState = CartesianToPlanetodetic(cartState);
+            outState = CartesianToPlanetodetic(cartState, flattening, eqRadius);
          }
          else
          {
@@ -509,7 +512,12 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "Delaunay") // Modified by M.H.
       {
          Rvector6 kepl = DelaunayToKeplerian(state, mu);
-         Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         #ifdef DEBUG_STATE_CONVERSION
+         MessageInterface::ShowMessage("   DelaunayToKeplerian = %s", kepl.ToString().c_str());
+         #endif
+         //It should call KeplerianToCartesian() (LOJ: 2013.11.12)
+         //Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         Rvector6 cart = KeplerianToCartesian(mu, kepl, anomalyType);
          if (toType == "Cartesian")
          {
             outState = cart;
@@ -539,7 +547,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          }
          else if (toType == "Planetodetic") // Modified by M.H.
          {
-            outState = CartesianToPlanetodetic(cart);
+            outState = CartesianToPlanetodetic(cart, flattening, eqRadius);
          }
          else
          {
@@ -551,7 +559,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       
       else if (fromType == "Planetodetic") // Modified by M.H.
       {
-         Rvector6 cart = PlanetodeticToCartesian(state);
+         Rvector6 cart = PlanetodeticToCartesian(state, flattening, eqRadius);
          
          if (toType == "Cartesian")
          {
@@ -970,26 +978,29 @@ Rvector6 StateConversionUtil::DelaunayToKeplerian(const Rvector6& delaunay, cons
 
 // Modified by M.H.
 //------------------------------------------------------------------------------
-// Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian)
+// Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian, Real flattening,
+//                                  Real eqRadius)
 //------------------------------------------------------------------------------
 /**
  * Converts from Planetocentric to Cartesian.
  *
- * @param <cartesian>     Cartesian state
+ * @param <cartesian>   Cartesian state
+ * @param <flattening>  flattening coefficient for the central body
+ * @param <eqRadius>    equatorial radius for the central body
  *
  * @return Spacecraft orbit state converted from Cartesian to Planetodetic
  */
 //---------------------------------------------------------------------------
-Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian)
+Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian,
+                                                      Real flattening, Real eqRadius)
 {
    // Convert Cartesian state to Planetocentric state
    Rvector6 planetocentric= CartesianToSphericalAZFPA(cartesian);
    
-   Real Req = 6378.1363; // equatorial radius
-   Real f = 0.0033527; // flattening coefficients
-   
-   //Real Req = GetCentralBody()->GetEquatorialRadius();
-   //Real f = GetCentralBody()->GetFlattening();
+   //Real Req = 6378.1363; // equatorial radius
+   //Real f = 0.0033527; // flattening coefficients
+   Real Req = eqRadius; // equatorial radius
+   Real f = flattening; // flattening coefficients
    
    Real rMag = planetocentric[0];
    Real lon = planetocentric[1]; // longitude
@@ -1022,20 +1033,26 @@ Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian)
 
 // Modified by M.H.
 //------------------------------------------------------------------------------
-// Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic)
+// Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic, Real flattening,
+//                                  Real eqRadius)
 //------------------------------------------------------------------------------
 /**
  * Converts from Planetodetic to Cartesian.
  *
- * @param <planetodetic>     Planetodetic state
+ * @param <planetodetic>  Planetodetic state
+ * @param <flattening>    flattening coefficient for the central body
+ * @param <eqRadius>      equatorial radius for the central body
  *
  * @return Spacecraft orbit state converted from Planetodetic to Cartesian
  */
 //---------------------------------------------------------------------------
-Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodetic)
+Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodetic,
+                                                      Real flattening, Real eqRadius)
 {
-   Real Req = 6378.1363;
-   Real f = 0.0033527;
+   //Real Req = 6378.1363;
+   //Real f = 0.0033527;
+   Real Req = eqRadius;
+   Real f = flattening;
    
    Real rMag = planetodetic[0];
    Real lon = planetodetic[1] * RAD_PER_DEG;

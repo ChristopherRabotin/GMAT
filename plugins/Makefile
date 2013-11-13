@@ -18,6 +18,7 @@ all:
 	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
+	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
@@ -31,6 +32,7 @@ rebuild:
 	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuild;
 	cd ExtraPropagatorsPlugin; make rebuild;
+	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
@@ -43,6 +45,7 @@ clean:
 	cd EstimationPlugin; make clean;
 	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
+	cd ProductionPropagatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
 	cd FormationPlugin; make clean;
@@ -61,7 +64,9 @@ all:
 	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
+	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
+	cd MatlabInterfacePlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
 	cd StationPlugin; make all;
@@ -74,7 +79,9 @@ rebuild:
 	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuild;
 	cd ExtraPropagatorsPlugin; make rebuild;
+	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
+	cd MatlabInterfacePlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
 	cd StationPlugin; make rebuild;
@@ -87,7 +94,9 @@ clean:
 	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
+	cd ProductionPropagatorPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
+	cd MatlabInterfacePlugin; make clean;
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
 	cd StationPlugin; make clean;
@@ -104,6 +113,7 @@ all:
 	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
+	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
 	cd MatlabInterfacePlugin; make all;
 	cd FminconOptimizerPlugin; make all;
@@ -119,6 +129,7 @@ rebuild:
 	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuld;
 	cd ExtraPropagatorsPlugin; make rebuild;
+	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
 	cd MatlabInterfacePlugin; make rebuild;
 	cd FminconOptimizerPlugin; make rebuild;
@@ -134,6 +145,7 @@ clean:
 	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
+	cd ProductionPropagatorPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
 	cd MatlabInterfacePlugin; make clean;
 	cd FminconOptimizerPlugin; make clean;
@@ -153,6 +165,7 @@ all:
 	cd GeometricMeasurementPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd ProductionPropagatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
@@ -167,6 +180,7 @@ rebuild:
 	cd GeometricMeasurementPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd ProductionPropagatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -181,6 +195,7 @@ clean:
 	cd EphemPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd EventLocatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd ProductionPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);

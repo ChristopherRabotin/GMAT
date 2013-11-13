@@ -245,7 +245,7 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    SetObjectJ2000Body(LOS);
    
    if (includeGOS)
-      SetObjectJ2000Body(LOS);
+      SetObjectJ2000Body(GOS);
    
    #ifdef DEBUG_OBJECT_INITIALIZER
       MessageInterface::ShowMessage("J2000 Body set ...\n");
