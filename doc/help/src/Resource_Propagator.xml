@@ -650,6 +650,7 @@
 
                     <listitem>
                       <para><guibutton>PrinceDormand78</guibutton>,
+                      <guilabel>PrinceDormand853</guilabel>,
                       <guibutton>PrinceDormand45</guibutton>,
                       <guibutton>RungeKutta89</guibutton>,<guibutton>RungeKutta68</guibutton>,
                       <guibutton>RungeKutta56</guibutton>,
@@ -813,6 +814,18 @@
               <entry><para>An adaptive step, eighth order Runge-Kutta
               integrator with seventh order error control. The coefficients
               were derived by Prince and Dormand.</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PrinceDormand853</guilabel></entry>
+
+              <entry><para>An adaptive step, eighth order Runge-Kutta
+              integrator with 5th order error control that incorporates a 3rd
+              order correction, as described in section II.10 of "Solving
+              Ordinary Differential Equations I: Nonstiff Problems" by Hairer,
+              Norsett and Warner. The coefficients were derived by Prince and
+              Dormand. This integrator performs surprisingly well at loose
+              Accuracy settings.</para></entry>
             </row>
 
             <row>
