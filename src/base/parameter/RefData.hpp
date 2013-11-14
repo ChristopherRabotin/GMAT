@@ -23,7 +23,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-
+#include "Parameter.hpp"
 
 /**
  * Moved out of the RefObjType class so that the Visual Studio exports could be implemented
@@ -72,7 +72,9 @@ class GMAT_API RefData
 public:
 
    RefData(const std::string &name = "",
-           const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
+           const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT,
+           GmatParam::DepObject depObj = GmatParam::NO_DEP,
+           bool isSettable = false);
    RefData(const RefData &rd);
    RefData& operator= (const RefData &rd);
    virtual ~RefData();
@@ -107,7 +109,8 @@ protected:
    std::string mParamDepName;
    std::string mParamTypeName;
    Gmat::ObjectType mParamOwnerType;
-   
+   GmatParam::DepObject mParamDepObj;
+   bool mIsParamSettable;
    std::vector<RefObjType> mRefObjList;
    
    StringArray mObjectTypeNames;
