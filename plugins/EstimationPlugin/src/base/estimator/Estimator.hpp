@@ -215,6 +215,17 @@ protected:
    /// Flag indicating is an Event is currently being located
    bool                    locatingEvent;
 
+
+   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
+   std::string         epochFormat;							// made changes by TUAN NGUYEN
+   std::string         startEpoch;							// made changes by TUAN NGUYEN
+   std::string         endEpoch;							// made changes by TUAN NGUYEN
+   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
+   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
+   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
+   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+
+
    /// Parameters associated with the Estimators
    enum
    {
@@ -225,6 +236,9 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
+	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN
+	  START_EPOCH,							// made changes by TUAN NGUYEN
+	  END_EPOCH,							// made changes by TUAN NGUYEN
       EstimatorParamCount
    };
 

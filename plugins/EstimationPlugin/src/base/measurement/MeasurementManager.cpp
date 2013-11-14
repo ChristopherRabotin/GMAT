@@ -885,7 +885,16 @@ ObservationData* MeasurementManager::GetObsDataObject(const Integer observationT
 void MeasurementManager::AdvanceObservation()
 {
    if (currentObs != observations.end())
+   {
       ++currentObs;
+      while (!currentObs->inUsed)					// made changes by TUAN NGUYEN
+      {												// made changes by TUAN NGUYEN
+         if (currentObs != observations.end())		// made changes by TUAN NGUYEN
+            ++currentObs;							// made changes by TUAN NGUYEN
+		 else										// made changes by TUAN NGUYEN
+	        break;									// made changes by TUAN NGUYEN
+      }												// made changes by TUAN NGUYEN
+   }
 }
 
 //------------------------------------------------------------------------------

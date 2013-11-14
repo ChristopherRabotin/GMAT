@@ -47,6 +47,9 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
+   "EpochFormat",							// made changes by TUAN NGUYEN
+   "StartEpoch",							// made changes by TUAN NGUYEN
+   "EndEpoch",								// made changes by TUAN NGUYEN
 };
 
 const Gmat::ParameterType
@@ -59,6 +62,9 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::ENUMERATION_TYPE,					// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
 };
 
 
@@ -94,8 +100,16 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    showAllResiduals     (true),
    showSpecificResiduals(false),
    showErrorBars        (false),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   estimationStart      (GmatTimeConstants::MJD_OF_J2000),				// made changes by TUAN NGUYEN
+   estimationEnd        (GmatTimeConstants::MJD_OF_J2000 + 1.0),		// made changes by TUAN NGUYEN
+   epochFormat          ("TAIModJulian")								// made changes by TUAN NGUYEN
 {
+   std::stringstream ss("");											// made changes by TUAN NGUYEN
+   ss << GmatTimeConstants::MJD_OF_J2000;								// made changes by TUAN NGUYEN
+   startEpoch = ss.str();												// made changes by TUAN NGUYEN
+   endEpoch   = ss.str();												// made changes by TUAN NGUYEN
+
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;
 
@@ -150,7 +164,12 @@ Estimator::Estimator(const Estimator& est) :
    showAllResiduals     (est.showAllResiduals),
    showSpecificResiduals(est.showSpecificResiduals),
    showErrorBars        (est.showErrorBars),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   estimationStart      (est.estimationStart),				// made changes by TUAN NGUYEN
+   estimationEnd        (est.estimationEnd),				// made changes by TUAN NGUYEN
+   epochFormat          (est.epochFormat),					// made changes by TUAN NGUYEN
+   startEpoch           (est.startEpoch),					// made changes by TUAN NGUYEN
+   endEpoch             (est.endEpoch)						// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -210,6 +229,12 @@ Estimator& Estimator::operator=(const Estimator& est)
       addedPlots           = est.addedPlots;
 
       locatingEvent        = false;
+
+	  estimationStart      = est.estimationStart;			// made changes by TUAN NGUYEN
+	  estimationEnd        = est.estimationEnd;				// made changes by TUAN NGUYEN
+	  epochFormat          = est.epochFormat;				// made changes by TUAN NGUYEN
+	  startEpoch           = est.startEpoch;				// made changes by TUAN NGUYEN
+	  endEpoch             = est.endEpoch;					// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -232,6 +257,11 @@ bool Estimator::Initialize()
 
    if (retval)
    {
+	  // check the validity of the input start and end times
+      if (estimationEnd < estimationStart)
+         throw SolverException(
+            "Estimator error - estimation end time is before estimation start time.\n");
+
       // Check to make sure required objects have been set
       if (!propagator)
          throw SolverException(
@@ -442,6 +472,12 @@ std::string Estimator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)
       return propagatorName;
+   if (id == EPOCH_FORMAT)								// made changes by TUAN NGUYEN
+      return epochFormat;								// made changes by TUAN NGUYEN
+   if (id == START_EPOCH)								// made changes by TUAN NGUYEN
+      return startEpoch;								// made changes by TUAN NGUYEN
+   if (id == END_EPOCH)									// made changes by TUAN NGUYEN
+      return endEpoch;									// made changes by TUAN NGUYEN
 
    return Solver::GetStringParameter(id);
 }
@@ -495,6 +531,25 @@ bool Estimator::SetStringParameter(const Integer id,
       propagatorName = value;
       return true;
    }
+   if (id == EPOCH_FORMAT)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      epochFormat = value;												// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == START_EPOCH)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      startEpoch = value;												// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == END_EPOCH)													// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      endEpoch = value;													// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
 }

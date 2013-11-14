@@ -162,7 +162,6 @@ void BatchEstimatorInv::Accumulate()
 
    // Get the current observation data
    const ObservationData *currentObs =  measManager.GetObsData();
-//   bool runAccumulation = true;
    if ((modelsToAccess.size() > 0)&&(measManager.Calculate(modelsToAccess[0], true) >= 1))
    {
 	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
@@ -170,12 +169,21 @@ void BatchEstimatorInv::Accumulate()
 	  {
 	     for (Integer i=0; i < currentObs->value.size(); ++i)
 	     {
-		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > 1000.0) then throw away this data record
+			// Data filtered based on residual limits:
+		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
 		    {
 		       measManager.GetObsDataObject()->inUsed = false;
-//		       runAccumulation = false;
 			   break;
 		    }
+
+			// Data filtered based on time range:
+			Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+			Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+			if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
+			{
+		       measManager.GetObsDataObject()->inUsed = false;
+			   break;
+			}
 	     }
 	  }
    }
@@ -187,7 +195,6 @@ void BatchEstimatorInv::Accumulate()
    // Currently assuming uniqueness; modify if more than 1 possible here
 //   if ((modelsToAccess.size() > 0) &&
 //       (measManager.Calculate(modelsToAccess[0], true) >= 1))
-//   if (runAccumulation)
    if (measManager.GetObsDataObject()->inUsed)
    {
 //      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
