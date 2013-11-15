@@ -1118,7 +1118,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  // r1 and r2 are location of station and spacecraft in central body inertial coordinate system for downlink leg					// made change by TUAN NGUYEN
 //    RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1, r2, t3R);												// made change by TUAN NGUYEN
 	  // Note: the change of spacecraft position with amount of (ssb2cb_t2T - ssb2cb_t3R) due to										// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t1T to t2R									// made change by TUAN NGUYEN
+	  //       the origin of local inertial coordinate system moving during time period from t2T to t3R									// made change by TUAN NGUYEN
 	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1, r2 +(ssb2cb_t2T - ssb2cb_t3R), t3R);					// made change by TUAN NGUYEN
 
 	  Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
