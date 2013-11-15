@@ -32,8 +32,8 @@
 #include "Transponder.hpp"
 #include "Troposphere.hpp"
 
-#define DEBUG_RANGE_CALC_WITH_EVENTS
-#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
+//#define DEBUG_RANGE_CALC_WITH_EVENTS
+//#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
 //#define SHOW_RANGE_CALC
 //#define DEBUG_DERIVATIVES
@@ -1403,7 +1403,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 	  i--;
    }
 
-   MessageInterface::ShowMessage("value = %.12lf\n", value);
+//   MessageInterface::ShowMessage("value = %.12lf\n", value);
 
    return value;
 
