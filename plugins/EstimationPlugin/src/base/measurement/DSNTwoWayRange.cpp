@@ -32,8 +32,8 @@
 #include "Transponder.hpp"
 #include "Troposphere.hpp"
 
-//#define DEBUG_RANGE_CALC_WITH_EVENTS
-//#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
+#define DEBUG_RANGE_CALC_WITH_EVENTS
+#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
 //#define SHOW_RANGE_CALC
 //#define DEBUG_DERIVATIVES
@@ -1370,28 +1370,20 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
    {
       f_dot = (*rampTB)[i].rampRate;
 
+	  // Specify frequency at the begining and lenght of the current interval   
 	  if (i == end_interval)
-	  {
-		 // Specify lenght of the current interval
 		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-		 if (dt < interval_len)
-            interval_len = dt;
-
-         // Specify frequency at the begin of the current interval
-		 f0 = (*rampTB)[i].rampFrequency;
-      }
 	  else
-	  {
-		 // Specify lenght of the current interval 
 		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-		 f0 = (*rampTB)[i].rampFrequency;
-		 if (dt < interval_len)
-		 {
-			f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
-			interval_len = dt;
-		 }
+
+	  f0 = (*rampTB)[i].rampFrequency;
+	  if (dt < interval_len)
+	  {
+		 f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
+         interval_len = dt;
 	  }
-      // Specify frequency at the end of the current interval
+
+	  // Specify frequency at the end of the current interval
 	  f1 = f0 + f_dot*interval_len;
 
 	  // Take integral for the current interval
@@ -1399,8 +1391,10 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 	  value  = value + value1;
 
 //	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
-//      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+//      MessageInterface::ShowMessage("interval i = %d: Start: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
 //	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+//      MessageInterface::ShowMessage("interval i = %d:   End: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n\n", i+1,
+//	   (*rampTB)[i+1].epoch,  (*rampTB)[i+1].uplinkBand, (*rampTB)[i+1].rampType, (*rampTB)[i+1].rampFrequency, (*rampTB)[i+1].rampRate);
 
 
       // Specify dt 
@@ -1409,7 +1403,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 	  i--;
    }
 
-//   MessageInterface::ShowMessage("value = %.12lf\n", value);
+   MessageInterface::ShowMessage("value = %.12lf\n", value);
 
    return value;
 
