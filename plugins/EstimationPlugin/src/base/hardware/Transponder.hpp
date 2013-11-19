@@ -82,21 +82,21 @@ public:
    virtual bool         Initialize();
 
    virtual Real			GetDelay(Integer whichOne=0);
-   virtual bool 			SetDelay(Real delay, Integer whichOne=0);
-   virtual bool 			IsFeasible(Integer whichOne=0);
+   virtual bool 		SetDelay(Real delay, Integer whichOne=0);
+   virtual bool 		IsFeasible(Integer whichOne=0);
    virtual Integer 		GetSignalCount();
    virtual bool			IsTransmitted(Integer whichOne=0);
    virtual Signal*		GetSignal(Integer whichOne=0);
-   virtual bool 			SetSignal(Signal* s,Integer whichOne=0);
+   virtual bool 		SetSignal(Signal* s,Integer whichOne=0);
 
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    std::string	inputFrequencyModel;
    Real			inputCenterFrequency;
-   Real 			inputBandwidth;
-   std::string outputFrequencyModel;
-   std::string turnAroundRatio;
+   Real 		inputBandwidth;
+   std::string  outputFrequencyModel;
+   std::string  turnAroundRatio;
 
    /// Published parameters for the RF hardware
    enum

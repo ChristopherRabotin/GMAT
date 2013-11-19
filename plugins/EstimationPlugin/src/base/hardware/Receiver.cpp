@@ -26,20 +26,20 @@
 /// Text strings used to script Receiver properties
 const std::string
 Receiver::PARAMETER_TEXT[ReceiverParamCount - RFHardwareParamCount] =
-   {
-      "FrequencyModel",
-      "CenterFrequency",
-      "Bandwidth",
-   };
+{
+   "FrequencyModel",
+   "CenterFrequency",
+   "Bandwidth",
+};
 
 /// Integer IDs associated with the Receiver properties
 const Gmat::ParameterType
 Receiver::PARAMETER_TYPE[ReceiverParamCount - RFHardwareParamCount] =
-   {
-      Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE,
-   };
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -59,11 +59,11 @@ Receiver::Receiver(const std::string &name):
    RFHardware      ("Receiver", name),
    frequencyModel  ("constant"),
    centerFrequency (0.0),
-   bandwidth       (0.0)
+   bandwidth       (1.0e18)
 {
-   //MessageInterface::ShowMessage("Receiver::Receiver()\n");
    objectTypeNames.push_back("Receiver");
    parameterCount = ReceiverParamCount;
+
    isTransmitted1 = false;
    signal1 = new Signal();
 }
@@ -114,9 +114,9 @@ Receiver& Receiver::operator=(const Receiver& recei)
 {
    if (this != &recei)
    {
-      frequencyModel = recei.frequencyModel;
+      frequencyModel  = recei.frequencyModel;
       centerFrequency = recei.centerFrequency;
-      bandwidth = recei.bandwidth;
+      bandwidth       = recei.bandwidth;
       
       RFHardware::operator=(recei);
    }
@@ -253,13 +253,15 @@ std::string Receiver::GetParameterUnit(const Integer id) const
 {
    switch(id)
    {
-   case FREQUENCY_MODEL:
-      return "";                              // It has no unit
-   case CENTER_FREQUENCY:
-   case BANDWIDTH:
-      return "MHz";                           // The units of center frequency and bandwidth are MHz
-   default:
-      break;
+      case FREQUENCY_MODEL:
+         return "";                              // It has no unit
+
+      case CENTER_FREQUENCY:
+      case BANDWIDTH:
+         return "MHz";                           // The units of center frequency and bandwidth are MHz
+
+      default:
+         break;
    }
    
    return RFHardware::GetParameterUnit(id);
@@ -359,14 +361,21 @@ Real Receiver::SetRealParameter(const Integer id, const Real value)
 {
    switch (id)
    {
-      case CENTER_FREQUENCY:
-         if (value >= 0.0)
-            centerFrequency = value;
-         return centerFrequency;
-      case BANDWIDTH:
-         if (value >= 0.0)
-            bandwidth = value;
-         return bandwidth;
+//      case CENTER_FREQUENCY:
+//         if (value >= 0.0)
+//            centerFrequency = value;
+//         return centerFrequency;
+//      case BANDWIDTH:
+//         if (value >= 0.0)
+//            bandwidth = value;
+//         return bandwidth;
+
+      case HARDWARE_DELAY:
+	  case CENTER_FREQUENCY:
+	  case BANDWIDTH:
+         MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+		 return 0.0;
+
       default:
          break;
    }
@@ -425,10 +434,10 @@ std::string Receiver::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case FREQUENCY_MODEL:
-      return frequencyModel;
-   default:
-      break;
+      case FREQUENCY_MODEL:
+         return frequencyModel;
+      default:
+         break;
    }
    
    return RFHardware::GetStringParameter(id);
@@ -452,11 +461,13 @@ bool Receiver::SetStringParameter(const Integer id,
 {
    switch (id)
    {
-   case FREQUENCY_MODEL:
-      frequencyModel = value;
-      return true;
-   default:
-      break;
+      case FREQUENCY_MODEL:
+//       frequencyModel = value;
+		 MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+         return true;
+
+      default:
+         break;
    }
    
    return RFHardware::SetStringParameter(id, value);

@@ -999,7 +999,7 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
    if ((t1 < time_min)||(t1 > time_max))
    {
 	  char s[200];
-	  sprintf(&s[0], "Error: End time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t1, time_min, time_max);
+	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
 	  std::string st(&s[0]);
 
 	  throw MeasurementException(st);
@@ -1009,15 +1009,15 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
    if ((t0 < time_min)||(t0 > time_max))
    {
 	  char s[200];
-	  sprintf(&s[0], "Error: Start time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t0, time_min, time_max);
+	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
 	  std::string st(&s[0]);
 
 	  throw MeasurementException(st);
    }
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-   MessageInterface::ShowMessage(" Start time t0 = %.12lf A1Mjd\n", t0);
-   MessageInterface::ShowMessage(" End time t1   = %.12lf A1Mjd\n", t1);
+   MessageInterface::ShowMessage(" Start epoch t1T = %.12lf A1Mjd\n", t0);
+   MessageInterface::ShowMessage(" End epoch t3R   = %.12lf A1Mjd\n", t1);
    MessageInterface::ShowMessage(" elapse time   = %.12lf s\n", delta_t);
 #endif
    // search for end interval:
@@ -1088,105 +1088,3 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
 
 }
 
-/*
-Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
-{
-
-   if (delta_t < 0)
-      throw MeasurementException("Error: Elapse time has to be a non negative number\n");
-
-   if (rampTB == NULL)
-	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
-   else if ((*rampTB).size() == 0)
-	  throw MeasurementException("Error: No data in ramp table\n");
-   
-
-   Real time_min = (*rampTB)[0].epoch;
-   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
-   if ((t1 < time_min)||(t1 > time_max))
-   {
-	  char s[200];
-	  sprintf(&s[0], "Error: End time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t1, time_min, time_max);
-	  std::string st(&s[0]);
-
-	  throw MeasurementException(st);
-   }
-
-   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   if ((t0 < time_min)||(t0 > time_max))
-   {
-	  char s[200];
-	  sprintf(&s[0], "Error: Start time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t0, time_min, time_max);
-	  std::string st(&s[0]);
-
-	  throw MeasurementException(st);
-   }
-
-   // search for end interval:
-   UnsignedInt end_interval = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   {
-      if (t1 < (*rampTB)[i].epoch)
-	  {
-         end_interval = i-1;      
-		 break;
-	  }
-   }
-
-   // search for end interval:
-   Real f0, f1, f_dot;
-   Real value1;
-   Real interval_len;
-
-   Real value = 0.0;
-   Real dt = delta_t;
-   Integer i = end_interval;
-   while (dt > 0)
-   {
-      f_dot = (*rampTB)[i].rampRate;
-
-	  if (i == end_interval)
-	  {
-		 // Specify lenght of the current interval
-		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-		 if (dt < interval_len)
-            interval_len = dt;
-
-         // Specify frequency at the begin of the current interval
-		 f0 = (*rampTB)[i].rampFrequency;
-      }
-	  else
-	  {
-		 // Specify lenght of the current interval 
-		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-		 f0 = (*rampTB)[i].rampFrequency;
-		 if (dt < interval_len)
-		 {
-			f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
-			interval_len = dt;
-		 }
-	  }
-      // Specify frequency at the end of the current interval
-	  f1 = f0 + f_dot*interval_len;
-
-	  // Take integral for the current interval
-	  value1 = (f0 + f1) * interval_len / 2;
-	  value  = value + value1;
-
-//	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
-//      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
-//	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
-
-
-      // Specify dt 
- 	  dt = dt - interval_len;
-
-	  i--;
-   }
-
-//   MessageInterface::ShowMessage("value = %.12lf\n", value);
-
-   return value;
-
-}
-*/

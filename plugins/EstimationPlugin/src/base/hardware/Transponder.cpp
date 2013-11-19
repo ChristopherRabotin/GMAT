@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "Transponder.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // Static data
@@ -25,24 +26,24 @@
 /// Text strings used to script Receiver properties
 const std::string
 Transponder::PARAMETER_TEXT[TransponderParamCount - RFHardwareParamCount] =
-	{
-		"InputFrequencyModel",
-		"InputCenterFrequency",
-		"InputBandwidth",
-		"OutputFrequencyModel",
-		"TurnAroundRatio",
-	};
+{
+   "InputFrequencyModel",
+   "InputCenterFrequency",
+   "InputBandwidth",
+   "OutputFrequencyModel",
+   "TurnAroundRatio",
+};
 
 /// Integer IDs associated with the Receiver properties
 const Gmat::ParameterType
 Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
-	{
-		Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE,
-	};
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -59,19 +60,20 @@ Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
 //------------------------------------------------------------------------------
 Transponder::Transponder(const std::string &name):
 	RFHardware				("Transponder", name),
-	inputFrequencyModel	("CenterAndBandwidth"),
+	inputFrequencyModel	    ("CenterAndBandwidth"),
 	inputCenterFrequency	(0.0),
-	inputBandwidth			(0.0),
+	inputBandwidth			(1.0e18),
 	outputFrequencyModel	("TurnAroundRatio"),
-	turnAroundRatio		("240/221")
+	turnAroundRatio		    ("240/221")
 {
    objectTypeNames.push_back("Transponder");
    parameterCount = TransponderParamCount;
-	isTransmitted1 = false;
-	isTransmitted2 = true;
 
-	signal1 = new Signal();
-	signal2 = new Signal();
+   isTransmitted1 = false;
+   isTransmitted2 = true;
+
+   signal1 = new Signal();
+   signal2 = new Signal();
 }
 
 //------------------------------------------------------------------------------
@@ -101,11 +103,11 @@ Transponder::~Transponder()
 //------------------------------------------------------------------------------
 Transponder::Transponder(const Transponder& trans):
    RFHardware				(trans),
-   inputFrequencyModel 	(trans.inputFrequencyModel),
-   inputCenterFrequency (trans.inputCenterFrequency),
+   inputFrequencyModel 	    (trans.inputFrequencyModel),
+   inputCenterFrequency     (trans.inputCenterFrequency),
    inputBandwidth			(trans.inputBandwidth),
-   outputFrequencyModel	(trans.outputFrequencyModel),
-   turnAroundRatio		(trans.turnAroundRatio)
+   outputFrequencyModel	    (trans.outputFrequencyModel),
+   turnAroundRatio		    (trans.turnAroundRatio)
 {
 }
 
@@ -124,11 +126,11 @@ Transponder& Transponder::operator=(const Transponder& trans)
 {
    if (this != &trans)
    {
-   	inputFrequencyModel = trans.inputFrequencyModel;
-   	inputCenterFrequency = trans.inputCenterFrequency;
-   	inputBandwidth = trans.inputBandwidth;
-   	outputFrequencyModel = trans.outputFrequencyModel;
-   	turnAroundRatio = trans.turnAroundRatio;
+   	  inputFrequencyModel  = trans.inputFrequencyModel;
+   	  inputCenterFrequency = trans.inputCenterFrequency;
+   	  inputBandwidth       = trans.inputBandwidth;
+   	  outputFrequencyModel = trans.outputFrequencyModel;
+   	  turnAroundRatio      = trans.turnAroundRatio;
 
       RFHardware::operator=(trans);
    }
@@ -300,8 +302,10 @@ Real Transponder::GetRealParameter(const Integer id) const
    {
       case INPUT_CENTER_FREQUENCY:
          return inputCenterFrequency;
+
       case INPUT_BANDWIDTH:
       	return inputBandwidth;
+
       default:
          break;
    }
@@ -326,15 +330,21 @@ Real Transponder::SetRealParameter(const Integer id, const Real value)
 {
    switch (id)
    {
-      case INPUT_CENTER_FREQUENCY:
-         if (value >= 0.0)
-            inputCenterFrequency = value;
-         return inputCenterFrequency;
+//      case INPUT_CENTER_FREQUENCY:
+//         if (value >= 0.0)
+//            inputCenterFrequency = value;
+//         return inputCenterFrequency;
+//      case INPUT_BANDWIDTH:
+//         if (value >= 0.0)
+//            inputBandwidth = value;
+//         return inputBandwidth;
+
+	  case INPUT_CENTER_FREQUENCY:
       case INPUT_BANDWIDTH:
-         if (value >= 0.0)
-            inputBandwidth = value;
-         return inputBandwidth;
-      default:
+         MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+		 return 0.0;
+	  
+	  default:
          break;
    }
 
@@ -422,23 +432,29 @@ std::string Transponder::GetStringParameter(const Integer id) const
 bool Transponder::SetStringParameter(const Integer id,
 							const std::string &value)
 {
-	switch (id)
-	{
-		case INPUT_FREQUENCY_MODEL:
-			inputFrequencyModel = value;
-			return true;
-		case OUTPUT_FREQUENCY_MODEL:
-			outputFrequencyModel = value;
-			return true;
-		case TURN_AROUND_RATIO:
-			turnAroundRatio = value;
-			return true;
+   switch (id)
+   {
+//      case INPUT_FREQUENCY_MODEL:
+//         inputFrequencyModel = value;
+//         return true;
+//      case OUTPUT_FREQUENCY_MODEL:
+//         outputFrequencyModel = value;
+//         return true;
 
-		default:
-			break;
-	}
+      case INPUT_FREQUENCY_MODEL:
+      case OUTPUT_FREQUENCY_MODEL:
+         MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+         return true;
 
-	return RFHardware::SetStringParameter(id, value);
+      case TURN_AROUND_RATIO:
+         turnAroundRatio = value;
+         return true;
+
+      default:
+         break;
+   }
+
+   return RFHardware::SetStringParameter(id, value);
 }
 
 

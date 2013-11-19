@@ -948,8 +948,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
 			uplinkFreq = frequency/1.0e6;							// unit MHz
 
-			// Get uplink band based on definition of frequency range
-			freqBand = FrequencyBand(frequency);
+//			// Get uplink band based on definition of frequency range
+//			freqBand = FrequencyBand(frequency);
+			// Get frequency band from ramp table at given time
+			freqBand = GetUplinkBandFromRampTable(t1T);
 
 			// Range modulo constant is specified by GMAT script
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -988,48 +990,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          #endif
 
 	  }
-
 	  
-/*
-	  if (!isFromObsData)																											// made changes by TUAN NGUYEN
-//	  if (obsData == NULL)																											// made changes by TUAN NGUYEN
-	  {
-		 if (rampTB == NULL)
-		 {
-            // Get uplink frequency from hardware (transmitter) when ramp table is not used
-            Signal* uplinkSignal = gsTransmitter->GetSignal();
-            uplinkFreq = uplinkSignal->GetValue();		// unit: MHz
-	        frequency = uplinkFreq*1.0e6;				// unit: Hz
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from hardware...\n"); 
-            #endif
-		 }
-		 else
-		 {
-//			frequency = GetFrequencyFromRampTable(t3R);				// unit: Hz
-			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
-			uplinkFreq = frequency/1.0e6;							// unit MHz
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
-            #endif
-		 }
-	  }
-	  else
-	  {
-		 // Get uplink frequency from observation data object
-		 // Note: frequency had been set by the frequency in observaion data
-//		 frequency = obsData->uplinkFreq;			// unit: Hz																		// made changes by TUAN NGUYEN
-//         freqBand = obsData->uplinkBand;																							// made changes by TUAN NGUYEN
-//         rangeModulo = obsData->rangeModulo;																						// made changes by TUAN NGUYEN
-//		 obsValue = obsData->value;																									// made changes by TUAN NGUYEN
-
-		 uplinkFreq = frequency/1.0e6;				// unit: MHz																	// made changes by TUAN NGUYEN
-         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		    MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...\n"); 
-         #endif
-	  }
-*/
 
       // 8. Calculate media correction for uplink leg:
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS   
@@ -1176,7 +1137,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  }
 
 	  
-//	  if (this->isFromObsData)
 	  if (obsData != NULL)
 	  {
 	     if (GmatMathUtil::Abs(realRange - obsValue[0]) > rangeModulo/2)
@@ -1228,14 +1188,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
 
       
-
-
-	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-//	     MessageInterface::ShowMessage(" Participants[1] name = '%s'\n", participants[1]->GetName().c_str());
-//		 MessageInterface::ShowMessage(" Participants[1] ID = %d \n", participants[1]->GetParameterID("CartesianX"));
-//	     CalculateMeasurementDerivatives(participants[1], participants[1]->GetParameterID("CartesianX"));
-      #endif
-
       retval = true;
    }
 
@@ -1331,7 +1283,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
    if ((t1 < time_min)||(t1 > time_max))
    {
 	  char s[200];
-	  sprintf(&s[0], "Error: End time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t1, time_min, time_max);
+	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
 	  std::string st(&s[0]);
 
 	  throw MeasurementException(st);
@@ -1341,7 +1293,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
    if ((t0 < time_min)||(t0 > time_max))
    {
 	  char s[200];
-	  sprintf(&s[0], "Error: Start time %.12lf is out of range [%.12lf , %.12lf] of range table\n", t0, time_min, time_max);
+	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
 	  std::string st(&s[0]);
 
 	  throw MeasurementException(st);
