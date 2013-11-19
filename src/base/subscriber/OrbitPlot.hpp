@@ -37,10 +37,13 @@ public:
    const StringArray&   GetSpacePointList();
    const StringArray&   GetSpacecraftList();
    const StringArray&   GetNonSpacecraftList();
-   
+
+   #if 1
    UnsignedInt          GetColor(const std::string &item, const std::string &objName);
    bool                 SetColor(const std::string &item, const std::string &objName,
                                  UnsignedInt value);
+   #endif
+   
    bool                 GetShowObject(const std::string &name);
    void                 SetShowObject(const std::string &name, bool value);
    
@@ -70,6 +73,7 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id, const Integer value);
@@ -154,9 +158,10 @@ protected:
    Integer mScCount;
    Integer mObjectCount;
    Integer mNonStdBodyCount;
+   #if 1
    /// It uses predefined colors up to 15 objects, after 15 it uses red
    Integer mDefaultColorCount;
-   
+   #endif
    // for data control
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -172,12 +177,14 @@ protected:
    RealArray mScVxArray;
    RealArray mScVyArray;
    RealArray mScVzArray;
-   
+
+   #if 1
    // arrays for holding object colors
    UnsignedIntArray mScOrbitColorArray;
    UnsignedIntArray mScTargetColorArray;
    UnsignedIntArray mOrbitColorArray;
    UnsignedIntArray mTargetColorArray;
+   #endif
    
    // arrays for holding solver current data
    std::vector<StringArray> mCurrScArray;
@@ -188,10 +195,14 @@ protected:
    std::vector<RealArray> mCurrVxArray;
    std::vector<RealArray> mCurrVyArray;
    std::vector<RealArray> mCurrVzArray;
-   
-   // maps for object and color, flag, epoch
+
+   #if 1
+   // maps for object and color
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
+   #endif
+   
+   // maps for object, flag, and epoch
    std::map<std::string, bool> mDrawOrbitMap;
    std::map<std::string, bool> mShowObjectMap;
    std::map<std::string, Real> mScInitialEpochMap;
@@ -206,19 +217,19 @@ protected:
    void                 BufferZeroData(Integer scIndex);
    virtual Integer      BufferOrbitData(const Real *dat, Integer len);
    
-   /// Adds Spacecraft and other objects to object arrays and color maps
+   /// Adds Spacecraft and other objects to object arrays
    bool                 AddSpacePoint(const std::string &name, Integer index,
                                       bool show = true);
-   /// Clears all object arrays and color maps, called from TakeAction("Clear")
+   /// Clears all object arrays called from TakeAction("Clear")
    bool                 ClearSpacePointList();
-   /// Removes SpacePoint object from the object and color array, called from TakeAction("Remove")
+   /// Removes SpacePoint object from the object called from TakeAction("Remove")
    bool                 RemoveSpacePoint(const std::string &name);
    /// Finds the index of the element label from the element label array.
    Integer              FindIndexOfElement(StringArray &labelArray,
                                            const std::string &label);
    /// Builds dynamic arrays to pass to plotting canvas
    void                 BuildDynamicArrays();
-   /// Clears dynamic arrays such as object name array, color array, etc.
+   /// Clears dynamic arrays such as object name array, etc.
    void                 ClearDynamicArrays();
    /// Updates plotting object information such as plotting object pointer, option flags, etc.
    void                 UpdateObjectList(SpacePoint *sp, bool show = false);
@@ -245,10 +256,11 @@ protected:
       PARAMETER_TYPE[OrbitPlotParamCount - SubscriberParamCount];
    static const std::string
       PARAMETER_TEXT[OrbitPlotParamCount - SubscriberParamCount];
-   
+
+   #if 1
    const static int MAX_SP_COLOR = 15;
    static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
-   
+   #endif
 };
 
 #endif

@@ -38,6 +38,7 @@
 #include "NadirPointing.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
+#include "ColorTypes.hpp"            // for namespace GmatColor::
 #ifdef __USE_SPICE__
 #include "SpiceAttitude.hpp"         // for SpiceAttitude - to set object name and ID
 #endif
@@ -313,12 +314,15 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft() <%p>'%s' entered\n", this, name.c_str());
    #endif
-
+   
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
-
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::RED, GmatColor::TEAL);
+   
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();

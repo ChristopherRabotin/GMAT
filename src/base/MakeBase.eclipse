@@ -510,6 +510,7 @@ OBJECTS = \
     util/BodyFixedStateConverter.o \
     util/CalculationUtilities.o \
     util/Code500EphemerisFile.o \
+    util/ColorDatabase.o \
     util/Date.o \
     util/DateUtil.o \
     util/ElapsedTime.o \

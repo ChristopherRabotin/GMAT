@@ -95,7 +95,7 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
    "Integer",     "UnsignedInt", "UnsignedIntArray", "IntegerArray", "Real",
    "RealElement", "String",      "StringArray",      "Boolean",      "BooleanArray",
    "Rvector",     "Rmatrix",     "Time",             "Object",       "ObjectArray",
-   "OnOff",       "Enumeration", "Filename"
+   "OnOff",       "Enumeration", "Filename",         "Color"
 };
 
 /**
@@ -4264,8 +4264,9 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    
    switch (tid)
    {
-   // Objects write out a string without quotes
+   // Objects and colors write out a string without quotes
    case Gmat::OBJECT_TYPE:
+   case Gmat::COLOR_TYPE:
       if (inMatlabMode)
          stream << "'";
       stream << GetStringParameter(id);

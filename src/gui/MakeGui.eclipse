@@ -213,6 +213,7 @@ OBJECTS = \
     forcemodel/DragInputsDialog.o \
     foundation/ArraySetupDialog.o \
     foundation/ArraySetupPanel.o \
+    foundation/GmatColorPanel.o \
     foundation/GmatDialog.o \
     foundation/GmatMdiChildFrame.o \
     foundation/GmatPanel.o \

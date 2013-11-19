@@ -21,7 +21,6 @@
 
 #include "OrbitPlot.hpp"
 #include "PlotInterface.hpp"       // for UpdateGlPlot()
-#include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "SubscriberException.hpp" // for SubscriberException()
 #include "MessageInterface.hpp"    // for ShowMessage()
 #include "TextParser.hpp"          // for SeparateBrackets()
@@ -29,6 +28,11 @@
 #include "CoordinateConverter.hpp" // for Convert()
 #include "SpaceObject.hpp"         // for GetEpoch()
 #include <algorithm>               // for find(), distance()
+
+#if 1
+#include "ColorTypes.hpp"          // for namespace GmatColor::
+#endif
+
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
@@ -78,17 +82,17 @@ OrbitPlot::PARAMETER_TYPE[OrbitPlotParamCount - SubscriberParamCount] =
    Gmat::BOOLEAN_TYPE,           //"ShowPlot"
 };
 
-
+#if 1
 const UnsignedInt
 OrbitPlot::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
 {
    GmatColor::RED,         GmatColor::LIME,      GmatColor::YELLOW,  
-   GmatColor::AQUA,        GmatColor::PINK,      GmatColor::L_BLUE,  
-   GmatColor::L_GRAY,      GmatColor::BLUE,      GmatColor::FUCHSIA,  
+   GmatColor::AQUA,        GmatColor::PINK,      GmatColor::LIGHT_BLUE,  
+   GmatColor::LIGHT_GRAY,  GmatColor::BLUE,      GmatColor::FUCHSIA,  
    GmatColor::BEIGE,       GmatColor::RED,       GmatColor::LIME,  
    GmatColor::YELLOW,      GmatColor::AQUA,      GmatColor::PINK
 };
-
+#endif
 
 //------------------------------------------------------------------------------
 // OrbitPlot(const std::string &type, const std::string &name)
@@ -130,34 +134,39 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mScVxArray.clear();
    mScVyArray.clear();
    mScVzArray.clear();
+   mDrawOrbitMap.clear();
+   mShowObjectMap.clear();
+
+   
+   #if 1
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
    mOrbitColorArray.clear();
    mTargetColorArray.clear();
-   
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
-   mDrawOrbitMap.clear();
-   mShowObjectMap.clear();
+   #endif
+   
    
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
    mNonStdBodyCount = 0;
-   
+
+   #if 1
    // default planet color
    mOrbitColorMap["Earth"] = GmatColor::GREEN;
    mOrbitColorMap["Luna"] = GmatColor::SILVER;
    mOrbitColorMap["Sun"] = GmatColor::ORANGE;
    mOrbitColorMap["Mercury"] = GmatColor::GRAY;
    mOrbitColorMap["Venus"] = GmatColor::BEIGE;
-   mOrbitColorMap["Mars"] = GmatColor::L_GRAY;
-   mOrbitColorMap["Jupiter"] = GmatColor::L_BROWN;
-   mOrbitColorMap["Saturn"] = GmatColor::D_BROWN;
+   mOrbitColorMap["Mars"] = GmatColor::LIGHT_GRAY;
+   mOrbitColorMap["Jupiter"] = GmatColor::PERU;
+   mOrbitColorMap["Saturn"] = GmatColor::SADDLE_BROWN;
    mOrbitColorMap["Uranus"] = GmatColor::BLUE;
    mOrbitColorMap["Neptune"] = GmatColor::NAVY;
    mOrbitColorMap["Pluto"] = GmatColor::PURPLE;
-   
+   #endif
 }
 
 
@@ -201,16 +210,19 @@ OrbitPlot::OrbitPlot(const OrbitPlot &plot)
    mScVxArray = plot.mScVxArray;
    mScVyArray = plot.mScVyArray;
    mScVzArray = plot.mScVzArray;
+   mDrawOrbitMap = plot.mDrawOrbitMap;
+   mShowObjectMap = plot.mShowObjectMap;
    
+   
+   #if 1
    mScOrbitColorArray = plot.mScOrbitColorArray;
    mScTargetColorArray = plot.mScTargetColorArray;
    mOrbitColorArray = plot.mOrbitColorArray;
    mTargetColorArray = plot.mTargetColorArray;
-   
    mOrbitColorMap = plot.mOrbitColorMap;
    mTargetColorMap = plot.mTargetColorMap;
-   mDrawOrbitMap = plot.mDrawOrbitMap;
-   mShowObjectMap = plot.mShowObjectMap;
+   #endif
+   
    
    mNumData = plot.mNumData;
    mNumCollected = plot.mNumCollected;
@@ -260,15 +272,19 @@ OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
    mScVxArray = plot.mScVxArray;
    mScVyArray = plot.mScVyArray;
    mScVzArray = plot.mScVzArray;
+   mDrawOrbitMap = plot.mDrawOrbitMap;
+   mShowObjectMap = plot.mShowObjectMap;
+
+   
+   #if 1
    mScOrbitColorArray = plot.mScOrbitColorArray;
    mScTargetColorArray = plot.mScTargetColorArray;
    mOrbitColorArray = plot.mOrbitColorArray;
    mTargetColorArray = plot.mTargetColorArray;
-   
    mOrbitColorMap = plot.mOrbitColorMap;
    mTargetColorMap = plot.mTargetColorMap;
-   mDrawOrbitMap = plot.mDrawOrbitMap;
-   mShowObjectMap = plot.mShowObjectMap;
+   #endif
+
    
    mNumData = plot.mNumData;
    mNumCollected = plot.mNumCollected;
@@ -311,6 +327,7 @@ const StringArray& OrbitPlot::GetNonSpacecraftList()
 }
 
 
+#if 1
 //------------------------------------------------------------------------------
 // UnsignedInt GetColor(const std::string &item, const std::string &name)
 //------------------------------------------------------------------------------
@@ -402,8 +419,9 @@ bool OrbitPlot::SetColor(const std::string &item, const std::string &name,
    #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage("OrbitPlot::SetColor() returning %d\n", retval);
    #endif
-    return retval;
+   return retval;
 }
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -706,16 +724,32 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
             mAllSpNameArray[i] = newName;
       
       //----------------------------------------------------
+      // Since spacecraft name is used as key for showing
+      // and drawing object map, I can't change the key name,
+      // so it is removed and inserted with new name.
+      //----------------------------------------------------
+      std::map<std::string, bool>::iterator drawOrbitPos, showObjectPos;
+      drawOrbitPos = mDrawOrbitMap.find(oldName);
+      showObjectPos = mShowObjectMap.find(oldName);
+      if (drawOrbitPos != mDrawOrbitMap.end() &&
+          showObjectPos != mShowObjectMap.end())
+      {
+         mDrawOrbitMap[newName] = mDrawOrbitMap[oldName];
+         mShowObjectMap[newName] = mShowObjectMap[oldName];
+         mDrawOrbitMap.erase(drawOrbitPos);
+         mShowObjectMap.erase(showObjectPos);
+      }
+      
+      
+      #if 1
+      //----------------------------------------------------
       // Since spacecraft name is used as key for spacecraft
       // color map, I can't change the key name, so it is
       // removed and inserted with new name
       //----------------------------------------------------
       std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-      std::map<std::string, bool>::iterator drawOrbitPos, showObjectPos;
       orbColorPos = mOrbitColorMap.find(oldName);
       targColorPos = mTargetColorMap.find(oldName);
-      drawOrbitPos = mDrawOrbitMap.find(oldName);
-      showObjectPos = mShowObjectMap.find(oldName);
       
       if (orbColorPos != mOrbitColorMap.end() &&
           targColorPos != mTargetColorMap.end())
@@ -727,8 +761,6 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
          mShowObjectMap[newName] = mShowObjectMap[oldName];
          mOrbitColorMap.erase(orbColorPos);
          mTargetColorMap.erase(targColorPos);
-         mDrawOrbitMap.erase(drawOrbitPos);
-         mShowObjectMap.erase(showObjectPos);
          
          #if DBGLVL_RENAME
          MessageInterface::ShowMessage("--- After rename\n");
@@ -740,6 +772,7 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
          }
          #endif
       }
+      #endif
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -769,6 +802,9 @@ std::string OrbitPlot::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OrbitPlot::GetParameterID(const std::string &str) const
 {
+   if (str == "OrbitColor" || str == "TargetColor")
+      return Gmat::PARAMETER_REMOVED;
+   
    for (int i=SubscriberParamCount; i<OrbitPlotParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SubscriberParamCount])
@@ -799,6 +835,16 @@ std::string OrbitPlot::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+bool OrbitPlot::IsParameterReadOnly(const Integer id) const
+{
+   if (id == ORBIT_COLOR || id == TARGET_COLOR)
+      return true;
+   
+   return Subscriber::IsParameterReadOnly(id);
+}
 
 //------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const Integer id) const
@@ -1063,7 +1109,8 @@ bool OrbitPlot::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 const UnsignedIntArray&
 OrbitPlot::GetUnsignedIntArrayParameter(const Integer id) const
-{   
+{
+   #if 1
    switch (id)
    {
    case ORBIT_COLOR:
@@ -1073,9 +1120,14 @@ OrbitPlot::GetUnsignedIntArrayParameter(const Integer id) const
    default:
       return Subscriber::GetUnsignedIntArrayParameter(id);
    }
+   #endif
+   
+   return Subscriber::GetUnsignedIntArrayParameter(id);
+
 }
 
 
+#if 1
 //------------------------------------------------------------------------------
 // virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
 //                                             const UnsignedInt value,
@@ -1166,6 +1218,7 @@ UnsignedInt OrbitPlot::SetUnsignedIntParameter(const Integer id,
       return Subscriber::SetUnsignedIntParameter(id, value, index);
    }
 }
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -1586,6 +1639,7 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
          if (mDrawObjectArray.size() < mShowObjectMap.size())
             mDrawObjectArray.push_back(true); //added (LOJ: 2011.01.13 for bug 2215 fix)
          
+         #if 1
          UnsignedInt targetColor = GmatColor::TEAL;
          // Make lighter target color for ground track plot since it draws on the texture map
          if (GetTypeName() == "GroundTrackPlot")
@@ -1617,6 +1671,7 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
             mTargetColorArray.push_back(targetColor);
          }
       }
+      #endif
    }
    
    #if DBGLVL_ADD   
@@ -1627,12 +1682,16 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("   mAllSpNameArray[%d]=%s, draw=%d, show=%d "
-          "orbColor=%u, targColor=%u\n", i, objName.c_str(), mDrawOrbitMap[objName],
-          mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
+         ("   mAllSpNameArray[%d]=%s, draw=%d, show=%d\n", i, objName.c_str(),
+          mDrawOrbitMap[objName], mShowObjectMap[objName]);
+      
+      #if 1
+      MessageInterface::ShowMessage
+         ("   orbColor=%u, targColor=%u\n", mOrbitColorMap[objName], mTargetColorMap[objName]);
       MessageInterface::ShowMessage
          ("   mOrbitColorArray[%d]=%u, mTargetColorArray[%d]=%u\n", i, mOrbitColorArray[i],
           i, mTargetColorArray[i]);
+      #endif
    }
    #endif
    
@@ -1654,17 +1713,20 @@ bool OrbitPlot::ClearSpacePointList()
    mDrawObjectArray.clear();
    mScNameArray.clear();
    mObjectNameArray.clear();
-   mOrbitColorArray.clear();
-   mTargetColorArray.clear();
-   
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
    mScVxArray.clear();
    mScVyArray.clear();
    mScVzArray.clear();
+   
+   #if 1
+   mOrbitColorArray.clear();
+   mTargetColorArray.clear();
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
+   #endif
+   
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
@@ -1737,8 +1799,11 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
       mScNameArray.erase(scPos);
       
       // just reduce the size of array
+      #if 1
       mScOrbitColorArray.erase(mScOrbitColorArray.begin());
       mScTargetColorArray.erase(mScTargetColorArray.begin());
+      #endif
+      
       mScXArray.erase(mScXArray.begin());
       mScYArray.erase(mScYArray.begin());
       mScZArray.erase(mScZArray.begin());
@@ -1748,12 +1813,14 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
       
       mScCount = mScNameArray.size();
       
+      #if 1
       // update color array
       for (int i=0; i<mScCount; i++)
       {
          mScOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
          mScTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
       }
+      #endif
       
       #if DBGLVL_REMOVE_SP
       MessageInterface::ShowMessage("---After remove from mScNameArray:\n");
@@ -1792,6 +1859,22 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
    
    if (spPos != mAllSpNameArray.end() && objPos != mObjectNameArray.end())
    {
+      mAllSpNameArray.erase(spPos);
+      mObjectNameArray.erase(objPos);
+      mAllSpCount = mAllSpNameArray.size();
+      removedFromAllSpArray = true;
+      
+      #if DBGLVL_REMOVE_SP
+      MessageInterface::ShowMessage("---After remove from mAllSpNameArray\n");
+      MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
+      for (int i=0; i<mAllSpCount; i++)
+      {
+         MessageInterface::ShowMessage
+            ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
+      }
+      #endif
+      
+      #if 1
       std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
       orbColorPos = mOrbitColorMap.find(name);
       targColorPos = mTargetColorMap.find(name);
@@ -1800,8 +1883,6 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
           targColorPos != mTargetColorMap.end())
       {
          // erase given spacecraft name
-         mAllSpNameArray.erase(spPos);
-         mObjectNameArray.erase(objPos);
          mOrbitColorMap.erase(orbColorPos);
          mTargetColorMap.erase(targColorPos);
          
@@ -1818,18 +1899,9 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
             mTargetColorArray[i] = mTargetColorMap[mAllSpNameArray[i]];
          }
          
-         #if DBGLVL_REMOVE_SP
-         MessageInterface::ShowMessage("---After remove from mAllSpNameArray\n");
-         MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
-         for (int i=0; i<mAllSpCount; i++)
-         {
-            MessageInterface::ShowMessage
-               ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
-         }
-         #endif
-         
          removedFromAllSpArray = true;
       }
+      #endif
    }
 
    //-------------------------------------------------------
@@ -1970,66 +2042,6 @@ void OrbitPlot::BuildDynamicArrays()
    
    mScCount = mScNameArray.size();
    mObjectCount = mObjectNameArray.size();
-   
-   // Now orbit and target colors are configurable in GroundTrackPlot
-   // so commented out (LOJ: 2013.09.20)
-   
-   // // Since we don't know the type of objects until object is initialized,
-   // // change to use the same default spacecraft orbit color for OrbitView and
-   // // GroundTrackPlot.  If GroundStation is added for GroundTrackPlot, its color
-   // // is set to the first default color, which makes color different from OrbitView.
-   // // (LOJ: 2012.09.13)
-   // if (groundStationFound)
-   // {
-   //    #if DBGLVL_INIT
-   //    MessageInterface::ShowMessage
-   //       ("   Now changing colors for spacecraft to use defined colors\n");
-   //    #endif
-      
-   //    UnsignedIntArray colorArray;
-      
-   //    for (Integer i = 0; i < mObjectCount; i++)
-   //    {
-   //       if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT) ||
-   //           mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
-   //          colorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-   //    }
-      
-   //    #if DBGLVL_INIT
-   //    MessageInterface::ShowMessage("   colorArray.size() = %d\n", colorArray.size());
-   //    for (UnsignedInt i = 0; i < colorArray.size(); i++)
-   //       MessageInterface::ShowMessage("      color[%d] = %u\n", i, colorArray[i]);
-   //    #endif
-      
-   //    Integer colorIndex = 0;
-   //    for (Integer i = 0; i < mObjectCount; i++)
-   //    {
-   //       if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-   //       {
-   //          mOrbitColorArray[i] = colorArray[colorIndex];
-   //          colorIndex++;
-   //       }
-   //    }
-      
-   //    for (Integer i = 0; i < mObjectCount; i++)
-   //    {
-   //       if (mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
-   //       {
-   //          mOrbitColorArray[i] = colorArray[colorIndex];
-   //          colorIndex++;
-   //       }
-   //    }
-      
-   //    // Now change mScOrbitColorArray
-   //    colorIndex = 0;
-   //    for (Integer i = 0; i < mScCount; i++)
-   //    {
-   //       mScOrbitColorArray[i] = colorArray[colorIndex];
-   //       colorIndex++;
-   //    }
-   // }
-   
-   
    
    #if DBGLVL_INIT
    MessageInterface::ShowMessage("OrbitPlot::BuildDynamicArrays() leaving\n");

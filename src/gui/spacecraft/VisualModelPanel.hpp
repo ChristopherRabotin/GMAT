@@ -29,6 +29,7 @@
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "wx/spinctrl.h"
+#include <wx/clrpicker.h>           // for wxColorPickerCtrl
 #include "VisualModelCanvas.hpp"
 #include "Spacecraft.hpp"
 
@@ -58,6 +59,7 @@ protected:
    void OnEarthButton(wxCommandEvent& event);
    void OnSpin(wxSpinEvent& event);
    void OnSlide(wxCommandEvent& event);
+   void OnColorPickerChange(wxColourPickerEvent& event);
    void UpdateTextCtrl(int id);
    
 private:
@@ -116,10 +118,17 @@ private:
 	// Button that automatically centers the model
 	wxButton *recenterButton;
    
+   // Color pickers
+   wxColourPickerCtrl *mOrbitColorCtrl;
+   wxColourPickerCtrl *mTargetColorCtrl;
+   wxColour mOrbitColor;
+   wxColour mTargetColor;
+   
    // The spacecraft panel that this panel belongs to
    GmatPanel *theScPanel;
    
    void Create();
+   void LoadData();
    void InitializeCanvas();
 	void ToggleInterface(bool enable);
    void AutoScaleModel();
@@ -147,7 +156,9 @@ private:
       ID_TRAN_TEXT,
       ID_SCALE_TEXT,
       
-      ID_STATIC_ELEMENT     
+      ID_STATIC_ELEMENT,
+      
+      ID_COLOR_CTRL,
    };
 };
 #endif

@@ -51,8 +51,10 @@ BEGIN_EVENT_TABLE(OrbitViewPanel, GmatPanel)
    EVT_BUTTON(ADD_SP_BUTTON, OrbitViewPanel::OnAddSpacePoint)
    EVT_BUTTON(REMOVE_SP_BUTTON, OrbitViewPanel::OnRemoveSpacePoint)
    EVT_BUTTON(CLEAR_SP_BUTTON, OrbitViewPanel::OnClearSpacePoint)
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    EVT_BUTTON(ORBIT_COLOR_BUTTON, OrbitViewPanel::OnOrbitColorClick)
    EVT_BUTTON(TARGET_COLOR_BUTTON, OrbitViewPanel::OnTargetColorClick)
+   #endif
    EVT_LISTBOX(ID_LISTBOX, OrbitViewPanel::OnSelectAvailObject)
    EVT_LISTBOX(SC_SEL_LISTBOX, OrbitViewPanel::OnSelectSpacecraft)
    EVT_LISTBOX(OBJ_SEL_LISTBOX, OrbitViewPanel::OnSelectOtherObject)
@@ -186,16 +188,20 @@ void OrbitViewPanel::InitializeData()
    mHasRealDataChanged = false;
    mHasDrawingOptionChanged = false;
    mHasSpChanged = false;
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    mHasOrbitColorChanged = false;
    mHasTargetColorChanged = false;
+   #endif
    mHasShowObjectChanged = false;
    mHasCoordSysChanged = false;
    mHasViewInfoChanged = false;
    mScCount = 0;
    mNonScCount = 0;
-   
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
+   #endif
 }
 
 
@@ -221,14 +227,16 @@ void OrbitViewPanel::Create()
    //-----------------------------------------------------------------
    // platform dependent button size
    //-----------------------------------------------------------------
-   int arrowW = 20;
-   int colorW = 25;
    #ifdef __WXMAC__
-   arrowW = 40;
-   colorW = 10;
+   int arrowW = 40;
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
+   int colorW = 10;
+   #endif
    #else
-   arrowW = 20;
-   colorW = 25;
+   int arrowW = 20;
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
+   int colorW = 25;
+   #endif
    #endif
    
    //-----------------------------------------------------------------
@@ -513,7 +521,8 @@ void OrbitViewPanel::Create()
    mDrawObjectCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw Object"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
-   
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    wxStaticText *orbitColorLabel =
       new wxStaticText(this, -1, wxT("Orbit Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
@@ -524,15 +533,17 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
                                      wxDefaultPosition, wxSize(colorW, 20), 0);
+   #endif
    
    wxFlexGridSizer *scOptionSizer1 = new wxFlexGridSizer(1, 0, 0);
    scOptionSizer1->Add(mDrawObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionSizer1->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    scOptionSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionSizer1->Add(mTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   
+   #endif
    mScOptionSizer = new wxBoxSizer(wxVERTICAL);
    mScOptionSizer->Add(scOptionSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
    
@@ -936,23 +947,28 @@ void OrbitViewPanel::LoadData()
             
             mDrawObjectMap[scNameArray[i]] =
                mOrbitView->GetShowObject(scNameArray[i]);
+            
+            #ifdef __USE_COLOR_FROM_SUBSCRIBER__
             mOrbitColorMap[scNameArray[i]]
                = RgbColor(mOrbitView->GetColor("Orbit", scNameArray[i]));
             mTargetColorMap[scNameArray[i]]
                = RgbColor(mOrbitView->GetColor("Target", scNameArray[i]));
+            #endif
             
             // Remove from the available ListBox
             mSpacecraftListBox->Delete(mSpacecraftListBox->FindString(scNames[i]));
             
             // Add to excluded list
             mExcludedScList.Add(scNames[i]);
-            
+
+            #ifdef __USE_COLOR_FROM_SUBSCRIBER__
             #if DEBUG_OPENGL_PANEL_LOAD > 1
             MessageInterface::ShowMessage
                ("OrbitViewPanel::LoadData() scName=%s, orbColor=%u, "
                 "targetColor=%u\n", scNameArray[i].c_str(),
                 mOrbitColorMap[scNameArray[i]].GetIntColor(),
                 mTargetColorMap[scNameArray[i]].GetIntColor());
+            #endif
             #endif
          }
          
@@ -969,10 +985,13 @@ void OrbitViewPanel::LoadData()
             
             mDrawObjectMap[nonScNameArray[i]] =
                mOrbitView->GetShowObject(nonScNameArray[i]);
+
+            #ifdef __USE_COLOR_FROM_SUBSCRIBER__
             mOrbitColorMap[nonScNameArray[i]]
                = RgbColor(mOrbitView->GetColor("Orbit", nonScNameArray[i]));
             mTargetColorMap[nonScNameArray[i]]
                = RgbColor(mOrbitView->GetColor("Target", nonScNameArray[i]));
+            #endif
             
             // Remove from the available ListBox
             mCelesPointListBox->Delete(mCelesPointListBox->FindString(nonScNames[i]));
@@ -1350,9 +1369,10 @@ void OrbitViewPanel::SaveData()
          #endif
          
          mHasSpChanged = false;
+         #ifdef __USE_COLOR_FROM_SUBSCRIBER__
          mHasOrbitColorChanged = true;
          mHasTargetColorChanged = true;
-         
+         #endif
          mScCount = mSelectedScListBox->GetCount();
          mNonScCount = mSelectedObjListBox->GetCount();
          
@@ -1420,7 +1440,8 @@ void OrbitViewPanel::SaveData()
                SetShowObject(mSelSpName, mDrawObjectMap[mSelSpName]);
          }
       }
-      
+
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       //--------------------------------------------------------------
       // save orbit color
       //--------------------------------------------------------------
@@ -1502,6 +1523,7 @@ void OrbitViewPanel::SaveData()
                         mTargetColorMap[mSelSpName].GetIntColor());
          }
       }
+      #endif
       
       //--------------------------------------------------------------
       // save coordinate system
@@ -1594,7 +1616,7 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          mExcludedScList.Add(str);
          
          mDrawObjectMap[str.c_str()] = true;
-         ShowSpacePointOption(str, true, true, GmatColor::RED);
+         ShowSpacePointOption(str, true);
          mHasSpChanged = true;
          EnableUpdate(true);
       }
@@ -1633,7 +1655,8 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          mExcludedCelesPointList.Add(str);
          
          mDrawObjectMap[str.c_str()] = true;
-         ShowSpacePointOption(str, true, false, GmatColor::L_BROWN);
+         ShowSpacePointOption(str, true, false);
+         
          mHasSpChanged = true;
          EnableUpdate(true);
       }
@@ -1874,6 +1897,8 @@ void OrbitViewPanel::OnCheckBoxChange(wxCommandEvent& event)
    EnableUpdate(true);
 }
 
+
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
 //------------------------------------------------------------------------------
 // void OnOrbitColorClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -1981,6 +2006,7 @@ void OrbitViewPanel::OnTargetColorClick(wxCommandEvent& event)
       mHasTargetColorChanged = true;
    }
 }
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -2080,22 +2106,22 @@ void OrbitViewPanel::OnTextChange(wxCommandEvent& event)
 
 //------------------------------------------------------------------------------
 // void ShowSpacePointOption(const wxString &name, bool show = true,
-//                           bool isSc = true,
-//                           UnsignedInt color = GmatColor::RED)
+//                           bool isSc = true)
 //------------------------------------------------------------------------------
 void OrbitViewPanel::ShowSpacePointOption(const wxString &name, bool show,
-                                          bool isSc, UnsignedInt color)
+                                          bool isSc)
 {
    #if DEBUG_OPENGL_PANEL_SHOW
    MessageInterface::ShowMessage
-      ("OrbitViewPanel::ShowSpacePointOption() name=%s, show=%d, isSc=%d, "
-       "color=%u\n", name.c_str(), show, isSc, color);
+      ("OrbitViewPanel::ShowSpacePointOption() name=%s, show=%d, isSc=%d\n",
+       name.c_str(), show, isSc);
    #endif
    
    if (!name.IsSameAs(""))
    {
       mSelSpName = std::string(name.c_str());
-      
+
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       // if object name not found, insert
       if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
       {
@@ -2104,7 +2130,7 @@ void OrbitViewPanel::ShowSpacePointOption(const wxString &name, bool show,
             ("ShowSpacePointOption() name not found, so adding it to color map\n");
          #endif
          
-         mOrbitColorMap[mSelSpName] = RgbColor(color);
+         mOrbitColorMap[mSelSpName] = RgbColor(GmatColor::RED);
          mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE);
       }
       
@@ -2116,31 +2142,29 @@ void OrbitViewPanel::ShowSpacePointOption(const wxString &name, bool show,
          ("OrbitViewPanel::ShowSpacePointOption() orbColor=%u, targColor=%u\n",
           orbColor.GetIntColor(), targColor.GetIntColor());
       #endif
+      #endif
       
       mDrawObjectCheckBox->SetValue(mDrawObjectMap[mSelSpName]);
       
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
+      // Set target color for all objects using targColor (LOJ: 2013.10.23)
+      mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
       
       if (isSc)
          mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
       else
-         mTargetColor.Set(0, 0, 0, 0); // Set target colot to black for non-spacecraft
+         mTargetColor.Set(GmatColor::GRAY); // Set target colot to gray for non-spacecraft
       
       mOrbitColorButton->SetBackgroundColour(mOrbitColor);
       mTargetColorButton->SetBackgroundColour(mTargetColor);
       mOrbitColorButton->Refresh();
       mTargetColorButton->Refresh();
       
-      if (isSc)
-      {
-         mTargetColorLabel->Enable();
-         mTargetColorButton->Enable();
-      }
-      else
-      {
-         mTargetColorLabel->Disable();
-         mTargetColorButton->Disable();
-      }
+      // Enable all objects target color (LOJ: 2013.10.23)
+      mTargetColorLabel->Enable();
+      mTargetColorButton->Enable();
+      #endif
       
       mObjectSizer->Show(mScOptionSizer, show);
    }
