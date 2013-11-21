@@ -54,7 +54,8 @@ const std::string
 BatchEstimator::PARAMETER_TEXT[] =
 {
    "EstimationEpochFormat",         // The epoch of the solution
-   "EstimationEpoch",         // The epoch of the solution
+   "EstimationEpoch",				// The epoch of the solution
+   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
    // todo Add useApriori here
 };
 
@@ -63,6 +64,7 @@ BatchEstimator::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
 };
 
 
@@ -454,6 +456,63 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
+
+
+//------------------------------------------------------------------------------
+// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets "On" or "Off" value
+ *
+ * @param id	The id number of a parameter
+ *
+ * @return "On" or "Off" value
+ */
+//------------------------------------------------------------------------------
+// made changes by TUAN NGUYEN
+std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+{
+   if (id == USE_PRIORI_ESTIMATE)
+      return (useApriori ? "On" : "Off");
+
+   return Estimator::GetOnOffParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool BatchEstimator::SetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets "On" or "Off" value
+ *
+ * @param id		The id number of a parameter
+ * @param value		value "On" or "Off"
+ *
+ * @return true value when it successfully sets the value, false otherwise. 
+ */
+//------------------------------------------------------------------------------
+// made changes by TUAN NGUYEN
+bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   if (id == USE_PRIORI_ESTIMATE)
+   {
+      if (value == "On")
+	  {
+         useApriori = true;
+		 return true;
+	  }
+      if (value == "Off")
+	  {
+         useApriori = false;
+		 return true;
+	  }
+
+	  return false;
+   }
+
+   return Estimator::SetOnOffParameter(id, value);
+}
+
 
 
 //------------------------------------------------------------------------------

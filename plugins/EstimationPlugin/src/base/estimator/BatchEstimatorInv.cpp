@@ -172,6 +172,7 @@ void BatchEstimatorInv::Accumulate()
 			// Data filtered based on residual limits:
 		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
 		    {
+//				MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
 		       measManager.GetObsDataObject()->inUsed = false;
 			   break;
 		    }
@@ -190,7 +191,6 @@ void BatchEstimatorInv::Accumulate()
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
    #endif
-
 
    // Currently assuming uniqueness; modify if more than 1 possible here
 //   if ((modelsToAccess.size() > 0) &&

@@ -101,14 +101,12 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    showSpecificResiduals(false),
    showErrorBars        (false),
    locatingEvent        (false),
-   estimationStart      (GmatTimeConstants::MJD_OF_J2000),				// made changes by TUAN NGUYEN
-   estimationEnd        (GmatTimeConstants::MJD_OF_J2000 + 1.0),		// made changes by TUAN NGUYEN
+   estimationStart      (0.0),											// made changes by TUAN NGUYEN
+   estimationEnd        (100000.0),										// made changes by TUAN NGUYEN
    epochFormat          ("TAIModJulian")								// made changes by TUAN NGUYEN
 {
-   std::stringstream ss("");											// made changes by TUAN NGUYEN
-   ss << GmatTimeConstants::MJD_OF_J2000;								// made changes by TUAN NGUYEN
-   startEpoch = ss.str();												// made changes by TUAN NGUYEN
-   endEpoch   = ss.str();												// made changes by TUAN NGUYEN
+   startEpoch = "0.0";													// made changes by TUAN NGUYEN
+   endEpoch   = "100000.0";												// made changes by TUAN NGUYEN
 
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;

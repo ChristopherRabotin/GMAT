@@ -31,6 +31,7 @@
 #include "Receiver.hpp"
 #include "Transponder.hpp"
 #include "Troposphere.hpp"
+#include <sstream>
 
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
@@ -927,8 +928,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  Real uplinkFreq;
 	  if (obsData == NULL)																											// made changes by TUAN NGUYEN
 	  {
+//		  MessageInterface::ShowMessage("obsData = NULL  ******\n"); 
 		 if (rampTB == NULL)
 		 {
+//			 MessageInterface::ShowMessage("rampTB = NULL  ++++\n");
             // Get uplink frequency from GMAT script when ramp table is not used
             Signal* uplinkSignal = gsTransmitter->GetSignal();
             uplinkFreq = uplinkSignal->GetValue();		// unit: MHz
@@ -944,6 +947,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 }
 		 else
 		 {
+//			 MessageInterface::ShowMessage("rampTB != NULL  ++++\n");
 			// Get uplink frequency at a given time from ramped frequency table
 			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
 			uplinkFreq = frequency/1.0e6;							// unit MHz
@@ -961,8 +965,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  }
 	  else
 	  {
+//		  MessageInterface::ShowMessage("obsData != NULL  ******\n");
 		 if (rampTB == NULL)
 		 {
+//			 MessageInterface::ShowMessage("rampTB = NULL  ++++\n");
 			// Get uplink frequency at a given time from observation data
             frequency = obsData->uplinkFreq;			            // unit: Hz	
 
@@ -972,6 +978,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 }
 		 else
 		 {
+//			 MessageInterface::ShowMessage("rampTB != NULL  ++++\n");
 			// Get uplink frequency at a given time from ramped frequency table
 			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
 
@@ -1211,8 +1218,33 @@ Real DSNTwoWayRange::GetFrequencyFactor(Real frequency)
 {
    Real factor;
 
-//   if (isFromObsData)
-   if (obsData != NULL)
+   if ((obsData == NULL)&&(rampTB == NULL))
+   {
+      // Map the frequency to the corresponding factor here
+      if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
+      {
+         // S-band
+         factor = frequency / 2.0;
+	     if (freqBand == 0)
+		    freqBand = 1;					// 1 for S-band
+      }
+      else if ((frequency >= 7900000000.0) && (frequency <= 8400000000.0))
+      {
+		 // X-band (Band values from Wikipedia; check them!
+         // factor = frequency * 11.0 / 75.0;				// for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
+	     factor = frequency * 221.0 / 1498.0;				// for X-band with BVE:   Moyer's eq 13-110
+	     if (freqBand == 0)
+		    freqBand = 2;					// 2 for X-band
+      }
+      else
+      {
+		 std::stringstream ss;
+		 ss << "Error: No frequency band was specified for frequency = " << frequency << "Hz\n";
+		 throw MeasurementException(ss.str());
+      }
+      // Todo: Figure out how to detect HEV and BVE
+   }
+   else
    {
 	   switch (freqBand)
 	   {
@@ -1223,30 +1255,6 @@ Real DSNTwoWayRange::GetFrequencyFactor(Real frequency)
 		   factor = frequency *221.0/1498.0;
 		   break;
 	   }
-   }
-   else
-   {
-      // Default value: DSN14 factor with the S-band multiplier
-      factor = 2090659968.0 / 2.0;
-
-      // Map the frequency to the corresponding factor here
-      // S-band
-      if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
-      {
-         factor = frequency / 2.0;
-	     if (freqBand == 0)
-		    freqBand = 1;					// 1 for S-band
-      }
-
-      // X-band (Band values from Wikipedia; check them!
-      if ((frequency >= 7900000000.0) && (frequency <= 8400000000.0))
-      {
-         // factor = frequency * 11.0 / 75.0;				// for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
-	     factor = frequency * 221.0 / 1498.0;				// for X-band with BVE:   Moyer's eq 13-110
-	     if (freqBand == 0)
-		    freqBand = 2;					// 2 for X-band
-      }
-      // Todo: Figure out how to detect HEV and BVE
    }
 
    return factor;
@@ -1342,7 +1350,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 	  value1 = (GetFrequencyFactor(f0) + GetFrequencyFactor(f1)) * interval_len / 2;
 	  value  = value + value1;
 
-//	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
+//	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
 //      MessageInterface::ShowMessage("interval i = %d: Start: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
 //	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
 //      MessageInterface::ShowMessage("interval i = %d:   End: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n\n", i+1,
@@ -1362,27 +1370,3 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 }
 
 
-/*
-Real DSNTwoWayRange::GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB)
-{
-   // search for interval which contains time t:
-   UnsignedInt interval_index = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   {
-      if (t < (*rampTB)[i].epoch)
-	  {
-         interval_index = i-1;      
-		 break;
-	  }
-   }
-
-   // specify frequency at time t:
-   Real t_start = (*rampTB)[interval_index].epoch;
-   Real f0 = (*rampTB)[interval_index].rampFrequency;
-   Real f_dot = (*rampTB)[interval_index].rampRate;
-	   
-   Real f = f0 + f_dot*(t - t_start);
-
-   return f;
-}
-*/
