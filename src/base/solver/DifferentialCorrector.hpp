@@ -85,6 +85,21 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
+   // Updates from KARI
+   // Modified by MH
+   /// Script parameter specifying the inversion algorithm
+   std::string dcType;
+   /// Enumerated algorithm types ised to make the code more efficient
+   Integer dcTypeId;
+   /// Nominal data saved for the Broyden methods
+	Real *savedNominal;
+	/// Variable data saved for the Broyden methods
+	std::vector<Real> savedVariable;
+	/// Jacobian data saved for the Broyden methods
+	Real **savedJacobian;
+	/// Jacobian inverse data saved for the Broyden methods
+	Real **savedInverseJacobian;
+	
    // Core data members used for the targeter numerics
    /// The number of goals in the targeting problem
    Integer                     goalCount;
@@ -128,6 +143,7 @@ protected:
    {
       goalNamesID = SolverParamCount,
       derivativeMethodID,
+      searchTypeID,
       DifferentialCorrectorParamCount
    };
 
