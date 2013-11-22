@@ -28,6 +28,7 @@
 #include "Transmitter.hpp"
 #include "Receiver.hpp"
 #include "Transponder.hpp"
+#include <sstream>
 
 
 //#define DEBUG_DOPPLER_CALC_WITH_EVENTS
@@ -957,12 +958,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 				scTransponder->GetName().c_str());
       #endif
 
+
       // 10. Get transmitter, receiver, and transponder delays:
       Real transmitDelay = gsTransmitter->GetDelay();
       Real receiveDelay = gsReceiver->GetDelay();
       Real targetDelay = scTransponder->GetDelay();
 
-      // 11. Get frequency
+
+      // 11. Get frequency, frequency band, turn around ratio, and time interval:
 	  Real uplinkFreqS, uplinkFreqE;
       if (rampTB == NULL)
       {
@@ -970,6 +973,17 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          Signal* uplinkSignal = gsTransmitter->GetSignal();
          uplinkFreqS = uplinkFreqE = uplinkSignal->GetValue();		// unit: MHz
 	     frequency  = frequencyE = uplinkFreqS*1.0e6;				// unit: Hz
+
+		 // Get frequency band:
+		 if (obsData != NULL)
+	        freqBand = freqBandE = obsData->uplinkBand;				// frequency band for this case is specified by observation data
+		 else
+			freqBand = freqBandE = FrequencyBand(frequency);		// frequency band for this case is specified as shown in WikiPedia
+
+		 // Get turn around ratio:
+         turnaround = scTransponder->GetTurnAroundRatio();			// the value of turn around ratio is get from GMAT script
+         if (turnaround == 1.0)										// if the value of turn around ratio is not set by GMAT script, GMAT sets the value associated to frequency band   
+            turnaround = GetTurnAroundRatio(freqBand);
 
          #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	        MessageInterface::ShowMessage("   Uplink frequency is gotten from hardware...\n"); 
@@ -983,83 +997,25 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          uplinkFreqS = frequency/1.0e6;								// unit MHz
          uplinkFreqE = frequencyE/1.0e6;							// unit MHz
 
+		 // Get frequency band from ramp table:
+		 freqBand = GetUplinkBandFromRampTable(t1TS);
+		 freqBandE = GetUplinkBandFromRampTable(t1TE);
+		 if (freqBand != freqBandE)
+		    throw MeasurementException("Error: Frequency bands for S path (%d) and E path (%d) are not the same. In DSNTwoWayDoppler calculation, it assumes that frequency band for S path and E path signals have to be the same !!!\n");  
+
+		 turnaround = GetTurnAroundRatio(freqBand);				// Get value of turn around ratio associated with frequency band
+
          #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	        MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
          #endif
       }
 
-	  // Get frequency band and interval
-      if (obsData == NULL)
-	  {
-		 if (rampTB == NULL)
-			freqBand = freqBandE = FrequencyBand(frequency);
-		 else
-		 {
-			// Get frequency band from ramp table:
-			freqBand = GetUplinkBandFromRampTable(t1TS);
-			freqBandE = GetUplinkBandFromRampTable(t1TE);
-		 }
-		 // when no observation data is used, interval value obtained from GMAT script was used
-	  }
-	  else
-	  {
-		  if (rampTB == NULL)
-		     freqBand = freqBandE = obsData->uplinkBand;
-		  else
-		  {
-			// Get frequency band from ramp table:
-			freqBand = GetUplinkBandFromRampTable(t1TS);
-			freqBandE = GetUplinkBandFromRampTable(t1TE);
-		  }
+	  // Get time interval
+	  // Note that: when no observation data is used, interval value obtained from GMAT script was used
+	  if (obsData != NULL)
+         interval = obsData->dopplerCountInterval;
 
-		  interval = obsData->dopplerCountInterval;
-	  }
 
-/*
-//	  if (!isFromObsData)
-      if (obsData == NULL)
-	  {
-		 if (rampTB == NULL)
-		 {
-            // Get uplink frequency from GMAT script
-            Signal* uplinkSignal = gsTransmitter->GetSignal();
-            uplinkFreqS = uplinkFreqE = uplinkSignal->GetValue();		// unit: MHz
-	        frequency  = frequencyE = uplinkFreqS*1.0e6;				// unit: Hz
-			freqBand = freqBandE = FrequencyBand(frequency);
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from hardware...\n"); 
-            #endif
-		 }
-		 else
-		 {
-			// Get uplink frequency from ramped frequency table
-			frequency = GetFrequencyFromRampTable(t1TS);				// unit: Hz
-			frequencyE = GetFrequencyFromRampTable(t1TE);				// unit: Hz
-			uplinkFreqS = frequency/1.0e6;								// unit MHz
-			uplinkFreqE = frequencyE/1.0e6;								// unit MHz
-			freqBand = FrequencyBand(frequency);
-			freqBandE = FrequencyBand(frequencyE);						// assume that uplink frequency bands for path E and S to be the same
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
-            #endif
-		 }
-		 // when no observation data is used, AveragingInterval value obatined from GMAT script was used
-	  }
-	  else
-	  {
-		 // Get uplink frequency from observation data object
-		 // Note: frequency had been set by the frequency in observaion data
-		 frequency = obsData->uplinkFreq;
-		 uplinkFreqS = frequency/1.0e6;									// unit: MHz
-		 uplinkFreqE = frequencyE/1.0e6;								// unit: MHz
-
-         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		    MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...\n"); 
-         #endif
-	  }
-*/
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 	     MessageInterface::ShowMessage("3. Sensors' infor:\n");
 		 MessageInterface::ShowMessage("    List of sensors: %s, %s, %s\n",
@@ -1070,6 +1026,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("    Transponder delay = %.12le s\n", targetDelay);
 		 MessageInterface::ShowMessage("    UpLink signal frequency for S path = %.12le MHz\n", uplinkFreqS);
 		 MessageInterface::ShowMessage("    UpLink signal frequency for E path = %.12le MHz\n", uplinkFreqE);
+
+		 MessageInterface::ShowMessage("    frequency band for S path = %d\n", freqBand);
+		 MessageInterface::ShowMessage("    frequency band for E path = %d\n", freqBandE);
+		 MessageInterface::ShowMessage("    turn around ratio = %lf\n", turnaround);
+		 MessageInterface::ShowMessage("    time interval = %lf s\n", interval);
       #endif
 
 
@@ -1253,8 +1214,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
       // 15. Calculate Frequency Doppler Shift:
       dtdt = dtE - dtS;
-      turnaround = scTransponder->GetTurnAroundRatio();
-//      frequency = uplinkFreq*1.0e6;															// made changes by TUAN NGUYEN
+
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
   	     MessageInterface::ShowMessage("6. Calculate Frequency Doppler Shift:\n");
          MessageInterface::ShowMessage("    t1S                   : %.12lf s\n"
@@ -1269,29 +1229,33 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("         dtdt = dtE - dtS : %.15lf s\n", dtdt);
       #endif
 
-	  if (rampTB != NULL)																																	// made changes by TUAN NGUYEN
+	  if (rampTB != NULL)																											// made changes by TUAN NGUYEN
 	  {
 //		 currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;		// made changes by TUAN NGUYEN
-		 currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE)/ interval;											// made changes by TUAN NGUYEN
+		 currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE)/ interval;					// made changes by TUAN NGUYEN
          #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 		 Real rampedIntegral = IntegralRampedFrequency(t1TE, interval + dtS-dtE);
             MessageInterface::ShowMessage("    Use ramped DSNTwoWayDoppler calculation:\n");
 			MessageInterface::ShowMessage("    ramped integral = %.12lf\n", rampedIntegral);
          #endif
 	  }
-	  else																																					// made changes by TUAN NGUYEN
+	  else																															// made changes by TUAN NGUYEN
 	  {
          #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
             MessageInterface::ShowMessage("    Use unramped DSNTwoWayDoppler calculation:\n");
 			MessageInterface::ShowMessage("       frequency        : %.12lf Hz\n", frequency);
          #endif
 		 
-		 currentMeasurement.uplinkBand = freqBand;																											// made changes by TUAN NGUYEN
-		 currentMeasurement.dopplerCountInterval = interval;																								// made changes by TUAN NGUYEN
-	     currentMeasurement.value[0] = -turnaround*frequency*(interval - dtdt)/interval;																	// made changes by TUAN NGUYEN
+	     currentMeasurement.value[0] = -turnaround*frequency*(interval - dtdt)/interval;											// made changes by TUAN NGUYEN
 	  }
 
-      currentMeasurement.isFeasible = true;
+	  currentMeasurement.uplinkFreq = frequencyE;				// uplink frequency for E path										// made changes by TUAN NGUYEN
+	  currentMeasurement.uplinkBand = freqBand;																						// made changes by TUAN NGUYEN
+	  currentMeasurement.dopplerCountInterval = interval;																			// made changes by TUAN NGUYEN
+      
+	  // Note that: It needs to check return signal not be blocked by Earth. If it is blocked, isFeasible has to set to false.
+	  currentMeasurement.isFeasible = true;
+
 
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("    Calculated Doppler C = %.12le Hz\n", currentMeasurement.value[0]);
@@ -1335,4 +1299,32 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 void DSNTwoWayDoppler::SetHardwareDelays(bool loadEvents)
 {
    AveragedDoppler::SetHardwareDelays(loadEvents);
+}
+
+
+//------------------------------------------------------------------------------
+// Real DSNTwoWayDoppler::GetTurnAroundRatio(Integer freqBand)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves trun around ratio
+ *
+ * @param freqBand   frequency band
+ *
+ * return   the value of trun around ratio associated with frequency band 
+ */
+//------------------------------------------------------------------------------
+Real DSNTwoWayDoppler::GetTurnAroundRatio(Integer freqBand)
+{
+   switch (freqBand)
+   {
+      case 1:				// for S-band, turn around ratio is 240/221
+         return 240.0/221.0;
+      case 2:				// for X-band, turn around ratio is 880/749
+         return 880.0/749.0;
+	}
+
+	// Display an error message when frequency band is not specified 
+	std::stringstream ss;
+	ss << "Error: frequency band " << freqBand << " is not specified.\n";
+	throw MeasurementException(ss.str());
 }
