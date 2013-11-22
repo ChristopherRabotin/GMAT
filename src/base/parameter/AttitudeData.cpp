@@ -33,7 +33,6 @@
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
-
 const std::string
 AttitudeData::VALID_OBJECT_TYPE_LIST[AttitudeDataObjectCount] =
 {
@@ -102,8 +101,15 @@ Real AttitudeData::GetReal(Integer item)
    
    // get the basics - cosine matrix, angular velocity, euler angle sequence
    Rmatrix33        cosMat        = mSpacecraft->GetAttitude(epoch);
-   Rvector3         angVel        = mSpacecraft->GetAngularVelocity(epoch) 
-                                    * GmatMathConstants::DEG_PER_RAD;
+   // Some attitude models don't compute rates, so we only want to try to get
+   // rates if that is the data we need to return
+   Rvector3 angVel(0.0,0.0,0.0);
+   if (((item >= EULER_ANGLE_RATE_1) && (item <= EULER_ANGLE_RATE_3)) ||
+       ((item >= ANGULAR_VELOCITY_X) && (item <= ANGULAR_VELOCITY_Z)))
+   {
+      angVel        = mSpacecraft->GetAngularVelocity(epoch)
+                                 * GmatMathConstants::DEG_PER_RAD;
+   }
    UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
    Rvector3         euler;
    
