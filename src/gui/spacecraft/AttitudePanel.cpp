@@ -89,8 +89,6 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL_NUTATION_ANGLE,   AttitudePanel::OnNutationAngleTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_INIT_SPIN_ANGLE,  AttitudePanel::OnInitialSpinAngleTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_SPIN_RATE,        AttitudePanel::OnSpinRateTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_REFERENCE_VECTOR,        AttitudePanel::OnReferenceVectorTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_CONSTRAINT_VECTOR,       AttitudePanel::OnConstraintVectorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,   AttitudePanel::OnBodyAlignmentVectorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR,  AttitudePanel::OnBodyConstraintVectorTextUpdate)
    EVT_COMBOBOX(ID_CB_STATE,              AttitudePanel::OnStateTypeSelection)
@@ -99,7 +97,7 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_COMBOBOX(ID_CB_COORDSYS,           AttitudePanel::OnCoordinateSystemSelection)
    EVT_COMBOBOX(ID_CB_MODEL,              AttitudePanel::OnAttitudeModelSelection)
    EVT_COMBOBOX(ID_CB_REFERENCE_BODY,     AttitudePanel::OnReferenceBodySelection)
-   EVT_COMBOBOX(ID_CB_MODE_OF_CONSTRAINT, AttitudePanel::OnModeOfConstraintSelection)
+   EVT_COMBOBOX(ID_CB_CONSTRAINT_TYPE,    AttitudePanel::OnConstraintTypeSelection)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -169,9 +167,7 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 
    nadirPointingDataLoaded      = false;  // WCS: Added, this flag tells whether data is loaded or not
    attRefBodyModified           = false;
-   modeOfConstraintModified     = false;
-   refVectorModified            = false;
-   constraintVectorModified     = false;
+   constraintTypeModified       = false;
    bodyAlignVectorModified      = false;
    bodyConstraintVectorModified = false;
 
@@ -493,28 +489,6 @@ void AttitudePanel::Create()
                      wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Now add the NadirPointing widgets
-   referenceVectorLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Reference Vector"), wxDefaultPosition, wxDefaultSize, 0);
-   refVectorXTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   refVectorYTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   refVectorZTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Constraint Vector"), wxDefaultPosition, wxDefaultSize, 0);
-   constraintVectorXTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorYTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorZTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyAlignVectorLabel =
       new wxStaticText(this, ID_TEXT, wxT("Body Alignment Vector"), wxDefaultPosition, wxDefaultSize, 0);
    bodyAlignVectorXTextCtrl =
@@ -540,26 +514,26 @@ void AttitudePanel::Create()
 
    // Reference Body must be a Celestial Body
    attRefBodyLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Reference Body"),
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Reference Body"),
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    referenceBodyComboBox =  theGuiManager->GetCelestialBodyComboBox(this, ID_CB_REFERENCE_BODY,
       wxDefaultSize);
    referenceBodyComboBox->SetToolTip(pConfig->Read(_T("ReferenceBodyHint")));
 
-   StringArray modes = Attitude::GetModesOfConstraint();
-   unsigned int modesSz = modes.size();
-   modeOfConstraintArray = new wxString[modesSz];
-   for (x = 0; x < modesSz; ++x)
-      modeOfConstraintArray[x] = wxT(modes[x].c_str());
+   StringArray constraintTypes = Attitude::GetAttitudeConstraintTypes();
+   unsigned int constraintTypesSz = constraintTypes.size();
+   constraintArray = new wxString[constraintTypesSz];
+   for (x = 0; x < constraintTypesSz; ++x)
+      constraintArray[x] = wxT(constraintTypes[x].c_str());
 
-   modeOfConstraintLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mode of Constraint"),
+   constraintTypeLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Constraint Type"),
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
-   modeOfConstraintComboBox =
-         new wxComboBox( this, ID_CB_MODE_OF_CONSTRAINT, wxT(modeOfConstraintArray[0]),
-            wxDefaultPosition, wxDefaultSize, modesSz, modeOfConstraintArray,
+   constraintTypeComboBox =
+         new wxComboBox( this, ID_CB_CONSTRAINT_TYPE, wxT(constraintArray[0]),
+            wxDefaultPosition, wxDefaultSize, constraintTypesSz, constraintArray,
             wxCB_DROPDOWN|wxCB_READONLY );
-   modeOfConstraintComboBox->SetToolTip(pConfig->Read(_T("ModeOfConstraintHint")));
+   constraintTypeComboBox->SetToolTip(pConfig->Read(_T("AttitudeConstraintTypeHint")));
 
 
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -637,16 +611,6 @@ void AttitudePanel::Create()
    //LOJ: - Add nutRefVecGroupSizer here
    //precessingSpinnerSizer->Add(nutRefVecGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   // Create 3 column flex grid sizer for reference vector
-   wxFlexGridSizer *refVectorTCSizer = new wxFlexGridSizer(3);
-   refVectorTCSizer->Add(refVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   refVectorTCSizer->Add(refVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   refVectorTCSizer->Add(refVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   // Create 3 column flex grid sizer for constraint vector
-   wxFlexGridSizer *conVectorTCSizer = new wxFlexGridSizer(3);
-   conVectorTCSizer->Add(constraintVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   conVectorTCSizer->Add(constraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   conVectorTCSizer->Add(constraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    // Create 3 column flex grid sizer for body alignment vector
    wxFlexGridSizer *bodyAlignVectorTCSizer = new wxFlexGridSizer(3);
    bodyAlignVectorTCSizer->Add(bodyAlignVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -658,14 +622,6 @@ void AttitudePanel::Create()
    bodyConstraintVectorTCSizer->Add(bodyConstraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    bodyConstraintVectorTCSizer->Add(bodyConstraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
-   // Create vertical box sizer for reference vector label and text ctrl
-   wxBoxSizer *refVectorSizer = new wxBoxSizer(wxVERTICAL);
-   refVectorSizer->Add(referenceVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   refVectorSizer->Add(refVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   // Create vertical box sizer for constraint vector label and text ctrl
-   wxBoxSizer *conVectorSizer = new wxBoxSizer(wxVERTICAL);
-   conVectorSizer->Add(constraintVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   conVectorSizer->Add(conVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    // Create vertical box sizer for body alignment vector label and text ctrl
    wxBoxSizer *bodyAlignVectorSizer = new wxBoxSizer(wxVERTICAL);
    bodyAlignVectorSizer->Add(bodyAlignVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -681,29 +637,26 @@ void AttitudePanel::Create()
    referenceBodySizer->Add(referenceBodyComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create horizontal box sizer for mode of constraint label and combobox
-   wxBoxSizer *modeOfConstraintSizer = new wxBoxSizer(wxHORIZONTAL);
-   modeOfConstraintSizer->Add(modeOfConstraintLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   modeOfConstraintSizer->Add(modeOfConstraintComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   wxBoxSizer *constraintTypeSizer = new wxBoxSizer(wxHORIZONTAL);
+   constraintTypeSizer->Add(constraintTypeLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   constraintTypeSizer->Add(constraintTypeComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create static box sizer for nadir pointing reference body and mode of constraint
-   GmatStaticBoxSizer *nadirPtBodyAndModeGroupSizer
+   GmatStaticBoxSizer *nadirPtBodyAndConstraintTypeGroupSizer
       = new GmatStaticBoxSizer(wxVERTICAL, this, "Body and Mode");
-   nadirPtBodyAndModeGroupSizer->Add(referenceBodySizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   nadirPtBodyAndModeGroupSizer->Add(modeOfConstraintSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtBodyAndConstraintTypeGroupSizer->Add(referenceBodySizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtBodyAndConstraintTypeGroupSizer->Add(constraintTypeSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create static box sizer for all nadir pointing vector items
    GmatStaticBoxSizer *nadirPtVectorsGroupSizer
       = new GmatStaticBoxSizer(wxVERTICAL, this, "Vectors");
-   nadirPtVectorsGroupSizer->Add(refVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   nadirPtVectorsGroupSizer->Add(conVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPtVectorsGroupSizer->Add(bodyAlignVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPtVectorsGroupSizer->Add(bodyConstraintVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create nadir pointing sizer for vectors
    nadirPointingSizer = new wxBoxSizer(wxVERTICAL);
-   nadirPointingSizer->Add(nadirPtBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPointingSizer->Add(nadirPtBodyAndConstraintTypeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPointingSizer->Add(nadirPtVectorsGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-//   nadirPointingSizer->Add(nadirPtRefBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Add to right box sizer
    boxSizer3->Add(precessingSpinnerSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -2142,27 +2095,6 @@ void AttitudePanel::OnSpinRateTextUpdate(wxCommandEvent &event)
    theScPanel->EnableUpdate(true);
 }
 
-//WCS: Added to trigger new value
-//------------------------------------------------------------------------------
-// void OnReferenceVectorTextUpdate(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void AttitudePanel::OnReferenceVectorTextUpdate(wxCommandEvent &event)
-{
-   refVectorModified = true;
-   dataChanged       = true;
-   theScPanel->EnableUpdate(true);
-}
-
-//WCS: Added to trigger new value
-//------------------------------------------------------------------------------
-// void OnConstraintVectorTextUpdate(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void AttitudePanel::OnConstraintVectorTextUpdate(wxCommandEvent &event)
-{
-   constraintVectorModified = true;
-   dataChanged              = true;
-   theScPanel->EnableUpdate(true);
-}
 
 //WCS: Added to trigger new value
 //------------------------------------------------------------------------------
@@ -2282,22 +2214,22 @@ void AttitudePanel::OnReferenceBodySelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnModeOfConstraintSelection(wxCommandEvent &event)
+// void OnConstraintTypeSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
- * Handles case when user updates the mode of constraint.
+ * Handles case when user updates the attitude constraint type.
  *
  * @param event  the wxCommandEvent to be handled
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::OnModeOfConstraintSelection(wxCommandEvent &event)
+void AttitudePanel::OnConstraintTypeSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("AttitudePanel::OnModeOfConstraintSelection() entered\n");
+      MessageInterface::ShowMessage("AttitudePanel::OnConstraintTypeSelection() entered\n");
    #endif
-//   std::string newMode      = modeOfConstraintComboBox->GetValue().c_str();
-   modeOfConstraintModified = true;
+//   std::string newMode      = constraintTypeComboBox->GetValue().c_str();
+   constraintTypeModified   = true;
    dataChanged              = true;
    theScPanel->EnableUpdate(true);
 }
@@ -3041,12 +2973,6 @@ void AttitudePanel::LoadNadirPointingData()
    #endif
    try
    {
-      refVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorX")));
-      refVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorY")));
-      refVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorZ")));
-      constraintVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorX")));
-      constraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorY")));
-      constraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorZ")));
       bodyAlignVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorX")));
       bodyAlignVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorY")));
       bodyAlignVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorZ")));
@@ -3054,10 +2980,10 @@ void AttitudePanel::LoadNadirPointingData()
       bodyConstraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorY")));
       bodyConstraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorZ")));
 
-      std::string referenceBody  = theAttitude->GetStringParameter("AttitudeReferenceBody");
+      std::string referenceBody      = theAttitude->GetStringParameter("AttitudeReferenceBody");
       referenceBodyComboBox->SetValue(wxT(referenceBody.c_str()));
-      std::string theMode  = theAttitude->GetStringParameter("ModeOfConstraint");
-      modeOfConstraintComboBox->SetValue(wxT(theMode.c_str()));
+      std::string theConstraintType  = theAttitude->GetStringParameter("AttitudeConstraintType");
+      constraintTypeComboBox->SetValue(wxT(theConstraintType.c_str()));
 
       nadirPointingDataLoaded = true;
    }
@@ -3082,42 +3008,6 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
       bool        success = true;
       std::string strValX, strValY, strValZ;
       Real        theX, theY, theZ;
-      if (refVectorModified)
-      {
-         strValX = (refVectorXTextCtrl->GetValue()).c_str();
-         strValY = (refVectorYTextCtrl->GetValue()).c_str();
-         strValZ = (refVectorZTextCtrl->GetValue()).c_str();
-         // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "ReferenceVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "ReferenceVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "ReferenceVectorZ", "Real Number")))
-         {
-            useAttitude->SetRealParameter("ReferenceVectorX", theX);
-            useAttitude->SetRealParameter("ReferenceVectorY", theY);
-            useAttitude->SetRealParameter("ReferenceVectorZ", theZ);
-            refVectorModified      = false;
-         }
-         else
-            success = false;
-      }
-      if (constraintVectorModified)
-      {
-         strValX = (constraintVectorXTextCtrl->GetValue()).c_str();
-         strValY = (constraintVectorYTextCtrl->GetValue()).c_str();
-         strValZ = (constraintVectorZTextCtrl->GetValue()).c_str();
-         // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "ConstraintVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "ConstraintVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "ConstraintVectorZ", "Real Number")))
-         {
-            useAttitude->SetRealParameter("ConstraintVectorX", theX);
-            useAttitude->SetRealParameter("ConstraintVectorY", theY);
-            useAttitude->SetRealParameter("ConstraintVectorZ", theZ);
-            constraintVectorModified      = false;
-         }
-         else
-            success = false;
-      }
       if (bodyAlignVectorModified)
       {
          strValX = (bodyAlignVectorXTextCtrl->GetValue()).c_str();
@@ -3162,11 +3052,11 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
          attRefBodyModified = false;
       }
 
-      if (modeOfConstraintModified)
+      if (constraintTypeModified)
       {
-         std::string newMode = modeOfConstraintComboBox->GetValue().c_str();
-         useAttitude->SetStringParameter("ModeOfConstraint", newMode);
-         modeOfConstraintModified = false;
+         std::string newMode = constraintTypeComboBox->GetValue().c_str();
+         useAttitude->SetStringParameter("AttitudeConstraintType", newMode);
+         constraintTypeModified = false;
       }
 
       if (success)

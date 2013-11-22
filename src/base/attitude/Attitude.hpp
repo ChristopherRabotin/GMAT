@@ -101,7 +101,7 @@ public:
    static StringArray       GetEulerSequenceStrings();
    static UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
 
-   static StringArray       GetModesOfConstraint();
+   static StringArray       GetAttitudeConstraintTypes();
 
    // method to convert an euler axis and angle to a cosine matrix
    static Rmatrix33 EulerAxisAndAngleToDCM(
@@ -163,6 +163,8 @@ public:
    /// Method returning a flag indicating whether or not setting of
    /// the initial attitude conditions is allowed for this attitude model
    bool                SetInitialAttitudeAllowed() const;
+   /// Does this model compute attitude rates?
+   bool                ModelComputesRates() const;
    
    /// Has this attitude been initialized?
    bool                IsInitialized()
@@ -304,13 +306,7 @@ protected:
        SPIN_RATE,
        // Add additional NadirPointing fields here
        ATTITUDE_REFERENCE_BODY,
-       MODE_OF_CONSTRAINT,
-       REFERENCE_VECTOR_X,
-       REFERENCE_VECTOR_Y,
-       REFERENCE_VECTOR_Z,
-       CONSTRAINT_VECTOR_X,
-       CONSTRAINT_VECTOR_Y,
-       CONSTRAINT_VECTOR_Z,
+       ATTITUDE_CONSTRAINT_TYPE,
        BODY_ALIGNMENT_VECTOR_X,
        BODY_ALIGNMENT_VECTOR_Y,
        BODY_ALIGNMENT_VECTOR_Z,
@@ -353,7 +349,7 @@ protected:
    static const Real        DCM_ORTHONORMALITY_TOLERANCE;
    static const Integer     OTHER_REPS_OFFSET;
 
-   static const std::string MODE_OF_CONSTRAINT_LIST[2];
+   static const std::string ATTITUDE_CONSTRAINT_TYPE_LIST[2];
 
    
    GmatAttitude::AttitudeStateType     inputAttitudeType;
@@ -419,6 +415,10 @@ protected:
    /// Has the warning about setting the initial attitude having no effect
    /// been written?
    bool                  warnNoAttitudeWritten;
+   /// does the current model compute attitude rates?
+   bool                  modelComputesRates;
+   /// Has warning about attitude rates not being computed been written?
+   bool                  warnNoRatesWritten;
 
    /// Additional data for CSFixed
    /// none at this time
@@ -439,9 +439,7 @@ protected:
    /// Additional data for NadirPointing
    std::string           refBodyName;
    CelestialBody         *refBody;
-   std::string           modeOfConstraint;
-   Rvector3              referenceVector;
-   Rvector3              constraintVector;
+   std::string           attitudeConstraintType;
    Rvector3              bodyAlignmentVector;
    Rvector3              bodyConstraintVector;
 

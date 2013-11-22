@@ -39,6 +39,7 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
+#include "GmatConstants.hpp"
 
 //#define DEBUG_REF_SETTING
 //#define DEBUG_ATTITUDE_GEN_STRING
@@ -54,6 +55,7 @@
 //#define DEBUG_ATTITUDE_INIT
 //#define DEBUG_UPDATE_STATE
 //#define DEBUG_SET_RATE
+//#define DEBUG_ANG_VEL
 
 //------------------------------------------------------------------------------
 // static data
@@ -111,13 +113,7 @@ Attitude::PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount] =
    "SpinRate",
    // Additional NadirPointing field text here
    "AttitudeReferenceBody",
-   "ModeOfConstraint",
-   "ReferenceVectorX",
-   "ReferenceVectorY",
-   "ReferenceVectorZ",
-   "ConstraintVectorX",
-   "ConstraintVectorY",
-   "ConstraintVectorZ",
+   "AttitudeConstraintType",
    "BodyAlignmentVectorX",
    "BodyAlignmentVectorY",
    "BodyAlignmentVectorZ",
@@ -186,12 +182,6 @@ Attitude::PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
 };
 
 const std::string
@@ -237,18 +227,19 @@ const std::string Attitude::EULER_SEQ_LIST[12] =
 };
 
 // Mode of Constraint values for NadirPointing
-const std::string Attitude::MODE_OF_CONSTRAINT_LIST[2] =
+const std::string Attitude::ATTITUDE_CONSTRAINT_TYPE_LIST[2] =
 {
       "OrbitNormal",
       "VelocityConstraint",
 };
 
-const Real    Attitude::TESTACCURACY                 = 1.19209290E-07;
-const Real    Attitude::QUAT_MIN_MAG                 = 1.0e-10;
-const Real    Attitude::ATTITUDE_TIME_TOLERANCE      = 1.0E-09;
-const Real    Attitude::EULER_ANGLE_TOLERANCE        = 1.0E-10;
-const Integer Attitude::OTHER_REPS_OFFSET            = 7000;
-const Real    Attitude::DCM_ORTHONORMALITY_TOLERANCE = 1.0e-14;
+const Real     Attitude::TESTACCURACY                 = 1.19209290E-07;
+const Real     Attitude::QUAT_MIN_MAG                 = 1.0e-10;
+const Real     Attitude::ATTITUDE_TIME_TOLERANCE      = 1.0E-09;
+const Real     Attitude::EULER_ANGLE_TOLERANCE        = 1.0E-10;
+const Integer  Attitude::OTHER_REPS_OFFSET            = 7000;
+
+const Real     Attitude::DCM_ORTHONORMALITY_TOLERANCE = 1.0e-14;
 
 
 //------------------------------------------------------------------------------
@@ -1083,12 +1074,6 @@ Rvector3 Attitude::ToEulerAngleRates(const Rvector3 &angularVel,
                "...... singularity found!!!\n");
       #endif
       std::stringstream errmsg;
-//      errmsg << "Error: the attitude defined by the euler angles (";
-//      errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
-//             << (eulerAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
-//             << (eulerAngles(2) * GmatMathConstants::DEG_PER_RAD);
-//      errmsg << ") is near a singularity." << std::endl;
-//      throw AttitudeException(errmsg.str());
       errmsg << "The attitude defined by the input euler angles (";
       errmsg << (eulerAngles(0) * GmatMathConstants::DEG_PER_RAD) << ", "
              << (eulerAngles(1) * GmatMathConstants::DEG_PER_RAD) << ", "
@@ -1267,7 +1252,7 @@ StringArray Attitude::GetEulerSequenceStrings()
 }
 
 //------------------------------------------------------------------------------
-//  StringArray GetModesOfConstraint()     [static]
+//  StringArray GetAttitudeConstraintTypes()     [static]
 //------------------------------------------------------------------------------
 /**
  * This method returns the possible values for Mode of Constraint (Nadir
@@ -1276,15 +1261,15 @@ StringArray Attitude::GetEulerSequenceStrings()
  * @return  array of strings for the Mode of Constraint
  */
 //------------------------------------------------------------------------------
-StringArray Attitude::GetModesOfConstraint()
+StringArray Attitude::GetAttitudeConstraintTypes()
 {
-   static StringArray modeStrings;  // compiler doesn't like this in the header
-   if (modeStrings.size() == 0)  // set it, if it hasn't been already
+   static StringArray constraintTypeStrings;  // compiler doesn't like this in the header
+   if (constraintTypeStrings.size() == 0)  // set it, if it hasn't been already
    {
       for (Integer i = 0; i < 2; i++)
-         modeStrings.push_back(MODE_OF_CONSTRAINT_LIST[i]);
+         constraintTypeStrings.push_back(ATTITUDE_CONSTRAINT_TYPE_LIST[i]);
    }
-   return modeStrings;
+   return constraintTypeStrings;
 }
 
 //------------------------------------------------------------------------------
@@ -1423,6 +1408,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    setInitialAttitudeAllowed (true),
    warnNoCSWritten         (false),
    warnNoAttitudeWritten   (false),
+   modelComputesRates      (true),
+   warnNoRatesWritten      (false),
    // Additional CSFixed fields here
    // none at this time
    // Additional Spinner fields here
@@ -1438,7 +1425,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    // Additional NaditPointing fields here
    refBodyName             ("Earth"),
    refBody                 (NULL),
-   modeOfConstraint        ("OrbitNormal")
+   attitudeConstraintType  ("OrbitNormal")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -1463,10 +1450,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    nutationReferenceVector.Set(0,0,1);
    bodySpinAxis.Set(0,0,1);
    // Additional NaditPointing fields here
-   referenceVector.Set(-1,0,0);
-   constraintVector.Set(0,1,0);
-   bodyAlignmentVector.Set(0,0,1);
-   bodyConstraintVector.Set(1,0,0);
+   bodyAlignmentVector.Set(1.0, 0.0, 0.0);
+   bodyConstraintVector.Set(0.0, 0.0, 1.0);
  }
  
 //------------------------------------------------------------------------------
@@ -1491,7 +1476,7 @@ Attitude::Attitude(const Attitude& att) :
    epoch                   (att.epoch),
    owningSC                (NULL),
    refCSName               (att.refCSName),
-   refCS                   (att.refCS),
+   refCS                   (att.refCS),   // shouldn't this be NULL?
    eulerSequence           (att.eulerSequence),
    eulerSequenceArray      (att.eulerSequenceArray),
    RBi                     (att.RBi),
@@ -1508,6 +1493,8 @@ Attitude::Attitude(const Attitude& att) :
    setInitialAttitudeAllowed (att.setInitialAttitudeAllowed),
    warnNoCSWritten         (att.warnNoCSWritten),
    warnNoAttitudeWritten   (att.warnNoAttitudeWritten),
+   modelComputesRates      (att.modelComputesRates),
+   warnNoRatesWritten      (att.warnNoRatesWritten),
    // Additional CSFixed fields here
    // none at this time
    // Additional Spinner fields here
@@ -1525,9 +1512,7 @@ Attitude::Attitude(const Attitude& att) :
    // Additional NadirPointing fields here
    refBodyName             (att.refBodyName),
    refBody                 (NULL),
-   modeOfConstraint        (att.modeOfConstraint),
-   referenceVector         (att.referenceVector),
-   constraintVector        (att.constraintVector),
+   attitudeConstraintType  (att.attitudeConstraintType),
    bodyAlignmentVector     (att.bodyAlignmentVector),
    bodyConstraintVector    (att.bodyConstraintVector)
 {
@@ -1581,6 +1566,8 @@ Attitude& Attitude::operator=(const Attitude& att)
    setInitialAttitudeAllowed = att.setInitialAttitudeAllowed;
    warnNoCSWritten         = att.warnNoCSWritten;
    warnNoAttitudeWritten   = att.warnNoAttitudeWritten;
+   modelComputesRates      = att.modelComputesRates;
+   warnNoRatesWritten      = att.warnNoRatesWritten;
    // Additional CSFixed fields here
    // none at this time
    // Additional Spinner fields here
@@ -1598,9 +1585,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    // Additional NadirPointing fields here
    refBodyName             = att.refBodyName;
    refBody                 = att.refBody;
-   modeOfConstraint        = att.modeOfConstraint;
-   referenceVector         = att.referenceVector;
-   constraintVector        = att.constraintVector;
+   attitudeConstraintType  = att.attitudeConstraintType;
    bodyAlignmentVector     = att.bodyAlignmentVector;
    bodyConstraintVector    = att.bodyConstraintVector;
 
@@ -1771,7 +1756,6 @@ bool Attitude::Initialize()
    return true;
 }
 
-
 //---------------------------------------------------------------------------
 //  const Real GetEpoch() const
 //---------------------------------------------------------------------------
@@ -1827,6 +1811,7 @@ void Attitude::SetOwningSpacecraft(GmatBase *theSC)
             "ERROR setting the owning spacecraft on attitude\n");
    }
 }
+
 
 ////---------------------------------------------------------------------------
 ////  bool    SetReferenceCoordinateSystemName(
@@ -2019,6 +2004,20 @@ const Rmatrix33& Attitude::GetCosineMatrix(Real atTime)
 //---------------------------------------------------------------------------
 const Rvector3& Attitude::GetAngularVelocity(Real atTime)
 {
+   #ifdef DEBUG_ANG_VEL
+      MessageInterface::ShowMessage("Entering GetAngVel for attitude of type %s\n",
+            attitudeModelName.c_str());
+      MessageInterface::ShowMessage("modelComputesRates = %s\n",
+            (modelComputesRates? "true" : "false"));
+   #endif
+   if (!modelComputesRates)
+   {
+      std::string errMsg = "Attitude rates for spacecraft ";
+      errMsg += owningSC->GetName() + " were requested, but attitude rates ";
+      errMsg += "are not computed when attitude mode is " + attitudeModelName;
+      errMsg += ".\n";
+      throw AttitudeException(errMsg);
+   }
    if (!isInitialized || needsReinit) Initialize();
 //   if (GmatMathUtil::Abs(atTime - attitudeTime) >
 //       ATTITUDE_TIME_TOLERANCE)
@@ -2050,6 +2049,16 @@ const Rvector3& Attitude::GetEulerAngleRates(Real atTime)
    "   with atTime = %.12f, and attitudeTime = %.12f\n",
    atTime, attitudeTime);
    #endif
+
+   if (!modelComputesRates)
+   {
+      std::string errMsg = "Attitude rates for spacecraft ";
+      errMsg += owningSC->GetName() + " were requested, but attitude rates ";
+      errMsg += "are not computed when attitude mode is " + attitudeModelName;
+      errMsg += ".\n";
+      throw AttitudeException(errMsg);
+   }
+
    if (!isInitialized || needsReinit) Initialize();
 //   if (GmatMathUtil::Abs(atTime - attitudeTime) >
 //       ATTITUDE_TIME_TOLERANCE)
@@ -2111,6 +2120,21 @@ bool Attitude::SetInitialAttitudeAllowed() const
    return setInitialAttitudeAllowed;
 }
 
+//---------------------------------------------------------------------------
+//  bool   ModelComputesRates() const
+//---------------------------------------------------------------------------
+ /**
+ * Returns a flag indicating whether or not this model computes attitude
+ * rates.
+ *
+ * @return true if the model computes rates; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool Attitude::ModelComputesRates() const
+{
+   return modelComputesRates;
+}
+
 //------------------------------------------------------------------------------
 //   std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -2129,6 +2153,12 @@ std::string Attitude::GetRefObjectName(const Gmat::ObjectType type) const
       MessageInterface::ShowMessage("Attitude::GetRefObjectName with type = %d\n",
             type);
    #endif
+
+   if (type == Gmat::CELESTIAL_BODY)
+   {
+      return refBodyName;
+   }
+
    if ((type == Gmat::UNKNOWN_OBJECT) ||
        (type == Gmat::COORDINATE_SYSTEM))
    {
@@ -2144,11 +2174,17 @@ const StringArray& Attitude::GetRefObjectNameArray(const Gmat::ObjectType type)
    refObjectNames.clear();
 
    if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::CELESTIAL_BODY)
+   {
+      refObjectNames.push_back(refBodyName);
+   }
+
+   if (type == Gmat::UNKNOWN_OBJECT ||
        type == Gmat::COORDINATE_SYSTEM)
    {
       refObjectNames.push_back(refCSName);
    }
-
+   return refObjectNames;
    //return refObjectNames; // previous ver
    return GmatBase::GetRefObjectNameArray(type);
 }
@@ -2172,6 +2208,16 @@ const StringArray& Attitude::GetRefObjectNameArray(const Gmat::ObjectType type)
 bool Attitude::SetRefObjectName(const Gmat::ObjectType type,
                                 const std::string &name)
 {
+   if (type == Gmat::CELESTIAL_BODY)
+   {
+      #ifdef DEBUG_ATTITUDE_SET
+         MessageInterface::ShowMessage("Attitude: Setting refBodyName to %s\n",
+                                       name.c_str());
+      #endif
+      refBodyName = name;
+      return true;
+   }
+
    if ((type == Gmat::UNKNOWN_OBJECT) ||
        (type == Gmat::COORDINATE_SYSTEM))
    {
@@ -2214,6 +2260,12 @@ bool Attitude::RenameRefObject(const Gmat::ObjectType type,
          refCSName = newName;
       }
    }
+   if (type == Gmat::CELESTIAL_BODY)
+   {
+      if (refBodyName == oldName)
+         refBodyName = newName;
+   }
+
    return true;
 }
                                
@@ -2237,6 +2289,9 @@ GmatBase* Attitude::GetRefObject(const Gmat::ObjectType type,
    {
       case Gmat::COORDINATE_SYSTEM:
          if (name == refCSName)           return refCS;
+         break;
+      case Gmat::CELESTIAL_BODY:
+         if (name == refBodyName)         return refBody;
          break;
       default:
          break;
@@ -2305,7 +2360,24 @@ bool Attitude::SetRefObject(GmatBase *obj,
       #endif
       return true;
    }
-   
+   if (obj->IsOfType("CelestialBody"))
+   {
+      if (name == refBodyName)
+      {
+         if (refBody != (CelestialBody*) obj)
+         {
+            refBody = (CelestialBody*) obj;
+            #ifdef DEBUG_REF_SETTING
+               MessageInterface::ShowMessage(
+                     "Entering Attitude::SetRefObject setting refBody pointer to %s<%p>\n",
+                     refBodyName.c_str(), obj);
+            #endif
+            needsReinit = true;  // need to reinitialize, since Reference Body has changed
+         }
+      }
+      return true;
+   }
+
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
 }
@@ -2319,6 +2391,7 @@ const ObjectTypeArray& Attitude::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
+   refObjectTypes.push_back(Gmat::CELESTIAL_BODY);
 
    return refObjectTypes;
 }
@@ -2765,7 +2838,7 @@ Real Attitude::GetRealParameter(const Integer id) const
    }
    // Additional Real data for NadirPointing
    // none at this time
-   if ((id >= REFERENCE_VECTOR_X) && (id <= BODY_CONSTRAINT_VECTOR_Z))
+   if ((id >= BODY_ALIGNMENT_VECTOR_X) && (id <= BODY_CONSTRAINT_VECTOR_Z))
    {
       Real nadirReal = GetNadirPointingRealParameter(id);
       if (nadirReal != REAL_PARAMETER_UNDEFINED)
@@ -3256,7 +3329,7 @@ Real Attitude::SetRealParameter(const Integer id,
    }
    // Additional Real data for NadirPointing
    // none at this time
-   if ((id >= REFERENCE_VECTOR_X) && (id <= BODY_CONSTRAINT_VECTOR_Z))
+   if ((id >= BODY_ALIGNMENT_VECTOR_X) && (id <= BODY_CONSTRAINT_VECTOR_Z))
    {
       Real nadirReal = SetNadirPointingRealParameter(id, value);
       if (nadirReal != REAL_PARAMETER_UNDEFINED)
@@ -3839,7 +3912,7 @@ std::string Attitude::GetStringParameter(const Integer id) const
       }
       return refBodyName;
    }
-   if (id == MODE_OF_CONSTRAINT)
+   if (id == ATTITUDE_CONSTRAINT_TYPE)
    {
       if (attitudeModelName != "NadirPointing")
       {
@@ -3848,7 +3921,7 @@ std::string Attitude::GetStringParameter(const Integer id) const
 //         warnMsg += " on a non-NadirPointing Attitude model\n";
 //         MessageInterface::ShowMessage(warnMsg);
       }
-      return modeOfConstraint;
+      return attitudeConstraintType;
    }
    return GmatBase::GetStringParameter(id);
 }
@@ -3999,7 +4072,7 @@ bool Attitude::SetStringParameter(const Integer     id,
       refBodyName = value;
       return true;
    }
-   if (id == MODE_OF_CONSTRAINT)
+   if (id == ATTITUDE_CONSTRAINT_TYPE)
    {
       if (attitudeModelName != "NadirPointing")
       {
@@ -4008,7 +4081,7 @@ bool Attitude::SetStringParameter(const Integer     id,
          warnMsg += " on a non-NadirPointing Attitude model has no effect\n";
          MessageInterface::ShowMessage(warnMsg);
       }
-      modeOfConstraint = value;
+      attitudeConstraintType = value;
       return true;
    }
 
@@ -4723,30 +4796,6 @@ Real Attitude::GetNadirPointingRealParameter(const Integer id) const
 //      warnMsg += " on a non-NadirPointing Attitude model\n";
 //      MessageInterface::ShowMessage(warnMsg);
    }
-   if (id == REFERENCE_VECTOR_X)
-   {
-      return referenceVector(0);
-   }
-   if (id == REFERENCE_VECTOR_Y)
-   {
-      return referenceVector(1);
-   }
-   if (id == REFERENCE_VECTOR_Z)
-   {
-      return referenceVector(2);
-   }
-   if (id == CONSTRAINT_VECTOR_X)
-   {
-      return constraintVector(0);
-   }
-   if (id == CONSTRAINT_VECTOR_Y)
-   {
-      return constraintVector(1);
-   }
-   if (id == CONSTRAINT_VECTOR_Z)
-   {
-      return constraintVector(2);
-   }
    if (id == BODY_ALIGNMENT_VECTOR_X)
    {
       return bodyAlignmentVector(0);
@@ -4786,36 +4835,6 @@ Real Attitude::SetNadirPointingRealParameter(const Integer id, const Real value)
       warnMsg += GetParameterText(id);
       warnMsg += " on a non-NadirPointing Attitude model has no effect\n";
       MessageInterface::ShowMessage(warnMsg);
-   }
-   if (id == REFERENCE_VECTOR_X)
-   {
-      referenceVector(0) = value;
-      return referenceVector(0);
-   }
-   if (id == REFERENCE_VECTOR_Y)
-   {
-      referenceVector(1) = value;
-      return referenceVector(1);
-   }
-   if (id == REFERENCE_VECTOR_Z)
-   {
-      referenceVector(2) = value;
-      return referenceVector(2);
-   }
-   if (id == CONSTRAINT_VECTOR_X)
-   {
-      constraintVector(0) = value;
-      return constraintVector(0);
-   }
-   if (id == CONSTRAINT_VECTOR_Y)
-   {
-      constraintVector(1) = value;
-      return constraintVector(1);
-   }
-   if (id == CONSTRAINT_VECTOR_Z)
-   {
-      constraintVector(2) = value;
-      return constraintVector(2);
    }
    if (id == BODY_ALIGNMENT_VECTOR_X)
    {
