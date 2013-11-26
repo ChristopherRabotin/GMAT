@@ -38,6 +38,7 @@
 #include "StringUtil.hpp"
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
+#include "AttitudeConversionUtility.hpp"
 #include <wx/config.h>
 
 //#define DEBUG_ATTITUDE_PANEL 1
@@ -3094,17 +3095,17 @@ bool AttitudePanel::UpdateCosineMatrix()
    {
       if (attStateType == stateTypeArray[QUATERNION])
       {
-         dcmat = Attitude::ToCosineMatrix(q);
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(q);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         dcmat = Attitude::ToCosineMatrix(ea * GmatMathConstants::RAD_PER_DEG,
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(ea * GmatMathConstants::RAD_PER_DEG,
                          (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q     = Attitude::ToQuaternion(mrp);
-         dcmat = Attitude::ToCosineMatrix(q);
+         q     = AttitudeConversionUtility::ToQuaternion(mrp);
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(q);
       }
       // update string versions of mat values (cosineMatrix)
       unsigned int x, y;
@@ -3141,16 +3142,16 @@ bool AttitudePanel::UpdateQuaternion()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         q = Attitude::ToQuaternion(dcmat);
+         q = AttitudeConversionUtility::ToQuaternion(dcmat);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         q = Attitude::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
+         q = AttitudeConversionUtility::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q     = Attitude::ToQuaternion(mrp);
+         q     = AttitudeConversionUtility::ToQuaternion(mrp);
       }
       // update string versions of q values
       for (unsigned int x = 0; x < 4; ++x)
@@ -3185,20 +3186,20 @@ bool AttitudePanel::UpdateEulerAngles()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         ea = Attitude::ToEulerAngles(dcmat,
+         ea = AttitudeConversionUtility::ToEulerAngles(dcmat,
                         (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                         * GmatMathConstants::DEG_PER_RAD;
       }
       else if (attStateType == stateTypeArray[QUATERNION])
       {
-         ea = Attitude::ToEulerAngles(q,
+         ea = AttitudeConversionUtility::ToEulerAngles(q,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                        * GmatMathConstants::DEG_PER_RAD;
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q  = Attitude::ToQuaternion(mrp);
-         ea = Attitude::ToEulerAngles(q,
+         q  = AttitudeConversionUtility::ToQuaternion(mrp);
+         ea = AttitudeConversionUtility::ToEulerAngles(q,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                        * GmatMathConstants::DEG_PER_RAD;
       }
@@ -3235,18 +3236,18 @@ bool AttitudePanel::UpdateMRPs()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         q   = Attitude::ToQuaternion(dcmat);
-         mrp = Attitude::ToMRPs(q);
+         q   = AttitudeConversionUtility::ToQuaternion(dcmat);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       else if (attStateType == stateTypeArray[QUATERNION])
       {
-         mrp = Attitude::ToMRPs(q);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         q   = Attitude::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
+         q   = AttitudeConversionUtility::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
                (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
-         mrp = Attitude::ToMRPs(q);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       // update string versions of mrp values
       for (unsigned int x = 0; x < 3; ++x)
@@ -3295,7 +3296,7 @@ bool AttitudePanel::UpdateAngularVelocity()
                MessageInterface::ShowMessage("   with seq = %d  %d  %d\n",
                      (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
             #endif
-            av = Attitude::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
+            av = AttitudeConversionUtility::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
                            ea * GmatMathConstants::RAD_PER_DEG,
                            (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                            * GmatMathConstants::DEG_PER_RAD;
@@ -3346,7 +3347,7 @@ bool AttitudePanel::UpdateEulerAngleRates()
          #endif
          if (retval)
          {
-            ear = Attitude::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
+            ear = AttitudeConversionUtility::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
                             ea * GmatMathConstants::RAD_PER_DEG,
                             (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                             * GmatMathConstants::DEG_PER_RAD;

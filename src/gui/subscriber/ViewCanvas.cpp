@@ -27,6 +27,7 @@
 #include "GuiInterpreter.hpp"
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 
 //http://www.opengl.org/resources/features/KilgardTechniques/oglpitfall/
@@ -2370,7 +2371,7 @@ void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
    int attIndex = satId * MAX_DATA * 4 + (mLastIndex*4);
    
    Rmatrix33 cosMat = sat->GetAttitude(time);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
+   Rvector quat = AttitudeConversionUtility::ToQuaternion(cosMat);
 
    #ifdef DEBUG_ATTITUDE
    MessageInterface::ShowMessage("Attitude quaternion for %s: [%lf  %lf  %lf  %lf]\n", 
@@ -2397,7 +2398,7 @@ void ViewCanvas::UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId)
    
    // Get attitude matrix   
    Rmatrix33 cosMat = sp->GetAttitude(time);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
+   Rvector quat = AttitudeConversionUtility::ToQuaternion(cosMat);
    #ifdef DEBUG_ATTITUDE
    MessageInterface::ShowMessage
       ("UpdateOtherObjectAttitude() '%s', attIndex=%d, quat=%s", objName.c_str(),
@@ -2466,7 +2467,7 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
       return;
    
    // the rotation matrix from celestial body fixed to inertial
-   Rmatrix33 matIB = Attitude::ToCosineMatrix(quat);
+   Rmatrix33 matIB = AttitudeConversionUtility::ToCosineMatrix(quat);
    
    #if DEBUG_ROTATE_BODY > 1
    MessageInterface::ShowMessage("==> matIB=\n%s", matIB.ToString(16, 25).c_str());
@@ -2507,7 +2508,7 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
    // Compute angle and axis
    Real eAngle;
    Rvector3 eAxis;
-   Attitude::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
+   AttitudeConversionUtility::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
    
    // Convert to degree
    Real angInDeg = GmatMathUtil::RadToDeg(eAngle, true);

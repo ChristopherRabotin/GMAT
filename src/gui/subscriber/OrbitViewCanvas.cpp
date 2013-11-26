@@ -47,6 +47,7 @@
 #include "BodyFixedAxes.hpp"
 #include "Rendering.hpp"
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
+#include "AttitudeConversionUtility.hpp"
 #include <string.h>                // for strlen( )
 
 #ifdef __WXMAC__
@@ -2603,7 +2604,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
          mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
    #endif
 
-   Rvector3 EARad = Attitude::ToEulerAngles(quat, 1,2,3);
+   Rvector3 EARad = AttitudeConversionUtility::ToEulerAngles(quat, 1,2,3);
    
    #ifdef DEBUG_SC_ATTITUDE
    MessageInterface::ShowMessage

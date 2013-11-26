@@ -26,6 +26,7 @@
 #include "AttitudeException.hpp"
 #include "SpiceAttitude.hpp"
 #include "MessageInterface.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 //#define DEBUG_SPICE_ATTITUDE
 //#define DEBUG_SPICE_ATTITUDE_GET_SET
@@ -305,7 +306,7 @@ const Rvector&   SpiceAttitude::GetQuaternion(Real atTime)
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime     = atTime;
-   quaternion       = Attitude::ToQuaternion(dcm);
+   quaternion       = AttitudeConversionUtility::ToQuaternion(dcm);
    return quaternion;
 }
 
@@ -326,7 +327,7 @@ const Rvector3&  SpiceAttitude::GetEulerAngles(Real atTime)
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime   = atTime;
-   eulerAngles    = Attitude::ToEulerAngles(dcm,
+   eulerAngles    = AttitudeConversionUtility::ToEulerAngles(dcm,
                               (Integer) eulerSequenceArray.at(0),
                               (Integer) eulerSequenceArray.at(1),
                               (Integer) eulerSequenceArray.at(2));
@@ -358,7 +359,7 @@ const Rvector3&  SpiceAttitude::GetEulerAngles(Real atTime,  Integer seq1,
 {
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime   = atTime;
-   eulerAngles    = Attitude::ToEulerAngles(dcm, seq1, seq2, seq3);
+   eulerAngles    = AttitudeConversionUtility::ToEulerAngles(dcm, seq1, seq2, seq3);
    return eulerAngles;
 }
 
@@ -419,7 +420,7 @@ const Rvector3& SpiceAttitude::GetEulerAngleRates(Real atTime)
    ComputeCosineMatrixAndAngularVelocity(atTime);
    attitudeTime        = atTime;
    eulerAngles         = GetEulerAngles(atTime);
-   eulerAngleRates     = Attitude::ToEulerAngleRates(angVel,
+   eulerAngleRates     = AttitudeConversionUtility::ToEulerAngleRates(angVel,
                          eulerAngles,
                          (Integer) eulerSequenceArray.at(0),
                          (Integer) eulerSequenceArray.at(1),

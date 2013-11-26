@@ -505,6 +505,7 @@ OBJECTS = \
     util/A1Date.o \
     util/A1Mjd.o \
     util/AngleUtil.o \
+    util/AttitudeConversionUtility.o \
     util/AttitudeUtil.o \
     util/BaseException.o \
     util/BodyFixedStateConverter.o \
