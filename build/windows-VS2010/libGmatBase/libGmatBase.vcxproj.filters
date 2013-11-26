@@ -1293,6 +1293,9 @@
     <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2542,6 +2545,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp">
       <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
