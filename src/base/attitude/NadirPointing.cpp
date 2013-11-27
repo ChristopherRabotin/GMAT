@@ -311,7 +311,7 @@ void NadirPointing::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 
 	   constraintVector[0] = 0;
 	   constraintVector[1] = 0;
-	   constraintVector[2] = 1;
+	   constraintVector[2] = -1;
    }
 
    // RBi calculation using TRIAD (from LVLH to body frame)
