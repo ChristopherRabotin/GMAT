@@ -29,6 +29,7 @@
 #include "RealUtilities.hpp"         // for IsEven()
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
+#include "AttitudeConversionUtility.hpp"
 #include <sstream>                   // for <<, std::endl
 
 #include "Code500EphemerisFile.hpp"
@@ -2794,7 +2795,7 @@ void EphemerisFile::GetAttitude()
    // Get spacecraft attitude in direction cosine matrix
    attEpoch = spacecraft->GetEpoch();
    Rmatrix33 dcm = spacecraft->GetAttitude(attEpoch);
-   Rvector quat = Attitude::ToQuaternion(dcm);
+   Rvector quat = AttitudeConversionUtility::ToQuaternion(dcm);
    for (int i = 0; i < 4; i++)
       attQuat[i] = quat[i];
 }

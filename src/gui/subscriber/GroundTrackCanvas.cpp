@@ -27,6 +27,7 @@
 #include "MessageInterface.hpp"
 #include "Rendering.hpp"           // for DrawStringAt(), DrawSquare()
 #include "MdiChildGroundTrackFrame.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -1874,7 +1875,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
       return;
    
    // the rotation matrix from celestial body fixed to inertial
-   Rmatrix33 matIB = Attitude::ToCosineMatrix(quat);
+   Rmatrix33 matIB = AttitudeConversionUtility::ToCosineMatrix(quat);
    
    #if DEBUG_ROTATE_BODY > 1
    MessageInterface::ShowMessage("==> matIB=\n%s", matIB.ToString(16, 25).c_str());
@@ -1915,7 +1916,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
    // Compute angle and axis
    Rvector3 eAxis;
    Real eAngle;
-   Attitude::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
+   AttitudeConversionUtility::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
    
    // Convert to degree
    Real angInDeg = GmatMathUtil::RadToDeg(eAngle, true);

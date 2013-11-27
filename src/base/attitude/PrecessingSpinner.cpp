@@ -21,6 +21,7 @@
 #include "Attitude.hpp"
 #include "AttitudeException.hpp"
 #include "MessageInterface.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 #include "PrecessingSpinner.hpp"
 
@@ -407,7 +408,7 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    {
 	   Rvector3 rvectorAlignNormalized = rvectorAlign / rvectorAlign.GetMagnitude();
 	   Real angleAlign = GmatMathUtil::ACos(bodySpinAxisNormalized * nutationReferenceVectorNormalized);	//in radian
-	   rmatrixInit = Attitude::EulerAxisAndAngleToDCM(rvectorAlignNormalized, angleAlign);
+	   rmatrixInit = AttitudeConversionUtility::EulerAxisAndAngleToDCM(rvectorAlignNormalized, angleAlign);
    }
 
    //Set Body 123 axis to perform 3-1-3 rotation
@@ -426,13 +427,13 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    bodyAxis3 = bodyAxis3 / bodyAxis3.GetMagnitude();
 
    //Rotate with PrecessingAngle
-   Rmatrix33 rmatrixPrecession = Attitude::EulerAxisAndAngleToDCM(bodyAxis3,precessionAngle);
+   Rmatrix33 rmatrixPrecession = AttitudeConversionUtility::EulerAxisAndAngleToDCM(bodyAxis3,precessionAngle);
 
    //Rotate with NutationAngle
-   Rmatrix33 rmatrixNutation = Attitude::EulerAxisAndAngleToDCM(bodyAxis1,nutationAngle);
+   Rmatrix33 rmatrixNutation = AttitudeConversionUtility::EulerAxisAndAngleToDCM(bodyAxis1,nutationAngle);
 
    //Rotate with SpinAngle
-   Rmatrix33 rmatrixSpin = Attitude::EulerAxisAndAngleToDCM(bodyAxis3,spinAngle);
+   Rmatrix33 rmatrixSpin = AttitudeConversionUtility::EulerAxisAndAngleToDCM(bodyAxis3,spinAngle);
 
    // Final rotation matrix from Inertial to Body
    dcm = rmatrixSpin * rmatrixNutation * rmatrixPrecession * rmatrixInit ;

@@ -70,47 +70,16 @@ class GMAT_API Attitude : public GmatBase
 public:
 
    // --------------------------------------------------------------------------
-   // BEGIN static methods for conversion
+   // BEGIN static methods
    // --------------------------------------------------------------------------
-   static Rmatrix33 ToCosineMatrix(const Rvector &quat1);
-   static Rmatrix33 ToCosineMatrix(const Rvector3 &eulerAngles, 
-                                   Integer seq1, Integer seq2, 
-                                   Integer seq3);
-   static Rmatrix33 ToCosineMatrix(const Real *eulerAngles, 
-                                   Integer seq1, Integer seq2, 
-                                   Integer seq3);
-   static Rvector3  ToEulerAngles(const Rvector &quat1, Integer seq1,
-                                  Integer seq2,         Integer seq3);
-   static Rvector3  ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
-                                  Integer seq2,            Integer seq3);
-   static Rvector   ToQuaternion(const Rvector3 &eulerAngles, 
-                                 Integer seq1, Integer seq2, Integer seq3);
-   static Rvector   ToQuaternion(const Rmatrix33 &cosMat);
-   static Rvector   ToQuaternion(const Rvector3 &MRPs);
-   static Rvector3  ToMRPs(const Rvector &quat1);
-   
-   static Rvector3  ToEulerAngleRates(const Rvector3 &angularVel, 
-                                      const Rvector3 &eulerAngles,
-                                      Integer seq1, Integer seq2, 
-                                      Integer seq3);
-   static Rvector3  ToAngularVelocity(const Rvector3 &eulerRates, 
-                                      const Rvector3 &eulerAngles,
-                                      Integer seq1, Integer seq2, 
-                                      Integer seq3);
                                       
    static StringArray       GetEulerSequenceStrings();
    static UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
 
-   static StringArray       GetModesOfConstraint();
+   static StringArray       GetAttitudeConstraintTypes();
 
-   // method to convert an euler axis and angle to a cosine matrix
-   static Rmatrix33 EulerAxisAndAngleToDCM(
-                        const Rvector3 &eAxis, Real eAngle);
-   // method to convert a cosine matrix to an euler axis and angle
-   static void      DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
-                                            Rvector3 &eAxis, Real &eAngle);
    // --------------------------------------------------------------------------
-   // END static methods for conversion
+   // END static methods
    // --------------------------------------------------------------------------
 
    // constructor
@@ -163,6 +132,8 @@ public:
    /// Method returning a flag indicating whether or not setting of
    /// the initial attitude conditions is allowed for this attitude model
    bool                SetInitialAttitudeAllowed() const;
+   /// Does this model compute attitude rates?
+   bool                ModelComputesRates() const;
    
    /// Has this attitude been initialized?
    bool                IsInitialized()
@@ -304,13 +275,7 @@ protected:
        SPIN_RATE,
        // Add additional NadirPointing fields here
        ATTITUDE_REFERENCE_BODY,
-       MODE_OF_CONSTRAINT,
-       REFERENCE_VECTOR_X,
-       REFERENCE_VECTOR_Y,
-       REFERENCE_VECTOR_Z,
-       CONSTRAINT_VECTOR_X,
-       CONSTRAINT_VECTOR_Y,
-       CONSTRAINT_VECTOR_Z,
+       ATTITUDE_CONSTRAINT_TYPE,
        BODY_ALIGNMENT_VECTOR_X,
        BODY_ALIGNMENT_VECTOR_Y,
        BODY_ALIGNMENT_VECTOR_Z,
@@ -347,13 +312,10 @@ protected:
  
    static const std::string EULER_SEQ_LIST[12];
    static const Real        TESTACCURACY;
-   static const Real        QUAT_MIN_MAG;
    static const Real        ATTITUDE_TIME_TOLERANCE;
-   static const Real        EULER_ANGLE_TOLERANCE;
-   static const Real        DCM_ORTHONORMALITY_TOLERANCE;
    static const Integer     OTHER_REPS_OFFSET;
 
-   static const std::string MODE_OF_CONSTRAINT_LIST[2];
+   static const std::string ATTITUDE_CONSTRAINT_TYPE_LIST[2];
 
    
    GmatAttitude::AttitudeStateType     inputAttitudeType;
@@ -419,6 +381,10 @@ protected:
    /// Has the warning about setting the initial attitude having no effect
    /// been written?
    bool                  warnNoAttitudeWritten;
+   /// does the current model compute attitude rates?
+   bool                  modelComputesRates;
+   /// Has warning about attitude rates not being computed been written?
+   bool                  warnNoRatesWritten;
 
    /// Additional data for CSFixed
    /// none at this time
@@ -439,9 +405,7 @@ protected:
    /// Additional data for NadirPointing
    std::string           refBodyName;
    CelestialBody         *refBody;
-   std::string           modeOfConstraint;
-   Rvector3              referenceVector;
-   Rvector3              constraintVector;
+   std::string           attitudeConstraintType;
    Rvector3              bodyAlignmentVector;
    Rvector3              bodyConstraintVector;
 

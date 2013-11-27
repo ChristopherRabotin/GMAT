@@ -222,5 +222,18 @@ namespace GmatOrbitConstants
 
 } // GmatOrbitConstants
 
+// Constants used in attitude conversion between DCM, Quaternion, etc.
+namespace GmatAttitudeConstants
+{
+   // Undefined
+   const static Real ATTITUDE_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
+
+   // Tolerance
+   const Real     QUAT_MIN_MAG                 = 1.0e-10;
+   const Real     EULER_ANGLE_TOLERANCE        = 1.0E-10;
+   const Real     DCM_ORTHONORMALITY_TOLERANCE = 1.0e-14;
+
+} // GmatAttitudeConstants
+
 
 #endif // GmatConstants_hpp

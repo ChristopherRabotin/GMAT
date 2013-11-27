@@ -510,6 +510,7 @@
     <ClCompile Include="..\..\..\src\base\util\A1Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
@@ -923,6 +924,7 @@
     <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">

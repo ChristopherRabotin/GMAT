@@ -38,6 +38,7 @@
 #include "MessageInterface.hpp"
 #include "Attitude.hpp"
 #include "Spacecraft.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 using namespace GmatMathUtil;        // for trig functions, etc.
 using namespace GmatTimeConstants;   // for JD offsets, etc.
@@ -51,6 +52,7 @@ using namespace GmatTimeConstants;   // for JD offsets, etc.
 //#define DEBUG_BF_RECOMPUTE
 //#define DEBUG_BF_EPOCHS
 //#define DEBUG_BF_SC
+//#define DEBUG_BFA_INIT
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -208,9 +210,31 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesNutationUpdateInterval() const
 //------------------------------------------------------------------------------
 bool BodyFixedAxes::Initialize()
 {
+#ifdef DEBUG_BFA_INIT
+   MessageInterface::ShowMessage("Entering BFA::Init ...\n");
+   if (origin)
+      MessageInterface::ShowMessage("origin is %s<%p>\n",
+            origin->GetName().c_str(), origin);
+#endif
    DynamicAxes::Initialize();
    if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
    
+   // Check for spacecraft origin whose attitude does not compute rates
+   if (origin && origin->IsOfType("Spacecraft"))
+   {
+      Attitude *att = (Attitude*) origin->GetRefObject(Gmat::ATTITUDE, "");
+      if (!att || !(att->ModelComputesRates()))
+      {
+         std::string errmsg = "The value of \"";
+         errmsg += origin->GetName() + "\" for field \"Origin\"";
+         errmsg += " on BodyFixed coordinate system \"" + coordName;
+         errmsg += "\" is not an allowed value.\n";
+         errmsg += "The allowed values are: ";
+         errmsg += "[ Spacecraft whose attitude model computes rates ].\n";
+         throw CoordinateSystemException(errmsg);
+      }
+   }
+
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = false;
    #endif
@@ -667,7 +691,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          Real librationAngles[3], andRates[3];
          de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
 
-         rotMatrix    = (Attitude::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
+         rotMatrix    = (AttitudeConversionUtility::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
          Real ca1    = cos(librationAngles[0]);
          Real ca2    = cos(librationAngles[1]);
          Real ca3    = cos(librationAngles[2]);

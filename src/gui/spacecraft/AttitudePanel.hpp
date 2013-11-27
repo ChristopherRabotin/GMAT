@@ -90,9 +90,7 @@ private:
    wxStaticText *spinRateLabel;
    // nadir-pointing
    wxStaticText *attRefBodyLabel;
-   wxStaticText *modeOfConstraintLabel;
-   wxStaticText *referenceVectorLabel;
-   wxStaticText *constraintVectorLabel;
+   wxStaticText *constraintTypeLabel;
    wxStaticText *bodyAlignVectorLabel;
    wxStaticText *bodyConstraintVectorLabel;
 
@@ -132,7 +130,7 @@ private:
    wxComboBox   *stateTypeComboBox;
    wxComboBox   *stateRateTypeComboBox;
    wxComboBox   *referenceBodyComboBox;
-   wxComboBox   *modeOfConstraintComboBox;
+   wxComboBox   *constraintTypeComboBox;
 
    // for precessing spinner data
    wxTextCtrl *spinAxis1TextCtrl;
@@ -148,12 +146,6 @@ private:
    wxTextCtrl *spinRateTextCtrl;
    
    //for nadir-pointing data
-   wxTextCtrl *refVectorXTextCtrl;
-   wxTextCtrl *refVectorYTextCtrl;
-   wxTextCtrl *refVectorZTextCtrl;
-   wxTextCtrl *constraintVectorXTextCtrl;
-   wxTextCtrl *constraintVectorYTextCtrl;
-   wxTextCtrl *constraintVectorZTextCtrl;
    wxTextCtrl *bodyAlignVectorXTextCtrl;
    wxTextCtrl *bodyAlignVectorYTextCtrl;
    wxTextCtrl *bodyAlignVectorZTextCtrl;
@@ -180,14 +172,14 @@ private:
    StringArray         eulerSeqArray;
    StringArray         stateTypeArray;
    StringArray         stateRateTypeArray;
-   StringArray         modeOfConstraintTypeArray;
+   StringArray         constraintTypeArray;
 
    /// those strings as wxString arrays for the combo boxes
    wxString            *attitudeModelArray;
    wxString            *eulerSequenceArray;
    wxString            *stateArray;
    wxString            *stateRateArray;
-   wxString            *modeOfConstraintArray;
+   wxString            *constraintArray;
    
    /// string versions of values in text boxes
    wxString            *cosineMatrix[9];
@@ -205,7 +197,7 @@ private:
    std::string         attRateStateType;
 
    std::string         attRefBodyName;
-   std::string         modeOfConstraint;
+   std::string         constraintType;
 
    /// flags for data modification
    bool                dataChanged;
@@ -250,9 +242,7 @@ private:
    
    bool             nadirPointingDataLoaded;
    bool             attRefBodyModified;
-   bool             modeOfConstraintModified;
-   bool             refVectorModified;
-   bool             constraintVectorModified;
+   bool             constraintTypeModified;
    bool             bodyAlignVectorModified;
    bool             bodyConstraintVectorModified;
 
@@ -315,10 +305,6 @@ private:
    void OnInitialSpinAngleTextUpdate(wxCommandEvent &event);       //WCS: Added to trigger new value
    /// when user types in a new spin rate
    void OnSpinRateTextUpdate(wxCommandEvent &event);               //WCS: Added to trigger new value
-   /// when user types in a new reference vector value
-   void OnReferenceVectorTextUpdate(wxCommandEvent &event);        //WCS: Added to trigger new value
-   /// when user types in a new constraint vector value
-   void OnConstraintVectorTextUpdate(wxCommandEvent &event);       //WCS: Added to trigger new value
    /// when user types in a new body alignment vector value
    void OnBodyAlignmentVectorTextUpdate(wxCommandEvent &event);    //WCS: Added to trigger new value
    /// when user types in a new body constraint vector value
@@ -336,7 +322,7 @@ private:
    /// when user selects a attitude model from combo box
    void OnReferenceBodySelection(wxCommandEvent &event);           //WCS: Added to trigger new value
    /// when user selects a attitude model from combo box
-   void OnModeOfConstraintSelection(wxCommandEvent &event);        //WCS: Added to trigger new value
+   void OnConstraintTypeSelection(wxCommandEvent &event);        //WCS: Added to trigger new value
    
    
    /// IDs for the controls and the menu commands
@@ -354,8 +340,6 @@ private:
       ID_TEXTCTRL_INIT_SPIN_ANGLE, //WCS: Added
       ID_TEXTCTRL_SPIN_RATE,       //WCS: Added
       // Added for NadirPointing
-      ID_TEXTCTRL_REFERENCE_VECTOR,       //WCS: Added
-      ID_TEXTCTRL_CONSTRAINT_VECTOR,      //WCS: Added
       ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,  //WCS: Added
       ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, //WCS: Added
       ID_CB_STATE,
@@ -365,7 +349,7 @@ private:
       ID_CB_MODEL,
       // Added for NadirPointing
       ID_CB_REFERENCE_BODY,
-      ID_CB_MODE_OF_CONSTRAINT,
+      ID_CB_CONSTRAINT_TYPE,
    };
    
    // IDs for state type
