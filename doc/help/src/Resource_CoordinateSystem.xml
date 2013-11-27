@@ -1870,7 +1870,7 @@
             <row>
               <entry><guilabel>BodyFixed</guilabel></entry>
 
-              <entry>Celestial Body</entry>
+              <entry>Celestial Body or Spacecraft</entry>
 
               <entry>IAU-1976 FK5</entry>
 
@@ -1883,7 +1883,14 @@
               built-in celestial bodies, the body fixed axes are computed
               using models provided by the IAU in “Report of the IAU/IAG
               Working Group on Cartographic Coordinates and Rotational
-              Elements of the Planets and Satellites: 2000”. </para></entry>
+              Elements of the Planets and Satellites: 2000”. </para><para>When
+              <guilabel>Origin</guilabel> is a
+              <guilabel>Spacecraft</guilabel>, the axes are computed using the
+              <guilabel>Spacecraft</guilabel>’s attitude model. Note: not all
+              attitude models compute body rates. In the case that body rates
+              are not available on a spacecraft, a request for velocity
+              transformations using a <guilabel>BodyFixed</guilabel> axis
+              system will result in an error.</para></entry>
             </row>
 
             <row>
