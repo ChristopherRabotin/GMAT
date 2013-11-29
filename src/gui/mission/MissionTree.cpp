@@ -158,7 +158,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(MT_RENAME, MissionTree::OnRename)
    EVT_MENU(MT_DELETE, MissionTree::OnDelete)
-   
+
    EVT_MENU(MT_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(MT_SHOW_SCRIPT, MissionTree::OnShowScript)
    EVT_MENU(MT_SHOW_MISSION_SEQUENCE, MissionTree::OnShowMissionSequence)
@@ -269,6 +269,14 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    
    InitializeCounter();
    AddIcons();
+
+   // shortcut keys
+   wxAcceleratorEntry entries[2];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_NUMPAD_DELETE, MT_DELETE);
+   entries[1].Set(wxACCEL_NORMAL, WXK_F2, MT_RENAME);
+   wxAcceleratorTable accel(2, entries);
+   this->SetAcceleratorTable(accel);
+
    
    // Now this is called from GmatNotebook after MissionTreeToolBar is created
    //AddDefaultMission();
@@ -3132,8 +3140,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       if (itemType < GmatTree::BEGIN_NO_PANEL || itemType == GmatTree::STOP)
       {
          menu.AppendSeparator();
-         menu.Append(MT_RENAME, wxT("Rename"));
-         menu.Append(MT_DELETE, wxT("Delete"));
+         menu.Append(MT_RENAME, wxT("Rename\tF2"));
+         menu.Append(MT_DELETE, wxT("Delete\tDEL"));
       }
       
       menu.AppendSeparator();

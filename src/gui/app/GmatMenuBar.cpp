@@ -79,15 +79,15 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    //-----------------------------------------------------------------   
    wxMenu *fileMenu = new wxMenu;
    wxMenu *newMenu = new wxMenu;
-   newMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("Script"));
-   newMenu->Append(MENU_LOAD_DEFAULT_MISSION, wxT("Mission"));
+   newMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("Script\tCtrl+Shift+N"));
+   newMenu->Append(MENU_LOAD_DEFAULT_MISSION, wxT("Mission\tCtrl+N"));
    fileMenu->Append(MENU_FILE_NEW, wxT("New"), newMenu, wxT(""));
    fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open..."), wxT(""));   
+   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open...\tCtrl+O"), wxT(""));   
    fileMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, wxT("Open &Recent"), wxT(""));
    fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save..."), wxT(""));
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT_AS, wxT("Save As..."), wxT(""));
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save...\tCtrl+Shift+S"), wxT(""));
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT_AS, wxT("Save As...\tF12"), wxT(""));
    
    if (runMode == GmatGlobal::TESTING || runMode == GmatGlobal::TESTING_NO_PLOTS)
    {
@@ -167,9 +167,9 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    //-----------------------------------------------------------------
    
    wxMenu *helpMenu = new wxMenu;
-   helpMenu->Append(MENU_HELP_WELCOME, wxT("Welcome Page"), wxT(""));
+   helpMenu->Append(MENU_HELP_WELCOME, wxT("Welcome Page\tCtrl+F1"), wxT(""));
    helpMenu->AppendSeparator();
-   helpMenu->Append(MENU_HELP_CONTENTS, wxT("Contents"), wxT(""));
+   helpMenu->Append(MENU_HELP_CONTENTS, wxT("Contents\tF1"), wxT(""));
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ONLINE, wxT("Online Help"), wxT(""));
    helpMenu->Append(MENU_HELP_TUTORIAL, wxT("Tutorials"), wxT(""));
@@ -280,15 +280,15 @@ void GmatMenuBar::UpdateRecentMenu(wxArrayString files)
    // create a new recent menu
    wxMenu *recentMenu = new wxMenu;
    if (files.GetCount() > 4)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT5, files[4]);
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT5, files[4]+"\tCtrl+Shift+1");
    if (files.GetCount() > 3)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT4, files[3]);
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT4, files[3]+"\tCtrl+Shift+2");
    if (files.GetCount() > 2)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT3, files[2]);
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT3, files[2]+"\tCtrl+Shift+3");
    if (files.GetCount() > 1)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT2, files[1]);
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT2, files[1]+"\tCtrl+Shift+4");
    if (files.GetCount() > 0)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, files[0]);
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, files[0]+"\tCtrl+Shift+5");
 
    wxMenuItem *recentMenuItem = fileMenu->Insert(3, MENU_FILE_OPEN_RECENT_SCRIPT1, wxT("Open Recent"), recentMenu, wxT(""));
    if (recentMenu->GetMenuItemCount() == 0)

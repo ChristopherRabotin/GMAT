@@ -252,6 +252,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_SASH_DRAGGED (ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag)
    EVT_MENU (ID_MSGWIN_MENU_COPY, GmatMainFrame::OnMsgWinCopy)
    EVT_MENU (ID_MSGWIN_MENU_SELECTALL, GmatMainFrame::OnMsgWinSelectAll)
+   EVT_MENU_RANGE(TOOL_NEXT_TAB, TOOL_PREV_TAB, GmatMainFrame::OnCycleTab)
 
    EVT_SIZE (GmatMainFrame::OnMainFrameSize)
    EVT_CLOSE (GmatMainFrame::OnClose)
@@ -549,6 +550,16 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       #endif
    #endif
    
+   wxAcceleratorEntry entries[6];
+   entries[0].Set(wxACCEL_CTRL,  WXK_F5, TOOL_RUN);
+   entries[1].Set(wxACCEL_NORMAL,  WXK_F10, TOOL_SCREENSHOT);
+   entries[2].Set(wxACCEL_NORMAL,  WXK_F9, TOOL_ANIMATION_PLAY);
+   entries[3].Set(wxACCEL_SHIFT,  WXK_F9, TOOL_ANIMATION_STOP);
+   entries[4].Set(wxACCEL_CTRL, WXK_PAGEUP, TOOL_PREV_TAB);
+   entries[5].Set(wxACCEL_CTRL, WXK_PAGEDOWN, TOOL_NEXT_TAB);
+   wxAcceleratorTable accel(6, entries);
+   this->SetAcceleratorTable(accel);
+
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
    #endif
@@ -4885,6 +4896,19 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 
    // Leaves bits of itself behind sometimes
    GetClientWindow()->Refresh();
+}
+
+
+void GmatMainFrame::OnCycleTab(wxCommandEvent &event)
+{
+	if (event.GetId() == GmatMenu::TOOL_NEXT_TAB)
+   {
+		theNotebook->AdvanceSelection();
+   }
+   else
+   {
+		theNotebook->AdvanceSelection(false);
+   }
 }
 
 

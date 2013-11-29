@@ -130,7 +130,7 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
       wxBitmap *bitmap = new wxBitmap(NewScript_xpm);
       theScriptButton = new wxBitmapButton
          (this, ID_BUTTON_SCRIPT, *bitmap, wxDefaultPosition, wxDefaultSize, 4);
-      theScriptButton->SetToolTip("Show Script");
+      theScriptButton->SetToolTip("Show Script (F7)");
       bitmap = new wxBitmap(report_xpm);
       theSummaryButton = new wxBitmapButton
          (this, ID_BUTTON_SUMMARY, *bitmap, wxDefaultPosition, wxDefaultSize, 4);
@@ -149,6 +149,8 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
 
       theHelpButton = new wxButton
          (this, ID_BUTTON_HELP, GUI_ACCEL_KEY"Help", wxDefaultPosition, wxDefaultSize, 0);
+      theHelpButton->SetToolTip("Panel-specific Help (F1)");
+
 
       // set the Apply button as the default button, T. Grubb
       theApplyButton->SetDefault();
@@ -189,6 +191,14 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
    #endif
 
    mObject = NULL;
+
+   // shortcut keys
+   wxAcceleratorEntry entries[3];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);
+   entries[1].Set(wxACCEL_NORMAL,  WXK_F7, ID_BUTTON_SCRIPT);
+   entries[2].Set(wxACCEL_CTRL,  (int) 'W', ID_BUTTON_CANCEL);
+   wxAcceleratorTable accel(3, entries);
+   this->SetAcceleratorTable(accel);
 
    #ifdef DEBUG_GMATPANEL
    MessageInterface::ShowMessage("GmatPanel::GmatPanel() exiting\n");

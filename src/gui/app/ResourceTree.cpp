@@ -281,7 +281,15 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    AddIcons();
    AddDefaultResources();
    AddUserResources(theGuiInterpreter->GetUserResources());   
-   
+
+   // shortcut keys
+   wxAcceleratorEntry entries[3];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_NUMPAD_DELETE, POPUP_DELETE);
+   entries[1].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'C', POPUP_CLONE);
+   entries[2].Set(wxACCEL_NORMAL, WXK_F2, POPUP_RENAME);
+   wxAcceleratorTable accel(3, entries);
+   this->SetAcceleratorTable(accel);
+
    theGuiManager->UpdateAll();
 }
 
@@ -2412,7 +2420,8 @@ void ResourceTree::OnClone(wxCommandEvent &event)
    // but using a new method GmatTreeItemData::IsClonable() instead. (LOJ: 2012.03.05)
    // I believe most of base creatable classes implemented Clone() method.
    
-   if (selItemData->IsClonable())
+   // Disallow clone for Propagator until cloning works for Propagator (GMT-2627)
+   if ((selItemData->IsClonable()) && (itemType != GmatTree::PROPAGATOR))
    {
       const std::string stdName = name.c_str();
       std::string cloneName;
@@ -4978,11 +4987,11 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          if (showRenameDelete)
          {
             menu.AppendSeparator();
-            menu.Append(POPUP_RENAME, wxT("Rename"));
-            menu.Append(POPUP_DELETE, wxT("Delete"));
+            menu.Append(POPUP_RENAME, wxT("Rename\tF2"));
+            menu.Append(POPUP_DELETE, wxT("Delete\tDEL"));
          }
          menu.AppendSeparator();
-         menu.Append(POPUP_CLONE, wxT("Clone"));
+         menu.Append(POPUP_CLONE, wxT("Clone\tCtrl+Shift+C"));
          // Disallow clone for Propagator until cloning works for Propagator (GMT-2627)
          if (itemType == GmatTree::PROPAGATOR)
             menu.Enable(POPUP_CLONE, false);

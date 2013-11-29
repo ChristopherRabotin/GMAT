@@ -47,6 +47,9 @@ BEGIN_EVENT_TABLE(ScriptPanel, GmatSavePanel)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ScriptPanel::OnTextEnterPressed)
    EVT_TEXT_MAXLEN(ID_TEXTCTRL, ScriptPanel::OnTextOverMaxLen)
    EVT_BUTTON(ID_SYNC_BUTTON, ScriptPanel::OnButton)
+   EVT_BUTTON(ID_SYNC_RUN_BUTTON, ScriptPanel::OnRunButton)
+   EVT_MENU(ID_TAB_NEXT, ScriptPanel::OnTabNext)
+   EVT_MENU(ID_TAB_PREV, ScriptPanel::OnTabPrev)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -113,8 +116,10 @@ void ScriptPanel::Create()
    //------------------------------------------------------
    mSaveSyncButton =
       new wxButton(this, ID_SYNC_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
+   mSaveSyncButton->SetToolTip("Save,Sync (Ctrl+Shift+F5)");
    mSaveSyncRunButton =
       new wxButton(this, ID_SYNC_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);   
+   mSaveSyncRunButton->SetToolTip("Save,Sync,Run (Shift+F5)");
    
    //------------------------------------------------------
    // add to sizer
@@ -139,6 +144,19 @@ void ScriptPanel::Create()
    pageSizer->Add(topSizer, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    pageSizer->Add(middleSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    theMiddleSizer->Add(pageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+
+   // shortcut keys
+   wxAcceleratorEntry entries[7];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);
+   entries[1].Set(wxACCEL_NORMAL,  WXK_F7, ID_BUTTON_SCRIPT);
+   entries[2].Set(wxACCEL_CTRL,  (int) 'W', ID_BUTTON_CLOSE);
+   entries[3].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_F5, ID_SYNC_BUTTON);
+   entries[4].Set(wxACCEL_ALT | wxACCEL_CTRL,  WXK_F5, ID_SYNC_RUN_BUTTON);
+   entries[5].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'D', ID_BUTTON_SAVE);
+   entries[6].Set(wxACCEL_SHIFT,  WXK_F12, ID_BUTTON_SAVE_AS);
+   wxAcceleratorTable accel(7, entries);
+   this->SetAcceleratorTable(accel);
+
 }
 
 
@@ -219,10 +237,15 @@ void ScriptPanel::ClickButton( bool run )
 {
 	wxCommandEvent event;
 	if (run)
+	{
 		event.SetEventObject(mSaveSyncRunButton);
+		OnRunButton(event);
+	}
 	else
+	{
 		event.SetEventObject(mSaveSyncButton);
-	OnButton(event);
+		OnButton(event);
+	}
 }
 
 
@@ -352,4 +375,41 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       MakeScriptActive(event, mFileContentsTextCtrl->IsModified());
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void OnRunButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptPanel::OnRunButton(wxCommandEvent& event)
+{
+   if (mFileContentsTextCtrl->GetValue() == "")
+   {
+      wxMessageDialog *msgDlg = new wxMessageDialog
+         (this, "Can not build an empty file ", "Can not build...",
+          wxOK | wxICON_INFORMATION, wxDefaultPosition);
+      msgDlg->ShowModal();
+      delete msgDlg;
+      return;
+   }
+
+   MakeScriptActive(event, mFileContentsTextCtrl->IsModified());
+}
+
+//------------------------------------------------------------------------------
+// void OnTabNext(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptPanel::OnTabNext(wxCommandEvent& event)
+{
+	mSaveSyncButton->SetFocus();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnTabPrev(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptPanel::OnTabPrev(wxCommandEvent& event)
+{
+	theCloseButton->SetFocus();
+}
+
 

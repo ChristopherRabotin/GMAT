@@ -61,7 +61,7 @@ public:
    const wxArrayString& GetCommandList(bool forViewControl = false);
    
 protected:
-   
+
 private:
 
    enum ActionType
