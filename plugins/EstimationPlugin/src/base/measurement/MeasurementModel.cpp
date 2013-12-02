@@ -23,7 +23,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 
-#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
+//#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
                                     // real world physical models
 
 // Moved here from inline location; includes should always be at the top in GMAT
@@ -1959,39 +1959,23 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
 
    if (forObservation != NULL)
    {
-	  if (forObservation->dataFormat == "GMATInternal")												// made changes by TUAN NGUYEN
-	  {
-//// What goes here???
-//         ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(true);				// made changes by TUAN NGUYEN
-	  }
-	  else if (forObservation->dataFormat == "GMAT_OD")												// made changes by TUAN NGUYEN
+	  if (forObservation->dataFormat == "GMAT_OD")												// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	
-//         ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(true);				// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);		// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
-         ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN
-   
-         #ifdef DEBUG_MEASUREMENT_CALCULATION
-	        MessageInterface::ShowMessage("#### Set uplink frequency: %.12le, uplink band: %d, and range modulo: %.12le from Observation Data  ####\n", forObservation->uplinkFreq, forObservation->uplinkBand, forObservation->rangeModulo);
-         #endif
+         ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN 
 	  }
-	  else if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
+	  else 
+	  if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	
-//         ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(true);				// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
-//		 MessageInterface::ShowMessage("#### Set uplink band: %d doppler count interval = %lf from Observation Data  ####\n", forObservation->uplinkBand, forObservation->dopplerCountInterval);
 		 ((AveragedDoppler*)measurement)->SetRealParameter("AveragingInterval", forObservation->dopplerCountInterval);		// made changes by TUAN NGUYEN
-         #ifdef DEBUG_MEASUREMENT_CALCULATION
-	        MessageInterface::ShowMessage("#### Set uplink band: %d doppler count interval = %lf from Observation Data  ####\n", forObservation->uplinkBand, ((DSNDopplerObsData*)forObservation)->dopplerCountInterval);
-         #endif
 	  }
-	   if (measurement->IsOfType("PhysicalMeasurement"))
+	  if (measurement->IsOfType("PhysicalMeasurement"))
       {
          ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);					// made changes by TUAN NGUYEN
       }
    }
-//   else
-//      ((PhysicalMeasurement*)measurement)->SetFlagToReadFromObservationData(false);			// set flag off when observation data is not used 
 
 
    // Specifying the value of calculated measurement C:

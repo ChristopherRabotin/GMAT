@@ -950,7 +950,7 @@ Integer PhysicalMeasurement::FrequencyBand(Real frequency)
 	  freqBand = 1;					// 1 for S-band
 
    // X-band (Band values from Wikipedia; check them!
-   if ((frequency >= 7900000000.0) && (frequency <= 8400000000.0))
+   if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
       freqBand = 2;					// 2 for X-band
 
    if (freqBand == 0)

@@ -77,8 +77,6 @@ public:
    Real         GetRangeModulo();												// made changes by TUAN NGUYEN
    void         SetObsValue(const RealArray& value);							// made changes by TUAN NGUYEN 
    RealArray    GetObsValue();													// made changes by TUAN NGUYEN
-//   void         SetFlagToReadFromObservationData(bool isFromObservationData);	// made changes by TUAN NGUYEN
-//   bool         GetFlagToReadFromObservationData();								// made changes by TUAN NGUYEN
 
    void         SetObservationDataRecord(ObservationData* data);				// made changes by TUAN NGUYEN 
    Integer      FrequencyBand(Real frequency);									// made changes by TUAN NGUYEN 
@@ -102,8 +100,6 @@ protected:
    Real                       rangeModulo;																// made changes by TUAN NGUYEN
    /// Observation value																				// made changes by TUAN NGUYEN
    RealArray                  obsValue;																	// made changes by TUAN NGUYEN
-   /// Flag indicating frequency, frquency band, and range modulo gotten from Observation Data file:	// made changes by TUAN NGUYEN
-//   bool                       isFromObsData;															// made changes by TUAN NGUYEN
    /// Observation data object containing an observation data record									// made changes by TUAN NGUYEN
    ObservationData*           obsData;																	// made changes by TUAN NGUYEN
 

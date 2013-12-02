@@ -1228,7 +1228,7 @@ Real DSNTwoWayRange::GetFrequencyFactor(Real frequency)
 	     if (freqBand == 0)
 		    freqBand = 1;					// 1 for S-band
       }
-      else if ((frequency >= 7900000000.0) && (frequency <= 8400000000.0))
+      else if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
       {
 		 // X-band (Band values from Wikipedia; check them!
          // factor = frequency * 11.0 / 75.0;				// for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
