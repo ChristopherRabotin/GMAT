@@ -99,9 +99,9 @@ void ReportFilePanel::Create()
    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
    
    // create the text ctrl
-   mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+   mFileContentsTextCtrl = new wxTextCtrl( this, -1, wxT(""),
                                            wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP |
-                                           wxTE_READONLY | wxTE_MULTILINE | wxGROW);
+                                           wxTE_READONLY | wxTE_MULTILINE | wxGROW );
    mFileContentsTextCtrl->Connect(wxEVT_RIGHT_DOWN,
                         wxMouseEventHandler(ReportFilePanel::OnRightMouseDown), NULL, this);
    
@@ -109,9 +109,15 @@ void ReportFilePanel::Create()
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
    // create popup menu
    mPopupMenu = new wxMenu();
-   mPopupMenu->Append(ID_MENU_COPY, "Copy");
+   mPopupMenu->Append(ID_MENU_COPY, "Copy\tCtrl+C");
    mPopupMenu->AppendSeparator();
-   mPopupMenu->Append(ID_MENU_SELECTALL, "Select All");
+   mPopupMenu->Append(ID_MENU_SELECTALL, "Select All\tCtrl+A");
+   // shortcut keys
+   wxAcceleratorEntry entries[2];
+   entries[0].Set(wxACCEL_CTRL,  (int) 'A', ID_MENU_SELECTALL);
+   entries[1].Set(wxACCEL_CTRL,  (int) 'C', ID_MENU_COPY);
+   wxAcceleratorTable accel(2, entries);
+   mFileContentsTextCtrl->SetAcceleratorTable(accel);
       
    // create bottom buttons
    theCloseButton =
