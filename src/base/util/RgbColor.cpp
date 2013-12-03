@@ -22,7 +22,9 @@
 
 #include "RgbColor.hpp"
 #include "StringUtil.hpp"
+#include "ColorDatabase.hpp"
 #include "UtilityException.hpp"
+#include "MessageInterface.hpp"
 #include <stdio.h>                 // for sprintf()
 
 //---------------------------------
@@ -35,10 +37,15 @@
 RgbColor::RgbColor()
 {
    // default to black
+   colorType.rgbColor.red = 0;
+   colorType.rgbColor.green = 0;
+   colorType.rgbColor.blue = 0;
+   colorType.rgbColor.alpha = 1; // opaque
+   
    colorType.bgrColor.red = 0;
    colorType.bgrColor.green = 0;
    colorType.bgrColor.blue = 0;
-   colorType.bgrColor.alpha = 0;
+   colorType.bgrColor.alpha = 1; // opaque
 }
 
 //------------------------------------------------------------------------------
@@ -46,6 +53,11 @@ RgbColor::RgbColor()
 //------------------------------------------------------------------------------
 RgbColor::RgbColor(const Byte red, const Byte green, const Byte blue, const Byte alpha)
 {
+   colorType.rgbColor.red = red;
+   colorType.rgbColor.green = green;
+   colorType.rgbColor.blue = blue;
+   colorType.rgbColor.alpha = alpha;
+   
    colorType.bgrColor.red = red;
    colorType.bgrColor.green = green;
    colorType.bgrColor.blue = blue;
@@ -178,18 +190,50 @@ void RgbColor::Set(const UnsignedInt intColor)
 
 // static methods
 //------------------------------------------------------------------------------
-// static UnsignedInt ToIntColor(const std::string &rgbString)
+// static UnsignedInt ToIntColor(const std::string &colorString)
 //------------------------------------------------------------------------------
 /**
- * Converts color in rgb triplet value such as [255 0 0]. Each value must be
- * between 0 and 255.
+ * Converts color in color name or rgb tuples such as [255 0 0].
+ * For rgb tuples, each value must be between 0 and 255.
  *
- * @throws an exception if value is invalid or out of range
+ * @colorString  Color name or rgb tuples
+ * @throws an exception if input is invalid color or invalid rgb tuples
  */
 //------------------------------------------------------------------------------
-UnsignedInt RgbColor::ToIntColor(const std::string &rgbString)
+UnsignedInt RgbColor::ToIntColor(const std::string &colorString)
 {
-   UnsignedIntArray intArray = GmatStringUtil::ToUnsignedIntArray(rgbString);
+   #ifdef DEBUG_INT_COLOR
+   MessageInterface::ShowMessage
+      ("RgbColor::ToIntColor() entered, colorString = '%s'\n", colorString.c_str());
+   #endif
+   
+   // First figure out if input is a color name
+   ColorDatabase *colorDb = ColorDatabase::Instance();
+   UnsignedInt intColor;
+   
+   if (!GmatStringUtil::StartsWith(colorString, "[") &&
+       !GmatStringUtil::EndsWith(colorString, "]"))
+   {
+      if (colorDb->HasColor(colorString))
+      {
+         intColor = colorDb->GetIntColor(colorString);
+         #ifdef DEBUG_INT_COLOR
+         MessageInterface::ShowMessage("RgbColor::ToIntColor() returning %06X\n", intColor);
+         #endif
+         return intColor;
+      }
+      else
+      {
+         UtilityException ue;
+         ue.SetDetails("The color \"%s\" not found in the color database. "
+                       "Available colors are \"%s\"\n", colorString.c_str(),
+                       colorDb->GetAllColorNames().c_str());
+         throw ue;
+      }
+   }
+   
+   // It is rgb tuples
+   UnsignedIntArray intArray = GmatStringUtil::ToUnsignedIntArray(colorString);
    Byte rgb[3];
    bool error = false;
    if (intArray.size() != 3)
@@ -216,13 +260,17 @@ UnsignedInt RgbColor::ToIntColor(const std::string &rgbString)
    {
       UtilityException ue;
       ue.SetDetails("%s has invalid RGB color values. Valid color value is "
-                    "Integer between 0 and 255", rgbString.c_str());
+                    "Integer between 0 and 255", colorString.c_str());
       throw ue;
    }
    else
    {
       RgbColor color = RgbColor(rgb[0], rgb[1], rgb[2]);
-      return color.GetIntColor();
+      intColor = color.GetIntColor();
+      #ifdef DEBUG_INT_COLOR
+      MessageInterface::ShowMessage("RgbColor::ToIntColor() returning %06X\n", intColor);
+      #endif
+      return intColor;
    }
 }
 

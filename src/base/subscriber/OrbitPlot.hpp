@@ -37,12 +37,6 @@ public:
    const StringArray&   GetSpacePointList();
    const StringArray&   GetSpacecraftList();
    const StringArray&   GetNonSpacecraftList();
-
-   #if 1
-   UnsignedInt          GetColor(const std::string &item, const std::string &objName);
-   bool                 SetColor(const std::string &item, const std::string &objName,
-                                 UnsignedInt value);
-   #endif
    
    bool                 GetShowObject(const std::string &name);
    void                 SetShowObject(const std::string &name, bool value);
@@ -93,12 +87,7 @@ public:
                                            const std::string &value,
                                            const Integer index);
    
-   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
-                                                const UnsignedInt value,
-                                                const Integer index);
    
-   virtual const UnsignedIntArray&
-                        GetUnsignedIntArrayParameter(const Integer id) const;   
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
@@ -132,11 +121,35 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    
+   virtual void         SetOrbitColorChanged(GmatBase *originator,
+                                             const std::string &newColor,
+                                             const std::string &objName,
+                                             const std::string &desc);
+   virtual void         SetTargetColorChanged(GmatBase *originator,
+                                              const std::string &newColor,
+                                              const std::string &objName,
+                                              const std::string &desc);
+   virtual void         SetSegmentOrbitColor(GmatBase *originator,
+                                             bool overrideColor,
+                                             UnsignedInt orbitColor,
+                                             const StringArray &objNames);
    // for GUI population
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
    
 protected:
+   
+   // methods inherited from the Subscriber
+   /*
+   virtual void         HandleOrbitColorChanged(GmatBase *originator,
+                                                const std::string &newColor,
+                                                const std::string &objName,
+                                                const std::string &desc);
+   virtual void         HandleTargetColorChanged(GmatBase *originator,
+                                                 const std::string &newColor,
+                                                 const std::string &objName,
+                                                 const std::string &desc);
+   */
    
    CoordinateSystem *mViewCoordSystem;
    
@@ -158,10 +171,7 @@ protected:
    Integer mScCount;
    Integer mObjectCount;
    Integer mNonStdBodyCount;
-   #if 1
-   /// It uses predefined colors up to 15 objects, after 15 it uses red
-   Integer mDefaultColorCount;
-   #endif
+      
    // for data control
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -177,14 +187,6 @@ protected:
    RealArray mScVxArray;
    RealArray mScVyArray;
    RealArray mScVzArray;
-
-   #if 1
-   // arrays for holding object colors
-   UnsignedIntArray mScOrbitColorArray;
-   UnsignedIntArray mScTargetColorArray;
-   UnsignedIntArray mOrbitColorArray;
-   UnsignedIntArray mTargetColorArray;
-   #endif
    
    // arrays for holding solver current data
    std::vector<StringArray> mCurrScArray;
@@ -195,12 +197,12 @@ protected:
    std::vector<RealArray> mCurrVxArray;
    std::vector<RealArray> mCurrVyArray;
    std::vector<RealArray> mCurrVzArray;
-
-   #if 1
+   
    // maps for object and color
-   std::map<std::string, UnsignedInt> mOrbitColorMap;
-   std::map<std::string, UnsignedInt> mTargetColorMap;
-   #endif
+   std::map<std::string, UnsignedInt> mDefaultOrbitColorMap;
+   std::map<std::string, UnsignedInt> mDefaultTargetColorMap;
+   std::map<std::string, UnsignedInt> mCurrentOrbitColorMap;
+   std::map<std::string, UnsignedInt> mCurrentTargetColorMap;
    
    // maps for object, flag, and epoch
    std::map<std::string, bool> mDrawOrbitMap;
@@ -216,6 +218,9 @@ protected:
    /// Buffers published spacecraft orbit data
    void                 BufferZeroData(Integer scIndex);
    virtual Integer      BufferOrbitData(const Real *dat, Integer len);
+
+   /// Returns object string list
+   virtual std::string  GetObjectStringList() const;
    
    /// Adds Spacecraft and other objects to object arrays
    bool                 AddSpacePoint(const std::string &name, Integer index,
@@ -257,10 +262,6 @@ protected:
    static const std::string
       PARAMETER_TEXT[OrbitPlotParamCount - SubscriberParamCount];
 
-   #if 1
-   const static int MAX_SP_COLOR = 15;
-   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
-   #endif
 };
 
 #endif

@@ -27,27 +27,49 @@
 #include "gmatwxdefs.hpp"
 #include <wx/clrpicker.h>           // for wxColorPickerCtrl
 #include "GmatPanel.hpp"
+#include "ColorTypes.hpp"           // for GmatColor::
 
 class GmatColorPanel: public wxPanel
 {
 public:
    GmatColorPanel(wxWindow *parent, GmatPanel *parentGmatPanel,
-                  SpacePoint *clonedSpacePoint);
+                  SpacePoint *clonedSpacePoint, bool useInputObjColor = false,
+                  bool overrideColor = false, bool showOrbitColorOnly = false,
+                  bool showOverrideColorCheckBox = false,
+                  const std::string &objName = "");
    ~GmatColorPanel();
    void SaveData();
    void LoadData();
    
-   bool HasColorChanged() { return colorChanged; }
+   bool HasColorChanged() { return mHasColorChanged; }
+   bool HasOverrideColorChanged() { return mHasOverrideColorChanged; }
+   bool GetOverrideColor() { return mOverrideColor; }
+   UnsignedInt GetOrbitColor() { return mOrbitIntColor; }
+   UnsignedInt GetTargetColor() { return mTargetIntColor; }
    
 private:
    
-   bool colorChanged;
+   bool mHasColorChanged;
+   bool mHasOverrideColorChanged;
+   bool mUseInputObjectColor;
+   bool mOverrideColor;
+   bool mShowOrbitColorOnly;
+   bool mShowOverrideColorCheckBox;
+   std::string mSpacePointName;
+   
+   UnsignedInt mDefaultOrbitColor;
+   UnsignedInt mOrbitIntColor;
+   UnsignedInt mTargetIntColor;
+   
    GmatPanel  *theParentGmatPanel;
    SpacePoint *theClonedSpacePoint;
    
    // Color pickers
+   wxStaticText *mOrbitColorLabel;
+   wxStaticText *mTargetColorLabel;
    wxColourPickerCtrl *mOrbitColorCtrl;
    wxColourPickerCtrl *mTargetColorCtrl;
+   wxCheckBox *mOverrideColorCheckBox;
    wxColour mOrbitColor;
    wxColour mTargetColor;
    
@@ -55,12 +77,14 @@ private:
    
    // Event Handling
    DECLARE_EVENT_TABLE();
+   void OnCheckBoxChange(wxCommandEvent& event);
    void OnColorPickerChange(wxColourPickerEvent &event);
    
    // IDs for the controls and the menu commands
    enum
    {     
-      ID_COLOR_CTRL = 30200
+      ID_COLOR_CTRL = 30200,
+      ID_CHECKBOX
    };
 };
 #endif

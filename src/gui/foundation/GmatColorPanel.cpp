@@ -27,13 +27,14 @@
 
 //#define DEBUG_COLOR_CONSTRUCTOR
 //#define DEBUG_COLOR_CHANGE
-#define DEBUG_PANEL_LOAD
+//#define DEBUG_PANEL_LOAD
 //#define DEBUG_PANEL_SAVE
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(GmatColorPanel, wxPanel)
+   EVT_CHECKBOX(ID_CHECKBOX, GmatColorPanel::OnCheckBoxChange)
    EVT_COLOURPICKER_CHANGED(ID_COLOR_CTRL, GmatColorPanel::OnColorPickerChange)
 END_EVENT_TABLE()
 
@@ -54,19 +55,36 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 GmatColorPanel::GmatColorPanel(wxWindow *parent, GmatPanel *parentGmatPanel,
-                               SpacePoint *clonedSpacePoint)
+                               SpacePoint *clonedSpacePoint, bool useInputObjColor,
+                               bool overrideColor, bool showOrbitColorOnly,
+                               bool showOverrideColorCheckBox,
+                               const std::string &objName)
    : wxPanel(parent)
 {
-   #ifdef DEBUG_PANEL_CONSTRUCTOR
+   //#ifdef DEBUG_PANEL_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("GmatColorPanel::GmatColorPanel() entered, parentGmatPanel=<%p>'%s', "
-       "clonedSpacePoint=<%p>'%s'\n", parentGmatPanel, parentGmatPanel->GetName().c_str(),
-       clonedSpacePoint, clonedSpacePoint->GetName().c_str());
-   #endif
+       "clonedSpacePoint=<%p>'%s', useInputObjColor=%d, overrideColor=%d, "
+       "showOrbitColorOnly=%d, showOverrideColorCheckBox=%d, objName='%s'\n",
+       parentGmatPanel, parentGmatPanel->GetName().c_str(), clonedSpacePoint,
+       clonedSpacePoint ? clonedSpacePoint->GetName().c_str() : "NULL",
+       useInputObjColor, overrideColor, showOrbitColorOnly, showOverrideColorCheckBox,
+       objName.c_str());
+   //#endif
    
    theParentGmatPanel = parentGmatPanel;
    theClonedSpacePoint = clonedSpacePoint;
-   colorChanged = false;
+   mHasColorChanged = false;
+   mHasOverrideColorChanged = false;
+   mUseInputObjectColor = useInputObjColor;
+   mOverrideColor = overrideColor;
+   mShowOrbitColorOnly = showOrbitColorOnly;
+   mShowOverrideColorCheckBox = showOverrideColorCheckBox;
+   mSpacePointName = objName;
+   
+   mDefaultOrbitColor = GmatColor::WHITE;
+   mOrbitIntColor = GmatColor::WHITE;
+   mTargetIntColor = GmatColor::WHITE;
    
    SetName("GmatColorPanel");
    
@@ -77,7 +95,7 @@ GmatColorPanel::GmatColorPanel(wxWindow *parent, GmatPanel *parentGmatPanel,
    MessageInterface::ShowMessage
       ("GmatColorPanel::GmatColorPanel() leaving, parentGmatPanel=<%p>'%s', "
        "clonedSpacePoint=<%p>'%s'\n", parentGmatPanel, parentGmatPanel->GetName().c_str(),
-       clonedSpacePoint, clonedSpacePoint->GetName().c_str());
+       clonedSpacePoint, clonedSpacePoint ? clonedSpacePoint->GetName().c_str() : "NULL");
    #endif
 }
 
@@ -113,14 +131,19 @@ void GmatColorPanel::Create()
    int buttonWidth = 25;
    #endif
    
+   // Add override color CheckBox
+   mOverrideColorCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Override Color For This Segment"),
+                     wxDefaultPosition, wxSize(-1, -1), bsize);
+   
    // Add orbit and target color button
-   wxStaticText *orbitColorLabel =
+   mOrbitColorLabel =
       new wxStaticText(this, -1, wxT("Orbit Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mOrbitColorCtrl =
       new wxColourPickerCtrl(this, ID_COLOR_CTRL, *wxRED,
                              wxDefaultPosition, wxSize(buttonWidth, 20), 0);
-   wxStaticText *targetColorLabel =
+   mTargetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);   
    wxColour targColor = wxTheColourDatabase->Find("STEEL BLUE");
@@ -129,10 +152,12 @@ void GmatColorPanel::Create()
                              wxDefaultPosition, wxSize(buttonWidth, 20), 0);
    
    wxBoxSizer *colorBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   colorBoxSizer->Add(orbitColorLabel, 0, wxALIGN_CENTER, bsize);
+   colorBoxSizer->Add(mOverrideColorCheckBox, 0, wxALIGN_CENTER, bsize);
+   colorBoxSizer->Add(20, 20);
+   colorBoxSizer->Add(mOrbitColorLabel, 0, wxALIGN_CENTER, bsize);
    colorBoxSizer->Add(mOrbitColorCtrl, 0, wxALIGN_CENTER, bsize);
    colorBoxSizer->Add(20, 20);
-   colorBoxSizer->Add(targetColorLabel, 0, wxALIGN_CENTER, bsize);
+   colorBoxSizer->Add(mTargetColorLabel, 0, wxALIGN_CENTER, bsize);
    colorBoxSizer->Add(mTargetColorCtrl, 0, wxALIGN_CENTER, bsize);
    
    // To center color buttons, use wxFlexGridSizer
@@ -149,13 +174,6 @@ void GmatColorPanel::Create()
    pageSizer->Add(colorSizer, 0, wxGROW | wxALIGN_CENTER, bsize);
    this->SetAutoLayout( true );  
    this->SetSizer( pageSizer );
-   
-   #if 0
-   this->SetAutoLayout( true );  
-   this->SetSizer( boxSizer1 );
-   boxSizer1->Fit( this );
-   boxSizer1->SetSizeHints( this );
-   #endif
 }    
 
 //------------------------------------------------------------------------------
@@ -166,22 +184,62 @@ void GmatColorPanel::LoadData()
    #ifdef DEBUG_PANEL_LOAD
    MessageInterface::ShowMessage("GmatColorPanel::LoadData() entered.\n");
    #endif
-   
+
    try
    {
-      // Load colors from the spacecraft
-      RgbColor orbitColor = RgbColor(theClonedSpacePoint->GetCurrentOrbitColor());
-      RgbColor targetColor = RgbColor(theClonedSpacePoint->GetCurrentTargetColor());
-
+      if (mUseInputObjectColor)
+      {
+         // Load colors from the input object name
+         SpacePoint *sp = (SpacePoint*)
+            ((theParentGmatPanel->GetGuiInterpreter())->GetConfiguredObject(mSpacePointName));
+         if (sp)
+         {
+            mOrbitIntColor = sp->GetCurrentOrbitColor();
+            mTargetIntColor = sp->GetCurrentTargetColor();
+         }
+      }
+      else
+      {
+         // Load colors from the spacecraft
+         mOrbitIntColor = theClonedSpacePoint->GetCurrentOrbitColor();
+         mTargetIntColor = theClonedSpacePoint->GetCurrentTargetColor();
+      }
+      
+      mDefaultOrbitColor = mOrbitIntColor;
+      
+      RgbColor rgbOrbitColor = RgbColor(mOrbitIntColor);
+      RgbColor rgbTargetColor = RgbColor(mTargetIntColor);
+      
       #ifdef DEBUG_PANEL_LOAD
-      MessageInterface::ShowMessage("   orbitColor  = %06X\n", orbitColor.GetIntColor());
-      MessageInterface::ShowMessage("   targetColor = %06X\n", targetColor.GetIntColor());
+      MessageInterface::ShowMessage("   rgbOrbitColor  = %06X\n", rgbOrbitColor.GetIntColor());
+      MessageInterface::ShowMessage("   rgbTargetColor = %06X\n", rgbTargetColor.GetIntColor());
       #endif
       
-      mOrbitColor.Set(orbitColor.Red(), orbitColor.Green(), orbitColor.Blue());      
-      mTargetColor.Set(targetColor.Red(), targetColor.Green(), targetColor.Blue());
+      mOrbitColor.Set(rgbOrbitColor.Red(), rgbOrbitColor.Green(), rgbOrbitColor.Blue());      
       mOrbitColorCtrl->SetColour(mOrbitColor);
+      mTargetColor.Set(rgbTargetColor.Red(), rgbTargetColor.Green(), rgbTargetColor.Blue());
       mTargetColorCtrl->SetColour(mTargetColor);
+      
+      // If showing only orbit color, hide target color
+      if (mShowOrbitColorOnly)
+      {
+         mTargetColorLabel->Hide();
+         mTargetColorCtrl->Hide();
+      }
+      
+      // If not overriding color, disable orbit color
+      if (!mOverrideColor)
+      {
+         mOverrideColorCheckBox->SetValue(false);
+         mOrbitColorLabel->Disable();
+         mOrbitColorCtrl->Disable();
+      }
+      
+      // If not showing override color check box, hide it
+      if (!mShowOverrideColorCheckBox)
+         mOverrideColorCheckBox->Hide();
+      
+      Layout();
    }
    catch (BaseException &e)
    {
@@ -203,7 +261,35 @@ void GmatColorPanel::SaveData()
    MessageInterface::ShowMessage
       ("GmatColorPanel::SaveData() setting colorChanged to true and exiting.\n");
    #endif
-   colorChanged = false;
+   mHasColorChanged = false;
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatColorPanel::OnCheckBoxChange(wxCommandEvent& event)
+{
+   mHasOverrideColorChanged = true;
+   mOverrideColor = mOverrideColorCheckBox->GetValue();
+   
+   if (mOverrideColor)
+   {
+      mOrbitColorLabel->Enable(true);
+      mOrbitColorCtrl->Enable(true);      
+   }
+   else
+   {
+      // Show original orbit color
+      RgbColor rgbOrbitColor = RgbColor(mDefaultOrbitColor);
+      mOrbitColor.Set(rgbOrbitColor.Red(), rgbOrbitColor.Green(), rgbOrbitColor.Blue());      
+      mOrbitColorCtrl->SetColour(mOrbitColor);
+      mOrbitIntColor = rgbOrbitColor.GetIntColor();
+      mOrbitColorLabel->Enable(false);
+      mOrbitColorCtrl->Enable(false);
+   }
+   
+	theParentGmatPanel->EnableUpdate(true);
 }
 
 
@@ -219,19 +305,35 @@ void GmatColorPanel::OnColorPickerChange(wxColourPickerEvent& event)
    if (event.GetEventObject() == mOrbitColorCtrl)
    {
       wxColour wxcolor = mOrbitColorCtrl->GetColour();
-      RgbColor color = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
-      std::string colorStr = RgbColor::ToRgbString(color.GetIntColor());
-      theClonedSpacePoint->SetStringParameter(theClonedSpacePoint->GetParameterID("OrbitColor"), colorStr);
+      RgbColor rgbColor = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
+      if (mUseInputObjectColor)
+      {
+         mOrbitIntColor = rgbColor.GetIntColor();
+      }
+      else
+      {
+         std::string colorStr = RgbColor::ToRgbString(rgbColor.GetIntColor());
+         theClonedSpacePoint->
+            SetStringParameter(theClonedSpacePoint->GetParameterID("OrbitColor"), colorStr);
+      }
    }
    else if (event.GetEventObject() == mTargetColorCtrl)
    {
       wxColour wxcolor = mTargetColorCtrl->GetColour();
-      RgbColor color = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
-      std::string colorStr = RgbColor::ToRgbString(color.GetIntColor());
-      theClonedSpacePoint->SetStringParameter(theClonedSpacePoint->GetParameterID("TargetColor"), colorStr);
+      RgbColor rgbColor = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
+      if (mUseInputObjectColor)
+      {
+         mTargetIntColor = rgbColor.GetIntColor();
+      }
+      else
+      {
+         std::string colorStr = RgbColor::ToRgbString(rgbColor.GetIntColor());
+         theClonedSpacePoint->
+            SetStringParameter(theClonedSpacePoint->GetParameterID("TargetColor"), colorStr);
+      }
    }
    
-	colorChanged = true;
+	mHasColorChanged = true;
 	theParentGmatPanel->EnableUpdate(true);
    
    #ifdef DEBUG_COLOR_CHANGE

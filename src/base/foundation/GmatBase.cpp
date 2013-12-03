@@ -49,7 +49,7 @@
 //#define DEBUG_GENERATING_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
-//#define DEBUG_CLOAKING
+#define DEBUG_CLOAKING
 //#define DEBUG_WRAPPER_REF
 
 /// Set the static "undefined" parameters

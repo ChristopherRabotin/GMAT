@@ -85,6 +85,9 @@ public:
    void               SetCurrentOrbitColor(UnsignedInt color);
    void               SetCurrentTargetColor(UnsignedInt color);
    void               SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor);
+   void               SetDefaultColors();
+   // static method to clear instance count
+   static void ClearInstanceCount();
    
    //---------------------------------------------------------------------------
    //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
@@ -152,7 +155,8 @@ public:
 
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
-
+   virtual bool            IsParameterCommandModeSettable(const Integer id) const;
+   
    virtual Integer         GetIntegerParameter(const Integer id) const;
    virtual Integer         GetIntegerParameter(const std::string &label) const;
    virtual Integer         SetIntegerParameter(const Integer id,
@@ -189,8 +193,7 @@ public:
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name, 
                                         const Integer index);
-   
-   
+      
 protected:
 
    enum
@@ -263,6 +266,7 @@ protected:
    Rmatrix33 cosineMat;
    
    /// orbit and target color (LOJ added 2013.10.22)
+   static Integer spacecraftInstanceCount;
    bool useOrbitColorName;
    bool useTargetColorName;
    UnsignedInt defaultOrbitColor;
@@ -271,7 +275,11 @@ protected:
    UnsignedInt targetColor;
    std::string orbitColorStr;
    std::string targetColorStr;
-
+   
+   /// Automatic default orbit and target colors
+   const static int MAX_SP_COLOR = 20;
+   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
+   static const UnsignedInt DEFAULT_TARGET_COLOR[MAX_SP_COLOR];
    
    std::string ParseKernelName(const std::string &kernel);
    void        ValidateKernel(const std::string &kName,

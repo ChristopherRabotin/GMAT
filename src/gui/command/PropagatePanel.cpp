@@ -23,6 +23,8 @@
 #include "ParameterSelectDialog.hpp"
 #include "SpaceObjectSelectDialog.hpp"
 #include "PropagatorSelectDialog.hpp"
+#include "GmatColorPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "StringUtil.hpp"               // for SeparateBy()
 #include "MessageInterface.hpp"
 
@@ -298,8 +300,15 @@ void PropagatePanel::Create()
    stopSizer->Add(stopTolSizer, 0, wxALIGN_LEFT|wxALL, 0);
    stopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, 0);
    
+   // Get first SpaceObject color
+   std::string objName = thePropCmd->GetFirstSpaceObjectName();
+   
+   // Create color panel
+   mColorPanel = new GmatColorPanel(this, this, NULL, true, false, true, true, objName);
+   
    pageSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
    pageSizer->Add(stopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
+   pageSizer->Add(mColorPanel, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
    
    theMiddleSizer->Add(pageSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
@@ -1446,11 +1455,32 @@ void PropagatePanel::SaveData()
          theGuiInterpreter->ValidateCommand(thePropCmd);
          
       } // if (mStopCondChanged)
+      
+      // Save new colors if changed
+      if (mColorPanel->HasColorChanged() || mColorPanel->HasOverrideColorChanged())
+      {
+         bool overrideColor = mColorPanel->GetOverrideColor();
+         UnsignedInt newOrbColor = mColorPanel->GetOrbitColor();
+         UnsignedInt newTargColor = mColorPanel->GetTargetColor();
+         #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   overrideColor=%d, newOrbColor=%06X, newTargColor=%06X\n",
+             overrideColor, newOrbColor, newTargColor);
+         #endif
+         thePropCmd->SetSegmentOrbitColor(newOrbColor);
+         thePropCmd->SetOverrideSegmentColor(overrideColor);
+      }
+      #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+      MessageInterface::ShowMessage("PropagatePanel::SaveData() leaving\n");
+      #endif
    } // try
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
+      #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+      MessageInterface::ShowMessage("PropagatePanel::SaveData() leaving\n");
+      #endif
       return;
    }
 }

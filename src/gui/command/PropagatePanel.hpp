@@ -23,7 +23,6 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
-#include "GmatStaticBoxSizer.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -31,6 +30,7 @@
 #include "Propagate.hpp"
 #include "StopCondition.hpp"
 #include "PropSetup.hpp"
+#include "GmatColorPanel.hpp"
 
 class PropagatePanel : public GmatPanel
 {
@@ -90,6 +90,8 @@ private:
    wxTextCtrl *mStopTolTextCtrl;
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
+   
+   GmatColorPanel *mColorPanel;
    
    bool mPropModeChanged;
    bool mPropDirChanged;

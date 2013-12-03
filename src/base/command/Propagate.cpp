@@ -26,9 +26,10 @@
 
 #include "Publisher.hpp"
 #include "Parameter.hpp"
-#include "TextParser.hpp" // for SeparateBrackets()
-#include "StringUtil.hpp" // for Trim()
-#include "AngleUtil.hpp"  // for PutAngleInDegRange()
+#include "TextParser.hpp"       // for SeparateBrackets()
+#include "StringUtil.hpp"       // for Trim()
+#include "AngleUtil.hpp"        // for PutAngleInDegRange()
+#include "ColorTypes.hpp"       // for GmatColor::
 #include "MessageInterface.hpp"
 #include "EventLocator.hpp"
 #include "EventModel.hpp"
@@ -158,7 +159,9 @@ Propagate::Propagate() :
    currentMode                 (INDEPENDENT),
    stopCondEpochID             (-1),
    stopCondBaseEpochID         (-1),
-   stopCondStopVarID           (-1)
+   stopCondStopVarID           (-1),
+   segmentOrbitColor           (GmatColor::WHITE),
+   overrideSegmentColor        (false)
 {
    stepBrackets[0] = stepBrackets[1] = 0.0;
    parameterCount = PropagateCommandParamCount;
@@ -279,7 +282,9 @@ Propagate::Propagate(const Propagate &prp) :
    currentMode                 (prp.currentMode),
    stopCondEpochID             (prp.stopCondEpochID),
    stopCondBaseEpochID         (prp.stopCondBaseEpochID),
-   stopCondStopVarID           (prp.stopCondStopVarID)
+   stopCondStopVarID           (prp.stopCondStopVarID),
+   segmentOrbitColor           (prp.segmentOrbitColor),
+   overrideSegmentColor        (prp.overrideSegmentColor)
 {
    parameterCount = prp.parameterCount;
    isInitialized = false;
@@ -343,6 +348,8 @@ Propagate& Propagate::operator=(const Propagate &prp)
    stopCondEpochID         = prp.stopCondEpochID;
    stopCondBaseEpochID     = prp.stopCondBaseEpochID;
    stopCondStopVarID       = prp.stopCondStopVarID;
+   segmentOrbitColor       = prp.segmentOrbitColor;
+   overrideSegmentColor    = prp.overrideSegmentColor;
    propAllSTMs             = prp.propAllSTMs;
    calcAllAmatrices        = prp.calcAllAmatrices;
 
@@ -2334,6 +2341,61 @@ void Propagate::ClearWrappers()
    #endif
 }
 
+//------------------------------------------------------------------------------
+// virtual void SetSegmentOrbitColor(UnsignedInt &newOrbColor)
+//------------------------------------------------------------------------------
+void Propagate::SetSegmentOrbitColor(UnsignedInt &newOrbColor)
+{
+   segmentOrbitColor = newOrbColor;
+}
+
+//------------------------------------------------------------------------------
+// virtual UnsignedInt GetSegmentOrbitColor()
+//------------------------------------------------------------------------------
+UnsignedInt Propagate::GetSegmentOrbitColor()
+{
+   return segmentOrbitColor;
+}
+
+//------------------------------------------------------------------------------
+// virtual std::string GetFirstSpaceObjectName()
+//------------------------------------------------------------------------------
+std::string Propagate::GetFirstSpaceObjectName()
+{
+   #ifdef DEBUG_FIRST_SO
+   MessageInterface::ShowMessage
+      ("Propagate::GetFirstSpaceObjectName() entered, satName.size() = %d\n", satName.size());
+   #endif
+   std::string firstObjName;
+   
+   if (satName.size() > 0)
+   {
+      if (satName[0]->size() > 0)
+         firstObjName = satName[0]->at(0);
+   }
+   
+   #ifdef DEBUG_FIRST_SO
+   MessageInterface::ShowMessage
+      ("Propagate::GetFirstSpaceObjectName() returning '%s'\n", firstObjName.c_str();
+   #endif
+   return firstObjName;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetOverrideSegmentColor(bool override)
+//------------------------------------------------------------------------------
+void Propagate::SetOverrideSegmentColor(bool override)
+{
+   overrideSegmentColor = override;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool GetOverrideSegmentColor()
+//------------------------------------------------------------------------------
+bool Propagate::GetOverrideSegmentColor()
+{
+   return overrideSegmentColor;
+}
 
 //------------------------------------------------------------------------------
 // void CheckForOptions(Integer &loc, std::string &generatingString)
@@ -3014,10 +3076,12 @@ bool Propagate::Initialize()
       p.clear();
       fm.clear();
    }
-
+   
    // Check uniqueness of objects we propagate
-   StringArray fullSatList;
-
+   // Make member data (LOJ: 2013.12.02)
+   //StringArray fullSatList;
+   fullSatList.clear();
+   
    // Only do this if the command has a formation -- can't do this here, but
    // kept in code so that it can be addressed at refactoring
    // if (hasFormation)
@@ -3308,7 +3372,7 @@ bool Propagate::Initialize()
    }
    streamID = publisher->RegisterPublishedData(this, streamID, owners,
          elements);
-
+   
    isInitialized = true;
 
    stopSats.clear();
@@ -4165,6 +4229,8 @@ bool Propagate::Execute()
                MessageInterface::ShowMessage("]\n");
             #endif
 
+            // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
+            publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
             publisher->Publish(this, streamID, pubdata, dim+1);
             CheckForEvents();
          }
@@ -4990,8 +5056,10 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          memcpy(&pubdata[index], j2kState, size*sizeof(Real));
          index += size;
       }
+      // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
+      publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
       publisher->Publish(this, streamID, pubdata, dim+1);
-
+      
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
             ("Propagate::TakeFinalStep: Step(%16.13le) advanced to "

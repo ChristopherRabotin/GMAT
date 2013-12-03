@@ -96,6 +96,7 @@ typedef std::vector<ElementWrapper*>           WrapperArray;
 typedef std::vector<Rvector6*>                 StateArray;
 typedef std::vector<A1Mjd*>                    EpochArray;
 typedef std::map<std::string, Integer>         IntegerMap;
+typedef std::map<std::string, UnsignedInt>     ColorMap;
 typedef std::map<std::string, GmatBase*>       ObjectMap;
 typedef std::map<std::string, ElementWrapper*> WrapperMap;
 typedef std::stack<ObjectMap*>                 ObjectMapStack;

@@ -469,9 +469,6 @@ bool OrbitView::Initialize()
          
          #if DBGLVL_INIT > 1
          MessageInterface::ShowMessage
-            ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
-             mScNameArray.size(), mScOrbitColorArray.size());
-         MessageInterface::ShowMessage
             ("   mObjectNameArray.size=%d, mOrbitColorArray.size=%d\n",
              mObjectNameArray.size(), mOrbitColorArray.size());
          
@@ -503,12 +500,11 @@ bool OrbitView::Initialize()
                 mObjectArray[i]->GetName().c_str());
          #endif
          
-         // set all object array and pointers
-         PlotInterface::SetGlObject(instanceName, mObjectNameArray,
-                                    mOrbitColorArray, mObjectArray);
+         // Set all object array and pointers
+         PlotInterface::SetGlObject(instanceName, mObjectNameArray, mObjectArray);
          
          //--------------------------------------------------------
-         // set CoordinateSystem
+         // Set CoordinateSystem
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
@@ -1731,6 +1727,27 @@ bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// void SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+//                           UnsignedInt orbitColor)
+//------------------------------------------------------------------------------
+/**
+ * Sets propagation segment orbit color so that subscribers can handle appropriately.
+ * 
+ * @param originator  The Propagate command pointer who is setting
+ * @param overrideColor  The flag indicating whether or not to override orbit color
+ * @param orbitColor  New orbit color to be applied to the space object
+ */
+//------------------------------------------------------------------------------
+void OrbitView::SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+                                     UnsignedInt orbitColor)
+{
+   MessageInterface::ShowMessage
+      ("==> OrbitView::SetSegmentOrbitColor() '%s' entered, originator=<%p>, "
+       "overrideColor=%d, orbitColor=%06X\n", GetName().c_str(), originator,
+       overrideColor, orbitColor);
+}
+
+//------------------------------------------------------------------------------
 // void PutRvector3Value(Rvector3 &rvec3, Integer id,
 //                       const std::string &sval, Integer index = -1);
 //------------------------------------------------------------------------------
@@ -1935,12 +1952,14 @@ bool OrbitView::UpdateSolverData()
    
    if (size == 0)
       return true;
-   
+
+   #if 0
    UnsignedIntArray colorArray = mScOrbitColorArray;
    if (runstate == Gmat::SOLVING)
       colorArray = mScTargetColorArray;
    else
       colorArray = mScOrbitColorArray;
+   #endif
    
    // Update plot with last iteration data
    for (int i=0; i<size-1; i++)
@@ -1958,8 +1977,8 @@ bool OrbitView::UpdateSolverData()
          UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
                       mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
                       mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
-                      mCurrVzArray[i], colorArray, true, mSolverIterOption,
-                      false, isDataOn);
+                      mCurrVzArray[i], mCurrentOrbitColorMap, mCurrentTargetColorMap,
+                      true, mSolverIterOption, false, isDataOn);
    }
    
    // Buffer last point and Update the plot
@@ -1967,8 +1986,8 @@ bool OrbitView::UpdateSolverData()
       UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
                    mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
-                   mCurrVzArray[last], colorArray, true, mSolverIterOption,
-                   true, isDataOn);
+                   mCurrVzArray[last], mCurrentOrbitColorMap, mCurrentTargetColorMap,
+                   true, mSolverIterOption, true, isDataOn);
    
    // clear arrays
    mCurrScArray.clear();

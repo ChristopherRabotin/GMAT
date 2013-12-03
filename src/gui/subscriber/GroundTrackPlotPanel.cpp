@@ -449,14 +449,16 @@ void GroundTrackPlotPanel::LoadData()
       #endif
 
       
-      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       std::string objName;
       // Load object drawing option and colors
       for (UnsignedInt i = 0; i < objects.size(); i++)
       {
          objName = objects[i];
+         
+         #ifdef __USE_COLOR_FROM_SUBSCRIBER__
          mOrbitColorMap[objName] = RgbColor(mGroundTrackPlot->GetColor("Orbit", objName));
          mTargetColorMap[objName] = RgbColor(mGroundTrackPlot->GetColor("Target", objName));
+         #endif
          
          // Put check mark in the object list
          for (int j = 0; j < count; j++)
@@ -469,8 +471,7 @@ void GroundTrackPlotPanel::LoadData()
             }
          }
       }
-      #endif
-
+      
       
       // Load drawing options
       str.Printf("%d", mGroundTrackPlot->GetIntegerParameter("DataCollectFrequency"));

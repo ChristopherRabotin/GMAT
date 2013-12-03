@@ -367,7 +367,7 @@ SolarSystem::SolarSystem(std::string withName) :
    #endif
    
    // Set default orbit and target colors
-   SetDefaultBodyColors(theSun);
+   SetDefaultSpacePointColors(theSun);
    
    theSun->SetCentralBody(EARTH_NAME);  // central body here is a reference body
    theSun->SetSource(STAR_POS_VEL_SOURCE);
@@ -422,7 +422,7 @@ SolarSystem::SolarSystem(std::string withName) :
       #endif
 
       // Set default orbit and target color (LOJ: 2013.11.15)
-      SetDefaultBodyColors(newPlanet);
+      SetDefaultSpacePointColors(newPlanet);
       
       if (PLANET_NAMES[ii] == EARTH_NAME) theEarth = newPlanet;
       newPlanet->SetCentralBody(SUN_NAME);
@@ -489,7 +489,7 @@ SolarSystem::SolarSystem(std::string withName) :
       #endif
       
       // Set default orbit and target colors
-      SetDefaultBodyColors(newMoon);
+      SetDefaultSpacePointColors(newMoon);
       
       newMoon->SetSource(MOON_POS_VEL_SOURCE[ii]);
       newMoon->SetEquatorialRadius(MOON_EQUATORIAL_RADIUS[ii]);
@@ -550,7 +550,10 @@ SolarSystem::SolarSystem(std::string withName) :
    #endif
    // 1. Create the SolarSystemBarycenter
    SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
+   // Set default orbit and target colors
+   SetDefaultSpacePointColors(ssb);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
+   ////ssb->SetIsBuiltIn(true, "SSB"); //LOJ: added
    AddSpecialPoint(ssb);
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");
@@ -3389,7 +3392,7 @@ void SolarSystem::DeleteBodiesInUse(bool deleteSpecialPoints)
       {
          #ifdef DEBUG_SS_CLONING
          MessageInterface::ShowMessage
-            ("   Deleting %s\n", ((*spi).second)->GetName().c_str());
+            ("   Deleting <%p> %s\n", (*spi).second, ((*spi).second)->GetName().c_str());
          #endif
          delete spi->second;       // delete each special point first
          spi->second = NULL;
@@ -3575,24 +3578,28 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
 }
 
 //------------------------------------------------------------------------------
-// void SetDefaultBodyColors(SpacePoint *body)
+// void SetDefaultSpacePointColors(SpacePoint *sp)
 //------------------------------------------------------------------------------
-void SolarSystem::SetDefaultBodyColors(SpacePoint *body)
+void SolarSystem::SetDefaultSpacePointColors(SpacePoint *sp)
 {
-   std::string bodyName = body->GetName();
+   std::string spName = sp->GetName();
    
-   if (bodyName == SUN_NAME)
-      body->SetDefaultColors(GmatColor::GOLD, GmatColor::DARK_GRAY);
-   else if (bodyName == MERCURY_NAME)
-      body->SetDefaultColors(GmatColor::AQUA,   GmatColor::DARK_GRAY);
-   else if (bodyName == VENUS_NAME)
-      body->SetDefaultColors(GmatColor::WHEAT, GmatColor::DARK_GRAY);
-   else if (bodyName == EARTH_NAME)
-      body->SetDefaultColors(GmatColor::DARK_GREEN,  GmatColor::DARK_GRAY);
-   else if (bodyName == MARS_NAME)
-      body->SetDefaultColors(GmatColor::ORANGE, GmatColor::DARK_GRAY);
-   else if (bodyName == JUPITER_NAME)
-      body->SetDefaultColors(GmatColor::DARK_GOLDEN_ROD, GmatColor::DARK_GRAY);
+   if (spName == SUN_NAME)
+      sp->SetDefaultColors(GmatColor::GOLD, GmatColor::DARK_GRAY);
+   else if (spName == MERCURY_NAME)
+      sp->SetDefaultColors(GmatColor::AQUA,   GmatColor::DARK_GRAY);
+   else if (spName == VENUS_NAME)
+      sp->SetDefaultColors(GmatColor::WHEAT, GmatColor::DARK_GRAY);
+   else if (spName == EARTH_NAME)
+      sp->SetDefaultColors(GmatColor::DARK_GREEN,  GmatColor::DARK_GRAY);
+   else if (spName == MOON_NAME)
+      sp->SetDefaultColors(GmatColor::GRAY,  GmatColor::DARK_GRAY);
+   else if (spName == MARS_NAME)
+      sp->SetDefaultColors(GmatColor::ORANGE, GmatColor::DARK_GRAY);
+   else if (spName == JUPITER_NAME)
+      sp->SetDefaultColors(GmatColor::DARK_GOLDEN_ROD, GmatColor::DARK_GRAY);
+   else if (spName == SOLAR_SYSTEM_BARYCENTER_NAME)
+      sp->SetDefaultColors(GmatColor::MAROON, GmatColor::DARK_GRAY);
    else
-      body->SetDefaultColors(GmatColor::BROWN, GmatColor::DARK_GRAY);
+      sp->SetDefaultColors(GmatColor::BROWN, GmatColor::DARK_GRAY);
 }

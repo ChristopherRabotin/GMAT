@@ -22,7 +22,9 @@
 #define ColorDatabase_hpp
 
 #include "gmatdefs.hpp"
-#include "RgbColor.hpp"
+//#include "RgbColor.hpp"
+
+class RgbColor;
 
 class GMAT_API ColorDatabase
 {

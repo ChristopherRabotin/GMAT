@@ -45,7 +45,7 @@ public:
    void Set(const UnsignedInt rgb);
    
    // static methods
-   static UnsignedInt ToIntColor(const std::string &rgbString);
+   static UnsignedInt ToIntColor(const std::string &colorString);
    static std::string ToRgbString(const UnsignedInt &intColor);
    
 private:

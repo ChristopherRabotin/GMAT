@@ -22,6 +22,7 @@
 #include "ColorDatabase.hpp"
 #include "ColorTypes.hpp"
 #include "GmatBaseException.hpp"
+#include "RgbColor.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_COLORDB_ADD

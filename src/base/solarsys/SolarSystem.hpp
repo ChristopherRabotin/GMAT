@@ -340,7 +340,7 @@ private:
    bool           CreateDeFile(const Integer id, const std::string &fileName,
                                Gmat::DeFileFormat format = Gmat::DE_BINARY);
    // method to set default colors
-   void           SetDefaultBodyColors(SpacePoint *body);
+   void           SetDefaultSpacePointColors(SpacePoint *sp);
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

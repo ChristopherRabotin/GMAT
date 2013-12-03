@@ -7250,6 +7250,10 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    // Set object manage option to configuration
    objectManageOption = 1;
    
+   // Clear SpacePoint instance count so that Spacecraft color starts from the
+   // same color for each run
+   SpacePoint::ClearInstanceCount();
+   
    // Clear command sequence before resource (loj: 2008.07.10)
    if (clearObjs)
    {

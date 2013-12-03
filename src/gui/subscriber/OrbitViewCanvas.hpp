@@ -73,9 +73,8 @@ public:
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval, int frameInc = 30);
-
+   
    void SetGlObject(const StringArray &objNames,
-                    const UnsignedIntArray &objOrbitColors,
                     const std::vector<SpacePoint*> &objectArray);
    
    // CoordinateSystem
