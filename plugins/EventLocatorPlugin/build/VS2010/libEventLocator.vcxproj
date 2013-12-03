@@ -64,6 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\..\..\application\plugins\</OutDir>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\..\..\..\application\plugins64\</OutDir>

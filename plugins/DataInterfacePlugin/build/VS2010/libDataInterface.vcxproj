@@ -45,6 +45,7 @@
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\..\application\plugins\</OutDir>
     <TargetName>libDataInterface</TargetName>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
