@@ -52,12 +52,12 @@ PLUGIN                 = ../plugins/libProductionPropagators
 
 # Alpha plugins
 #PLUGIN                = ./libCInterface
-#PLUGIN                = ../plugins/libEventLocator
-#PLUGIN                = ../plugins/libExtraPropagators
-#PLUGIN                = ../plugins/libGmatEstimation
-#PLUGIN                = ../plugins/libGeometricMeasurements
-#PLUGIN                = ../plugins/libGmatFunction
-#PLUGIN                = ../plugins/libSaveCommand
+PLUGIN                = ../plugins/libEventLocator
+PLUGIN                = ../plugins/libExtraPropagators
+PLUGIN                = ../plugins/libGmatEstimation
+PLUGIN                = ../plugins/libGeometricMeasurements
+PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                = ../plugins/libSaveCommand
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
