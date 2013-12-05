@@ -763,8 +763,9 @@ bool DragForce::Initialize()
                }
             }
             
-            if ((atmosphereType == "BodyDefault") ||
-                (atmosphereType == modelBodyIsUsing))
+//            if ((atmosphereType == "BodyDefault") ||								// made changes by TUAN NGUYEN for a bug GMT-4299
+//                (atmosphereType == modelBodyIsUsing))								// made changes by TUAN NGUYEN for a bug GMT-4299
+            if (atmosphereType == "BodyDefault")									// made changes by TUAN NGUYEN for a bug GMT-4299
                atmos = centralBody->GetAtmosphereModel();
             else
                atmos = internalAtmos;
