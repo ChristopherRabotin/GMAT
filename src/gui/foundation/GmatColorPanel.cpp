@@ -25,10 +25,10 @@
 #include "RgbColor.hpp"             // for RgbColor
 #include "MessageInterface.hpp"
 
-//#define DEBUG_COLOR_CONSTRUCTOR
-//#define DEBUG_COLOR_CHANGE
+//#define DEBUG_PANEL_CONSTRUCTOR
 //#define DEBUG_PANEL_LOAD
 //#define DEBUG_PANEL_SAVE
+//#define DEBUG_COLOR_CHANGE
 
 //------------------------------
 // event tables for wxWindows
@@ -52,35 +52,43 @@ END_EVENT_TABLE()
  * @param  parent  The parent window
  * @param  parentGmatPanel  The parent GmatPanel to access EnableUpdate()
  * @param  clonedSpacePoint  The cloned SpacePoint object pointer
+ * @param  useInputObjColor  Set this flag to true if color should be retrived
+ *                           using objName. (e.g. CelestialBody name) [false]
+ * @param  overrideOrbitColor  Set this flag to true if orbit color can be overriden [false]
+ * @param  showOrbitColorOnly  Set this flag to true if only showing orbit color [false]
+ * @param  showOverrideColorCheckBox  Set this flag to true if CheckBox for overriding
+ *                                    orbit color should be shown [false]
+ * @param  objName  The object name to be used for retriving orbit and target color [""]
  */
 //------------------------------------------------------------------------------
 GmatColorPanel::GmatColorPanel(wxWindow *parent, GmatPanel *parentGmatPanel,
                                SpacePoint *clonedSpacePoint, bool useInputObjColor,
-                               bool overrideColor, bool showOrbitColorOnly,
-                               bool showOverrideColorCheckBox,
-                               const std::string &objName)
+                               bool overrideOrbitColor, bool showOrbitColorOnly,
+                               bool showOverrideOrbitColorCheckBox,
+                               const std::string &objName, UnsignedInt overrdingColor)
    : wxPanel(parent)
 {
-   //#ifdef DEBUG_PANEL_CONSTRUCTOR
+   #ifdef DEBUG_PANEL_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("GmatColorPanel::GmatColorPanel() entered, parentGmatPanel=<%p>'%s', "
-       "clonedSpacePoint=<%p>'%s', useInputObjColor=%d, overrideColor=%d, "
-       "showOrbitColorOnly=%d, showOverrideColorCheckBox=%d, objName='%s'\n",
+       "clonedSpacePoint=<%p>'%s', useInputObjColor=%d, overrideOrbitColor=%d, "
+       "showOrbitColorOnly=%d, showOverrideOrbitColorCheckBox=%d, objName='%s'\n",
        parentGmatPanel, parentGmatPanel->GetName().c_str(), clonedSpacePoint,
        clonedSpacePoint ? clonedSpacePoint->GetName().c_str() : "NULL",
-       useInputObjColor, overrideColor, showOrbitColorOnly, showOverrideColorCheckBox,
+       useInputObjColor, overrideOrbitColor, showOrbitColorOnly, showOverrideOrbitColorCheckBox,
        objName.c_str());
-   //#endif
+   #endif
    
    theParentGmatPanel = parentGmatPanel;
    theClonedSpacePoint = clonedSpacePoint;
    mHasColorChanged = false;
    mHasOverrideColorChanged = false;
    mUseInputObjectColor = useInputObjColor;
-   mOverrideColor = overrideColor;
+   mOverrideOrbitColor = overrideOrbitColor;
    mShowOrbitColorOnly = showOrbitColorOnly;
-   mShowOverrideColorCheckBox = showOverrideColorCheckBox;
+   mShowOverrideOrbitColorCheckBox = showOverrideOrbitColorCheckBox;
    mSpacePointName = objName;
+   mOverrdingColor = overrdingColor;
    
    mDefaultOrbitColor = GmatColor::WHITE;
    mOrbitIntColor = GmatColor::WHITE;
@@ -132,7 +140,7 @@ void GmatColorPanel::Create()
    #endif
    
    // Add override color CheckBox
-   mOverrideColorCheckBox =
+   mOverrideOrbitColorCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Override Color For This Segment"),
                      wxDefaultPosition, wxSize(-1, -1), bsize);
    
@@ -152,7 +160,7 @@ void GmatColorPanel::Create()
                              wxDefaultPosition, wxSize(buttonWidth, 20), 0);
    
    wxBoxSizer *colorBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   colorBoxSizer->Add(mOverrideColorCheckBox, 0, wxALIGN_CENTER, bsize);
+   colorBoxSizer->Add(mOverrideOrbitColorCheckBox, 0, wxALIGN_CENTER, bsize);
    colorBoxSizer->Add(20, 20);
    colorBoxSizer->Add(mOrbitColorLabel, 0, wxALIGN_CENTER, bsize);
    colorBoxSizer->Add(mOrbitColorCtrl, 0, wxALIGN_CENTER, bsize);
@@ -206,6 +214,8 @@ void GmatColorPanel::LoadData()
       }
       
       mDefaultOrbitColor = mOrbitIntColor;
+      if (mOverrideOrbitColor)
+         mOrbitIntColor = mOverrdingColor;
       
       RgbColor rgbOrbitColor = RgbColor(mOrbitIntColor);
       RgbColor rgbTargetColor = RgbColor(mTargetIntColor);
@@ -227,18 +237,24 @@ void GmatColorPanel::LoadData()
          mTargetColorCtrl->Hide();
       }
       
-      // If not overriding color, disable orbit color
-      if (!mOverrideColor)
-      {
-         mOverrideColorCheckBox->SetValue(false);
-         mOrbitColorLabel->Disable();
-         mOrbitColorCtrl->Disable();
-      }
+      // Set value to overrding color CheckBox
+      if (mOverrideOrbitColor)
+         mOverrideOrbitColorCheckBox->SetValue(true);
+      else
+         mOverrideOrbitColorCheckBox->SetValue(false);
       
       // If not showing override color check box, hide it
-      if (!mShowOverrideColorCheckBox)
-         mOverrideColorCheckBox->Hide();
-      
+      if (!mShowOverrideOrbitColorCheckBox)
+         mOverrideOrbitColorCheckBox->Hide();
+      else
+      {
+         // If not overriding orbit color, disable it
+         if (!mOverrideOrbitColor)
+         {
+            mOrbitColorLabel->Disable();
+            mOrbitColorCtrl->Disable();
+         }
+      }
       Layout();
    }
    catch (BaseException &e)
@@ -257,7 +273,7 @@ void GmatColorPanel::LoadData()
 //------------------------------------------------------------------------------
 void GmatColorPanel::SaveData()
 {
-   #ifdef DEBUG_PANEL_LOAD
+   #ifdef DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage
       ("GmatColorPanel::SaveData() setting colorChanged to true and exiting.\n");
    #endif
@@ -271,9 +287,9 @@ void GmatColorPanel::SaveData()
 void GmatColorPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    mHasOverrideColorChanged = true;
-   mOverrideColor = mOverrideColorCheckBox->GetValue();
+   mOverrideOrbitColor = mOverrideOrbitColorCheckBox->GetValue();
    
-   if (mOverrideColor)
+   if (mOverrideOrbitColor)
    {
       mOrbitColorLabel->Enable(true);
       mOrbitColorCtrl->Enable(true);      

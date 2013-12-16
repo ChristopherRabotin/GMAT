@@ -46,7 +46,7 @@
 
 
 //#define DEBUG_J2000_STATE
-#define DEBUG_SPACE_POINT_CLOAKING
+//#define DEBUG_SPACE_POINT_CLOAKING
 //#define DEBUG_SPICE_KERNEL
 //#define DEBUG_SPACE_POINT_ORBIT_KERNELS
 //#define DEBUG_ATTITUDE
@@ -474,9 +474,11 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
    }
    if (id == ORBIT_COLOR)
    {
+      #ifdef DEBUG_SPACE_POINT_CLOAKING
       MessageInterface::ShowMessage
          ("==> '%s', defaultOrbitColor=%06X, orbitColor=%06X\n",
           GetName().c_str(), defaultOrbitColor, orbitColor);
+      #endif
       return (defaultOrbitColor == orbitColor);
    }
    if (id == TARGET_COLOR)

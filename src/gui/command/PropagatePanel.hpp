@@ -31,12 +31,13 @@
 #include "StopCondition.hpp"
 #include "PropSetup.hpp"
 #include "GmatColorPanel.hpp"
+#include <wx/treebase.h>
 
 class PropagatePanel : public GmatPanel
 {
 public:
    // constructors
-   PropagatePanel(wxWindow *parent, GmatCommand *cmd);
+   PropagatePanel(wxWindow *parent, GmatCommand *cmd, wxTreeItemId nodeId);
    virtual ~PropagatePanel();
    
    virtual bool PrepareObjectNameChange();
@@ -113,6 +114,7 @@ private:
    
    Propagate *thePropCmd;
    Parameter *theParameter;
+   wxTreeItemId theNodeId;
    
    wxArrayString mObjectTypeList;
    std::vector<StopCondition*> mRemovedStopCondList;

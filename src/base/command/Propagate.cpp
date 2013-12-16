@@ -33,12 +33,13 @@
 #include "MessageInterface.hpp"
 #include "EventLocator.hpp"
 #include "EventModel.hpp"
-
+#include "RgbColor.hpp"         // for ToIntColor()
 #include <sstream>
 #include <cmath>
 
 //#define DEBUG_PROPAGATE_ASSEMBLE
 //#define DEBUG_PARSING
+//#define DEBUG_COLOR
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_INIT 1
 //#define DEBUG_PROPAGATE_DIRECTION 1
@@ -160,7 +161,8 @@ Propagate::Propagate() :
    stopCondEpochID             (-1),
    stopCondBaseEpochID         (-1),
    stopCondStopVarID           (-1),
-   segmentOrbitColor           (GmatColor::WHITE),
+   segmentOrbitColorStr        (""),
+   segmentOrbitColor           (GmatColor::RED),
    overrideSegmentColor        (false)
 {
    stepBrackets[0] = stepBrackets[1] = 0.0;
@@ -283,6 +285,7 @@ Propagate::Propagate(const Propagate &prp) :
    stopCondEpochID             (prp.stopCondEpochID),
    stopCondBaseEpochID         (prp.stopCondBaseEpochID),
    stopCondStopVarID           (prp.stopCondStopVarID),
+   segmentOrbitColorStr        (prp.segmentOrbitColorStr),
    segmentOrbitColor           (prp.segmentOrbitColor),
    overrideSegmentColor        (prp.overrideSegmentColor)
 {
@@ -348,6 +351,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    stopCondEpochID         = prp.stopCondEpochID;
    stopCondBaseEpochID     = prp.stopCondBaseEpochID;
    stopCondStopVarID       = prp.stopCondStopVarID;
+   segmentOrbitColorStr    = prp.segmentOrbitColorStr;
    segmentOrbitColor       = prp.segmentOrbitColor;
    overrideSegmentColor    = prp.overrideSegmentColor;
    propAllSTMs             = prp.propAllSTMs;
@@ -632,7 +636,24 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
       }
       gen += "}";
    }
-
+   
+   // Now write orbit color
+   if (overrideSegmentColor)
+   {
+      std::string colorStr = ", OrbitColor = " + segmentOrbitColorStr;
+      if (stopWhen.size() > 0)
+      {
+         // Find last closing curly brace
+         std::string::size_type lastPos = gen.find_last_of("}");
+         if (lastPos != gen.npos)
+            gen.insert(lastPos, colorStr);
+         else
+            ; // Will it ever reach here?
+      }
+      else
+         gen.append("{" + colorStr + "}");
+   }
+   
    generatingString = gen + ";";
    // Then call the base class method
    return PropagationEnabledCommand::GetGeneratingString(mode, prefix, useName);
@@ -1882,7 +1903,7 @@ bool Propagate::InterpretAction()
 {
    #ifdef DEBUG_PROPAGATE_ASSEMBLE
    MessageInterface::ShowMessage
-      ("Propagate::InterpretAction() genString = \"%s\"\n",
+      ("\nPropagate::InterpretAction() entered, genString = \"%s\"\n",
        generatingString.c_str());
    #endif
 
@@ -1982,7 +2003,7 @@ bool Propagate::InterpretAction()
          }
       }
    }
-
+   
    // Look for repeated spacecraft names in list (will miss formation members)
    for (UnsignedInt i = 0; i < satList.size(); ++i)
    {
@@ -1993,14 +2014,25 @@ bool Propagate::InterpretAction()
             satDuplicates.push_back(satList[j]);
       }
    }
+   
    if (satDuplicates.size() > 0)
       throw CommandException("Duplicate Spacecraft names in a single Propagate "
             "line are not allowed");
-
+   
+   // Now OrbitColot is specified inside brackets without stopping conditions
+   // so check it (LOJ: 2013.12.16)
    if ((bracketCount[0] > 0) && (stopNames.size() == 0))
-      throw CommandException("Brackets for stopping conditions were found, "
-            "but no stopping conditions detected");
-
+   {
+      if (!overrideSegmentColor)
+         throw CommandException("Brackets for stopping conditions were found, "
+                                "but no stopping conditions detected");
+   }
+   
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+   MessageInterface::ShowMessage
+      ("Propagate::InterpretAction() returning true for genString = \"%s\"\n",
+       generatingString.c_str());
+   #endif
    return true;
 }
 
@@ -2342,11 +2374,12 @@ void Propagate::ClearWrappers()
 }
 
 //------------------------------------------------------------------------------
-// virtual void SetSegmentOrbitColor(UnsignedInt &newOrbColor)
+// virtual void SetSegmentOrbitColor(UnsignedInt &intColor)
 //------------------------------------------------------------------------------
-void Propagate::SetSegmentOrbitColor(UnsignedInt &newOrbColor)
+void Propagate::SetSegmentOrbitColor(UnsignedInt &intColor)
 {
-   segmentOrbitColor = newOrbColor;
+   segmentOrbitColor = intColor;
+   segmentOrbitColorStr = RgbColor::ToRgbString(intColor);
 }
 
 //------------------------------------------------------------------------------
@@ -2534,6 +2567,10 @@ void Propagate::FindSetupsAndStops(Integer &loc,
    //=================================================================
    #ifdef __NOT_USING_TEXTPARSER__
    //=================================================================
+   #ifdef DEBUG_PARSING
+   MessageInterface::ShowMessage
+      ("Propagate::FindSetupsAndStops() entered, NOT Using the TextParser...\n");
+   #endif
    // First parse the pieces from the string, starting at loc
    std::string tempString, setupWithStop, oneStop;
    const char *str = generatingString.c_str();
@@ -2656,13 +2693,23 @@ void Propagate::FindSetupsAndStops(Integer &loc,
    #else
    //=================================================================
 
+   #ifdef DEBUG_PARSING
+   MessageInterface::ShowMessage
+      ("Propagate::FindSetupsAndStops() entered, Using the TextParser...\n");
+   #endif
+   
    TextParser tp;
    StringArray chunks;
    std::string str1 = generatingString.substr(loc);
    // Remove all blank spaces
-   str1 = GmatStringUtil::RemoveAll(str1, ' ');
+   // Cannot remove blanks since OrbitColor can have triplet value, e.g [0 255 0]
+   // So remove blanks after }
+   //str1 = GmatStringUtil::RemoveAll(str1, ' ');
+   std::string::size_type closeBrace = str1.find_last_of("}");
+   str1 = GmatStringUtil::RemoveAll(str1, ' ', closeBrace);
+   
    std::string str2;
-
+   
    #ifdef DEBUG_PARSING
    MessageInterface::ShowMessage("str1 = '%s'\n", str1.c_str());
    #endif
@@ -2677,7 +2724,10 @@ void Propagate::FindSetupsAndStops(Integer &loc,
       #endif
 
       std::string::size_type lastCloseParen = str2.find_last_of(")");
-
+      
+      // If syntax is "Propagate Prop(Sat1, {Sat1.ElapsedSecs = 600})",
+      // make it to standard syntanx, i.e "Propagate Prop(Sat1) {Sat1.ElapsedSecs = 600}"
+      // to use TextParser::SeparateAllBrackets(str, "{})
       // Remove last ) after }
       if (lastCloseParen == (str2.size() - 1) && str2[lastCloseParen - 1] == '}')
       {
@@ -2729,18 +2779,87 @@ void Propagate::FindSetupsAndStops(Integer &loc,
             if (parts[i].find(",,") != std::string::npos)
                throw CommandException("Stopping condition parsing error; is "
                      "there an extra comma?");
-
+            
             StringArray tempStops = tp.SeparateBrackets(parts[i], "{}", ",", true);
-            copy(tempStops.begin(), tempStops.end(), back_inserter(stopStrings));
+            // Add only stop conditions, skip OrbitColor (LOJ: 2013.12.13)
+            //copy(tempStops.begin(), tempStops.end(), back_inserter(stopStrings));
+            for (UnsignedInt i = 0; i < tempStops.size(); i++)
+            {
+               #ifdef DEBUG_PARSING
+               MessageInterface::ShowMessage("   tempStops[%d] = %s\n", i, tempStops[i].c_str());
+               #endif
+               if (tempStops[i].find("OrbitColor") == std::string::npos)
+                  stopStrings.push_back(tempStops[i]);
+               else
+                  ParseSegmentColor(tempStops[i]);
+            }
          }
       }
    }
-
+   
    //=================================================================
    #endif
    //=================================================================
+   
+   #ifdef DEBUG_PARSING
+   MessageInterface::ShowMessage("Propagate::FindSetupsAndStops() leaving\n");
+   #endif
 }
 
+//------------------------------------------------------------------------------
+// void ParseSegmentColor(const std::string &colorString)
+//------------------------------------------------------------------------------
+void Propagate::ParseSegmentColor(const std::string &colorString)
+{
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("Propagate::ParseSegmentColor() entered, colorString = '%s'\n", colorString.c_str());
+   #endif
+   std::string colorStr = colorString;
+   
+   // Parse color value and check errors
+   StringArray parts = GmatStringUtil::SeparateByComma(colorString);
+   if (parts.size() > 1)
+      colorStr = parts[0];
+   
+   StringArray colorParts = GmatStringUtil::DecomposeBy(colorStr, "=");
+   #ifdef DEBUG_COLOR
+   for (UnsignedInt i = 0; i < colorParts.size(); i++)
+      MessageInterface::ShowMessage("   colorParts[%d] = %s\n", i, colorParts[i].c_str());
+   #endif
+   if (colorParts.size() == 2)
+   {
+      std::string colorVal = colorParts[1];
+      colorVal = GmatStringUtil::Strip(colorVal);
+      #ifdef DEBUG_COLOR
+      MessageInterface::ShowMessage("   colorVal = '%s'\n", colorVal.c_str());
+      #endif
+      
+      // Check if color value is valid
+      try
+      {
+         UnsignedInt intColor = RgbColor::ToIntColor(colorVal);
+         #ifdef DEBUG_COLOR
+         MessageInterface::ShowMessage("   intColor = %06X\n", intColor);
+         #endif
+         segmentOrbitColor = intColor;
+         overrideSegmentColor = true;
+         if (colorVal.find('[') == colorVal.npos)
+            segmentOrbitColorStr = colorVal;
+         else
+            segmentOrbitColorStr = RgbColor::ToRgbString(intColor);
+      }
+      catch (BaseException &be)
+      {
+         throw CommandException(be.GetFullMessage());
+      }
+   }
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("Propagate::ParseSegmentColor() leaving, segmentOrbitColor = %06X\n",
+       segmentOrbitColor);
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // void ConfigurePropSetup(std::string &setupDesc)
@@ -4195,6 +4314,9 @@ bool Propagate::Execute()
 //
 //            publisher->Publish(this, streamID, pubdata, dim+1);
 
+            // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
+            publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
+            
             CheckForEvents();
             break;
          }

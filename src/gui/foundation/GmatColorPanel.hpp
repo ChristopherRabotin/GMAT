@@ -34,16 +34,16 @@ class GmatColorPanel: public wxPanel
 public:
    GmatColorPanel(wxWindow *parent, GmatPanel *parentGmatPanel,
                   SpacePoint *clonedSpacePoint, bool useInputObjColor = false,
-                  bool overrideColor = false, bool showOrbitColorOnly = false,
-                  bool showOverrideColorCheckBox = false,
-                  const std::string &objName = "");
+                  bool overrideOrbitColor = false, bool showOrbitColorOnly = false,
+                  bool showOverrideOrbitColorCheckBox = false,
+                  const std::string &objName = "", UnsignedInt overrdingColor = 0);
    ~GmatColorPanel();
    void SaveData();
    void LoadData();
    
    bool HasColorChanged() { return mHasColorChanged; }
    bool HasOverrideColorChanged() { return mHasOverrideColorChanged; }
-   bool GetOverrideColor() { return mOverrideColor; }
+   bool GetOverrideColor() { return mOverrideOrbitColor; }
    UnsignedInt GetOrbitColor() { return mOrbitIntColor; }
    UnsignedInt GetTargetColor() { return mTargetIntColor; }
    
@@ -52,11 +52,12 @@ private:
    bool mHasColorChanged;
    bool mHasOverrideColorChanged;
    bool mUseInputObjectColor;
-   bool mOverrideColor;
+   bool mOverrideOrbitColor;
    bool mShowOrbitColorOnly;
-   bool mShowOverrideColorCheckBox;
+   bool mShowOverrideOrbitColorCheckBox;
    std::string mSpacePointName;
-   
+
+   UnsignedInt mOverrdingColor;
    UnsignedInt mDefaultOrbitColor;
    UnsignedInt mOrbitIntColor;
    UnsignedInt mTargetIntColor;
@@ -69,7 +70,7 @@ private:
    wxStaticText *mTargetColorLabel;
    wxColourPickerCtrl *mOrbitColorCtrl;
    wxColourPickerCtrl *mTargetColorCtrl;
-   wxCheckBox *mOverrideColorCheckBox;
+   wxCheckBox *mOverrideOrbitColorCheckBox;
    wxColour mOrbitColor;
    wxColour mTargetColor;
    

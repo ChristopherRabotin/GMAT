@@ -226,7 +226,7 @@ UnsignedInt RgbColor::ToIntColor(const std::string &colorString)
       {
          UtilityException ue;
          ue.SetDetails("The color \"%s\" not found in the color database. "
-                       "Available colors are \"%s\"\n", colorString.c_str(),
+                       "Available colors are \"%s\"", colorString.c_str(),
                        colorDb->GetAllColorNames().c_str());
          throw ue;
       }
@@ -259,8 +259,9 @@ UnsignedInt RgbColor::ToIntColor(const std::string &colorString)
    if (error)
    {
       UtilityException ue;
-      ue.SetDetails("%s has invalid RGB color values. Valid color value is "
-                    "Integer between 0 and 255", colorString.c_str());
+      ue.SetDetails("\"%s\" has invalid RGB color values. Valid color value is "
+                    "triplet Integer number between 0 and 255 inside of [ ]",
+                    colorString.c_str());
       throw ue;
    }
    else

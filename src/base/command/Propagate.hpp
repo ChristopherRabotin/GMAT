@@ -154,7 +154,7 @@ public:
    virtual void         ClearWrappers();
 
    // Methods used for segment orbit colors
-   virtual void         SetSegmentOrbitColor(UnsignedInt &newOrbColor);
+   virtual void         SetSegmentOrbitColor(UnsignedInt &intColor);
    virtual UnsignedInt  GetSegmentOrbitColor();
    virtual std::string  GetFirstSpaceObjectName();
    virtual void         SetOverrideSegmentColor(bool override);
@@ -277,6 +277,7 @@ protected:
    Integer                 stopCondStopVarID;
    
    // Orbit color
+   std::string segmentOrbitColorStr;
    UnsignedInt segmentOrbitColor;
    bool overrideSegmentColor;
    
@@ -318,6 +319,7 @@ protected:
                               std::string& generatingString,
                               StringArray &setupStrings, 
                               StringArray &stopStrings);
+   void                    ParseSegmentColor(const std::string &colorString);
    void                    ConfigurePropSetup(std::string &setupDesc);
    void                    ConfigureStoppingCondition(std::string &stopDesc);
    void                    CleanString(std::string &theString, 

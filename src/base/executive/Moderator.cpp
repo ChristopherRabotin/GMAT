@@ -8079,6 +8079,10 @@ void Moderator::CreateDefaultMission()
    
    try
    {
+      // Clear SpacePoint instance count so that Spacecraft color starts from the
+      // same color for each run
+      SpacePoint::ClearInstanceCount();
+      
       //----------------------------------------------------
       // Create default resource
       //----------------------------------------------------

@@ -32,8 +32,11 @@ public:
    
    virtual GmatCommand* GetCommand();
    virtual void SetCommand(GmatCommand *cmd);
+   virtual wxTreeItemId GetNodeId();
+   virtual void SetNodeId(const wxTreeItemId &nodeId);
    
 protected:
    GmatCommand *theCommand;
+   wxTreeItemId theNodeId;
 };
 #endif // MissionTreeItemData_hpp

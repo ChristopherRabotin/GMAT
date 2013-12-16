@@ -4143,13 +4143,13 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    wxString title = item->GetTitle();
    wxString name = item->GetName();
    GmatCommand *cmd = item->GetCommand();
-
+   
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewCommand() title=%s, name=%s, itemType=%d, cmd=<%p><%s>\n",
        title.c_str(), name.c_str(), itemType, cmd, cmd ? cmd->GetTypeName().c_str() : "NULL");
    #endif
-
+   
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType);
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
@@ -4157,7 +4157,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    switch (itemType)
    {
    case GmatTree::PROPAGATE:
-      sizer->Add(new PropagatePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      // Changed to pass node id so that propagate node text color can be changed
+      // when saving the panel (LOJ: 2013.12.12)
+      sizer->Add(new PropagatePanel(scrolledWin, cmd, item->GetNodeId()), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::MANEUVER:
       sizer->Add(new ManeuverPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
