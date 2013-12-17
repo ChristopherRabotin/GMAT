@@ -282,6 +282,8 @@ protected:
        BODY_CONSTRAINT_VECTOR_X,
        BODY_CONSTRAINT_VECTOR_Y,
        BODY_CONSTRAINT_VECTOR_Z,
+       // Add additional CCSDS-AEM fields here
+       AEM_FILE_NAME,
        AttitudeParamCount
    };
    
@@ -409,6 +411,8 @@ protected:
    Rvector3              bodyAlignmentVector;
    Rvector3              bodyConstraintVector;
 
+   /// Additional data for CCSDS-AEM
+   std::string           aemFile;
 
    //------------------------------------------------------------------------------
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)

@@ -121,6 +121,8 @@ Attitude::PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount] =
    "BodyConstraintVectorX",
    "BodyConstraintVectorY",
    "BodyConstraintVectorZ",
+   // Addtitional CCSDS_AEM field text here
+   "AttitudeFileName",
 };
 
 const Gmat::ParameterType
@@ -183,6 +185,8 @@ Attitude::PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   // Additional CCSDS_AEM field types here
+   Gmat::STRING_TYPE,
 };
 
 const std::string
@@ -367,10 +371,12 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    nutationAngle           (15.0 * GmatMathConstants::RAD_PER_DEG),
    initialSpinAngle        (0.0),
    spinRate                (10.0 * GmatMathConstants::RAD_PER_DEG),
-   // Additional NaditPointing fields here
+   // Additional NadirPointing fields here
    refBodyName             ("Earth"),
    refBody                 (NULL),
-   attitudeConstraintType  ("OrbitNormal")
+   attitudeConstraintType  ("OrbitNormal"),
+   // Additional CCSDS_AEM fields here
+   aemFile                 ("")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -394,7 +400,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    // Additional PrecessingSpinner fields here
    nutationReferenceVector.Set(0,0,1);
    bodySpinAxis.Set(0,0,1);
-   // Additional NaditPointing fields here
+   // Additional NadirPointing fields here
    bodyAlignmentVector.Set(1.0, 0.0, 0.0);
    bodyConstraintVector.Set(0.0, 0.0, 1.0);
  }
@@ -459,7 +465,9 @@ Attitude::Attitude(const Attitude& att) :
    refBody                 (NULL),
    attitudeConstraintType  (att.attitudeConstraintType),
    bodyAlignmentVector     (att.bodyAlignmentVector),
-   bodyConstraintVector    (att.bodyConstraintVector)
+   bodyConstraintVector    (att.bodyConstraintVector),
+   // Additional CCSDS_AEM fields here
+   aemFile                 (att.aemFile)
 {
 #ifdef DEBUG_ATTITUDE_INIT
    MessageInterface::ShowMessage("New attitude created by copying attitude <%p> of type %s\n",
@@ -533,6 +541,8 @@ Attitude& Attitude::operator=(const Attitude& att)
    attitudeConstraintType  = att.attitudeConstraintType;
    bodyAlignmentVector     = att.bodyAlignmentVector;
    bodyConstraintVector    = att.bodyConstraintVector;
+   // Additional CCSDS_AEM fields here
+   aemFile                 = att.aemFile;
 
    return *this;
 }
@@ -936,7 +946,7 @@ const Rmatrix33& Attitude::GetCosineMatrix(Real atTime)
 }
  
 //---------------------------------------------------------------------------
-//  const Rvector3&   SetAngularVelocity(Real atTime)
+//  const Rvector3&   GetAngularVelocity(Real atTime)
 //---------------------------------------------------------------------------
  /**
  * Returns the attitude rates at time atTime as an angular velocity.
@@ -1294,6 +1304,18 @@ bool Attitude::SetRefObject(GmatBase *obj,
                   "   Setting <%p>'%s' as reference coordinate system for attitude '%s'\n",
                   obj, name.c_str(), instanceName.c_str());
             #endif
+            // Make sure we don't have a circular dependency
+            CoordinateSystem *tmpCS = (CoordinateSystem*) obj;
+            if (tmpCS->IsOfType("BodyFixed") &&
+                tmpCS->UsesSpacecraft(owningSC->GetName()))
+            {
+               std::string errmsg = "Cannot set attitude coordinate system \"";
+               errmsg += tmpCS->GetName() + "\" on spacecraft \"";
+               errmsg += owningSC->GetName() + "\".  Body Fixed coordinate ";
+               errmsg += "system contains ";
+               errmsg += "circular reference to the spacecraft.\n";
+               throw AttitudeException(errmsg);
+            }
             refCS = (CoordinateSystem*) obj;
             needsReinit = true;  // need to reinitialize, since CS has changed
          }
@@ -1516,7 +1538,8 @@ bool Attitude::IsParameterReadOnly(const Integer id) const
 {
    #ifdef DEBUG_ATTITUDE_READ_ONLY
    MessageInterface::ShowMessage(
-   "Entering Attitude::ReadOnly with id = %d (%s)\n", id,
+   "Entering Attitude::ReadOnly (%s) with id = %d (%s)\n",
+   attitudeModelName.c_str(), id,
    GetParameterText(id).c_str());
    #endif
    if ((!modifyCoordSysAllowed) && (id == REFERENCE_COORDINATE_SYSTEM))
@@ -1616,6 +1639,11 @@ bool Attitude::IsParameterReadOnly(const Integer id) const
    if (attitudeModelName != "NadirPointing")
    {
       if ((id >= ATTITUDE_REFERENCE_BODY) && (id <= BODY_CONSTRAINT_VECTOR_Z))
+         return true;
+   }
+   if (attitudeModelName != "CCSDS_AEM")
+   {
+      if (id == AEM_FILE_NAME)
          return true;
    }
 
@@ -2868,6 +2896,10 @@ std::string Attitude::GetStringParameter(const Integer id) const
       }
       return attitudeConstraintType;
    }
+   if (id == AEM_FILE_NAME)
+   {
+      return aemFile;
+   }
    return GmatBase::GetStringParameter(id);
 }
 
@@ -3005,7 +3037,7 @@ bool Attitude::SetStringParameter(const Integer     id,
       return true;
    }
 
-   if (id <= ATTITUDE_REFERENCE_BODY)
+   if (id == ATTITUDE_REFERENCE_BODY)
    {
       if (attitudeModelName != "NadirPointing")
       {
@@ -3026,7 +3058,20 @@ bool Attitude::SetStringParameter(const Integer     id,
          warnMsg += " on a non-NadirPointing Attitude model has no effect\n";
          MessageInterface::ShowMessage(warnMsg);
       }
+      if ((value != "OrbitNormal") && (value != "VelocityConstraint"))
+      {
+         AttitudeException ae;
+         ae.SetDetails(errorMessageFormatUnnamed.c_str(),
+            value.c_str(), GetParameterText(id).c_str(),
+            "\"OrbitNormal\" \"VelocityConstraint\"");
+         throw ae;
+      }
       attitudeConstraintType = value;
+      return true;
+   }
+   if (id == AEM_FILE_NAME)
+   {
+      aemFile = value;
       return true;
    }
 
