@@ -65,11 +65,13 @@ public:
    static void      DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
                                             Rvector3 &eAxis, Real &eAngle);
 
+   static bool      IsValidEulerSequence(const std::string &theSeq);
+
 private:
    //------------------------------------------------------------------------------
    // private static data
    //------------------------------------------------------------------------------
-   // none
+   static const std::string VALID_EULER_SEQUENCES[12];
 
    //------------------------------------------------------------------------------
    // private constructors, destructor, operator=
