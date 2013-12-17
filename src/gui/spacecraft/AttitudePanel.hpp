@@ -60,6 +60,7 @@ private:
    wxBoxSizer   *precessingSpinnerSizer2; //LOJ: Added
    wxBoxSizer   *nadirPointingSizer;
    wxBoxSizer   *nadirPointingSizer2;
+   wxBoxSizer   *ccsdsAttitudeSizer;
    
    wxStaticText *config1StaticText;
    wxStaticText *config2StaticText;
@@ -93,6 +94,8 @@ private:
    wxStaticText *constraintTypeLabel;
    wxStaticText *bodyAlignVectorLabel;
    wxStaticText *bodyConstraintVectorLabel;
+   // CCSDS attitude
+   wxStaticText *aemFileLabel;
 
    wxTextCtrl   *st1TextCtrl;
    wxTextCtrl   *st2TextCtrl;
@@ -132,6 +135,9 @@ private:
    wxComboBox   *referenceBodyComboBox;
    wxComboBox   *constraintTypeComboBox;
 
+   wxBitmapButton *aemBrowseButton;
+
+
    // for precessing spinner data
    wxTextCtrl *spinAxis1TextCtrl;
    wxTextCtrl *spinAxis2TextCtrl;
@@ -152,6 +158,9 @@ private:
    wxTextCtrl *bodyConstraintVectorXTextCtrl;
    wxTextCtrl *bodyConstraintVectorYTextCtrl;
    wxTextCtrl *bodyConstraintVectorZTextCtrl;
+
+   // CCSDS attitude
+   wxTextCtrl *aemFileTextCtrl;
 
    /// objects needed
    GmatPanel      *theScPanel;
@@ -198,6 +207,9 @@ private:
 
    std::string         attRefBodyName;
    std::string         constraintType;
+
+   std::string         aemFile;
+   std::string         previousAemFile;
 
    /// flags for data modification
    bool                dataChanged;
@@ -246,6 +258,9 @@ private:
    bool             bodyAlignVectorModified;
    bool             bodyConstraintVectorModified;
 
+   bool             ccsdsDataLoaded;
+   bool             aemFileModified;
+
    void Create();
    
    void LoadPrecessingSpinnerData(); //LOJ: Added
@@ -253,6 +268,9 @@ private:
    
    void LoadNadirPointingData(); //WCS: Added
    void SaveNadirPointingData(Attitude *useAttitude); //WCS: Added
+
+   void LoadCCSDSAttitudeData();
+   void SaveCCSDSAttitudeData(Attitude *useAttitude);
 
    bool DisplayEulerAngles();
    bool DisplayQuaternion();
@@ -277,6 +295,7 @@ private:
    void ShowInitialAttitudeAndRate();
    void ShowPrecessingSpinnerData(); //LOJ: Added
    void ShowNadirPointingData();
+   void ShowCCSDSAttitudeData();
    void DisableAll();
    void EnableAll();
    void DisplayDataForModel(const std::string &modelType);
@@ -309,6 +328,10 @@ private:
    void OnBodyAlignmentVectorTextUpdate(wxCommandEvent &event);    //WCS: Added to trigger new value
    /// when user types in a new body constraint vector value
    void OnBodyConstraintVectorTextUpdate(wxCommandEvent &event);   //WCS: Added to trigger new value
+   /// when user types in a new AEM file name
+   void OnAEMFileTextUpdate(wxCommandEvent &event);
+   // when the user selects the Browse button for the AEM file
+   void OnBrowseButton(wxCommandEvent& event);
    /// when user selects state type from combo box
    void OnStateTypeSelection(wxCommandEvent &event);
    /// when user selects state rate type from combo box
@@ -350,6 +373,9 @@ private:
       // Added for NadirPointing
       ID_CB_REFERENCE_BODY,
       ID_CB_CONSTRAINT_TYPE,
+      // Added for CCSDS attitude
+      ID_TEXTCTRL_AEM_FILE,
+      ID_BUTTON_BROWSE,
    };
    
    // IDs for state type
@@ -382,7 +408,8 @@ private:
    static const Integer ATTITUDE_TEXT_CTRL_WIDTH;
    static const Integer QUATERNION_TEXT_CTRL_WIDTH;
 
-   /// @todo these should come from the Attitude class or GmatConstants
+   /// @todo these should come from the AttitudeConversionUtility or
+   /// GmatConstants
    static const Real    EULER_ANGLE_TOLERANCE;
    static const Real    DCM_ORTHONORMALITY_TOLERANCE;
 

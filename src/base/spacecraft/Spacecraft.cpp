@@ -36,6 +36,7 @@
 #include "Spinner.hpp"               // for command mode attitude creation
 #include "PrecessingSpinner.hpp"
 #include "NadirPointing.hpp"
+#include "CCSDSAttitude.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
@@ -1735,6 +1736,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                "------ error setting ref object %s on attitude\n",
                name.c_str());
             #endif
+            throw;
          }
       }
 
@@ -3139,6 +3141,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             newAtt = new PrecessingSpinner();
          else if (newAttType == "NadirPointing")
             newAtt = new NadirPointing();
+         else if (newAttType == "CCSDS-AEM")
+            newAtt = new CCSDSAttitude();
          #ifdef __USE_SPICE__
          else if (newAttType == "SpiceAttitude")
             newAtt = new SpiceAttitude();

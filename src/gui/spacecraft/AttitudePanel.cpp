@@ -28,6 +28,8 @@
  * parameters in the GUI Spacecraft Attitude TAB.
  */
 //------------------------------------------------------------------------------
+#include <fstream>
+#include <wx/config.h>
 #include "gmatdefs.hpp"
 #include "AttitudePanel.hpp"
 #include "AttitudeFactory.hpp"
@@ -39,7 +41,7 @@
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "AttitudeConversionUtility.hpp"
-#include <wx/config.h>
+#include "bitmaps/OpenFolder.xpm"
 
 //#define DEBUG_ATTITUDE_PANEL 1
 //#define DEBUG_ATTITUDE_SAVE
@@ -92,6 +94,7 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL_SPIN_RATE,        AttitudePanel::OnSpinRateTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,   AttitudePanel::OnBodyAlignmentVectorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR,  AttitudePanel::OnBodyConstraintVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_AEM_FILE,         AttitudePanel::OnAEMFileTextUpdate)
    EVT_COMBOBOX(ID_CB_STATE,              AttitudePanel::OnStateTypeSelection)
    EVT_COMBOBOX(ID_CB_STATE_RATE,         AttitudePanel::OnStateTypeRateSelection)
    EVT_COMBOBOX(ID_CB_SEQ,                AttitudePanel::OnEulerSequenceSelection)
@@ -99,6 +102,7 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_COMBOBOX(ID_CB_MODEL,              AttitudePanel::OnAttitudeModelSelection)
    EVT_COMBOBOX(ID_CB_REFERENCE_BODY,     AttitudePanel::OnReferenceBodySelection)
    EVT_COMBOBOX(ID_CB_CONSTRAINT_TYPE,    AttitudePanel::OnConstraintTypeSelection)
+   EVT_BUTTON(ID_BUTTON_BROWSE,           AttitudePanel::OnBrowseButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -146,6 +150,9 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    eulerSequence       = "321";  // Dunn changed from 312 to 321
    attStateType        = "";
    attRateStateType    = "";
+   attRefBodyName      = "";
+   constraintType      = "";
+   aemFile             = "";
    
    stateTypeModified     = false;
    rateStateTypeModified = false;
@@ -171,6 +178,9 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    constraintTypeModified       = false;
    bodyAlignVectorModified      = false;
    bodyConstraintVectorModified = false;
+
+   ccsdsDataLoaded              = false;
+   aemFileModified              = false;
 
    dataChanged = false;
    canClose    = true;
@@ -215,6 +225,13 @@ void AttitudePanel::Create()
    // being clipped
    // NOTE - this may need to be adjusted for different platforms
    Integer staticTextWidth = 165;
+
+   #if __WXMAC__
+   int buttonWidth = 40;
+   #else
+   int buttonWidth = 25;
+   #endif
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
 
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
@@ -536,6 +553,17 @@ void AttitudePanel::Create()
             wxCB_DROPDOWN|wxCB_READONLY );
    constraintTypeComboBox->SetToolTip(pConfig->Read(_T("AttitudeConstraintTypeHint")));
 
+   aemFileLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"File Name"), wxDefaultPosition, wxDefaultSize, 0);
+   aemFileTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_AEM_FILE, wxT(""),
+                     wxDefaultPosition, wxSize(300, -1),  0);
+   aemFileTextCtrl->SetToolTip(pConfig->Read(_T("AttitudeFileNameHint")));
+   aemBrowseButton =
+      new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, 20));
+   aemBrowseButton->SetToolTip(pConfig->Read(_T("BrowseAttitudeFileNameHint")));
+
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage(
@@ -546,9 +574,7 @@ void AttitudePanel::Create()
    
    // wx*Sizers
    wxBoxSizer *boxSizer1 = new wxBoxSizer(wxHORIZONTAL);
-   //GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
    GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-   //GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
    boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
    
    
@@ -659,15 +685,30 @@ void AttitudePanel::Create()
    nadirPointingSizer->Add(nadirPtBodyAndConstraintTypeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPointingSizer->Add(nadirPtVectorsGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
+   // Add a sizer for the CCSDS attitude items
+   wxBoxSizer *ccsdsBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   ccsdsBoxSizer->Add(aemFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   ccsdsBoxSizer->Add(aemFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   ccsdsBoxSizer->Add(aemBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+   GmatStaticBoxSizer *ccsdsGroupSizer =
+         new GmatStaticBoxSizer (wxVERTICAL, this, "Configuration");
+   ccsdsGroupSizer->Add(ccsdsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+   ccsdsAttitudeSizer = new wxBoxSizer(wxVERTICAL);
+   ccsdsAttitudeSizer->Add(ccsdsGroupSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+
    // Add to right box sizer
    boxSizer3->Add(precessingSpinnerSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Hide(precessingSpinnerSizer);
+//   boxSizer3->Hide(precessingSpinnerSizer);
    // Add to right box sizer
    boxSizer3->Add(nadirPointingSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Hide(nadirPointingSizer);
+//   boxSizer3->Hide(nadirPointingSizer);
+   // Add to right box sizer
+   boxSizer3->Add(ccsdsAttitudeSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//   boxSizer3->Hide(ccsdsAttitudeSizer);
+
    //======================================================================
-   
-   
    
    attitudeSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Initial Conditions" );
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
@@ -748,6 +789,11 @@ void AttitudePanel::Create()
    this->SetSizerAndFit( boxSizer1 );
    boxSizer1->Fit( this );
    boxSizer1->SetSizeHints( this );
+
+   // Hide the right side for now
+//   boxSizer3->Hide(precessingSpinnerSizer);
+//   boxSizer3->Hide(nadirPointingSizer);
+//   boxSizer3->Hide(ccsdsAttitudeSizer);
 
    std::string initialModel = config1ComboBox->GetValue().c_str();
    DisplayDataForModel(initialModel);
@@ -831,6 +877,8 @@ void AttitudePanel::LoadData()
             MessageInterface::ShowMessage("   NadirPointing data loaded\n");
          #endif
       }
+      else if (attitudeModel == "CCSDS-AEM")
+         LoadCCSDSAttitudeData();
 
       if (attStateType == "EulerAngles")
       {
@@ -983,25 +1031,52 @@ void AttitudePanel::SaveData()
         MessageInterface::ShowMessage("   Attitude pointer is NULL\n");
    #endif
       
-   //LOJ: Save data to the base attitude object
-   if (attitudeModel == "PrecessingSpinner")
-   {
-      SavePrecessingSpinnerData(useAttitude);
-      if (canClose) 
-         dataChanged = false;
-//      return;
-   }
-   else if (attitudeModel == "NadirPointing")
-   {
-      SaveNadirPointingData(useAttitude);
-      if (canClose)
-         dataChanged = false;
-   }
+//   //LOJ: Save data to the base attitude object
+//   if (attitudeModel == "PrecessingSpinner")
+//   {
+//      SavePrecessingSpinnerData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+////      return;
+//   }
+//   else if (attitudeModel == "NadirPointing")
+//   {
+//      SaveNadirPointingData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+//   }
+//   else if (attitudeModel == "CCSDS-AEM")
+//   {
+//      SaveCCSDSAttitudeData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+//   }
    
    bool canModifyCS    = useAttitude->CSModifyAllowed();
    bool canSetAttitude = useAttitude->SetInitialAttitudeAllowed();
    try
    {
+      //LOJ: Save data to the base attitude object
+      if (attitudeModel == "PrecessingSpinner")
+      {
+         SavePrecessingSpinnerData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+   //      return;
+      }
+      else if (attitudeModel == "NadirPointing")
+      {
+         SaveNadirPointingData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+      }
+      else if (attitudeModel == "CCSDS-AEM")
+      {
+         SaveCCSDSAttitudeData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+      }
+
       if (csModified || isNewAttitude)
       {
          #ifdef DEBUG_ATTITUDE_SAVE
@@ -1588,6 +1663,7 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
    //LOJ: Added to hide precessing spinner data
    boxSizer3->Hide(precessingSpinnerSizer);
    boxSizer3->Hide(nadirPointingSizer);
+   boxSizer3->Hide(ccsdsAttitudeSizer);
    
    boxSizer3->Show(attitudeSizer, true);
    boxSizer3->Show(attRateSizer, true);
@@ -1709,6 +1785,7 @@ void AttitudePanel::ShowPrecessingSpinnerData()
    // Hide initial attitude and rate
    HideInitialAttitudeAndRate();
    boxSizer3->Hide(nadirPointingSizer);
+   boxSizer3->Hide(ccsdsAttitudeSizer);
    boxSizer3->Show(precessingSpinnerSizer);
    boxSizer3->Layout();
 }
@@ -1721,7 +1798,21 @@ void AttitudePanel::ShowNadirPointingData()
    // Hide initial attitude and rate
    HideInitialAttitudeAndRate();
    boxSizer3->Hide(precessingSpinnerSizer);
+   boxSizer3->Hide(ccsdsAttitudeSizer);
    boxSizer3->Show(nadirPointingSizer);
+   boxSizer3->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowCCSDSAttitudeData()
+//------------------------------------------------------------------------------
+void AttitudePanel::ShowCCSDSAttitudeData()
+{
+   // Hide initial attitude and rate
+   HideInitialAttitudeAndRate();
+   boxSizer3->Hide(precessingSpinnerSizer);
+   boxSizer3->Hide(nadirPointingSizer);
+   boxSizer3->Show(ccsdsAttitudeSizer);
    boxSizer3->Layout();
 }
 
@@ -1847,6 +1938,12 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
       if (!nadirPointingDataLoaded)
          LoadNadirPointingData();
       ShowNadirPointingData();
+   }
+   else if (modelType == "CCSDS-AEM")
+   {
+      if (!ccsdsDataLoaded)
+         LoadCCSDSAttitudeData();
+      ShowCCSDSAttitudeData();
    }
    else
    {
@@ -2117,6 +2214,40 @@ void AttitudePanel::OnBodyConstraintVectorTextUpdate(wxCommandEvent &event)
    bodyConstraintVectorModified = true;
    dataChanged                  = true;
    theScPanel->EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnAEMFileTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnAEMFileTextUpdate(wxCommandEvent &event)
+{
+   aemFileModified = true;
+   dataChanged     = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnBrowseButton(wxCommandEvent &event)
+{
+   wxString prevFilename = aemFileTextCtrl->GetValue();
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString filename;
+
+      filename = dialog.GetPath().c_str();
+
+      if (!filename.IsSameAs(prevFilename))
+      {
+         aemFileTextCtrl->SetValue(filename);
+         aemFileModified = true;
+         dataChanged     = true;
+         theScPanel->EnableUpdate(true);
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2953,7 +3084,12 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
 
       if (success)
       {
-         // do I need to do something here?
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
       }
    }
    catch (BaseException &ex)
@@ -3062,7 +3198,104 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
 
       if (success)
       {
-         // do I need to do something here?
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
+      }
+   }
+   catch (BaseException &ex)
+   {
+      canClose    = false;
+      dataChanged = true;
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+   }
+
+}
+//------------------------------------------------------------------------------
+// void LoadCCSDSAttitudeData()
+//------------------------------------------------------------------------------
+void AttitudePanel::LoadCCSDSAttitudeData()
+{
+   #ifdef DEBUG_NADIR_POINTING
+      MessageInterface::ShowMessage("AttitudePanel::LoadNadirPointingData() entered\n");
+   #endif
+   try
+   {
+      std::string theAEM = theAttitude->GetStringParameter("AttitudeFileName");
+      aemFileTextCtrl->SetValue(theAEM.c_str());
+      aemFile         = theAEM;
+      previousAemFile = theAEM;
+
+      ccsdsDataLoaded = true;
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SaveCCSDSAttitudeData(Attitude *useAttitude)
+//------------------------------------------------------------------------------
+void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
+{
+   #ifdef DEBUG_NADIR_POINTING
+      MessageInterface::ShowMessage("AttitudePanel::SaveCCSDSAttitudeData() entered\n");
+   #endif
+   canClose = true;
+
+   try
+   {
+      bool success = true;
+
+      if (aemFileModified)
+      {
+         wxString str = aemFileTextCtrl->GetValue();
+         aemFile      = str.c_str();
+         std::ifstream filename(str.c_str());
+
+         // Check if the file doesn't exist then stop
+         if (!filename)
+         {
+            std::string errmsg = "The value \"";
+            errmsg += aemFile + "\" for field \"AttitudeFileName\" ";
+            errmsg += "is not an allowed value.  The allowed values are: ";
+            errmsg += "[ File must exist ]\n";
+            MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+            canClose    = false;
+            dataChanged = true;
+            success     = false;
+            aemFile     = previousAemFile;
+            return;
+         }
+         filename.close();
+
+         if (useAttitude->SetStringParameter("AttitudeFileName", aemFile))
+         {
+            previousAemFile = str.c_str();
+            success         = true;
+         }
+         else
+         {
+            // if there was an error, set it back to what it was the last time it was saved
+            aemFileTextCtrl->SetValue(previousAemFile.c_str());
+            aemFile         = previousAemFile;
+            success         = false;
+         }
+         aemFileModified = false;
+      }
+
+      if (success)
+      {
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
       }
    }
    catch (BaseException &ex)
