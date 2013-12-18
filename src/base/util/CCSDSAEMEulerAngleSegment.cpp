@@ -53,8 +53,9 @@ CCSDSAEMEulerAngleSegment::CCSDSAEMEulerAngleSegment(Integer segNum) :
    euler2      (2),
    euler3      (1)
 {
-   dataSize = 3;
-   dataType = "EULER_ANGLE";
+   dataSize           = 3;
+   dataType           = "EULER_ANGLE";
+   checkLagrangeOrder = true;
 }
 
 //------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ CCSDSAEMEulerAngleSegment::~CCSDSAEMEulerAngleSegment()
 //------------------------------------------------------------------------------
 // Validates the contents of the handled Euler Angle meta data elements.
 //------------------------------------------------------------------------------
-bool CCSDSAEMEulerAngleSegment::Validate()
+bool CCSDSAEMEulerAngleSegment::Validate(bool checkData)
 {
    #ifdef DEBUG_AEM_EULER_VALIDATE
       MessageInterface::ShowMessage("Entering CCSDSAEMEulerAngleSegment::Validate\n");
@@ -113,7 +114,7 @@ bool CCSDSAEMEulerAngleSegment::Validate()
       throw UtilityException(errmsg);
    }
 
-   return CCSDSAEMSegment::Validate();
+   return CCSDSAEMSegment::Validate(checkData);
 }
 
 //------------------------------------------------------------------------------
@@ -129,6 +130,9 @@ bool CCSDSAEMEulerAngleSegment::SetMetaData(const std::string &fieldName,
    #endif
    if (fieldName == "EULER_ROT_SEQ")
    {
+      // Checking here for valid Euler sequence; however, the standard states
+      // that, while any sequence is allowed, symmetric ones are not
+      // recommended.  We are not checking for that here at this time.
       if (!AttitudeConversionUtility::IsValidEulerSequence(value))
       {
          std::string errmsg = segError;

@@ -540,6 +540,7 @@ bool CCSDSEMReader::ParseFile()
                   throw UtilityException(errmsg);
                }
             }
+            currentSegment->Validate(false);
             metaMap.clear();
          }
          else if ((keyAllCaps == DATA_START) || (keyAllCaps == DATA_STOP) ||

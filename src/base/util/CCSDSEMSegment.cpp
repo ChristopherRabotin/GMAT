@@ -34,6 +34,7 @@
 //#define DEBUG_EM_COVERS_EPOCH
 //#define DEBUG_SLERP
 //#define DEBUG_EM_FIND_EXACT_MATCH
+//#define DEBUG_USABLE
 
 //------------------------------------------------------------------------------
 // static data
@@ -175,7 +176,8 @@ CCSDSEMSegment::CCSDSEMSegment(Integer segNum) :
    objectName          (UNSET_STRING),
    objectID            (UNSET_STRING),
    centerName          (UNSET_STRING),
-   usesUsableTimes     (false)
+   usesUsableTimes     (false),
+   checkLagrangeOrder  (false)
 {
    dataStore.clear();
    dataComments.clear();
@@ -204,7 +206,8 @@ CCSDSEMSegment::CCSDSEMSegment(const CCSDSEMSegment &copy) :
    objectName          (copy.objectName),
    objectID            (copy.objectID),
    centerName          (copy.centerName),
-   usesUsableTimes     (copy.usesUsableTimes)
+   usesUsableTimes     (copy.usesUsableTimes),
+   checkLagrangeOrder  (copy.checkLagrangeOrder)
 {
    EpochAndData *ed;
    for (Integer jj = 0; jj < (Integer) copy.dataStore.size(); jj++)
@@ -242,6 +245,7 @@ CCSDSEMSegment& CCSDSEMSegment::operator=(const CCSDSEMSegment &copy)
    objectID            = copy.objectID;
    centerName          = copy.centerName;
    usesUsableTimes     = copy.usesUsableTimes;
+   checkLagrangeOrder  = copy.checkLagrangeOrder;
 
    for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
    {
@@ -284,7 +288,7 @@ CCSDSEMSegment::~CCSDSEMSegment()
 // Validates the contents of the handled common meta data elements and checks
 // for the data.
 //------------------------------------------------------------------------------
-bool CCSDSEMSegment::Validate()
+bool CCSDSEMSegment::Validate(bool checkData)
 {
    // Time system
    if (timeSystem == UNSET_STRING)
@@ -321,7 +325,7 @@ bool CCSDSEMSegment::Validate()
    {
       std::string errmsg = segError;
       errmsg += "If usable start and stop times are to be used, both ";
-      errmsg += "USEABLE_START_TIME and USEABLE_STOP_TIME must be present.";
+      errmsg += "USEABLE_START_TIME and USEABLE_STOP_TIME must be present ";
       errmsg += "in the segment.\n";
       throw UtilityException(errmsg);
    }
@@ -357,7 +361,7 @@ bool CCSDSEMSegment::Validate()
    }
 
    // Interpolation
-   if (interpolationMethod == "LAGRANGE")
+   if ((interpolationMethod == "LAGRANGE") || checkLagrangeOrder)
    {
       if ((interpolationDegree < 0) || (interpolationDegree > 9))
       {
@@ -369,7 +373,7 @@ bool CCSDSEMSegment::Validate()
    }
 
    // Is there data?
-   if (dataStore.empty())
+   if (checkData && dataStore.empty())
    {
       std::string errmsg = segError;
       errmsg += "File does not contain data for segment of ";
@@ -412,6 +416,8 @@ bool CCSDSEMSegment::SetMetaData(const std::string &fieldName,
       centerName = value;
       return true;
    }
+   // @todo - check for this:
+   // "The TIME_SYSTEM value must remain fixed within an AEM."
    else if (fieldName == "TIME_SYSTEM")
    {
       timeSystem = GmatStringUtil::ToUpper(value);
@@ -472,6 +478,16 @@ bool CCSDSEMSegment::AddData(Real epoch, Rvector data)
       errmsg << "Data of type " << dataType;
       errmsg << " must contain " << dataSize;
       errmsg << " elements.\n";
+      throw UtilityException(errmsg.str());
+   }
+   if ((epoch < startTime) || (epoch > stopTime))
+   {
+      std::ostringstream errmsg("");
+      errmsg.precision(16);
+      errmsg << segError;
+      errmsg << "Data epoch " << epoch << " must be between the start time, ";
+      errmsg << startTime << ", and the stop time, " << stopTime;
+      errmsg << ", for the segment.\n";
       throw UtilityException(errmsg.str());
    }
    if (!dataStore.empty())
@@ -565,11 +581,25 @@ Real CCSDSEMSegment::GetStopTime() const
 //------------------------------------------------------------------------------
 Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
 {
+   // Make sure that if we are using usable times, we only check times
+   // between usableStartTime and usableStopTime
+   if (usesUsableTimes &&
+      ((atEpoch < (usableStartTime - EPOCH_MATCH_TOLERANCE)) ||
+       (atEpoch > (usableStopTime  + EPOCH_MATCH_TOLERANCE))))
+   {
+      std::ostringstream errmsg;
+      errmsg.precision(16);
+      errmsg << "Specified epoch ";
+      errmsg << atEpoch << " in segment ";
+      errmsg << segmentNumber << " must be within usable time range.\n";
+      throw UtilityException(errmsg.str());
+   }
    bool      exactMatchFound = false;
    Integer   matchPos        = -1;
    for (unsigned int ii= 0; ii < dataStore.size(); ii++)
    {
       Real theTime = (dataStore.at(ii))->epoch;
+
       #ifdef DEBUG_EM_FIND_EXACT_MATCH
          MessageInterface::ShowMessage("FindExactEpochMatch data entry %d "
                "epoch = %12.10f\n",
@@ -597,13 +627,66 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
       errmsg.precision(16);
       errmsg << "Error searching for epoch ";
       errmsg << atEpoch << " in segment ";
-      errmsg << segmentNumber << ".  ";
+      errmsg << segmentNumber << ", within usable time range.\n";
       throw UtilityException(errmsg.str());
    }
    if (exactMatchFound || (interpolationDegree == 0))
       return (dataStore.at(matchPos))->data;
    else
       return Interpolate(atEpoch);
+}
+
+//------------------------------------------------------------------------------
+// Determines the indices of the first and last usable line of data, based
+// on the usableStartTime and usableStopTime
+//------------------------------------------------------------------------------
+bool CCSDSEMSegment::GetUsableIndexRange(Integer &first, Integer &last)
+{
+   #ifdef DEBUG_USABLE
+      MessageInterface::ShowMessage("In GetUsableIndexRange, usableStart = %12.10f, usableStop = %12.10f\n",
+            usableStartTime, usableStopTime);
+   #endif
+   // If we are not using usableStartTime and usableStopTime, the range
+   // covers the entire startTime-stopTime span
+   first = 0;
+   last  = (Integer) dataStore.size() - 1;
+
+   // If we are using usableStartTime and usableStopTime, we need to figure
+   // out which lines of data are included in that span
+   if (usesUsableTimes)
+   {
+      bool firstFound = false;
+      for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+      {
+         Real iiEpoch = dataStore.at(ii)->epoch;
+         #ifdef DEBUG_USABLE
+            MessageInterface::ShowMessage("        ii = %d, epoch = %12.10f\n",
+                  ii, iiEpoch);
+         #endif
+         if (!firstFound && (iiEpoch > (usableStartTime - EPOCH_MATCH_TOLERANCE)))
+         {
+            first      = ii;
+            firstFound = true;
+         }
+         else if (iiEpoch > (usableStopTime + EPOCH_MATCH_TOLERANCE))
+         {
+            last = ii - 1;
+            break;
+         }
+      }
+      #ifdef DEBUG_USABLE
+         MessageInterface::ShowMessage("In GetUsableIndexRange, first = %d, last = %d\n",
+               first, last);
+      #endif
+   }
+   if (first == last)
+   {
+      std::string errmsg = segError;
+      errmsg += "Only one data point available ";
+      errmsg += "in usable epoch range.\n";
+      throw UtilityException(errmsg);
+   }
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -618,20 +701,28 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    // Input parsing
    Integer n = interpolationDegree;
 
+   Integer firstUsable;
+   Integer lastUsable;
+
+   GetUsableIndexRange(firstUsable, lastUsable);
+
    // Sanity Checks
-   Real minEpoch = dataStore.at(0)->epoch;
-   Real maxEpoch = dataStore.at(dataStore.size()-1)->epoch;
-   if ((atEpoch < minEpoch) || (atEpoch > maxEpoch))
+   Real minEpoch = dataStore.at(firstUsable)->epoch;
+   Real maxEpoch = dataStore.at(lastUsable)->epoch;
+   if ((atEpoch < (minEpoch - EPOCH_MATCH_TOLERANCE)) ||
+       (atEpoch > (maxEpoch + EPOCH_MATCH_TOLERANCE)))
    {
       std::string errmsg = "Requested time for LAGRANGE interpolation ";
-      errmsg += "is out-of-range.\n";
+      errmsg += "is out of usable epoch range.\n";
       throw UtilityException(errmsg);
    }
 
-   Integer numStates = dataStore.size();
+//   Integer numStates = dataStore.size();
+   // The number of usable states we have
+   Integer numStates = lastUsable - firstUsable + 1;
    if (n >= numStates)
    {
-      std::string errmsg = "Insufficient data for LAGRANGE interpolation.\n";
+      std::string errmsg = "Insufficient usable data for LAGRANGE interpolation.\n";
       throw UtilityException(errmsg);
    }
 
@@ -642,7 +733,7 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    // find correct (first largest) epoch in ephemeris data
    Real    anEpoch  = 0.0;
    Integer epochPos = 0;
-   for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+   for (Integer ii = firstUsable; ii <= lastUsable; ii++)
    {
       anEpoch = (dataStore.at(ii))->epoch;
       if ( anEpoch > atEpoch)
@@ -654,8 +745,8 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Integer initIndex = -1;
    // pick starting point for interpolation data
    // (region ending just before epoch's position in the ephemeris)
-   if (n+1 >= epochPos)
-       initIndex = 1;
+   if (n+1 >= (epochPos - firstUsable))  // was just epochPos
+       initIndex = firstUsable + 1;      // was 1
    else
        initIndex = epochPos - (n+1);
 
@@ -680,13 +771,11 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
 
    for (Integer ii = q; ii <= q+n; ii++)
    {
-      //      t1      = (dataStore.at(ii)->epoch - atEpoch) * GmatTimeConstants::SECS_PER_DAY;
       t1      = dataStore.at(ii)->epoch;
       d1      = dataStore.at(ii)->data;
       for (Integer jj = q; jj <= q+n; jj++)
       {
          t2  = dataStore.at(jj)->epoch;
-//         t2  = (dataStore.at(jj)->epoch - atEpoch) * GmatTimeConstants::SECS_PER_DAY;
          if (ii != jj)
             d1    = d1 * ( (atEpoch - t2) / (t1 - t2) );
       }
@@ -711,12 +800,23 @@ Rvector CCSDSEMSegment::InterpolateSLERP(Real atEpoch)
             segmentNumber, atEpoch);
    #endif
    // Sanity Checks
-   Real minEpoch = dataStore.at(0)->epoch;
-   Real maxEpoch = dataStore.at(dataStore.size()-1)->epoch;
+   Integer firstUsable, lastUsable;
+   GetUsableIndexRange(firstUsable, lastUsable);
+
+   #ifdef DEBUG_SLERP
+      MessageInterface::ShowMessage(">>>> dataStore size = %d, first = %d, last = %d\n",
+            (Integer) dataStore.size(), firstUsable, lastUsable);
+      MessageInterface::ShowMessage(">>>> first time = %12.10f,  last time = %12.10f\n",
+            dataStore.at(firstUsable)->epoch, dataStore.at(lastUsable)->epoch);
+      MessageInterface::ShowMessage(">>>>       and requested epoch = %12.10f\n",
+            atEpoch);
+   #endif
+   Real minEpoch = dataStore.at(firstUsable)->epoch;
+   Real maxEpoch = dataStore.at(lastUsable)->epoch;
    if ((atEpoch < minEpoch) || (atEpoch > maxEpoch))
    {
       std::string errmsg = "Requested time for SLERP interpolation ";
-      errmsg += "is out-of-range.\n";
+      errmsg += "is out of usable epoch range.\n";
       throw UtilityException(errmsg);
    }
 
@@ -724,7 +824,7 @@ Rvector CCSDSEMSegment::InterpolateSLERP(Real atEpoch)
    // find correct (first largest) epoch in ephemeris data
    Real    anEpoch  = 0.0;
    Integer epochPos = 0;
-   for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+   for (Integer ii = firstUsable; ii <= lastUsable; ii++)
    {
       anEpoch = (dataStore.at(ii))->epoch;
       if ( anEpoch > atEpoch)

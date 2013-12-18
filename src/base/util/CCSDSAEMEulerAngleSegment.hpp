@@ -38,7 +38,7 @@ public:
 
    virtual CCSDSEMSegment*  Clone() const;
 
-   virtual bool             Validate();
+   virtual bool             Validate(bool checkData = true);
    virtual Rmatrix33        GetState(Real atEpoch);
 
    virtual bool             SetMetaData(const std::string &fieldName,

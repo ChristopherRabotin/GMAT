@@ -59,7 +59,7 @@ public:
 
    virtual CCSDSEMSegment* Clone() const = 0;
 
-   virtual bool    Validate();
+   virtual bool    Validate(bool checkData = true);
 
    // A GetState method must be added to child classes, returning the
    // requested state data in the required format/representation
@@ -124,6 +124,8 @@ protected:
    /// Does the segment contain usable start and stop times?
    bool        usesUsableTimes;
 
+   bool        checkLagrangeOrder;
+
    // static data
 
    /// Tolerance to use when looking for an exact epoch match
@@ -142,6 +144,7 @@ protected:
 
    // Look for an exact epoch match
    virtual Rvector      DetermineState(Real atEpoch);
+   virtual bool         GetUsableIndexRange(Integer &first, Integer &last);
    /// Interpolate the data if necessary
    virtual Rvector      Interpolate(Real atEpoch) = 0;
    virtual Rvector      InterpolateLagrange(Real atEpoch);

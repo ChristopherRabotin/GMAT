@@ -94,7 +94,7 @@ CCSDSAEMSegment::~CCSDSAEMSegment()
 //------------------------------------------------------------------------------
 // Validates the contents of the handled AEM meta data elements.
 //------------------------------------------------------------------------------
-bool CCSDSAEMSegment::Validate()
+bool CCSDSAEMSegment::Validate(bool checkData)
 {
    #ifdef DEBUG_AEM_VALIDATE
       MessageInterface::ShowMessage("Entering CCSDSAEMSegment::Validate\n");
@@ -141,7 +141,7 @@ bool CCSDSAEMSegment::Validate()
    #ifdef DEBUG_AEM_VALIDATE
       MessageInterface::ShowMessage("EXITING CCSDSAEMSegment::Validate\n");
    #endif
-   return CCSDSEMSegment::Validate();
+   return CCSDSEMSegment::Validate(checkData);
 }
 
 //------------------------------------------------------------------------------
@@ -205,6 +205,7 @@ bool CCSDSAEMSegment::SetMetaData(const std::string &fieldName,
 //      }
       return true;
    }
+   // We are ignoring this for now; we use SLERP or Lagrange interpolation
    else if (fieldName == "INTERPOLATION_METHOD")
    {
       interpolationMethod = GmatStringUtil::ToUpper(value);
