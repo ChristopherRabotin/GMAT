@@ -885,7 +885,7 @@ void AttitudePanel::LoadData()
       #endif
       
       //LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
-      // I think DisplayDataForModel() handles loading also, so commented out
+      // I think DisplayDataForModel() handles loading also, so commented out (LOJ: 2013.12.18)
       // if (attitudeModel == "PrecessingSpinner")
       //    LoadPrecessingSpinnerData();
       // else if (attitudeModel == "NadirPointing")
@@ -897,7 +897,7 @@ void AttitudePanel::LoadData()
       // }
       // else if (attitudeModel == "CCSDS-AEM")
       //    LoadCCSDSAttitudeData();
-      
+            
       if (attStateType == "EulerAngles")
       {
          Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
@@ -960,22 +960,22 @@ void AttitudePanel::LoadData()
          }
          DisplayAngularVelocity();
       }
-      
-      
-      #ifdef DEBUG_ATTITUDE_LOAD
-      MessageInterface::ShowMessage("   calling DisplayDataForModel for %s\n", attitudeModel.c_str());
-      #endif
-      DisplayDataForModel(attitudeModel);
-      #ifdef DEBUG_ATTITUDE_LOAD
-         MessageInterface::ShowMessage("   AFTER DisplayDataForModel\n");
-      #endif
-
-      dataChanged = false;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   dataChanged = false;
+   
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("   calling DisplayDataForModel for %s\n", attitudeModel.c_str());
+   #endif
+   DisplayDataForModel(attitudeModel);
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("   AFTER DisplayDataForModel\n");
+   #endif
+   
    #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("AttitudePanel::LoadData() leaving\n");
    #endif
