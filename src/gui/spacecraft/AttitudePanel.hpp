@@ -49,7 +49,7 @@ public:
    
 private:    
 
-   GmatStaticBoxSizer *boxSizer3;
+   GmatStaticBoxSizer *rightSizer;
 
    wxFlexGridSizer    *flexGridSizer2;
 
