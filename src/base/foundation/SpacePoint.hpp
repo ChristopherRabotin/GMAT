@@ -245,8 +245,8 @@ protected:
    Integer         default_naifIdRefFrame;
    
    /// flag indicating whether or not the SPICE code is setup
-   bool                   spiceSetupDone;
-
+   bool            spiceSetupDone;
+   
    /// Orbit SPICE kernel name(s)
    StringArray     orbitSpiceKernelNames;
    /// Attitude SPICE kernel name(s)
@@ -285,5 +285,6 @@ protected:
    void        ValidateKernel(const std::string &kName,
                               const std::string label  = "OrbitSpiceKernelName",
                               const std::string ofType = "spk");
+
 };
 #endif // SpacePoint_hpp

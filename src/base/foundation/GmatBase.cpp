@@ -3425,8 +3425,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    #ifdef DEBUG_GENERATING_STRING
    MessageInterface::ShowMessage
       ("GmatBase::GetGeneratingString() <%p><%s>'%s' entered, mode=%d, prefix='%s', "
-       "useName='%s', \n", this, GetTypeName().c_str(), GetName().c_str(), mode,
-       prefix.c_str(), useName.c_str());
+       "useName='%s', cloaking=%s\n", this, GetTypeName().c_str(), GetName().c_str(), mode,
+       prefix.c_str(), useName.c_str(), cloaking ? "true" : "false");
    MessageInterface::ShowMessage
       ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
        "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
@@ -3497,7 +3497,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
             data << "Create " << tname << " " << nomme << ";";
          else
             data << "";
-
+         
          if (showInlineComment)
          {
             if ((inlineComment != "") &&
@@ -3505,11 +3505,17 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
                  (mode == Gmat::SHOW_SCRIPT)))
                data << inlineComment << "\n";
             else
-               data << "\n";
+            {
+               // Do not write extra line here for cloaked object (LOJ: 2013.12.17)
+               if (!cloaking)
+                  data << "\n";
+            }
          }
          else
          {
-            data << "\n";
+            // Do not write extra line here for cloaked object (LOJ: 2013.12.17)
+           if (!cloaking)
+               data << "\n";
          }
          
          // We now write out GMAT prefix on option from the startup file (see GMT-3233)
@@ -3527,7 +3533,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       preface = prefix;
       nomme = "";
    }
-
+      
    preface += nomme;
    WriteParameters(mode, preface, data);
    
@@ -3535,7 +3541,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    
    #ifdef DEBUG_GENERATING_STRING
    MessageInterface::ShowMessage
-      ("GmatBase::GetGeneratingString() returning\n%s\n", generatingString.c_str());
+      ("GmatBase::GetGeneratingString() returning\n'%s'\n", generatingString.c_str());
    #endif
    
    return generatingString;

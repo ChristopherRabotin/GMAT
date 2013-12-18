@@ -553,7 +553,6 @@ SolarSystem::SolarSystem(std::string withName) :
    // Set default orbit and target colors
    SetDefaultSpacePointColors(ssb);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
-   ////ssb->SetIsBuiltIn(true, "SSB"); //LOJ: added
    AddSpecialPoint(ssb);
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");

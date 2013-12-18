@@ -150,16 +150,16 @@ SpacePoint::DEFAULT_TARGET_COLOR[MAX_SP_COLOR] =
 SpacePoint::SpacePoint(Gmat::ObjectType ofType, const std::string &itsType,
                        const std::string &itsName) :
 GmatBase(ofType,itsType,itsName),
-theSolarSystem (NULL),
-inertialCS     (NULL),
-bodyFixedCS    (NULL),
-j2000Body      (NULL),
-j2000BodyName  ("Earth"),
-naifId         (UNDEFINED_NAIF_ID),
-naifIdRefFrame (UNDEFINED_NAIF_ID),
-naifIdObserver (UNDEFINED_NAIF_ID),
-spiceSetupDone (false),
-hasAttitude    (false),
+theSolarSystem     (NULL),
+inertialCS         (NULL),
+bodyFixedCS        (NULL),
+j2000Body          (NULL),
+j2000BodyName      ("Earth"),
+naifId             (UNDEFINED_NAIF_ID),
+naifIdRefFrame     (UNDEFINED_NAIF_ID),
+naifIdObserver     (UNDEFINED_NAIF_ID),
+spiceSetupDone     (false),
+hasAttitude        (false),
 useOrbitColorName  (true),
 useTargetColorName (true),
 defaultOrbitColor  (GmatColor::WHITE),
@@ -476,7 +476,7 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
    {
       #ifdef DEBUG_SPACE_POINT_CLOAKING
       MessageInterface::ShowMessage
-         ("==> '%s', defaultOrbitColor=%06X, orbitColor=%06X\n",
+         ("SpacePoint::IsParameterEqualToDefault() '%s', defaultOrbitColor=%06X, orbitColor=%06X\n",
           GetName().c_str(), defaultOrbitColor, orbitColor);
       #endif
       return (defaultOrbitColor == orbitColor);
@@ -1116,8 +1116,8 @@ bool SpacePoint::SetStringParameter(const Integer id,
 {
    #ifdef DEBUG_SET_STRING
    MessageInterface::ShowMessage
-      ("SpacePoint::SetStringParameter() '%s' entered, id=%d, value='%s'\n", GetName().c_str(),
-       id, value.c_str());
+      ("SpacePoint::SetStringParameter() <%p>'%s' entered, id=%d, value='%s'\n",
+       this, GetName().c_str(), id, value.c_str());
    #endif
    
    // this is also handled in CelestialBody and Spacecraft
@@ -1324,7 +1324,8 @@ bool SpacePoint::SetStringParameter(const Integer id,
       }
       
       #ifdef DEBUG_SET_STRING
-      MessageInterface::ShowMessage("   useColorName = %d\n", useColorName);
+      MessageInterface::ShowMessage
+         ("   useColorName = %d, cloaking = %d\n", useColorName, cloaking);
       MessageInterface::ShowMessage
          ("   orbitColor  = %06X, orbitColorStr='%s'\n", orbitColor, orbitColorStr.c_str());
       MessageInterface::ShowMessage
