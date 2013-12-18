@@ -90,7 +90,7 @@ CCSDSAEMQuaternionSegment::~CCSDSAEMQuaternionSegment()
 //------------------------------------------------------------------------------
 // Validates the contents of the handled Quaternion meta data elements.
 //------------------------------------------------------------------------------
-bool CCSDSAEMQuaternionSegment::Validate()
+bool CCSDSAEMQuaternionSegment::Validate(bool checkData)
 {
    #ifdef DEBUG_AEM_QUAT_VALIDATE
       MessageInterface::ShowMessage("Entering CCSDSAEMQuaternionSegment::Validate\n");
@@ -104,7 +104,7 @@ bool CCSDSAEMQuaternionSegment::Validate()
       throw UtilityException(errmsg);
    }
 
-   return CCSDSAEMSegment::Validate();
+   return CCSDSAEMSegment::Validate(checkData);
 }
 
 //------------------------------------------------------------------------------

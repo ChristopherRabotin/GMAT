@@ -163,7 +163,7 @@ CCSDSEMSegment* CCSDSAEMReader::CreateNewSegment(Integer segNum,
       std::string errmsg = "Error reading ephemeris message file \"";
       errmsg += emFile + "\".  ";
       errmsg += "Attitude type \"" + ofType;
-      errmsg += "\" is not valid.\n";
+      errmsg += "\" is invalid or not supported.\n";
       throw UtilityException(errmsg);
    }
    return NULL;  // for testing

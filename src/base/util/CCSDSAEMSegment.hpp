@@ -43,7 +43,7 @@ public:
 
    virtual Rmatrix33        GetState(Real atEpoch) = 0;
 
-   virtual bool             Validate();
+   virtual bool             Validate(bool checkData = true);
    // GetState should be added to leaf classes, returning the
    // necessary state data
 
