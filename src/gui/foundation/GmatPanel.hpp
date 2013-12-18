@@ -46,7 +46,8 @@ public:
              bool showScriptButton = true);
 
    virtual wxPanel* GetPanel();
-
+   virtual GuiInterpreter* GetGuiInterpreter();
+   
    virtual bool TakeAction(const wxString &action);
    virtual bool PrepareObjectNameChange();
    virtual void ObjectNameChanged(Gmat::ObjectType type,

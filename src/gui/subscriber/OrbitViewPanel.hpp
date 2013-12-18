@@ -26,8 +26,10 @@
 #include "GuiItemManager.hpp"
 #include "OrbitView.hpp"
 #include "OrbitView.hpp"
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
 #include "RgbColor.hpp"
 #include "ColorTypes.hpp"
+#endif
 
 class OrbitViewPanel: public GmatPanel
 {
@@ -46,8 +48,12 @@ protected:
    bool mHasRealDataChanged;
    bool mHasDrawingOptionChanged;
    bool mHasSpChanged;
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    bool mHasOrbitColorChanged;
    bool mHasTargetColorChanged;
+   #endif
+   
    bool mHasShowObjectChanged;
    bool mHasCoordSysChanged;
    bool mHasViewInfoChanged;
@@ -58,17 +64,22 @@ protected:
    int  mNonScCount;
    
    std::string mSelSpName;
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
+   wxColour mOrbitColor;
+   wxColour mTargetColor;
+   wxStaticText *mTargetColorLabel;
+   wxButton *mOrbitColorButton;
+   wxButton *mTargetColorButton;
+   #endif
+   
    std::map<std::string, bool> mDrawObjectMap;
    
    wxArrayString mExcludedScList;
    wxArrayString mExcludedCelesPointList;
    
-   wxColour mOrbitColor;
-   wxColour mTargetColor;
-   
-   wxStaticText *mTargetColorLabel;
    wxStaticText *mFovLabel;
    wxStaticText *mViewPointRefStaticText;
    wxStaticText *mViewPointVecStaticText;
@@ -120,8 +131,6 @@ protected:
    wxButton *addScButton;
    wxButton *removeScButton;
    wxButton *clearScButton;
-   wxButton *mOrbitColorButton;
-   wxButton *mTargetColorButton;
    
    wxComboBox *mSolverIterComboBox;
    wxComboBox *mCoordSysComboBox;
@@ -154,13 +163,15 @@ protected:
    void OnSelectSpacecraft(wxCommandEvent& event);
    void OnSelectOtherObject(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
+   #endif
    void OnComboBoxChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
-
-        // Support Function
-        void ValidateFovValues();
+   
+   // Support Function
+   void ValidateFovValues();
    
    DECLARE_EVENT_TABLE();
    
@@ -176,15 +187,15 @@ protected:
       ADD_SP_BUTTON,
       REMOVE_SP_BUTTON,
       CLEAR_SP_BUTTON,
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       ORBIT_COLOR_BUTTON,
       TARGET_COLOR_BUTTON
+      #endif
    };
    
 private:
-   void ShowSpacePointOption(const wxString &name,
-                             bool show = true, bool isSc = true,
-                             UnsignedInt color = GmatColor::RED);
-   
+
+   void ShowSpacePointOption(const wxString &name, bool show = true, bool isSc = true);
 };
 #endif
 

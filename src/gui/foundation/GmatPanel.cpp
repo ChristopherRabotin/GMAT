@@ -207,6 +207,15 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
 
 
 //------------------------------------------------------------------------------
+// GuiInterpreter* GetGuiInterpreter()
+//------------------------------------------------------------------------------
+GuiInterpreter* GmatPanel::GetGuiInterpreter()
+{
+   return theGuiInterpreter;
+}
+
+
+//------------------------------------------------------------------------------
 // wxPanel* GetPanel()
 //------------------------------------------------------------------------------
 wxPanel* GmatPanel::GetPanel()

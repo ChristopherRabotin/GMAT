@@ -549,6 +549,7 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
          break;
       case Gmat::STRING_TYPE:
       case Gmat::ENUMERATION_TYPE:
+      case Gmat::COLOR_TYPE:
       case Gmat::FILENAME_TYPE:
          sval = rhsWrapper->EvaluateString();
          sval = GmatStringUtil::RemoveEnclosingString(sval, "'");
@@ -676,6 +677,7 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
          break;
       case Gmat::STRING_TYPE:
       case Gmat::ENUMERATION_TYPE:
+      case Gmat::COLOR_TYPE:
       case Gmat::FILENAME_TYPE:
          // Object to String is needed for Remove for Formation
          if (rhsObj != NULL)
@@ -684,6 +686,7 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
          }
          else if ((rhsDataType == Gmat::STRING_TYPE ||
                    rhsDataType == Gmat::ENUMERATION_TYPE ||
+                   rhsDataType == Gmat::COLOR_TYPE ||
                    rhsDataType == Gmat::FILENAME_TYPE ||
                    rhsDataType == Gmat::ON_OFF_TYPE))
          {

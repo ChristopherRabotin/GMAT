@@ -60,6 +60,10 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
    
@@ -88,6 +92,8 @@ protected:
    virtual bool         UpdateSolverData();
    /// Handles published data
    virtual bool         Distribute(const Real * dat, Integer len);
+   /// Returns object string list
+   virtual std::string  GetObjectStringList() const;
    
    CelestialBody *centralBody;
    std::string centralBodyName;

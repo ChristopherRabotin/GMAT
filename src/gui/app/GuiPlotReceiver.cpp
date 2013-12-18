@@ -315,7 +315,7 @@ void GuiPlotReceiver::SetGlSolarSystem(const std::string &plotName, SolarSystem 
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGlObject(const std::string &plotName,
                                   const StringArray &objNames,
-                                  const UnsignedIntArray &objOrbitColors,
+                                  //const UnsignedIntArray &objOrbitColors,
                                   const std::vector<SpacePoint*> &objArray)
 {
    #if DEBUG_PLOTIF_GL_SET
@@ -332,7 +332,8 @@ void GuiPlotReceiver::SetGlObject(const std::string &plotName,
 
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->SetGlObject(objNames, objOrbitColors, objArray);
+         //frame->SetGlObject(objNames, objOrbitColors, objArray);
+         frame->SetGlObject(objNames, objArray);
       }
    }
 }
@@ -712,9 +713,11 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
                                    const RealArray &posX, const RealArray &posY,
                                    const RealArray &posZ, const RealArray &velX,
                                    const RealArray &velY, const RealArray &velZ,
-                                   const UnsignedIntArray &scColors, bool solving,
-                                   Integer solverOption, bool updateCanvas,
-                                   bool drawing, bool inFunction)
+                                   //const UnsignedIntArray &scColors,
+                                   const ColorMap &orbitColorMap,
+                                   const ColorMap &targetColorMap,
+                                   bool solving, Integer solverOption,
+                                   bool updateCanvas, bool drawing, bool inFunction)
 {
    #if DEBUG_PLOTIF_GL_UPDATE
    MessageInterface::ShowMessage
@@ -745,7 +748,9 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
              frame->GetPlotName().c_str());
          #endif
          frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                           scColors, solving, solverOption, updateCanvas, drawing,
+                           //scColors,
+                           orbitColorMap, targetColorMap,
+                           solving, solverOption, updateCanvas, drawing,
                            inFunction);
          
          updated = true;

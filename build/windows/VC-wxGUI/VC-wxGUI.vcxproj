@@ -49,7 +49,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;$(CSPICE_VC32)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;$(CSPICE_VC32)\include;C:\Projects\JazzPlugins\Vf13OptimizerPlugin\src\base\factory;C:\Projects\JazzPlugins\Vf13OptimizerPlugin\src\base\include;C:\Projects\JazzPlugins\Vf13OptimizerPlugin\src\base\plugin;C:\Projects\JazzPlugins\Vf13OptimizerPlugin\src\base\solver</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__INCLUDE_BUILTIN_PLUGINS__;__USE_MATLAB__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -64,7 +64,7 @@
     <Link>
       <AdditionalDependencies>wxbase28.lib;wxmsw28_core.lib;wxmsw28_adv.lib;wxmsw28_gl.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;glu32.lib;opengl32.lib;libeng.lib;libmx.lib;libmat.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;$(MATLAB32)\extern\lib\win32\microsoft;$(CSPICE_VC32)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;$(MATLAB32)\extern\lib\win32\microsoft;$(CSPICE_VC32)\lib;C:\Projects\Gmat3rdParty\vf13\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -98,6 +98,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp" />
+    <ClCompile Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
+    <ClCompile Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
+    <ClCompile Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\DataReader.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\FileReader.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\TcopsVHFAscii.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\TcopsVHFData.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceCommandFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\ReaderFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.cpp" />
@@ -145,11 +159,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\CoreMeasurement.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricAzEl.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricMeasurement.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRADec.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRange.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRangeRate.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.c" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.c" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.cpp" />
@@ -551,6 +560,7 @@
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -649,6 +659,7 @@
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatPanel.cpp" />
@@ -683,6 +694,7 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
@@ -738,6 +750,20 @@
     <ClCompile Include="..\BuiltinPluginManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp" />
+    <ClInclude Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
+    <ClInclude Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
+    <ClInclude Include="..\..\..\..\JazzPlugins\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\DataReader.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\FileReader.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\TcopsVHFAscii.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datareader\TcopsVHFData.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceCommandFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\ReaderFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.hpp" />
@@ -786,11 +812,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\EstimationDefs.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricAzEl.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricMeasurement.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRADec.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRange.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\GeometricRangeRate.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.h" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.h" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.hpp" />
@@ -1205,6 +1226,7 @@
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />
@@ -1309,6 +1331,7 @@
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatPanel.hpp" />
@@ -1343,6 +1366,7 @@
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />

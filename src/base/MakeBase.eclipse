@@ -518,6 +518,7 @@ OBJECTS = \
     util/CCSDSEMReader.o \
     util/CCSDSEMSegment.o \
     util/Code500EphemerisFile.o \
+    util/ColorDatabase.o \
     util/Date.o \
     util/DateUtil.o \
     util/ElapsedTime.o \

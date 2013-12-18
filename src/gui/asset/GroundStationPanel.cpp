@@ -27,6 +27,7 @@
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
+#include "GmatColorPanel.hpp"
 #include "BodyFixedStateConverter.hpp"
 #include "CelestialBody.hpp"
 #include "GuiInterpreter.hpp"
@@ -67,11 +68,10 @@ GroundStationPanel::GroundStationPanel(wxWindow *parent, const wxString &name)
 {           
    std::string groundName = std::string(name.c_str());
    theGroundStation = (GroundstationInterface*)theGuiInterpreter->GetConfiguredObject(groundName);
-
    guiManager     = GuiItemManager::GetInstance();
    guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    ss             = guiInterpreter->GetSolarSystemInUse();
-
+   
    if (theGroundStation)
    {
       Create();
@@ -89,7 +89,8 @@ GroundStationPanel::GroundStationPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 GroundStationPanel::~GroundStationPanel()
 {
-    GuiItemManager::GetInstance()->UnregisterComboBox("CelestialBody", centralBodyComboBox);
+   GuiItemManager::GetInstance()->UnregisterComboBox("CelestialBody", centralBodyComboBox);
+   delete localGroundStation;
 }
 
 //-------------------------------
@@ -107,8 +108,8 @@ void GroundStationPanel::Create()
 {
    // create local copy of ground station
    localGroundStation = (GroundstationInterface*)theGroundStation->Clone();
-
-    // Border size
+   
+   // Border size
    int minLabelSize;
    Integer bsize = 2;
    Integer labelSizeProportion = 0;
@@ -216,28 +217,23 @@ void GroundStationPanel::Create()
    minLabelSize = (minLabelSize < location1Label->GetBestSize().x) ? location1Label->GetBestSize().x : minLabelSize;
    minLabelSize = (minLabelSize < location2Label->GetBestSize().x) ? location2Label->GetBestSize().x : minLabelSize;
    minLabelSize = (minLabelSize < location3Label->GetBestSize().x) ? location3Label->GetBestSize().x : minLabelSize;
-//   minLabelSize = (minLabelSize < hardwareLabel->GetBestSize().x) ? hardwareLabel->GetBestSize().x : minLabelSize;
-
+   
    stationIDLabel->SetMinSize(wxSize(minLabelSize, stationIDLabel->GetMinHeight()));
    centralBodyLabel->SetMinSize(wxSize(minLabelSize, centralBodyLabel->GetMinHeight()));
-//   hardwareLabel->SetMinSize(wxSize(minLabelSize, hardwareLabel->GetMinHeight()));
 
    //-----------------------------------------------------------------
    // Add to Station ID sizer
    //-----------------------------------------------------------------
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
-   //flexGridSizer1->AddGrowableCol(1);
    flexGridSizer1->Add(stationIDLabel, labelSizeProportion, wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add(stationIDTextCtrl, ctrlSizeProportion, wxGROW|wxALL, bsize);
-   flexGridSizer1->Add(0, unitSizeProportion, wxALIGN_LEFT|wxALL, bsize);
-   
-   theMiddleSizer->Add(flexGridSizer1, 0, wxEXPAND|wxALL, bsize);
-   
+   GmatStaticBoxSizer *idSizer = new GmatStaticBoxSizer(wxVERTICAL, this , "");
+   idSizer->Add(flexGridSizer1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+      
    //-----------------------------------------------------------------
    // Add to location properties sizer
    //-----------------------------------------------------------------
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 3, 0, 0 );
-   //flexGridSizer2->AddGrowableCol(1);
    
    flexGridSizer2->Add(centralBodyLabel, labelSizeProportion, wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer2->Add(centralBodyComboBox, ctrlSizeProportion, wxGROW|wxALL, bsize);
@@ -262,31 +258,21 @@ void GroundStationPanel::Create()
    flexGridSizer2->Add(location3Label, labelSizeProportion, wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer2->Add(location3TextCtrl, ctrlSizeProportion, wxGROW|wxALL, bsize);
    flexGridSizer2->Add(location3Unit, unitSizeProportion, wxALIGN_LEFT|wxALL, bsize);
-
+   
    // create the location Properties group box
    locationPropertiesSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Location" );
-   locationPropertiesSizer->Add(flexGridSizer2, 0, wxEXPAND|wxALL, bsize);
-
+   locationPropertiesSizer->Add(flexGridSizer2, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
+   
+   // Create color panel
+   GmatColorPanel *colorPanel = new GmatColorPanel(this, this, localGroundStation);
+   
    //-----------------------------------------------------------------
-   // Add to hardware properties sizer
+   // Now put id, location and color into the middle sizer
    //-----------------------------------------------------------------
-//   wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 3, 0, 0 );
-//   //flexGridSizer2->AddGrowableCol(1);
-//
-//   flexGridSizer3->Add(hardwareLabel, labelSizeProportion, wxALIGN_LEFT|wxALL, bsize);
-//   flexGridSizer3->Add(hardwareTextCtrl, ctrlSizeProportion, wxGROW|wxALL, bsize);
-//
-//   // create the hardware Properties group box
-//   hardwarePropertiesSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Hardware" );
-//   hardwarePropertiesSizer->Add(flexGridSizer3, 0, wxEXPAND|wxALL, bsize);
-
-   //-----------------------------------------------------------------
-   // Now put ground & fuel properties sizers into the middle sizer
-   //-----------------------------------------------------------------
-   theMiddleSizer->Add(locationPropertiesSizer, 1, wxEXPAND|wxALL, bsize);
-//   theMiddleSizer->Add(hardwarePropertiesSizer, 0, wxEXPAND|wxALL, bsize);
+   theMiddleSizer->Add(idSizer, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(locationPropertiesSizer, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(colorPanel, 0, wxEXPAND|wxALIGN_CENTRE|wxALL, bsize);
    theMiddleSizer->SetSizeHints(this);
-
 }
 
 //------------------------------------------------------------------------------
@@ -316,7 +302,6 @@ void GroundStationPanel::LoadData()
       location2TextCtrl->SetValue(ToWxString(location2));
       location3 = localGroundStation->GetRealParameter(BodyFixedPoint::LOCATION_3);
       location3TextCtrl->SetValue(ToWxString(location3));
-      //hardwareTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::HARDWARE).c_str()));
       
       // update labels and tooltips based on statetype
       UpdateControls();

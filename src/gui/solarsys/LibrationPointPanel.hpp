@@ -26,36 +26,37 @@
 class LibrationPointPanel: public GmatPanel
 {
 public:
-    LibrationPointPanel(wxWindow *parent, const wxString &name);
-    ~LibrationPointPanel();
+   LibrationPointPanel(wxWindow *parent, const wxString &name);
+   ~LibrationPointPanel();
    virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
-    
+   
    
 private:
-    // member data
-    LibrationPoint *theLibrationPt;
-
-    wxComboBox *primaryBodyCB;
-    wxComboBox *secondaryBodyCB;
-    wxComboBox *librationPtCB;
-    
-    // member functions
-    void OnComboBoxChange(wxCommandEvent& event);
+   // member data
+   LibrationPoint *theLibrationPt;
+   LibrationPoint *theClonedLibPoint;
+   
+   wxComboBox *primaryBodyCB;
+   wxComboBox *secondaryBodyCB;
+   wxComboBox *librationPtCB;
+   
+   // member functions
+   void OnComboBoxChange(wxCommandEvent& event);
 	void UpdateComboBoxes();
-
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-        
-    DECLARE_EVENT_TABLE();
-    
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 6150,
-        ID_COMBOBOX
-    };
+   
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   
+   DECLARE_EVENT_TABLE();
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 6150,
+      ID_COMBOBOX
+   };
 };
 #endif
 

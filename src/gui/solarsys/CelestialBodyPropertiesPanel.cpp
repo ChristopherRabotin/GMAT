@@ -22,10 +22,11 @@
 //------------------------------------------------------------------------------
 
 #include "CelestialBodyPropertiesPanel.hpp"
-#include "GmatBaseException.hpp"
-#include "GmatAppData.hpp"
+//#include "GmatBaseException.hpp"
+//#include "GmatAppData.hpp"
+#include "GmatColorPanel.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"
+//#include "StringUtil.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 #include <fstream>
@@ -363,7 +364,11 @@ void CelestialBodyPropertiesPanel::Create()
    
    pageSizer    = new GmatStaticBoxSizer(wxVERTICAL, this, "");
    
+   // Create color panel
+   GmatColorPanel *colorPanel = new GmatColorPanel(this, theCBPanel, theBody);
+   
    pageSizer->Add(optionsSizer, 1, wxALIGN_LEFT|wxGROW, bSize); 
+   pageSizer->Add(colorPanel, 1, wxALIGN_CENTER|wxGROW, bSize); 
    
    this->SetAutoLayout(true);
    this->SetSizer(pageSizer);
