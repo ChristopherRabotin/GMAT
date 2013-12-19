@@ -1317,6 +1317,9 @@
     <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp">
       <Filter>Source Files\attitude</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2590,6 +2593,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp">
       <Filter>Source Files\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

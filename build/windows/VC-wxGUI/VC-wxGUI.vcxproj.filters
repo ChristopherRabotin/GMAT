@@ -2247,6 +2247,30 @@
     <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp">
       <Filter>Source Files\gui\foundation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4273,6 +4297,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp">
       <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
