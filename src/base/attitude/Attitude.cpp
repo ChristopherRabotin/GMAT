@@ -121,7 +121,7 @@ Attitude::PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount] =
    "BodyConstraintVectorX",
    "BodyConstraintVectorY",
    "BodyConstraintVectorZ",
-   // Addtitional CCSDS_AEM field text here
+   // Addtitional CCSDS-AEM field text here
    "AttitudeFileName",
 };
 
@@ -185,7 +185,7 @@ Attitude::PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   // Additional CCSDS_AEM field types here
+   // Additional CCSDS-AEM field types here
    Gmat::STRING_TYPE,
 };
 
@@ -375,7 +375,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    refBodyName             ("Earth"),
    refBody                 (NULL),
    attitudeConstraintType  ("OrbitNormal"),
-   // Additional CCSDS_AEM fields here
+   // Additional CCSDS-AEM fields here
    aemFile                 ("")
 {
    parameterCount = AttitudeParamCount;
@@ -466,7 +466,7 @@ Attitude::Attitude(const Attitude& att) :
    attitudeConstraintType  (att.attitudeConstraintType),
    bodyAlignmentVector     (att.bodyAlignmentVector),
    bodyConstraintVector    (att.bodyConstraintVector),
-   // Additional CCSDS_AEM fields here
+   // Additional CCSDS-AEM fields here
    aemFile                 (att.aemFile)
 {
 #ifdef DEBUG_ATTITUDE_INIT
@@ -541,7 +541,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    attitudeConstraintType  = att.attitudeConstraintType;
    bodyAlignmentVector     = att.bodyAlignmentVector;
    bodyConstraintVector    = att.bodyConstraintVector;
-   // Additional CCSDS_AEM fields here
+   // Additional CCSDS-AEM fields here
    aemFile                 = att.aemFile;
 
    return *this;
@@ -1641,7 +1641,7 @@ bool Attitude::IsParameterReadOnly(const Integer id) const
       if ((id >= ATTITUDE_REFERENCE_BODY) && (id <= BODY_CONSTRAINT_VECTOR_Z))
          return true;
    }
-   if (attitudeModelName != "CCSDS_AEM")
+   if (attitudeModelName != "CCSDS-AEM")
    {
       if (id == AEM_FILE_NAME)
          return true;
