@@ -104,6 +104,9 @@ bool CCSDSAEMQuaternionSegment::Validate(bool checkData)
       throw UtilityException(errmsg);
    }
 
+   #ifdef DEBUG_AEM_QUAT_VALIDATE
+      MessageInterface::ShowMessage("EXITing CCSDSAEMQuaternionSegment::Validate\n");
+   #endif
    return CCSDSAEMSegment::Validate(checkData);
 }
 

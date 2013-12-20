@@ -35,6 +35,7 @@
 //#define DEBUG_SLERP
 //#define DEBUG_EM_FIND_EXACT_MATCH
 //#define DEBUG_USABLE
+//#define DEBUG_EM_VALIDATE
 
 //------------------------------------------------------------------------------
 // static data
@@ -290,6 +291,9 @@ CCSDSEMSegment::~CCSDSEMSegment()
 //------------------------------------------------------------------------------
 bool CCSDSEMSegment::Validate(bool checkData)
 {
+   #ifdef DEBUG_EM_VALIDATE
+      MessageInterface::ShowMessage("Entering EMSegment::Validate ...\n");
+   #endif
    // Time system
    if (timeSystem == UNSET_STRING)
    {
@@ -380,6 +384,9 @@ bool CCSDSEMSegment::Validate(bool checkData)
       errmsg += "data type " + dataType + "\n";
       throw UtilityException(errmsg);
    }
+   #ifdef DEBUG_EM_VALIDATE
+      MessageInterface::ShowMessage("EXITing EMSegment::Validate ...\n");
+   #endif
 
    return true;
 }
