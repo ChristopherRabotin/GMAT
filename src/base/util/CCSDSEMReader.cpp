@@ -31,6 +31,7 @@
 
 //#define DEBUG_PARSE_EM_FILE
 //#define DEBUG_INIT_EM_FILE
+//#define DEBUG_EM_FILE
 
 // -----------------------------------------------------------------------------
 // static data
@@ -90,6 +91,7 @@ CCSDSEMReader::CCSDSEMReader(const CCSDSEMReader &copy) :
 {
    comments.clear();
    segments.clear();
+   numSegments = 0;
    for (unsigned int ii = 0; ii < copy.segments.size(); ii++)
    {
       segments.push_back((copy.segments[ii])->Clone());
@@ -125,6 +127,7 @@ CCSDSEMReader& CCSDSEMReader::operator=(const CCSDSEMReader &copy)
       delete segments[ii];
    }
    segments.clear();
+   numSegments = 0;
    for (unsigned int ii = 0; ii < copy.segments.size(); ii++)
    {
       segments.push_back((copy.segments[ii])->Clone());
@@ -147,6 +150,7 @@ CCSDSEMReader::~CCSDSEMReader()
       delete segments[ii];
    }
    segments.clear();
+   numSegments = 0;
 
    metaMap.clear();
    comments.clear();
@@ -157,6 +161,8 @@ CCSDSEMReader::~CCSDSEMReader()
 // -----------------------------------------------------------------------------
 void CCSDSEMReader::Initialize()
 {
+   if (isInitialized) return;
+
    #ifdef DEBUG_INIT_EM_FILE
       MessageInterface::ShowMessage("Entering CCSDSEMReader::Initialize ...\n");
    #endif
@@ -242,6 +248,10 @@ void CCSDSEMReader::Initialize()
    {
       segStart   = (segments.at(jj))->GetStartTime();
       segStop    = (segments.at(jj))->GetStopTime();
+      #ifdef DEBUG_INIT_EM_FILE
+         MessageInterface::ShowMessage("--- last segment stop time = %12.10f, segment start = %12.10f\n",
+               currentStop, segStart);
+      #endif
       if (segStart < currentStop)
       {
          std::string errmsg = "Error reading ephemeris message file \"";
@@ -263,7 +273,24 @@ void CCSDSEMReader::Initialize()
 // -----------------------------------------------------------------------------
 bool CCSDSEMReader::SetFile(const std::string &theEMFile)
 {
-   emFile = theEMFile;
+   #ifdef DEBUG_EM_FILE
+      MessageInterface::ShowMessage("In SetFile, current file = %s, new file = %s\n",
+            emFile.c_str(), theEMFile.c_str());
+      MessageInterface::ShowMessage("     and number of segments = %d\n",
+            numSegments);
+   #endif
+   if (theEMFile != emFile)
+   {
+      emFile        = theEMFile;
+      isInitialized = false;
+      for (unsigned int ii = 0; ii < segments.size(); ii++)
+      {
+         delete segments[ii];
+      }
+      segments.clear();
+      numSegments = 0;
+      Initialize();
+   }
    return true;
 }
 
