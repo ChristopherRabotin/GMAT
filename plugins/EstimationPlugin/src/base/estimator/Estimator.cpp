@@ -62,7 +62,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::ENUMERATION_TYPE,					// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
    Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
    Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
 };
@@ -101,15 +101,17 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    showSpecificResiduals(false),
    showErrorBars        (false),
    locatingEvent        (false),
-   estimationStart      (0.0),											// made changes by TUAN NGUYEN
-   estimationEnd        (100000.0),										// made changes by TUAN NGUYEN
+   startEpoch           (DateUtil::EARLIEST_VALID_MJD),					// made changes by TUAN NGUYEN
+   endEpoch             (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
    epochFormat          ("TAIModJulian")								// made changes by TUAN NGUYEN
 {
-   startEpoch = "0.0";													// made changes by TUAN NGUYEN
-   endEpoch   = "100000.0";												// made changes by TUAN NGUYEN
 
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;
+
+   // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
+   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
+   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
 
    esm.SetMeasurementManager(&measManager);
 }

@@ -726,6 +726,8 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       fm.clear();
       psm.clear();
       baseEpoch.clear();
+	  currEpoch.clear();				// made changes by TUAN NGUYEN		fix bug #1 of ticket GMT-4314
+	  elapsedTime.clear();				// made changes by TUAN NGUYEN
 
       for (UnsignedInt n = 0; n < propagators.size(); ++n)
       {

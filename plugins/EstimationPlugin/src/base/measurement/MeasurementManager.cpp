@@ -34,6 +34,7 @@
 //#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
 //#define DEBUG_MODEL_MAPPING
 //#define DEBUG_CALCULATE
+//#define DEBUG_ADVANCE_OBSERVATION							// made changes by TUAN NGUYEN
 
 // Selects between old datafile classes and the classes in the DataFile plugin
 //#define USE_DATAFILE_PLUGINS
@@ -895,6 +896,14 @@ void MeasurementManager::AdvanceObservation()
 	        break;									// made changes by TUAN NGUYEN
       }												// made changes by TUAN NGUYEN
    }
+
+
+#ifdef DEBUG_ADVANCE_OBSERVATION
+   if (currentObs == observations.end())
+      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs == end\n");
+   else
+	   MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs->epoch = %.12lf   correntObs->value.size() = %d\n", currentObs->epoch, currentObs->value.size());
+#endif
 }
 
 //------------------------------------------------------------------------------

@@ -40,13 +40,14 @@
 const std::string DataFile::PARAMETER_TEXT[] =
 {
    "Filename",
-   "Format"
+   "Format",
 };
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
+//   Gmat::ENUMERATION_TYPE,			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
 };
 
 
@@ -341,6 +342,8 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
    if (id == ObsType)
    {
       obsType = value;
+//	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))			// make changes by TUAN NGUYEN 
+//		  obsType = value.substr(1,value.size()-2);											// make changes by TUAN NGUYEN  fix Bug3, error 1 in ticket GMT-4314
       return true;
    }
 

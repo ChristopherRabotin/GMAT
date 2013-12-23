@@ -162,7 +162,14 @@ void BatchEstimatorInv::Accumulate()
 
    // Get the current observation data
    const ObservationData *currentObs =  measManager.GetObsData();
-   if ((modelsToAccess.size() > 0)&&(measManager.Calculate(modelsToAccess[0], true) >= 1))
+//MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
+
+   int numMeasModels = modelsToAccess.size();
+   if (numMeasModels == 0)
+	   throw EstimatorException("Error: No measurement model was defined in script for running estimation.\n");
+
+   int count = measManager.Calculate(modelsToAccess[0], true);
+   if (count >= 1)
    {
 	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
 	  if (iterationsTaken == 0)
@@ -172,7 +179,7 @@ void BatchEstimatorInv::Accumulate()
 			// Data filtered based on residual limits:
 		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
 		    {
-//				MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
+//			MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
 		       measManager.GetObsDataObject()->inUsed = false;
 			   break;
 		    }
@@ -182,12 +189,14 @@ void BatchEstimatorInv::Accumulate()
 			Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
 			if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
 			{
+//			MessageInterface::ShowMessage("currentObs->epoch = %.12lf is outside range [%.12lf , %.12lf]\n", currentObs->epoch, epoch1, epoch2);
 		       measManager.GetObsDataObject()->inUsed = false;
 			   break;
 			}
+//			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
 	     }
 	  }
-   }
+   
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
    #endif
@@ -200,11 +209,12 @@ void BatchEstimatorInv::Accumulate()
 //      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
       RealArray hTrow;
       hTrow.assign(stateSize, 0.0);
-      UnsignedInt rowCount = calculatedMeas->value.size();
-      for (UnsignedInt i = 0; i < rowCount; ++i)
+      int rowCount = calculatedMeas->value.size();
+
+	  for (int i = 0; i < rowCount; ++i)
          hTilde.push_back(hTrow);
 
-      // Now walk the state vector and get elements of H-tilde for each piece
+	  // Now walk the state vector and get elements of H-tilde for each piece
       for (UnsignedInt i = 0; i < stateMap->size(); ++i)
       {
          if ((*stateMap)[i]->subelement == 1)
@@ -242,7 +252,7 @@ void BatchEstimatorInv::Accumulate()
          }
       }
 
-      // Apply the STM
+	  // Apply the STM
       #ifdef DEBUG_ACCUMULATION
          MessageInterface::ShowMessage("Applying the STM\n");
       #endif
@@ -397,7 +407,7 @@ void BatchEstimatorInv::Accumulate()
          MessageInterface::ShowMessage("]\n");
       #endif
    }
-
+   }
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
       #ifdef SHOW_STATE_TRANSITIONS
