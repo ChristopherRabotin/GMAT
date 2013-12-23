@@ -551,7 +551,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #endif
    
    wxAcceleratorEntry entries[6];
-   entries[0].Set(wxACCEL_CTRL,  WXK_F5, TOOL_RUN);
+   entries[0].Set(wxACCEL_NORMAL,  WXK_F5, TOOL_RUN);
    entries[1].Set(wxACCEL_NORMAL,  WXK_F10, TOOL_SCREENSHOT);
    entries[2].Set(wxACCEL_NORMAL,  WXK_F9, TOOL_ANIMATION_PLAY);
    entries[3].Set(wxACCEL_SHIFT,  WXK_F9, TOOL_ANIMATION_STOP);
