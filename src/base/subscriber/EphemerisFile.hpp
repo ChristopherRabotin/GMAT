@@ -342,9 +342,9 @@ protected:
                                   const StringArray &satNames,
                                   const std::string &desc);
    virtual void HandlePropagatorChange(GmatBase *provider);
-   virtual void HandleScPropertyChange(GmatBase *originator, Real epoch,
-                                       const std::string &satName,
-                                       const std::string &desc);
+   virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
+                                               const std::string &satName,
+                                               const std::string &desc);
    enum
    {
       SPACECRAFT = SubscriberParamCount,

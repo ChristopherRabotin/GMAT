@@ -31,13 +31,14 @@
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
-// none at this time
+// none
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  Nadir(const std::string &itsName)
+//  NadirPointing(const std::string &itsName)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the Nadir class (constructor).
@@ -61,7 +62,7 @@ NadirPointing::NadirPointing(const std::string &itsName) :
 }
 
 //------------------------------------------------------------------------------
-//  Nadir(const Nadir &att)
+//  NadirPointing(const NadirPointing &att)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the Nadir class as a copy of the
@@ -76,15 +77,15 @@ NadirPointing::NadirPointing(const NadirPointing& att) :
 }
  
 //------------------------------------------------------------------------------
-//  Nadir& operator= (const Nadir& att)
+//  NadirPointing& operator= (const NadirPointing& att)
 //------------------------------------------------------------------------------
 /**
- * Assignment operator for the Nadir class.
+ * Assignment operator for the NadirPointing class.
  *
- * @param att the Nadir object whose data to assign to "this"
- *            Nadir.
+ * @param att the NadirPointing object whose data to assign to "this"
+ *            NadirPointing.
  *
- * @return "this" Nadir with data of input Nadir att.
+ * @return "this" NadirPointing with data of input NadirPointing att.
  */
 //------------------------------------------------------------------------------
 NadirPointing& NadirPointing::operator=(const NadirPointing& att)
@@ -97,10 +98,10 @@ NadirPointing& NadirPointing::operator=(const NadirPointing& att)
 
 
 //------------------------------------------------------------------------------
-//  ~Nadir()
+//  ~NadirPointing()
 //------------------------------------------------------------------------------
 /**
- * Destroys the Nadir class (constructor).
+ * Destroys the NadirPointing class (constructor).
  */
 //------------------------------------------------------------------------------
 NadirPointing::~NadirPointing()
@@ -164,20 +165,20 @@ Rmatrix33 NadirPointing::TRIAD(Rvector3& V1, Rvector3& V2, Rvector3& W1, Rvector
 	// W1, W2 : defined in frame B
 	// TRIAD algorithm calculates the rotation matrix from A to B
 
-	Rvector3 r1 = V1.GetUnitVector();
-	Rvector3 temp = Cross(V1,V2);
-	Rvector3 r2 = temp.GetUnitVector();
-	Rvector3 r3 = Cross(V1,temp);
-	r3 = r3.GetUnitVector();
+   Rvector3 r1 = V1.GetUnitVector();
+   Rvector3 temp = Cross(V1,V2);
+   Rvector3 r2 = temp.GetUnitVector();
+   Rvector3 r3 = Cross(V1,temp);
+   r3 = r3.GetUnitVector();
 
-	Rvector3 s1 = W1.GetUnitVector();
-	temp = Cross(W1,W2);
-	Rvector3 s2 = temp.GetUnitVector();
-	Rvector3 s3 = Cross(W1,temp);
-	s3 = s3.GetUnitVector();
+   Rvector3 s1 = W1.GetUnitVector();
+   temp = Cross(W1,W2);
+   Rvector3 s2 = temp.GetUnitVector();
+   Rvector3 s3 = Cross(W1,temp);
+   s3 = s3.GetUnitVector();
 
-	// YRL, calculate resultRotMatrix
-	Rmatrix33 resultRotMatrix = Outerproduct(s1,r1) + Outerproduct(s2,r2) + Outerproduct(s3,r3) ;	
+   // YRL, calculate resultRotMatrix
+   Rmatrix33 resultRotMatrix = Outerproduct(s1,r1) + Outerproduct(s2,r2) + Outerproduct(s3,r3) ;
 
 	return resultRotMatrix;
 }

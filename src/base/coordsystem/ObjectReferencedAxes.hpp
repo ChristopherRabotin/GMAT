@@ -53,6 +53,8 @@ public:
    virtual void SetZAxis(const std::string &toValue);   
    virtual SpacePoint* GetPrimaryObject() const;
    virtual SpacePoint* GetSecondaryObject() const;
+   virtual std::string GetPrimaryObjectName() const;
+   virtual std::string GetSecondaryObjectName() const;
    virtual std::string GetXAxis() const;
    virtual std::string GetYAxis() const;
    virtual std::string GetZAxis() const;

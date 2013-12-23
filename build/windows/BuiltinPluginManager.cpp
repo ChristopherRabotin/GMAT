@@ -26,6 +26,10 @@
 #include "SaveCommandFactory.hpp"
 #include "EphemPropFactory.hpp"
 #include "EventLocatorFactory.hpp"
+#include "VF13Factory.hpp"
+#include "DataInterfaceCommandFactory.hpp"
+#include "DataInterfaceFactory.hpp"
+#include "ReaderFactory.hpp"
 
 #ifdef __USE_MATLAB__
 #include "MatlabInterfaceFactory.hpp"
@@ -48,6 +52,10 @@ void ForStaticLinkBuild::RegisterBuiltinPluginFactories(FactoryManager *factoryM
    factoryManager->RegisterFactory(new SaveCommandFactory());
    factoryManager->RegisterFactory(new EphemPropFactory());
    factoryManager->RegisterFactory(new EventLocatorFactory());
+   factoryManager->RegisterFactory(new VF13Factory());
+   factoryManager->RegisterFactory(new DataInterfaceCommandFactory());
+   factoryManager->RegisterFactory(new DataInterfaceFactory());
+   factoryManager->RegisterFactory(new ReaderFactory());
    
    #ifdef __USE_MATLAB__
    factoryManager->RegisterFactory(new MatlabInterfaceFactory());

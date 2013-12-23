@@ -21,10 +21,12 @@
 //------------------------------------------------------------------------------
 
 #include "LibrationPointPanel.hpp"
+#include "GmatColorPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_LIBRATIONPOINT_PANEL 1
+//#define DEBUG_PANEL_LOAD
+//#define DEBUG_PANEL_SAVE
 
 //------------------------------
 // event tables for wxWindows
@@ -58,11 +60,23 @@ LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
 {
    theLibrationPt =
       (LibrationPoint*)theGuiInterpreter->GetConfiguredObject(name.c_str());
-
-   Create();
-   Show();
-
-   EnableUpdate(false);
+   
+   if (theLibrationPt != NULL)
+   {
+      theClonedLibPoint = (LibrationPoint*)(theLibrationPt->Clone());
+      SetName("LibrationPointPanel");
+      
+      Create();
+      Show();
+      
+      EnableUpdate(false);
+   }
+   else
+   {
+      // show error message
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel:Create() the LibrationPoint is NULL\n");
+   }
 }
 
 
@@ -80,7 +94,9 @@ LibrationPointPanel::~LibrationPointPanel()
    theGuiManager->UnregisterComboBox("CelestialBody", primaryBodyCB);
    theGuiManager->UnregisterComboBox("CelestialBody", secondaryBodyCB);
    theGuiManager->RemoveFromResourceUpdateListeners(this);
-
+   
+   // Delete cloned LibrationPoint
+   delete theClonedLibPoint;
 }
 
 //-------------------------------
@@ -117,61 +133,59 @@ void LibrationPointPanel::Create()
    int bsize = 2; // border size
    
    wxString librationList[] = {"L1", "L2", "L3", "L4", "L5"};
-   if (theLibrationPt != NULL)
-   {
-      // create sizers
-      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 2, bsize, bsize);
-      
-      // label for primary body combobox
-      wxStaticText *primaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Primary Body:"), wxDefaultPosition, wxDefaultSize, 0);
-      
-      // register for updates, in order to refresh
-	  theGuiManager->AddToResourceUpdateListeners(this);
-
-      // combo box for avaliable bodies 
-      primaryBodyCB = 
-		  theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
-      
-      // label for secondary body combobox
-      wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Secondary Body:"), wxDefaultPosition, wxDefaultSize, 0);
-      
-      // combo box for avaliable bodies 
-      secondaryBodyCB = 
-         theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
-      
-      // label for libration point combobox
-      wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Libration Point:"), wxDefaultPosition, wxDefaultSize, 0);
-      
-      // combo box for libration points 
-      librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
-         wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_READONLY);
-      
-      // add labels and comboboxes to page sizer    
-      pageSizer->Add(primaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(primaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(secondaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(secondaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(librationPointLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(librationPtCB, 0, wxALIGN_LEFT | wxALL, bsize);
-      
-      // create Options box:
-      GmatStaticBoxSizer *optionsStaticBoxSizer =
-         new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
-      optionsStaticBoxSizer->Add(pageSizer, 0, wxALIGN_LEFT|wxALL,bsize);
-      
-      // add page sizer to middle sizer
-      theMiddleSizer->Add(optionsStaticBoxSizer, 0, wxEXPAND|wxALL, bsize);
-   }
-   else
-   {
-      // show error message
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel:Create() theLP is NULL\n");
-   }
+   // create sizers
+   wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 2, bsize, bsize);
    
+   // label for primary body combobox
+   wxStaticText *primaryBodyLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Primary Body:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   // register for updates, in order to refresh
+   theGuiManager->AddToResourceUpdateListeners(this);
+   
+   // combo box for avaliable bodies 
+   primaryBodyCB = 
+      theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+   
+   // label for secondary body combobox
+   wxStaticText *secondaryBodyLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Secondary Body:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   // combo box for avaliable bodies 
+   secondaryBodyCB = 
+      theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+   
+   // label for libration point combobox
+   wxStaticText *librationPointLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Libration Point:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   // combo box for libration points 
+   librationPtCB =
+      new wxComboBox(this, ID_COMBOBOX, wxT(""),
+                     wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_READONLY);
+   
+   // add labels and comboboxes to page sizer    
+   pageSizer->Add(primaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+   pageSizer->Add(primaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
+   pageSizer->Add(secondaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+   pageSizer->Add(secondaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
+   pageSizer->Add(librationPointLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+   pageSizer->Add(librationPtCB, 0, wxALIGN_LEFT | wxALL, bsize);
+   
+   // create Options box:
+   GmatStaticBoxSizer *optionsStaticBoxSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
+   optionsStaticBoxSizer->Add(pageSizer, 0, wxALIGN_LEFT|wxALL,bsize);
+   
+   // Create color panel
+   GmatColorPanel *colorPanel = new GmatColorPanel(this, this, theClonedLibPoint);
+   
+   // add page sizer to middle sizer
+   theMiddleSizer->Add(optionsStaticBoxSizer, 0, wxEXPAND|wxALL, bsize);
+   theMiddleSizer->Add(colorPanel, 0, wxEXPAND|wxALL, bsize);   
 }
 
 
@@ -179,7 +193,7 @@ void LibrationPointPanel::Create()
 // virtual void LoadData()
 //------------------------------------------------------------------------------
 /**
- * Loads data for the LibrationPoint..
+ * Loads data for the LibrationPoint.
  */
 //------------------------------------------------------------------------------
 void LibrationPointPanel::LoadData()
@@ -190,30 +204,30 @@ void LibrationPointPanel::LoadData()
       UpdateComboBoxes();
 
       // load primary body
-      std::string primaryBody = theLibrationPt->GetStringParameter("Primary");
+      std::string primaryBody = theClonedLibPoint->GetStringParameter("Primary");
       primaryBodyCB->SetValue(primaryBody.c_str());
 
       // load secondary body
-      std::string secondaryBody = theLibrationPt->GetStringParameter("Secondary");
+      std::string secondaryBody = theClonedLibPoint->GetStringParameter("Secondary");
       secondaryBodyCB->SetValue(secondaryBody.c_str());
-
-      #if DEBUG_LIBRATIONPOINT_PANEL
+      
+      #ifdef DEBUG_PANEL_LOAD
          MessageInterface::ShowMessage
             ("LibrationPointPanel::LoadData() primary body = %s\n", 
-               primaryBody.c_str());
+             primaryBody.c_str());
          MessageInterface::ShowMessage
             ("LibrationPointPanel::LoadData() secondary body = %s\n", 
-               secondaryBody.c_str());
+             secondaryBody.c_str());
       #endif
 
       // load libration
-      std::string librationPoint = theLibrationPt->GetStringParameter("Point");
+      std::string librationPoint = theClonedLibPoint->GetStringParameter("Point");
       librationPtCB->SetValue(librationPoint.c_str());
 
-      #if DEBUG_LIBRATIONPOINT_PANEL
+      #ifdef DEBUG_PANEL_LOAD
          MessageInterface::ShowMessage
             ("LibrationPointPanel::LoadData() libration point = %s\n",
-               librationPoint.c_str());
+             librationPoint.c_str());
       #endif
    }
    catch (BaseException &e)
@@ -266,16 +280,16 @@ void LibrationPointPanel::SaveData()
       
       // Primary body
       spName = primaryBodyString.c_str();
-      int primaryBodyID = theLibrationPt->GetParameterID("Primary");
-      theLibrationPt->SetStringParameter(primaryBodyID, spName);
+      int primaryBodyID = theClonedLibPoint->GetParameterID("Primary");
+      theClonedLibPoint->SetStringParameter(primaryBodyID, spName);
       SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
-      theLibrationPt->SetRefObject(primary, Gmat::SPACE_POINT, spName);
+      theClonedLibPoint->SetRefObject(primary, Gmat::SPACE_POINT, spName);
       
       // set Earth as J000Body of primary body if NULL
       if (primary->GetJ2000Body() == NULL)
          primary->SetJ2000Body(j2000body);
       
-      #if DEBUG_LIBRATIONPOINT_PANEL
+      #ifdef DEBUG_PANEL_SAVE
       MessageInterface::ShowMessage
          ("LibrationPointPanel::SaveData() primary body ID = %d\n", 
           primaryBodyID);
@@ -286,16 +300,16 @@ void LibrationPointPanel::SaveData()
       
       // Secondary body
       spName = secondaryBodyString.c_str();
-      int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
-      theLibrationPt->SetStringParameter(secondaryBodyID, spName);
+      int secondaryBodyID = theClonedLibPoint->GetParameterID("Secondary");
+      theClonedLibPoint->SetStringParameter(secondaryBodyID, spName);
       SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
-      theLibrationPt->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
+      theClonedLibPoint->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
       
       // set Earth as J000Body of secondary body if NULL
       if (secondary->GetJ2000Body() == NULL)
          secondary->SetJ2000Body(j2000body);
       
-      #if DEBUG_LIBRATIONPOINT_PANEL
+      #ifdef DEBUG_PANEL_SAVE
       MessageInterface::ShowMessage
          ("LibrationPointPanel::SaveData() secondary body ID = %d\n", 
           secondaryBodyID);
@@ -307,9 +321,9 @@ void LibrationPointPanel::SaveData()
       
       // Libration point
       wxString librationPointString = librationPtCB->GetValue().Trim();
-      int librationPointID = theLibrationPt->GetParameterID("Point");
+      int librationPointID = theClonedLibPoint->GetParameterID("Point");
       
-      #if DEBUG_LIBRATIONPOINT_PANEL
+      #ifdef DEBUG_PANEL_SAVE
       MessageInterface::ShowMessage
          ("LibrationPointPanel::SaveData() libration point ID = %d\n", 
           librationPointID);
@@ -318,8 +332,10 @@ void LibrationPointPanel::SaveData()
           librationPointString.c_str());
       #endif
       
-      theLibrationPt->SetStringParameter(librationPointID, librationPointString.c_str());
+      theClonedLibPoint->SetStringParameter(librationPointID, librationPointString.c_str());
       
+      // Copy cloned object to actual object
+      theLibrationPt->Copy(theClonedLibPoint);
       EnableUpdate(false);
    }
    catch (BaseException &e)
@@ -390,10 +406,11 @@ void LibrationPointPanel::UpdateComboBoxes()
 //------------------------------------------------------------------------------
 bool LibrationPointPanel::RefreshObjects(Gmat::ObjectType type)
 {
-	if ((type == Gmat::CALCULATED_POINT) || (type == Gmat::CELESTIAL_BODY) || (type == Gmat::SOLAR_SYSTEM))
+	if ((type == Gmat::CALCULATED_POINT) || (type == Gmat::CELESTIAL_BODY) ||
+       (type == Gmat::SOLAR_SYSTEM))
    {
       // Update comboboxes with Barycenters
-	  UpdateComboBoxes();
+      UpdateComboBoxes();
       return true;
    }
    else

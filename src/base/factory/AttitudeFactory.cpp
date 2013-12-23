@@ -27,6 +27,7 @@
 #include "Spinner.hpp"
 #include "PrecessingSpinner.hpp"
 #include "NadirPointing.hpp"
+#include "CCSDSAttitude.hpp"
 #ifdef __USE_SPICE__
    #include "SpiceAttitude.hpp"
 #endif
@@ -59,6 +60,8 @@ Attitude* AttitudeFactory::CreateAttitude(const std::string &ofType,
       return new PrecessingSpinner(withName);
    else if (ofType == "NadirPointing")
       return new NadirPointing(withName);
+   else if (ofType == "CCSDS-AEM")
+      return new CCSDSAttitude(withName);
 //   //else if (ofType == "ThreeAxis")   // TBD
 //   //   return new ThreeAxis(withName);
    #ifdef __USE_SPICE__
@@ -92,6 +95,7 @@ Factory(Gmat::ATTITUDE)
       creatables.push_back("Spinner");
       creatables.push_back("PrecessingSpinner");
       creatables.push_back("NadirPointing");
+      creatables.push_back("CCSDS-AEM");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -122,6 +126,7 @@ Factory(createList,Gmat::ATTITUDE)
       creatables.push_back("Spinner");
       creatables.push_back("PrecessingSpinner");
       creatables.push_back("NadirPointing");
+      creatables.push_back("CCSDS-AEM");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -150,6 +155,7 @@ Factory(fact)
       creatables.push_back("Spinner");
       creatables.push_back("PrecessingSpinner");
       creatables.push_back("NadirPointing");
+      creatables.push_back("CCSDS-AEM");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
@@ -181,6 +187,7 @@ AttitudeFactory& AttitudeFactory::operator= (const AttitudeFactory& fact)
       creatables.push_back("Spinner");
       creatables.push_back("PrecessingSpinner");
       creatables.push_back("NadirPointing");
+      creatables.push_back("CCSDS-AEM");
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif

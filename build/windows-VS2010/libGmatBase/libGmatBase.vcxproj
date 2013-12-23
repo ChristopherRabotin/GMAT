@@ -162,6 +162,7 @@
     <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp" />
@@ -518,7 +519,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -567,6 +575,7 @@
     <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp" />
@@ -932,7 +941,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />

@@ -125,7 +125,7 @@ protected:
                              ElementWrapper *rhsWrapper);
    void ClearMathTree();
    ElementWrapper* RunMathTree();
-   void HandleScPropertyChange(ElementWrapper *lhsWrapper);
+   void HandleObjectPropertyChange(ElementWrapper *lhsWrapper);
 
    void PassToClones();
    void MatchAttribute(Integer id, GmatBase *owner, GmatBase *receiver);

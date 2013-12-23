@@ -26,6 +26,7 @@
 #include "FormationSetupPanel.hpp"
 #include "GmatAppData.hpp"
 #include "ResourceTree.hpp"
+#include "GmatColorPanel.hpp"
 #include "FormationInterface.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
@@ -55,7 +56,7 @@ END_EVENT_TABLE()
 //------------------------------
     
 //------------------------------------------------------------------------------
-// FormationSetupPanel(wxWindow *parent, const wxString &subscriberName)
+// FormationSetupPanel(wxWindow *parent, const wxString &formationName)
 //------------------------------------------------------------------------------
 /**
  * Constructs FormationSetupPanel object.
@@ -70,6 +71,9 @@ FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
    : GmatPanel(parent)
 {
    mFormationName = std::string(formationName.c_str());
+   mFormation = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
+   mClonedFormation = (FormationInterface*)(mFormation->Clone());
+   
    Create();
    Show();
 }
@@ -81,6 +85,7 @@ FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
 FormationSetupPanel::~FormationSetupPanel()
 {
    theGuiManager->UnregisterListBox("SpaceObject", mSoAvailableListBox, &mSoExcList);
+   delete mClonedFormation;
 }
 
 
@@ -106,18 +111,15 @@ void FormationSetupPanel::Create()
    #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage("FormationSetupPanel::Create() enters...\n");
    #endif
-
-   Integer bsize = 3; // border size
+   
+   Integer bsize = 2; // border size
    //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
-
+   
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
    pConfig->SetPath(wxT("/Formation"));
-
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
    //------------------------------------------------------
    // available SpaceObject list (1st column)
@@ -133,7 +135,7 @@ void FormationSetupPanel::Create()
    mSoAvailableListBox->SetToolTip(pConfig->Read(_T("AvailableSpacecraftListHint")));
    
    availableBoxSizer->Add(mSoAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   
    //------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
@@ -155,32 +157,43 @@ void FormationSetupPanel::Create()
    arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
-   // selected spacecraft list (4th column)
+   // selected spacecraft list (3rd column)
    //------------------------------------------------------
    GmatStaticBoxSizer *mSoSelectedBoxSizer = new GmatStaticBoxSizer( wxVERTICAL, this, 
       wxT("Spacecraft in "GUI_ACCEL_KEY"Formation") );
    
    mSoSelectedListBox =
-      new wxListBox(this, SEL_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
+      new wxListBox(this, SEL_LISTBOX, wxDefaultPosition, wxSize(150,200),
                     emptyList, wxLB_SINGLE);
    mSoSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedSpacecraftListHint")));
    
    mSoSelectedBoxSizer->Add(mSoSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
-   // put in the order
+   // put in the FlexGridSizer
    //------------------------------------------------------    
-   mFlexGridSizer->Add(availableBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mSoSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   wxFlexGridSizer *flexGridSizer = new wxFlexGridSizer(3, 0, 0);
+   flexGridSizer->Add(availableBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer->Add(mSoSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   //------------------------------------------------------
+   // add to page sizer
+   //------------------------------------------------------
+   GmatStaticBoxSizer *pageBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "");
+   pageBoxSizer->Add(flexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // Create color panel
+   //------------------------------------------------------    
+   GmatColorPanel *colorPanel = new GmatColorPanel(this, this, mClonedFormation);
+   
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(colorPanel, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   
    #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage("FormationSetupPanel::Create() exits...\n");
    #endif
@@ -193,12 +206,13 @@ void FormationSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::LoadData()
 {
-   FormationInterface *form = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
-   StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
-
+   //FormationInterface *mFormation = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
+   
    // Set object pointer for "Show Script"
-   mObject = form;
-
+   mObject = mFormation;
+   
+   StringArray scList = mClonedFormation->GetStringArrayParameter(mClonedFormation->GetParameterID("Add"));
+   
    for (unsigned int i=0; i<scList.size(); i++)
    {
       mSoSelectedListBox->Append(scList[i].c_str());
@@ -216,16 +230,19 @@ void FormationSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::SaveData()
 {
-   FormationInterface *form = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
-   form->SetBooleanParameter("Clear", true);
+   //FormationInterface *mFormation = (FormationInterface*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
+   mClonedFormation->SetBooleanParameter("Clear", true);
    
    int soCount = mSoSelectedListBox->GetCount();
    for (int i=0; i<soCount; i++)
    {
-      form->SetStringParameter(form->GetParameterID("Add"),
+      mClonedFormation->SetStringParameter(mClonedFormation->GetParameterID("Add"),
                                std::string(mSoSelectedListBox->GetString(i).c_str()));
    }
-
+   
+   // Copy cloned object to actual object
+   mFormation->Copy(mClonedFormation);
+   
    theGuiManager->UpdateFormation();
    GmatAppData::Instance()->GetResourceTree()->UpdateFormation();
 }

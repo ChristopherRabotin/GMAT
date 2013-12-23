@@ -23,6 +23,10 @@
 #include "ParameterSelectDialog.hpp"
 #include "SpaceObjectSelectDialog.hpp"
 #include "PropagatorSelectDialog.hpp"
+#include "GmatColorPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
+#include "GmatAppData.hpp"
+#include "MissionTree.hpp"
 #include "StringUtil.hpp"               // for SeparateBy()
 #include "MessageInterface.hpp"
 
@@ -31,6 +35,7 @@
 //#define DEBUG_PROPAGATE_PANEL_SAVE
 //#define DEBUG_PROPAGATE_PANEL_STOPCOND
 //#define DEBUG_RENAME
+//#define DEBUG_COLOR
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -52,7 +57,7 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
+PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd, wxTreeItemId nodeId)
    : GmatPanel(parent)
 {
    #ifdef DEBUG_PROPAGATE_PANEL
@@ -60,6 +65,7 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    #endif
    
    thePropCmd = (Propagate *)cmd;
+   theNodeId = nodeId;
    
    InitializeData();   
    mObjectTypeList.Add("Spacecraft");
@@ -298,8 +304,22 @@ void PropagatePanel::Create()
    stopSizer->Add(stopTolSizer, 0, wxALIGN_LEFT|wxALL, 0);
    stopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, 0);
    
+   // Get first SpaceObject color
+   std::string objName = thePropCmd->GetFirstSpaceObjectName();
+   bool overrideColor = thePropCmd->GetOverrideSegmentColor();
+   UnsignedInt segmentColor = thePropCmd->GetSegmentOrbitColor();
+   
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("PropagatePanel Loading... overrideColor = %d, segmentColor = %06X\n", overrideColor, segmentColor);
+   #endif
+   
+   // Create color panel
+   mColorPanel = new GmatColorPanel(this, this, NULL, true, overrideColor, true, true, objName, segmentColor);
+   
    pageSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
    pageSizer->Add(stopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
+   pageSizer->Add(mColorPanel, 0, wxGROW|wxALIGN_CENTER|wxALL, 0);
    
    theMiddleSizer->Add(pageSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
@@ -1446,11 +1466,35 @@ void PropagatePanel::SaveData()
          theGuiInterpreter->ValidateCommand(thePropCmd);
          
       } // if (mStopCondChanged)
+      
+      // Save new colors if changed
+      if (mColorPanel->HasColorChanged() || mColorPanel->HasOverrideColorChanged())
+      {
+         bool overrideColor = mColorPanel->GetOverrideColor();
+         UnsignedInt newOrbColor = mColorPanel->GetOrbitColor();
+         UnsignedInt newTargColor = mColorPanel->GetTargetColor();
+         #ifdef DEBUG_COLOR
+         MessageInterface::ShowMessage
+            ("PropagatePanel Saving... overrideColor=%d, newOrbColor=%06X, newTargColor=%06X\n",
+             overrideColor, newOrbColor, newTargColor);
+         #endif
+         thePropCmd->SetSegmentOrbitColor(newOrbColor);
+         thePropCmd->SetOverrideSegmentColor(overrideColor);
+         
+         // Update Propagate item text color in the MissionTree
+         (GmatAppData::Instance()->GetMissionTree())->ChangeNodeColor(theNodeId, newOrbColor);
+      }
+      #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+      MessageInterface::ShowMessage("PropagatePanel::SaveData() leaving\n");
+      #endif
    } // try
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
+      #ifdef DEBUG_PROPAGATE_PANEL_SAVE
+      MessageInterface::ShowMessage("PropagatePanel::SaveData() leaving\n");
+      #endif
       return;
    }
 }

@@ -249,6 +249,7 @@
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatPanel.cpp" />
@@ -453,6 +454,7 @@
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatPanel.hpp" />

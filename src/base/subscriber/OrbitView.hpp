@@ -122,6 +122,10 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    
+   virtual void         SetSegmentOrbitColor(GmatBase *originator,
+                                             bool overrideColor,
+                                             UnsignedInt orbitColor);
+   
 protected:
 
    void     PutRvector3Value(Rvector3 &rvec3, Integer id,

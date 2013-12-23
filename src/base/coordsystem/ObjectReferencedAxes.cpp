@@ -187,6 +187,8 @@ const ObjectReferencedAxes& ObjectReferencedAxes::operator=(
 //---------------------------------------------------------------------------
 ObjectReferencedAxes::~ObjectReferencedAxes()
 {
+   primary = NULL;
+   secondary = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -376,6 +378,22 @@ SpacePoint* ObjectReferencedAxes::GetPrimaryObject() const
 SpacePoint* ObjectReferencedAxes::GetSecondaryObject() const
 {
    return secondary;
+}
+
+//------------------------------------------------------------------------------
+// virtual std::string GetPrimaryObjectName() const
+//------------------------------------------------------------------------------
+std::string ObjectReferencedAxes::GetPrimaryObjectName() const
+{
+   return primaryName;
+}
+
+//------------------------------------------------------------------------------
+// virtual std::string GetSecondaryObjectName() const
+//------------------------------------------------------------------------------
+std::string ObjectReferencedAxes::GetSecondaryObjectName() const
+{
+   return secondaryName;
 }
 
 //------------------------------------------------------------------------------

@@ -59,7 +59,6 @@ public:
    
    virtual void SetGlObject(const std::string &plotName,
                         const StringArray &objNames,
-                        const UnsignedIntArray &objOrbitColors,
                         const std::vector<SpacePoint*> &objArray) = 0;
    
    virtual void SetGlCoordSystem(const std::string &plotName,
@@ -109,8 +108,8 @@ public:
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,
                         const RealArray &velY, const RealArray &velZ,
-                        const UnsignedIntArray &scColors, bool solving,
-                        Integer solverOption, bool updateCanvas,
+                        const ColorMap &orbitColorMap, const ColorMap &targetColorMap, 
+                        bool solving, Integer solverOption, bool updateCanvas,
                         bool drawing, bool inFunction) = 0;
    
    virtual bool TakeGlAction(const std::string &plotName,

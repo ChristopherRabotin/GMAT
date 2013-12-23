@@ -486,7 +486,7 @@ void MdiChildViewFrame::SetNumPointsToRedraw(Integer numPoints)
       mCanvas->SetNumPointsToRedraw(numPoints);
 }
 
-
+#if 0
 //------------------------------------------------------------------------------
 // void SetObjectColors(const wxStringColorMap &objectColorMap)
 //------------------------------------------------------------------------------
@@ -495,7 +495,7 @@ void MdiChildViewFrame::SetObjectColors(const wxStringColorMap &objectColorMap)
    if (mCanvas)
       mCanvas->SetObjectColors(objectColorMap);
 }
-
+#endif
 
 //------------------------------------------------------------------------------
 // void SetShowObjects(const wxStringBoolMap &showObjMap)
@@ -736,11 +736,12 @@ void MdiChildViewFrame::OnClose(wxCloseEvent &event)
 // void SetGlObject(const StringArray &objNames, ...
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetGlObject(const StringArray &objNames,
-                                    const UnsignedIntArray &objOrbitColors,
+                                    //const UnsignedIntArray &objOrbitColors,
                                     const std::vector<SpacePoint*> &objArray)
 {
    if (mCanvas)
-      mCanvas->SetGlObject(objNames, objOrbitColors, objArray);
+      //mCanvas->SetGlObject(objNames, objOrbitColors, objArray);
+      mCanvas->SetGlObject(objNames, objArray);
 }
 
 
@@ -836,8 +837,10 @@ void MdiChildViewFrame::UpdatePlot(const StringArray &scNames, const Real &time,
                                    const RealArray &posX, const RealArray &posY,
                                    const RealArray &posZ, const RealArray &velX,
                                    const RealArray &velY, const RealArray &velZ,
-                                   const UnsignedIntArray &scColors, bool solving,
-                                   Integer solverOption, bool updateCanvas,
+                                   //const UnsignedIntArray &scColors,
+                                   const ColorMap &orbitColorMap,
+                                   const ColorMap &targetColorMap,
+                                   bool solving, Integer solverOption, bool updateCanvas,
                                    bool drawing, bool inFunction)
 {
    #ifdef DEBUG_UPDATE_PLOT
@@ -849,7 +852,9 @@ void MdiChildViewFrame::UpdatePlot(const StringArray &scNames, const Real &time,
    if (mCanvas)
    {
       mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                          scColors, solving, solverOption, drawing, inFunction);
+                          //scColors, solving, solverOption, drawing, inFunction);
+                          orbitColorMap, targetColorMap,solving, solverOption,
+                          drawing, inFunction);
       
       mInFunction = inFunction;
       
