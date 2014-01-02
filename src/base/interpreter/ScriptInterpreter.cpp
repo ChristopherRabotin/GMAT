@@ -2109,8 +2109,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             {
                Gmat::ParameterType paramType = obj->GetParameterType(paramID);
                // Since string can have minus sign, check it first
-               if (paramType != Gmat::STRING_TYPE && paramType != Gmat::ENUMERATION_TYPE &&
-                   paramType != Gmat::FILENAME_TYPE || paramType == Gmat::COLOR_TYPE)
+               if ((paramType != Gmat::STRING_TYPE && paramType != Gmat::ENUMERATION_TYPE &&
+                   paramType != Gmat::FILENAME_TYPE) || paramType == Gmat::COLOR_TYPE)
                   inCommandMode = true;
             }
             else

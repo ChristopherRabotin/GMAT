@@ -1863,15 +1863,15 @@ void OrbitPlot::BuildDynamicArrays()
    }
    
    // Add non-spacecraft objects to the list
-   bool groundStationFound = false;
+   // bool groundStationFound = false;
    for (int i=0; i<mAllSpCount; i++)
    {      
       if (mAllSpArray[i])
       {
          if (!mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
          {
-            if (mAllSpArray[i]->IsOfType(Gmat::GROUND_STATION))
-               groundStationFound = true;
+            //if (mAllSpArray[i]->IsOfType(Gmat::GROUND_STATION))
+            //   groundStationFound = true;
             
             // Add to all object list
             mObjectNameArray.push_back(mAllSpNameArray[i]);                  

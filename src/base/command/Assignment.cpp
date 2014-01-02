@@ -1448,7 +1448,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    
    ElementWrapper *lhsOldWrapper = NULL;
    ElementWrapper *rhsOldWrapper = NULL;
-   ElementWrapper *rhsNewWrapper = NULL;
+   #ifdef DEBUG_WRAPPER_CODE
+      ElementWrapper *rhsNewWrapper = NULL;
+   #endif
    
    #ifdef DEBUG_WRAPPER_CODE
    ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
@@ -1567,7 +1569,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
          if (rhsWrapper != toWrapper)
          {
             rhsOldWrapper = rhsWrapper;
-            rhsNewWrapper = toWrapper;
+            #ifdef DEBUG_WRAPPER_CODE
+               rhsNewWrapper = toWrapper;
+            #endif
             rhsWrapper = toWrapper;
          }
          retval = true;
@@ -1599,7 +1603,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
                MessageInterface::ShowMessage("   now setting rhsNewWrapper to <%p>\n", toWrapper);
                #endif
                rhsOldWrapper = mathWrapperMap[withName];
-               rhsNewWrapper = toWrapper;
+               #ifdef DEBUG_WRAPPER_CODE
+                  rhsNewWrapper = toWrapper;
+               #endif
                mathWrapperMap[withName] = toWrapper;
             }
             retval = true;

@@ -494,7 +494,9 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    IntegerMap::iterator pos1 = opIndexMap.end();
    IntegerMap::iterator pos2 = opIndexMap.end();
    IntegerMap::iterator pos3 = opIndexMap.end();
-   Integer index1 = -1;
+   #if DEBUG_FIND_LOWEST_OPERATOR
+      Integer index1 = -1;
+   #endif
    Integer index2 = -1;
    std::string lastOp;
    bool opFound = false;
@@ -513,8 +515,10 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    
    if (pos1 != opIndexMap.end() || pos2 != opIndexMap.end())
    {
-      if (pos1 != opIndexMap.end())
-         index1 = pos1->second;
+      #if DEBUG_FIND_LOWEST_OPERATOR
+         if (pos1 != opIndexMap.end())
+            index1 = pos1->second;
+      #endif
       if (pos2 != opIndexMap.end())
          index2 = pos2->second;
       

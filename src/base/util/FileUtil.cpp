@@ -2261,8 +2261,8 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
    char buffer[BUFFER_SIZE];
    bool dataFound = false;
    bool alphaFound = false;
-   Real rval;
-   int colCount = 0, fileCols = 0;
+   //Real rval;
+   //int colCount = 0, fileCols = 0;
    char ch;
    StringTokenizer stk;
    std::string line;

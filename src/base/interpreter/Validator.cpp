@@ -988,8 +988,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    //-------------------------------------------------------------------
    bool isLeftValid = true;
    ElementWrapper *leftEw = NULL;
-   static bool writeWarning = true; // To write warning message per session
    
+   // not used -- see commented code below
+//   static bool writeWarning = true; // To write warning message per session
+
    try
    {         
       #if DBGLVL_WRAPPERS > 1

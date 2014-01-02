@@ -66,9 +66,9 @@ Rvector::Rvector(int size)
 Rvector::Rvector(int size, Real a1, ...)
   : ArrayTemplate<Real> (size)
 {
-    int i,a;
+    int i; //,a;
     va_list ap;
-    a = 0;
+    //a = 0;
 
     elementD[0] = a1;
     va_start(ap, a1);
@@ -105,9 +105,9 @@ Rvector::~Rvector()
 //------------------------------------------------------------------------------
 void Rvector::Set(int numElem, Real a1, ...)
 {
-   int i,a;
+   int i; //,a;
    va_list ap;
-   a = 0;
+   //a = 0;
 
    elementD[0] = a1;
    va_start(ap, a1);

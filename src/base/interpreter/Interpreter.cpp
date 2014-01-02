@@ -4266,7 +4266,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4301,7 +4301,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
             InterpreterException ex
                ("The field name \"" + lhsPropName + "\" on object \"" + lhsObjName + "\" is not permitted");
             HandleError(ex);
-            return false;
+            return NULL;
          }
       }
       
@@ -4325,7 +4325,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4344,7 +4344,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4844,13 +4844,16 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
    try
    {
       std::string fromTypeName = fromObj->GetTypeName();
-      bool continueNext = false;
+      // bool continueNext = false;
       
       // Handle if RHS is Parameter
       if (fromObj->GetType() == Gmat::PARAMETER)
       {        
-         Parameter *fromParam = (Parameter*)fromObj;
-         Gmat::ParameterType fromType = fromParam->GetReturnType();
+         #ifdef DEBUG_SET
+            // Currently only used in the debug
+            Parameter *fromParam = (Parameter*)fromObj;
+            Gmat::ParameterType fromType = fromParam->GetReturnType();
+         #endif
          Gmat::ObjectType toObjPropObjType = toObj->GetPropertyObjectType(toId);
          
          #ifdef DEBUG_SET
