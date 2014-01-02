@@ -91,6 +91,7 @@ protected:
    std::string dcType;
    /// Enumerated algorithm types ised to make the code more efficient
    Integer dcTypeId;
+
    /// Nominal data saved for the Broyden methods
 	Real *savedNominal;
 	/// Variable data saved for the Broyden methods
@@ -99,6 +100,8 @@ protected:
 	Real **savedJacobian;
 	/// Jacobian inverse data saved for the Broyden methods
 	Real **savedInverseJacobian;
+	/// Flag used to trigger skipping perts for Broyden updates
+	bool skipPerts;
 	
    // Core data members used for the targeter numerics
    /// The number of goals in the targeting problem

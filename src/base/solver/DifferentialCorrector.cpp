@@ -79,6 +79,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    savedNominal            (NULL),
    savedJacobian           (NULL),
    savedInverseJacobian    (NULL),
+   skipPerts               (false),
 
    goalCount               (0),
    goal                    (NULL),
@@ -125,6 +126,7 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    savedNominal            (NULL),
    savedJacobian           (NULL),
    savedInverseJacobian    (NULL),
+   skipPerts               (false),
 
    goalCount               (dc.goalCount),
    goal                    (NULL),
@@ -172,6 +174,7 @@ DifferentialCorrector::operator=(const DifferentialCorrector& dc)
       savedJacobian = NULL;
       savedInverseJacobian = NULL;
       savedVariable.clear();
+      skipPerts = false;
 
       goalCount        = dc.goalCount;
       derivativeMethod = dc.derivativeMethod;
@@ -597,6 +600,7 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
       {
          nominal[i] = goal[i] + 10.0 * tolerance[i];
       }
+      skipPerts = false;
    }
 
    if (action == "SetMode")
@@ -783,6 +787,7 @@ bool DifferentialCorrector::Initialize()
       inverseJacobian[i] = new Real[localVariableCount];
       savedInverseJacobian[i] = new Real[localVariableCount];
    }
+   skipPerts = false;
 
    Solver::Initialize();
 
@@ -1079,6 +1084,7 @@ void DifferentialCorrector::CalculateParameters()
          {
             CalculateJacobian();
             InvertJacobian();
+            skipPerts = true;
          }
          else
          {
@@ -1282,9 +1288,14 @@ void DifferentialCorrector::CheckCompletion()
       {
          // Set to run perts if not converged
          pertNumber = -1;
-         // Build the first perturbation
-         currentState = PERTURBING;
-         RunPerturbation();
+         if (!skipPerts)
+         {
+            // Build the first perturbation
+            currentState = PERTURBING;
+            RunPerturbation();
+         }
+         else
+            currentState = CALCULATING;
       }
       else
       {
