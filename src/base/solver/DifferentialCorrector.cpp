@@ -1087,24 +1087,43 @@ void DifferentialCorrector::CalculateParameters()
                      variable.size(), savedVariable.size());
             #endif
 
-            std::vector<Real> s, y;
+            std::vector<Real> s, y, numerator;
             // Set the size for the vectors before loading them
             s.reserve(variableCount);
             y.reserve(goalCount);
+            numerator.reserve(goalCount);
 
-            for ( Integer i = 0; i < variableCount; ++i )
-               s[i] = variable[i] - savedVariable[i];
-
-            for ( Integer j = 0; j < goalCount; ++j )
-               y[j] = -nominal[j] + savedNominal[j];
-            // F(x) = goal - nominal = 0 -> F(xk+1)-F(xk) = -nominal(k+1) + nominal(k)
+            Real denom = 0.0;
 
             for ( Integer i = 0; i < variableCount; ++i )
             {
-               for ( Integer j = 0; j < goalCount; ++j )
-                  jacobian[i][j] = savedJacobian[i][j] +
-                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
+               s[i] = variable[i] - savedVariable[i];
+               // Build the denominator
+               denom += s[i] * s[i];
             }
+
+            for ( Integer j = 0; j < goalCount; ++j )
+//               y[j] = -nominal[j] + savedNominal[j];
+               y[j] = nominal[j] - savedNominal[j];
+
+//            for ( Integer i = 0; i < goalCount; ++i )
+//            {
+//               for ( Integer j = 0; j < variableCount; ++j )
+//                  jacobian[i][j] = savedJacobian[i][j] +
+//                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
+
+            for ( Integer i = 0; i < goalCount; ++i )
+            {
+               numerator[i] = y[i];
+               for ( Integer j = 0; j < variableCount; ++j )
+                  numerator[i] += -savedJacobian[j][i]*s[j];
+            }
+
+            for (Integer i = 0; i < variableCount; ++i)
+               for (Integer j = 0; j < variableCount; ++j)
+                  jacobian[j][i] = savedJacobian[j][i] +
+                        numerator[i] * s[j] / denom;
+
             InvertJacobian();
          }
          break;
