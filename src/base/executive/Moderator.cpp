@@ -1317,14 +1317,14 @@ ObjectMap* Moderator::GetConfiguredObjectMap()
 
 //------------------------------------------------------------------------------
 // const StringArray& GetListOfObjects(Gmat::ObjectType type,
-//                                     bool excludeDefaultObjects)
+//                                     bool excludeDefaultObjects = false)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
  *
  * @param <type> object type
  * @param <excludeDefaultObjects> set this flag to true if default objects
- *           should be execluded, such as  default coordinate systems
+ *           should be execluded, such as  default coordinate systems [false]
  *
  * @return array of configured item names of the type; return empty array if none
  *  return all configured item if type is UNKNOWN_OBJECT
@@ -7250,6 +7250,10 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    // Set object manage option to configuration
    objectManageOption = 1;
    
+   // Clear SpacePoint instance count so that Spacecraft color starts from the
+   // same color for each run
+   SpacePoint::ClearInstanceCount();
+   
    // Clear command sequence before resource (loj: 2008.07.10)
    if (clearObjs)
    {
@@ -7692,7 +7696,7 @@ void Moderator::CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultBarycenter()
 {
-   #if DEBUG_INITIALIZE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
       ("Moderator checking if default barycenter should be created...\n");
@@ -7701,21 +7705,21 @@ void Moderator::CreateDefaultBarycenter()
    try
    {
       SolarSystem *ss = GetSolarSystemInUse();
-
-      // Solar System Barycenter
+      
+      // Create BuiltIn Solar System Barycenter
       Barycenter *bary = (Barycenter*) GetCalculatedPoint(GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME);
       if (bary == NULL)
       {
          bary = (Barycenter*) CreateCalculatedPoint("Barycenter", GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME, false);
 
-         #if DEBUG_INITIALIZE
+         #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
@@ -8075,6 +8079,10 @@ void Moderator::CreateDefaultMission()
    
    try
    {
+      // Clear SpacePoint instance count so that Spacecraft color starts from the
+      // same color for each run
+      SpacePoint::ClearInstanceCount();
+      
       //----------------------------------------------------
       // Create default resource
       //----------------------------------------------------

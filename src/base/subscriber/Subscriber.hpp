@@ -63,9 +63,22 @@ public:
    void                 SetManeuvering(GmatBase *maneuver, bool flag, Real epoch,
                                        const StringArray &satNames,
                                        const std::string &desc);
-   void                 SetScPropertyChanged(GmatBase *originator, Real epoch,
-                                             const std::string &satName,
+   void                 SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
+                                                     const std::string &satName,
+                                                     const std::string &desc);
+   virtual void         SetOrbitColorChanged(GmatBase *originator,
+                                             const std::string &newColor,
+                                             const std::string &objName,
                                              const std::string &desc);
+   virtual void         SetTargetColorChanged(GmatBase *originator,
+                                              const std::string &newColor,
+                                              const std::string &objName,
+                                              const std::string &desc);
+   virtual void         SetSegmentOrbitColor(GmatBase *originator,
+                                             bool overrideColor,
+                                             UnsignedInt orbitColor,
+                                             const StringArray &objNames);
+   
    Subscriber*          Next();
    bool                 Add(Subscriber *s);
    bool                 Remove(Subscriber *s, const bool del);
@@ -232,11 +245,13 @@ protected:
                                           bool maneuvering, Real epoch,
                                           const StringArray &satNames,
                                           const std::string &desc);
-   virtual void         HandleScPropertyChange(GmatBase *originator, Real epoch,
-                                               const std::string &satName,
-                                               const std::string &desc);
-
-   /// Parses string value such as "[0 127 255]" and converts to unsigned int array for color, position, size, etc.
+   virtual void         HandleSpacecraftPropertyChange(GmatBase *originator,
+                                                       Real epoch,
+                                                       const std::string &satName,
+                                                       const std::string &desc);
+   
+   /// Parses string value such as "[0 127 255]" and converts to unsigned int array
+   /// for color, position, size, etc.
    virtual void         PutUnsignedIntValue(Integer id, const std::string &sval);
 
 public:

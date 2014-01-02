@@ -57,6 +57,7 @@ public:
    virtual GmatCoordinate::ParameterUsage
                            UsesReferenceObject() const;
    virtual SpacePoint*     GetReferenceObject() const;
+   virtual std::string     GetReferenceObjectName() const;
    virtual void            SetReferenceObject(SpacePoint *reObj);
    virtual bool            UsesSpacecraft(const std::string &withName = "") const;
 

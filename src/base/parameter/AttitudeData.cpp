@@ -32,7 +32,7 @@
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
-
+#include "AttitudeConversionUtility.hpp"
 
 const std::string
 AttitudeData::VALID_OBJECT_TYPE_LIST[AttitudeDataObjectCount] =
@@ -102,8 +102,15 @@ Real AttitudeData::GetReal(Integer item)
    
    // get the basics - cosine matrix, angular velocity, euler angle sequence
    Rmatrix33        cosMat        = mSpacecraft->GetAttitude(epoch);
-   Rvector3         angVel        = mSpacecraft->GetAngularVelocity(epoch) 
-                                    * GmatMathConstants::DEG_PER_RAD;
+   // Some attitude models don't compute rates, so we only want to try to get
+   // rates if that is the data we need to return
+   Rvector3 angVel(0.0,0.0,0.0);
+   if (((item >= EULER_ANGLE_RATE_1) && (item <= EULER_ANGLE_RATE_3)) ||
+       ((item >= ANGULAR_VELOCITY_X) && (item <= ANGULAR_VELOCITY_Z)))
+   {
+      angVel        = mSpacecraft->GetAngularVelocity(epoch)
+                                 * GmatMathConstants::DEG_PER_RAD;
+   }
    UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
    Rvector3         euler;
    
@@ -123,12 +130,12 @@ Real AttitudeData::GetReal(Integer item)
    // do conversions if necessary
    if ((item >= QUAT_1) && (item <= QUAT_4))
    {
-      Rvector quat = Attitude::ToQuaternion(cosMat);
+      Rvector quat = AttitudeConversionUtility::ToQuaternion(cosMat);
       return quat[item - QUAT_1];
    }    
    if ((item >= EULER_ANGLE_1) && (item <= EULER_ANGLE_3))
    {
-      euler = Attitude::ToEulerAngles(cosMat, 
+      euler = AttitudeConversionUtility::ToEulerAngles(cosMat,
               (Integer) seq[0], 
               (Integer) seq[1], 
               (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
@@ -139,17 +146,17 @@ Real AttitudeData::GetReal(Integer item)
    // obvious method of index control.
    if ((item >= MRP_1) && (item <= MRP_3))
    {
-      Rvector  quat = Attitude::ToQuaternion(cosMat);
-      Rvector3 mrp  = Attitude::ToMRPs(quat);
+      Rvector  quat = AttitudeConversionUtility::ToQuaternion(cosMat);
+      Rvector3 mrp  = AttitudeConversionUtility::ToMRPs(quat);
       return mrp[item - MRP_1];
    }           
    if ((item >= EULER_ANGLE_RATE_1) && (item <= EULER_ANGLE_RATE_3))
    {
-      euler = Attitude::ToEulerAngles(cosMat, 
+      euler = AttitudeConversionUtility::ToEulerAngles(cosMat,
               (Integer) seq[0], 
               (Integer) seq[1], 
               (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
-      Rvector3 eulerRates = Attitude::ToEulerAngleRates(
+      Rvector3 eulerRates = AttitudeConversionUtility::ToEulerAngleRates(
                             angVel * GmatMathConstants::RAD_PER_DEG,
                             euler  * GmatMathConstants::RAD_PER_DEG,
                             (Integer) seq[0], 
@@ -270,7 +277,7 @@ std::string AttitudeData::GetString(Integer item)
    
    // Get cosine matrix which is internal representation and always gets updated
    Rmatrix33 cosMat = mSpacecraft->GetAttitude(epoch);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
+   Rvector quat = AttitudeConversionUtility::ToQuaternion(cosMat);
    
    switch (item)
    {

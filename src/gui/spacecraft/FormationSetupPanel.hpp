@@ -25,6 +25,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
+#include "FormationInterface.hpp"
 
 class FormationSetupPanel: public GmatPanel
 {
@@ -35,6 +36,9 @@ public:
 protected:
    
    std::string mFormationName;
+   FormationInterface *mFormation;
+   FormationInterface *mClonedFormation;
+   
    wxArrayString mSoExcList;
    
    wxListBox *mSoAvailableListBox;

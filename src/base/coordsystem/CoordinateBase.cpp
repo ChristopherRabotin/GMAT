@@ -127,7 +127,8 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    if (&coordBase == this)
       return *this;
    GmatBase::operator=(coordBase);
-   
+
+   MessageInterface::ShowMessage("***> CoordinateBase::operator=() this=<%p>'%s'\n", this, GetName().c_str());
    origin        = coordBase.origin;
    originName    = coordBase.originName;
    j2000Body     = coordBase.j2000Body;
@@ -163,9 +164,6 @@ CoordinateBase::~CoordinateBase()
 //------------------------------------------------------------------------------
 void CoordinateBase::SetSolarSystem(SolarSystem *ss)
 {
-   if (ss == NULL)
-      return;
-   
    #ifdef DEBUG_SET_SS
    MessageInterface::ShowMessage
       ("CoordinateBase::SetSolarSystem() entered, this='%s', solar=<%p>, ss=<%p>, "
@@ -174,6 +172,9 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
        origin, origin ? origin->GetName().c_str() : "NULL", j2000Body,
        j2000Body ? j2000Body->GetName().c_str() : "NULL");
    #endif
+   
+   if (ss == NULL)
+      return;
    
    if (solar != ss)
    {
@@ -204,28 +205,10 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
       // set J2000Body of origin
       if (origin != NULL)
           origin->SetJ2000Body(solar->GetBody(origin->GetJ2000BodyName()));
-
-      if (UsesPrimary())
-      {
-         SpacePoint* primaryObject = GetPrimaryObject();
-         if (primaryObject != NULL)
-             primaryObject->SetJ2000Body(solar->GetBody(primaryObject->GetJ2000BodyName()));
-      }
-
-      if (UsesSecondary())
-      {
-         SpacePoint* secondaryObject = GetSecondaryObject();
-         if (secondaryObject != NULL)
-            secondaryObject->SetJ2000Body(solar->GetBody(secondaryObject->GetJ2000BodyName()));
-      }
-
-      if (UsesReferenceObject())
-      {
-         SpacePoint* refObject = GetReferenceObject();
-         if (refObject != NULL)
-            refObject->SetJ2000Body(solar->GetBody(refObject->GetJ2000BodyName()));
-      }
-
+      
+      // Set J2000Body for other reference objects
+      SetJ2000BodyForOtherRefObjects();
+      
       #ifdef DEBUG_SET_SS
       MessageInterface::ShowMessage
          ("CoordinateBase::SetSolarSystem() leaving, got new SolarSystem <%p>, "
@@ -810,21 +793,22 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
 bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
-   if (obj == NULL)
-      return false;
-
    #ifdef DEBUG_SET_REF
    MessageInterface::ShowMessage
-      ("CoordinateBase::SetRefObject() <%s> of type %s, obj=%p, name=%s\n", GetName().c_str(),
-       GetTypeName().c_str(), obj, name.c_str());
+      ("CoordinateBase::SetRefObject() <%s> of type %s, obj=<%p>'%s', name=%s\n",
+       GetName().c_str(), GetTypeName().c_str(), obj, obj ? obj->GetName().c_str() : "NULL",
+       name.c_str());
    MessageInterface::ShowMessage("   needs celestial body origin?   %s\n",
          (RequiresCelestialBodyOrigin()? "true" : "false"));
    #endif
    
+   if (obj == NULL)
+      return false;
+   
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       SpacePoint *sp = (SpacePoint*) obj;
-
+      
       if (name == originName)
       {
          // Origin may have to be a celestial body
@@ -835,8 +819,18 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            name.c_str(), "Origin", "Celestial Body");
             throw cse;
          }
+         #ifdef DEBUG_SET_REF
+         MessageInterface::ShowMessage
+            ("   Setting origin <%p>'%s' to <%p>'%s'\n", origin,
+             origin ? origin->GetName().c_str() : "NULL", sp, sp->GetName().c_str());
+         #endif
          origin = sp;
       }
+
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage
+         ("   origin = <%p>'%s'\n", origin, origin ? origin->GetName().c_str() : "NULL");
+      #endif
       
       // J2000Body must be a celestial body
       if (name == j2000BodyName)
@@ -848,47 +842,56 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            name.c_str(), "J2000Body", "Celestial Body");
             throw cse;
          }
+         #ifdef DEBUG_SET_REF
+         MessageInterface::ShowMessage
+            ("   Setting j2000Body <%p>'%s' to <%p>'%s'\n", j2000Body,
+             j2000Body ? j2000Body->GetName().c_str() : "NULL", sp, sp->GetName().c_str());
+         #endif
          j2000Body = sp;
       }
       
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage
+         ("   j2000Body = <%p>'%s'\n", j2000Body, j2000Body ? j2000Body->GetName().c_str() : "NULL");
+      #endif
+      
+      if (j2000Body == NULL)
+         return false;
+      
       if (origin != NULL)
+      {
          if (name == origin->GetJ2000BodyName())
+         {
+            #ifdef DEBUG_SET_REF
+            MessageInterface::ShowMessage
+               ("   Setting J2000Body of origin <%p>'%s' to <%p>'%s'\n", origin, origin->GetName().c_str(),
+                sp, sp->GetName().c_str());
+            #endif
             origin->SetJ2000Body(sp);
-
-      if (UsesPrimary())
-      {
-         SpacePoint* primaryObject = GetPrimaryObject();
-         if (primaryObject != NULL)
-         {
-            if (name == primaryObject->GetJ2000BodyName())
-               primaryObject->SetJ2000Body(sp);
          }
       }
-
-      if (UsesSecondary())
-      {
-         SpacePoint* secondaryObject = GetSecondaryObject();
-         if (secondaryObject != NULL)
-         {
-            if (name == secondaryObject->GetJ2000BodyName())
-               secondaryObject->SetJ2000Body(sp);
-         }
-      }
-
-      if (UsesReferenceObject())
-      {
-         SpacePoint* refObject = GetReferenceObject();
-         if (refObject != NULL)
-         {
-            if (name == refObject->GetJ2000BodyName())
-               refObject->SetJ2000Body(sp);
-         }
-      }
-
+      
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage("   solar = <%p>\n", solar);
+      #endif
+      
+      if (solar == NULL)
+         return false;
+      
+      // Set J2000Body for other reference objects
+      SetJ2000BodyForOtherRefObjects();
+      
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage("CoordinateBase::SetRefObject() returning true\n");
+      #endif
       return true;
    }
    
    // Not handled here -- invoke the next higher SetRefObject call
+   #ifdef DEBUG_SET_REF
+   MessageInterface::ShowMessage
+      ("CoordinateBase::SetRefObject() returning GmatBase::SetRefObject()\n");
+   #endif
    return GmatBase::SetRefObject(obj, type, name);
 }
 
@@ -922,5 +925,112 @@ bool CoordinateBase::RenameRefObject(const Gmat::ObjectType type,
       originName = newName;
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetJ2000BodyForOtherRefObjects()
+//------------------------------------------------------------------------------
+void CoordinateBase::SetJ2000BodyForOtherRefObjects()
+{
+   if (UsesPrimary())
+   {
+      //SpacePoint* primaryObject = GetPrimaryObject();
+      std::string primaryName = GetPrimaryObjectName();
+      SpacePoint* primaryObject = solar->GetBody(primaryName);
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage
+         ("   primaryName = '%s', primaryObject = <%p>'%s'\n", primaryName.c_str(),
+          primaryObject, primaryObject ? primaryObject->GetName().c_str() : "NULL");
+      #endif
+      if (primaryObject != NULL)
+      {
+         std::string j2000BodyName = primaryObject->GetJ2000BodyName();
+         SpacePoint *j2000Body = solar->GetBody(j2000BodyName);
+         if (j2000Body != NULL)
+         {
+            #ifdef SET_REF_OBJ
+            MessageInterface::ShowMessage
+               ("   Setting J2000Body of primaryObject <%p>'%s' to <%p>'%s'\n", primaryObject,
+                primaryObject->GetName().c_str(), j2000Body, j2000Body->GetName().c_str());
+            #endif
+            primaryObject->SetJ2000Body(j2000Body);
+         }
+      }
+   }
+   else
+   {
+      #ifdef SET_REF_OBJ
+      MessageInterface::ShowMessage("   Not using primary object\n");
+      #endif
+   }
+   
+   if (UsesSecondary())
+   {
+      //SpacePoint* secondaryObject = GetSecondaryObject();
+      std::string secondaryName = GetSecondaryObjectName();
+      SpacePoint* secondaryObject = solar->GetBody(secondaryName);
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage
+         ("   secondaryName = '%s', secondaryObject = <%p>'%s'\n", secondaryName.c_str(),
+          secondaryObject, secondaryObject ? secondaryObject->GetName().c_str() : "NULL");
+      #endif
+      if (secondaryObject != NULL)
+      {
+         std::string j2000BodyName = secondaryObject->GetJ2000BodyName();
+         SpacePoint *j2000Body = solar->GetBody(j2000BodyName);
+         if (j2000Body != NULL)
+         {
+            #ifdef DEBUG_SET_REF
+            MessageInterface::ShowMessage
+               ("   Setting J2000Body of secondaryObject <%p>'%s' to <%p>'%s'\n", secondaryObject,
+                secondaryObject->GetName().c_str(), j2000Body, j2000Body->GetName().c_str());
+            #endif
+            secondaryObject->SetJ2000Body(j2000Body);
+         }
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage("   Not using secondary object\n");
+      #endif
+   }
+   
+   if (UsesReferenceObject())
+   {
+      //SpacePoint* refObject = GetReferenceObject();
+      std::string refObjName = GetReferenceObjectName();
+      SpacePoint* refObject = solar->GetBody(refObjName);
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage
+         ("   refObjName = '%s', refObject = <%p>'%s'\n", refObjName.c_str(), refObject,
+          refObject ? refObject->GetName().c_str() : "NULL");
+      #endif
+      if (refObject != NULL)
+      {
+         std::string j2000BodyName = refObject->GetJ2000BodyName();
+         SpacePoint *j2000Body = solar->GetBody(j2000BodyName);
+         if (j2000Body != NULL)
+         {
+            #ifdef DEBUG_SET_REF
+            MessageInterface::ShowMessage
+               ("   Setting J2000Body of refObject <%p>'%s' to <%p>'%s'\n", refObject,
+                refObject->GetName().c_str(), j2000Body, j2000Body->GetName().c_str());
+            #endif
+            refObject->SetJ2000Body(j2000Body);
+         }
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_SET_REF
+      MessageInterface::ShowMessage("   Not using reference object\n");
+      #endif
+   }
+   
+   #ifdef DEBUG_SET_REF
+   MessageInterface::ShowMessage("CoordinateBase::SetRefObject() leaving\n");
+   #endif
 }
 

@@ -71,6 +71,8 @@
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"         // for GetNextCommand()
 #include "StringUtil.hpp"          // for GmatStringUtil::
+#include "Propagate.hpp"           // for GetSegmentOrbitColor()
+#include "RgbColor.hpp"
 
 // Should we sort the command list?
 #define __SORT_COMMAND_LIST__
@@ -158,7 +160,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(MT_RENAME, MissionTree::OnRename)
    EVT_MENU(MT_DELETE, MissionTree::OnDelete)
-   
+
    EVT_MENU(MT_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(MT_SHOW_SCRIPT, MissionTree::OnShowScript)
    EVT_MENU(MT_SHOW_MISSION_SEQUENCE, MissionTree::OnShowMissionSequence)
@@ -269,6 +271,14 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    
    InitializeCounter();
    AddIcons();
+
+   // shortcut keys
+   wxAcceleratorEntry entries[2];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_NUMPAD_DELETE, MT_DELETE);
+   entries[1].Set(wxACCEL_NORMAL, WXK_F2, MT_RENAME);
+   wxAcceleratorTable accel(2, entries);
+   this->SetAcceleratorTable(accel);
+
    
    // Now this is called from GmatNotebook after MissionTreeToolBar is created
    //AddDefaultMission();
@@ -446,6 +456,32 @@ void MissionTree::ChangeNodeLabel(const wxString &oldLabel)
       #ifdef DEBUG_CHANGE_NODE_LABEL
       MessageInterface::ShowMessage("===> <%s> not found\n", oldLabel.c_str());
       #endif
+   }
+   #ifdef DEBUG_CHANGE_NODE_LABEL
+   MessageInterface::ShowMessage("MissionTree::ChangeNodeLabel() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ChangeNodeColor(const wxTreeItemId &nodeId, UnsignedInt intColor)
+//------------------------------------------------------------------------------
+void MissionTree::ChangeNodeColor(const wxTreeItemId &nodeId, UnsignedInt intColor)
+{
+   #ifdef DEBUG_NODE_COLOR
+   MessageInterface::ShowMessage
+      ("MissionTree::ChangeNodeColor() entered, nodeId=<%p>, intColor=%06X\n",
+       &nodeId, intColor);
+   #endif
+   
+   if (nodeId.IsOk())
+   {
+      RgbColor rgb(intColor);
+      wxColour textColor(rgb.Red(), rgb.Green(), rgb.Blue());
+      //SetItemTextColour(nodeId, textColor);
+      SetItemBackgroundColour(nodeId, textColor);
+      Refresh();
+      Update();
    }
 }
 
@@ -893,21 +929,21 @@ void MissionTree::ShowEllipsisInPreviousNode(wxTreeItemId parent, wxTreeItemId n
 wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
                                         Integer level, bool &isLastItemHidden)
 {
-   wxString typeName = cmd->GetTypeName().c_str();
+   wxString cmdTypeName = cmd->GetTypeName().c_str();
    wxString cmdName = cmd->GetName().c_str();
    wxTreeItemId node;
    
    #if DEBUG_BUILD_TREE_ITEM
    MessageInterface::ShowMessage
       ("\nMissionTree::BuildTreeItem() entered, parent='%s', cmd=<%s>'%s', level=%d\n",
-       GetItemText(parent).c_str(), typeName.c_str(), cmdName.c_str(), level);
+       GetItemText(parent).c_str(), cmdTypeName.c_str(), cmdName.c_str(), level);
    MessageInterface::ShowMessage
       ("   inScriptEvent=%d, mViewAll=%d, mUsingViewLevel=%d, mViewLevel=%d\n",
        inScriptEvent, mViewAll, mUsingViewLevel, mViewLevel);
    #endif
    
-   // if typeName not found in the view list and not showing all
-   if (mViewCommands.Index(typeName) == wxNOT_FOUND && !mViewAll && !mUsingViewLevel)
+   // if cmdTypeName not found in the view list and not showing all
+   if (mViewCommands.Index(cmdTypeName) == wxNOT_FOUND && !mViewAll && !mUsingViewLevel)
    {
       if (cmd->GetTypeName() == "BeginScript")
          mScriptEventCount++;
@@ -926,7 +962,7 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
       
       // Always show EndBranch command
       // Fix constant, was "EndBranch"
-	  // (TGG: 2012.07.17 for bug GMT-2901)
+      // (TGG: 2012.07.17 for bug GMT-2901)
       if (!cmd->IsOfType("BranchEnd") && !viewCmdFoundInBranch)
       {
          isLastItemHidden = true;
@@ -941,10 +977,13 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
    
    #if DEBUG_BUILD_TREE_ITEM
    MessageInterface::ShowMessage
-      ("   Creating command node for <%s>'%s'\n", typeName.c_str(), cmdName.c_str());
+      ("   Creating command node for <%s>'%s'\n", cmdTypeName.c_str(), cmdName.c_str());
    #endif
    
    node = UpdateCommandTree(parent, cmd, level);
+   
+   // Change command item text color (LOJ: 2013.12.11)
+   ChangeCommandNodeColor(cmd, node);
    
    // If it is not a branch end, then show ellipsis
    if (isLastItemHidden && !cmd->IsOfType("BranchEnd"))
@@ -1785,7 +1824,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 	wxString parentName = GetItemText(parentId);
 	wxString currItemName = GetItemText(currId);
    wxString currTypeName = currCmd->GetTypeName().c_str();
-   wxString cmdTypeName = cmd->GetTypeName().c_str();   
+   wxString cmdTypeName = cmd->GetTypeName().c_str();
    wxString prevTypeName = prevCmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
    wxTreeItemId node;
@@ -1911,6 +1950,13 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          ("*** ERROR *** Command:'%s' not appended or created\n",
           cmd->GetTypeName().c_str());
    }
+   
+   // Change command item text color (LOJ: 2013.12.11)
+   ChangeCommandNodeColor(cmd, node);
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage("MissionTree::InsertCommand() leaving\n");
+   #endif
    
    return node;
 }
@@ -2881,6 +2927,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
    // get some info about this item
    wxTreeItemId currId = event.GetItem();
+   
    OpenItem(currId);
 }
 
@@ -2896,11 +2943,15 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnDoubleClick(wxMouseEvent &event)
 {
-   //MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
+   #ifdef DEBUG_DOUBLE_CLICK
+   MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
+   #endif
+   
    //wxPoint position = event.GetPosition();
    //MessageInterface::ShowMessage("Event position is %d %d\n", position.x, position.y );
    
    wxTreeItemId currId = GetSelection();
+   mLastDoubleClickItemId = currId;
    MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(currId);
    MissionTreeItemData *parent = (MissionTreeItemData *)GetItemData(GetItemParent(currId));
    
@@ -2918,8 +2969,12 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
       item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    // Show panel here. because OnItemActivated() always collapse the node.
+   item->SetNodeId(mLastDoubleClickItemId);
    theMainFrame->CreateChild(item);
    
+   #ifdef DEBUG_DOUBLE_CLICK
+   MessageInterface::ShowMessage("MissionTree::OnDoubleClick() leaving\n");
+   #endif
    //CheckClickIn(position);
 }
 
@@ -3132,8 +3187,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       if (itemType < GmatTree::BEGIN_NO_PANEL || itemType == GmatTree::STOP)
       {
          menu.AppendSeparator();
-         menu.Append(MT_RENAME, wxT("Rename"));
-         menu.Append(MT_DELETE, wxT("Delete"));
+         menu.Append(MT_RENAME, wxT("Rename\tF2"));
+         menu.Append(MT_DELETE, wxT("Delete\tDEL"));
       }
       
       menu.AppendSeparator();
@@ -4121,7 +4176,7 @@ void MissionTree::OpenItem(wxTreeItemId currId)
    
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
-      ("MissionTree::OnItemActivated() item='%s' parent='%s'\n",
+      ("MissionTree::OpenItem() item='%s' parent='%s'\n",
        item->GetTitle().c_str(), parent->GetTitle().c_str());
    #endif
    
@@ -4905,6 +4960,32 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
    return false;
 }
 
+//------------------------------------------------------------------------------
+// void ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+void MissionTree::ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
+{
+   std::string cmdTypeName = cmd->GetTypeName();
+   
+   if (cmdTypeName == "Propagate")
+   {
+      Propagate *propCmd = (Propagate*)cmd;
+      if (propCmd->GetOverrideSegmentColor() == true)
+      {
+         UnsignedInt intColor = propCmd->GetSegmentOrbitColor();
+         #ifdef DEBUG_COLOR
+         MessageInterface::ShowMessage
+            ("ChangeCommandNodeColor() Setting propagation color to %06X\n", intColor);
+         #endif
+         RgbColor rgb(intColor);
+         wxColour propColor(rgb.Red(), rgb.Green(), rgb.Blue());
+         //SetItemTextColour(itemId, propColor);
+         SetItemBackgroundColour(itemId, propColor);
+         Refresh();
+         Update();
+      }
+   }
+}
 
 // For Debug
 //------------------------------------------------------------------------------

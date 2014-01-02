@@ -1001,7 +1001,7 @@ bool Publisher::GetManeuvering()
 
 
 //------------------------------------------------------------------------------
-// void SetScPropertyChanged(GmatBase *originator, Real epoch,
+// void SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
 //                           const std::string &satName, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
@@ -1013,18 +1013,92 @@ bool Publisher::GetManeuvering()
  * @param desc  Description of property change
  */
 //------------------------------------------------------------------------------
-void Publisher::SetScPropertyChanged(GmatBase *originator, Real epoch,
-                                     const std::string &satName,
+void Publisher::SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
+                                             const std::string &satName,
+                                             const std::string &desc)
+{
+   std::list<Subscriber*>::iterator current = subscriberList.begin();
+   while (current != subscriberList.end())
+   {
+      (*current)->SetSpacecraftPropertyChanged(originator, epoch, satName, desc);
+      current++;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetOrbitColorChanged(GmatBase *originator, const std::string &newColor, ...)
+//------------------------------------------------------------------------------
+/**
+ * Sets object orbit color change so that subscribers can handle appropriately.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param newColor  New color to be applied to the object
+ * @param objName  Name of the object
+ * @param desc  Description of property change
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetOrbitColorChanged(GmatBase *originator,
+                                     const std::string &newColor,
+                                     const std::string &objName,
                                      const std::string &desc)
 {
    std::list<Subscriber*>::iterator current = subscriberList.begin();
    while (current != subscriberList.end())
    {
-      (*current)->SetScPropertyChanged(originator, epoch, satName, desc);
+      (*current)->SetOrbitColorChanged(originator, newColor, objName, desc);
       current++;
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void SetTargetColorChanged(GmatBase *originator, const std::string &newColor, ...)
+//------------------------------------------------------------------------------
+/**
+ * Sets object target color change so that subscribers can handle appropriately.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param newColor  New color to be applied to the object
+ * @param objName  Name of the object
+ * @param desc  Description of property change
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetTargetColorChanged(GmatBase *originator,
+                                      const std::string &newColor,
+                                      const std::string &objName,
+                                      const std::string &desc)
+{
+   std::list<Subscriber*>::iterator current = subscriberList.begin();
+   while (current != subscriberList.end())
+   {
+      (*current)->SetTargetColorChanged(originator, newColor, objName, desc);
+      current++;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+//                           UnsignedInt orbitColor)
+//------------------------------------------------------------------------------
+/**
+ * Sets propagation segment orbit color so that subscribers can handle appropriately.
+ * 
+ * @param originator  The Propagate command pointer who is setting
+ * @param overrideColor  The flag indicating whether or not to override orbit color
+ * @param orbitColor  New orbit color to be applied to the space object
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+                                     UnsignedInt orbitColor, const StringArray &objNames)
+{
+   std::list<Subscriber*>::iterator current = subscriberList.begin();
+   while (current != subscriberList.end())
+   {
+      (*current)->SetSegmentOrbitColor(originator, overrideColor, orbitColor, objNames);
+      current++;
+   }
+}
 
 //------------------------------------------------------------------------------
 // void UpdateProviderId(Integer newId)

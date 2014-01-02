@@ -145,10 +145,10 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    #endif
    
    // add run tools
-   toolBar->AddTool(TOOL_RUN, _T("Run"), *bitmaps[8], _T("Run"));
+   toolBar->AddTool(TOOL_RUN, _T("Run"), *bitmaps[8], _T("Run (F5)"));
    toolBar->AddTool(TOOL_PAUSE, _T("Pause"), *bitmaps[9], _T("Pause"));
    toolBar->AddTool(TOOL_STOP, _T("Stop"), *bitmaps[10], _T("Stop"));
-   toolBar->AddTool(TOOL_SCREENSHOT, _T("Screenshot"), *bitmaps[16], _T("Screenshot"));
+   toolBar->AddTool(TOOL_SCREENSHOT, _T("Screenshot"), *bitmaps[16], _T("Screenshot (F10)"));
    toolBar->AddSeparator();
    
    #ifdef DEBUG_TOOLBAR
@@ -248,9 +248,9 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
    #endif
    
    toolBar->AddTool(TOOL_ANIMATION_PLAY, _T("AnimationPlay"), *bitmaps[0],
-                    _T("Start Animation"), wxITEM_CHECK);
+                    _T("Start Animation (F9)"), wxITEM_CHECK);
    toolBar->AddTool(TOOL_ANIMATION_STOP, _T("AnimationStop"), *bitmaps[1],
-                    _T("Stop Animation"));
+                    _T("Stop Animation (Shift+F9)"));
    toolBar->AddTool(TOOL_ANIMATION_FAST, _T("AnimationFast"), *bitmaps[2],
                     _T("Faster Animation"));
    toolBar->AddTool(TOOL_ANIMATION_SLOW, _T("AnimationSlow"), *bitmaps[3],

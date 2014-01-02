@@ -462,7 +462,8 @@ std::string ObjectPropertyWrapper::EvaluateString() const
 {
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE ||
-       propType == Gmat::ENUMERATION_TYPE || propType == Gmat::FILENAME_TYPE)
+       propType == Gmat::ENUMERATION_TYPE || propType == Gmat::ENUMERATION_TYPE ||
+       propType == Gmat::FILENAME_TYPE)
       return object->GetStringParameter(propID);
    else
       throw GmatBaseException
@@ -486,6 +487,7 @@ bool ObjectPropertyWrapper::SetString(const std::string &toValue)
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE ||
        propType == Gmat::ENUMERATION_TYPE ||
+       propType == Gmat::COLOR_TYPE ||
        propType == Gmat::FILENAME_TYPE ||
        propType == Gmat::STRINGARRAY_TYPE ||
        propType == Gmat::OBJECT_TYPE) // Added OBJECT_TYPE to handle "DefaultFM.Drag = None;"
@@ -647,6 +649,20 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
 const Integer ObjectPropertyWrapper::GetPropertyId()
 {
    return propID;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetPropertyNames()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the object's property names
+ *
+ * @return The property names
+ */
+//------------------------------------------------------------------------------
+const StringArray& ObjectPropertyWrapper::GetPropertyNames()
+{
+   return propIDNames;
 }
 
 

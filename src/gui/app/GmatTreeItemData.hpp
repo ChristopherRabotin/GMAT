@@ -391,7 +391,8 @@ public:
    void SetClonable(bool clonable);
    
    virtual GmatCommand* GetCommand();
-
+   virtual wxTreeItemId GetNodeId();
+   
 protected:
    wxString mItemTitle;
    wxString mItemName;

@@ -24,14 +24,14 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "LoadPOV.hpp"
+#include "GmatStaticBoxSizer.hpp"
+#include "GmatColorPanel.hpp"
+#include "RgbColor.hpp"             // for RgbColor
+#include <wx/clrpicker.h>           // for wxColorPickerCtrl
 
-//#define DEBUG_ORBIT_PANEL
-//#define DEBUG_ORBIT_PANEL_LOAD
-//#define DEBUG_ORBIT_PANEL_CONVERT
-//#define DEBUG_ORBIT_PANEL_COMBOBOX
-//#define DEBUG_ORBIT_PANEL_STATE_TYPE
-//#define DEBUG_ORBIT_PANEL_SAVE
-//#define DEBUG_ORBIT_PANEL_CHECK_RANGE
+//#define DEBUG_PANEL_CREATE
+//#define DEBUG_PANEL_LOAD
+//#define DEBUG_PANEL_SAVE
 
 //------------------------------
 // event tables for wxWindows
@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(VisualModelPanel, wxPanel)
    EVT_SLIDER(ID_ROT_SLIDER, VisualModelPanel::OnSlide)
    EVT_SLIDER(ID_TRAN_SLIDER, VisualModelPanel::OnSlide)
    EVT_SLIDER(ID_SCALE_SLIDER, VisualModelPanel::OnSlide)
+   EVT_COLOURPICKER_CHANGED(ID_COLOR_CTRL, VisualModelPanel::OnColorPickerChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -78,11 +79,12 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
    theGuiManager = GuiItemManager::GetInstance();
    currentSpacecraft = spacecraft;
    theSolarSystem = solarsystem;
-
+   
    FileManager *fm = FileManager::Instance();
    modelPath = wxT(fm->GetPathname("MODEL_PATH").c_str());
    
    Create();
+   LoadData();
 }
 
 
@@ -119,19 +121,27 @@ bool VisualModelPanel::CanvasOn(bool onOrOff)
 //------------------------------------------------------------------------------
 void VisualModelPanel::Create()
 {
-   #ifdef DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage("In VisualModelPanel::Create() \n");
+   #ifdef DEBUG_PANEL_CREATE
+      MessageInterface::ShowMessage("VisualModelPanel::Create() entered\n");
    #endif
-
+   
    Integer bsize = 2.0; // border size
    wxArrayString emptyList;
-
+   
+   //-----------------------------------------------------------------
+   // Platform dependent button size
+   //-----------------------------------------------------------------
+   #ifdef __WXMAC__
+   int buttonWidth = 40;
+   #else
+   int buttonWidth = 25;
+   #endif
+   
    // Creates the sizer for the overall panel
    wxBoxSizer *visSizer = new wxBoxSizer(wxHORIZONTAL);
 
    // Sizer for the left side, which has all the sliders
-   wxBoxSizer *leftSizer =
-      new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
 
    // A box containing the file loader
    wxStaticBox *filenameBox =
@@ -367,11 +377,39 @@ void VisualModelPanel::Create()
    rightSizer->Add(canvasPanel, 0, wxEXPAND | wxALIGN_CENTER, bsize);
    rightSizer->Add(showEarthButton, 0, wxALL | wxALIGN_CENTER, bsize);
    canvasPanel->SetSizer(canvasSizer);
-
+   
    // Add the left and right halves together
    visSizer->Add(leftSizer, 1, wxGROW | wxALIGN_CENTER, bsize);
    visSizer->Add(rightSizer, 1, wxGROW | wxALIGN_CENTER, bsize);
+   GmatStaticBoxSizer *modelSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Model");
+   modelSizer->Add(visSizer, 0, wxALIGN_CENTER, 0);
+   
+   // Create color panel
+   GmatColorPanel *colorPanel = new GmatColorPanel(this, theScPanel, currentSpacecraft);
+   
+   // Sizer for the page
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   pageSizer->Add(modelSizer, 0, wxGROW | wxALIGN_CENTER, bsize);
+   pageSizer->Add(colorPanel, 0, wxGROW | wxALIGN_CENTER, bsize);
+      
+   // Set the sizer to the overall sizer
+   this->SetAutoLayout(true);  
+   this->SetSizer(pageSizer);
+   
+   #ifdef DEBUG_PANEL_CREATE
+      MessageInterface::ShowMessage("VisualModelPanel::Create() leaving\n");
+   #endif
+}
 
+//------------------------------------------------------------------------------
+// virtual void LoadData()
+//------------------------------------------------------------------------------
+void VisualModelPanel::LoadData()
+{
+   #ifdef DEBUG_PANEL_LOAD
+   MessageInterface::ShowMessage("VisualModelPanel::LoadData() entered.\n");
+   #endif
+   
    InitializeCanvas();
 	if (currentSpacecraft->modelFile == "")
 	{
@@ -380,9 +418,12 @@ void VisualModelPanel::Create()
 	}
 	else
 		interfaceEnabled = true;
-   // Set the sizer to the overall sizer
-   this->SetSizer( visSizer );
+   
+   #ifdef DEBUG_PANEL_LOAD
+   MessageInterface::ShowMessage("VisualModelPanel::LoadData() exiting.\n");
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // void ToggleInterface(bool enable)
@@ -636,6 +677,38 @@ void VisualModelPanel::OnTextCtrlEnter(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
+// void OnColorPickerChange(wxColourPickerEvent& event)
+//------------------------------------------------------------------------------
+void VisualModelPanel::OnColorPickerChange(wxColourPickerEvent& event)
+{
+   #ifdef DEBUG_COLOR_CHANGE
+   MessageInterface::ShowMessage("OnColorPickerChange() entered\n");
+   #endif
+   
+   if (event.GetEventObject() == mOrbitColorCtrl)
+   {
+      wxColour wxcolor = mOrbitColorCtrl->GetColour();
+      RgbColor color = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
+      std::string colorStr = RgbColor::ToRgbString(color.GetIntColor());
+      currentSpacecraft->SetStringParameter(currentSpacecraft->GetParameterID("OrbitColor"), colorStr);
+   }
+   else if (event.GetEventObject() == mTargetColorCtrl)
+   {
+      wxColour wxcolor = mTargetColorCtrl->GetColour();
+      RgbColor color = RgbColor(wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
+      std::string colorStr = RgbColor::ToRgbString(color.GetIntColor());
+      currentSpacecraft->SetStringParameter(currentSpacecraft->GetParameterID("TargetColor"), colorStr);
+   }
+   
+	dataChanged = true;
+	theScPanel->EnableUpdate(true);
+   
+   #ifdef DEBUG_COLOR_CHANGE
+   MessageInterface::ShowMessage("OnColorPickerChange() leaving\n");
+   #endif
+}
+
+//------------------------------------------------------------------------------
 // void UpdateTextCtrl(int id)
 //------------------------------------------------------------------------------
 /**
@@ -842,7 +915,7 @@ void VisualModelPanel::SaveData()
 {
    canClose    = true;
    
-   #ifdef DEBUG_SAVE
+   #ifdef DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage
       ("VisualModelPanel::SaveData() entered, mTextChanged=%d, dataChanged=%d, canClose=%d\n",
        mTextChanged, dataChanged, canClose);
@@ -875,7 +948,7 @@ void VisualModelPanel::SaveData()
    if (canClose)
       dataChanged = false;
    
-   #ifdef DEBUG_SAVE
+   #ifdef DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage
       ("VisualModelPanel::SaveData() leaving, mTextChanged=%d, dataChanged=%d, canClose=%d\n",
        mTextChanged, dataChanged, canClose);

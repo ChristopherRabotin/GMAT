@@ -49,7 +49,7 @@ public:
    
 private:    
 
-   GmatStaticBoxSizer *boxSizer3;
+   GmatStaticBoxSizer *rightSizer;
 
    wxFlexGridSizer    *flexGridSizer2;
 
@@ -60,6 +60,7 @@ private:
    wxBoxSizer   *precessingSpinnerSizer2; //LOJ: Added
    wxBoxSizer   *nadirPointingSizer;
    wxBoxSizer   *nadirPointingSizer2;
+   wxBoxSizer   *ccsdsAttitudeSizer;
    
    wxStaticText *config1StaticText;
    wxStaticText *config2StaticText;
@@ -90,11 +91,11 @@ private:
    wxStaticText *spinRateLabel;
    // nadir-pointing
    wxStaticText *attRefBodyLabel;
-   wxStaticText *modeOfConstraintLabel;
-   wxStaticText *referenceVectorLabel;
-   wxStaticText *constraintVectorLabel;
+   wxStaticText *constraintTypeLabel;
    wxStaticText *bodyAlignVectorLabel;
    wxStaticText *bodyConstraintVectorLabel;
+   // CCSDS attitude
+   wxStaticText *aemFileLabel;
 
    wxTextCtrl   *st1TextCtrl;
    wxTextCtrl   *st2TextCtrl;
@@ -132,7 +133,10 @@ private:
    wxComboBox   *stateTypeComboBox;
    wxComboBox   *stateRateTypeComboBox;
    wxComboBox   *referenceBodyComboBox;
-   wxComboBox   *modeOfConstraintComboBox;
+   wxComboBox   *constraintTypeComboBox;
+
+   wxBitmapButton *aemBrowseButton;
+
 
    // for precessing spinner data
    wxTextCtrl *spinAxis1TextCtrl;
@@ -148,18 +152,15 @@ private:
    wxTextCtrl *spinRateTextCtrl;
    
    //for nadir-pointing data
-   wxTextCtrl *refVectorXTextCtrl;
-   wxTextCtrl *refVectorYTextCtrl;
-   wxTextCtrl *refVectorZTextCtrl;
-   wxTextCtrl *constraintVectorXTextCtrl;
-   wxTextCtrl *constraintVectorYTextCtrl;
-   wxTextCtrl *constraintVectorZTextCtrl;
    wxTextCtrl *bodyAlignVectorXTextCtrl;
    wxTextCtrl *bodyAlignVectorYTextCtrl;
    wxTextCtrl *bodyAlignVectorZTextCtrl;
    wxTextCtrl *bodyConstraintVectorXTextCtrl;
    wxTextCtrl *bodyConstraintVectorYTextCtrl;
    wxTextCtrl *bodyConstraintVectorZTextCtrl;
+
+   // CCSDS attitude
+   wxTextCtrl *aemFileTextCtrl;
 
    /// objects needed
    GmatPanel      *theScPanel;
@@ -180,14 +181,14 @@ private:
    StringArray         eulerSeqArray;
    StringArray         stateTypeArray;
    StringArray         stateRateTypeArray;
-   StringArray         modeOfConstraintTypeArray;
+   StringArray         constraintTypeArray;
 
    /// those strings as wxString arrays for the combo boxes
    wxString            *attitudeModelArray;
    wxString            *eulerSequenceArray;
    wxString            *stateArray;
    wxString            *stateRateArray;
-   wxString            *modeOfConstraintArray;
+   wxString            *constraintArray;
    
    /// string versions of values in text boxes
    wxString            *cosineMatrix[9];
@@ -205,7 +206,10 @@ private:
    std::string         attRateStateType;
 
    std::string         attRefBodyName;
-   std::string         modeOfConstraint;
+   std::string         constraintType;
+
+   std::string         aemFile;
+   std::string         previousAemFile;
 
    /// flags for data modification
    bool                dataChanged;
@@ -250,11 +254,12 @@ private:
    
    bool             nadirPointingDataLoaded;
    bool             attRefBodyModified;
-   bool             modeOfConstraintModified;
-   bool             refVectorModified;
-   bool             constraintVectorModified;
+   bool             constraintTypeModified;
    bool             bodyAlignVectorModified;
    bool             bodyConstraintVectorModified;
+
+   bool             ccsdsDataLoaded;
+   bool             aemFileModified;
 
    void Create();
    
@@ -263,6 +268,9 @@ private:
    
    void LoadNadirPointingData(); //WCS: Added
    void SaveNadirPointingData(Attitude *useAttitude); //WCS: Added
+
+   void LoadCCSDSAttitudeData();
+   void SaveCCSDSAttitudeData(Attitude *useAttitude);
 
    bool DisplayEulerAngles();
    bool DisplayQuaternion();
@@ -287,6 +295,7 @@ private:
    void ShowInitialAttitudeAndRate();
    void ShowPrecessingSpinnerData(); //LOJ: Added
    void ShowNadirPointingData();
+   void ShowCCSDSAttitudeData();
    void DisableAll();
    void EnableAll();
    void DisplayDataForModel(const std::string &modelType);
@@ -315,14 +324,14 @@ private:
    void OnInitialSpinAngleTextUpdate(wxCommandEvent &event);       //WCS: Added to trigger new value
    /// when user types in a new spin rate
    void OnSpinRateTextUpdate(wxCommandEvent &event);               //WCS: Added to trigger new value
-   /// when user types in a new reference vector value
-   void OnReferenceVectorTextUpdate(wxCommandEvent &event);        //WCS: Added to trigger new value
-   /// when user types in a new constraint vector value
-   void OnConstraintVectorTextUpdate(wxCommandEvent &event);       //WCS: Added to trigger new value
    /// when user types in a new body alignment vector value
    void OnBodyAlignmentVectorTextUpdate(wxCommandEvent &event);    //WCS: Added to trigger new value
    /// when user types in a new body constraint vector value
    void OnBodyConstraintVectorTextUpdate(wxCommandEvent &event);   //WCS: Added to trigger new value
+   /// when user types in a new AEM file name
+   void OnAEMFileTextUpdate(wxCommandEvent &event);
+   // when the user selects the Browse button for the AEM file
+   void OnBrowseButton(wxCommandEvent& event);
    /// when user selects state type from combo box
    void OnStateTypeSelection(wxCommandEvent &event);
    /// when user selects state rate type from combo box
@@ -336,7 +345,7 @@ private:
    /// when user selects a attitude model from combo box
    void OnReferenceBodySelection(wxCommandEvent &event);           //WCS: Added to trigger new value
    /// when user selects a attitude model from combo box
-   void OnModeOfConstraintSelection(wxCommandEvent &event);        //WCS: Added to trigger new value
+   void OnConstraintTypeSelection(wxCommandEvent &event);        //WCS: Added to trigger new value
    
    
    /// IDs for the controls and the menu commands
@@ -354,8 +363,6 @@ private:
       ID_TEXTCTRL_INIT_SPIN_ANGLE, //WCS: Added
       ID_TEXTCTRL_SPIN_RATE,       //WCS: Added
       // Added for NadirPointing
-      ID_TEXTCTRL_REFERENCE_VECTOR,       //WCS: Added
-      ID_TEXTCTRL_CONSTRAINT_VECTOR,      //WCS: Added
       ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,  //WCS: Added
       ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, //WCS: Added
       ID_CB_STATE,
@@ -365,7 +372,10 @@ private:
       ID_CB_MODEL,
       // Added for NadirPointing
       ID_CB_REFERENCE_BODY,
-      ID_CB_MODE_OF_CONSTRAINT,
+      ID_CB_CONSTRAINT_TYPE,
+      // Added for CCSDS attitude
+      ID_TEXTCTRL_AEM_FILE,
+      ID_BUTTON_BROWSE,
    };
    
    // IDs for state type
@@ -398,7 +408,8 @@ private:
    static const Integer ATTITUDE_TEXT_CTRL_WIDTH;
    static const Integer QUATERNION_TEXT_CTRL_WIDTH;
 
-   /// @todo these should come from the Attitude class or GmatConstants
+   /// @todo these should come from the AttitudeConversionUtility or
+   /// GmatConstants
    static const Real    EULER_ANGLE_TOLERANCE;
    static const Real    DCM_ORTHONORMALITY_TOLERANCE;
 

@@ -67,10 +67,12 @@ public:
    
    // objects
    virtual const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
-   virtual const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
+   virtual const ColorMap& GetObjectOrbitColorMap() { return mObjectOrbitColorMap; }
+   virtual const ColorMap& GetObjectTargetColorMap() { return mObjectTargetColorMap; }
    virtual const wxArrayString& GetObjectNames() { return mObjectNames; }
    virtual const wxArrayString& GetValidCSNames() { return mValidCSNames; }
-   virtual void SetObjectColors(const wxStringColorMap &objectColorMap);
+   virtual void SetObjectOrbitColors(const ColorMap &orbitColorMap);
+   virtual void SetObjectTargetColors(const ColorMap &targetColorMap);
    virtual void SetShowObjects(const wxStringBoolMap &showObjMap);  
    virtual wxString GetGotoObjectName();
    
@@ -100,7 +102,6 @@ public:
    virtual void ViewAnimation(int interval, int frameInc = 30) = 0;
    
    virtual void SetGlObject(const StringArray &objNames,
-                        const UnsignedIntArray &objOrbitColors,
                         const std::vector<SpacePoint*> &objectArray);
    
    // SolarSystem
@@ -145,14 +146,13 @@ public:
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,
                         const RealArray &velY, const RealArray &velZ,
-                        const UnsignedIntArray &scColors, bool solving,
-                        Integer solverOption, bool drawing,
+                        const ColorMap &orbitColorMap,
+                        const ColorMap &targetColorMap,
+                        bool solving, Integer solverOption, bool drawing,
                         bool inFunction = false);
    
    // object
-   virtual void AddObjectList(const wxArrayString &objNames,
-                        const UnsignedIntArray &objColors,
-                        bool clearList = true);
+   virtual void AddObjectList(const wxArrayString &objNames, bool clearList = true);
    
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
    // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
@@ -286,7 +286,8 @@ protected:
    wxArrayString mObjectNames;
    wxArrayString mShowObjectNames;
    wxArrayString mValidCSNames;
-   wxStringColorMap mObjectColorMap;
+   ColorMap mObjectOrbitColorMap;
+   ColorMap mObjectTargetColorMap;
    wxStringBoolMap  mShowObjectMap;
    std::vector<SpacePoint*> mObjectArray;
    std::vector<bool> mDrawOrbitArray;

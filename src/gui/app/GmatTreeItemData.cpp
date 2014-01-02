@@ -120,7 +120,7 @@ void GmatTreeItemData::SetClonable(bool clonable)
 
 
 //------------------------------------------------------------------------------
-// Command* GetCommand()
+// firtual Command* GetCommand()
 //------------------------------------------------------------------------------
 /**
  * @return Command pointer
@@ -129,4 +129,13 @@ void GmatTreeItemData::SetClonable(bool clonable)
 GmatCommand* GmatTreeItemData::GetCommand()
 {
    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual wxTreeItemId GetNodeId()
+//------------------------------------------------------------------------------
+wxTreeItemId GmatTreeItemData::GetNodeId()
+{
+   return wxTreeItemId();
 }

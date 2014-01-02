@@ -36,6 +36,7 @@
 #include "Spinner.hpp"               // for command mode attitude creation
 #include "PrecessingSpinner.hpp"
 #include "NadirPointing.hpp"
+#include "CCSDSAttitude.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
@@ -71,6 +72,7 @@
 //#define DEBUG_HARDWARE
 //#define DEBUG_SC_INPUT_TYPES
 //#define DEBUG_GEN_STRING
+//#define DEBUG_SC_ATTITUDE_DATA
 
 
 #ifdef DEBUG_SPACECRAFT
@@ -313,12 +315,12 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft() <%p>'%s' entered\n", this, name.c_str());
    #endif
-
+   
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
-
+      
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -1734,6 +1736,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                "------ error setting ref object %s on attitude\n",
                name.c_str());
             #endif
+            throw;
          }
       }
 
@@ -1865,6 +1868,11 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    else
    {
+      #ifdef DEBUG_SC_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("In SC::SetRefObject, checking attitude ... which is %sNULL\n",
+               (attitude? "NOT " : ""));
+      #endif
       // first, try setting it on the attitude (owned object)   .......
       if (attitude)
       {
@@ -1877,7 +1885,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             #endif
             // Pass objName as name since name can be blank.
             // Attitude::SetRefObject() checks names before setting
-            attitude->SetRefObject(obj, type, objName);
+            bool setOnAttitude = attitude->SetRefObject(obj, type, objName);
+            if (setOnAttitude) return true;
          }
          catch (BaseException &)
          {
@@ -3132,6 +3141,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             newAtt = new PrecessingSpinner();
          else if (newAttType == "NadirPointing")
             newAtt = new NadirPointing();
+         else if (newAttType == "CCSDS-AEM")
+            newAtt = new CCSDSAttitude();
          #ifdef __USE_SPICE__
          else if (newAttType == "SpiceAttitude")
             newAtt = new SpiceAttitude();
@@ -3152,56 +3163,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             errmsg += value + "\n";
             throw SpaceObjectException(errmsg);
          }
-         // Get reference objects from old attitude object
-         std::string oldAttCSName      = "";
-         std::string oldAttBodyName    = "";
-         GmatBase    *oldAttCS         = NULL;
-         GmatBase    *oldAttBody       = NULL;
-         bool        oldAttFound       = false;
-         if (attitude != NULL)
+         bool attitudeOK = SetAttitudeAndCopyData(attitude, newAtt, true);
+         if (!attitudeOK)
          {
-            #ifdef DEBUG_SC_ATTITUDE
-               MessageInterface::ShowMessage("   new attitude is of type %s\n",
-                     newAtt->GetAttitudeModelName().c_str());
-            #endif
-            // Get reference coordinate system from old attitude object
-            oldAttCSName    = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-            oldAttCS        = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-            //oldAttBodyName  = attitude->GetRefObjectName(Gmat::CELESTIAL_BODY);
-            //oldAttBody      = attitude->GetRefObject(Gmat::CELESTIAL_BODY, oldAttBodyName);
-            oldAttFound = true;
-            delete attitude;
-            ownedObjectCount--;
+            std::string errmsg = "Cannot copy attitude data to new attitude object!\n";
+            throw SpaceObjectException(errmsg);
          }
-         #ifdef __USE_SPICE__
-         // If it's a SPICE attitude, set the object data
-         // @todo we may need to add some kind of AddData method to Attitude
-         // so that plugin attitudes may implement it for setup
-         if (newAtt->IsOfType("SpiceAttitude"))
-         {
-            SpiceAttitude *spiceAtt = (SpiceAttitude*) newAtt;
-            spiceAtt->SetObjectID(instanceName, naifId, naifIdRefFrame);
-            for (Integer ii = 0; ii < (Integer) attitudeSpiceKernelNames.size(); ii++)
-               spiceAtt->SetStringParameter("AttitudeKernelName", attitudeSpiceKernelNames[ii], ii);
-            for (Integer ii = 0; ii < (Integer) scClockSpiceKernelNames.size(); ii++)
-               spiceAtt->SetStringParameter("SCClockKernelName", scClockSpiceKernelNames[ii], ii);
-            for (Integer ii = 0; ii < (Integer) frameSpiceKernelNames.size(); ii++)
-               spiceAtt->SetStringParameter("FrameKernelName", frameSpiceKernelNames[ii], ii);
-            }
-         #endif
-         newAtt->SetEpoch(state.GetEpoch()); // correct? do we want to do this?  for Spinner?
-         newAtt->NeedsReinitialization();
-         newAtt->SetOwningSpacecraft(this);
-         if (oldAttFound)
-         {
-            newAtt->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-            newAtt->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
-            //newAtt->SetRefObjectName(Gmat::CELESTIAL_BODY, oldAttBodyName);
-            //newAtt->SetRefObject(oldAttCS, Gmat::CELESTIAL_BODY, oldAttBodyName);
-         }
-         attitude = newAtt;
-         ownedObjectCount++;
-         attitudeModel = value;
       }
       return true;
    }
@@ -4770,40 +4737,15 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
 
    if (obj->IsOfType(Gmat::ATTITUDE))
    {
-      // Get reference coordinate system from old attitude object
-      std::string oldAttCSName    = "";
-      std::string oldAttBodyName  = "";
-      GmatBase    *oldAttCS       = NULL;
-      GmatBase    *oldAttBody     = NULL;
-      bool        oldAttFound     = false;
-      if (attitude != NULL)
+      Attitude *newAtt = (Attitude*) (obj->Clone());
+//      attitude = (Attitude*)(obj->Clone());
+      bool attitudeOK = SetAttitudeAndCopyData(attitude, newAtt, true);
+      if (!attitudeOK)
       {
-         // Get reference coordinate system from old attitude object
-         oldAttCSName    = attitude->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-         oldAttCS        = attitude->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-         //oldAttBodyName  = attitude->GetRefObjectName(Gmat::CELESTIAL_BODY);
-         //oldAttBody      = attitude->GetRefObject(Gmat::CELESTIAL_BODY, oldAttBodyName);
-         oldAttFound = true;
-         delete attitude;
-         --ownedObjectCount;
+         std::string errmsg = "Cannot copy attitude data to new attitude object!\n";
+         throw SpaceObjectException(errmsg);
       }
-      attitude = (Attitude*)(obj->Clone());
-      ++ownedObjectCount;
-      attitude->SetEpoch(state.GetEpoch());
-      attitude->SetOwningSpacecraft(this);
-
-      #ifdef DEBUG_CLONES
-      MessageInterface::ShowMessage
-         ("   oldAttFound=%d, oldAttCS=<%p>, oldAttBody=<%p>\n", oldAttFound, oldAttCS, oldAttBody);
-      #endif
       
-      if (oldAttFound)
-      {
-         attitude->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
-         attitude->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
-         //attitude->SetRefObjectName(Gmat::CELESTIAL_BODY, oldAttBodyName);
-         //attitude->SetRefObject(oldAttBody, Gmat::CELESTIAL_BODY, oldAttBodyName);
-      }
       isInitialized = false;
    }
 }
@@ -5139,14 +5081,20 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
       #endif
       attitude = NULL;
       attitude = (Attitude*) att->Clone();
+
+      bool attitudeOK = SetAttitudeAndCopyData(att, attitude, false);
+      if (!attitudeOK)
+      {
+         std::string errmsg = "Cannot copy attitude data to new attitude object!\n";
+         throw SpaceObjectException(errmsg);
+      }
       #ifdef DEBUG_SC_OWNED_OBJECT
       MessageInterface::ShowMessage
          ("Spacecraft::CloneOwnedObjects() ------> new CLONED attitude <%p> is of type %s\n",
           attitude, attitude->GetTypeName().c_str());
       #endif
-      attitude->SetEpoch(state.GetEpoch());
-      attitude->SetOwningSpacecraft(this);
-      ownedObjectCount++;
+
+
       #ifdef DEBUG_SC_OWNED_OBJECT
       MessageInterface::ShowMessage
          ("Spacecraft::CloneOwnedObjects() <%p>'%s' ownedObjectCount=%d\n",
@@ -6884,3 +6832,76 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    }
    return validated;
 }
+
+//-------------------------------------------------------------------------
+// bool SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt,
+//                             bool deleteOldAtt = false)
+//-------------------------------------------------------------------------
+bool Spacecraft::SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt,
+                                        bool deleteOldAtt)
+{
+   #ifdef DEBUG_SC_ATTITUDE_DATA
+      MessageInterface::ShowMessage("In SetAttitudeAndCopyData with oldAtt %s<%p> and newAtt %s<%p>\n",
+            (oldAtt->GetAttitudeModelName()).c_str(), oldAtt,
+            (newAtt->GetAttitudeModelName()).c_str(), newAtt);
+   #endif
+   if (oldAtt != NULL)
+   {
+      // Get reference objects from old attitude object:
+
+      // Get reference coordinate system from old attitude object
+      std::string oldAttCSName     = oldAtt->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      GmatBase    *oldAttCS        = oldAtt->GetRefObject(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+      // Get reference body from old attitude object
+      std::string oldAttBodyName   = oldAtt->GetRefObjectName(Gmat::CELESTIAL_BODY);
+      GmatBase    *oldAttBody      = oldAtt->GetRefObject(Gmat::CELESTIAL_BODY, oldAttBodyName);
+
+      #ifdef DEBUG_SC_ATTITUDE_DATA
+         MessageInterface::ShowMessage("   old CS name = %s, old body name = %s\n",
+               oldAttCSName.c_str(), oldAttBodyName.c_str());
+         if (!oldAttCS) MessageInterface::ShowMessage("   oldAttCS is NULL!!!\n");
+         if (!oldAttBody) MessageInterface::ShowMessage("   oldAttBody is NULL!!!\n");
+      #endif
+
+      // Set the reference objects on the new attitude
+      newAtt->SetRefObjectName(Gmat::COORDINATE_SYSTEM, oldAttCSName);
+      newAtt->SetRefObject(oldAttCS, Gmat::COORDINATE_SYSTEM, oldAttCSName);
+      newAtt->SetRefObjectName(Gmat::CELESTIAL_BODY, oldAttBodyName);
+      newAtt->SetRefObject(oldAttBody, Gmat::CELESTIAL_BODY, oldAttBodyName);
+
+      #ifdef __USE_SPICE__
+      // If it's a SPICE attitude, set the object data
+      // @todo we may need to add some kind of AddData method to Attitude
+      // so that plugin attitudes may implement it for setup
+      if (newAtt->IsOfType("SpiceAttitude"))
+      {
+         SpiceAttitude *spiceAtt = (SpiceAttitude*) newAtt;
+         spiceAtt->SetObjectID(instanceName, naifId, naifIdRefFrame);
+         for (Integer ii = 0; ii < (Integer) attitudeSpiceKernelNames.size(); ii++)
+            spiceAtt->SetStringParameter("AttitudeKernelName", attitudeSpiceKernelNames[ii], ii);
+         for (Integer ii = 0; ii < (Integer) scClockSpiceKernelNames.size(); ii++)
+            spiceAtt->SetStringParameter("SCClockKernelName", scClockSpiceKernelNames[ii], ii);
+         for (Integer ii = 0; ii < (Integer) frameSpiceKernelNames.size(); ii++)
+            spiceAtt->SetStringParameter("FrameKernelName", frameSpiceKernelNames[ii], ii);
+      }
+      #endif
+
+      if (deleteOldAtt)
+      {
+         delete oldAtt;
+         ownedObjectCount--;
+      }
+   }
+   newAtt->SetEpoch(state.GetEpoch());
+   newAtt->SetOwningSpacecraft(this);
+   newAtt->NeedsReinitialization();
+
+   // Set attitude to the new one
+   attitude = newAtt;
+   ownedObjectCount++;
+
+   attitudeModel = newAtt->GetAttitudeModelName();
+
+   return true;
+}
+

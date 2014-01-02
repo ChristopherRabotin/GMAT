@@ -132,12 +132,12 @@ void PlotInterface::SetGlSolarSystem(const std::string &plotName, SolarSystem *s
 //------------------------------------------------------------------------------
 void PlotInterface::SetGlObject(const std::string &plotName,
                                 const StringArray &objNames,
-                                const UnsignedIntArray &objOrbitColors,
+                                //const UnsignedIntArray &objOrbitColors,
                                 const std::vector<SpacePoint*> &objArray)
 {
    if (thePlotReceiver != NULL)
-      thePlotReceiver->SetGlObject(
-            plotName, objNames, objOrbitColors, objArray);
+      //thePlotReceiver->SetGlObject(plotName, objNames, objOrbitColors, objArray);
+      thePlotReceiver->SetGlObject(plotName, objNames, objArray);
 }
 
 
@@ -335,9 +335,11 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
                                  const RealArray &posX, const RealArray &posY,
                                  const RealArray &posZ, const RealArray &velX,
                                  const RealArray &velY, const RealArray &velZ,
-                                 const UnsignedIntArray &scColors, bool solving,
-                                 Integer solverOption, bool updateCanvas,
-                                 bool drawing, bool inFunction)
+                                 //const UnsignedIntArray &scColors,
+                                 const ColorMap &orbitColorMap,
+                                 const ColorMap &targetColorMap,
+                                 bool solving, Integer solverOption,
+                                 bool updateCanvas, bool drawing, bool inFunction)
 {
    #if DEBUG_PLOTIF_GL_UPDATE
    MessageInterface::ShowMessage
@@ -347,8 +349,11 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
    
    if (thePlotReceiver != NULL)
       return thePlotReceiver->UpdateGlPlot(plotName, oldName, scNames, time,
-            posX, posY, posZ, velX, velY, velZ, scColors, solving, solverOption, 
-            updateCanvas, drawing, inFunction);
+                                           posX, posY, posZ, velX, velY, velZ,
+                                           //scColors,
+                                           orbitColorMap, targetColorMap,
+                                           solving, solverOption, 
+                                           updateCanvas, drawing, inFunction);
    
    return false;
 } // end UpdateGlPlot()

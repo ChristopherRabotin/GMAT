@@ -22,13 +22,16 @@
 #define GroundTrackPlotPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include <wx/clrpicker.h>           // for wxColorPickerCtrl
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 #include "GroundTrackPlot.hpp"
+
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
+#include <wx/clrpicker.h>           // for wxColorPickerCtrl
 #include "RgbColor.hpp"
 #include "ColorTypes.hpp"
+#endif
 
 class GroundTrackPlotPanel: public GmatPanel
 {
@@ -47,24 +50,26 @@ protected:
    bool mHasRealDataChanged;
    bool mHasDataOptionChanged;
    bool mHasObjectListChanged;
-   bool mHasOrbitColorChanged;
-   bool mHasTargetColorChanged;
    bool mHasCentralBodyChanged;
    bool mHasTextureMapChanged;
+
    
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
+   bool mHasOrbitColorChanged;
+   bool mHasTargetColorChanged;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
-   
    wxColour mOrbitColor;
    wxColour mTargetColor;
+   wxColourPickerCtrl *mOrbitColorCtrl;
+   wxColourPickerCtrl *mTargetColorCtrl;
+   #endif
+
    
    wxTextCtrl *mDataCollectFreqTextCtrl;
    wxTextCtrl *mUpdatePlotFreqTextCtrl;
    wxTextCtrl *mNumPointsToRedrawTextCtrl;
    wxTextCtrl *mTextureMapTextCtrl;
-   
-   wxColourPickerCtrl *mOrbitColorCtrl;
-   wxColourPickerCtrl *mTargetColorCtrl;
    
    wxButton *mTextureMapBrowseButton;
    
@@ -88,7 +93,11 @@ protected:
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnCheckListBoxChange(wxCommandEvent& event);
    void OnCheckListBoxSelect(wxCommandEvent& event);
+   
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    void OnColorPickerChange(wxColourPickerEvent& event);
+   #endif
+   
    void OnComboBoxChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
    
@@ -102,14 +111,19 @@ protected:
       ID_CHECKLISTBOX,
       ID_CHECKBOX,
       ID_BROWSE_BUTTON,
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       ID_COLOR_CTRL,
+      #endif
    };
    
 private:
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    void ShowSpacePointColor(const wxString &name,
                             UnsignedInt color = GmatColor::RED);
    void SaveObjectColors(const wxString &which,
                          std::map<std::string, RgbColor> &colorMap);
+   #endif
 };
 #endif
 

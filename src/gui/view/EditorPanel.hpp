@@ -49,6 +49,9 @@ private:
    // event handling
    void OnTextOverMaxLen(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
+   void OnRunButton(wxCommandEvent& event);
+   void OnTabNext(wxCommandEvent& event);
+   void OnTabPrev(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
    
@@ -57,6 +60,9 @@ private:
    {
       ID_TEXT = 9000,
       ID_SYNC_BUTTON,
+      ID_SYNC_RUN_BUTTON,
+	  ID_TAB_NEXT,
+	  ID_TAB_PREV
    };
 };
 

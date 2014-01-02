@@ -54,6 +54,9 @@ private:
    void OnTextUpdate(wxCommandEvent& event);
    void OnTextOverMaxLen(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
+   void OnRunButton(wxCommandEvent& event);
+   void OnTabNext(wxCommandEvent& event);
+   void OnTabPrev(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 
@@ -63,8 +66,11 @@ private:
       ID_TEXT = 9000,
       ID_LISTBOX,
       ID_SYNC_BUTTON,
+      ID_SYNC_RUN_BUTTON,
       ID_COLOR_BUTTON,
       ID_COMBO,
+	  ID_TAB_NEXT,
+	  ID_TAB_PREV,
       ID_TEXTCTRL
    };
 };
