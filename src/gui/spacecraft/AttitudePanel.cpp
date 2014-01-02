@@ -28,6 +28,8 @@
  * parameters in the GUI Spacecraft Attitude TAB.
  */
 //------------------------------------------------------------------------------
+#include <fstream>
+#include <wx/config.h>
 #include "gmatdefs.hpp"
 #include "AttitudePanel.hpp"
 #include "AttitudeFactory.hpp"
@@ -38,15 +40,16 @@
 #include "StringUtil.hpp"
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
-#include <wx/config.h>
+#include "AttitudeConversionUtility.hpp"
+#include "bitmaps/OpenFolder.xpm"
 
 //#define DEBUG_ATTITUDE_PANEL 1
+//#define DEBUG_ATTITUDE_LOAD
 //#define DEBUG_ATTITUDE_SAVE
 //#define DEBUG_ATTITUDE_RATE
 //#define DEBUG_ATTITUDE_ANG_VEL
 //#define DEBUG_ATTITUDE_PANEL_DCM
-//#define DEBUG_PRECESSING_SPINNER
-//#define DEBUG_NADIR_POINTING
+//#define DEBUG_SHOW_MODEL
 
 //------------------------------------------------------------------------------
 // static data
@@ -89,17 +92,17 @@ BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL_NUTATION_ANGLE,   AttitudePanel::OnNutationAngleTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_INIT_SPIN_ANGLE,  AttitudePanel::OnInitialSpinAngleTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_SPIN_RATE,        AttitudePanel::OnSpinRateTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_REFERENCE_VECTOR,        AttitudePanel::OnReferenceVectorTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_CONSTRAINT_VECTOR,       AttitudePanel::OnConstraintVectorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR,   AttitudePanel::OnBodyAlignmentVectorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR,  AttitudePanel::OnBodyConstraintVectorTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_AEM_FILE,         AttitudePanel::OnAEMFileTextUpdate)
    EVT_COMBOBOX(ID_CB_STATE,              AttitudePanel::OnStateTypeSelection)
    EVT_COMBOBOX(ID_CB_STATE_RATE,         AttitudePanel::OnStateTypeRateSelection)
    EVT_COMBOBOX(ID_CB_SEQ,                AttitudePanel::OnEulerSequenceSelection)
    EVT_COMBOBOX(ID_CB_COORDSYS,           AttitudePanel::OnCoordinateSystemSelection)
    EVT_COMBOBOX(ID_CB_MODEL,              AttitudePanel::OnAttitudeModelSelection)
    EVT_COMBOBOX(ID_CB_REFERENCE_BODY,     AttitudePanel::OnReferenceBodySelection)
-   EVT_COMBOBOX(ID_CB_MODE_OF_CONSTRAINT, AttitudePanel::OnModeOfConstraintSelection)
+   EVT_COMBOBOX(ID_CB_CONSTRAINT_TYPE,    AttitudePanel::OnConstraintTypeSelection)
+   EVT_BUTTON(ID_BUTTON_BROWSE,           AttitudePanel::OnBrowseButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -115,7 +118,7 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
                              Spacecraft *spacecraft) :
-   wxPanel     (parent), 
+   wxPanel     (parent),
    theAttitude (NULL),
    attCS       (NULL),
    toCS        (NULL),
@@ -147,6 +150,9 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    eulerSequence       = "321";  // Dunn changed from 312 to 321
    attStateType        = "";
    attRateStateType    = "";
+   attRefBodyName      = "";
+   constraintType      = "";
+   aemFile             = "";
    
    stateTypeModified     = false;
    rateStateTypeModified = false;
@@ -169,11 +175,12 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 
    nadirPointingDataLoaded      = false;  // WCS: Added, this flag tells whether data is loaded or not
    attRefBodyModified           = false;
-   modeOfConstraintModified     = false;
-   refVectorModified            = false;
-   constraintVectorModified     = false;
+   constraintTypeModified       = false;
    bodyAlignVectorModified      = false;
    bodyConstraintVectorModified = false;
+
+   ccsdsDataLoaded              = false;
+   aemFileModified              = false;
 
    dataChanged = false;
    canClose    = true;
@@ -218,7 +225,17 @@ void AttitudePanel::Create()
    // being clipped
    // NOTE - this may need to be adjusted for different platforms
    Integer staticTextWidth = 165;
-
+   
+   #if __WXMAC__
+   int buttonWidth = 40;
+   int otherTextWidth = 100;
+   #else
+   int buttonWidth = 25;
+   int otherTextWidth = 100;
+   #endif
+   
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
+   
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
@@ -242,21 +259,15 @@ void AttitudePanel::Create()
    
    q = Rvector(4);
    
+   //======================================================================
+   // Create left side items
+   //======================================================================
    // get list of models and put them into the combo box
    modelArray = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATTITUDE);
    unsigned int modelSz = modelArray.size();
-   
-   //======================================================================
-   //LOJ: Just for testing
-   // It should appear automatically when new model is added to factory
-   // @todo - Remove this when you integrate with new attitude model
-//   modelArray.push_back("PrecessingSpinner");
-//   modelSz++;
-   //======================================================================
    attitudeModelArray = new wxString[modelSz];
    for (x = 0; x < modelSz; ++x)
       attitudeModelArray[x] = wxT(modelArray[x].c_str());
-   
    
    config1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Model"),
@@ -311,6 +322,9 @@ void AttitudePanel::Create()
          wxCB_DROPDOWN|wxCB_READONLY );
    stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
    
+   //======================================================================
+   // Create right side items
+   //======================================================================
    st1StaticText =
       new wxStaticText( this, ID_TEXT, wxT(""),
                         wxDefaultPosition, wxDefaultSize, 0);
@@ -417,22 +431,22 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Set data on the SPICE tab."),
                         wxDefaultPosition, wxSize(staticTextWidth,20), 0); //wxDefaultSize, 0);
 
-   //======================================================================
-   //LOJ: Shows how to create text label and text ctrl
-   //======================================================================
    // Create body spin axis text label
    spinAxisLabel =
       new wxStaticText(this, ID_TEXT, wxT("Body Spin Axis"), wxDefaultPosition, wxDefaultSize, 0);
    // Create body spin axis text ctrl
    spinAxis1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    spinAxis2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    spinAxis3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_SPIN_AXIS, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    // Create nutation reference vector text label
    nutRefVecLabel =
@@ -440,16 +454,17 @@ void AttitudePanel::Create()
    // Create nutation reference vector text ctrl
    nutRefVec1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    nutRefVec2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    nutRefVec3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_NUT_REF_VEC, wxT(""), wxDefaultPosition, 
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
-   //LOJ: @todo - Add angles/rates data here
-   //======================================================================
    // Create labels and text ctrls for other angles and rates
    initPrecAngleLabel =
       new wxStaticText(this, ID_TEXT, wxT("Initial Precession Angle"), wxDefaultPosition, wxDefaultSize, 0);
@@ -458,7 +473,8 @@ void AttitudePanel::Create()
 
    initPrecAngleTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_INIT_PREC_ANGLE, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    precessionRateLabel =
       new wxStaticText(this, ID_TEXT, wxT("Precession Rate"), wxDefaultPosition, wxDefaultSize, 0);
@@ -466,7 +482,8 @@ void AttitudePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("deg/sec"), wxDefaultPosition, wxDefaultSize, 0);
    precessionRateTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_PRECESSION_RATE, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    nutationAngleLabel =
       new wxStaticText(this, ID_TEXT, wxT("Nutation Angle"), wxDefaultPosition, wxDefaultSize, 0);
@@ -474,7 +491,8 @@ void AttitudePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    nutationAngleTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_NUTATION_ANGLE, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    initSpinAngleLabel =
       new wxStaticText(this, ID_TEXT, wxT("Initial Spin Angle"), wxDefaultPosition, wxDefaultSize, 0);
@@ -482,7 +500,8 @@ void AttitudePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    initSpinAngleTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_INIT_SPIN_ANGLE, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    spinRateLabel =
       new wxStaticText(this, ID_TEXT, wxT("Spin Rate"), wxDefaultPosition, wxDefaultSize, 0);
@@ -490,76 +509,73 @@ void AttitudePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("deg/sec"), wxDefaultPosition, wxDefaultSize, 0);
    spinRateTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_SPIN_RATE, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Now add the NadirPointing widgets
-   referenceVectorLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Reference Vector"), wxDefaultPosition, wxDefaultSize, 0);
-   refVectorXTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   refVectorYTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   refVectorZTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_REFERENCE_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Constraint Vector"), wxDefaultPosition, wxDefaultSize, 0);
-   constraintVectorXTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorYTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   constraintVectorZTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyAlignVectorLabel =
       new wxStaticText(this, ID_TEXT, wxT("Body Alignment Vector"), wxDefaultPosition, wxDefaultSize, 0);
    bodyAlignVectorXTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyAlignVectorYTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyAlignVectorZTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_ALIGNMENT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   bodyConstraintVectorLabel =
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+  bodyConstraintVectorLabel =
       new wxStaticText(this, ID_TEXT, wxT("Body Constraint Vector"), wxDefaultPosition, wxDefaultSize, 0);
    bodyConstraintVectorXTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyConstraintVectorYTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    bodyConstraintVectorZTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_BODY_CONSTRAINT_VECTOR, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     //wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Reference Body must be a Celestial Body
    attRefBodyLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Reference Body"),
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Reference Body"),
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    referenceBodyComboBox =  theGuiManager->GetCelestialBodyComboBox(this, ID_CB_REFERENCE_BODY,
       wxDefaultSize);
    referenceBodyComboBox->SetToolTip(pConfig->Read(_T("ReferenceBodyHint")));
 
-   StringArray modes = Attitude::GetModesOfConstraint();
-   unsigned int modesSz = modes.size();
-   modeOfConstraintArray = new wxString[modesSz];
-   for (x = 0; x < modesSz; ++x)
-      modeOfConstraintArray[x] = wxT(modes[x].c_str());
+   StringArray constraintTypes = Attitude::GetAttitudeConstraintTypes();
+   unsigned int constraintTypesSz = constraintTypes.size();
+   constraintArray = new wxString[constraintTypesSz];
+   for (x = 0; x < constraintTypesSz; ++x)
+      constraintArray[x] = wxT(constraintTypes[x].c_str());
 
-   modeOfConstraintLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mode of Constraint"),
+   constraintTypeLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Constraint Type"),
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
-   modeOfConstraintComboBox =
-         new wxComboBox( this, ID_CB_MODE_OF_CONSTRAINT, wxT(modeOfConstraintArray[0]),
-            wxDefaultPosition, wxDefaultSize, modesSz, modeOfConstraintArray,
+   constraintTypeComboBox =
+         new wxComboBox( this, ID_CB_CONSTRAINT_TYPE, wxT(constraintArray[0]),
+            wxDefaultPosition, wxDefaultSize, constraintTypesSz, constraintArray,
             wxCB_DROPDOWN|wxCB_READONLY );
-   modeOfConstraintComboBox->SetToolTip(pConfig->Read(_T("ModeOfConstraintHint")));
+   constraintTypeComboBox->SetToolTip(pConfig->Read(_T("AttitudeConstraintTypeHint")));
+   
+   // Now create CCSDS-AEM widgets
+   aemFileLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"File Name"), wxDefaultPosition, wxDefaultSize, 0);
+   aemFileTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL_AEM_FILE, wxT(""),
+                     wxDefaultPosition, wxSize(300, -1),  0);
+   aemFileTextCtrl->SetToolTip(pConfig->Read(_T("AttitudeFileNameHint")));
+   aemBrowseButton =
+      new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, 20));
+   aemBrowseButton->SetToolTip(pConfig->Read(_T("BrowseAttitudeFileNameHint")));
 
 
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -568,18 +584,10 @@ void AttitudePanel::Create()
    #endif
    
    Integer bsize = 2; // border size
-   
-   // wx*Sizers
-   wxBoxSizer *boxSizer1 = new wxBoxSizer(wxHORIZONTAL);
-   //GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
-   GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-   //GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-   boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
-   
-   
-   //======================================================================
-   //LOJ: Shows how to create sizers and add controls
-   //======================================================================   
+
+   //-----------------------------------------------------------------
+   // Create sizers for ProcessingSpinner model
+   //-----------------------------------------------------------------
    // Create 3 column flex grid sizer for body spin axis text ctrl
    wxFlexGridSizer *spinAxisTCSizer = new wxFlexGridSizer(3);
    spinAxisTCSizer->Add(spinAxis1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -602,12 +610,14 @@ void AttitudePanel::Create()
    nutRefVecSizer->Add(nutRefVecLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    nutRefVecSizer->Add(nutRefVecTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   // Create static box sizer for all body spin axis items
+   // Create static box sizer for all body spin axis and nutation ref vector items
    GmatStaticBoxSizer *spinAxisGroupSizer
       = new GmatStaticBoxSizer(wxVERTICAL, this, "Vectors");
    spinAxisGroupSizer->Add(spinAxisSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    spinAxisGroupSizer->Add(nutRefVecSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
+   // Create 3x5 flex grid sizer for ProcessingSpinner angles and rates
+   // 1st column: Labels, 2nd column: Values, 3rd column: units
    wxFlexGridSizer *precSpinAnglesRatesSizer = new wxFlexGridSizer(3,5);
    precSpinAnglesRatesSizer->Add(initPrecAngleLabel, 0, wxALIGN_LEFT|wxALL, bsize );
    precSpinAnglesRatesSizer->Add(initPrecAngleTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
@@ -634,19 +644,10 @@ void AttitudePanel::Create()
    precessingSpinnerSizer = new wxBoxSizer(wxVERTICAL);
    precessingSpinnerSizer->Add(spinAxisGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    precessingSpinnerSizer->Add(precSpinAnglesRatesGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   //LOJ: - Add nutRefVecGroupSizer here
-   //precessingSpinnerSizer->Add(nutRefVecGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   // Create 3 column flex grid sizer for reference vector
-   wxFlexGridSizer *refVectorTCSizer = new wxFlexGridSizer(3);
-   refVectorTCSizer->Add(refVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   refVectorTCSizer->Add(refVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   refVectorTCSizer->Add(refVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   // Create 3 column flex grid sizer for constraint vector
-   wxFlexGridSizer *conVectorTCSizer = new wxFlexGridSizer(3);
-   conVectorTCSizer->Add(constraintVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   conVectorTCSizer->Add(constraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   conVectorTCSizer->Add(constraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   //-----------------------------------------------------------------
+   // Create sizers for NadirPointing model
+   //-----------------------------------------------------------------
    // Create 3 column flex grid sizer for body alignment vector
    wxFlexGridSizer *bodyAlignVectorTCSizer = new wxFlexGridSizer(3);
    bodyAlignVectorTCSizer->Add(bodyAlignVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -657,15 +658,7 @@ void AttitudePanel::Create()
    bodyConstraintVectorTCSizer->Add(bodyConstraintVectorXTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    bodyConstraintVectorTCSizer->Add(bodyConstraintVectorYTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    bodyConstraintVectorTCSizer->Add(bodyConstraintVectorZTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-
-   // Create vertical box sizer for reference vector label and text ctrl
-   wxBoxSizer *refVectorSizer = new wxBoxSizer(wxVERTICAL);
-   refVectorSizer->Add(referenceVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   refVectorSizer->Add(refVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   // Create vertical box sizer for constraint vector label and text ctrl
-   wxBoxSizer *conVectorSizer = new wxBoxSizer(wxVERTICAL);
-   conVectorSizer->Add(constraintVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   conVectorSizer->Add(conVectorTCSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
    // Create vertical box sizer for body alignment vector label and text ctrl
    wxBoxSizer *bodyAlignVectorSizer = new wxBoxSizer(wxVERTICAL);
    bodyAlignVectorSizer->Add(bodyAlignVectorLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -681,40 +674,41 @@ void AttitudePanel::Create()
    referenceBodySizer->Add(referenceBodyComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create horizontal box sizer for mode of constraint label and combobox
-   wxBoxSizer *modeOfConstraintSizer = new wxBoxSizer(wxHORIZONTAL);
-   modeOfConstraintSizer->Add(modeOfConstraintLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   modeOfConstraintSizer->Add(modeOfConstraintComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   wxBoxSizer *constraintTypeSizer = new wxBoxSizer(wxHORIZONTAL);
+   constraintTypeSizer->Add(constraintTypeLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   constraintTypeSizer->Add(constraintTypeComboBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create static box sizer for nadir pointing reference body and mode of constraint
-   GmatStaticBoxSizer *nadirPtBodyAndModeGroupSizer
+   GmatStaticBoxSizer *nadirPtBodyAndConstraintTypeGroupSizer
       = new GmatStaticBoxSizer(wxVERTICAL, this, "Body and Mode");
-   nadirPtBodyAndModeGroupSizer->Add(referenceBodySizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   nadirPtBodyAndModeGroupSizer->Add(modeOfConstraintSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtBodyAndConstraintTypeGroupSizer->Add(referenceBodySizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPtBodyAndConstraintTypeGroupSizer->Add(constraintTypeSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create static box sizer for all nadir pointing vector items
    GmatStaticBoxSizer *nadirPtVectorsGroupSizer
       = new GmatStaticBoxSizer(wxVERTICAL, this, "Vectors");
-   nadirPtVectorsGroupSizer->Add(refVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   nadirPtVectorsGroupSizer->Add(conVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPtVectorsGroupSizer->Add(bodyAlignVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPtVectorsGroupSizer->Add(bodyConstraintVectorSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    // Create nadir pointing sizer for vectors
    nadirPointingSizer = new wxBoxSizer(wxVERTICAL);
-   nadirPointingSizer->Add(nadirPtBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   nadirPointingSizer->Add(nadirPtBodyAndConstraintTypeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    nadirPointingSizer->Add(nadirPtVectorsGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-//   nadirPointingSizer->Add(nadirPtRefBodyAndModeGroupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-
-   // Add to right box sizer
-   boxSizer3->Add(precessingSpinnerSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Hide(precessingSpinnerSizer);
-   // Add to right box sizer
-   boxSizer3->Add(nadirPointingSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Hide(nadirPointingSizer);
-   //======================================================================
    
+   // Add a sizer for the CCSDS attitude items
+   wxBoxSizer *ccsdsBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   ccsdsBoxSizer->Add(aemFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   ccsdsBoxSizer->Add(aemFileTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   ccsdsBoxSizer->Add(aemBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
+   GmatStaticBoxSizer *ccsdsGroupSizer =
+         new GmatStaticBoxSizer (wxVERTICAL, this, "Configuration");
+   ccsdsGroupSizer->Add(ccsdsBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
+   ccsdsAttitudeSizer = new wxBoxSizer(wxVERTICAL);
+   ccsdsAttitudeSizer->Add(ccsdsGroupSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   
+   // Add sizer for attitude initial conditions
    attitudeSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Initial Conditions" );
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
@@ -780,23 +774,44 @@ void AttitudePanel::Create()
    attRateSizer->Add(stateRateTypeStaticText , 0, wxALIGN_LEFT|wxALL, bsize);
    attRateSizer->Add(stateRateTypeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    attRateSizer->Add(flexGridSizer3, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);         
+
    
-   boxSizer2->Add(flexGridSizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   // Add to left sizer
+   GmatStaticBoxSizer *leftSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   leftSizer->Add(flexGridSizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    
-   boxSizer3->Add(attitudeSizer, 0, wxGROW| wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Add(attRateSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Add to right sizer
+   rightSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   rightSizer->Add(precessingSpinnerSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   rightSizer->Add(nadirPointingSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   rightSizer->Add(ccsdsAttitudeSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   rightSizer->Add(attitudeSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   rightSizer->Add(attRateSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   boxSizer1->Add( boxSizer3, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Since we are adding all widgets for all models, hide some sizers so that
+   // only the biggest height and width can show initially. Otherwise, it will be too tall.
+   // It looks like ccsdsAttitudeSizer is the widest and attitudeSizer and attRateSizer
+   // togeter are the tallest (LOJ: 2013.12.18)
+   rightSizer->Hide(precessingSpinnerSizer);
+   rightSizer->Hide(nadirPointingSizer);
+   //rightSizer->Hide(ccsdsAttitudeSizer);
+   //rightSizer->Hide(attitudeSizer);
+   //rightSizer->Hide(attRateSizer);
    
+   wxBoxSizer *panelSizer = new wxBoxSizer(wxHORIZONTAL);
+   panelSizer->Add( leftSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   panelSizer->Add( rightSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize); // use 1 so that group line expands
    
    this->SetAutoLayout( true );  
-   this->SetSizerAndFit( boxSizer1 );
-   boxSizer1->Fit( this );
-   boxSizer1->SetSizeHints( this );
-
-   std::string initialModel = config1ComboBox->GetValue().c_str();
-   DisplayDataForModel(initialModel);
+   this->SetSizerAndFit( panelSizer );
+   panelSizer->Fit( this );
+   panelSizer->SetSizeHints( this );
+   
+   // Show initial model
+   // Why showing the model here? theAttitude has not been set at this point.
+   // Commented out (LOJ: 2013.12.18)
+   //std::string initialModel = config1ComboBox->GetValue().c_str();
+   //DisplayDataForModel(initialModel);
    
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
@@ -813,7 +828,7 @@ void AttitudePanel::Create()
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadData()
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
    #endif
    
@@ -823,7 +838,7 @@ void AttitudePanel::LoadData()
    theAttitude = (Attitude*) theSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
    if (theAttitude == NULL)   // no attitude yet
    {
-      #ifdef DEBUG_ATTITUDE_PANEL
+      #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage
          ("   Attitude is NULL, so try to create %s.\n", attitudeModelArray[0].c_str());
       #endif
@@ -843,7 +858,7 @@ void AttitudePanel::LoadData()
    
    try
    {
-      #ifdef DEBUG_ATTITUDE_PANEL
+      #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("   Now retrieve data from the attitude\n");
       #endif
       
@@ -865,19 +880,24 @@ void AttitudePanel::LoadData()
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
       
-      //DisplayDataForModel(attitudeModel);
+      #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage("   attitudeModel = '%s'\n", attitudeModel.c_str());
+      #endif
       
       //LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
-      if (attitudeModel == "PrecessingSpinner")
-         LoadPrecessingSpinnerData();
-      else if (attitudeModel == "NadirPointing")
-      {
-         LoadNadirPointingData();
-         #ifdef DEBUG_ATTITUDE_PANEL
-            MessageInterface::ShowMessage("   NadirPointing data loaded\n");
-         #endif
-      }
-
+      // I think DisplayDataForModel() handles loading also, so commented out (LOJ: 2013.12.18)
+      // if (attitudeModel == "PrecessingSpinner")
+      //    LoadPrecessingSpinnerData();
+      // else if (attitudeModel == "NadirPointing")
+      // {
+      //    LoadNadirPointingData();
+      //    #ifdef DEBUG_ATTITUDE_LOAD
+      //       MessageInterface::ShowMessage("   NadirPointing data loaded\n");
+      //    #endif
+      // }
+      // else if (attitudeModel == "CCSDS-AEM")
+      //    LoadCCSDSAttitudeData();
+            
       if (attStateType == "EulerAngles")
       {
          Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
@@ -940,21 +960,25 @@ void AttitudePanel::LoadData()
          }
          DisplayAngularVelocity();
       }
-
-      #ifdef DEBUG_ATTITUDE_PANEL
-         MessageInterface::ShowMessage("   calling DisplayDataForModel\n");
-      #endif
-      DisplayDataForModel(attitudeModel);
-      #ifdef DEBUG_ATTITUDE_PANEL
-         MessageInterface::ShowMessage("   AFTER DisplayDataForModel\n");
-      #endif
-
-      dataChanged = false;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   dataChanged = false;
+   
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("   calling DisplayDataForModel for %s\n", attitudeModel.c_str());
+   #endif
+   DisplayDataForModel(attitudeModel);
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("   AFTER DisplayDataForModel\n");
+   #endif
+   
+   #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage("AttitudePanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -1029,25 +1053,52 @@ void AttitudePanel::SaveData()
         MessageInterface::ShowMessage("   Attitude pointer is NULL\n");
    #endif
       
-   //LOJ: Save data to the base attitude object
-   if (attitudeModel == "PrecessingSpinner")
-   {
-      SavePrecessingSpinnerData(useAttitude);
-      if (canClose) 
-         dataChanged = false;
-//      return;
-   }
-   else if (attitudeModel == "NadirPointing")
-   {
-      SaveNadirPointingData(useAttitude);
-      if (canClose)
-         dataChanged = false;
-   }
+//   //LOJ: Save data to the base attitude object
+//   if (attitudeModel == "PrecessingSpinner")
+//   {
+//      SavePrecessingSpinnerData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+////      return;
+//   }
+//   else if (attitudeModel == "NadirPointing")
+//   {
+//      SaveNadirPointingData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+//   }
+//   else if (attitudeModel == "CCSDS-AEM")
+//   {
+//      SaveCCSDSAttitudeData(useAttitude);
+//      if (canClose)
+//         dataChanged = false;
+//   }
    
    bool canModifyCS    = useAttitude->CSModifyAllowed();
    bool canSetAttitude = useAttitude->SetInitialAttitudeAllowed();
    try
    {
+      //LOJ: Save data to the base attitude object
+      if (attitudeModel == "PrecessingSpinner")
+      {
+         SavePrecessingSpinnerData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+   //      return;
+      }
+      else if (attitudeModel == "NadirPointing")
+      {
+         SaveNadirPointingData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+      }
+      else if (attitudeModel == "CCSDS-AEM")
+      {
+         SaveCCSDSAttitudeData(useAttitude);
+         if (canClose)
+            dataChanged = false;
+      }
+
       if (csModified || isNewAttitude)
       {
          #ifdef DEBUG_ATTITUDE_SAVE
@@ -1615,9 +1666,9 @@ bool AttitudePanel::ValidateState(const std::string which,
 void AttitudePanel::HideInitialAttitudeAndRate()
 {
    // can hide entire sizers here
-   boxSizer3->Hide(attitudeSizer); // , true);
-   boxSizer3->Hide(attRateSizer); // , true);
-   boxSizer3->Layout();
+   rightSizer->Hide(attitudeSizer); // , true);
+   rightSizer->Hide(attRateSizer); // , true);
+   rightSizer->Layout();
    Refresh();
 }
 
@@ -1632,11 +1683,12 @@ void AttitudePanel::HideInitialAttitudeAndRate()
 void AttitudePanel::ShowInitialAttitudeAndRate()
 {
    //LOJ: Added to hide precessing spinner data
-   boxSizer3->Hide(precessingSpinnerSizer);
-   boxSizer3->Hide(nadirPointingSizer);
+   rightSizer->Hide(precessingSpinnerSizer);
+   rightSizer->Hide(nadirPointingSizer);
+   rightSizer->Hide(ccsdsAttitudeSizer);
    
-   boxSizer3->Show(attitudeSizer, true);
-   boxSizer3->Show(attRateSizer, true);
+   rightSizer->Show(attitudeSizer, true);
+   rightSizer->Show(attRateSizer, true);
 
    // all representations show these three widgets
    st1TextCtrl->Show(true);
@@ -1741,7 +1793,7 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
    str2TextCtrl->Show(true);
    str3TextCtrl->Show(true);
 
-   boxSizer3->Layout();
+   rightSizer->Layout();
    Refresh();
 }
 
@@ -1754,9 +1806,10 @@ void AttitudePanel::ShowPrecessingSpinnerData()
    //MessageInterface::ShowMessage("AttitudePanel::ShowPrecessingSpinnerData() entered\n");
    // Hide initial attitude and rate
    HideInitialAttitudeAndRate();
-   boxSizer3->Hide(nadirPointingSizer);
-   boxSizer3->Show(precessingSpinnerSizer);
-   boxSizer3->Layout();
+   rightSizer->Hide(nadirPointingSizer);
+   rightSizer->Hide(ccsdsAttitudeSizer);
+   rightSizer->Show(precessingSpinnerSizer);
+   rightSizer->Layout();
 }
 
 //------------------------------------------------------------------------------
@@ -1766,9 +1819,23 @@ void AttitudePanel::ShowNadirPointingData()
 {
    // Hide initial attitude and rate
    HideInitialAttitudeAndRate();
-   boxSizer3->Hide(precessingSpinnerSizer);
-   boxSizer3->Show(nadirPointingSizer);
-   boxSizer3->Layout();
+   rightSizer->Hide(precessingSpinnerSizer);
+   rightSizer->Hide(ccsdsAttitudeSizer);
+   rightSizer->Show(nadirPointingSizer);
+   rightSizer->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowCCSDSAttitudeData()
+//------------------------------------------------------------------------------
+void AttitudePanel::ShowCCSDSAttitudeData()
+{
+   // Hide initial attitude and rate
+   HideInitialAttitudeAndRate();
+   rightSizer->Hide(precessingSpinnerSizer);
+   rightSizer->Hide(nadirPointingSizer);
+   rightSizer->Show(ccsdsAttitudeSizer);
+   rightSizer->Layout();
 }
 
 //------------------------------------------------------------------------------
@@ -1877,11 +1944,15 @@ void AttitudePanel::EnableAll()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayDataForModel(const std::string &modelType)
 {
+   #ifdef DEBUG_SHOW_MODEL
+   MessageInterface::ShowMessage
+      ("\nAttitudePanel::DisplayDataForModel() entered, modelType='%s'\n", modelType.c_str());
+   #endif
+   
    // need to create a temporary attitude object in order to query it
    Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
                            CreateObject(modelType, "", 0);
 
-   //LOJ: Modified to show precessing spinner data
    if (modelType == "PrecessingSpinner")
    {
       if (!precessingSpinnerDataLoaded)
@@ -1893,6 +1964,12 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
       if (!nadirPointingDataLoaded)
          LoadNadirPointingData();
       ShowNadirPointingData();
+   }
+   else if (modelType == "CCSDS-AEM")
+   {
+      if (!ccsdsDataLoaded)
+         LoadCCSDSAttitudeData();
+      ShowCCSDSAttitudeData();
    }
    else
    {
@@ -1916,6 +1993,15 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    {
       spiceMessage->Show(false);
    }
+   
+   Layout();
+   Refresh();
+   Update();
+   
+   #ifdef DEBUG_SHOW_MODEL
+   MessageInterface::ShowMessage
+      ("AttitudePanel::DisplayDataForModel() leaving, modelType='%s'\n", modelType.c_str());
+   #endif
    delete tmpAttitude;
 }
 
@@ -2142,27 +2228,6 @@ void AttitudePanel::OnSpinRateTextUpdate(wxCommandEvent &event)
    theScPanel->EnableUpdate(true);
 }
 
-//WCS: Added to trigger new value
-//------------------------------------------------------------------------------
-// void OnReferenceVectorTextUpdate(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void AttitudePanel::OnReferenceVectorTextUpdate(wxCommandEvent &event)
-{
-   refVectorModified = true;
-   dataChanged       = true;
-   theScPanel->EnableUpdate(true);
-}
-
-//WCS: Added to trigger new value
-//------------------------------------------------------------------------------
-// void OnConstraintVectorTextUpdate(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void AttitudePanel::OnConstraintVectorTextUpdate(wxCommandEvent &event)
-{
-   constraintVectorModified = true;
-   dataChanged              = true;
-   theScPanel->EnableUpdate(true);
-}
 
 //WCS: Added to trigger new value
 //------------------------------------------------------------------------------
@@ -2184,6 +2249,40 @@ void AttitudePanel::OnBodyConstraintVectorTextUpdate(wxCommandEvent &event)
    bodyConstraintVectorModified = true;
    dataChanged                  = true;
    theScPanel->EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnAEMFileTextUpdate(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnAEMFileTextUpdate(wxCommandEvent &event)
+{
+   aemFileModified = true;
+   dataChanged     = true;
+   theScPanel->EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnBrowseButton(wxCommandEvent &event)
+{
+   wxString prevFilename = aemFileTextCtrl->GetValue();
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString filename;
+
+      filename = dialog.GetPath().c_str();
+
+      if (!filename.IsSameAs(prevFilename))
+      {
+         aemFileTextCtrl->SetValue(filename);
+         aemFileModified = true;
+         dataChanged     = true;
+         theScPanel->EnableUpdate(true);
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2282,22 +2381,22 @@ void AttitudePanel::OnReferenceBodySelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnModeOfConstraintSelection(wxCommandEvent &event)
+// void OnConstraintTypeSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
- * Handles case when user updates the mode of constraint.
+ * Handles case when user updates the attitude constraint type.
  *
  * @param event  the wxCommandEvent to be handled
  *
  */
 //------------------------------------------------------------------------------
-void AttitudePanel::OnModeOfConstraintSelection(wxCommandEvent &event)
+void AttitudePanel::OnConstraintTypeSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("AttitudePanel::OnModeOfConstraintSelection() entered\n");
+      MessageInterface::ShowMessage("AttitudePanel::OnConstraintTypeSelection() entered\n");
    #endif
-//   std::string newMode      = modeOfConstraintComboBox->GetValue().c_str();
-   modeOfConstraintModified = true;
+//   std::string newMode      = constraintTypeComboBox->GetValue().c_str();
+   constraintTypeModified   = true;
    dataChanged              = true;
    theScPanel->EnableUpdate(true);
 }
@@ -2826,10 +2925,10 @@ bool AttitudePanel::DisplayEulerAngleRates()
 //------------------------------------------------------------------------------
 bool AttitudePanel::DisplayAngularVelocity()
 {
-   bool retval = true;
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::DisplayAngularVelocity() entered\n");
    #endif
+   bool retval = true;
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
@@ -2860,23 +2959,16 @@ bool AttitudePanel::DisplayAngularVelocity()
    return retval;
 }
 
-//LOJ: Addded
 //------------------------------------------------------------------------------
 // void LoadPrecessingSpinnerData()
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadPrecessingSpinnerData()
 {
-   #ifdef DEBUG_PRECESSING_SPINNER
+   #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("AttitudePanel::LoadPrecessingSpinnerData() entered\n");
    #endif
    try
    {
-      //LOJ: @todo
-      // Use theAttitude->GetRealParameter() to get value and set to spin axis text ctrl
-      // For example
-      //spinAxis1TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("SpinAxis1"));
-      
-      // Just for testing
       spinAxis1TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisX")));
       spinAxis2TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisY")));
       spinAxis3TextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodySpinAxisZ")));
@@ -2897,6 +2989,10 @@ void AttitudePanel::LoadPrecessingSpinnerData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
    }
+   
+   #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage("AttitudePanel::LoadPrecessingSpinnerData() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -2904,16 +3000,11 @@ void AttitudePanel::LoadPrecessingSpinnerData()
 //------------------------------------------------------------------------------
 void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
 {
-   #ifdef DEBUG_PRECESSING_SPINNER
+   #ifdef DEBUG_ATTITUE_SAVE
       MessageInterface::ShowMessage("AttitudePanel::SavePrecessingSpinnerData() entered\n");
    #endif
    canClose = true;
    
-   //LOJ: @todo
-   // Use theAttitude->SetRealParameter() to set value to attitude object
-   // In PrecessingSpinner::SetRealParameter(), do the range checking
-   //    if range checking failed, throw an exception so that it can be
-   //    caught here
    try
    {
       bool        success = true;
@@ -3020,7 +3111,12 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
 
       if (success)
       {
-         // do I need to do something here?
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
       }
    }
    catch (BaseException &ex)
@@ -3029,6 +3125,10 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
       dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
+   
+   #ifdef DEBUG_ATTITUE_SAVE
+      MessageInterface::ShowMessage("AttitudePanel::SavePrecessingSpinnerData() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -3036,17 +3136,11 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadNadirPointingData()
 {
-   #ifdef DEBUG_NADIR_POINTING
+   #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("AttitudePanel::LoadNadirPointingData() entered\n");
    #endif
    try
    {
-      refVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorX")));
-      refVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorY")));
-      refVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ReferenceVectorZ")));
-      constraintVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorX")));
-      constraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorY")));
-      constraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("ConstraintVectorZ")));
       bodyAlignVectorXTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorX")));
       bodyAlignVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorY")));
       bodyAlignVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyAlignmentVectorZ")));
@@ -3054,10 +3148,10 @@ void AttitudePanel::LoadNadirPointingData()
       bodyConstraintVectorYTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorY")));
       bodyConstraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorZ")));
 
-      std::string referenceBody  = theAttitude->GetStringParameter("AttitudeReferenceBody");
+      std::string referenceBody      = theAttitude->GetStringParameter("AttitudeReferenceBody");
       referenceBodyComboBox->SetValue(wxT(referenceBody.c_str()));
-      std::string theMode  = theAttitude->GetStringParameter("ModeOfConstraint");
-      modeOfConstraintComboBox->SetValue(wxT(theMode.c_str()));
+      std::string theConstraintType  = theAttitude->GetStringParameter("AttitudeConstraintType");
+      constraintTypeComboBox->SetValue(wxT(theConstraintType.c_str()));
 
       nadirPointingDataLoaded = true;
    }
@@ -3065,6 +3159,10 @@ void AttitudePanel::LoadNadirPointingData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
    }
+   
+   #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage("AttitudePanel::LoadNadirPointingData() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -3072,7 +3170,7 @@ void AttitudePanel::LoadNadirPointingData()
 //------------------------------------------------------------------------------
 void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
 {
-   #ifdef DEBUG_NADIR_POINTING
+   #ifdef DEBUG_ATTITUDE_SAVE
       MessageInterface::ShowMessage("AttitudePanel::SaveNadirPointingData() entered\n");
    #endif
    canClose = true;
@@ -3082,42 +3180,6 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
       bool        success = true;
       std::string strValX, strValY, strValZ;
       Real        theX, theY, theZ;
-      if (refVectorModified)
-      {
-         strValX = (refVectorXTextCtrl->GetValue()).c_str();
-         strValY = (refVectorYTextCtrl->GetValue()).c_str();
-         strValZ = (refVectorZTextCtrl->GetValue()).c_str();
-         // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "ReferenceVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "ReferenceVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "ReferenceVectorZ", "Real Number")))
-         {
-            useAttitude->SetRealParameter("ReferenceVectorX", theX);
-            useAttitude->SetRealParameter("ReferenceVectorY", theY);
-            useAttitude->SetRealParameter("ReferenceVectorZ", theZ);
-            refVectorModified      = false;
-         }
-         else
-            success = false;
-      }
-      if (constraintVectorModified)
-      {
-         strValX = (constraintVectorXTextCtrl->GetValue()).c_str();
-         strValY = (constraintVectorYTextCtrl->GetValue()).c_str();
-         strValZ = (constraintVectorZTextCtrl->GetValue()).c_str();
-         // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "ConstraintVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "ConstraintVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "ConstraintVectorZ", "Real Number")))
-         {
-            useAttitude->SetRealParameter("ConstraintVectorX", theX);
-            useAttitude->SetRealParameter("ConstraintVectorY", theY);
-            useAttitude->SetRealParameter("ConstraintVectorZ", theZ);
-            constraintVectorModified      = false;
-         }
-         else
-            success = false;
-      }
       if (bodyAlignVectorModified)
       {
          strValX = (bodyAlignVectorXTextCtrl->GetValue()).c_str();
@@ -3162,16 +3224,21 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
          attRefBodyModified = false;
       }
 
-      if (modeOfConstraintModified)
+      if (constraintTypeModified)
       {
-         std::string newMode = modeOfConstraintComboBox->GetValue().c_str();
-         useAttitude->SetStringParameter("ModeOfConstraint", newMode);
-         modeOfConstraintModified = false;
+         std::string newMode = constraintTypeComboBox->GetValue().c_str();
+         useAttitude->SetStringParameter("AttitudeConstraintType", newMode);
+         constraintTypeModified = false;
       }
 
       if (success)
       {
-         // do I need to do something here?
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
       }
    }
    catch (BaseException &ex)
@@ -3180,6 +3247,110 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
       dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
+   
+   #ifdef DEBUG_ATTITUDE_SAVE
+      MessageInterface::ShowMessage("AttitudePanel::SaveNadirPointingData() leaving\n");
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void LoadCCSDSAttitudeData()
+//------------------------------------------------------------------------------
+void AttitudePanel::LoadCCSDSAttitudeData()
+{
+   #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage
+         ("AttitudePanel::LoadCCSDSAttitudeData() entered, theAttitude=<%p>\n", theAttitude);
+   #endif
+   try
+   {
+      std::string theAEM = theAttitude->GetStringParameter("AttitudeFileName");
+      aemFileTextCtrl->SetValue(theAEM.c_str());
+      aemFile         = theAEM;
+      previousAemFile = theAEM;
+
+      ccsdsDataLoaded = true;
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+   }
+   #ifdef DEBUG_ATTITUDE_LOAD
+      MessageInterface::ShowMessage("AttitudePanel::LoadCCSDSAttitudeData() leaving\n");
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void SaveCCSDSAttitudeData(Attitude *useAttitude)
+//------------------------------------------------------------------------------
+void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
+{
+   #ifdef DEBUG_ATTITUDE_SAVE
+      MessageInterface::ShowMessage("AttitudePanel::SaveCCSDSAttitudeData() entered\n");
+   #endif
+   canClose = true;
+
+   try
+   {
+      bool success = true;
+
+      if (aemFileModified)
+      {
+         wxString str = aemFileTextCtrl->GetValue();
+         aemFile      = str.c_str();
+         std::ifstream filename(str.c_str());
+
+         // Check if the file doesn't exist then stop
+         if (!filename)
+         {
+            std::string errmsg = "The value \"";
+            errmsg += aemFile + "\" for field \"AttitudeFileName\" ";
+            errmsg += "is not an allowed value.  The allowed values are: ";
+            errmsg += "[ File must exist ]\n";
+            MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+            canClose    = false;
+            dataChanged = true;
+            success     = false;
+            aemFile     = previousAemFile;
+            return;
+         }
+         filename.close();
+
+         if (useAttitude->SetStringParameter("AttitudeFileName", aemFile))
+         {
+            previousAemFile = str.c_str();
+            success         = true;
+         }
+         else
+         {
+            // if there was an error, set it back to what it was the last time it was saved
+            aemFileTextCtrl->SetValue(previousAemFile.c_str());
+            aemFile         = previousAemFile;
+            success         = false;
+         }
+         aemFileModified = false;
+      }
+
+      if (success)
+      {
+         canClose = true;
+      }
+      else
+      {
+         canClose    = false;
+         dataChanged = true;
+      }
+   }
+   catch (BaseException &ex)
+   {
+      canClose    = false;
+      dataChanged = true;
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+   }
+   
+   #ifdef DEBUG_ATTITUDE_SAVE
+      MessageInterface::ShowMessage("AttitudePanel::SaveCCSDSAttitudeData() leaving\n");
+   #endif
 
 }
 
@@ -3204,17 +3375,17 @@ bool AttitudePanel::UpdateCosineMatrix()
    {
       if (attStateType == stateTypeArray[QUATERNION])
       {
-         dcmat = Attitude::ToCosineMatrix(q);
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(q);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         dcmat = Attitude::ToCosineMatrix(ea * GmatMathConstants::RAD_PER_DEG,
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(ea * GmatMathConstants::RAD_PER_DEG,
                          (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q     = Attitude::ToQuaternion(mrp);
-         dcmat = Attitude::ToCosineMatrix(q);
+         q     = AttitudeConversionUtility::ToQuaternion(mrp);
+         dcmat = AttitudeConversionUtility::ToCosineMatrix(q);
       }
       // update string versions of mat values (cosineMatrix)
       unsigned int x, y;
@@ -3251,16 +3422,16 @@ bool AttitudePanel::UpdateQuaternion()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         q = Attitude::ToQuaternion(dcmat);
+         q = AttitudeConversionUtility::ToQuaternion(dcmat);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         q = Attitude::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
+         q = AttitudeConversionUtility::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q     = Attitude::ToQuaternion(mrp);
+         q     = AttitudeConversionUtility::ToQuaternion(mrp);
       }
       // update string versions of q values
       for (unsigned int x = 0; x < 4; ++x)
@@ -3295,20 +3466,20 @@ bool AttitudePanel::UpdateEulerAngles()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         ea = Attitude::ToEulerAngles(dcmat,
+         ea = AttitudeConversionUtility::ToEulerAngles(dcmat,
                         (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                         * GmatMathConstants::DEG_PER_RAD;
       }
       else if (attStateType == stateTypeArray[QUATERNION])
       {
-         ea = Attitude::ToEulerAngles(q,
+         ea = AttitudeConversionUtility::ToEulerAngles(q,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                        * GmatMathConstants::DEG_PER_RAD;
       }
       else if (attStateType == stateTypeArray[MRPS])  // Dunn Added
       {
-         q  = Attitude::ToQuaternion(mrp);
-         ea = Attitude::ToEulerAngles(q,
+         q  = AttitudeConversionUtility::ToQuaternion(mrp);
+         ea = AttitudeConversionUtility::ToEulerAngles(q,
                        (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                        * GmatMathConstants::DEG_PER_RAD;
       }
@@ -3345,18 +3516,18 @@ bool AttitudePanel::UpdateMRPs()
    {
       if (attStateType == stateTypeArray[DCM])
       {
-         q   = Attitude::ToQuaternion(dcmat);
-         mrp = Attitude::ToMRPs(q);
+         q   = AttitudeConversionUtility::ToQuaternion(dcmat);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       else if (attStateType == stateTypeArray[QUATERNION])
       {
-         mrp = Attitude::ToMRPs(q);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       else if (attStateType == stateTypeArray[EULER_ANGLES])
       {
-         q   = Attitude::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
+         q   = AttitudeConversionUtility::ToQuaternion(ea * GmatMathConstants::RAD_PER_DEG,
                (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
-         mrp = Attitude::ToMRPs(q);
+         mrp = AttitudeConversionUtility::ToMRPs(q);
       }
       // update string versions of mrp values
       for (unsigned int x = 0; x < 3; ++x)
@@ -3405,7 +3576,7 @@ bool AttitudePanel::UpdateAngularVelocity()
                MessageInterface::ShowMessage("   with seq = %d  %d  %d\n",
                      (Integer) seq[0], (Integer) seq[1], (Integer) seq[2]);
             #endif
-            av = Attitude::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
+            av = AttitudeConversionUtility::ToAngularVelocity(ear * GmatMathConstants::RAD_PER_DEG,
                            ea * GmatMathConstants::RAD_PER_DEG,
                            (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                            * GmatMathConstants::DEG_PER_RAD;
@@ -3456,7 +3627,7 @@ bool AttitudePanel::UpdateEulerAngleRates()
          #endif
          if (retval)
          {
-            ear = Attitude::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
+            ear = AttitudeConversionUtility::ToEulerAngleRates(av * GmatMathConstants::RAD_PER_DEG,
                             ea * GmatMathConstants::RAD_PER_DEG,
                             (Integer) seq[0], (Integer) seq[1], (Integer) seq[2])
                             * GmatMathConstants::DEG_PER_RAD;

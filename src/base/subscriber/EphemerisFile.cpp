@@ -29,6 +29,7 @@
 #include "RealUtilities.hpp"         // for IsEven()
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
+#include "AttitudeConversionUtility.hpp"
 #include <sstream>                   // for <<, std::endl
 
 #include "Code500EphemerisFile.hpp"
@@ -2794,7 +2795,7 @@ void EphemerisFile::GetAttitude()
    // Get spacecraft attitude in direction cosine matrix
    attEpoch = spacecraft->GetEpoch();
    Rmatrix33 dcm = spacecraft->GetAttitude(attEpoch);
-   Rvector quat = Attitude::ToQuaternion(dcm);
+   Rvector quat = AttitudeConversionUtility::ToQuaternion(dcm);
    for (int i = 0; i < 4; i++)
       attQuat[i] = quat[i];
 }
@@ -5449,22 +5450,21 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
 
 
 //------------------------------------------------------------------------------
-// virtual void HandleScPropertyChange(GmatBase *originator, Real epoch,
-//                                     const std::string &satName,
-//                                     const std::string &desc)
+// virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
+//                 const std::string &satName, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
  * @see Subscriber
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
-                                           const std::string &satName,
-                                           const std::string &desc)
+void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
+                                                   const std::string &satName,
+                                                   const std::string &desc)
 {
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
    MessageInterface::ShowMessage
       ("\n==================================================\n"
-       "EphemerisFile::HandleScPropertyChange() '%s' entered, originator=<%p>, "
+       "EphemerisFile::HandleSpacecraftPropertyChange() '%s' entered, originator=<%p>, "
        "epoch=%.15f, satName='%s', desc='%s', active=%d\n", GetName().c_str(),
        originator, epoch, satName.c_str(), desc.c_str(), active);
    DebugWriteTime("   event epoch ", epoch, true);
@@ -5474,7 +5474,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    {
       #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
       MessageInterface::ShowMessage
-         ("EphemerisFile::HandleScPropertyChange() '%s' leaving, it is not active\n", GetName().c_str());
+         ("EphemerisFile::HandleSpacecraftPropertyChange() '%s' leaving, it is not active\n", GetName().c_str());
       #endif
       return;
    }
@@ -5483,7 +5483,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    {
       #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
       MessageInterface::ShowMessage
-         ("EphemerisFile::HandleScPropertyChange() '%s' leaving, user defined final "
+         ("EphemerisFile::HandleSpacecraftPropertyChange() '%s' leaving, user defined final "
           "epoch has been processed\n", GetName().c_str());
       #endif
       return;
@@ -5501,7 +5501,7 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    {
       #ifdef DEBUG_EPHEMFILE_RESTART
       MessageInterface::ShowMessage
-         ("EphemerisFile::HandleScPropertyChange() Calling FinishUpWriting()\n");
+         ("EphemerisFile::HandleSpacecraftPropertyChange() Calling FinishUpWriting()\n");
       #endif
       
       // Write any data in the buffer
@@ -5520,6 +5520,6 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
    
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
    MessageInterface::ShowMessage
-      ("EphemerisFile::HandleScPropertyChange() '%s' leaving\n", GetName().c_str());
+      ("EphemerisFile::HandleSpacecraftPropertyChange() '%s' leaving\n", GetName().c_str());
    #endif
 }

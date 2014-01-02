@@ -1387,10 +1387,10 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath)
    std::string absPath;
    StringTokenizer st(relPath, "/\\");
    StringArray allNames = st.GetAllTokens();
-   Integer numNames = allNames.size();
    StringArray pathNames;
    
    #ifdef DEBUG_FILE_PATH
+   Integer numNames = allNames.size();
    MessageInterface::ShowMessage("There are %d names in relPath\n", numNames);
    for (int i = 0; i < numNames; i++)
       MessageInterface::ShowMessage("   allNames[%d] = '%s'\n", i, allNames[i].c_str());

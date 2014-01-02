@@ -206,7 +206,8 @@ void ExpressionParser::EvalTwoFactors(Real &result)
 void ExpressionParser::EvalExponent(Real &result)
 {
    //register int t;
-   Real temp, ex;
+   Real temp;
+   // Real ex;
 
    EvalUnary(result);
 
@@ -214,7 +215,7 @@ void ExpressionParser::EvalExponent(Real &result)
    {
       GetToken();
       EvalExponent(temp);
-      ex = result;
+      // ex = result;
 
       if (temp == 0.0)
       {

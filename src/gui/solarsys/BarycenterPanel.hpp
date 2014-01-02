@@ -19,6 +19,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
+#include "GmatColorPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "Barycenter.hpp"
 
@@ -35,7 +36,9 @@ public:
 
 private:
    Barycenter *theBarycenter;
-
+   Barycenter *theClonedBarycenter;
+   GmatColorPanel *theColorPanel;
+   
    static const int MAX_LIST_SIZE = 30;
    wxArrayString mBodyNames;
 

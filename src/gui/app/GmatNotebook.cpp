@@ -252,7 +252,7 @@ wxPanel* GmatNotebook::CreateMissionPage()
    // Create mission tree
    //---------------------------------------------
    long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-      wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT |wxTR_EXTENDED;
+      wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT |wxTR_EXTENDED | wxTR_ROW_LINES;
    // If we allow the the user to be able to edit labels in the tree control. 
    // add wxTR_EDIT_LABELS;
    // @note - This option confuses with double click on the active node.

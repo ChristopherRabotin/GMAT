@@ -69,3 +69,18 @@ void MissionTreeItemData::SetCommand(GmatCommand* cmd)
    theCommand = cmd;
 }
 
+//------------------------------------------------------------------------------
+// virtual wxTreeItemId GetNodeId()
+//------------------------------------------------------------------------------
+wxTreeItemId MissionTreeItemData::GetNodeId()
+{
+   return theNodeId;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetNodeId(const wxTreeItemId &nodeId)
+//------------------------------------------------------------------------------
+void MissionTreeItemData::SetNodeId(const wxTreeItemId &nodeId)
+{
+   theNodeId = nodeId;
+}

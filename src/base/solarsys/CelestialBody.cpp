@@ -2161,14 +2161,14 @@ bool CelestialBody::RemoveValidModelName(Gmat::ModelType m,
                                          const std::string &modelName)
 {
    // remove it, if it's on the list
-   bool found = false;
+   // bool found = false;
    for (StringArray::iterator i = models[(Integer)m].begin();
         i != models[(Integer)m].end(); ++i)
    {
       if (*i == modelName)
       {
          models[(Integer)m].erase(i);
-         found = true;
+         // found = true;
          break;
       }
    }

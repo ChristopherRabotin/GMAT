@@ -525,6 +525,9 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -988,6 +991,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -20,13 +20,16 @@
 
 #include "GroundTrackPlotPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
-#include "StringUtil.hpp"
 
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
 #include "ColorTypes.hpp"           // for namespace GmatColor::
-#include "MessageInterface.hpp"
 #include <wx/clrpicker.h>           // for wxColorPickerCtrl
 #include "wx/colordlg.h"            // for wxColourDialog
+#endif
+
 #include "bitmaps/OpenFolder.xpm"   // for browse button bitmap
+#include "StringUtil.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_PANEL 1
 //#define DEBUG_PANEL_CREATE 1
@@ -49,7 +52,9 @@ BEGIN_EVENT_TABLE(GroundTrackPlotPanel, GmatPanel)
    EVT_BUTTON(ID_BROWSE_BUTTON, GroundTrackPlotPanel::OnBrowseButton)
    EVT_CHECKBOX(ID_CHECKBOX, GroundTrackPlotPanel::OnCheckBoxChange)
    EVT_CHECKLISTBOX(ID_CHECKLISTBOX, GroundTrackPlotPanel::OnCheckListBoxChange)
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    EVT_COLOURPICKER_CHANGED(ID_COLOR_CTRL, GroundTrackPlotPanel::OnColorPickerChange)
+   #endif
    EVT_COMBOBOX(ID_COMBOBOX, GroundTrackPlotPanel::OnComboBoxChange)
    EVT_LISTBOX(ID_CHECKLISTBOX, GroundTrackPlotPanel::OnCheckListBoxSelect)
    EVT_TEXT(ID_TEXTCTRL, GroundTrackPlotPanel::OnTextChange)
@@ -172,13 +177,14 @@ void GroundTrackPlotPanel::InitializeData()
    mHasRealDataChanged = false;
    mHasDataOptionChanged = false;
    mHasObjectListChanged = false;
-   mHasOrbitColorChanged = false;
-   mHasTargetColorChanged = false;
+   
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    mHasCentralBodyChanged = false;
    mHasTextureMapChanged = false;
-   
+   mHasOrbitColorChanged = false;
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
+   #endif
 }
 
 
@@ -206,12 +212,16 @@ void GroundTrackPlotPanel::Create()
    //-----------------------------------------------------------------
    #ifdef __WXMAC__
    int arrowW = 40;
-   int colorW = 10;
    int buttonWidth = 40;
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
+   int colorW = 40;
+   #endif
    #else
    int arrowW = 20;
-   int colorW = 25;
    int buttonWidth = 25;
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
+   int colorW = 25;
+   #endif
    #endif
    
    //-----------------------------------------------------------------
@@ -234,6 +244,8 @@ void GroundTrackPlotPanel::Create()
    mObjectCheckListBox =
       theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
                                                false, false, true, true);
+
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    //-----------------------------------
    // Drawing color
    wxStaticText *orbitColorLabel =
@@ -257,6 +269,8 @@ void GroundTrackPlotPanel::Create()
    colorSizer->Add(mOrbitColorCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    colorSizer->Add(targetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    colorSizer->Add(mTargetColorCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   #endif
+
    
    //-----------------------------------
    // Drawing options sizer
@@ -266,7 +280,9 @@ void GroundTrackPlotPanel::Create()
    drawingOptionFlexSizer->Add(10, 2, wxALIGN_LEFT|wxALL, bsize);
    drawingOptionFlexSizer->Add(selectedObjectLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    drawingOptionFlexSizer->Add(mObjectCheckListBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    drawingOptionFlexSizer->Add(colorSizer, wxALIGN_LEFT|wxALL, bsize);
+   #endif
    
    // Add to drawing option sizer
    GmatStaticBoxSizer *drawingOptionSizer =
@@ -431,14 +447,18 @@ void GroundTrackPlotPanel::LoadData()
       for (unsigned int i = 0; i < objects.size(); i++)
          MessageInterface::ShowMessage("      %d = '%s'\n", i, objects[i].c_str());
       #endif
+
       
       std::string objName;
       // Load object drawing option and colors
       for (UnsignedInt i = 0; i < objects.size(); i++)
       {
          objName = objects[i];
+         
+         #ifdef __USE_COLOR_FROM_SUBSCRIBER__
          mOrbitColorMap[objName] = RgbColor(mGroundTrackPlot->GetColor("Orbit", objName));
          mTargetColorMap[objName] = RgbColor(mGroundTrackPlot->GetColor("Target", objName));
+         #endif
          
          // Put check mark in the object list
          for (int j = 0; j < count; j++)
@@ -451,6 +471,7 @@ void GroundTrackPlotPanel::LoadData()
             }
          }
       }
+      
       
       // Load drawing options
       str.Printf("%d", mGroundTrackPlot->GetIntegerParameter("DataCollectFrequency"));
@@ -471,7 +492,9 @@ void GroundTrackPlotPanel::LoadData()
       if (objects.size() > 0)
       {
          mObjectCheckListBox->SetSelection(0);
+         #ifdef __USE_COLOR_FROM_SUBSCRIBER__
          ShowSpacePointColor(mObjectCheckListBox->GetStringSelection());
+         #endif
       }
    }
    catch (BaseException &e)
@@ -589,7 +612,8 @@ void GroundTrackPlotPanel::SaveData()
          mGroundTrackPlot->SetStringParameter("TextureMap",
                                               mTextureMapTextCtrl->GetValue().c_str());
       }
-
+      
+      #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       // Save orbit colors
       if (mHasOrbitColorChanged)
       {
@@ -603,6 +627,7 @@ void GroundTrackPlotPanel::SaveData()
          mHasTargetColorChanged = false;
          SaveObjectColors("Target", mTargetColorMap);
       }
+      #endif
       
       EnableUpdate(false);
       canClose = true;
@@ -680,12 +705,15 @@ void GroundTrackPlotPanel::OnCheckListBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GroundTrackPlotPanel::OnCheckListBoxSelect(wxCommandEvent& event)
 {
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    // Show object color
    wxString selObj = mObjectCheckListBox->GetStringSelection();
    ShowSpacePointColor(selObj);
+   #endif
 }
 
 
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
 //------------------------------------------------------------------------------
 // void OnColorPickerChange(wxColourPickerEvent& event)
 //------------------------------------------------------------------------------
@@ -743,6 +771,7 @@ void GroundTrackPlotPanel::OnColorPickerChange(wxColourPickerEvent& event)
    MessageInterface::ShowMessage("GroundTrackPlotPanel::OnColorPickerChange() entered\n");
    #endif
 }
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -794,6 +823,7 @@ void GroundTrackPlotPanel::OnTextChange(wxCommandEvent& event)
 // private methods
 //---------------------------------
 
+#ifdef __USE_COLOR_FROM_SUBSCRIBER__
 //------------------------------------------------------------------------------
 // void ShowSpacePointColor(const wxString &name, UnsignedInt color = GmatColor::RED)
 //------------------------------------------------------------------------------
@@ -837,7 +867,6 @@ void GroundTrackPlotPanel::ShowSpacePointColor(const wxString &name, UnsignedInt
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void SaveObjectColors(const wxString &which,
 //                       std::map<std::string, RgbColor> &colorMap)
@@ -871,5 +900,5 @@ void GroundTrackPlotPanel::SaveObjectColors(const wxString &which,
    MessageInterface::ShowMessage("GroundTrackPlotPanel::SaveObjectColors() leaving\n");
    #endif
 }
-
+#endif
 

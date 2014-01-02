@@ -44,11 +44,14 @@
  * Constructor.
  */
 //------------------------------------------------------------------------------
-RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType)
+RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
+                 GmatParam::DepObject depObj, bool isSettable)
 {
    mActualParamName = name;
    GmatStringUtil::ParseParameter(name, mParamTypeName, mParamOwnerName, mParamDepName);
    mParamOwnerType = paramOwnerType;
+   mParamDepObj = depObj;
+   mIsParamSettable = isSettable;
    mRefObjList.clear();
    mNumRefObjects = 0;
    #ifdef DEBUG_REFDATA
@@ -75,6 +78,8 @@ RefData::RefData(const RefData &copy)
    mParamDepName = copy.mParamDepName;
    mParamTypeName = copy.mParamTypeName;
    mParamOwnerType = copy.mParamOwnerType;
+   mParamDepObj = copy.mParamDepObj;
+   mIsParamSettable = copy.mIsParamSettable;
    mObjectTypeNames = copy.mObjectTypeNames;
    mAllRefObjectNames = copy.mAllRefObjectNames;
    mNumRefObjects = copy.mNumRefObjects;
@@ -95,11 +100,16 @@ RefData::RefData(const RefData &copy)
 //------------------------------------------------------------------------------
 RefData& RefData::operator= (const RefData& right)
 {
+   if (this == &right)
+      return *this;
+   
    mActualParamName = right.mActualParamName;
    mParamOwnerName = right.mParamOwnerName;
    mParamDepName = right.mParamDepName;
    mParamTypeName = right.mParamTypeName;
    mParamOwnerType = right.mParamOwnerType;
+   mParamDepObj = right.mParamDepObj;
+   mIsParamSettable = right.mIsParamSettable;
    mObjectTypeNames = right.mObjectTypeNames;
    mAllRefObjectNames = right.mAllRefObjectNames;
    mNumRefObjects = right.mNumRefObjects;

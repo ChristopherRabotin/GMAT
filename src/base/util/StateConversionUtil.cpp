@@ -218,6 +218,9 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Delaunay") // Modified by M.H.
          {
             Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+            #ifdef DEBUG_STATE_CONVERSION
+            MessageInterface::ShowMessage("   CartesianToKeplerian = %s", kepl.ToString().c_str());
+            #endif
             outState = KeplerianToDelaunay(kepl, mu); 
          }
          else if (toType == "Planetodetic") // Modified by M.H.
@@ -509,7 +512,12 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "Delaunay") // Modified by M.H.
       {
          Rvector6 kepl = DelaunayToKeplerian(state, mu);
-         Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         #ifdef DEBUG_STATE_CONVERSION
+         MessageInterface::ShowMessage("   DelaunayToKeplerian = %s", kepl.ToString().c_str());
+         #endif
+         //It should call KeplerianToCartesian() (LOJ: 2013.11.12)
+         //Rvector6 cart = CartesianToKeplerian(mu, state, anomalyType);
+         Rvector6 cart = KeplerianToCartesian(mu, kepl, anomalyType);
          if (toType == "Cartesian")
          {
             outState = cart;
@@ -640,7 +648,7 @@ Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesia
    Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
    Rvector3 vel(cartesian[3], cartesian[4], cartesian[5]);
    Real rMag = pos.GetMagnitude();
-   Real vMag = vel.GetMagnitude();
+   //Real vMag = vel.GetMagnitude();
    
    if (rMag <= 0.0)
    {
@@ -1295,7 +1303,7 @@ Rvector6 StateConversionUtil::CartesianToKeplerian(Real mu, const Rvector6 &stat
    Real     r[3];
    Real     v[3];
    Real     tfp;
-   Integer  ret;
+   //Integer  ret;
    Integer  errorCode;
 
    for (int i=0; i<6; i++)
@@ -1322,7 +1330,7 @@ Rvector6 StateConversionUtil::CartesianToKeplerian(Real mu, const Rvector6 &stat
          switch (errorCode)
          {
          case 0: // no error
-            ret = 1;
+            //ret = 1;
             break;
          case 2:
             throw UtilityException

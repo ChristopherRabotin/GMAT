@@ -73,9 +73,21 @@ public:
                                        const std::string &desc);
    bool                 GetManeuvering();
    
-   void                 SetScPropertyChanged(GmatBase *originator, Real epoch,
-                                             const std::string &satName,
+   void                 SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
+                                                     const std::string &satName,
+                                                     const std::string &desc);
+   void                 SetOrbitColorChanged(GmatBase *originator,
+                                             const std::string &newColor,
+                                             const std::string &objName,
                                              const std::string &desc);
+   void                 SetTargetColorChanged(GmatBase *originator,
+                                              const std::string &newColor,
+                                              const std::string &objName,
+                                              const std::string &desc);
+   void                 SetSegmentOrbitColor(GmatBase *originator,
+                                             bool overrideColor,
+                                             UnsignedInt orbitColor,
+                                             const StringArray &objNames);
    
    CoordinateSystem* GetInternalCoordSystem() { return internalCoordSystem; }
    CoordinateSystem* GetDataCoordSystem() { return dataCoordSystem; }

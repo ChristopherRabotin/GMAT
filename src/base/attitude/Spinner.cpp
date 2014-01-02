@@ -27,6 +27,7 @@
 #include "Spinner.hpp"
 #include "TimeTypes.hpp"
 #include "MessageInterface.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 //#define DEBUG_SPINNER_INIT
 //#define DEBUG_SPINNER
@@ -211,7 +212,7 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #endif
    // Compute the Euler angle
    Real      theEAngle      = initialwMag * dt;
-   Rmatrix33 RBB0t          = Attitude::EulerAxisAndAngleToDCM(
+   Rmatrix33 RBB0t          = AttitudeConversionUtility::EulerAxisAndAngleToDCM(
                               initialeAxis, theEAngle);
    
    dcm                      = RBB0t * RB0I;

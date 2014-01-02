@@ -733,7 +733,8 @@ bool Assignment::Validate()
                   if ((rhsDataType != Gmat::STRING_TYPE) )
                      retval = false;
                }
-               else if (lhsDataType == Gmat::ENUMERATION_TYPE)
+               else if (lhsDataType == Gmat::ENUMERATION_TYPE ||
+                        lhsDataType == Gmat::COLOR_TYPE) // For color setting (LOJ: 2013.11.22)
                {
                   if ((rhsDataType != Gmat::STRING_TYPE) )
                      retval = false;
@@ -1174,10 +1175,10 @@ bool Assignment::Execute()
                                            globalObjectMap, setRefObj);
       }
       
-      // Check if setting spacecraft property
+      // Check if setting object property
       if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT ||
           lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
-         HandleScPropertyChange(lhsWrapper);
+         HandleObjectPropertyChange(lhsWrapper);
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage("   ElementWrapper::SetValue() returned %d\n", retval);
@@ -1447,7 +1448,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    
    ElementWrapper *lhsOldWrapper = NULL;
    ElementWrapper *rhsOldWrapper = NULL;
-   ElementWrapper *rhsNewWrapper = NULL;
+   #ifdef DEBUG_WRAPPER_CODE
+      ElementWrapper *rhsNewWrapper = NULL;
+   #endif
    
    #ifdef DEBUG_WRAPPER_CODE
    ShowWrapper("   ", "lhsWrapper:", lhsWrapper);
@@ -1566,7 +1569,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
          if (rhsWrapper != toWrapper)
          {
             rhsOldWrapper = rhsWrapper;
-            rhsNewWrapper = toWrapper;
+            #ifdef DEBUG_WRAPPER_CODE
+               rhsNewWrapper = toWrapper;
+            #endif
             rhsWrapper = toWrapper;
          }
          retval = true;
@@ -1598,7 +1603,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
                MessageInterface::ShowMessage("   now setting rhsNewWrapper to <%p>\n", toWrapper);
                #endif
                rhsOldWrapper = mathWrapperMap[withName];
-               rhsNewWrapper = toWrapper;
+               #ifdef DEBUG_WRAPPER_CODE
+                  rhsNewWrapper = toWrapper;
+               #endif
                mathWrapperMap[withName] = toWrapper;
             }
             retval = true;
@@ -2227,21 +2234,92 @@ ElementWrapper* Assignment::RunMathTree()
    
 }
 
-
 //------------------------------------------------------------------------------
-// void HandleScPropertyChange(ElementWrapper *lhsWrapper)
+// void HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
 //------------------------------------------------------------------------------
-void Assignment::HandleScPropertyChange(ElementWrapper *lhsWrapper)
+void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
 {
+   #ifdef DEBUG_PROPERTY_CHANGE
+   MessageInterface::ShowMessage
+      ("Assignment::HandleObjectPropertyChange() entered, lhsWrapper='%s'\n",
+       lhsWrapper->GetDescription().c_str());
+   #endif
+   
+   std::string propName;
+   
+   // Get property name
+   if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
+   {
+      StringArray propNames = ((ObjectPropertyWrapper*)lhsWrapper)->GetPropertyNames();
+      int propSize = propNames.size();
+      
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   There are %d properties\n", propSize);
+      for (int i = 0; i < propSize; i++)
+         MessageInterface::ShowMessage("      propNames[%d] = '%s'\n", i, propNames[i].c_str());
+      #endif
+      
+      if (propSize == 0)
+         throw  CommandException("Assignment command cannot handle object property change, "
+                                 "property name is empty");
+      
+      // Get first property name (Why is there more than one property name?)
+      propName = propNames[0];
+   }
+   
    GmatBase *obj = lhsWrapper->GetRefObject();
    if (obj != NULL)
    {
+      // Check for the Spacecraft first
       if (obj->IsOfType(Gmat::SPACECRAFT))
       {
-         publisher->SetScPropertyChanged(this, obj->GetRealParameter("A1Epoch"),
+         if (propName == "OrbitColor")
+         {
+            #ifdef DEBUG_PROPERTY_CHANGE
+            MessageInterface::ShowMessage("   Calling Publisher to handle orbit color change\n");
+            #endif
+            publisher->SetOrbitColorChanged(this, obj->GetStringParameter("OrbitColor"),
+                                            obj->GetName(), lhs + " = " + rhs);
+         }
+         else if (propName == "TargetColor")
+         {
+            #ifdef DEBUG_PROPERTY_CHANGE
+            MessageInterface::ShowMessage("   Calling Publisher to handle target color change\n");
+            #endif
+            publisher->SetTargetColorChanged(this, obj->GetStringParameter("TargetColor"),
+                                             obj->GetName(), lhs + " = " + rhs);
+         }
+         else
+         {
+            #ifdef DEBUG_PROPERTY_CHANGE
+            MessageInterface::ShowMessage("   Calling Publisher to handle spacecraft property change\n");
+            #endif
+            publisher->SetSpacecraftPropertyChanged(this, obj->GetRealParameter("A1Epoch"),
+                                                    obj->GetName(), lhs + " = " + rhs);
+         }
+      }
+      else if (propName == "OrbitColor")
+      {
+         #ifdef DEBUG_PROPERTY_CHANGE
+         MessageInterface::ShowMessage("   Calling Publisher to handle orbit color change\n");
+         #endif
+         publisher->SetOrbitColorChanged(this, obj->GetStringParameter("OrbitColor"),
                                          obj->GetName(), lhs + " = " + rhs);
       }
+      else if (propName == "TargetColor")
+      {
+         #ifdef DEBUG_PROPERTY_CHANGE
+         MessageInterface::ShowMessage("   Calling Publisher to handle target color change\n");
+         #endif
+         publisher->SetTargetColorChanged(this, obj->GetStringParameter("TargetColor"),
+                                          obj->GetName(), lhs + " = " + rhs);
+      }
    }
+   #ifdef DEBUG_PROPERTY_CHANGE
+   MessageInterface::ShowMessage
+      ("Assignment::HandleObjectPropertyChange() leaving, lhsWrapper='%s'\n",
+       lhsWrapper->GetDescription().c_str());
+   #endif
 }
 
 

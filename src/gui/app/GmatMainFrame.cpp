@@ -252,6 +252,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_SASH_DRAGGED (ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag)
    EVT_MENU (ID_MSGWIN_MENU_COPY, GmatMainFrame::OnMsgWinCopy)
    EVT_MENU (ID_MSGWIN_MENU_SELECTALL, GmatMainFrame::OnMsgWinSelectAll)
+   EVT_MENU_RANGE(TOOL_NEXT_TAB, TOOL_PREV_TAB, GmatMainFrame::OnCycleTab)
 
    EVT_SIZE (GmatMainFrame::OnMainFrameSize)
    EVT_CLOSE (GmatMainFrame::OnClose)
@@ -549,6 +550,16 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       #endif
    #endif
    
+   wxAcceleratorEntry entries[6];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_F5, TOOL_RUN);
+   entries[1].Set(wxACCEL_NORMAL,  WXK_F10, TOOL_SCREENSHOT);
+   entries[2].Set(wxACCEL_NORMAL,  WXK_F9, TOOL_ANIMATION_PLAY);
+   entries[3].Set(wxACCEL_SHIFT,  WXK_F9, TOOL_ANIMATION_STOP);
+   entries[4].Set(wxACCEL_CTRL, WXK_PAGEUP, TOOL_PREV_TAB);
+   entries[5].Set(wxACCEL_CTRL, WXK_PAGEDOWN, TOOL_NEXT_TAB);
+   wxAcceleratorTable accel(6, entries);
+   this->SetAcceleratorTable(accel);
+
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
    #endif
@@ -4143,13 +4154,13 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    wxString title = item->GetTitle();
    wxString name = item->GetName();
    GmatCommand *cmd = item->GetCommand();
-
+   
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewCommand() title=%s, name=%s, itemType=%d, cmd=<%p><%s>\n",
        title.c_str(), name.c_str(), itemType, cmd, cmd ? cmd->GetTypeName().c_str() : "NULL");
    #endif
-
+   
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType);
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
@@ -4157,7 +4168,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    switch (itemType)
    {
    case GmatTree::PROPAGATE:
-      sizer->Add(new PropagatePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      // Changed to pass node id so that propagate node text color can be changed
+      // when saving the panel (LOJ: 2013.12.12)
+      sizer->Add(new PropagatePanel(scrolledWin, cmd, item->GetNodeId()), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::MANEUVER:
       sizer->Add(new ManeuverPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -4885,6 +4898,19 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 
    // Leaves bits of itself behind sometimes
    GetClientWindow()->Refresh();
+}
+
+
+void GmatMainFrame::OnCycleTab(wxCommandEvent &event)
+{
+	if (event.GetId() == GmatMenu::TOOL_NEXT_TAB)
+   {
+		theNotebook->AdvanceSelection();
+   }
+   else
+   {
+		theNotebook->AdvanceSelection(false);
+   }
 }
 
 

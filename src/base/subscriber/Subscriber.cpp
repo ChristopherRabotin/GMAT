@@ -519,7 +519,7 @@ void Subscriber::SetManeuvering(GmatBase *originator, bool flag, Real epoch,
 
 
 //------------------------------------------------------------------------------
-// void SetScPropertyChanged(GmatBase *originator, Real epoch,
+// void SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
 //                           const std::string &satName, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
@@ -531,13 +531,78 @@ void Subscriber::SetManeuvering(GmatBase *originator, bool flag, Real epoch,
  * @param desc  Description of property change
  */
 //------------------------------------------------------------------------------
-void Subscriber::SetScPropertyChanged(GmatBase *originator, Real epoch,
-                                      const std::string &satName,
-                                      const std::string &desc)
+void Subscriber::SetSpacecraftPropertyChanged(GmatBase *originator, Real epoch,
+                                              const std::string &satName,
+                                              const std::string &desc)
 {
-   HandleScPropertyChange(originator, epoch, satName, desc);
+   HandleSpacecraftPropertyChange(originator, epoch, satName, desc);
 }
 
+
+//------------------------------------------------------------------------------
+// void SetOrbitColorChanged(GmatBase *originator, const std::string &newColor, ...)
+//------------------------------------------------------------------------------
+/**
+ * Sets object orbit color change.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param newColor  New color to be applied to the object
+ * @param objName  Name of the object
+ * @param desc  Description of property change
+ * @param isSpacecraft Set to true if object is a Spcecraft
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetOrbitColorChanged(GmatBase *originator,
+                                      const std::string &newColor,
+                                      const std::string &objName,
+                                      const std::string &desc)
+{
+   // Do nothing here
+   // Derived classes should handle this if needed
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTargetColorChanged(GmatBase *originator, const std::string &newColor, ...)
+//------------------------------------------------------------------------------
+/**
+ * Sets object target color change.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param newColor  New color to be applied to the object
+ * @param objName  Name of the object
+ * @param desc  Description of property change
+ * @param isSpacecraft Set to true if object is a Spcecraft
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetTargetColorChanged(GmatBase *originator,
+                                       const std::string &newColor,
+                                       const std::string &objName,
+                                       const std::string &desc)
+{
+   // Do nothing here
+   // Derived classes should handle this if needed
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+//                                   UnsignedInt orbitColor)
+//------------------------------------------------------------------------------
+/**
+ * Sets propagation segment orbit color so that subscribers can handle appropriately.
+ * 
+ * @param originator  The Propagate command pointer who is setting
+ * @param overrideColor  The flag indicating whether or not to override orbit color
+ * @param orbitColor  New orbit color to be applied to the space object
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
+                                      UnsignedInt orbitColor, const StringArray &objNames)
+{
+   // Do nothing here
+   // Derived classes should handle this if needed
+}
 
 //------------------------------------------------------------------------------
 // Subscriber* Next()
@@ -1819,6 +1884,7 @@ bool Subscriber::Distribute(const Real *dat, Integer len)
 //------------------------------------------------------------------------------
 /**
  * Handles maneuvering on or off.
+ * Derived subscribers should override this method if necessary.
  * 
  * @param originator  The maneuver command pointer who is maneuvering
  * @param maneuvering  Set to true if maneuvering
@@ -1836,11 +1902,12 @@ void Subscriber::HandleManeuvering(GmatBase *originator, bool maneuvering,
 
 
 //------------------------------------------------------------------------------
-// void HandleScPropertyChange(GmatBase *originator, Real epoch,
+// virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
 //                             const std::string &satName, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
- * Handles spacecraft property change.
+ * Handles spacecraft epoch change.
+ * Derived subscribers should override this method if necessary.
  * 
  * @param originator  The assignment command pointer who is setting
  * @param epoch  Epoch of spacecraft at property change
@@ -1848,9 +1915,9 @@ void Subscriber::HandleManeuvering(GmatBase *originator, bool maneuvering,
  * @param desc  Description of property change
  */
 //------------------------------------------------------------------------------
-void Subscriber::HandleScPropertyChange(GmatBase *originator, Real epoch,
-                                        const std::string &satName,
-                                        const std::string &desc)
+void Subscriber::HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
+                                                const std::string &satName,
+                                                const std::string &desc)
 {
    // do nothing here
 }

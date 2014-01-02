@@ -152,6 +152,13 @@ public:
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                                           const std::string &withName);
    virtual void         ClearWrappers();
+
+   // Methods used for segment orbit colors
+   virtual void         SetSegmentOrbitColor(UnsignedInt &intColor);
+   virtual UnsignedInt  GetSegmentOrbitColor();
+   virtual std::string  GetFirstSpaceObjectName();
+   virtual void         SetOverrideSegmentColor(bool override);
+   virtual bool         GetOverrideSegmentColor();
    
    // Methods used for running the command
    virtual bool         Initialize();
@@ -188,6 +195,8 @@ protected:
    Integer                      stopTrigger;
    /// Array of triggers
    std::vector <StopCondition*> triggers;
+   /// Full list of spacecraft propagating
+   StringArray                 fullSatList;
    /// Names of the spacecraft used in the stopping conditions
    StringArray                  stopSatNames;
    /// String used in the stopping conditions
@@ -266,7 +275,12 @@ protected:
    Integer                 stopCondBaseEpochID;
    /// Epoch on the stopping condition
    Integer                 stopCondStopVarID;
-
+   
+   // Orbit color
+   std::string segmentOrbitColorStr;
+   UnsignedInt segmentOrbitColor;
+   bool overrideSegmentColor;
+   
    /// Parameter IDs
    enum
    {
@@ -280,6 +294,7 @@ protected:
       PROP_FORWARD,
       PROP_ALL_STM,
       CALC_ALL_AMATRIX,
+      ORBIT_COLOR,
       PropagateCommandParamCount,
    };
 
@@ -304,6 +319,7 @@ protected:
                               std::string& generatingString,
                               StringArray &setupStrings, 
                               StringArray &stopStrings);
+   void                    ParseSegmentColor(const std::string &colorString);
    void                    ConfigurePropSetup(std::string &setupDesc);
    void                    ConfigureStoppingCondition(std::string &stopDesc);
    void                    CleanString(std::string &theString, 

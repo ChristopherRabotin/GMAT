@@ -37,7 +37,9 @@ class GMAT_API OrbitData : public RefData
 public:
 
    OrbitData(const std::string &name = "",
-             const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
+             const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT,
+             GmatParam::DepObject depObj = GmatParam::NO_DEP,
+             bool isSettable = false);
    OrbitData(const OrbitData &data);
    OrbitData& operator= (const OrbitData& right);
    virtual ~OrbitData();
@@ -113,21 +115,26 @@ public:
 
 protected:
 
-   virtual bool              AddRefObject(const Gmat::ObjectType type,
-                                          const std::string &name, GmatBase *obj = NULL,
-                                          bool replaceName = false);
-
+   // Inherited methods from RefData
+   virtual bool AddRefObject(const Gmat::ObjectType type,
+                             const std::string &name, GmatBase *obj = NULL,
+                             bool replaceName = false);
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   
+   // Methods
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
    
    void SetInternalCoordSys(CoordinateSystem *cs);
-   Rvector6 GetRelativeCartState(SpacePoint *origin);
    Real GetPositionMagnitude(SpacePoint *origin);
+   Rvector6 GetRelativeCartState(SpacePoint *origin);
+   Rvector6 GetCartStateInParameterCS(Integer item, Real rval);
+   Rvector6 GetCartStateInParameterOrigin(Integer item, Real rval);
+   void SetRealParameters(Integer item, Real rval);
+   void DebugOutputData(CoordinateSystem *paramOwnerCS);
    
-   // The inherited methods from RefData
-   virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
-   
+   // Data members
    Rvector6 mCartState;
    Rvector6 mKepState;
    Rvector6 mModKepState;
@@ -138,8 +145,8 @@ protected:
    Rvector6 mDelaState;
    Rvector6 mPlanetodeticState;
 
-   Rmatrix66  mSTM;
-   Rmatrix33  mSTMSubset;
+   Rmatrix66 mSTM;
+   Rmatrix33 mSTMSubset;
    
    Real mCartEpoch;
    Real mGravConst;
