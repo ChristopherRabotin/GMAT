@@ -1292,7 +1292,10 @@ bool Simulator::HasLocalClones()
 //------------------------------------------------------------------------------
 void Simulator::UpdateClonedObject(GmatBase *obj)
 {
-   throw SolverException("To do: implement Simulator::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw SolverException("To do: implement Simulator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 

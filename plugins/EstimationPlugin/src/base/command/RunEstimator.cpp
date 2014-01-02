@@ -719,7 +719,10 @@ bool RunEstimator::HasLocalClones()
 //------------------------------------------------------------------------------
 void RunEstimator::UpdateClonedObject(GmatBase *obj)
 {
-   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw CommandException("To do: implement RunEstimator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 //------------------------------------------------------------------------------

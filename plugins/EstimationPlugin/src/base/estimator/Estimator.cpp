@@ -1276,7 +1276,10 @@ bool Estimator::HasLocalClones()
 //------------------------------------------------------------------------------
 void Estimator::UpdateClonedObject(GmatBase *obj)
 {
-   throw SolverException("To do: implement Estimator::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw SolverException("To do: implement Estimator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 

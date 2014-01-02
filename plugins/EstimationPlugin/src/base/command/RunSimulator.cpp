@@ -657,7 +657,10 @@ bool RunSimulator::HasLocalClones()
 //------------------------------------------------------------------------------
 void RunSimulator::UpdateClonedObject(GmatBase *obj)
 {
-   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw CommandException("To do: implement RunSimulator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 
