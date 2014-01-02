@@ -46,7 +46,6 @@ Propagator* ExtraPropagatorFactory::CreatePropagator(const std::string &ofType,
 {
    if (ofType == "BulirschStoer")
       return new BulirschStoer(withName);
-
    return NULL;
 }
 

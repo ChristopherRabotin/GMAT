@@ -1,19 +1,111 @@
 #!/bin/bash
-# Set up the environment for GMAT first
-# This assumes that the user has set the MATLABFORGMAT environment variable in her/his environment.plist file.  
-# MATLABFORGMAT should point to the directory where MATLAB has been installed, i.e. /Applications/MATLAB_R2007b
-# This also assumes that the user has set the FORTRANFORGMAT environment variable in her/his environment.plist file.  
+# Sets up the environment for GMAT, then runs the executable.
+# This assumes that the user has set the MATLAB_APP_PATH in her/his gmat_startup_file.txt file and that
+# the gmat_startup_file.txt resides in the bin folder where the GMAT.app bundle resides.
+# MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB has been installed, e.g.
+#     /Applications/MATLAB_R2010a/MATLAB_R2012a.app
+# NOTE that currently, we are only running 32-bit GUI versions of GMAT and therefore, we need to use 32-bit
+# version(s) of MATLAB here.  When 64-bit is available and working, the archflag here may be modified.
+#
+# To debug errors, set the debugit flag to 'true'.  By default, debug is written to a file inside
+# the bundle in the directory from which this script is run.  This may be changed to write to a
+# different file by setting debugfile (see below).
+#
+# Currently unused/TBD:
+# This also assumes that the user has set the FORTRANFORGMAT environment variable in her/his environment.plist file.
 # FORTRANFORGMAT should point to the directory where gfortran has been installed, i.e. /usr/local/gfortran
-# Intel ...
-if [[ `arch` = "i386" ]]; then
-export DYLD_LIBRARY_PATH=$MATLABFORGMAT/bin/maci:/$MATLABFORGMAT/sys/os/maci:$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
-else   # PowerPC ...
-export DYLD_LIBRARY_PATH=$MATLABFORGMAT/bin/mac:/$MATLABFORGMAT/sys/os/mac:$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+#
+
+# First, we want to find out exactly where this script is
+here="${0%/*}"
+
+# Set debug flag and file here ......................
+debugit='false'
+if [ $debugit = 'true' ]
+then
+   debugfile="$here/debugrungmat.txt"
 fi
-export PATH=$MATLABFORGMAT/bin:$FORTRANFORGMAT/lib:$PATH
+# ...................................................
+
+# Set architecture flag here ........................
+archflag='32bit'
+# archflag='64bit'
+# ...................................................
+
+
+# What do we want to run?
+cmd='GMAT'
+# Where is the startup file?
+FILE="$here/../../../gmat_startup_file.txt"
+
+# begin debugging
+if [ $debugit = 'true' ]
+then
+   echo "The meaning of here is "$here"" > $debugfile
+   echo "The meaning of cmd is "$cmd"" >> $debugfile
+   pwd >> $debugfile
+   if [ -f $FILE ]
+   then
+      echo "Now about to read file $FILE" >> $debugfile
+   else
+      echo "DOES NOT EXIST -  file $FILE" >> $debugfile
+      exit 1
+   fi
+fi
+# end debugging
+
+# turn ON extended globbing
+shopt -s extglob
+
+keyword="MATLAB_APP_PATH" 
+keylen=${#keyword}
+
+# read until we find the matlab location keyword
+# then strip off leading blanks, the equal sign,
+# leading blanks (again), then trailing blanks
+while read line
+   do
+      case "$line" in
+      ${keyword}*)
+         value=${line:$keylen}
+         matlabloc=${value##+([[:space:]])}
+         matlabloc=${matlabloc#=}
+         matlabloc=${matlabloc##+([[:space:]])}
+         matlabloc=${matlabloc%%+([[:space:]])}
+      ;;
+      esac
+   done < $FILE
+
+# begin debugging
+if [ $debugit = 'true' ]
+then
+   echo "value is |$value|"  >> $debugfile
+   echo "setting matlab location to |$matlabloc|"  >> $debugfile
+fi
+# end debugging
+
+if [ -n $matlabloc ]
+then
+   if [ -d $matlabloc ]
+   then
+      if [ $archflag = '32bit' ]
+      then
+         export DYLD_LIBRARY_PATH=$matlabloc/bin/maci:$matlabloc/sys/os/maci:$DYLD_LIBRARY_PATH
+      else   # 64-bit 
+         export DYLD_LIBRARY_PATH=$matlabloc/bin/maci64:$matlabloc/sys/os/maci64:$DYLD_LIBRARY_PATH
+      fi
+   fi
+fi
+
+# FORTRAN set-up is TBD
+#export DYLD_LIBRARY_PATH=$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+#export PATH=$matlabloc/bin:$FORTRANFORGMAT/lib:$PATH
+export PATH=$matlabloc/bin:$PATH
+
+# turn OFF extended globbing
+shopt -u extglob
+
 # for CSPICE
 ulimit -s 61440
-here="${0%/*}"
-cmd='GMAT'
-
+# We need this dollar-sign-at-sign thing here in order to pass arguments into GMAT!!!
 exec "$here/$cmd" "$@"

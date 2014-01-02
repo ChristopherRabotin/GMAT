@@ -3,9 +3,9 @@ GMAT_CURRENT_DIR = $(GMAT_HOME)/DailyBuildScript/VS
 GMAT_DIR = $(GMAT_HOME)/GmatDevelopment
 GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
 GMAT_SRC_GUI_DIR = $(GMAT_DIR)/src/gui
-GMAT_PLUGIN_DIR = $(GMAT_HOME)/GmatPlugins
+GMAT_PLUGIN_DIR = $(GMAT_HOME)/GmatPlugins/code
 GMAT_BUILD_DIR = $(GMAT_DIR)/build/windows-VS2010
-GMAT_PLUGIN_BUILD_DIR = $(GMAT_HOME)/GmatPlugins/build/VS2010
+GMAT_PLUGIN_BUILD_DIR = $(GMAT_HOME)/GmatPlugins/code/build/VS2010
 GMAT_BIN_DIR = $(GMAT_DIR)/application/bin
 GMAT_MATLAB_CINTF_DIR = $(GMAT_DIR)/application/matlab/libCInterface
 GMAT_PLUGIN_BIN_DIR = $(GMAT_DIR)/application/plugins
@@ -51,7 +51,8 @@ clean:
 # checks out the repositories
 checkout:
 	cd $(GMAT_DIR); git checkout master; git pull 
-	cd $(GMAT_PLUGIN_DIR); svn cleanup; svn update; 
+	cd $(GMAT_PLUGIN_DIR); git checkout master; git pull; 
+#	cd $(GMAT_PLUGIN_DIR); svn cleanup; svn update; 
 
 # assembles the latest build, including user help
 dist: 

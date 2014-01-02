@@ -32,7 +32,7 @@
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_DC_INIT 1
-#define DEBUG_JACOBIAN
+//#define DEBUG_JACOBIAN
 //#define DEBUG_VARIABLES_CALCS
 //#define DEBUG_TARGETING_MODES
 
@@ -1065,18 +1065,16 @@ void DifferentialCorrector::CalculateParameters()
 //   CalculateJacobian();
 //   InvertJacobian();
    // Modified by MH
-
-   MessageInterface::ShowMessage("%d iterations of type %d\n", iterationsTaken, dcTypeId);
-
    switch (dcTypeId)
    {
-      case 1:
+      case 1:           // Newton-Raphson
          // Build and invert the sensitivity matrix
          CalculateJacobian();
          InvertJacobian();
          break;
 
-      case 2:
+      case 2:           // Broyden
+         // Iteration counter already incremented at this point on 1st pass
          if ( iterationsTaken == 1 )
          {
             CalculateJacobian();
@@ -1084,31 +1082,54 @@ void DifferentialCorrector::CalculateParameters()
          }
          else
          {
-            MessageInterface::ShowMessage("%d variables; %d saved variables\n",
-                  variable.size(), savedVariable.size());
+            #ifdef DEBUG_BROYDEN
+               MessageInterface::ShowMessage("%d variables; %d saved variables\n",
+                     variable.size(), savedVariable.size());
+            #endif
 
-            std::vector<Real> s, y;
+            std::vector<Real> s, y, numerator;
+            // Set the size for the vectors before loading them
             s.reserve(variableCount);
             y.reserve(goalCount);
+            numerator.reserve(goalCount);
 
-            for ( Integer i = 0; i < variableCount; ++i )
-               s[i] = variable[i] - savedVariable[i];
-
-            for ( Integer j = 0; j < goalCount; ++j )
-               y[j] = -nominal[j] + savedNominal[j];
-            // F(x) = goal - nominal = 0 -> F(xk+1)-F(xk) = -nominal(k+1) + nominal(k)
+            Real denom = 0.0;
 
             for ( Integer i = 0; i < variableCount; ++i )
             {
-               for ( Integer j = 0; j < goalCount; ++j )
-                  jacobian[i][j] = savedJacobian[i][j] +
-                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
+               s[i] = variable[i] - savedVariable[i];
+               // Build the denominator
+               denom += s[i] * s[i];
             }
+
+            for ( Integer j = 0; j < goalCount; ++j )
+//               y[j] = -nominal[j] + savedNominal[j];
+               y[j] = nominal[j] - savedNominal[j];
+
+//            for ( Integer i = 0; i < goalCount; ++i )
+//            {
+//               for ( Integer j = 0; j < variableCount; ++j )
+//                  jacobian[i][j] = savedJacobian[i][j] +
+//                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
+
+            for ( Integer i = 0; i < goalCount; ++i )
+            {
+               numerator[i] = y[i];
+               for ( Integer j = 0; j < variableCount; ++j )
+                  numerator[i] += -savedJacobian[j][i]*s[j];
+            }
+
+            for (Integer i = 0; i < variableCount; ++i)
+               for (Integer j = 0; j < variableCount; ++j)
+                  jacobian[j][i] = savedJacobian[j][i] +
+                        numerator[i] * s[j] / denom;
+
             InvertJacobian();
          }
          break;
 
-      case 3:
+      case 3:        // Modified Broyden
+         // Iteration counter already incremented at this point on 1st pass
          if ( iterationsTaken == 1 )
          {
             CalculateJacobian();
@@ -1117,6 +1138,7 @@ void DifferentialCorrector::CalculateParameters()
          else
          {
             std::vector<Real> s, y;
+            // Set the size for the vectors before loading them
             s.reserve(variableCount);
             y.reserve(goalCount);
 
@@ -1137,7 +1159,6 @@ void DifferentialCorrector::CalculateParameters()
          throw SolverException("Undefined DifferentialCorrector algorithm");
    }
 
-MessageInterface::ShowMessage("TypeID %d\n", dcTypeId);
    if ( dcTypeId != 1 )
    {
       Integer localVariableCount = variableNames.size();
@@ -1147,10 +1168,14 @@ MessageInterface::ShowMessage("TypeID %d\n", dcTypeId);
       for (Integer m = 0; m < localGoalCount; ++m)
          savedNominal[m] = nominal[m];
 
-      MessageInterface::ShowMessage("Saving variables; %d -> ",
-            savedVariable.size());
+      #ifdef DEBUG_BROYDEN
+         MessageInterface::ShowMessage("Saving variables; %d -> ",
+               savedVariable.size());
+      #endif
       savedVariable = variable;
-      MessageInterface::ShowMessage("%d\n", savedVariable.size());
+      #ifdef DEBUG_BROYDEN
+         MessageInterface::ShowMessage("%d\n", savedVariable.size());
+      #endif
 
       if ( dcTypeId == 2 )
       {

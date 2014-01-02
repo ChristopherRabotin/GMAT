@@ -36,7 +36,7 @@ fi
 # ***********************************
 
 # Change to build/os directory
-if [ $mac == true ]
+if [ "$mac" = true ]
 then
 		cd ../build/macosx
 else 

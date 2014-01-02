@@ -1157,7 +1157,32 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    //
    Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
    geoLat = atan2(state[2], rxy);
-   geoHeight = rxy / cos(geoLat) - cbRadius;
+//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid		// made changes by TUAN NGUYEN
+//
+//   Real cs = cos(geoLat);												// made changes by TUAN NGUYEN
+//   Real sn = sin(geoLat);												// made changes by TUAN NGUYEN
+//   Real f = cbFlattening;												// made changes by TUAN NGUYEN
+//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// made changes by TUAN NGUYEN    Fixed bug GMT-4184
+
+   Real delta = 1.0;
+   Real tolerance = 1.0e-7;    // Better than 0.0001 degrees
+   Real ecc2 = cbFlattening * (2.0 - cbFlattening);
+
+   Real cFactor, oldlat, newlat, sinlat;
+   newlat = geoLat;
+   while (delta > tolerance)
+   {
+      oldlat = newlat;
+      sinlat = sin(oldlat);
+      cFactor = cbRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+      newlat = atan2(state[2] + cFactor*ecc2*sinlat, rxy);
+      delta = fabs(newlat - oldlat);
+   }
+
+   sinlat = sin(newlat);
+   cFactor = cbRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+   geoHeight = rxy / cos(newlat) - cFactor;
+
 
    // Only do lat/long (in degrees) if needed
    if (includeLatLong)
