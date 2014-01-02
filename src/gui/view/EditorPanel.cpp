@@ -137,7 +137,7 @@ void EditorPanel::Create()
       new wxButton(this, ID_SYNC_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
    mSaveSyncButton->SetToolTip("Save,Sync (Ctrl+Shift+S)");
    mSaveSyncRunButton =
-      new wxButton(this, ID_SYNC_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
+      new wxButton(this, ID_SYNC_RUN_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
    mSaveSyncRunButton->SetToolTip("Save,Sync,Run (Ctrl+Shift+F5)");
    
    // shortcut keys
