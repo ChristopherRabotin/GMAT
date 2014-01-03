@@ -523,8 +523,10 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
       //  All other values are not allowed!
       else
       {
-         // Warn here?  or throw?
-         retval = false;
+         throw SolverException("The value of \"" + value +
+               "\" for field \"Algorithm\" on object \"" + instanceName +
+               "\" is not an allowed value.\nThe allowed values are: "
+               "[NewtonRaphson Broyden ModifiedBroyden]");
       }
 
       return retval;
