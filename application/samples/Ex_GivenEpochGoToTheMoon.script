@@ -293,7 +293,7 @@ Target 'Fine Lunar Target' DC1 {SolveMode = Solve, ExitMode = DiscardAndContinue
    
    %  Vary parking orbit geometry using intial guess from coarse targeting
    Vary 'Vary RAAN' DC1(MoonSat.RAAN = RAAN, {Perturbation = .000001, MaxStep = 2});
-   Vary 'Varry AOP' DC1(MoonSat.AOP = AOP, {Perturbation = .000001,MaxStep = 2});
+   Vary 'Vary AOP' DC1(MoonSat.AOP = AOP, {Perturbation = .000001,MaxStep = 2});
    Vary 'Vary TOI' DC1(TOI.Element1 = TOI.Element1, {Perturbation = .0000001,MaxStep = .01});
    
    %  Apply TOI
