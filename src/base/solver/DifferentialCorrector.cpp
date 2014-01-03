@@ -1062,6 +1062,14 @@ void DifferentialCorrector::RunPerturbation()
 //------------------------------------------------------------------------------
 /**
  * Updates the values for the variables based on the inverted Jacobian.
+ *
+ * @note: In GMAT's Differential Corrector, the Jacobian matrix is ordered
+ *        with the first index spanning the number of variables, and the second
+ *        index the number of goals.  This results in a matrix inverted from the
+ *        usual convention.
+ *
+ *        The inverse matrix then has the first index moving through the goals
+ *        and the second through the variables.
  */
 //------------------------------------------------------------------------------
 void DifferentialCorrector::CalculateParameters()
@@ -1109,14 +1117,7 @@ void DifferentialCorrector::CalculateParameters()
             }
 
             for ( Integer j = 0; j < goalCount; ++j )
-//               y[j] = -nominal[j] + savedNominal[j];
                y[j] = nominal[j] - savedNominal[j];
-
-//            for ( Integer i = 0; i < goalCount; ++i )
-//            {
-//               for ( Integer j = 0; j < variableCount; ++j )
-//                  jacobian[i][j] = savedJacobian[i][j] +
-//                        ((y[i] - savedJacobian[i][j]*s[i])*s[i])/(s[i]*s[i]);
 
             for ( Integer i = 0; i < goalCount; ++i )
             {
@@ -1125,7 +1126,7 @@ void DifferentialCorrector::CalculateParameters()
                   numerator[i] += -savedJacobian[j][i]*s[j];
             }
 
-            for (Integer i = 0; i < variableCount; ++i)
+            for (Integer i = 0; i < goalCount; ++i)
                for (Integer j = 0; j < variableCount; ++j)
                   jacobian[j][i] = savedJacobian[j][i] +
                         numerator[i] * s[j] / denom;
@@ -1140,23 +1141,57 @@ void DifferentialCorrector::CalculateParameters()
          {
             CalculateJacobian();
             InvertJacobian();
+            skipPerts = true;
          }
          else
          {
-            std::vector<Real> s, y;
+            std::vector<Real> s, y, temp, v;
             // Set the size for the vectors before loading them
             s.reserve(variableCount);
             y.reserve(goalCount);
+            temp.reserve(variableCount);
+            v.reserve(goalCount);
 
             for ( Integer i = 0; i < variableCount; ++i )
                s[i] = variable[i] - savedVariable[i];
+
             for ( Integer j = 0; j < goalCount; ++j )
-               y[j] = -nominal[j] + savedNominal[j];
+               y[j] = nominal[j] - savedNominal[j];
+
+            // Build the denominator
+            Real denom = 0.0;
+            for (Integer i = 0; i < variableCount; ++i)
+            {
+               temp[i] = 0.0;
+               for (Integer j = 0; j < goalCount; ++j)
+               {
+                  temp[i] += savedInverseJacobian[j][i] * y[j];
+               }
+            }
+            for (Integer i = 0; i < variableCount; ++i)
+               denom += temp[i] * s[i];
+
+            // Build v_k
+            for (Integer i = 0; i < goalCount; ++i)
+            {
+               v[i] = 0.0;
+               for (Integer j = 0; j < variableCount; ++j)
+                  v[i] += savedInverseJacobian[i][j] * s[j];
+               v[i] /= denom;
+            }
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               temp[i] = s[i];
+               for ( Integer j = 0; j < goalCount; ++j )
+                  temp[i] -= savedInverseJacobian[j][i] * y[j];
+            }
 
             for ( Integer i = 0; i < variableCount; ++i )
             {
                for ( Integer j = 0; j < goalCount; ++j )
-                  inverseJacobian[i][j] = savedInverseJacobian[i][j] - ((savedInverseJacobian[i][j]*y[i]-s[i])*(s[i]*savedInverseJacobian[i][j]))/(s[i]*savedInverseJacobian[i][j]*y[i]);
+                  inverseJacobian[j][i] = savedInverseJacobian[j][i] +
+                        temp[i] * v[j];
             }
          }
          break;
