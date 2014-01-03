@@ -504,7 +504,7 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
       bool retval = true;
 
       if (value == "NewtonRaphson" || value == "Broyden" ||
-          value == "GeneralizedBroyden")
+          value == "ModifiedBroyden")
       {
          dcType = value;
          if (dcType == "NewtonRaphson")
@@ -515,7 +515,7 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
          {
             dcTypeId = 2;
          }
-         else if(dcType == "GeneralizedBroyden")
+         else if(dcType == "ModifiedBroyden")
          {
             dcTypeId = 3;
          }
@@ -1227,7 +1227,7 @@ void DifferentialCorrector::CalculateParameters()
                savedJacobian[m][n] = jacobian[m][n];
          }
       }
-      else // dctype = GeneralizedBroyden
+      else // dctype = ModifiedBroyden
       {
          // savedInverseJacobian = inverseJacobian;
          for (Integer m = 0; m < localGoalCount; ++m)
