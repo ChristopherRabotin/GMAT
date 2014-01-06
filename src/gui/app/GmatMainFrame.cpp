@@ -550,14 +550,15 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       #endif
    #endif
    
-   wxAcceleratorEntry entries[6];
+   wxAcceleratorEntry entries[7];
    entries[0].Set(wxACCEL_NORMAL,  WXK_F5, TOOL_RUN);
    entries[1].Set(wxACCEL_NORMAL,  WXK_F10, TOOL_SCREENSHOT);
    entries[2].Set(wxACCEL_NORMAL,  WXK_F9, TOOL_ANIMATION_PLAY);
    entries[3].Set(wxACCEL_SHIFT,  WXK_F9, TOOL_ANIMATION_STOP);
    entries[4].Set(wxACCEL_CTRL, WXK_PAGEUP, TOOL_PREV_TAB);
    entries[5].Set(wxACCEL_CTRL, WXK_PAGEDOWN, TOOL_NEXT_TAB);
-   wxAcceleratorTable accel(6, entries);
+   entries[6].Set(wxACCEL_CTRL, (int) 'H', MENU_EDIT_FIND);
+   wxAcceleratorTable accel(7, entries);
    this->SetAcceleratorTable(accel);
 
    #ifdef DEBUG_MAINFRAME
