@@ -2775,8 +2775,11 @@ void Propagate::FindSetupsAndStops(Integer &loc,
             #ifdef DEBUG_PARSING
             MessageInterface::ShowMessage("   adding stop conditions\n");
             #endif
-
-            if (parts[i].find(",,") != std::string::npos)
+            
+            // Check for empty string between commas (LOJ: 2013.12.24)
+            std::string tempPart = GmatStringUtil::RemoveAll(parts[i], ' ');
+            //if (parts[i].find(",,") != std::string::npos)
+            if (tempPart.find(",,") != std::string::npos)
                throw CommandException("Stopping condition parsing error; is "
                      "there an extra comma?");
             

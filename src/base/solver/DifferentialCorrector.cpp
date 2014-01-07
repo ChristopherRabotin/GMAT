@@ -1598,6 +1598,10 @@ std::string DifferentialCorrector::GetProgressString()
                         << "*** Performing Differential Correction "
                         << "(using \"" << instanceName << "\")\n";
 
+               if (progressStyle == VERBOSE_STYLE)
+                  progress << "*** Solution Algorithm: "
+                           << dcType << "\n";
+
                // Write out the setup data
                progress << "*** " << localVariableCount << " variables; "
                         << localGoalCount << " goals\n   Variables:  ";

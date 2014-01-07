@@ -31,7 +31,8 @@
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
-// none
+const Real NadirPointing::DENOMINATOR_TOLERANCE = 1.0e-15;
+
 
 //------------------------------------------------------------------------------
 // public methods
@@ -165,17 +166,59 @@ Rmatrix33 NadirPointing::TRIAD(Rvector3& V1, Rvector3& V2, Rvector3& W1, Rvector
 	// W1, W2 : defined in frame B
 	// TRIAD algorithm calculates the rotation matrix from A to B
 
-   Rvector3 r1 = V1.GetUnitVector();
+   Real v1Mag = V1.GetMagnitude();
+   if (v1Mag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   Rvector3 r1 = V1 / v1Mag;
    Rvector3 temp = Cross(V1,V2);
-   Rvector3 r2 = temp.GetUnitVector();
+   Real tempMag = temp.GetMagnitude();
+   if (tempMag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   Rvector3 r2 = temp / tempMag;
    Rvector3 r3 = Cross(V1,temp);
-   r3 = r3.GetUnitVector();
+   Real r3Mag = r3.GetMagnitude();
+   if (r3Mag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   r3 = r3 / r3Mag;
 
-   Rvector3 s1 = W1.GetUnitVector();
+   Real w1Mag = W1.GetMagnitude();
+   if (w1Mag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   Rvector3 s1 = W1 / w1Mag;
    temp = Cross(W1,W2);
-   Rvector3 s2 = temp.GetUnitVector();
+   Real temp2Mag = temp.GetMagnitude();
+   if (temp2Mag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   Rvector3 s2 = temp/temp2Mag;
    Rvector3 s3 = Cross(W1,temp);
-   s3 = s3.GetUnitVector();
+   Real s3Mag = s3.GetMagnitude();
+   if (s3Mag < DENOMINATOR_TOLERANCE)
+   {
+      std::string errmsg = "Nadir attitude for spacecraft \"";
+      errmsg += owningSC->GetName() + "\" is singular.\n";
+      throw AttitudeException(errmsg);
+   }
+   s3 = s3/s3Mag;
 
    // YRL, calculate resultRotMatrix
    Rmatrix33 resultRotMatrix = Outerproduct(s1,r1) + Outerproduct(s2,r2) + Outerproduct(s3,r3) ;
@@ -239,29 +282,19 @@ void NadirPointing::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #endif
 
    // Error message
-   if ( bodyAlignmentVector.GetMagnitude() < 1.0e-5 )
+   std::string attErrorMsg = "Nadir Pointing attitude model is singular and/or ";
+   attErrorMsg            += "undefined for Spacecraft \"";
+   attErrorMsg            += owningSC->GetName() + "\".";
+   if ((bodyAlignmentVector.GetMagnitude() < 1.0e-5 )  ||
+       (bodyConstraintVector.GetMagnitude() < 1.0e-5)  ||
+       (bodyAlignmentVector.GetUnitVector()*
+             bodyConstraintVector.GetUnitVector()
+             > ( 1.0 - 1.0e-5))                        ||
+       (pos.GetMagnitude() < 1.0e-5)                   ||
+       (vel.GetMagnitude() < 1.0e-5)                   ||
+       (Cross(pos,vel).GetMagnitude() < 1.0e-5)        )
    {
-	   throw AttitudeException("The size of BodyAlignmentVector is too small.");
-   }
-   else if ( bodyConstraintVector.GetMagnitude() < 1.0e-5 )
-   {
-	   throw AttitudeException("The size of BodyConstraintVector is too small.");
-   }
-   else if ( bodyAlignmentVector.GetUnitVector()*bodyConstraintVector.GetUnitVector() > ( 1.0 - 1.0e-5) )
-   {
-	   throw AttitudeException("BodyAlignmentVector and BodyConstraintVector are the same.");
-   }
-   else if ( pos.GetMagnitude() < 1.0e-5 )
-   {
-	   throw AttitudeException("A position vector is zero.");
-   }
-   else if ( vel.GetMagnitude() < 1.0e-5 )
-   {
-	   throw AttitudeException("A velocity vector is zero.");
-   }
-   else if ( Cross(pos,vel).GetMagnitude() < 1.0e-5 )
-   {
-	   throw AttitudeException("Cross product of position and velocity is zero: LVLH frame cannot be defined.");
+      throw AttitudeException(attErrorMsg);
    }
    
    Rvector3 normal = Cross(pos,vel);
@@ -304,7 +337,7 @@ void NadirPointing::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 	   constraintVector[1] = 1;
 	   constraintVector[2] = 0;
    }
-   else if ( attitudeConstraintType == "VelocityConstraint" )
+   else if ( attitudeConstraintType == "Velocity" )
    {
 	   referenceVector[0] = -1;
 	   referenceVector[1] = 0;
