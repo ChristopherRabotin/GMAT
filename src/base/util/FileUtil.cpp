@@ -44,6 +44,7 @@
 
 #ifdef __MAC__
 #include <mach-o/dyld.h>
+#include <unistd.h>                // for getcwd
 #endif
 
 #ifdef __linux__
