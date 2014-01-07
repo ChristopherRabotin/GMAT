@@ -235,7 +235,7 @@ const std::string Attitude::EULER_SEQ_LIST[12] =
 const std::string Attitude::ATTITUDE_CONSTRAINT_TYPE_LIST[2] =
 {
       "OrbitNormal",
-      "VelocityConstraint",
+      "Velocity",
 };
 
 const Real     Attitude::TESTACCURACY                 = 1.19209290E-07;
@@ -3058,12 +3058,12 @@ bool Attitude::SetStringParameter(const Integer     id,
          warnMsg += " on a non-NadirPointing Attitude model has no effect\n";
          MessageInterface::ShowMessage(warnMsg);
       }
-      if ((value != "OrbitNormal") && (value != "VelocityConstraint"))
+      if ((value != "OrbitNormal") && (value != "Velocity"))
       {
          AttitudeException ae;
          ae.SetDetails(errorMessageFormatUnnamed.c_str(),
             value.c_str(), GetParameterText(id).c_str(),
-            "\"OrbitNormal\" \"VelocityConstraint\"");
+            "\"OrbitNormal\" \"Velocity\"");
          throw ae;
       }
       attitudeConstraintType = value;
