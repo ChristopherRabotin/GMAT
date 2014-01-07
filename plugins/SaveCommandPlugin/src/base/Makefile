@@ -25,11 +25,10 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
 TARGET = ../lib/libSaveCommand.dylib
 
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
-           -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
+           $(MAC_ARCHITECTURE_FLAGS)
 else
 TARGET = ../lib/libSaveCommand$(SHARED_EXTENSION)
-CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
-           -ffriend-injection -fPIC
+CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -fPIC
 endif
                    
                    

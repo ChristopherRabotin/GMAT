@@ -25,11 +25,10 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
 TARGET = ../lib/libDataInterface.dylib
 
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall \
-           -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
+           $(MAC_ARCHITECTURE_FLAGS)
 else
 TARGET = ../lib/libDataInterface$(SHARED_EXTENSION)
-CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall \
-           -ffriend-injection -fPIC
+CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall -fPIC
 endif
                  
                    
