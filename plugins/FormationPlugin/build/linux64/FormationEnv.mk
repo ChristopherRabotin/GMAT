@@ -29,9 +29,9 @@ SHARED_EXTENSION = .so
 SHARED_LIB_FLAGS = $(FORMATION_LINK_FLAGS) -shared -fPIC
 
 ifeq ($(DEBUG_BUILD), 1)
-OPTIMIZATIONS = -fno-strict-aliasing -ffriend-injection $(WX_28_DEFINES)
+OPTIMIZATIONS = -fno-strict-aliasing $(WX_28_DEFINES)
 else
-OPTIMIZATIONS = -O3 -fno-strict-aliasing -ffriend-injection $(WX_28_DEFINES)
+OPTIMIZATIONS = -O3 -fno-strict-aliasing $(WX_28_DEFINES)
 endif
 
 # Do not edit below this line -- here we build up longer compile/link strings

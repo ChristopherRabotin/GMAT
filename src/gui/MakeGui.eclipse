@@ -354,8 +354,12 @@ endif
 
 macrez:
 	@echo "linking Carbon and wx resource files ......."
-	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
+
+# Used to be:
+#	@echo "linking Carbon and wx resource files ......."
+#	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
+#	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 
 macosx: 
 	@echo "building Mac application bundle ......."
