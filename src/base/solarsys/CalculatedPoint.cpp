@@ -77,6 +77,12 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
    parameterCount = CalculatedPointParamCount;
+
+   // we want to cloak the DEFAULT CalculatedPoint data; i.e. we want to write only those
+   // parameters that have been modified by the user to a script; and we don't
+   // want to include the Create line either.  This will not be true for user-defined
+   // CalculatedPoints (LOJ: 2013.12.17)
+   cloaking = true;
 }
 
 //------------------------------------------------------------------------------

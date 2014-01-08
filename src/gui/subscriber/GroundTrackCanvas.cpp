@@ -27,6 +27,7 @@
 #include "MessageInterface.hpp"
 #include "Rendering.hpp"           // for DrawStringAt(), DrawSquare()
 #include "MdiChildGroundTrackFrame.hpp"
+#include "AttitudeConversionUtility.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -1203,7 +1204,8 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    {
       // We are not drawing trajectory other than spacecraft.
       // Just settinig color here for label
-      *sIntColor = mObjectColorMap[objName].GetIntColor();
+      //*sIntColor = mObjectOrbitColorMap[objName].GetIntColor(); //LOJ: 2013.11.25
+      *sIntColor = mObjectOrbitColorMap[objName.c_str()];
       
       #if DEBUG_ORBIT_LINES > 1
       MessageInterface::ShowMessage
@@ -1357,7 +1359,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    // Why  it doesn't use alpha?
    //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
    glLineWidth(0.5);
-      
+   
    Real plusLon1 = GmatMathUtil::Mod(lon1, GmatMathConstants::TWO_PI_DEG);
    Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
    Real minusLon1 = GmatMathUtil::Mod(lon1, -GmatMathConstants::TWO_PI_DEG);
@@ -1874,7 +1876,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
       return;
    
    // the rotation matrix from celestial body fixed to inertial
-   Rmatrix33 matIB = Attitude::ToCosineMatrix(quat);
+   Rmatrix33 matIB = AttitudeConversionUtility::ToCosineMatrix(quat);
    
    #if DEBUG_ROTATE_BODY > 1
    MessageInterface::ShowMessage("==> matIB=\n%s", matIB.ToString(16, 25).c_str());
@@ -1915,7 +1917,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
    // Compute angle and axis
    Rvector3 eAxis;
    Real eAngle;
-   Attitude::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
+   AttitudeConversionUtility::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
    
    // Convert to degree
    Real angInDeg = GmatMathUtil::RadToDeg(eAngle, true);

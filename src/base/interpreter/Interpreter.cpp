@@ -4266,7 +4266,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4301,7 +4301,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
             InterpreterException ex
                ("The field name \"" + lhsPropName + "\" on object \"" + lhsObjName + "\" is not permitted");
             HandleError(ex);
-            return false;
+            return NULL;
          }
       }
       
@@ -4325,7 +4325,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4344,7 +4344,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          InterpreterException ex
             ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
-         return false;
+         return NULL;
       }
       
       if (isRhsObject)
@@ -4509,7 +4509,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toObj, GmatBase *fromOwner,
       {
          // LHS is a Variable or String, RHS is a Parameter
          if (toType == Gmat::STRING_TYPE || toType == Gmat::ENUMERATION_TYPE ||
-             toType == Gmat::FILENAME_TYPE)
+             toType == Gmat::FILENAME_TYPE || toType == Gmat::COLOR_TYPE)
             toObj->SetStringParameter("Value", rhsParam->GetString());
          else if (toType == Gmat::REAL_TYPE)
             ParseVariableExpression(toParam, rhs);
@@ -4518,7 +4518,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toObj, GmatBase *fromOwner,
       {
          // LHS is a Variable or String, RHS is an ObjectProperty
          if (toType == Gmat::STRING_TYPE || toType == Gmat::ENUMERATION_TYPE ||
-             toType == Gmat::FILENAME_TYPE)
+             toType == Gmat::FILENAME_TYPE || toType == Gmat::COLOR_TYPE)
             toObj->SetStringParameter("Value", fromOwner->GetStringParameter(fromId));
          else if (toType == Gmat::REAL_TYPE)
          {
@@ -4837,20 +4837,23 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
    
    toType = toObj->GetParameterType(toId);
    
-   // Let's treat enumeration and filename type as string type
-   if (toType == Gmat::ENUMERATION_TYPE || toType == Gmat::FILENAME_TYPE)
+   // Let's treat enumeration, filename, and color type as string type
+   if (toType == Gmat::ENUMERATION_TYPE || toType == Gmat::FILENAME_TYPE || toType == Gmat::COLOR_TYPE)
       toType = Gmat::STRING_TYPE;
    
    try
    {
       std::string fromTypeName = fromObj->GetTypeName();
-      bool continueNext = false;
+      // bool continueNext = false;
       
       // Handle if RHS is Parameter
       if (fromObj->GetType() == Gmat::PARAMETER)
       {        
-         Parameter *fromParam = (Parameter*)fromObj;
-         Gmat::ParameterType fromType = fromParam->GetReturnType();
+         #ifdef DEBUG_SET
+            // Currently only used in the debug
+            Parameter *fromParam = (Parameter*)fromObj;
+            Gmat::ParameterType fromType = fromParam->GetReturnType();
+         #endif
          Gmat::ObjectType toObjPropObjType = toObj->GetPropertyObjectType(toId);
          
          #ifdef DEBUG_SET
@@ -5140,7 +5143,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       if (toType == fromType)
       {
          if (toType == Gmat::STRING_TYPE || toType == Gmat::ENUMERATION_TYPE ||
-             toType == Gmat::FILENAME_TYPE)
+             toType == Gmat::FILENAME_TYPE || toType == Gmat::COLOR_TYPE)
          {
             if (isRhsProperty)
             {
@@ -5680,6 +5683,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::ENUMERATION_TYPE:
    case Gmat::FILENAME_TYPE:
+   case Gmat::COLOR_TYPE:
    case Gmat::STRING_TYPE:
    case Gmat::STRINGARRAY_TYPE:
       {
@@ -6257,6 +6261,7 @@ bool Interpreter::SetPropertyStringValue(GmatBase *obj, const Integer id,
    {
    case Gmat::ENUMERATION_TYPE:
    case Gmat::FILENAME_TYPE:
+   case Gmat::COLOR_TYPE:
    case Gmat::STRING_TYPE:
       {
          // remove enclosing quotes if used
@@ -6364,7 +6369,7 @@ std::string Interpreter::GetPropertyValue(GmatBase *obj, const Integer id)
       sval = GmatStringUtil::ToString(obj->GetRealParameter(id));
    }
    else if (type == Gmat::STRING_TYPE || type == Gmat::ENUMERATION_TYPE ||
-            type == Gmat::FILENAME_TYPE)
+            type == Gmat::FILENAME_TYPE || type == Gmat::COLOR_TYPE)
    {
       sval = obj->GetStringParameter(id);
    }
@@ -6479,15 +6484,22 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       // verify that we accept only numeric ARRAYTYPE
       // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
       //      Long term, we need a GetParameterTypeArray or something
-	  if (((type != Gmat::BOOLEANARRAY_TYPE) &&
-          (type != Gmat::INTARRAY_TYPE) &&
-          (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-          (type != Gmat::RVECTOR_TYPE)) &&
-		   (!((type == Gmat::OBJECT_TYPE) && 
-		      ((obj->GetParameterText(id) == "ViewDirection") ||
-			   (obj->GetParameterText(id) == "ViewPointVector") || 
-			   (obj->GetParameterText(id) == "ViewPointReference") ))))
-		  return retval;
+      if (((type != Gmat::BOOLEANARRAY_TYPE) &&
+           (type != Gmat::INTARRAY_TYPE) &&
+           (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+           (type != Gmat::RVECTOR_TYPE) &&
+           (type != Gmat::COLOR_TYPE)) &&
+          (!((type == Gmat::OBJECT_TYPE) && 
+             ((obj->GetParameterText(id) == "ViewDirection") ||
+              (obj->GetParameterText(id) == "ViewPointVector") || 
+              (obj->GetParameterText(id) == "ViewPointReference") ))))
+      {
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("   Error, expects only numbers inside []\n");
+         #endif
+         return retval;
+      }
+      
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6530,6 +6542,12 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
                setWithIndex = true;
             }
          }
+      }
+      // Color can be rgb triplet or color name, so handle here
+      if (type == Gmat::COLOR_TYPE)
+      {
+         setWithIndex = false;
+         retval = SetPropertyValue(obj, id, type, value);
       }
       
       if (setWithIndex)

@@ -612,6 +612,8 @@ bool GravityFileUtil::ReadDatFile(const std::string &filename, Integer& degree,
    //-------------------------------------------------------
    // read coefficient drift rate
    //-------------------------------------------------------
+   // The return here is intentionally ignored.  The compiler may throw a
+   // warning for this line that can be safely ignored.
    char* ch = fgets( buf, maxLen, fp );
    while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
    {

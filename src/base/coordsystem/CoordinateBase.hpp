@@ -94,7 +94,10 @@ public:
    virtual void                  SetEopFile(EopFile *eopF)               = 0;
    virtual void                  SetCoefficientsFile(
                                     ItrfCoefficientsFile *itrfF)         = 0;
-   
+
+   virtual std::string           GetPrimaryObjectName() const            = 0;
+   virtual std::string           GetSecondaryObjectName() const          = 0;
+   virtual std::string           GetReferenceObjectName() const          = 0;
    virtual SpacePoint*           GetPrimaryObject() const                = 0;
    virtual SpacePoint*           GetSecondaryObject() const              = 0;
    virtual SpacePoint*           GetReferenceObject() const              = 0;
@@ -178,6 +181,9 @@ protected:
    /// flag indicating whether or not this CS can currently be modified (generally
    /// only set to false for built-in CSs when the script is being interpreted)
    bool          allowModify;
+
+   /// Method for setting J2000Body for other reference objects
+   void SetJ2000BodyForOtherRefObjects();
 
 };
 #endif // CoordinateBase_hpp

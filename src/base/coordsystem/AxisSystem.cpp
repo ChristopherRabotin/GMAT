@@ -739,7 +739,29 @@ SpacePoint* AxisSystem::GetReferenceObject() const
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// virtual std::string GetPrimaryObjectName() const
+//------------------------------------------------------------------------------
+std::string AxisSystem::GetPrimaryObjectName() const
+{
+   return "";
+}
 
+//------------------------------------------------------------------------------
+// virtual std::string GetSecondaryObjectName() const
+//------------------------------------------------------------------------------
+std::string AxisSystem::GetSecondaryObjectName() const
+{
+   return "";
+}
+
+//------------------------------------------------------------------------------
+// virtual std::string GetReferenceObjectName() const
+//------------------------------------------------------------------------------
+std::string AxisSystem::GetReferenceObjectName() const
+{
+   return "";
+}
 
 //---------------------------------------------------------------------------
 //  A1Mjd GetEpoch() const

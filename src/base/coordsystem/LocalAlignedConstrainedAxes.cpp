@@ -307,6 +307,14 @@ SpacePoint* LocalAlignedConstrainedAxes::GetReferenceObject() const
    return referenceObject;
 }
 
+//------------------------------------------------------------------------------
+// virtual std::string GetReferenceObjectName() const
+//------------------------------------------------------------------------------
+std::string LocalAlignedConstrainedAxes::GetReferenceObjectName() const
+{
+   return referenceObjName;
+}
+
 //---------------------------------------------------------------------------
 //  void SetReferenceObject(SpacePoint *refObj)
 //---------------------------------------------------------------------------

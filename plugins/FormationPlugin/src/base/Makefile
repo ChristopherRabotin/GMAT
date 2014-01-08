@@ -23,11 +23,10 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace \
                    $(MAC_ARCHITECTURE_FLAGS)
 TARGET = ../lib/libFormation.dylib
 CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
-           -ffriend-injection $(MAC_ARCHITECTURE_FLAGS)
+           $(MAC_ARCHITECTURE_FLAGS)
 else
 TARGET = ../lib/libFormation$(SHARED_EXTENSION)
-CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
-           -ffriend-injection -fPIC
+CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -fPIC
 endif
 
 all: $(TARGET)

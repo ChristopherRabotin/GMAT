@@ -155,8 +155,11 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
                                 Integer count)
 {
    Integer i, i6;
-   Real    alt;
-  
+
+   #ifdef DEBUG_GEODETICS
+      Real    alt;
+   #endif
+
    Real    lst;     // Local apparent solar time (Hrs)
    Real    den[8], temp[2];
    
@@ -204,7 +207,10 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       i6 = i*6;
       mass = 48;
 
-      alt = CalculateGeodetics(&pos[i6], epoch, true);
+      #ifdef DEBUG_GEODETICS
+         alt =
+      #endif
+      CalculateGeodetics(&pos[i6], epoch, true);
       lst = sod/3600.0 + geoLong/15.0;
 
 

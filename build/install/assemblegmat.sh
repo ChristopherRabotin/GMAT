@@ -19,7 +19,6 @@
 #   -u user       Use repository username user (default: prompt)
 #
 # Prerequisites:
-#   svn
 #   standard POSIX utilities
 
 # Initializations
@@ -49,7 +48,7 @@ END
 
 # File sources
 devrepo=`dirname $0`'/../..'
-jazzrepo='https://gs580s-jazz.ndc.nasa.gov/svn/GMAT' 
+internalrepo='ssh://gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmatinternal.git'
 apppath="$devrepo/application"
 
 # Argument handling
@@ -128,16 +127,9 @@ rm -rf "$dest/debug"
 # Mars-GRAM 2005 data
 if [ $TYPE = 'full' -o $TYPE = 'full-release' ]
 then
-    mgpath="$jazzrepo/trunk/code/MarsGRAMPlugin/data"
-    if [ $user ]
-    then
-        ustring="--username $user"
-    fi
-    if [ $pw ]
-    then
-        pwstring="--password $pw"
-    fi
-    svn export $ustring $pwstring --force "$mgpath" "$dest/data/atmosphere"
+    git clone "$internalrepo" git
+    cp -av git/code/MarsGRAMPlugin/data/MarsGRAM2005 "$dest/data/atmosphere"
+    rm -rf git
 fi
 
 # libCInterface MATLAB files

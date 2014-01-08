@@ -103,6 +103,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
 
    theHelpButton = new wxButton
       (this, ID_BUTTON_HELP, GUI_ACCEL_KEY"Help", wxDefaultPosition, wxDefaultSize, 0);
+   theHelpButton->SetToolTip("Panel-specific Help (F1)");
 
    // adds the buttons to button sizer
    theButtonSizer->Add(0, 1, wxALIGN_LEFT | wxALL);
@@ -112,6 +113,14 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
 
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
+
+   // shortcut keys
+   wxAcceleratorEntry entries[2];
+   entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);
+   entries[1].Set(wxACCEL_CTRL,  (int) 'W', ID_BUTTON_CANCEL);
+   wxAcceleratorTable accel(2, entries);
+   this->SetAcceleratorTable(accel);
+
 }
 
 

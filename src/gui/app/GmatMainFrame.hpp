@@ -210,6 +210,7 @@ public:
    void OnMainFrameSize(wxSizeEvent &event);
    void OnSetFocus(wxFocusEvent &event);
    void OnKeyDown(wxKeyEvent &event);
+   void OnCycleTab(wxCommandEvent &event);
    
    void OnAnimation(wxCommandEvent& event);
    

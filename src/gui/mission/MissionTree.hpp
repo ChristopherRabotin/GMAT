@@ -54,6 +54,7 @@ public:
    void UpdateMission(bool resetCounter, bool viewAll = true, bool collapse = false);
    void UpdateMissionForRename();
    void ChangeNodeLabel(const wxString &oldLabel);
+   void ChangeNodeColor(const wxTreeItemId &nodeId, UnsignedInt color);
    void SetMissionTreeDocked(bool docked = false);
    void SetViewAll(bool viewAll = true);
    void SetViewLevel(int level);
@@ -61,7 +62,7 @@ public:
    const wxArrayString& GetCommandList(bool forViewControl = false);
    
 protected:
-   
+
 private:
 
    enum ActionType
@@ -93,6 +94,7 @@ private:
    
    wxPoint      mLastClickPoint;
    wxTreeItemId mLastRightClickItemId;
+   wxTreeItemId mLastDoubleClickItemId;
    
    bool inScriptEvent;
    bool inFiniteBurn;
@@ -223,6 +225,7 @@ private:
    bool IsInsideSolverBranch(wxTreeItemId itemId, GmatTree::ItemType &itemType,
                              GmatTree::ItemType &solverItemType, wxTreeItemId &branchId,
                              GmatCommand **branchCmd);
+   void ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");

@@ -1392,20 +1392,20 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    //std::string mLastDataRecStartGreg;
    //std::string mLastDataRecEndGreg;
    double startMjd = 0.0;
-   double endMjd = 0.0;
+   //double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
    {
       mLastDataRecStartGreg = ToA1Gregorian(*start);
       mLastDataRecEndGreg = ToA1Gregorian(*end);
       startMjd = start->GetReal();
-      endMjd = end->GetReal();
+      //endMjd = end->GetReal();
    }
    else  // UTC time system
    {
       mLastDataRecStartGreg = ToUtcGregorian(*start);
       mLastDataRecEndGreg = ToUtcGregorian(*end);
       startMjd = ToUtcModJulian(*start);
-      endMjd = ToUtcModJulian(*end);
+      //endMjd = ToUtcModJulian(*end);
    }
    
    // Write data record

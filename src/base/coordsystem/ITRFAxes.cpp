@@ -432,8 +432,11 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                     JD_JAN_5_1941);
    Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
 
-   Real xp,yp,LOD,dUT1;
-   dUT1 = eop->GetUt1UtcOffset(utcMJD +  offset);
+   Real xp,yp,LOD;
+   #ifdef DEBUG_ITRF_ROT_MATRIX
+      Real dUT1;
+      dUT1 = eop->GetUt1UtcOffset(utcMJD +  offset);
+   #endif
    eop->GetPolarMotionAndLod(utcMJD +  offset, xp, yp, LOD);
 
    xp = xp*sec2rad;

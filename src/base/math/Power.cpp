@@ -149,10 +149,10 @@ bool Power::ValidateInputs()
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
-   
+
    if (type1 == Gmat::REAL_TYPE)
    {
-      if (type2 == Gmat::REAL_TYPE || type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1)
+      if (type2 == Gmat::REAL_TYPE || (type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1))
          retval = true;
    }
    else if (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1)

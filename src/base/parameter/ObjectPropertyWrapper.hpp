@@ -66,7 +66,8 @@ public:
    virtual bool                SetObject(GmatBase* obj);
    
    const Integer               GetPropertyId();
-
+   const StringArray&          GetPropertyNames();
+   
    virtual bool                TakeRequiredAction() const;
 
 protected:  

@@ -84,7 +84,7 @@ public:
    virtual void SetIsNewFrame(bool flag);
    virtual void SetXyPlaneColor(UnsignedInt color);
    virtual void SetSunLineColor(UnsignedInt color);
-   virtual void SetObjectColors(const wxStringColorMap &objectColorMap);
+   //virtual void SetObjectColors(const wxStringColorMap &objectColorMap);
    virtual void SetShowObjects(const wxStringBoolMap &showObjMap);
    virtual void SetNumPointsToRedraw(Integer numPoints);
    
@@ -111,7 +111,7 @@ public:
    
    // drawing
    virtual void SetGlObject(const StringArray &objNames,
-                        const UnsignedIntArray &objOrbitColors,
+                        //const UnsignedIntArray &objOrbitColors,
                         const std::vector<SpacePoint*> &objArray);
    
    virtual void SetGlCoordSystem(CoordinateSystem *internalCs,
@@ -142,8 +142,10 @@ public:
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,
                         const RealArray &velY, const RealArray &velZ,
-                        const UnsignedIntArray &scColors, bool solving,
-                        Integer solverOption, bool updateCanvas,
+                        //const UnsignedIntArray &scColors,
+                        const ColorMap &orbitColorMap,
+                        const ColorMap &targetColorMap,
+                        bool solving, Integer solverOption, bool updateCanvas,
                         bool drawing, bool inFunction = false);
    virtual void TakeAction(const std::string &action);
    virtual void InitializePlot();

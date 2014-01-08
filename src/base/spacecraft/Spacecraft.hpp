@@ -507,6 +507,7 @@ private:
    void              SetPossibleInputTypes(const std::string& label, const std::string &rep);
    bool              ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue, bool checkCoupled = true);
 
+   bool              SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt, bool deleteOldAtt = false);
 };
 
 #endif // Spacecraft_hpp
