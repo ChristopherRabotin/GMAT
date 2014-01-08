@@ -46,6 +46,7 @@ protected:
       NadirPointingParamCount = KinematicParamCount
    };
    
+   static const Real DENOMINATOR_TOLERANCE;
 
    Rmatrix33 TRIAD(Rvector3& V1, Rvector3& V2, Rvector3& W1, Rvector3& W2);
 

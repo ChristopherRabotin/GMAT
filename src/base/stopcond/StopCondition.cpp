@@ -29,6 +29,7 @@
 #include "StringUtil.hpp"              // for ReplaceName()
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
+#include <stdlib.h>                    // for atof
 
 
 //#define DEBUG_STOPCOND_INIT

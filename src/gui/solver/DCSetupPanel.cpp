@@ -110,6 +110,9 @@ void DCSetupPanel::LoadData()
    id = theDC->GetParameterID("ShowProgress");
    showProgressCheckBox->SetValue(theDC->GetBooleanParameter(id));
    
+   id = theDC->GetParameterID("Algorithm");
+   algorithmComboBox->SetValue(theDC->GetStringParameter(id).c_str());
+
    id = theDC->GetParameterID("DerivativeMethod");
    // id = theDC->GetParameterID("UseCentralDifferences");
    derivativeMethodComboBox->SetValue(theDC->GetStringParameter(id).c_str());
@@ -166,6 +169,9 @@ void DCSetupPanel::SaveData()
       
       id = theDC->GetParameterID("ShowProgress");
       theDC->SetBooleanParameter(id, showProgressCheckBox->GetValue());
+
+      id = theDC->GetParameterID("Algorithm");
+      theDC->SetStringParameter(id, algorithmComboBox->GetValue().c_str());
     
       id = theDC->GetParameterID("DerivativeMethod");
       // id = theDC->GetParameterID("UseCentralDifferences");
@@ -196,7 +202,12 @@ void DCSetupPanel::Setup( wxWindow *parent)
    derivativeMethodArray[1] = "ForwardDifference";
    derivativeMethodArray[2] = "BackwardDifference";
    
+   wxString *algorithmArray = new wxString[3];
+   algorithmArray[0] = "NewtonRaphson";
+   algorithmArray[1] = "Broyden";
+   algorithmArray[2] = "ModifiedBroyden";
    
+
     wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
     #if __WXMAC__
     int buttonWidth = 40;
@@ -210,6 +221,11 @@ void DCSetupPanel::Setup( wxWindow *parent)
    wxFlexGridSizer *grid1 = new wxFlexGridSizer( 2, 0, 0 );
    grid1->AddGrowableCol(1);
    
+   algorithmStaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Algorithm"), wxDefaultPosition,wxDefaultSize, 0);
+   algorithmComboBox =
+      new wxComboBox( parent, ID_COMBOBOX, wxT("NewtonRaphson"), wxDefaultPosition,
+                      wxSize(200,-1), 3, algorithmArray, wxCB_DROPDOWN|wxCB_READONLY );
    maxStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Iterations"), wxDefaultPosition, wxDefaultSize, 0 );
    maxTextCtrl =
@@ -220,6 +236,8 @@ void DCSetupPanel::Setup( wxWindow *parent)
       new wxComboBox( parent, ID_COMBOBOX, wxT("CentralDifference"), wxDefaultPosition, 
                       wxSize(200,-1), 3, derivativeMethodArray, wxCB_DROPDOWN|wxCB_READONLY );
    
+   grid1->Add( algorithmStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid1->Add( algorithmComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    grid1->Add( maxStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid1->Add( maxTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
    grid1->Add( derivativeMethodStaticText, 0, wxALIGN_LEFT|wxALL, bsize );

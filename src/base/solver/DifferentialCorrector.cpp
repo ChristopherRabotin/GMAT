@@ -50,7 +50,8 @@ DifferentialCorrector::PARAMETER_TEXT[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
    "Goals",
-   "DerivativeMethod"
+   "DerivativeMethod",
+   "Algorithm"					// searchTypeID
 };
 
 const Gmat::ParameterType
@@ -58,6 +59,7 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
+   Gmat::ENUMERATION_TYPE,
    Gmat::ENUMERATION_TYPE
 };
 
@@ -71,6 +73,14 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
 //------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(std::string name) :
    Solver                  ("DifferentialCorrector", name),
+   // KARI additions
+   dcType                  ("NewtonRaphson"),
+   dcTypeId                (1),
+   savedNominal            (NULL),
+   savedJacobian           (NULL),
+   savedInverseJacobian    (NULL),
+   skipPerts               (false),
+
    goalCount               (0),
    goal                    (NULL),
    tolerance               (NULL),
@@ -110,6 +120,14 @@ DifferentialCorrector::~DifferentialCorrector()
 //------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    Solver                  (dc),
+   // KARI additions
+   dcType                  (dc.dcType),
+   dcTypeId                (dc.dcTypeId),
+   savedNominal            (NULL),
+   savedJacobian           (NULL),
+   savedInverseJacobian    (NULL),
+   skipPerts               (false),
+
    goalCount               (dc.goalCount),
    goal                    (NULL),
    tolerance               (NULL),
@@ -130,7 +148,8 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
       ("DifferentialCorrector::DC(COPY constructor) entered\n");
    #endif
    goalNames.clear();
-
+   savedVariable.clear();
+   
    parameterCount = dc.parameterCount;
 }
 
@@ -141,20 +160,29 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
 DifferentialCorrector&
 DifferentialCorrector::operator=(const DifferentialCorrector& dc)
 {
-   if (&dc == this)
-      return *this;
+   if (&dc != this)
+   {
+      Solver::operator=(dc);
 
-   Solver::operator=(dc);
+      FreeArrays();
+      goalNames.clear();
 
-   FreeArrays();
-   goalNames.clear();
+      // KARI Enhancements
+      dcType = dc.dcType;
+      dcTypeId = dc.dcTypeId;
+      savedNominal = NULL;
+      savedJacobian = NULL;
+      savedInverseJacobian = NULL;
+      savedVariable.clear();
+      skipPerts = false;
 
-   goalCount        = dc.goalCount;
-   derivativeMethod = dc.derivativeMethod;
-   diffMode         = dc.diffMode;
-   firstPert        = dc.firstPert;
-   incrementPert    = dc.incrementPert;
-
+      goalCount        = dc.goalCount;
+      derivativeMethod = dc.derivativeMethod;
+      diffMode         = dc.diffMode;
+      firstPert        = dc.firstPert;
+      incrementPert    = dc.incrementPert;
+   }
+   
    return *this;
 }
 
@@ -232,8 +260,8 @@ Integer DifferentialCorrector::GetParameterID(const std::string &str) const
       if (writeDeprecatedMsg)
       {
          MessageInterface::ShowMessage
-            (deprecatedMessageFormat.c_str(), "UseCentralDifferences", GetName().c_str(),
-             "DerivativeMethod");
+            (deprecatedMessageFormat.c_str(), "UseCentralDifferences", 
+            GetName().c_str(), "DerivativeMethod");
          writeDeprecatedMsg = false;
       }
       return derivativeMethodID;
@@ -408,6 +436,9 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
    if (id == derivativeMethodID)
       return derivativeMethod;
 
+   if (id == searchTypeID)
+      return dcType;
+
    return Solver::GetStringParameter(id);
 }
 
@@ -464,6 +495,39 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
       //  All other values are not allowed!
       else
          retval = false;
+
+      return retval;
+   }
+
+   if (id == searchTypeID)
+   {
+      bool retval = true;
+
+      if (value == "NewtonRaphson" || value == "Broyden" ||
+          value == "ModifiedBroyden")
+      {
+         dcType = value;
+         if (dcType == "NewtonRaphson")
+         {
+            dcTypeId = 1;
+         }
+         else if(dcType == "Broyden")
+         {
+            dcTypeId = 2;
+         }
+         else if(dcType == "ModifiedBroyden")
+         {
+            dcTypeId = 3;
+         }
+      }
+      //  All other values are not allowed!
+      else
+      {
+         throw SolverException("The value of \"" + value +
+               "\" for field \"Algorithm\" on object \"" + instanceName +
+               "\" is not an allowed value.\nThe allowed values are: "
+               "[NewtonRaphson Broyden ModifiedBroyden]");
+      }
 
       return retval;
    }
@@ -538,6 +602,7 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
       {
          nominal[i] = goal[i] + 10.0 * tolerance[i];
       }
+      skipPerts = false;
    }
 
    if (action == "SetMode")
@@ -698,27 +763,33 @@ bool DifferentialCorrector::Initialize()
    FreeArrays();
 
    // Setup the goal data structures
-   goal      = new Real[localGoalCount];
-   tolerance = new Real[localGoalCount];
-   nominal   = new Real[localGoalCount];
+   goal         = new Real[localGoalCount];
+   tolerance    = new Real[localGoalCount];
+   nominal      = new Real[localGoalCount];
+   savedNominal = new Real[localGoalCount];
 
    // And the sensitivity matrix
    Integer i;
    achieved        = new Real*[localVariableCount];
    backAchieved    = new Real*[localVariableCount];
    jacobian        = new Real*[localVariableCount];
+   savedJacobian   = new Real*[localVariableCount];
    for (i = 0; i < localVariableCount; ++i)
    {
       jacobian[i]        = new Real[localGoalCount];
+      savedJacobian[i]   = new Real[localGoalCount];
       achieved[i]        = new Real[localGoalCount];
       backAchieved[i]    = new Real[localGoalCount];
    }
 
    inverseJacobian = new Real*[localGoalCount];
+   savedInverseJacobian = new Real*[localGoalCount];
    for (i = 0; i < localGoalCount; ++i)
    {
       inverseJacobian[i] = new Real[localVariableCount];
+      savedInverseJacobian[i] = new Real[localVariableCount];
    }
+   skipPerts = false;
 
    Solver::Initialize();
 
@@ -993,13 +1064,181 @@ void DifferentialCorrector::RunPerturbation()
 //------------------------------------------------------------------------------
 /**
  * Updates the values for the variables based on the inverted Jacobian.
+ *
+ * @note: In GMAT's Differential Corrector, the Jacobian matrix is ordered
+ *        with the first index spanning the number of variables, and the second
+ *        index the number of goals.  This results in a matrix inverted from the
+ *        usual convention.
+ *
+ *        The inverse matrix then has the first index moving through the goals
+ *        and the second through the variables.
  */
 //------------------------------------------------------------------------------
 void DifferentialCorrector::CalculateParameters()
 {
-   // Build and invert the sensitivity matrix
-   CalculateJacobian();
-   InvertJacobian();
+//   // Build and invert the sensitivity matrix
+//   CalculateJacobian();
+//   InvertJacobian();
+   // Modified by MH
+   switch (dcTypeId)
+   {
+      case 1:           // Newton-Raphson
+         // Build and invert the sensitivity matrix
+         CalculateJacobian();
+         InvertJacobian();
+         break;
+
+      case 2:           // Broyden
+         // Iteration counter already incremented at this point on 1st pass
+         if ( iterationsTaken == 1 )
+         {
+            CalculateJacobian();
+            InvertJacobian();
+            skipPerts = true;
+         }
+         else
+         {
+            #ifdef DEBUG_BROYDEN
+               MessageInterface::ShowMessage("%d variables; %d saved variables\n",
+                     variable.size(), savedVariable.size());
+            #endif
+
+            std::vector<Real> s, y, numerator;
+            // Set the size for the vectors before loading them
+            s.reserve(variableCount);
+            y.reserve(goalCount);
+            numerator.reserve(goalCount);
+
+            Real denom = 0.0;
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               s[i] = variable[i] - savedVariable[i];
+               // Build the denominator
+               denom += s[i] * s[i];
+            }
+
+            for ( Integer j = 0; j < goalCount; ++j )
+               y[j] = nominal[j] - savedNominal[j];
+
+            for ( Integer i = 0; i < goalCount; ++i )
+            {
+               numerator[i] = y[i];
+               for ( Integer j = 0; j < variableCount; ++j )
+                  numerator[i] += -savedJacobian[j][i]*s[j];
+            }
+
+            for (Integer i = 0; i < goalCount; ++i)
+               for (Integer j = 0; j < variableCount; ++j)
+                  jacobian[j][i] = savedJacobian[j][i] +
+                        numerator[i] * s[j] / denom;
+
+            InvertJacobian();
+         }
+         break;
+
+      case 3:        // Modified Broyden
+         // Iteration counter already incremented at this point on 1st pass
+         if ( iterationsTaken == 1 )
+         {
+            CalculateJacobian();
+            InvertJacobian();
+            skipPerts = true;
+         }
+         else
+         {
+            std::vector<Real> s, y, temp, v;
+            // Set the size for the vectors before loading them
+            s.reserve(variableCount);
+            y.reserve(goalCount);
+            temp.reserve(variableCount);
+            v.reserve(goalCount);
+
+            for ( Integer i = 0; i < variableCount; ++i )
+               s[i] = variable[i] - savedVariable[i];
+
+            for ( Integer j = 0; j < goalCount; ++j )
+               y[j] = nominal[j] - savedNominal[j];
+
+            // Build the denominator
+            Real denom = 0.0;
+            for (Integer i = 0; i < variableCount; ++i)
+            {
+               temp[i] = 0.0;
+               for (Integer j = 0; j < goalCount; ++j)
+               {
+                  temp[i] += savedInverseJacobian[j][i] * y[j];
+               }
+            }
+            for (Integer i = 0; i < variableCount; ++i)
+               denom += temp[i] * s[i];
+
+            // Build v_k
+            for (Integer i = 0; i < goalCount; ++i)
+            {
+               v[i] = 0.0;
+               for (Integer j = 0; j < variableCount; ++j)
+                  v[i] += savedInverseJacobian[i][j] * s[j];
+               v[i] /= denom;
+            }
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               temp[i] = s[i];
+               for ( Integer j = 0; j < goalCount; ++j )
+                  temp[i] -= savedInverseJacobian[j][i] * y[j];
+            }
+
+            for ( Integer i = 0; i < variableCount; ++i )
+            {
+               for ( Integer j = 0; j < goalCount; ++j )
+                  inverseJacobian[j][i] = savedInverseJacobian[j][i] +
+                        temp[i] * v[j];
+            }
+         }
+         break;
+
+      default:
+         throw SolverException("Undefined DifferentialCorrector algorithm");
+   }
+
+   if ( dcTypeId != 1 )
+   {
+      Integer localVariableCount = variableNames.size();
+      Integer localGoalCount = goalNames.size();
+
+      // savedNominal = nominal;
+      for (Integer m = 0; m < localGoalCount; ++m)
+         savedNominal[m] = nominal[m];
+
+      #ifdef DEBUG_BROYDEN
+         MessageInterface::ShowMessage("Saving variables; %d -> ",
+               savedVariable.size());
+      #endif
+      savedVariable = variable;
+      #ifdef DEBUG_BROYDEN
+         MessageInterface::ShowMessage("%d\n", savedVariable.size());
+      #endif
+
+      if ( dcTypeId == 2 )
+      {
+         // savedJacobian = jacobian;
+         for (Integer m = 0; m < localVariableCount; ++m)
+         {
+            for (Integer n = 0; n < localGoalCount; ++n)
+               savedJacobian[m][n] = jacobian[m][n];
+         }
+      }
+      else // dctype = ModifiedBroyden
+      {
+         // savedInverseJacobian = inverseJacobian;
+         for (Integer m = 0; m < localGoalCount; ++m)
+         {
+            for (Integer n = 0; n < localVariableCount; ++n)
+               savedInverseJacobian[m][n] = inverseJacobian[m][n];
+         }
+      }
+   }
 
    std::vector<Real> delta;
 
@@ -1086,9 +1325,14 @@ void DifferentialCorrector::CheckCompletion()
       {
          // Set to run perts if not converged
          pertNumber = -1;
-         // Build the first perturbation
-         currentState = PERTURBING;
-         RunPerturbation();
+         if (!skipPerts)
+         {
+            // Build the first perturbation
+            currentState = PERTURBING;
+            RunPerturbation();
+         }
+         else
+            currentState = CALCULATING;
       }
       else
       {
@@ -1286,6 +1530,28 @@ void DifferentialCorrector::FreeArrays()
       delete [] inverseJacobian;
       inverseJacobian = NULL;
    }
+   
+   if (savedNominal)
+   {
+      delete [] savedNominal;
+      savedNominal = NULL;
+   }
+
+   if (savedJacobian)
+   {
+      for (Integer i = 0; i < variableCount; ++i)
+         delete [] savedJacobian[i];
+      delete [] savedJacobian;
+      savedJacobian = NULL;
+   }
+
+   if (savedInverseJacobian)
+   {
+      for (Integer i = 0; i < goalCount; ++i)
+         delete [] savedInverseJacobian[i];
+      delete [] savedInverseJacobian;
+      savedInverseJacobian = NULL;
+   }
 
    if (indx)
    {
@@ -1331,6 +1597,10 @@ std::string DifferentialCorrector::GetProgressString()
                         << "********\n"
                         << "*** Performing Differential Correction "
                         << "(using \"" << instanceName << "\")\n";
+
+               if (progressStyle == VERBOSE_STYLE)
+                  progress << "*** Solution Algorithm: "
+                           << dcType << "\n";
 
                // Write out the setup data
                progress << "*** " << localVariableCount << " variables; "

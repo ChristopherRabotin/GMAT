@@ -4,7 +4,7 @@
 # Flags used to control the build
 USE_SPICE = 1
 CONSOLE_APP = 0
-DEBUG_BUILD = 0
+DEBUG_BUILD = 1
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
 USE_STC_EDITOR = 0
@@ -24,7 +24,7 @@ WX_CONFIG_PATH =
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
 # *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /home/djc/TS_Code/Gmat3rdParty
+SPICE_DIR = /home/djc/gsfcgit/Gmat3rdParty
 SPICE_INCLUDE = -I$(SPICE_DIR)/cspice/include
 SPICE_LIB_DIR = $(SPICE_DIR)/cspice/lib
 SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
@@ -80,9 +80,9 @@ DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
                  -fexpensive-optimizations
 
 ifeq ($(DEBUG_BUILD), 1)
-OPTIMIZATIONS = -fno-strict-aliasing -ffriend-injection $(WX_28_DEFINES)
+OPTIMIZATIONS = -fno-strict-aliasing $(WX_28_DEFINES)
 else
-OPTIMIZATIONS = -O3 -fno-strict-aliasing -ffriend-injection $(WX_28_DEFINES)
+OPTIMIZATIONS = -O3 -fno-strict-aliasing $(WX_28_DEFINES)
 endif
 
 # Do not edit below this line -- here we build up longer compile/link strings
@@ -90,7 +90,7 @@ LINUX_MAC = 1
 
 ifeq ($(CONSOLE_APP), 0)
 WXCPPFLAGS = `$(WX_CONFIG_PATH)wx-config --cppflags`
-WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no` -lGL -lGLU
+WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no` -lGL -lGLU -lX11 -ldl
 endif
 
 

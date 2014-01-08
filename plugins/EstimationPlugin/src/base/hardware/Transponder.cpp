@@ -18,6 +18,7 @@
 
 #include "Transponder.hpp"
 #include "MessageInterface.hpp"
+#include <stdlib.h>                // for atof
 
 //------------------------------------------------------------------------------
 // Static data

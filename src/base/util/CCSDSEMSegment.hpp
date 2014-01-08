@@ -126,6 +126,9 @@ protected:
 
    bool        checkLagrangeOrder;
 
+   Integer     firstUsable;
+   Integer     lastUsable;
+
    // static data
 
    /// Tolerance to use when looking for an exact epoch match
