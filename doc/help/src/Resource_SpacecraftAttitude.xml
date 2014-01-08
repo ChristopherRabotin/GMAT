@@ -40,8 +40,6 @@
     a <guilabel>Spacecraft</guilabel>. The <guilabel>SpiceAttitude</guilabel>
     model allows you to define the <guilabel>Spacecraft</guilabel> attitude
     based on SPICE attitude kernels.</para>
-	
-
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Spacecraft"/></para>
@@ -299,6 +297,73 @@
           </row>
 
           <row>
+            <entry><guilabel>AttitudeConstraintType</guilabel></entry>
+
+            <entry><para>The constraint type for resolving attitude ambiguity.
+            The attitude is computed such that the angle between the
+            <guilabel>BodyConstraintVector</guilabel> and the constraint
+            defined by <guilabel>AttitudeConstraintType</guilabel> is
+            minimized. A <guilabel>Velocity</guilabel> constraint uses the
+            inertial velocity vector expressed with respect to the
+            <guilabel>AttitudeReferenceBody</guilabel>. An
+            <guilabel>OrbitNormal</guilabel> constraint uses the orbit normal
+            vector expressed with respect to the
+            <guilabel>AttitudeReferenceBody</guilabel>. <guilabel>
+            AttitudeConstraintType</guilabel> is used for the following
+            attitude models: <guilabel>NadirPointing</guilabel>. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>Velocity</guilabel>,
+                    <guilabel>OrbitNormal</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>OrbitNormal</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>AttitudeCoordinateSystem</guilabel></entry>
 
             <entry><para>The <guilabel>CoordinateSystem</guilabel> used in
@@ -420,6 +485,63 @@
           </row>
 
           <row>
+            <entry><guilabel>AttitudeReferenceBody</guilabel></entry>
+
+            <entry><para>The celestial body used to define nadir.
+            <guilabel>AttitudeReferenceBody</guilabel> is used for the
+            following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Resource</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Celestial Body</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Earth</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>AttitudeSpiceKernelName</guilabel></entry>
 
             <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel>
@@ -454,6 +576,357 @@
 
                   <listitem>
                     <para>empty array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyAlignmentVectorX</guilabel></entry>
+
+            <entry><para>The x-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <guilabel>BodyAlignmentVectorX</guilabel> is used for the
+            following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyAlignmentVectorY</guilabel></entry>
+
+            <entry><para>The y-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <guilabel>BodyAlignmentVectorY</guilabel> is used for the
+            following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyAlignmentVectorZ</guilabel></entry>
+
+            <entry><para>The z-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <guilabel>BodyAlignmentVectorZ</guilabel> is used for the
+            following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyConstraintVectorX</guilabel></entry>
+
+            <entry><para>The x-component of the constraint vector, expressed
+            in the body frame. See <link
+            linkend="AttitudeNadirPointing">NadirPointing</link> description
+            for further details. <guilabel>BodyConstraintVectorX</guilabel> is
+            used for the following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyConstraintVectorY</guilabel></entry>
+
+            <entry><para>The y-component of the constraint vector, expressed
+            in the body frame. See <link
+            linkend="AttitudeNadirPointing">NadirPointing</link> description
+            for further details. <guilabel>BodyConstraintVectorY</guilabel> is
+            used for the following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BodyConstraintVectorZ</guilabel></entry>
+
+            <entry><para>The z-component of the constraint vector, expressed
+            in the body frame. See <link
+            linkend="AttitudeNadirPointing">NadirPointing</link> description
+            for further details. <guilabel>BodyConstraintVectorZ</guilabel> is
+            used for the following attitude models:
+            <guilabel>NadirPointing</guilabel>.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Real &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
                   </listitem>
                 </varlistentry>
 
@@ -1981,8 +2454,11 @@
       a particular model, fields of that type have no effect for that model.
       Similarly, fields marked as active do affect the attitude for a
       particular model.</para>
-	  
-	  	<note><para> GMAT attitude parameterizations such as the DCM rotate from inertial to body. </para></note>
+
+      <note>
+        <para>GMAT attitude parameterizations such as the DCM rotate from
+        inertial to body.</para>
+      </note>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="5">
@@ -2002,7 +2478,7 @@
 
               <entry>Coord. Sys.</entry>
 
-              <entry>Attitude Repressentation</entry>
+              <entry>Attitude Representation</entry>
 
               <entry>Attitude Rate</entry>
 
@@ -2037,6 +2513,18 @@
 
             <row>
               <entry><guilabel>SpiceAttitude</guilabel></entry>
+
+              <entry><para>Inactive</para></entry>
+
+              <entry><para>Inactive</para></entry>
+
+              <entry><para>Inactive</para></entry>
+
+              <entry><para>Active</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>NadirPointing</guilabel></entry>
 
               <entry><para>Inactive</para></entry>
 
@@ -2373,6 +2861,84 @@ Enhanced3DView1.ViewDirection = Mars
 BeginMissionSequence
 
 Propagate spkProp(MarsExpress) {MarsExpress.ElapsedDays = 0.2}</code></programlisting>
+    </refsection>
+
+    <refsection xml:id="AttitudeNadirPointing">
+      <title>Nadir Pointing Model</title>
+
+      <para>The <guilabel>NadirPointing</guilabel> attitude mode configures
+      the attitude of a spacecraft to point a specified vector in the
+      spacecraft body system in the nadir direction. The ambiguity in angle
+      about the nadir vector is resolved by minimizing the angle between two
+      constraint vectors. Note: the nadir pointing mode points the attitude in
+      the negative radial direction (not opposite the planetodetic
+      normal).</para>
+
+      <para>To configure which axis points to nadir, set the
+      <guilabel>AttitudeReferenceBody</guilabel> field to the desired
+      celestial body and define the body components of the alignment vector
+      using the <guilabel>BodyAlignmentVector</guilabel> fields. To configure
+      the constraint, set the <guilabel>AttitudeConstraintType</guilabel>
+      field to the desired constraint type, and define the body components of
+      the constraint using the <guilabel>BodyConstraintVector</guilabel>
+      fields. GMAT supports two constraint types,
+      <guilabel>OrbitNormal</guilabel> and <guilabel>Velocity</guilabel>, and
+      in both cases the vectors are constructed using the inertial spacecraft
+      state with respect to the
+      <guilabel>AttitudeReferenceBody</guilabel>.</para>
+
+      <warning>
+        <para>Attitude rates are not computed for the
+        <guilabel>NadirPointing</guilabel> model. If you perform a computation
+        that requires attitude rate information when using the
+        <guilabel>NadirPointing</guilabel> mode, GMAT will throw an error
+        message and execution will stop. Similarly, if the definitions of the
+        <guilabel>BodyAlignmentVector</guilabel> and
+        <guilabel>BodyConstraintVector</guilabel> fields result in an
+        undefined attitude, an error message is thrown and execution will
+        stop.</para>
+      </warning>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftAttitude_GUI_6.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>The script example below shows how to configure a
+      <guilabel>Spacecraft</guilabel> to use an Earth
+      <guilabel>NadirPointing</guilabel> attitude system where the body y-axis
+      points nadir and the angle between the body x-axis and the orbit normal
+      vector is a minimum.</para>
+
+      <programlisting><code>Create Spacecraft aSat;
+GMAT aSat.Attitude                 = NadirPointing;
+GMAT aSat.AttitudeReferenceBody    = Earth
+GMAT aSat.AttitudeConstraintType   = OrbitNormal
+GMAT aSat.BodyAlignmentVectorX  = 0
+GMAT aSat.BodyAlignmentVectorY  = 1
+GMAT aSat.BodyAlignmentVectorZ  = 0
+GMAT aSat.BodyConstraintVectorX = 1
+GMAT aSat.BodyConstraintVectorX = 0
+GMAT aSat.BodyConstraintVectorX = 0
+
+Create ForceModel Propagator1_ForceModel
+Create Propagator Propagator1
+Propagator1.FM        = Propagator1_ForceModel
+Propagator1.MaxStep   = 10
+
+Create OrbitView OrbitView1;
+OrbitView1.Add                = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector    = [ 30000 0 0 ]
+
+BeginMissionSequence
+
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
     </refsection>
   </refsection>
 </refentry>
