@@ -599,8 +599,9 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
 {
    #if DBGLVL_RENAME
    MessageInterface::ShowMessage
-      ("OrbitPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+      ("\nOrbitPlot::RenameRefObject() '%s' entered, type=%s, oldName=%s, newName=%s, "
+       "mAllSpCount=%d\n", GetName().c_str(), GetObjectTypeString(type).c_str(),
+       oldName.c_str(), newName.c_str(), mAllSpCount);
    #endif
    
    if (type == Gmat::SPACECRAFT || type == Gmat::GROUND_STATION ||
@@ -608,61 +609,121 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
    {
       // for spacecraft name
       for (int i=0; i<mAllSpCount; i++)
+      {
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage
+            ("   mAllSpNameArray[%d] = '%s'\n", i, mAllSpNameArray[i].c_str());
+         #endif
          if (mAllSpNameArray[i] == oldName)
             mAllSpNameArray[i] = newName;
+      }
       
       //----------------------------------------------------
       // Since spacecraft name is used as key for showing
       // and drawing object map, I can't change the key name,
       // so it is removed and inserted with new name.
       //----------------------------------------------------
+      #if DBGLVL_RENAME
+      MessageInterface::ShowMessage
+         ("   mDrawOrbitMap.size()=%d, mShowObjectMap.size()=%d\n",
+          mDrawOrbitMap.size(), mShowObjectMap.size());
+      #endif
       std::map<std::string, bool>::iterator drawOrbitPos, showObjectPos;
       drawOrbitPos = mDrawOrbitMap.find(oldName);
       showObjectPos = mShowObjectMap.find(oldName);
       if (drawOrbitPos != mDrawOrbitMap.end() &&
           showObjectPos != mShowObjectMap.end())
       {
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage
+            ("   Renaming by adding new name and deleting old name in "
+             "mDrawOrbitMap and mShowObjectMap\n");
+         #endif
          mDrawOrbitMap[newName] = mDrawOrbitMap[oldName];
          mShowObjectMap[newName] = mShowObjectMap[oldName];
          mDrawOrbitMap.erase(drawOrbitPos);
          mShowObjectMap.erase(showObjectPos);
+         
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage("   --- After rename\n");
+         for (drawOrbitPos = mDrawOrbitMap.begin(); drawOrbitPos != mDrawOrbitMap.end(); ++drawOrbitPos)
+            MessageInterface::ShowMessage
+               ("   obj = %20s, draw = %d\n", drawOrbitPos->first.c_str(), drawOrbitPos->second);
+         #endif
       }
       
-      
       //----------------------------------------------------
-      // Since spacecraft name is used as key for spacecraft
+      // Since object name is used as key for object default
       // color map, I can't change the key name, so it is
       // removed and inserted with new name
       //----------------------------------------------------
-      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-      std::map<std::string, UnsignedInt>::iterator currOrbColorPos, currTargColorPos;
-      orbColorPos = mDefaultOrbitColorMap.find(oldName);
-      targColorPos = mDefaultTargetColorMap.find(oldName);
-      currOrbColorPos = mCurrentOrbitColorMap.find(oldName);
-      currTargColorPos = mCurrentTargetColorMap.find(oldName);
+      #if DBGLVL_RENAME
+      MessageInterface::ShowMessage
+         ("   mDefaultOrbitColorMap.size()=%d, mDefaultTargetColorMap.size()=%d\n",
+          mCurrentOrbitColorMap.size(), mCurrentTargetColorMap.size());
+      #endif
+      std::map<std::string, UnsignedInt>::iterator defOrbColorPos, defTargColorPos;
+      defOrbColorPos = mDefaultOrbitColorMap.find(oldName);
+      defTargColorPos = mDefaultTargetColorMap.find(oldName);
       
-      if (orbColorPos != mDefaultOrbitColorMap.end() &&
-          targColorPos != mDefaultTargetColorMap.end())
+      if (defOrbColorPos != mDefaultOrbitColorMap.end() &&
+          defTargColorPos != mDefaultTargetColorMap.end())
       {
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage
+            ("   Renaming by adding new name and deleting old name in ColorMaps \n");
+         #endif
          // add new spacecraft name key and delete old
          mDefaultOrbitColorMap[newName] = mDefaultOrbitColorMap[oldName];
          mDefaultTargetColorMap[newName] = mDefaultTargetColorMap[oldName];
-         mCurrentOrbitColorMap[newName] = mCurrentOrbitColorMap[oldName];
-         mCurrentTargetColorMap[newName] = mCurrentTargetColorMap[oldName];
-         mDrawOrbitMap[newName] = mDrawOrbitMap[oldName];
-         mShowObjectMap[newName] = mShowObjectMap[oldName];
-         mDefaultOrbitColorMap.erase(orbColorPos);
-         mDefaultTargetColorMap.erase(targColorPos);
-         mCurrentOrbitColorMap.erase(currOrbColorPos);
-         mCurrentTargetColorMap.erase(currTargColorPos);
+         mDefaultOrbitColorMap.erase(defOrbColorPos);
+         mDefaultTargetColorMap.erase(defTargColorPos);
          
          #if DBGLVL_RENAME
-         MessageInterface::ShowMessage("--- After rename\n");
-         for (orbColorPos = mDefaultOrbitColorMap.begin();
-              orbColorPos != mDefaultOrbitColorMap.end(); ++orbColorPos)
+         MessageInterface::ShowMessage("   --- After rename\n");
+         for (defOrbColorPos = mDefaultOrbitColorMap.begin();
+              defOrbColorPos != mDefaultOrbitColorMap.end(); ++defOrbColorPos)
          {
             MessageInterface::ShowMessage
-               ("obj = %20s, color = %d\n", orbColorPos->first.c_str(), orbColorPos->second);
+               ("   obj = %20s, color = %d\n", defOrbColorPos->first.c_str(), defOrbColorPos->second);
+         }
+         #endif
+      }
+      
+      //----------------------------------------------------
+      // Since object name is used as key for object current
+      // color map, I can't change the key name, so it is
+      // removed and inserted with new name
+      //----------------------------------------------------
+      #if DBGLVL_RENAME
+      MessageInterface::ShowMessage
+         ("   mCurrentOrbitColorMap.size()=%d, mCurrentTargetColorMap.size()=%d\n",
+          mCurrentOrbitColorMap.size(), mCurrentTargetColorMap.size());
+      #endif
+      std::map<std::string, UnsignedInt>::iterator curOrbColorPos, curTargColorPos;
+      curOrbColorPos = mCurrentOrbitColorMap.find(oldName);
+      curTargColorPos = mCurrentTargetColorMap.find(oldName);
+      
+      if (curOrbColorPos != mCurrentOrbitColorMap.end() &&
+          curTargColorPos != mCurrentTargetColorMap.end())
+      {
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage
+            ("   Renaming by adding new name and deleting old name in CurrentColorMaps \n");
+         #endif
+         // Add new object name key and delete old
+         mCurrentOrbitColorMap[newName] = mCurrentOrbitColorMap[oldName];
+         mCurrentTargetColorMap[newName] = mCurrentTargetColorMap[oldName];
+         mCurrentOrbitColorMap.erase(curOrbColorPos);
+         mCurrentTargetColorMap.erase(curTargColorPos);
+         
+         #if DBGLVL_RENAME
+         MessageInterface::ShowMessage("   --- After rename\n");
+         for (curOrbColorPos = mCurrentOrbitColorMap.begin();
+              curOrbColorPos != mCurrentOrbitColorMap.end(); ++curOrbColorPos)
+         {
+            MessageInterface::ShowMessage
+               ("   obj = %20s, color = %d\n", curOrbColorPos->first.c_str(), curOrbColorPos->second);
          }
          #endif
       }
@@ -673,6 +734,10 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
          mViewCoordSysName = newName;
    }
    
+   #if DBGLVL_RENAME
+   MessageInterface::ShowMessage
+      ("OrbitPlot::RenameRefObject() '%s' returning true\n", GetName().c_str());
+   #endif
    return true;
 }
 
