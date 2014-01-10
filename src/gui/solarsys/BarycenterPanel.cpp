@@ -24,7 +24,7 @@
 #include "GmatStaticBoxSizer.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_BARYCENTER_PANEL 1
+//#define DEBUG_BARYCENTER_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
