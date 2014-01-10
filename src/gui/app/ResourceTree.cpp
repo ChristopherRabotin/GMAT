@@ -2348,6 +2348,10 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       return;
    }
    
+   int answer = wxMessageBox(wxT("Are you sure you want to delete " + selItemData->GetName() + "?"),
+                         wxT("Please confirm"), wxYES_NO);
+   if (answer == wxNO) return;
+
    Gmat::ObjectType objType = GetObjectType(itemType);
    if (objType == Gmat::UNKNOWN_OBJECT)
       return;
