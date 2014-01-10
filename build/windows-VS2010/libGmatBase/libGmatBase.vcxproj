@@ -395,6 +395,8 @@
     <ClCompile Include="..\..\..\src\base\parameter\BplaneData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BplaneParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BplaneReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BurnData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BurnParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BurnReal.cpp" />
@@ -407,6 +409,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\ExpressionParser.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\HardwareParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\HardwareReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\KeplerianParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\NumberWrapper.cpp" />
@@ -420,6 +423,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\OrbitRmat66.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\OrbitRvec6.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\OrbitStmParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Parameter.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ParameterDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ParameterInfo.cpp" />
@@ -809,6 +813,8 @@
     <ClInclude Include="..\..\..\src\base\parameter\BplaneData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BplaneParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BplaneReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BurnData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BurnParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BurnReal.hpp" />
@@ -821,6 +827,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\ExpressionParser.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\HardwareParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\HardwareReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\KeplerianParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\NumberWrapper.hpp" />
@@ -834,6 +841,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\OrbitRmat66.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\OrbitRvec6.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\OrbitStmParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\paramdefs.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Parameter.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ParameterDatabase.hpp" />

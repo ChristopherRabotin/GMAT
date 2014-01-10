@@ -1320,6 +1320,18 @@
     <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2596,6 +2608,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
