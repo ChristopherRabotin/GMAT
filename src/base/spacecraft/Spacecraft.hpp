@@ -292,13 +292,15 @@ protected:
 
    enum MultipleReps  // these are IDs for the different representations
    {
-      CART_X = 10000,      // Cartesian
+      // Cartesian
+      CART_X = 10000,
       CART_Y,
       CART_Z,
       CART_VX,
       CART_VY,
       CART_VZ,
-      KEPL_SMA,            // Keplerian
+      // Keplerian
+      KEPL_SMA,
       KEPL_ECC,
       KEPL_INC,
       KEPL_RAAN,
@@ -307,39 +309,68 @@ protected:
       KEPL_EA,
       KEPL_MA,
       KEPL_HA,
-      MOD_KEPL_RADPER,     // Modified Keplerian
+      // Modified Keplerian
+      MOD_KEPL_RADPER,
       MOD_KEPL_RADAPO,
-      AZFPA_RMAG,          // SphericalAZFPA
+      // SphericalAZFPA
+      AZFPA_RMAG,
       AZFPA_RA,
       AZFPA_DEC,
       AZFPA_VMAG,
       AZFPA_AZI,
       AZFPA_FPA,
-      RADEC_RAV,           // SphericalRADEC
+      // SphericalRADEC
+      RADEC_RAV,
       RADEC_DECV,
-      EQ_PEY,              // Equinoctial
+      // Equinoctial
+      EQ_PEY,
       EQ_PEX,
       EQ_PNY,
       EQ_PNX,
       EQ_MLONG,
-      MOD_EQ_P,		// Modified Equinoctial (Semi-latus rectum); Modified by M.H.
+      // Modified Equinoctial (Semi-latus rectum); Modified by M.H.
+      MOD_EQ_P,
       MOD_EQ_F,		
       MOD_EQ_G,		
       MOD_EQ_H,		
       MOD_EQ_K,		
       MOD_EQ_TLONG,
-      DEL_DELA_l,	// Delaunay; Modified by M.H.
+      // Delaunay; Modified by M.H.
+      DEL_DELA_l,
       DEL_DELA_g,
       DEL_DELA_h,
       DEL_DELA_L,
       DEL_DELA_G,
       DEL_DELA_H,
-      PLD_RMAG,		// Planetodetic; Modified by M.H.
+      // Planetodetic; Modified by M.H.
+      PLD_RMAG,
       PLD_LON,
       PLD_LAT,
       PLD_VMAG,
       PLD_AZI,
       PLD_HFPA,
+      // Hyperbolic Asymptotes mod by YK 
+      HYP_ASYM_C3,
+      HYP_ASYM_Incoming_RLA,  // radPer and TA are shared by Mod_Kep and Kep.
+      HYP_ASYM_Incoming_DLA,
+      HYP_ASYM_Incoming_BVAZI,
+      HYP_ASYM_Outgoing_RLA,  // radPer and TA are shared by Mod_Kep and Kep.
+      HYP_ASYM_Outgoing_DLA,
+      HYP_ASYM_Outgoing_BVAZI,
+      // Brouwer-Lyddane Mean elements (short term only) mod by YK 
+      BROLYD_SHORT_SMA,
+      BROLYD_SHORT_ECC,
+      BROLYD_SHORT_INC,
+      BROLYD_SHORT_RAAN,
+      BROLYD_SHORT_AOP,
+      BROLYD_SHORT_MA,
+      // Brouwer-Lyddane Mean elements mod by YK 
+      BROLYD_LONG_SMA,
+      BROLYD_LONG_ECC,
+      BROLYD_LONG_INC,
+      BROLYD_LONG_RAAN,
+      BROLYD_LONG_AOP,
+      BROLYD_LONG_MA,
       EndMultipleReps
    };
    // these are the corresponding strings
@@ -360,9 +391,13 @@ protected:
       SPHERICAL_AZFPA_ID,
       SPHERICAL_RADEC_ID,
       EQUINOCTIAL_ID,
-      MODIFIED_EQUINOCTIAL_ID,	// Modified by M.H.
-      DELAUNAY_ID,				// Modified by M.H.
-      PLANETODETIC_ID		// Modified by M.H.
+      MODIFIED_EQUINOCTIAL_ID,   // Modified by M.H.
+      DELAUNAY_ID,	            // Modified by M.H.
+      PLANETODETIC_ID,           // Modified by M.H.
+      IN_ASYM_ID,	               // Mod by YK
+      OUT_ASYM_ID,
+      BROLYD_SHORT_ID,
+      BROLYD_LONG_ID
    };
    
    static const Integer ATTITUDE_ID_OFFSET;

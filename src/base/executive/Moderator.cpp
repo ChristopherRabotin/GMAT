@@ -3379,6 +3379,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    
    if (param == NULL)
    {
+      #if DEBUG_CREATE_PARAMETER
+      MessageInterface::ShowMessage
+         ("   The type '%s' is not in the creatable list.\n", newType.c_str());
+      #endif
       throw GmatBaseException
          ("The Moderator cannot create a Parameter type \"" + newType +
           "\" named \"" + name + "\"\n");
@@ -7842,6 +7846,54 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
 
+   // Modified by YK
+   // IncomingAsymptote parameters
+   CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
+   CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
+   CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default IncomingAsymptote parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // OutgoingAsymptote parameters
+   CreateParameter("OutgoingRHA", "DefaultSC.EarthMJ2000Eq.OutgoingRHA");
+   CreateParameter("OutgoingDHA", "DefaultSC.EarthMJ2000Eq.OutgoingDHA");
+   CreateParameter("OutgoingBVAZI", "DefaultSC.EarthMJ2000Eq.OutgoingBVAZI");
+
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default OutgoingAsymptote parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // BrouwerMeanShort parameters
+   // In averaging process, osculating AOP relates to every elements.
+   // Therefore, averaged elements have coordinate dependecy.
+   // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+   CreateParameter("BrouwerShortSMA", "DefaultSC.EarthMJ2000Eq.BrouwerShortSMA");
+   CreateParameter("BrouwerShortECC", "DefaultSC.EarthMJ2000Eq.BrouwerShortECC");
+   CreateParameter("BrouwerShortINC", "DefaultSC.EarthMJ2000Eq.BrouwerShortINC");
+   CreateParameter("BrouwerShortRAAN", "DefaultSC.EarthMJ2000Eq.BrouwerShortRAAN");
+   CreateParameter("BrouwerShortAOP", "DefaultSC.EarthMJ2000Eq.BrouwerShortAOP");
+   CreateParameter("BrouwerShortMA", "DefaultSC.EarthMJ2000Eq.BrouwerShortMA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default BrouwerMeanShort parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // BrouwerMeanLong parameters
+   // In averaging process, osculating AOP relates to every elements.
+   // Therefore, averaged elements have coordinate dependecy.
+   CreateParameter("BrouwerLongSMA", "DefaultSC.EarthMJ2000Eq.BrouwerLongSMA");
+   CreateParameter("BrouwerLongECC", "DefaultSC.EarthMJ2000Eq.BrouwerLongECC");
+   CreateParameter("BrouwerLongINC", "DefaultSC.EarthMJ2000Eq.BrouwerLongINC");
+   CreateParameter("BrouwerLongRAAN", "DefaultSC.EarthMJ2000Eq.BrouwerLongRAAN");
+   CreateParameter("BrouwerLongAOP", "DefaultSC.EarthMJ2000Eq.BrouwerLongAOP");
+   CreateParameter("BrouwerLongMA", "DefaultSC.EarthMJ2000Eq.BrouwerLongMA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default BrouwerMeanLong parameters created\n");
+   #endif
+   
    // Orbital parameters
    CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
    CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");

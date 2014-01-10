@@ -1827,6 +1827,16 @@ bool OrbitPanel::CheckState(Rvector6 &state)
       retval = CheckSpherical(state, stateTypeStr);
    else if (mFromStateTypeStr == "Equinoctial")
       retval = CheckEquinoctial(state);
+   
+   else if (mFromStateTypeStr == "OutgoingAsymptote") // YK
+      retval = CheckOutgoingAsymptote(state);
+   else if (mFromStateTypeStr == "IncomingAsymptote") 
+      retval = CheckIncomingAsymptote(state);
+   else if (mFromStateTypeStr == "BrouwerMeanShort") 
+      retval = CheckOutgoingAsymptote(state);
+   else if (mFromStateTypeStr == "BrouwerMeanLong") 
+      retval = CheckIncomingAsymptote(state);
+
    else
    {
       MessageInterface::PopupMessage
@@ -2493,6 +2503,256 @@ bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
    
    return retval;
 }
+
+//------------------------------------------------------------------------------
+// bool CheckOutgoingAsymptote(Rvector6 &state) by YK
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed OutgoingAsymptote state for validity.
+ *
+ * @param <state> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckOutgoingAsymptote(Rvector6 &state)
+{
+	
+   bool retval = true;
+   
+   std::string ElementNames[6];
+   ElementNames[0] = "RadPer";
+   ElementNames[1] = "C3Energy";
+   ElementNames[2] = "OutgoingRHA";
+   ElementNames[3] = "OutgoingDHA";
+   ElementNames[4] = "OutgoingBVAZI";
+   ElementNames[5] = "TA";
+   mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
+
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+      MessageInterface::ShowMessage(
+            "OrbitPanel::CheckOutgoingAsymptote, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
+         retval = false;
+      else
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+   }
+
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckOutgoingAsymptote() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckIncomingAsymptote(Rvector6 &state) by YK
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed IncomingAsymptote state for validity.
+ *
+ * @param <state> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckIncomingAsymptote(Rvector6 &state)
+{
+	
+   bool retval = true;
+   
+   std::string ElementNames[6];
+   ElementNames[0] = "RadPer";
+   ElementNames[1] = "C3Energy";
+   ElementNames[2] = "IncomingRHA";
+   ElementNames[3] = "IncomingDHA";
+   ElementNames[4] = "IncomingBVAZI";
+   ElementNames[5] = "TA";
+   mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
+
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+      MessageInterface::ShowMessage(
+            "OrbitPanel::CheckIncomingAsymptote, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
+         retval = false;
+      else
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+   }
+
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckIncomingAsymptote() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckBrouwerMeanShort(Rvector6 &state) by YK
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed BrouwerMeanShort state for validity.
+ *
+ * @param <state> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckBrouwerMeanShort(Rvector6 &state)
+{
+	
+   bool retval = true;
+   
+   std::string ElementNames[6];
+   ElementNames[0] = "SMAP";
+   ElementNames[1] = "ECCP";
+   ElementNames[2] = "INCP";
+   ElementNames[3] = "RAANP";
+   ElementNames[4] = "AOPP";
+   ElementNames[5] = "MAP";
+   mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "MA" is allowed, GetValue will return "".  Reset to "MA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::MA];
+
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+      MessageInterface::ShowMessage(
+            "OrbitPanel::CheckBrouwerMeanShort, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
+         retval = false;
+      else
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+   }
+
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckBrouwerMeanShort() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckBrouwerMeanLong(Rvector6 &state) by YK
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed BrouwerMeanLong state for validity.
+ *
+ * @param <state> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckBrouwerMeanLong(Rvector6 &state)
+{
+	
+   bool retval = true;
+   
+   std::string ElementNames[6];
+   ElementNames[0] = "SMADP";
+   ElementNames[1] = "ECCDP";
+   ElementNames[2] = "INCDP";
+   ElementNames[3] = "RAANDP";
+   ElementNames[4] = "AOPDP";
+   ElementNames[5] = "MADP";
+   mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "MA" is allowed, GetValue will return "".  Reset to "MA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::MA];
+
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+      MessageInterface::ShowMessage(
+            "OrbitPanel::CheckBrouwerMeanLong, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
+         retval = false;
+      else
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+   }
+
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckBrouwerMeanLong() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
 
 
 //------------------------------------------------------------------------------

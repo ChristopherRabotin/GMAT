@@ -134,6 +134,12 @@ private:
    bool CheckModKeplerian(Rvector6 &state);
    bool CheckSpherical(Rvector6 &state, const wxString &stateType);
    bool CheckEquinoctial(Rvector6 &state);
+   
+   bool CheckOutgoingAsymptote(Rvector6 &state); // mod by YK
+   bool CheckIncomingAsymptote(Rvector6 &state);
+   bool CheckBrouwerMeanShort(Rvector6 &state); 
+   bool CheckBrouwerMeanLong(Rvector6 &state);
+   
    bool CheckAnomaly(Rvector6 &state);
    bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
    

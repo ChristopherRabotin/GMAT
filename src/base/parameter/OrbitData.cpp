@@ -741,203 +741,74 @@ Rvector6 OrbitData::GetEquinState()
    
    return mEquinState;
 }
-// Modified by M.H.
+
+// Modified by YK
 //------------------------------------------------------------------------------
-// Real GetModEquinReal(Integer item)
+// Rvector6 OrbitData::GetIncAsymState()
 //------------------------------------------------------------------------------
-/**
- * Retrieves ModifiedEquinoctial element
- */
-//------------------------------------------------------------------------------
-Real OrbitData::GetModEquinReal(Integer item)
+Rvector6 OrbitData::GetIncAsymState()
 {
-   #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetModEquinReal() item=%d\n", item);
-   #endif
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
    
+   // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-
-   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
-   {
-      state = state - mOrigin->GetMJ2000State(mCartEpoch);
-   }
+   Rvector6 mIncAsymState = StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+                                                         mGravConst, mFlattening, mEqRadius);
    
-   Rvector3 pos(state[0], state[1], state[2]);
-   Rvector3 vel(state[3], state[4], state[5]);   
-   Real rMag = pos.GetMagnitude();
-   
-   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
-      throw ParameterException
-         ("*** Error *** Cannot convert from Cartesian to ModifiedEquinoctial because position vector is a zero vector.");
-   
-   switch (item)
-   {
-   case MOD_EQ_P:
-{
-Rvector6 modequiState = GetModEquinState();
-         return modequiState[0];
-}
-   case MOD_EQ_F:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[1];
-      }
-   case MOD_EQ_G:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[2];
-      }
-   case MOD_EQ_H:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[3];
-      }
-   case MOD_EQ_K:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[4];
-      }
-   case MOD_EQ_TLONG:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[5];
-      }
-      
-   default:
-      throw ParameterException("OrbitData::GetModEquinReal() Unknown parameter id: " +
-                               GmatRealUtil::ToString(item));
-   }
+   return mIncAsymState;
 }
 
-// Modified by M.H.
+// Modified by YK
 //------------------------------------------------------------------------------
-// Real GetDelaReal(Integer item)
+// Rvector6 OrbitData::GetOutAsymState()
 //------------------------------------------------------------------------------
-/**
- * Retrieves Delaunay element
- */
-//------------------------------------------------------------------------------
-Real OrbitData::GetDelaReal(Integer item)
+Rvector6 OrbitData::GetOutAsymState()
 {
-   #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetDelaReal() item=%d\n", item);
-   #endif
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
    
+   // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-
-   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
-   {
-      state = state - mOrigin->GetMJ2000State(mCartEpoch);
-   }
+   Rvector6 mOutAsymState = StateConversionUtil::Convert(state, "Cartesian", "OutgoingAsymptote",
+                                                         mGravConst, mFlattening, mEqRadius);
    
-   Rvector3 pos(state[0], state[1], state[2]);
-   Rvector3 vel(state[3], state[4], state[5]);   
-   Real rMag = pos.GetMagnitude();
-   
-   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
-      throw ParameterException
-         ("*** Error *** Cannot convert from Cartesian to Delaunay because position vector is a zero vector.");
-   
-   switch (item)
-   {
-   case DEL_DELA_SL:
-{
-Rvector6 delaState = GetDelaState();
-         return delaState[0];
-}
-   case DEL_DELA_SG:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[1];
-      }
-   case DEL_DELA_SH:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[2];
-      }
-   case DEL_DELA_L:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[3];
-      }
-   case DEL_DELA_G:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[4];
-      }
-   case DEL_DELA_H:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[5];
-      }
-      
-   default:
-      throw ParameterException("OrbitData::GetDelaReal() Unknown parameter id: " +
-                               GmatRealUtil::ToString(item));
-   }
+   return mOutAsymState;
 }
 
-// Modified by M.H. ??
+// Modified by YK
 //------------------------------------------------------------------------------
-// Real GetPlanetodeticReal(Integer item)
+// Rvector6 OrbitData::GetBLshortState()
 //------------------------------------------------------------------------------
-/**
- * Retrives Planetodetic element.
- */
-//------------------------------------------------------------------------------
-Real OrbitData::GetPlanetodeticReal(Integer item)
+Rvector6 OrbitData::GetBLshortState()
 {
-   #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetPlanetodeticReal() item=%d\n", item);
-   #endif
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
    
-   Rvector6 state = GetPlanetodeticState();
-
-   #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage
-      ("OrbitData::GetPlanetodeticReal() item=%s state=%s\n",
-       item, state.ToString().c_str());
-   #endif
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mBLshortState = StateConversionUtil::Convert(state, "Cartesian", "BrouwerMeanShort",
+                                                         mGravConst, mFlattening, mEqRadius);
    
-   switch (item)
-   {
-   case PLD_RMAG:
-{
-Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[0];
-}
-   case PLD_LON:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[1];
-      }
-   case PLD_LAT:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[2];
-      }
-   case PLD_VMAG:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[3];
-      }
-   case PLD_AZI:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[4];
-      }
-   case PLD_HFPA:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[5];
-      }
-      
-   default:
-      throw ParameterException("OrbitData::GetPlanetodeticReal() Unknown parameter id: " +
-                               GmatRealUtil::ToString(item));
-   }
+   return mBLshortState;
 }
 
+// Modified by YK
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetBLlongState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetBLlongState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mBLlongState = StateConversionUtil::Convert(state, "Cartesian", "BrouwerMeanLong",
+                                                        mGravConst, mFlattening, mEqRadius);
+   
+   return mBLlongState;
+}
 
 
 //------------------------------------------------------------------------------
@@ -1298,6 +1169,497 @@ Real OrbitData::GetEquinReal(Integer item)
       
    default:
       throw ParameterException("OrbitData::GetEquinReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Real GetModEquinReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves ModifiedEquinoctial element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetModEquinReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetModEquinReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to ModifiedEquinoctial because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case MOD_EQ_P:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[0];
+      }
+   case MOD_EQ_F:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[1];
+      }
+   case MOD_EQ_G:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[2];
+      }
+   case MOD_EQ_H:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[3];
+      }
+   case MOD_EQ_K:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[4];
+      }
+   case MOD_EQ_TLONG:
+      {
+         Rvector6 modequiState = GetModEquinState();
+         return modequiState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetModEquinReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Real GetDelaReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Delaunay element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetDelaReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetDelaReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to Delaunay because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case DEL_DELA_SL:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[0];
+      }
+   case DEL_DELA_SG:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[1];
+      }
+   case DEL_DELA_SH:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[2];
+      }
+   case DEL_DELA_L:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[3];
+      }
+   case DEL_DELA_G:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[4];
+      }
+   case DEL_DELA_H:
+      {
+         Rvector6 delaState = GetDelaState();
+         return delaState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetDelaReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by M.H. ??
+//------------------------------------------------------------------------------
+// Real GetPlanetodeticReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Planetodetic element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetPlanetodeticReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetPlanetodeticReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetPlanetodeticState();
+
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetPlanetodeticReal() item=%s state=%s\n",
+       item, state.ToString().c_str());
+   #endif
+   
+   switch (item)
+   {
+   case PLD_RMAG:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[0];
+      }
+   case PLD_LON:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[1];
+      }
+   case PLD_LAT:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[2];
+      }
+   case PLD_VMAG:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[3];
+      }
+   case PLD_AZI:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[4];
+      }
+   case PLD_HFPA:
+      {
+         Rvector6 PlanetodeticState = GetPlanetodeticState();
+         return PlanetodeticState[5];
+      }
+      
+   default:
+      throw ParameterException("OrbitData::GetPlanetodeticReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by YK
+//------------------------------------------------------------------------------
+// Real GetIncAsymReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves IncomingAsymptote element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetIncAsymReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetIncAsymReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to IncomingAsymptote because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case INCASYM_RADPER:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[0];
+   }
+   
+   case INCASYM_C3:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[1];
+   }
+   
+   case INCASYM_RHA:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[2];
+   }
+   
+   case INCASYM_DHA:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[3];
+   }
+   
+   case INCASYM_BVAZI:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[4];
+   }
+   
+   case INCASYM_TA:
+   {
+      Rvector6 IncAsymState = GetIncAsymState();
+      return IncAsymState[5];
+   }
+   
+   default:
+      throw ParameterException("OrbitData::GetIncAsymReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by YK
+//------------------------------------------------------------------------------
+// Real GetOutAsymReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves OutgoingAsymptote element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetOutAsymReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetOutAsymReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to OutgoingAsymptote because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case OUTASYM_RADPER:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[0];
+   }
+   
+   case OUTASYM_C3:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[1];
+   }
+   
+   case OUTASYM_RHA:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[2];
+   }
+   
+   case OUTASYM_DHA:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[3];
+   }
+   
+   case OUTASYM_BVAZI:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[4];
+   }
+   
+   case OUTASYM_TA:
+   {
+      Rvector6 OutAsymState = GetOutAsymState();
+      return OutAsymState[5];
+   }
+   
+   default:
+      throw ParameterException("OrbitData::GetOutAsymReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+
+// Modified by YK
+//------------------------------------------------------------------------------
+// Real GetBLshortReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves BrouwerMeanShort element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetBLshortReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetBLshortReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to BrouwerMeanShort because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case BLS_SMA:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[0];
+   }
+   
+   case BLS_ECC:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[1];
+   }
+   
+   case BLS_INC:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[2];
+   }
+   
+   case BLS_RAAN:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[3];
+   }
+   
+   case BLS_AOP:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[4];
+   }
+   
+   case BLS_MA:
+   {
+      Rvector6 BLshortState = GetBLshortState();
+      return BLshortState[5];
+   }
+   
+   default:
+      throw ParameterException("OrbitData::GetBLshortReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+// Modified by YK
+//------------------------------------------------------------------------------
+// Real GetBLlongReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves BrouwerMeanShort element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetBLlongReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetBLlongReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to BrouwerMeanLong because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case BLL_SMA:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[0];
+   }
+   
+   case BLL_ECC:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[1];
+   }
+   
+   case BLL_INC:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[2];
+   }
+   
+   case BLL_RAAN:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[3];
+   }
+   
+   case BLL_AOP:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[4];
+   }
+   
+   case BLL_MA:
+   {
+      Rvector6 BLlongState = GetBLlongState();
+      return BLlongState[5];
+   }
+   
+   default:
+      throw ParameterException("OrbitData::GetBLlongReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(item));
    }
 }
@@ -2114,8 +2476,8 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    case CART_VZ:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VZ"), rval);
       break;
-
-      // Keplerian
+      
+   // Keplerian
    case KEP_SMA:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMA"), rval);
       break;
@@ -2270,6 +2632,83 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
       break;
    case PLD_HFPA:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticHFPA"), rval);
+      break;
+      
+   // Incoming Asymptote State
+   case INCASYM_RADPER:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      break;
+   case INCASYM_C3:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
+      break;
+   case INCASYM_RHA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingRHA"), rval);
+      break;
+   case INCASYM_DHA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingDHA"), rval);
+      break;
+   case INCASYM_BVAZI:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingBVAZI"), rval);
+      break;
+   
+   // Outgoing Asymptote State
+   case OUTASYM_RADPER:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      break;
+    case OUTASYM_C3:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
+      break;
+  case OUTASYM_RHA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingRHA"), rval);
+      break;
+   case OUTASYM_DHA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingDHA"), rval);
+      break;
+   case OUTASYM_BVAZI:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingBVAZI"), rval);
+      break;
+   case OUTASYM_TA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TA"), rval);
+      break;
+      
+   // Brouwer-Lyddane Mean-short
+   case BLS_SMA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMAP"), rval);
+      break;
+   case BLS_ECC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECCP"), rval);
+      break;
+   case BLS_INC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INCP"), rval);
+      break;
+   case BLS_RAAN:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAANP"), rval);
+      break;
+   case BLS_AOP:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOPP"), rval);
+      break;
+   case BLS_MA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MAP"), rval);
+      break;
+
+   // Brouwer-Lyddane Mean-long
+   case BLL_SMA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMADP"), rval);
+      break;
+   case BLL_ECC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECCDP"), rval);
+      break;
+   case BLL_INC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INCDP"), rval);
+      break;
+   case BLL_RAAN:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAANDP"), rval);
+      break;
+   case BLL_AOP:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOPDP"), rval);
+      break;
+   case BLL_MA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MADP"), rval);
       break;
 
    default:

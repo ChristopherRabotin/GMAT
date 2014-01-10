@@ -50,10 +50,15 @@ public:
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
    Rvector6 GetEquinState();
-    // Modified by M.H.
+   // Modified by M.H.
    Rvector6 GetModEquinState();
    Rvector6 GetDelaState();
    Rvector6 GetPlanetodeticState();
+   // Modified by YK
+   Rvector6 GetIncAsymState();
+   Rvector6 GetOutAsymState();
+   Rvector6 GetBLshortState();
+   Rvector6 GetBLlongState();
    
    void SetReal(Integer item, Real rval);
    void SetRvector6(const Rvector6 &val);
@@ -94,6 +99,19 @@ public:
 
    Real GetPlanetodeticReal(Integer item);
    Real GetPlanetodeticReal(const std::string &str);
+
+   // Modified by YK
+   Real GetIncAsymReal(Integer item);
+   Real GetIncAsymReal(const std::string &str);
+   
+   Real GetOutAsymReal(Integer item);
+   Real GetOutAsymReal(const std::string &str);
+
+   Real GetBLshortReal(Integer item);
+   Real GetBLshortReal(const std::string &str);
+   
+   Real GetBLlongReal(Integer item);
+   Real GetBLlongReal(const std::string &str);
 
    const Rmatrix66& GetStmRmat66(Integer item);
    const Rmatrix33& GetStmRmat33(Integer item);
@@ -144,6 +162,11 @@ protected:
    Rvector6 mModEquinState;
    Rvector6 mDelaState;
    Rvector6 mPlanetodeticState;
+   // Modified by YK
+   Rvector6 mIncAsymState;
+   Rvector6 mOutAsymState;
+   Rvector6 mBLshortState;
+   Rvector6 mBLlongState;
 
    Rmatrix66 mSTM;
    Rmatrix33 mSTMSubset;
@@ -210,6 +233,22 @@ protected:
    // Modified by M.H.
    // Planetodetic items
    enum {PLD_RMAG = Item10Count, PLD_LON, PLD_LAT, PLD_VMAG, PLD_AZI, PLD_HFPA, Item11Count};
+
+   // Modified by YK
+   // Incoming Asymptote State
+   enum {INCASYM_RADPER = Item11Count, INCASYM_C3, INCASYM_RHA, INCASYM_DHA, INCASYM_BVAZI, INCASYM_TA, Item12Count};
+   
+   // Modified by YK
+   // Outgoing Asymptote State
+   enum {OUTASYM_RADPER = Item12Count, OUTASYM_C3, OUTASYM_RHA, OUTASYM_DHA, OUTASYM_BVAZI, OUTASYM_TA, Item13Count};
+   
+   // Modified by YK
+   // Brouwer-Lyddane Mean-short 
+   enum {BLS_SMA = Item13Count, BLS_ECC, BLS_INC, BLS_RAAN, BLS_AOP, BLS_MA, Item14Count};
+   
+   // Modified by YK
+   // Brouwer-Lyddane Mean-long 
+   enum {BLL_SMA = Item14Count, BLL_ECC, BLL_INC, BLL_RAAN, BLL_AOP, BLL_MA, Item15Count};
 
    enum
    {
