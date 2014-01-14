@@ -25,6 +25,7 @@
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
 #include "TimeSystemConverter.hpp"
+#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -46,6 +47,9 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
+   "EpochFormat",							// made changes by TUAN NGUYEN
+   "StartEpoch",							// made changes by TUAN NGUYEN
+   "EndEpoch",								// made changes by TUAN NGUYEN
 };
 
 const Gmat::ParameterType
@@ -58,6 +62,9 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
 };
 
 
@@ -93,10 +100,18 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    showAllResiduals     (true),
    showSpecificResiduals(false),
    showErrorBars        (false),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   startEpoch           (DateUtil::EARLIEST_VALID_MJD),					// made changes by TUAN NGUYEN
+   endEpoch             (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
+   epochFormat          ("TAIModJulian")								// made changes by TUAN NGUYEN
 {
+
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;
+
+   // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
+   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
+   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
 
    esm.SetMeasurementManager(&measManager);
 }
@@ -131,6 +146,7 @@ Estimator::~Estimator()
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
    measurementNames     (est.measurementNames),
+   modelNames           (est.modelNames),
    solveForStrings      (est.solveForStrings),
    absoluteTolerance    (est.absoluteTolerance),
    relativeTolerance    (est.relativeTolerance),
@@ -148,7 +164,12 @@ Estimator::Estimator(const Estimator& est) :
    showAllResiduals     (est.showAllResiduals),
    showSpecificResiduals(est.showSpecificResiduals),
    showErrorBars        (est.showErrorBars),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   estimationStart      (est.estimationStart),				// made changes by TUAN NGUYEN
+   estimationEnd        (est.estimationEnd),				// made changes by TUAN NGUYEN
+   epochFormat          (est.epochFormat),					// made changes by TUAN NGUYEN
+   startEpoch           (est.startEpoch),					// made changes by TUAN NGUYEN
+   endEpoch             (est.endEpoch)						// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -181,6 +202,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       Solver::operator=(est);
 
       measurementNames = est.measurementNames;
+      modelNames       = est.modelNames;
       solveForStrings  = est.solveForStrings;
 
       absoluteTolerance = est.absoluteTolerance;
@@ -207,6 +229,12 @@ Estimator& Estimator::operator=(const Estimator& est)
       addedPlots           = est.addedPlots;
 
       locatingEvent        = false;
+
+	  estimationStart      = est.estimationStart;			// made changes by TUAN NGUYEN
+	  estimationEnd        = est.estimationEnd;				// made changes by TUAN NGUYEN
+	  epochFormat          = est.epochFormat;				// made changes by TUAN NGUYEN
+	  startEpoch           = est.startEpoch;				// made changes by TUAN NGUYEN
+	  endEpoch             = est.endEpoch;					// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -229,6 +257,11 @@ bool Estimator::Initialize()
 
    if (retval)
    {
+	  // check the validity of the input start and end times
+      if (estimationEnd < estimationStart)
+         throw SolverException(
+            "Estimator error - estimation end time is before estimation start time.\n");
+
       // Check to make sure required objects have been set
       if (!propagator)
          throw SolverException(
@@ -439,6 +472,12 @@ std::string Estimator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)
       return propagatorName;
+   if (id == EPOCH_FORMAT)								// made changes by TUAN NGUYEN
+      return epochFormat;								// made changes by TUAN NGUYEN
+   if (id == START_EPOCH)								// made changes by TUAN NGUYEN
+      return startEpoch;								// made changes by TUAN NGUYEN
+   if (id == END_EPOCH)									// made changes by TUAN NGUYEN
+      return endEpoch;									// made changes by TUAN NGUYEN
 
    return Solver::GetStringParameter(id);
 }
@@ -492,6 +531,25 @@ bool Estimator::SetStringParameter(const Integer id,
       propagatorName = value;
       return true;
    }
+   if (id == EPOCH_FORMAT)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      epochFormat = value;												// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == START_EPOCH)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      startEpoch = value;												// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == END_EPOCH)													// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      endEpoch = value;													// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
 }
@@ -962,9 +1020,42 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
+          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
+         modelNames.push_back(obj->GetName());
          measManager.AddMeasurement((MeasurementModel *)obj);
+         return true;
+      }
+      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
+      {
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Loading the measurement manager\n");
+         #endif
+
+         MeasurementModel *meas;
+         // Retrieve each measurement model from the tracking system ...
+         for (UnsignedInt i = 0;
+                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
+         {
+            #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+               MessageInterface::ShowMessage("   Measurement %d\n", i);
+            #endif
+
+            // ...and pass them to the measurement manager
+            meas = ((TrackingSystem*)obj)->GetMeasurement(i);
+            if (meas == NULL)
+            {
+               MessageInterface::ShowMessage("Estimator cannot initialize "
+                        "because an expected MeasurementModel is NULL\n");
+               throw SolverException("In Estimator::SetRefObject, a "
+                        "measurement in the tracking system " + obj->GetName() +
+                        " is NULL\n");
+            }
+
+            modelNames.push_back(meas->GetName());
+            measManager.AddMeasurement(meas);
+         }
          return true;
       }
    }
@@ -1185,7 +1276,10 @@ bool Estimator::HasLocalClones()
 //------------------------------------------------------------------------------
 void Estimator::UpdateClonedObject(GmatBase *obj)
 {
-   throw SolverException("To do: implement Estimator::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw SolverException("To do: implement Estimator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 
@@ -1424,4 +1518,66 @@ Integer Estimator::SetSolverResults(Real*, const std::string&,
 //------------------------------------------------------------------------------
 void Estimator::SetResultValue(Integer, Real, const std::string&)
 {
+}
+
+
+///// These methods need to be commented
+// made changes by TUAN NGUYEN
+bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
+{
+
+   (*outputStateElement) = inputStateElement;
+
+   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
+   {
+      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))
+	  {
+         SpaceObject* obj = (SpaceObject*) (infor->object);
+         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+         if (cs == NULL)
+            throw GmatBaseException("Coordinate system for "+obj->GetName()+" is not set\n");
+
+         SpacePoint* sp = obj->GetJ2000Body();
+         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
+			"MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());
+		
+         CoordinateConverter* cv = new CoordinateConverter();
+         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);
+		 Integer index;
+		 if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))
+            index = infor->subelement-1;
+		 else if (infor->elementName == "Velocity")
+			index = infor->subelement+2;
+		 else
+            throw GmatBaseException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
+
+         inState.SetElement(index, inputStateElement);
+         Rvector6 outState;
+		
+         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
+
+         (*outputStateElement) = outState[index]; 
+//		 (*outputStateElement) = inState[index]; 
+         delete cv;
+	  }
+   }
+
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+void Estimator::GetEstimationState(GmatState& outputState)
+{
+	const std::vector<ListItem*> *map = esm.GetStateMap();
+
+	Real outputStateElement;
+	outputState.SetSize(map->size());
+
+	for (UnsignedInt i = 0; i < map->size(); ++i)
+	{
+		ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+		outputState[i] = outputStateElement;
+	}
 }

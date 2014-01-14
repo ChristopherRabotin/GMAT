@@ -26,6 +26,9 @@
 #include "estimation_defs.hpp"
 #include "CoreMeasurement.hpp"
 #include "Troposphere.hpp"
+///// TBD: Determine if there is a more generic way to add these
+#include "ObservationData.hpp"			// made changes by TUAN NGUYEN
+#include "RampTableData.hpp"			// made changes by TUAN NGUYEN
 
 // Temporary removal of ionosphere from Mac and Linux
 #ifdef _WIN32
@@ -54,11 +57,12 @@ public:
    PhysicalMeasurement(const PhysicalMeasurement& pm);
    PhysicalMeasurement& operator=(const PhysicalMeasurement& pm);
 
-   void        SetConstantFrequency(Real newFreq);
-   Real        GetConstantFrequency();
+   void        SetConstantFrequency(Real newFreq, Integer index=0);						// made changes by TUAN NGUYEN
+   Real        GetConstantFrequency(Integer index=0);
 
    void 			AddCorrection(const std::string& modelName);
-   RealArray	TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix Ro_j2k);
+//   RealArray	TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix33 Ro_j2k);
+   RealArray    TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
 
 #ifdef IONOSPHERE
    RealArray	IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);
@@ -66,11 +70,46 @@ public:
 
    RealArray	CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);
 
+///// TBD: Determine if there is a more generic way to add these
+   void         SetFrequencyBand(Integer frequencyBand, Integer index=0);		// made changes by TUAN NGUYEN
+   Integer      GetFrequencyBand(Integer index=0);								// made changes by TUAN NGUYEN
+   void         SetRangeModulo(Real rangeMod);									// made changes by TUAN NGUYEN
+   Real         GetRangeModulo();												// made changes by TUAN NGUYEN
+   void         SetObsValue(const RealArray& value);							// made changes by TUAN NGUYEN 
+   RealArray    GetObsValue();													// made changes by TUAN NGUYEN
+
+   void         SetObservationDataRecord(ObservationData* data);				// made changes by TUAN NGUYEN 
+   Integer      FrequencyBand(Real frequency);									// made changes by TUAN NGUYEN 
+
+   void         SetRampTable(std::vector<RampTableData>* rt);					// made changes by TUAN NGUYEN
+   void         SetRelativityCorrection(bool useRelCorr);						// made changes by TUAN NGUYEN
+   void         SetETMinusTAICorrection(bool useETTAICorr);						// made changes by TUAN NGUYEN
 
 
 protected:
-   /// Constant frequency value used in a physical measurement when needed
+   /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path
    Real                       frequency;		// Its unit is Hz (not MHz)
+///// TBD: Determine if there is a more generic way to add these
+   /// Constant frequency value used in a physical measurement when needed for E path in DSNDoppler		// made changes by TUAN NGUYEN
+   Real                       frequencyE;		// Its unit is Hz (not MHz)								// made changes by TUAN NGUYEN
+   /// Frequency band	(In DSNDoppler, it is used for S path)											// made changes by TUAN NGUYEN
+   Integer                    freqBand;																	// made changes by TUAN NGUYEN
+   /// Frequency band for E path																		// made changes by TUAN NGUYEN
+   Integer                    freqBandE;																// made changes by TUAN NGUYEN
+   /// Range modulo																						// made changes by TUAN NGUYEN
+   Real                       rangeModulo;																// made changes by TUAN NGUYEN
+   /// Observation value																				// made changes by TUAN NGUYEN
+   RealArray                  obsValue;																	// made changes by TUAN NGUYEN
+   /// Observation data object containing an observation data record									// made changes by TUAN NGUYEN
+   ObservationData*           obsData;																	// made changes by TUAN NGUYEN
+
+
+   /// Frequency ramp table used to calculate frequency ramp measurements								// made changes by TUAN NGUYEN
+   std::vector<RampTableData>* rampTB;																	// made changes by TUAN NGUYEN
+   /// Flags to indicate using relativity correction and ET-TAI correction								// made changes by TUAN NGUYEN
+   bool                        useRelativityCorrection;													// made changes by TUAN NGUYEN
+   bool                        useETminusTAICorrection;													// made changes by TUAN NGUYEN
+
    /// Internal vector used in derivative calculations
    Rvector3                   rangeVec;
 
@@ -98,6 +137,10 @@ protected:
                                     Rmatrix &stmInv);
    virtual void               SetHardwareDelays(bool loadEvents = true);
 
+///// TBD: Determine if there is a more generic way to add these
+   Real                       GetFrequencyFromRampTable(Real epoch);			// Get frequency from ramped table for a given epoch (in A1Mjd)		// made changes by TUAN NGUYEN
+   Integer                    GetUplinkBandFromRampTable(Real epoch);           // made changes by TUAN NGUYEN
+   virtual Real               IntegralRampedFrequency(Real t1, Real delta_t);   // made changes by TUAN NGUYEN
 
    /// Enumeration defining the PhysicalMeasurement's scriptable parameters
    enum

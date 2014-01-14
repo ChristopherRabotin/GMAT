@@ -39,7 +39,11 @@ MeasurementData::MeasurementData() :
    epoch       (0.0),
    isFeasible  (false),
    covariance  (NULL),
-   eventCount  (0)
+   eventCount  (0),
+   uplinkBand  (0),				// made changes by TUAN NGUYEN
+   uplinkFreq  (0.0),			// made changes by TUAN NGUYEN
+   rangeModulo (1.0),			// made changes by TUAN NGUYEN
+   dopplerCountInterval	(1.0e-10)	// made changes by TUAN NGUYEN
 {
 }
 
@@ -76,7 +80,12 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    value          (md.value),
    isFeasible     (md.isFeasible),
    covariance     (md.covariance),
-   eventCount     (md.eventCount)
+   eventCount     (md.eventCount),
+///// TBD: Do these go here?
+   uplinkBand     (md.uplinkBand),			// made changes by TUAN NGUYEN
+   uplinkFreq     (md.uplinkFreq),			// made changes by TUAN NGUYEN
+   rangeModulo    (md.rangeModulo),			// made changes by TUAN NGUYEN
+   dopplerCountInterval	(md.dopplerCountInterval)	// made changes by TUAN NGUYEN
 {
 }
 
@@ -107,6 +116,10 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       isFeasible      = md.isFeasible;
       covariance      = md.covariance;
       eventCount      = md.eventCount;
+	  uplinkBand      = md.uplinkBand;			// made changes by TUAN NGUYEN
+	  uplinkFreq      = md.uplinkFreq;			// made changes by TUAN NGUYEN
+	  rangeModulo     = md.rangeModulo;			// made changes by TUAN NGUYEN
+	  dopplerCountInterval = md.dopplerCountInterval;	// made changes by TUAN NGUYEN
    }
 
    return *this;

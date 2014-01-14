@@ -30,6 +30,7 @@
 //#define WALK_STATE_MACHINE
 //#define DEBUG_VERBOSE
 //#define DEBUG_WEIGHTS
+//#define DEBUG_O_MINUS_C
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -136,8 +137,8 @@ void  BatchEstimatorInv::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 void BatchEstimatorInv::Accumulate()
 {
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
    #endif
 
    // Measurements are possible!
@@ -155,18 +156,65 @@ void BatchEstimatorInv::Accumulate()
       MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
    #endif
 
-   // Currently assuming uniqueness; modify if more than 1 possible here
-   if ((modelsToAccess.size() > 0) &&
-       (measManager.Calculate(modelsToAccess[0], true) >= 1))
+   
+   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);
+   Real maxLimit = measModel->GetRealParameter("ResidualMax");
+
+   // Get the current observation data
+   const ObservationData *currentObs =  measManager.GetObsData();
+//MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
+
+   int numMeasModels = modelsToAccess.size();
+   if (numMeasModels == 0)
+	   throw EstimatorException("Error: No measurement model was defined in script for running estimation.\n");
+
+   int count = measManager.Calculate(modelsToAccess[0], true);
+   if (count >= 1)
    {
-      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
+	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
+	  if (iterationsTaken == 0)
+	  {
+	     for (Integer i=0; i < currentObs->value.size(); ++i)
+	     {
+			// Data filtered based on residual limits:
+		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
+		    {
+//			MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
+		       measManager.GetObsDataObject()->inUsed = false;
+			   break;
+		    }
+
+			// Data filtered based on time range:
+			Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+			Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+			if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
+			{
+//			MessageInterface::ShowMessage("currentObs->epoch = %.12lf is outside range [%.12lf , %.12lf]\n", currentObs->epoch, epoch1, epoch2);
+		       measManager.GetObsDataObject()->inUsed = false;
+			   break;
+			}
+//			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
+	     }
+	  }
+   
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
+   #endif
+
+   // Currently assuming uniqueness; modify if more than 1 possible here
+//   if ((modelsToAccess.size() > 0) &&
+//       (measManager.Calculate(modelsToAccess[0], true) >= 1))
+   if (measManager.GetObsDataObject()->inUsed)
+   {
+//      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
       RealArray hTrow;
       hTrow.assign(stateSize, 0.0);
-      UnsignedInt rowCount = calculatedMeas->value.size();
-      for (UnsignedInt i = 0; i < rowCount; ++i)
+      int rowCount = calculatedMeas->value.size();
+
+	  for (int i = 0; i < rowCount; ++i)
          hTilde.push_back(hTrow);
 
-      // Now walk the state vector and get elements of H-tilde for each piece
+	  // Now walk the state vector and get elements of H-tilde for each piece
       for (UnsignedInt i = 0; i < stateMap->size(); ++i)
       {
          if ((*stateMap)[i]->subelement == 1)
@@ -178,7 +226,9 @@ void BatchEstimatorInv::Accumulate()
                      i, (*stateMap)[i]->elementName.c_str(),
                      (*stateMap)[i]->subelement, (*stateMap)[i]->length,
                      (*stateMap)[i]->elementID);
+			   MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
             #endif
+			
             stateDeriv = measManager.CalculateDerivatives(
                   (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                   modelsToAccess[0]);
@@ -202,7 +252,7 @@ void BatchEstimatorInv::Accumulate()
          }
       }
 
-      // Apply the STM
+	  // Apply the STM
       #ifdef DEBUG_ACCUMULATION
          MessageInterface::ShowMessage("Applying the STM\n");
       #endif
@@ -244,7 +294,7 @@ void BatchEstimatorInv::Accumulate()
       }
 
       // Accumulate the observed - calculated difference
-      const ObservationData *currentObs =  measManager.GetObsData();
+//      const ObservationData *currentObs =  measManager.GetObsData();
       Real ocDiff;
       #ifdef DEBUG_ACCUMULATION
          MessageInterface::ShowMessage("Accumulating the O-C differences\n");
@@ -254,6 +304,27 @@ void BatchEstimatorInv::Accumulate()
       for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
       {
          ocDiff = currentObs->value[k] - calculatedMeas->value[k];
+
+         #ifdef DEBUG_O_MINUS_C
+//		    if ((calculatedMeas->value[k] < 0)||(calculatedMeas->value[k] > currentObs->rangeModulo))
+//				MessageInterface::ShowMessage("!!!!! Error: Get incorrect calculated measurement value:   C =  %.12le\n", calculatedMeas->value[k]);
+//			MessageInterface::ShowMessage("Calculate O-C = %.12le:  O = %.12le    C = %.12le   k = %d  calculatedMeas = <%p>\n\n", ocDiff, currentObs->value[k], calculatedMeas->value[k], k, calculatedMeas);
+		    Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+		    MessageInterface::ShowMessage("Observation data: %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     M = %.12le  frequency = %.12le\n",
+				currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
+				calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
+				ocDiff, currentObs->rangeModulo, currentObs->uplinkFreq);
+         #endif
+//		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
+//                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+//                                      GmatTimeConstants::JD_JAN_5_1941);
+//		    MessageInterface::ShowMessage("%s    %.12lf   %.12le\n", currentObs->participantIDs[0].c_str(), C_Epoch,	ocDiff);
+
          measurementEpochs.push_back(currentEpoch);
          measurementResiduals.push_back(ocDiff);
          measurementResidualID.push_back(calculatedMeas->uniqueID);
@@ -336,7 +407,7 @@ void BatchEstimatorInv::Accumulate()
          MessageInterface::ShowMessage("]\n");
       #endif
    }
-
+   }
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
       #ifdef SHOW_STATE_TRANSITIONS
@@ -358,7 +429,14 @@ void BatchEstimatorInv::Accumulate()
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;
+
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("Exit BatchEstimatorInv::Accumulate()\n");
+   #endif
+
 }
+
+
 
 
 //------------------------------------------------------------------------------
@@ -404,6 +482,24 @@ void BatchEstimatorInv::Estimate()
    #endif
 
    Rmatrix cov = information.Inverse();
+   
+   #ifdef DEBUG_VERBOSE
+      MessageInterface::ShowMessage(" residuals: [\n");
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
+      MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   covarian matrix:\n");
+      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
+      {
+         MessageInterface::ShowMessage("      [");
+         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)
+         {
+            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));
+         }
+         MessageInterface::ShowMessage("]\n");
+      }
+   #endif
 
    dx.clear();
    Real delta;

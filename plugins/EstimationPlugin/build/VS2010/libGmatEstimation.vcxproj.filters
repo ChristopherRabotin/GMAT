@@ -273,6 +273,21 @@
     <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatData.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatODDopplerType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatODType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\RampTableData.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\RampTableType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -484,6 +499,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatData.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatODDopplerType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatODType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\RampTableData.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\RampTableType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

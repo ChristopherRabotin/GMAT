@@ -23,8 +23,11 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 
-#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
+//#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
                                     // real world physical models
+
+// Moved here from inline location; includes should always be at the top in GMAT
+#include "AveragedDoppler.hpp"
 
 
 //#define TEST_FIRE_MEASUREMENT
@@ -32,6 +35,11 @@
 //#define DEBUG_HARDWARE
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_SET_CORRECTION
+//#define DEBUG_MEASUREMENT_CALCULATION							// made changes by TUAN NGUYEN
+//#define DEBUG_BIAS
+//#define DEBUG_SET_REF_OBJECT
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_SET_ONOFF											// made changes by TUAN NGUYEN
 
 //------------------------------------------------------------------------------
 // Static data initialization
@@ -40,24 +48,36 @@
 const std::string MeasurementModel::PARAMETER_TEXT[] =
 {
    "ObservationData",
+///// TBD: Do we want something more generic here?
+   "RampTables",					// made changes by TUAN NGUYEN
    "Type",
    "Participants",
    "Bias",
    "NoiseSigma",
    "TimeConstant",
-   "Frequency"
+   "Frequency",
+///// TBD: Do we want something more generic here?
+   "RangeModuloConstant",
+   "RelativityCorrection",			// made changes by TUAN NGUYEN
+   "ETminusTAICorrection",			// made changes by TUAN NGUYEN
+   "ResidualMax",					// made changes by TUAN NGUYEN
 };
 
 
 const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
 {
    Gmat::OBJECTARRAY_TYPE,
+   Gmat::OBJECTARRAY_TYPE,			// made changes by TUAN NGUYEN
    Gmat::OBJECT_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
+   Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,					// made changes by TUAN NGUYEN
 };
 
 //------------------------------------------------------------------------------
@@ -85,9 +105,16 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    theData                 (NULL),
    theDataDerivatives      (NULL),
    timeConstant            (6000.0),
+   useRelativityCorrection (false),									// made changes by TUAN NGUYEN
+   useETminusTAICorrection (false),									// made changes by TUAN NGUYEN
+   residualMax			   (1.0e18),								// made changes by TUAN NGUYEN
    modelID                 (-1),
    measurementNeedsObjects (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel default construction <%p>\n", this);
+#endif
+
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("MeasurementModel");
 
@@ -117,12 +144,16 @@ MeasurementModel::~MeasurementModel()
 MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    GmatBase                (mm),
    observationStreamName   (mm.observationStreamName),
+   rampTableStreamName     (mm.rampTableStreamName),			// made changes by TUAN NGUYEN
    participantNames        (mm.participantNames),
    participantHardwareNames(mm.participantHardwareNames),
    measurementType         (mm.measurementType),
    theData                 (NULL),
    theDataDerivatives      (NULL),
    timeConstant            (mm.timeConstant),
+   useRelativityCorrection (mm.useRelativityCorrection),		// made changes by TUAN NGUYEN
+   useETminusTAICorrection (mm.useETminusTAICorrection),		// made changes by TUAN NGUYEN
+   residualMax			   (mm.residualMax),					// made changes by TUAN NGUYEN
    modelID                 (mm.modelID),
    measurementNeedsObjects (false)
 {
@@ -139,6 +170,11 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
 
    for (UnsignedInt i = 0; i < participantHardwareNames.size(); ++i)
       participantHardwareNames[i] = mm.participantHardwareNames[i];
+
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel copy construction <%p> name = '%s':   measurement<%p '%s'>\n", this, this->GetName().c_str(), measurement, measurement->GetName().c_str());
+#endif
+
 }
 
 //------------------------------------------------------------------------------
@@ -154,16 +190,24 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
 //------------------------------------------------------------------------------
 MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel '=' operator <%p>\n", this);
+#endif
+
    if (&mm != this)
    {
       GmatBase::operator=(mm);
       observationStreamName   = mm.observationStreamName;
+	  rampTableStreamName     = mm.rampTableStreamName;				// made changes by TUAN NGUYEN
       participantNames        = mm.participantNames;
       participantHardwareNames= mm.participantHardwareNames;
       measurementType         = mm.measurementType;
       theData                 = NULL;
       theDataDerivatives      = NULL;
       timeConstant            = mm.timeConstant;
+	  useRelativityCorrection = mm.useRelativityCorrection;			// made changes by TUAN NGUYEN
+	  useETminusTAICorrection = mm.useETminusTAICorrection;			// made changes by TUAN NGUYEN
+	  residualMax             = mm.residualMax;						// made changes by TUAN NGUYEN
       modelID                 = mm.modelID;
 
       if (mm.measurement != NULL)
@@ -199,6 +243,10 @@ GmatBase *MeasurementModel::Clone() const
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
       MessageInterface::ShowMessage("Entered MeasurementModel::Clone()\n");
    #endif
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel Clone()\n");
+#endif
+
 
    return new MeasurementModel(*this);
 }
@@ -257,6 +305,10 @@ bool MeasurementModel::Initialize()
                         participantHardwareNames[i][j]);
             }
          }
+
+		 // Pass flags to use relativity correction and ET-TAI correction to CoreMeasurement object:			// made changes by TUAN NGUYEN
+	     ((PhysicalMeasurement*)measurement)->SetRelativityCorrection(useRelativityCorrection);					// made changes by TUAN NGUYEN
+	     ((PhysicalMeasurement*)measurement)->SetETMinusTAICorrection(useETminusTAICorrection);					// made changes by TUAN NGUYEN
 
          // Validate CoreMeasurement member
          if (measurement->Initialize())
@@ -559,6 +611,14 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
          if (measurement->IsOfType("PhysicalMeasurement"))
             return ((PhysicalMeasurement*)measurement)->GetConstantFrequency();
 
+   if (id == RangeModuloConstant)											// made changes by TUAN NGUYEN
+      if (measurement != NULL)												// made changes by TUAN NGUYEN
+         if (measurement->IsOfType("PhysicalMeasurement"))					// made changes by TUAN NGUYEN
+            return ((PhysicalMeasurement*)measurement)->GetRangeModulo();	// made changes by TUAN NGUYEN
+
+   if (id == ResidualMaxLimit)												// made changes by TUAN NGUYEN
+      return residualMax;													// made changes by TUAN NGUYEN
+
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
    {
@@ -611,6 +671,21 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
       return measurement->SetRealParameter(newId, value);
    }
 
+   if (id == RangeModuloConstant)														// made changes by TUAN NGUYEN
+   {																					// made changes by TUAN NGUYEN
+      if (measurement != NULL)															// made changes by TUAN NGUYEN
+      {																					// made changes by TUAN NGUYEN
+         if (measurement->IsOfType("PhysicalMeasurement"))								// made changes by TUAN NGUYEN
+         {																				// made changes by TUAN NGUYEN
+            if (value > 0.0)															// made changes by TUAN NGUYEN
+            {																			// made changes by TUAN NGUYEN
+               ((PhysicalMeasurement*)measurement)->SetRangeModulo(value);				// made changes by TUAN NGUYEN
+            }																			// made changes by TUAN NGUYEN
+            return ((PhysicalMeasurement*)measurement)->GetRangeModulo();				// made changes by TUAN NGUYEN
+         }																				// made changes by TUAN NGUYEN
+      }																					// made changes by TUAN NGUYEN
+   }																					// made changes by TUAN NGUYEN
+
    if (id == Frequency)
    {
       if (measurement != NULL)
@@ -624,6 +699,14 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
             return ((PhysicalMeasurement*)measurement)->GetConstantFrequency();
          }
       }
+   }
+
+   if (id == ResidualMaxLimit)
+   {
+      if (value <= 0.0)
+		  throw MeasurementException("Error: GMAT cannot accept a non positive value for measurement model's ResidualMaxLimit parameter.");
+      residualMax = value;
+	  return residualMax;
    }
 
    return GmatBase::SetRealParameter(id, value);
@@ -870,6 +953,61 @@ Real MeasurementModel::GetRealParameter(const Integer id, const Integer index) c
    return GmatBase::GetRealParameter(id, index);
 }
 
+// made changes by TUAN NGUYEN
+std::string MeasurementModel::GetOnOffParameter(const Integer id) const
+{
+	if (id == RelativityCorrection)
+	   return (useRelativityCorrection ? "On" : "Off");
+	if (id == ETminusTAICorrection)
+	   return (useETminusTAICorrection ? "On" : "Off");
+
+	return GmatBase::GetOnOffParameter(id);
+}
+
+// made changes by TUAN NGUYEN
+bool MeasurementModel::SetOnOffParameter(const Integer id, const std::string &value)
+{
+#ifdef DEBUG_SET_ONOFF
+	if (id == RelativityCorrection)
+	   MessageInterface::ShowMessage("MeasurementModel::SetOnOffParameter( RelativityCorrection, %s)\n", value.c_str());
+	if (id == ETminusTAICorrection)
+	   MessageInterface::ShowMessage("MeasurementModel::SetOnOffParameter( ET-TAICorrection, %s)\n", value.c_str());
+#endif
+
+   if (id == RelativityCorrection)
+   {
+      if (value == "On")
+	  {
+         useRelativityCorrection = true;
+		 return true;
+	  }
+      if (value == "Off")
+	  {
+         useRelativityCorrection = false;
+		 return true;
+	  }
+
+	  return false;
+   }
+
+   if (id == ETminusTAICorrection)
+   {
+      if (value == "On")
+	  {
+         useETminusTAICorrection = true;
+		 return true;
+	  }
+      if (value == "Off")
+	  {
+         useETminusTAICorrection = false;
+		 return true;
+	  }
+
+	  return false;
+   }
+
+   return GmatBase::SetOnOffParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -906,7 +1044,8 @@ std::string MeasurementModel::GetStringParameter(const Integer id) const
 bool MeasurementModel::SetStringParameter(const Integer id,
       const std::string & value)
 {
-   if (id == ObservationData)
+//   if (id == ObservationData)				// made changes by TUAN NGUYEN
+   if (id == ObsData)						// made changes by TUAN NGUYEN
    {
       // Only add the obs data if it is not in the list already
       if (find(observationStreamName.begin(), observationStreamName.end(),
@@ -916,6 +1055,23 @@ bool MeasurementModel::SetStringParameter(const Integer id,
          return true;
       }
    }
+   if (id == RampTables)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      // Only add the ramp table if it is not in the list already		// made changes by TUAN NGUYEN
+      if (find(rampTableStreamName.begin(), rampTableStreamName.end(),	// made changes by TUAN NGUYEN
+            value) == rampTableStreamName.end())						// made changes by TUAN NGUYEN
+      {																	// made changes by TUAN NGUYEN
+		 if (rampTableStreamName.size() == 0)							// made changes by TUAN NGUYEN
+         {																// made changes by TUAN NGUYEN
+			rampTableStreamName.push_back(value);						// made changes by TUAN NGUYEN
+			return true;												// made changes by TUAN NGUYEN
+		 }																// made changes by TUAN NGUYEN
+		 else															// made changes by TUAN NGUYEN
+			 throw MeasurementException(
+			 "Error: This GmatEstimation version allows "+GetName()+
+			 ".RampTables having only one ramp table!!!\n");			// made changes by TUAN NGUYEN
+      }																	// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
    if (id == MeasurementType)
    {
       measurementType = value;
@@ -1025,8 +1181,11 @@ std::string MeasurementModel::GetStringParameter(const Integer id,
 {
    if (id == Participants)
       return participantNames[index];
-   if (id == ObservationData)
+//   if (id == ObservationData)						// made changes by TUAN NGUYEN
+   if (id == ObsData)								// made changes by TUAN NGUYEN
       return observationStreamName[index];
+   if (id == RampTables)							// made changes by TUAN NGUYEN
+      return rampTableStreamName[index];			// made changes by TUAN NGUYEN
 
    return GmatBase::GetStringParameter(id, index);
 }
@@ -1130,7 +1289,8 @@ bool MeasurementModel::SetStringParameter(const Integer id,
          return true;
       }
 
-   case ObservationData:
+//   case ObservationData:															// made changes by TUAN NGUYEN
+   case ObsData:																	// made changes by TUAN NGUYEN
       {
          if (index < (Integer)observationStreamName.size())
             observationStreamName[index] = value;
@@ -1141,6 +1301,24 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
          return true;
       }
+///// TBD: Do we want something more generic here?
+   case RampTables:																	// made changes by TUAN NGUYEN
+      {																				// made changes by TUAN NGUYEN
+         if (index < (Integer)rampTableStreamName.size())							// made changes by TUAN NGUYEN
+            rampTableStreamName[index] = value;										// made changes by TUAN NGUYEN
+         else																		// made changes by TUAN NGUYEN
+            if (find(rampTableStreamName.begin(), rampTableStreamName.end(),		// made changes by TUAN NGUYEN
+                  value) == rampTableStreamName.end())								// made changes by TUAN NGUYEN
+			{																		// made changes by TUAN NGUYEN
+			   if (rampTableStreamName.size() == 0)									// made changes by TUAN NGUYEN
+                  rampTableStreamName.push_back(value);								// made changes by TUAN NGUYEN
+			   else																	// made changes by TUAN NGUYEN
+				  throw MeasurementException(
+				  "Error: This GmatEstimation version allows "+GetName()+
+				  ".RampTables having only one ramp table!!!\n");					// made changes by TUAN NGUYEN
+			}																		// made changes by TUAN NGUYEN
+         return true;																// made changes by TUAN NGUYEN
+      }																				// made changes by TUAN NGUYEN
    default:
       return GmatBase::SetStringParameter(id, value, index);
    }
@@ -1169,13 +1347,22 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
       #endif
       return participantNames;
    }
-   if (id == ObservationData)
+//   if (id == ObservationData)													// made changes by TUAN NGUYEN
+   if (id == ObsData)															// made changes by TUAN NGUYEN
    {
       #ifdef DEBUG_MEASUREMENT_INITIALIZATION
          MessageInterface::ShowMessage("Reporting %d observation streams\n",
                observationStreamName.size());
       #endif
       return observationStreamName;
+   }
+   if (id == RampTables)														// made changes by TUAN NGUYEN
+   {																			// made changes by TUAN NGUYEN
+      #ifdef DEBUG_MEASUREMENT_INITIALIZATION									// made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("Reporting %d ramp table streams\n",		// made changes by TUAN NGUYEN
+               rampTableStreamName.size());										// made changes by TUAN NGUYEN
+      #endif																	// made changes by TUAN NGUYEN
+      return rampTableStreamName;												// made changes by TUAN NGUYEN
    }
 
    return GmatBase::GetStringArrayParameter(id);
@@ -1520,6 +1707,13 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             name.c_str(), obj->GetTypeName().c_str());
    #endif
 
+   #ifdef DEBUG_SET_REF_OBJECT
+	  MessageInterface::ShowMessage("MeasurementModel<%p '%s'> sets ref object <%p '%s'> names as '%s' with type %s\n", 
+		    this, this->GetName().c_str(),
+		    obj, obj->GetName().c_str(),
+            name.c_str(), obj->GetTypeName().c_str());
+   #endif
+
    if (obj->IsOfType(Gmat::CORE_MEASUREMENT))
    {
       CoreMeasurement *meas = (CoreMeasurement*)obj;
@@ -1745,8 +1939,46 @@ void MeasurementModel::SetModelID(Integer newID)
  * @return A reference to the calculated MeasurementData
  */
 //------------------------------------------------------------------------------
-const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)
+// const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)					// made changes by TUAN NGUYEN
+const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents, 
+			ObservationData* forObservation, std::vector<RampTableData>* rampTB)					// made changes by TUAN NGUYEN
 {
+   #ifdef DEBUG_MEASUREMENT_CALCULATION
+      MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p)\n", this, (withEvents?"true":"false"), forObservation, rampTB);
+   #endif
+
+   // Handle the physical model settings for physical model classes only
+   if (measurement->IsOfType("PhysicalMeasurement"))
+   {
+      // Passing ramp table to measurement object
+      ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);										// made changes by TUAN NGUYEN
+
+      // Passing observation data to measurement object
+      ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);					// made changes by TUAN NGUYEN
+   }
+
+   if (forObservation != NULL)
+   {
+	  if (forObservation->dataFormat == "GMAT_OD")												// made changes by TUAN NGUYEN
+	  {																								// made changes by TUAN NGUYEN	
+         ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);		// made changes by TUAN NGUYEN
+         ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
+         ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN 
+	  }
+	  else 
+	  if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
+	  {																								// made changes by TUAN NGUYEN	
+         ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
+		 ((AveragedDoppler*)measurement)->SetRealParameter("AveragingInterval", forObservation->dopplerCountInterval);		// made changes by TUAN NGUYEN
+	  }
+	  if (measurement->IsOfType("PhysicalMeasurement"))
+      {
+         ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);					// made changes by TUAN NGUYEN
+      }
+   }
+
+
+   // Specifying the value of calculated measurement C:
    measurement->CalculateMeasurement(withEvents);
 
    // Add in the Biases if the measurement was feasible
@@ -1775,6 +2007,10 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)
          MessageInterface::ShowMessage("]\n");
       #endif
    }
+   
+   #ifdef DEBUG_MEASUREMENT_CALCULATION
+      MessageInterface::ShowMessage(" Exit MeasurementModel::CalculateMeasurement(%s, %p)\n", (withEvents?"true":"false"), forObservation);
+   #endif
 
    return *theData;
 }

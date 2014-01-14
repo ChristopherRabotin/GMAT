@@ -17,6 +17,9 @@
 //------------------------------------------------------------------------------
 
 #include "Antenna.hpp"
+#include "MessageInterface.hpp"
+
+#define DISABLE_ALL_ANTENNA_PARAMETERS
 
 //------------------------------------------------------------------------------
 // Static data
@@ -37,9 +40,9 @@ const Gmat::ParameterType
 Antenna::PARAMETER_TYPE[AntennaParamCount - HardwareParamCount] =
    {
       Gmat::REAL_TYPE,
-      Gmat::INTEGER_TYPE,
-      Gmat::INTEGER_TYPE,
-      Gmat::INTEGER_TYPE,
+      Gmat::REAL_TYPE,
+      Gmat::REAL_TYPE,
+      Gmat::REAL_TYPE,
    };
 
 //------------------------------------------------------------------------------
@@ -58,10 +61,10 @@ Antenna::PARAMETER_TYPE[AntennaParamCount - HardwareParamCount] =
 //-----------------------------------------------------------------------------
 Antenna::Antenna(const std::string &type, const std::string &name) :
    Hardware             (Gmat::HARDWARE, type, name),
-   antennaDelay         (1e-6),
-   phaseCenterLocation1 (0),
-   phaseCenterLocation2 (0),
-   phaseCenterLocation3 (0)
+   antennaDelay         (0.0),			// (1e-6),
+   phaseCenterLocation1 (0.0),
+   phaseCenterLocation2 (0.0),
+   phaseCenterLocation3 (0.0)
 {
    // TODO Auto-generated constructor stub
    objectTypes.push_back(Gmat::ANTENNA);
@@ -118,7 +121,7 @@ Antenna & Antenna::operator=(const Antenna & ant)
    {
       Hardware::operator=(ant);
 
-      antennaDelay 			= ant.antennaDelay;
+      antennaDelay 		   = ant.antennaDelay;
       phaseCenterLocation1 = ant.phaseCenterLocation1;
       phaseCenterLocation2 = ant.phaseCenterLocation2;
       phaseCenterLocation3 = ant.phaseCenterLocation3;
@@ -323,6 +326,7 @@ bool Antenna::IsParameterReadOnly(const Integer id) const
  * @return The property's value
  */
 //------------------------------------------------------------------------------
+/*
 Integer Antenna::GetIntegerParameter(const Integer id) const
 {
    switch (id)
@@ -342,7 +346,7 @@ Integer Antenna::GetIntegerParameter(const Integer id) const
 
    return Hardware::GetIntegerParameter(id);
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Integer SetRealParameter(const Integer id, const Integer value)
@@ -356,6 +360,7 @@ Integer Antenna::GetIntegerParameter(const Integer id) const
  * @return The property's value at the end of the call
  */
 //------------------------------------------------------------------------------
+/*
 Integer Antenna::SetIntegerParameter(const Integer id, const Integer value)
 {
    switch (id)
@@ -378,7 +383,7 @@ Integer Antenna::SetIntegerParameter(const Integer id, const Integer value)
 
    return Hardware::SetIntegerParameter(id, value);
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const std::string & label) const
@@ -391,11 +396,12 @@ Integer Antenna::SetIntegerParameter(const Integer id, const Integer value)
  * @return The property's value
  */
 //------------------------------------------------------------------------------
+/*
 Integer Antenna::GetIntegerParameter(const std::string & label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const std::string & label, const Integer value)
@@ -409,11 +415,12 @@ Integer Antenna::GetIntegerParameter(const std::string & label) const
  * @return The property's value at the end of the call
  */
 //------------------------------------------------------------------------------
+/*
 Integer Antenna::SetIntegerParameter(const std::string & label, const Integer value)
 {
    return SetIntegerParameter(GetParameterID(label), value);
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
@@ -433,8 +440,17 @@ Real Antenna::GetRealParameter(const Integer id) const
       case ANTENNA_DELAY:
          return antennaDelay;
 
-      default:
-         break;
+      case PHASE_CENTER_LOCATION1:
+         return phaseCenterLocation1;
+
+      case PHASE_CENTER_LOCATION2:
+         return phaseCenterLocation2;
+
+      case PHASE_CENTER_LOCATION3:
+         return phaseCenterLocation3;
+
+//      default:
+//         break;
    }
 
    return Hardware::GetRealParameter(id);
@@ -455,6 +471,18 @@ Real Antenna::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Antenna::SetRealParameter(const Integer id, const Real value)
 {
+#ifdef DISABLE_ALL_ANTENNA_PARAMETERS
+   switch (id)
+   {
+      case ANTENNA_DELAY:
+      case PHASE_CENTER_LOCATION1:
+      case PHASE_CENTER_LOCATION2:
+      case PHASE_CENTER_LOCATION3:
+	     MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter in script was ignored. In the current version, GMAT does not allow to use this paramter!!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+         return 0.0;
+   }
+
+#else
    switch (id)
    {
       case ANTENNA_DELAY:
@@ -462,9 +490,22 @@ Real Antenna::SetRealParameter(const Integer id, const Real value)
             antennaDelay = value;
          return antennaDelay;
 
-      default:
-         break;
+      case PHASE_CENTER_LOCATION1:
+            phaseCenterLocation1 = value;
+         return phaseCenterLocation1;
+
+      case PHASE_CENTER_LOCATION2:
+            phaseCenterLocation2 = value;
+         return phaseCenterLocation2;
+
+      case PHASE_CENTER_LOCATION3:
+            phaseCenterLocation3 = value;
+         return phaseCenterLocation3;
+
+//      default:
+//         break;
    }
+#endif
 
    return Hardware::SetRealParameter(id, value);
 }

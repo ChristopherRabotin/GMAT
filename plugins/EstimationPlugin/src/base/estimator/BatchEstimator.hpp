@@ -78,6 +78,11 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value,
                                            const Integer index);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
+                                         const std::string &value);						// made changes by TUAN NGUYEN
+
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
    virtual bool         TakeAction(const std::string &action,
@@ -110,6 +115,7 @@ protected:
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
+	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
       BatchEstimatorParamCount,
    };
 

@@ -38,6 +38,7 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
+//#define DEBUG_PROPAGATION
 
 // Macros for debugging of the state machine
 //#define WALK_STATE_MACHINE
@@ -53,7 +54,8 @@ const std::string
 BatchEstimator::PARAMETER_TEXT[] =
 {
    "EstimationEpochFormat",         // The epoch of the solution
-   "EstimationEpoch",         // The epoch of the solution
+   "EstimationEpoch",				// The epoch of the solution
+   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
    // todo Add useApriori here
 };
 
@@ -62,6 +64,7 @@ BatchEstimator::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
 };
 
 
@@ -456,6 +459,63 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
+// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets "On" or "Off" value
+ *
+ * @param id	The id number of a parameter
+ *
+ * @return "On" or "Off" value
+ */
+//------------------------------------------------------------------------------
+// made changes by TUAN NGUYEN
+std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+{
+   if (id == USE_PRIORI_ESTIMATE)
+      return (useApriori ? "On" : "Off");
+
+   return Estimator::GetOnOffParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool BatchEstimator::SetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets "On" or "Off" value
+ *
+ * @param id		The id number of a parameter
+ * @param value		value "On" or "Off"
+ *
+ * @return true value when it successfully sets the value, false otherwise. 
+ */
+//------------------------------------------------------------------------------
+// made changes by TUAN NGUYEN
+bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   if (id == USE_PRIORI_ESTIMATE)
+   {
+      if (value == "On")
+	  {
+         useApriori = true;
+		 return true;
+	  }
+      if (value == "Off")
+	  {
+         useApriori = false;
+		 return true;
+	  }
+
+	  return false;
+   }
+
+   return Estimator::SetOnOffParameter(id, value);
+}
+
+
+
+//------------------------------------------------------------------------------
 // const StringArray& GetPropertyEnumStrings(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -696,11 +756,11 @@ void BatchEstimator::CompleteInitialization()
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
          plotMeasurements.clear();
-         plotMeasurements.push_back(measurementNames[i]);
-         std::string plotName = instanceName + "_" + measurementNames[i] +
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
          BuildResidualPlot(plotName, plotMeasurements);
       }
@@ -735,6 +795,8 @@ void BatchEstimator::CompleteInitialization()
       // Now load up the observations
       measManager.PrepareForProcessing();
       measManager.LoadObservations();
+///// Check for more generic approach
+	  measManager.LoadRampTables();											// made changes by TUAN NGUYEN
 
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
@@ -778,9 +840,9 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-      if (useApriori)
-         x0bar[i] = (*estimationState)[i];
-      else
+//      if (useApriori)											// made changes by TUAN NGUYEN
+//         x0bar[i] = (*estimationState)[i];					// made changes by TUAN NGUYEN
+//      else													// made changes by TUAN NGUYEN			Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
          x0bar[i] = 0.0;
    }
 
@@ -871,11 +933,18 @@ void BatchEstimator::FindTimeStep()
    {
       // Estimate and check for convergence after processing measurements
       currentState = ESTIMATING;
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
+   #endif
+
    }
    else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be CALCULATING\n");
+   #endif
    }
    else
    {
@@ -903,7 +972,7 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("BatchEstimator state is CALCULATING\n");
+	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
    #endif
 
    // Update the STM
@@ -929,6 +998,11 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
+
+   #ifdef WALK_STATE_MACHINE
+	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
+   #endif
+
 }
 
 
@@ -1036,7 +1110,8 @@ void BatchEstimator::CheckCompletion()
             for (UnsignedInt j = 0; j <  stateSize; ++j)
                information(i,j) = 0.0;
       }
-      measurementResiduals.clear();
+
+	  measurementResiduals.clear();
       measurementEpochs.clear();
       measurementResidualID.clear();
 
@@ -1046,6 +1121,7 @@ void BatchEstimator::CheckCompletion()
                (*stm)(i,j) = 1.0;
             else
                (*stm)(i,j) = 0.0;
+
       esm.MapSTMToObjects();
 
       for (Integer i = 0; i < information.GetNumRows(); ++i)
@@ -1128,6 +1204,8 @@ std::string BatchEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
+   GmatState outputEstimationState;											// made changes by TUAN NGUYEN
+
    if (isInitialized)
    {
       switch (currentState)
@@ -1154,13 +1232,16 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   Estimation Epoch (A.1 modified Julian): "
                            << estimationEpoch << "\n\n";
 
-               for (UnsignedInt i = 0; i < map->size(); ++i)
+			   GetEstimationState(outputEstimationState);
+               
+			   for (UnsignedInt i = 0; i < map->size(); ++i)
                {
                   progress << "   "
                            << (*map)[i]->objectName << "."
                            << (*map)[i]->elementName << "."
                            << (*map)[i]->subelement << " = "
-                           << (*estimationState)[i] << "\n";
+//                           << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
+                           << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
                };
 
                progress << "\n a priori covariance:\n\n";
@@ -1183,10 +1264,13 @@ std::string BatchEstimator::GetProgressString()
             progress << "   Estimation Epoch: "
                      << estimationEpoch << "\n";
 
+			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                progress << "   "
-                        << (*estimationState)[i];
+//                        << (*estimationState)[i];								// made changes by TUAN NGUYEN
+			              << outputEstimationState[i];							// made changes by TUAN NGUYEN
             }
 
             progress << "\n   RMS residuals: "
@@ -1211,13 +1295,16 @@ std::string BatchEstimator::GetProgressString()
                progress << "   Estimation Epoch (A.1 modified Julian): "
                         << estimationEpoch << "\n\n";
 
+			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                progress << "   "
                         << (*map)[i]->objectName << "."
                         << (*map)[i]->elementName << "."
                         << (*map)[i]->subelement << " = "
-                        << (*estimationState)[i] << "\n";
+//                        << (*estimationState)[i] << "\n";						// made changes by TUAN NGUYEN
+			            << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
             { // Switch statement scoping

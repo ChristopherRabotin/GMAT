@@ -31,18 +31,18 @@
 /// Text strings used to script Transmitter properties
 const std::string
 Transmitter::PARAMETER_TEXT[TransmitterParamCount - RFHardwareParamCount] =
-	{
-		"FrequencyModel",
-		"Frequency",
-	};
+{
+   "FrequencyModel",
+   "Frequency",
+};
 
 /// Integer IDs associated with the Transmitter properties
 const Gmat::ParameterType
 Transmitter::PARAMETER_TYPE[TransmitterParamCount - RFHardwareParamCount] =
-	{
-		Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-	};
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -60,12 +60,13 @@ Transmitter::PARAMETER_TYPE[TransmitterParamCount - RFHardwareParamCount] =
 Transmitter::Transmitter(const std::string &name) :
    RFHardware     ("Transmitter", name),
    frequencyModel ("constant"),
-   frequency		(0.0)
+   frequency	  (0.0)
 {
    objectTypeNames.push_back("Transmitter");
    parameterCount = TransmitterParamCount;
-	isTransmitted1 = true;
-	signal1 = new Signal();
+
+   isTransmitted1 = true;
+   signal1 = new Signal();
 }
 
 //------------------------------------------------------------------------------
@@ -93,11 +94,11 @@ Transmitter::~Transmitter()
  */
 //------------------------------------------------------------------------------
 Transmitter::Transmitter(const Transmitter & trans) :
-	RFHardware        (trans),
-   frequencyModel 	(trans.frequencyModel),
-   frequency			(trans.frequency)
+   RFHardware        (trans),
+   frequencyModel 	 (trans.frequencyModel),
+   frequency		 (trans.frequency)
 {
-	signal1->SetValue(frequency);
+   signal1->SetValue(frequency);
 }
 
 
@@ -116,8 +117,8 @@ Transmitter& Transmitter::operator =(const Transmitter & trans)
 {
    if (this != &trans)
    {
-   	frequencyModel = trans.frequencyModel;
-   	frequency = trans.frequency;
+   	  frequencyModel = trans.frequencyModel;
+   	  frequency      = trans.frequency;
 
       RFHardware::operator=(trans);
    }
@@ -253,15 +254,15 @@ Gmat::ParameterType Transmitter::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Transmitter::GetParameterUnit(const Integer id) const
 {
-	switch (id)
-	{
-		case FREQUENCY_MODEL:
-			return "";						// It has no unit
-		case FREQUENCY:
-			return "MHz";					// Unit of frequency is MHz
-		default:
-			break;
-	}
+   switch (id)
+   {
+      case FREQUENCY_MODEL:
+         return "";						// It has no unit
+      case FREQUENCY:
+         return "MHz";					// Unit of frequency is MHz
+      default:
+         break;
+   }
 
    return RFHardware::GetParameterUnit(id);
 }
@@ -367,6 +368,10 @@ Real Transmitter::SetRealParameter(const Integer id, const Real value)
             frequency = value;
          return frequency;
 
+	  case HARDWARE_DELAY:
+		 MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+		 return 0.0;
+
       default:
          break;
    }
@@ -450,16 +455,18 @@ std::string Transmitter::GetStringParameter(const Integer id) const
 bool Transmitter::SetStringParameter(const Integer id,
 							const std::string &value)
 {
-	switch (id)
-	{
-		case FREQUENCY_MODEL:
-			frequencyModel = value;
-			return true;
-		default:
-			break;
-	}
+   switch (id)
+   {
+      case FREQUENCY_MODEL:
+//		 frequencyModel = value;
+		 MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+		 return true;
 
-	return RFHardware::SetStringParameter(id, value);
+      default:
+         break;
+   }
+
+   return RFHardware::SetStringParameter(id, value);
 }
 
 
@@ -559,14 +566,14 @@ Real Transmitter::GetDelay(Integer whichOne)
 //------------------------------------------------------------------------------
 bool Transmitter::SetDelay(Real delay, Integer whichOne)
 {
-	switch(whichOne)
-	{
-	   case 0:
-	   	hardwareDelay1 = delay;
-	   	return true;
-	   default:
-	   	throw new GmatBaseException("Delay index is out of bound\n");
-	}
+   switch(whichOne)
+   {
+      case 0:
+	   	 hardwareDelay1 = delay;
+	   	 return true;
+	  default:
+	   	 throw new GmatBaseException("Delay index is out of bound\n");
+   }
 }
 
 

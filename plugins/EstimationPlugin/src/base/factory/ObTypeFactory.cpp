@@ -25,7 +25,10 @@
 // Supported ObTypes
 #include "GmatObType.hpp"
 
-
+/// TBD: Are these needed?
+#include "GmatODType.hpp"						// made change by TUAN NGUYEN
+#include "GmatODDopplerType.hpp"				// made change by TUAN NGUYEN
+#include "RampTableType.hpp"                    // made change by TUAN NGUYEN
 //-----------------------------------------------------------------------------
 // ObTypeFactory()
 //-----------------------------------------------------------------------------
@@ -39,6 +42,9 @@ ObTypeFactory::ObTypeFactory() :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
    }
 }
 
@@ -70,6 +76,9 @@ ObTypeFactory::ObTypeFactory(StringArray createList) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
    }
 }
 
@@ -89,6 +98,8 @@ ObTypeFactory::ObTypeFactory(const ObTypeFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
    }
 }
 
@@ -113,6 +124,9 @@ ObTypeFactory& ObTypeFactory::operator= (const ObTypeFactory& fact)
       if (creatables.empty())
       {
          creatables.push_back("GMATInternal");
+		 creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
+		 creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
+		 creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
       }
    }
 
@@ -139,6 +153,12 @@ ObType* ObTypeFactory::CreateObType(const std::string &ofType,
 
    if (ofType == "GMATInternal")
       retval = new GmatObType(withName);
+   else if (ofType == "GMAT_OD")				// made change by TUAN NGUYEN
+      retval = new GmatODType(withName);		// made change by TUAN NGUYEN
+   else if (ofType == "GMAT_ODDoppler")			// made change by TUAN NGUYEN
+      retval = new GmatODDopplerType(withName);	// made change by TUAN NGUYEN
+   else if (ofType == "GMAT_RampTable")			// made change by TUAN NGUYEN
+      retval = new RampTableType(withName);		// made change by TUAN NGUYEN
 
    return retval;
 }

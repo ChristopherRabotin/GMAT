@@ -48,6 +48,11 @@ DATAFILE_OBJECTS = measurementfile/B3_obtype.o \
                    measurementfile/ObservationData.o \
                    measurementfile/ObType.o \
                    measurementfile/GmatObType.o \
+                   measurementfile/GmatData.o \
+                   measurementfile/GmatODType.o \
+                   measurementfile/GmatODDopplerType.o \
+                   measurementfile/RampTableData.o \
+                   measurementfile/RampTableType.o \
                    factory/DataFileFactory.o \
                    factory/ObTypeFactory.o
 else
@@ -171,7 +176,6 @@ CPP_OBJECTS = \
     hardware/Antenna.o \
     hardware/Receiver.o \
     hardware/Transponder.o \
-    measurementfile/DataFileAdapter.o \
     measurement/CoreMeasurement.o \
     measurement/MediaCorrection.o \
     measurement/MeasurementData.o \
@@ -196,6 +200,8 @@ CPP_OBJECTS = \
     trackingsystem/OpticalTrackingSystem.o \
     trackingsystem/TDRSSTrackingSystem.o \
     trackingsystem/USNTrackingSystem.o
+
+#    measurementfile/DataFileAdapter.o \
 
 ifeq ($(PLATFORM), mac)
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)

@@ -84,6 +84,10 @@ public:
    virtual void         WriteMeasurement(MeasurementData* theMeas);
    virtual ObservationData*
                         ReadObservation();
+///// TBD: Determine if there is a more generic way to add these
+   virtual RampTableData*							// made changes by TUAN NGUYEN
+	                    ReadRampTableData();		// made changes by TUAN NGUYEN
+
    virtual bool         CloseStream();
 
    /// @todo: Check this

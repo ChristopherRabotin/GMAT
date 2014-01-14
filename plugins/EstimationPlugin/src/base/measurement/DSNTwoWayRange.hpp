@@ -57,6 +57,10 @@ protected:
 
    virtual bool                  Evaluate(bool withEvents = false);
    Real                          GetFrequencyFactor(Real frequency = 0.0);
+   virtual Real                  IntegralRampedFrequency(Real t0, Real t1);				// made changes by TUAN NGUYEN
+
+// private:
+//   Real GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);		// made changes by TUAN NGUYEN
 };
 
 #endif /* DSNTwoWayRange_hpp */

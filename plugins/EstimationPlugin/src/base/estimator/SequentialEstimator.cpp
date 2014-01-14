@@ -301,6 +301,9 @@ void SequentialEstimator::CompleteInitialization()
    // Now load up the observations
    measManager.PrepareForProcessing();
    measManager.LoadObservations();
+///// Make more generic?
+   measManager.LoadRampTables();											// made changes by TUAN NGUYEN
+
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
    nextMeasurementEpoch = measManager.GetEpoch();
@@ -329,11 +332,11 @@ void SequentialEstimator::CompleteInitialization()
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
          plotMeasurements.clear();
-         plotMeasurements.push_back(measurementNames[i]);
-         std::string plotName = instanceName + "_" + measurementNames[i] +
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
          BuildResidualPlot(plotName, plotMeasurements);
       }

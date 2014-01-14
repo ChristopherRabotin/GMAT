@@ -80,11 +80,9 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 EPHEM_PATH             = OUTPUT_PATH/
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
-GMAT_FUNCTION_PATH     = C:/Projects/GMAT/RoutineTests/GmatFunctions
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
-MATLAB_FUNCTION_PATH   = C:/Projects/GMAT/RoutineTests/MatlabFunctions
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------

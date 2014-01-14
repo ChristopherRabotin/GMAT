@@ -35,6 +35,8 @@
 
 #include "SpacePoint.hpp"
 
+//#define DEBUG_RANGE_CALC_WITH_EVENTS
+//#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
 //#define VIEW_PARTICIPANT_STATES
 //#define CHECK_PARTICIPANT_LOCATIONS
@@ -436,10 +438,12 @@ const std::vector<RealArray>& USNTwoWayRange::CalculateMeasurementDerivatives(
 
             Rvector6 uplinkDeriv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkDeriv, false);
+//			GetRangeDerivative(uplinkLeg, stmInv, uplinkDeriv, false, 0, 1, true, true);
 
             // Downlink leg
             Rvector6 downlinkDeriv;
             GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, false);
+//			GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, true, 1, 0, true, true);
 
 
             // Add 'em up per eq 7.52 and 7.53

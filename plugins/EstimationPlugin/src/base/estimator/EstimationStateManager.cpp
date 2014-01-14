@@ -33,6 +33,7 @@
 //#define DUMP_STATE
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CLONING
+//#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_ESM_LOADING
 
@@ -252,34 +253,25 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
       StringArray *objectProps = new StringArray;
       elements[current] = objectProps;
 
-      if (obj->IsOfType(Gmat::FORMATION))
+      try
       {
-         Integer id = obj->GetParameterID("A1Epoch");
-         epochIDs.push_back(id);
-      }
-      else
-      {
-         #ifdef DEBUG_PARTICIPANTS
-            MessageInterface::ShowMessage("Getting Epoch parameter for a %s "
-                  "<%p> named %s\n", obj->GetTypeName().c_str(), obj,
-                  obj->GetName().c_str());
-         #endif
-         Integer id;
-         try
+         if (obj->IsOfType(Gmat::FORMATION))
          {
-            id = obj->GetParameterID("Epoch");
+            Integer id = obj->GetParameterID("A1Epoch");
+            epochIDs.push_back(id);
          }
-         catch (...)
+         else
          {
-            id = -1;
-         }
-         if (id != -1)
-         {
+            Integer id = obj->GetParameterID("Epoch");
             if (obj->GetParameterType(id) != Gmat::REAL_TYPE)
                id = obj->GetParameterID("A1Epoch");
+            epochIDs.push_back(id);
          }
-
-         epochIDs.push_back(id);
+      }
+      catch (BaseException&)
+      {
+         // Epoch is not a valid parameter
+         epochIDs.push_back(-1);
       }
    }
 
@@ -439,10 +431,10 @@ bool EstimationStateManager::SetProperty(std::string prop)
    }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Current SolveFor parameters:\n");
+      MessageInterface::ShowMessage("EstmationStateManager::SetProperty():  Current SolveFor parameters:\n");
    
 	   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
-   		MessageInterface::ShowMessage("   %s\n", solveForNames[i].c_str());
+   		  MessageInterface::ShowMessage("  solve for name = '%s';  object name = '%s';   parameter = '%s'\n", solveForNames[i].c_str(), solveForObjectNames[i].c_str(), solveForIDNames[i].c_str());
    #endif 
 
    return retval;
@@ -505,9 +497,9 @@ bool EstimationStateManager::SetProperty(std::string prop, Integer loc)
    }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Current SolveFor parameters:\n");
+      MessageInterface::ShowMessage("EstimationStateManager::SetProperty():    Current SolveFor parameters:\n");
       for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
-         MessageInterface::ShowMessage("   %s\n", solveForNames[i].c_str());
+	     MessageInterface::ShowMessage("  solve for name = '%s';  object name = '%s';   parameter = '%s'\n", solveForNames[i].c_str(), solveForObjectNames[i].c_str(), solveForIDNames[i].c_str());
    #endif
    
    return retval;
@@ -826,7 +818,6 @@ bool EstimationStateManager::MapVectorToObjects()
                   "%s not set; Element type not handled\n",label.c_str());
       }
    }
-
 
    GmatEpoch theEpoch = state.GetEpoch();
    for (UnsignedInt i = 0; i < objects.size(); ++i)

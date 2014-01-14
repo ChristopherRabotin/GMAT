@@ -30,12 +30,13 @@
 //------------------------------------------------------------------------------
 MediaCorrection::MediaCorrection(const std::string &typeStr,
 											const std::string &nomme) :
-	GmatBase		(Gmat::MEDIA_CORRECTION, typeStr, nomme)
+	GmatBase		(Gmat::MEDIA_CORRECTION, typeStr, nomme),
+	solarSystem     (NULL)												// made changes by TUAN NGUYEN
 {
    objectTypes.push_back(Gmat::MEDIA_CORRECTION);
    objectTypeNames.push_back("MediaCorrection");
 
-   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();
+//   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();		// made changes by TUAN NGUYEN
    modelName	= typeStr;
    model 		= 0;
 }

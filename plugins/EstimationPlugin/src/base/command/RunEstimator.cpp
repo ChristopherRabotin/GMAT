@@ -27,6 +27,8 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
+//#define DEBUG_STATE
+//#define DEBUG_EVENT_STATE
 
 
 //------------------------------------------------------------------------------
@@ -304,7 +306,7 @@ bool RunEstimator::Initialize()
    theEstimator->TakeAction("IncrementInstanceCount");
    simObj->TakeAction("IncrementInstanceCount");
 
-   // Set the streams for the measurement manager
+   // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theEstimator->GetMeasurementManager();
    StringArray streamList = measman->GetStreamList();
    for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
@@ -322,6 +324,30 @@ bool RunEstimator::Initialize()
          throw CommandException("Did not find the object named " +
                streamList[ms]);
    }
+
+///// Check for generic approach here
+   // Set the ramp table data streams for the measurement manager					// made changes by TUAN NGUYEN
+   streamList = measman->GetRampTableDataStreamList();								// made changes by TUAN NGUYEN
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)							// made changes by TUAN NGUYEN
+   {																				// made changes by TUAN NGUYEN
+      GmatBase *obj = FindObject(streamList[ms]);									// made changes by TUAN NGUYEN
+      if (obj != NULL)																// made changes by TUAN NGUYEN
+      {																				// made changes by TUAN NGUYEN
+         if (obj->IsOfType(Gmat::DATASTREAM))										// made changes by TUAN NGUYEN
+         {																			// made changes by TUAN NGUYEN
+            DataFile *df = (DataFile*)obj;											// made changes by TUAN NGUYEN
+            measman->SetRampTableDataStreamObject(df);								// made changes by TUAN NGUYEN
+         }																			// made changes by TUAN NGUYEN
+		 else
+			MessageInterface::ShowMessage("Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
+      }																				// made changes by TUAN NGUYEN
+      else																			// made changes by TUAN NGUYEN
+	  {
+//		 MessageInterface::ShowMessage("Error: Did not find the object named '%s'\n",streamList[ms].c_str());
+         throw CommandException("Error: Did not find the object named " +			// made changes by TUAN NGUYEN
+               streamList[ms]);														// made changes by TUAN NGUYEN
+	  }
+   }																				// made changes by TUAN NGUYEN
 
    // Next initialize the estimation subsystem
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
@@ -479,6 +505,9 @@ void RunEstimator::SetPropagationProperties(PropagationStateManager *psm)
 //------------------------------------------------------------------------------
 bool RunEstimator::Execute()
 {
+   #ifdef DEBUG_STATE
+	  MessageInterface::ShowMessage("*** Enter RunEstimator:Execute()\n");
+   #endif
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
@@ -502,35 +531,85 @@ bool RunEstimator::Execute()
    switch (state)
    {
       case Solver::INITIALIZING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): INITIALIZING state\n");
+         #endif
          PrepareToEstimate();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): INITIALIZING state\n");
+         #endif
          break;
 
       case Solver::PROPAGATING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): PROPAGATING state\n");
+         #endif
          Propagate();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): PROPAGATING state\n");
+         #endif
+
          break;
 
       case Solver::CALCULATING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): CALCULATING state\n");
+         #endif
          Calculate();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): CALCULATING state\n");
+         #endif
+
          break;
 
       case Solver::LOCATING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): LOCATING state\n");
+         #endif
          LocateEvent();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): LOCATING state\n");
+         #endif
          break;
 
       case Solver::ACCUMULATING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ACCUMULATING state\n");
+         #endif
          Accumulate();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ACCUMULATING state\n");
+         #endif
          break;
 
       case Solver::ESTIMATING:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ESTIMATING state\n");
+         #endif
          Estimate();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ESTIMATING state\n");
+         #endif
          break;
 
       case Solver::CHECKINGRUN:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): CHECKINGRUN state\n");
+         #endif
          CheckConvergence();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): CHECKINGRUN state\n");
+         #endif
          break;
 
       case Solver::FINISHED:
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Entered RunEstimator::Execute(): FINISHED state\n");
+         #endif
          Finalize();
+         #ifdef DEBUG_STATE
+            MessageInterface::ShowMessage("Exit RunEstimator::Execute(): FINISHED state\n");
+         #endif
          break;
 
       default:
@@ -540,6 +619,9 @@ bool RunEstimator::Execute()
 
    state = theEstimator->AdvanceState();
 
+   #ifdef DEBUG_STATE
+      MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
+   #endif
    return true;
 }
 
@@ -637,7 +719,10 @@ bool RunEstimator::HasLocalClones()
 //------------------------------------------------------------------------------
 void RunEstimator::UpdateClonedObject(GmatBase *obj)
 {
-   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw CommandException("To do: implement RunEstimator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 //------------------------------------------------------------------------------
@@ -829,12 +914,13 @@ void RunEstimator::LocateEvent()
          currentEvent = ((Event*)eventList[0]);
 //         newEvent = true;
          eventIndex = 0;
-         // Will need to be updated when multiple propagators are enabled:
+
+		 // Will need to be updated when multiple propagators are enabled:
          eventMan->SetObject(propagators[0]);
          eventMan->SetObject(currentEvent);
          eventMan->SetFixedState(currentEvent);
-
-         // Reset the state data to the starting states
+         
+		 // Reset the state data to the starting states
          BufferSatelliteStates(false);
          propagators[0]->GetODEModel()->UpdateFromSpaceObject();
          fm[0]->SetTime(dt);
@@ -887,7 +973,7 @@ void RunEstimator::LocateEvent()
          fm[0]->SetTime(dt);
 
          #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("   Event %d, of type %s\n", j,
+            MessageInterface::ShowMessage("   Event %d, of type %s\n", eventIndex,
                   currentEvent->GetTypeName().c_str());
          #endif
       }
@@ -906,9 +992,9 @@ void RunEstimator::LocateEvent()
                MessageInterface::ShowMessage("   %.12lf", odeState[i]);
             MessageInterface::ShowMessage("\n");
          #endif
+
       }
    }
-
 
    if (currentEvent != NULL)
    {
@@ -922,6 +1008,7 @@ void RunEstimator::LocateEvent()
    BufferSatelliteStates(false);
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
+
 }
 
 

@@ -118,8 +118,11 @@ public:
    virtual void UpdateClonedObject(GmatBase *obj);
 
 protected:
-   /// Names of the measurement objects used in the estimation
+///// TBD: Do we need to separate TS and MM like this going forward?
+   /// Names of measurements and tracking systems used in the estimation
    StringArray             measurementNames;
+   /// Names of the measurement models used in the estimation
+   StringArray             modelNames;
    /// The solve for parameters in the estimation problem
    StringArray             solveForStrings;
    /// The consider parameters in the estimation problem
@@ -212,6 +215,17 @@ protected:
    /// Flag indicating is an Event is currently being located
    bool                    locatingEvent;
 
+
+   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
+   std::string         epochFormat;							// made changes by TUAN NGUYEN
+   std::string         startEpoch;							// made changes by TUAN NGUYEN
+   std::string         endEpoch;							// made changes by TUAN NGUYEN
+   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
+   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
+   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
+   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+
+
    /// Parameters associated with the Estimators
    enum
    {
@@ -222,6 +236,9 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
+	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN
+	  START_EPOCH,							// made changes by TUAN NGUYEN
+	  END_EPOCH,							// made changes by TUAN NGUYEN
       EstimatorParamCount
    };
 
@@ -247,6 +264,11 @@ protected:
    virtual Integer         SetSolverResults(Real*, const std::string&,
                                             const std::string&);
    virtual void            SetResultValue(Integer, Real, const std::string&);
+
+///// TBD: Do simulators need this too?  If so, move to base class
+   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
+   virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
+
 };
 
 #endif /* Estimator_hpp */

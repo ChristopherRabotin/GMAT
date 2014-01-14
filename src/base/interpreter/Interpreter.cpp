@@ -7505,7 +7505,12 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 
    if (propName == "Format")
    {
-      GmatBase* obs = CreateObject(value, "", 0, false);
+	  // GmatBase* obs = CreateObject(value, "", 0, false);								// made changes by TUAN NGUYEN
+	  std::string value1 = value;														// made changes by TUAN NGUYEN
+	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))		// made changes by TUAN NGUYEN
+		  value1 = value.substr(1,value.size()-2);										// made changes by TUAN NGUYEN
+      GmatBase* obs = CreateObject(value1, "", 0, false);								// made changes by TUAN NGUYEN		fix Bug 3, error 1 in ticket GMT-4314
+
       if (obs != NULL)
       {
          if (obs->IsOfType(Gmat::OBTYPE))

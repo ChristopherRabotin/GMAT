@@ -35,13 +35,21 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
+   inUsed            (true),				// made changes by TUAN NGUYEN
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
    uniqueID          (-1),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
-   noiseCovariance   (NULL)
+   noiseCovariance   (NULL),
+///// TBD: Determine if there is a more generic way to add these, and if they go here
+   uplinkBand        (0),					// made changes by TUAN NGUYEN
+   uplinkFreq        (0.0),					// made changes by TUAN NGUYEN
+   rangeModulo       (1.0),					// made changes by TUAN NGUYEN
+   dopplerCountInterval   (1.0e-10)			// made changes by TUAN NGUYEN
 {
+///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
+   dataFormat = "GMATInternal";				// made changes by TUAN NGUYEN
 }
 
 
@@ -67,6 +75,7 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
+   inUsed                  (od.inUsed),					// made changes by TUAN NGUYEN
    typeName                (od.typeName),
    type                    (od.type),
    uniqueID                (od.uniqueID),
@@ -77,8 +86,14 @@ ObservationData::ObservationData(const ObservationData& od):
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
-   extraData               (od.extraData)
+   extraData               (od.extraData),
+//   dataFormat              (od.dataFormat),			// made changes by TUAN NGUYEN
+   uplinkBand              (od.uplinkBand),				// made changes by TUAN NGUYEN
+   uplinkFreq              (od.uplinkFreq),				// made changes by TUAN NGUYEN
+   rangeModulo             (od.rangeModulo),			// made changes by TUAN NGUYEN
+   dopplerCountInterval	   (od.dopplerCountInterval)	// made changes by TUAN NGUYEN
 {
+   dataFormat = od.dataFormat;							// made changes by TUAN NGUYEN
 }
 
 
@@ -97,6 +112,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
+	   inUsed                 = od.inUsed;			// made changes by TUAN NGUYEN
       typeName                = od.typeName;
       type                    = od.type;
       uniqueID                = od.uniqueID;
@@ -108,6 +124,11 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;
       extraData               = od.extraData;
+	  dataFormat              = od.dataFormat;		// made changes by TUAN NGUYEN
+	  uplinkBand              = od.uplinkBand;		// made changes by TUAN NGUYEN
+	  uplinkFreq              = od.uplinkFreq;		// made changes by TUAN NGUYEN
+	  rangeModulo             = od.rangeModulo;		// made changes by TUAN NGUYEN
+	  dopplerCountInterval    = od.dopplerCountInterval;	// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -123,6 +144,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
+   inUsed                  = true;					// made changes by TUAN NGUYEN
    typeName                = "";
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    uniqueID                = -1;
@@ -132,4 +154,9 @@ void ObservationData::Clear()
    extraDataDescriptions.clear();
    extraTypes.clear();
    extraData.clear();
+///// TBD: Determine if there is a more generic way to add these
+   uplinkBand              = 0;						// made changes by TUAN NGUYEN
+   uplinkFreq              = 0.0;					// made changes by TUAN NGUYEN
+   rangeModulo             = 1.0;					// made changes by TUAN NGUYEN
+   dopplerCountInterval    = 1.0e-10;				// made changes by TUAN NGUYEN
 }

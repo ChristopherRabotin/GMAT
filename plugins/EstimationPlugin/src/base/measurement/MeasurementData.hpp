@@ -74,6 +74,22 @@ public:
    Covariance        *covariance;
    /// Number of events associated with this measurement
    Integer           eventCount;
+
+
+///// TBD: Do these go here like this?  We may want a more generic container here
+   // This section added by TUAN NGUYEN for DSNTwoWayRange measurement data
+   /// Uplink band
+   Integer uplinkBand;
+   /// Uplink frequency
+   Real uplinkFreq;
+   /// Range modulo
+   Real rangeModulo;
+
+///// TBD: Do these go here like this?  We may want a more generic container here
+   // This section added by TUAN NGUYEN for DSNTwoWayDoppler measurement data
+   // Doppler count interval
+   Real dopplerCountInterval;
+
 };
 
 #endif /* MeasurementData_hpp */
