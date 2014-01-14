@@ -22,7 +22,7 @@
 
 #include "BrouwerMeanShortParameters.hpp"
 #include "ColorTypes.hpp"
-
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // BLshortSMAP::BLshortSMAP(const std::string &name, GmatBase *obj)
@@ -66,7 +66,6 @@ BLshortSMAP::~BLshortSMAP()
 //------------------------------------------------------------------------------
 bool BLshortSMAP::Evaluate()
 {
-
    mRealValue = OrbitData::GetBLshortReal(BLS_SMA);
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
@@ -600,10 +599,9 @@ bool BLshortState::Evaluate()
 {
    mRvec6Value = GetBLshortState();
    
-   #if DEBUG_CARTESIAN_PARAM
+   #if DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("EquinState::Evaluate() mRvec6Value =\n%s\n",
-       mRvec6Value.ToString().c_str());
+      ("BLshortState::Evaluate() mRvec6Value =\n%s\n", mRvec6Value.ToString().c_str());
    #endif
    
    return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);

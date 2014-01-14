@@ -151,23 +151,7 @@ protected:
    Rvector6 GetCartStateInParameterOrigin(Integer item, Real rval);
    void SetRealParameters(Integer item, Real rval);
    void DebugOutputData(CoordinateSystem *paramOwnerCS);
-   
-   // Data members
-   Rvector6 mCartState;
-   Rvector6 mKepState;
-   Rvector6 mModKepState;
-   Rvector6 mSphRaDecState;
-   Rvector6 mSphAzFpaState;
-   // Modified by M.H.
-   Rvector6 mModEquinState;
-   Rvector6 mDelaState;
-   Rvector6 mPlanetodeticState;
-   // Modified by YK
-   Rvector6 mIncAsymState;
-   Rvector6 mOutAsymState;
-   Rvector6 mBLshortState;
-   Rvector6 mBLlongState;
-
+      
    Rmatrix66 mSTM;
    Rmatrix33 mSTMSubset;
    

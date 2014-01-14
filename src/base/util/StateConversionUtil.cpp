@@ -53,6 +53,7 @@
 //#define DEBUG_CONVERT_ERRORS
 //#define DEBUG_SC_CONVERT_VALIDATE
 //#define DEBUG_BROUWER_SHORT
+//#define DEBUG_BROUWER_LONG
 
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
@@ -2045,7 +2046,7 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
          ("   ==> iteration: %d, emag: %.10f > tol: %.10f\n", ii, emag, tol);
 		#endif
       
-		blmean	= blmean2;
+		blmean = blmean2;
 		
 		#ifdef DEBUG_BROUWER_SHORT
       MessageInterface::ShowMessage
@@ -2321,7 +2322,13 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToCartesian(Real mu, const Rvector
  */
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian)
-{ 
+{
+   #ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage
+      ("\nStateConversionUtil::CartesianToBrouwerMeanLong() entered, mu = %.10f\n   cartesian = %s",
+       mu, cartesian.ToString().c_str());
+   #endif
+   
 	Real	 mu_Earth= 398600.4418;
    // Changed abs() to Abs() (LOJ: 2014.01.07)
 	//if (abs(mu - mu_Earth) > 1.0)
@@ -2332,6 +2339,9 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 		errmsg << " while converting from the BrouwerMeanShort to";
 		errmsg << " the Cartesian.";
 		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
 		throw UtilityException(errmsg.str());
 	}
 	
@@ -2350,17 +2360,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 		return blmean;
 	}
    
-	kep[5]= kep[5] * RAD_PER_DEG;
-	kep[5]=TrueToMeanAnomaly(kep[5],kep[1]);
-	kep[5]= kep[5] * DEG_PER_RAD;
+	kep[5] = kep[5] * RAD_PER_DEG;
+	kep[5] = TrueToMeanAnomaly(kep[5],kep[1]);
+	kep[5] = kep[5] * DEG_PER_RAD;
    
-	#ifdef DEBUG_BrouwerMeanLongToOsculatingElements
-		MessageInterface::ShowMessage("cart: %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", cart[0], cart[1], cart[2], 
-			cart[3], cart[4], cart[5]);
-	#endif
-	#ifdef DEBUG_BrouwerMeanLongToOsculatingElements
-		MessageInterface::ShowMessage("kep: %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", kep[0], kep[1], kep[2], 
-			kep[3], kep[4], kep[5]);
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage("   tol : %.10f, maxiter: %d", tol, maxiter);
+   MessageInterface::ShowMessage("   cart: %s", cart.ToString().c_str());
+   MessageInterface::ShowMessage("   kep : %s", kep.ToString().c_str());
 	#endif
    
 	Integer pseudostate=0;
@@ -2374,16 +2381,13 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
    
 	Rvector6 blmean = kep;
 	Rvector6 kep2	= BrouwerMeanLongToOsculatingElements(mu, kep);
-	#ifdef DEBUG_BrouwerMeanLongToOsculatingElements
-		MessageInterface::ShowMessage("kep2: %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", kep2[0], kep2[1], kep2[2], 
-			kep2[3], kep2[4], kep2[5]);
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage("   kep2: %s", kep2.ToString().c_str());
 	#endif
 	Rvector6 blmean2;
 	
 	for (unsigned int jj = 0; jj < 6; jj++)
-	{
 		blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
-	}
    
 	Real emag = 1.0;
 	Integer ii = 0;
@@ -2392,32 +2396,39 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
    
 	while (emag > tol)
 	{
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage
+         ("   ==> iteration: %d, emag: %.10f > tol: %.10f\n", ii, emag, tol);
+		#endif
+      
 		blmean	= blmean2;
 		
-		#ifdef DEBUG_BrouwerMeanLongToOsculatingElements
-			MessageInterface::ShowMessage("blmean: %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", blmean[0], blmean[1], blmean[2], 
-			blmean[3], blmean[4], blmean[5]);
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage
+         ("   blmean: %s   Calling BrouwerMeanLongToOsculatingElements()\n", blmean.ToString().c_str());
 		#endif
-
+      
 		kep2	= BrouwerMeanLongToOsculatingElements(mu, blmean);
 		
 		for (unsigned int jj = 0; jj < 6; jj++)
-		{
 			blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
-		}
+      
 		temp	= cart - KeplerianToCartesian(mu, kep2, type2);
-		
 		cart2	= KeplerianToCartesian(mu, kep2, type2);
-
+      
 		for (unsigned int jj = 0; jj < 6; jj++)
-		{
 			temp[jj]	= cart2[jj] - cart[jj] ;
-		}
-		emag	= Sqrt(pow(temp[0],2.0)+pow(temp[0],2.0)+pow(temp[0],2.0))/Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) 
-				+ Sqrt(pow(temp[3],2.0)+pow(temp[4],2.0)+pow(temp[5],2.0))/Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+      
+      // Should the 2nd and 3rd temp[0] be temp[1] and temp[2]?
+      // Changed to temp[1] and temp[2] (LOJ: 2014.01.13)
+		//emag	= Sqrt(pow(temp[0],2.0) + pow(temp[0],2.0) + pow(temp[0],2.0)) /
+		emag	= Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0)) /
+              Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) +
+              Sqrt(pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
+              Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
 		
-		#ifdef DEBUG_BrouwerMeanLongToOsculatingElements
-			MessageInterface::ShowMessage("%12.10f\n", emag);
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage("   emag  : %.10f\n", emag);
 		#endif
 		if (ii > maxiter)
 		{		
@@ -2425,12 +2436,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 			break;
 		}
 		ii = ii + 1;
-	}
+	} // while (emag > tol)
    
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage("   ==> emag: %.10f <= tol: %.10f\n", emag, tol);
+	#endif
+
 	for (unsigned int jj = 0; jj < 6; jj++)
-	{
 		blmean[jj]	= blmean2[jj] ;
-	}
    
 	if (pseudostate != 0)
 	{
@@ -2449,19 +2462,20 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 	blmean[4] = Mod(blmean[4], 360.0);
 	blmean[5] = Mod(blmean[5], 360.0);
    
-	if (blmean[3] <0.0)
-	{
-		blmean[3]=blmean[3] + 360.0;
-	}
-	if (blmean[4] <0.0)
-	{
-		blmean[4]=blmean[4] + 360.0;
-	}	
-	if (blmean[5] <0.0)
-	{
-		blmean[5]=blmean[5] + 360.0;
-	}
-
+	if (blmean[3] < 0.0)
+		blmean[3] = blmean[3] + 360.0;
+   
+	if (blmean[4] < 0.0)
+		blmean[4] = blmean[4] + 360.0;
+   
+	if (blmean[5] < 0.0)
+		blmean[5] = blmean[5] + 360.0;
+   
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToBrouwerMeanLong() returning\n   %s",
+       blmean.ToString().c_str());
+   #endif
 	return blmean;
 }
 
@@ -2477,7 +2491,13 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
  */
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml)
-{ 
+{
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::BrouwerMeanLongToOsculatingElements() entered, mu = %.10f\n   blml = %s",
+       mu, blml.ToString().c_str());
+   #endif
+   
 	Real	 mu_Earth= 398600.4418;
    // Changed abs() to Abs() (LOJ: 2014.01.07)
 	//if (abs(mu - mu_Earth) > 1.0)
@@ -2488,6 +2508,10 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 		errmsg << " while converting from the BrouwerMeanShort  to";
 		errmsg << " the Cartesian.";
 		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG_OSKEP
+      MessageInterface::ShowMessage
+         ("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
 		throw UtilityException(errmsg.str());
 	}
 
@@ -2521,6 +2545,10 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 		errmsg << " the Cartesian.";
 		errmsg << " BrouwerMeanLong is applicable";
 		errmsg << " only if ECCDP is equal to or smaller than 0.97." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG_OSKEP
+      MessageInterface::ShowMessage
+         ("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
 		throw UtilityException(errmsg.str());
 	}
    
@@ -2547,6 +2575,12 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 		MessageInterface::ShowMessage(warn);
 	}
 	
+   #ifdef DEBUG_BROUWER_OSKEP
+   MessageInterface::ShowMessage
+      ("   raandp = %.10f, aopdp = %.10f, eccdp = %.10f,  meanAnom = %.10f\n", raandp, aopdp,
+       eccdp, meanAnom);
+   #endif
+   
    Real    bk2=(1.0/2.0)*(j2*ae*ae);
    Real    bk3=-j3*pow(ae,3);
    Real    bk4=-(3.0/8.0)*j4*pow(ae,4);
@@ -2576,12 +2610,23 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    sinraandp=Sin(raandp);
    Real    cosraandp=Cos(raandp);
 	
-//-------------------------------------I
-// COMPUTE TRUE ANOMALY(DOUBLE PRIMED) I
-//-------------------------------------I
-
-	Real	  tadp = MeanToTrueAnomaly(meanAnom, eccdp, 0.5E-15);
+   //-------------------------------------I
+   // COMPUTE TRUE ANOMALY(DOUBLE PRIMED) I
+   //-------------------------------------I
+   
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute true anomaly double primed\n");
+   #endif
+   
+   // Changed tolerance to 1.E-8 to avoid infinite loop in ComputeMeanToTrueAnomaly()
+   // (LOJ: Fix for GMT-4362 2013.01.13)
+	//Real	  tadp = MeanToTrueAnomaly(meanAnom, eccdp, 0.5E-15);
+	Real	  tadp = MeanToTrueAnomaly(meanAnom, eccdp, 1.E-8);
 	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   tadp = %.10f\n", tadp);
+   #endif
+   
 	Real	  rp = smadp*(1.0-eccdp*eccdp)/(1.0 + eccdp*Cos(tadp));
 	Real	  adr	= smadp/rp;
    Real    sinta=Sin(tadp);
@@ -2591,6 +2636,9 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    adr3=adr2*adr;
    Real    costa2=costa*costa;
 	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute a1-a8 terms\n");
+   #endif
    Real    a1=((1.0/8.0)*gmp2*cn2)*(1.0-11.0*theta2-((40.0*theta4)/(1.0-5.0*theta2)));
    Real    a2=((5.0/12.0)*g4dg2*cn2)*(1.0-((8.0*theta4)/(1.0-5.0*theta2))-3.0*theta2);
    Real    a3=g5dg2*((3.0*eccdp2)+4.0);
@@ -2607,6 +2655,9 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    b14=a7+(5.0/64.0)*a5*a10;
    Real    b15=a8*a10*(35.0/384.0); 
    
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute a11-a27 terms\n");
+   #endif
    Real    a11=2.0+eccdp2;
    Real    a12=3.0*eccdp2+2.0;
    Real    a13=theta2*a12;
@@ -2624,6 +2675,9 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    a26=16.0*a16+40.0*a17+3.0;
    Real    a27=a22*(1.0/8.0)*(11.0+200.0*a17+80.0*a16);
 	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute b1-b12 termm\n");
+   #endif
    Real    b1=cn*(a1-a2)-((a11-400.0*a15-40.0*a14-11.0*a13)*(1.0/16.0)+(11.0+200.0*a17+80.0*a16)*a22*(1.0/8.0))*gmp2+((-80.0*a15-8.0*a14-3.0*a13+a11)*(5.0/24.0)+(5.0/12.0)*a26*a22)*g4dg2;
    Real    b2=a6*a19*(2.0+cn-eccdp2)+(5.0/64.0)*a5*a19*cn2-(15.0/32.0)*a4*a18*cn*cn2+((5.0/64.0)*a5+a6)*a21*tanI2+(9.0*eccdp2+26.0)*(5.0/64.0)*a4*a18+(15.0/32.0)*a3*a21*a26*sinI*(1.0-theta);
    Real    b3=((80.0*a17+5.0+32.0*a16)*a22*sinI*(theta-1.0)*(35.0/576.0)*g5dg2*eccdp)-((a22*tanI2+(2.0*eccdp2+3.0*(1.0-cn2*cn))*sinI)*(35.0/1152.0)*a8p);
@@ -2637,9 +2691,12 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    b11=a21*(a5*(5.0/64.0)+a6+a3*a26*(15.0/32.0)*sinI*sinI);
    Real    b12=-((80.0*a17+32.0*a16+5.0)*(a22*eccdp*sinI*sinI*(35.0/576.0)*g5dg2)+(a8*a21*(35.0/1152.0)));
 	
-//----------------------------I
-// COMPUTE (SEMI-MAJOR AXIS)  I
-//----------------------------I
+   //----------------------------I
+   // COMPUTE (SEMI-MAJOR AXIS)  I
+   //----------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute semi-major axis\n");
+   #endif
     Real    sma=smadp*(1.0+gm2*((3.0*theta2-1.0)*(eccdp2/(cn2*cn2*cn2))*(cn+(1.0/(1.0+cn)))+((3.0*theta2-1.0)/(cn2*cn2*cn2))*(eccdp*costa)*(3.0+3.0*eccdp*costa+eccdp2*costa2)+3.0*(1.0-theta2)*adr3*cs2gta));
     Real    sn2gta=Sin(2.0*aopdp+2.0*tadp);
     Real    snf2gd=Sin(2.0*aopdp+tadp);
@@ -2653,23 +2710,30 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
     Real    sinGD=Sin(aopdp);
     Real    cosGD=Cos(aopdp);
     Real    dlt1e=b14*sinGD+b13*cs2gd-b15*sin3gd;
-	
-//------------------------I
-// COMPUTE (L+G+H) PRIMED I
-//------------------------I
-	
-    Real    blghp=raandp+aopdp+meanAnom+b3*cs3gd+b1*sn2gd+b2*cosGD;
-    blghp = Mod(blghp,(TWO_PI));
-    if (blghp < 0.0)
-    { 
+    
+   //------------------------I
+   // COMPUTE (L+G+H) PRIMED I
+   //------------------------I
+    
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute L+G+H Primed\n");
+   #endif
+   Real    blghp=raandp+aopdp+meanAnom+b3*cs3gd+b1*sn2gd+b2*cosGD;
+   blghp = Mod(blghp,(TWO_PI));
+   if (blghp < 0.0)
+   { 
 		blghp=blghp+(TWO_PI);
-    }
-    Real    eccdpdl=b4*sn2gd-b5*cosGD+b6*cs3gd-(1.0/4.0)*cn2*cn*gmp2*(2.0*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)*sinta+3.0*(1.0-theta2)*((-adr2*cn2-adr+1.0)*snf2gd+(adr2*cn2+adr+(1.0/3.0))*sn3fgd));
-    Real    dltI=(1.0/2.0)*theta*gmp2*sinI*(eccdp*cs3fgd+3.0*(eccdp*csf2gd+cs2gta))-(a21/cn2)*(b8*sinGD+b7*cs2gd-b9*sin3gd);
-    Real    sinDH=(1.0/cosI2)*((1.0/2.0)*(b12*cs3gd+b11*cosGD+b10*sn2gd-((1.0/2.0)*gmp2*theta*sinI*(6.0*(eccdp*sinta-meanAnom+tadp)-(3.0*(sn2gta+eccdp*snf2gd)+eccdp*sn3fgd)))));
-//-----------------I
-// COMPUTE (L+G+H) I
-//-----------------I
+   }
+   Real    eccdpdl=b4*sn2gd-b5*cosGD+b6*cs3gd-(1.0/4.0)*cn2*cn*gmp2*(2.0*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)*sinta+3.0*(1.0-theta2)*((-adr2*cn2-adr+1.0)*snf2gd+(adr2*cn2+adr+(1.0/3.0))*sn3fgd));
+   Real    dltI=(1.0/2.0)*theta*gmp2*sinI*(eccdp*cs3fgd+3.0*(eccdp*csf2gd+cs2gta))-(a21/cn2)*(b8*sinGD+b7*cs2gd-b9*sin3gd);
+   Real    sinDH=(1.0/cosI2)*((1.0/2.0)*(b12*cs3gd+b11*cosGD+b10*sn2gd-((1.0/2.0)*gmp2*theta*sinI*(6.0*(eccdp*sinta-meanAnom+tadp)-(3.0*(sn2gta+eccdp*snf2gd)+eccdp*sn3fgd)))));
+   
+   //-----------------I
+   // COMPUTE (L+G+H) I
+   //-----------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute L+G+H\n");
+   #endif
 	Real    blgh=blghp+((1.0/(cn+1.0))*(1.0/4.0)*eccdp*gmp2*cn2*(3.0*(1.0-theta2)*(sn3fgd*((1.0/3.0)+adr2*cn2+adr)+snf2gd*(1.0-(adr2*cn2+adr)))+2.0*sinta*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)))
             +gmp2*(3.0/2.0)*((-2.0*theta-1.0+5.0*theta2)*(eccdp*sinta+tadp-meanAnom))+(3.0+2.0*theta-5.0*theta2)*(gmp2*(1.0/4.0)*(eccdp*sn3fgd+3.0*(sn2gta+eccdp*snf2gd)));
    blgh = Mod(blgh,(TWO_PI));
@@ -2683,24 +2747,32 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    Real    eccdpdl2=eccdpdl*eccdpdl;
    Real    eccdpde2=(eccdp+dlte)*(eccdp+dlte);
 
-//-------------------------I
-// COMPUTE ECC             I
-//-------------------------I
+   //-------------------------I
+   // COMPUTE ECC             I
+   //-------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute eccentricity\n");
+   #endif
    Real    ecc=sqrt(eccdpdl2+eccdpde2);
    Real    sinDH2=sinDH*sinDH;
    Real    squar=(dltI*cosI2*(1.0/2.0)+sinI2)*(dltI*cosI2*(1.0/2.0)+sinI2);
    Real    sqrI=sqrt(sinDH2+squar);
 	
-//--------------------------I
-// COMPUTE (INCLINATION) I
-//--------------------------I
+   //--------------------------I
+   // COMPUTE (INCLINATION)    I
+   //--------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute inclination\n");
+   #endif
    Real    inc=2*ASin(sqrI);
    inc = Mod(inc,(TWO_PI));
    
-	
-//-------------------------I
-// COMPUTE (MEAN ANOMALY) I
-//-------------------------I
+   //-------------------------I
+   // COMPUTE (MEAN ANOMALY)  I
+   //-------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute mean anomaly\n");
+   #endif
 	Real ma;
 	if (ecc <= 1.0E-11)
 	{
@@ -2718,9 +2790,12 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 		ma = ma + TWO_PI;
 	}
 
-//---------------------------------------I
-// COMPUTE (LONGITUDE OF ASCENDING NODE) I
-//---------------------------------------I
+   //---------------------------------------I
+   // COMPUTE (LONGITUDE OF ASCENDING NODE) I
+   //---------------------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute longitude of ascending node\n");
+   #endif
 	Real	raan;
 	if (inc <= 1.0E-11)
 	{    
@@ -2733,16 +2808,19 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
       raan=ATan2(arg1,arg2);
       raan=Mod(raan,(TWO_PI));
 	}
-    if (raan < 0)
+   if (raan < 0)
 	{
 		raan=raan+(TWO_PI);
 	}
 	
-//---------------------------------I
-// COMPUTE (ARGUMENT  OF PERIGEE)  I
-//---------------------------------I
+   //---------------------------------I
+   // COMPUTE (ARGUMENT  OF PERIGEE)  I
+   //---------------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute argument of perigee\n");
+   #endif
 	Real aop;
-		 
+   
 	aop = blgh-ma-raan;
    aop=Mod(aop,(TWO_PI));
 	if (aop < 0.0)
@@ -2751,13 +2829,19 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	}
 
 	Real kepl[6];
-	kepl[0]	=	sma*re;
+	kepl[0]	=	sma * re;
 	kepl[1]	=	ecc;
-	kepl[2]	=	inc*DEG_PER_RAD;
-	kepl[3]	=	raan*DEG_PER_RAD;
-	kepl[4]	=	aop*DEG_PER_RAD;
-	kepl[5]	=	ma*DEG_PER_RAD;
+	kepl[2]	=	inc * DEG_PER_RAD;
+	kepl[3]	=	raan * DEG_PER_RAD;
+	kepl[4]	=	aop * DEG_PER_RAD;
+	kepl[5]	=	ma * DEG_PER_RAD;
 	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::BrouwerMeanLongToOsculatingElements() returning "
+       "%.10f %.10f %.10f %.10f %.10f %.10f\n", kepl[0], kepl[1], kepl[2], kepl[3],
+       kepl[4], kepl[5]);
+   #endif
 	return kepl;
 }
 
@@ -4021,15 +4105,15 @@ Real StateConversionUtil::MeanToTrueAnomaly(Real maRadians, Real ecc, Real tol)
 {
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage
-      ("MeanToTrueAnomaly() maRadians=%f, ecc=%f\n", maRadians, ecc);
+      ("MeanToTrueAnomaly() maRadians=%.10f, ecc=%.10f, tol=%.15f\n", maRadians, ecc, tol);
    #endif
-
+   
    Real ta;
    Integer iter;
    Integer ret;
 
    ret = ComputeMeanToTrueAnomaly(maRadians, ecc, tol, &ta, &iter);
-
+   
    if (ret == 0)
    {
       #ifdef DEBUG_ANOMALY
@@ -4038,7 +4122,11 @@ Real StateConversionUtil::MeanToTrueAnomaly(Real maRadians, Real ecc, Real tol)
 
       return ta;
    }
-
+   
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("MeanToTrueAnomaly() Throwing a exception - error converting MA to TA\n");
+   #endif
    throw UtilityException("MeanToTrueAnomaly() Error converting "
                           " Mean Anomaly to True Anomaly\n");
 }
@@ -5720,13 +5808,19 @@ Integer StateConversionUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3
  */
 //------------------------------------------------------------------------------
 Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, Real tol,
-                                                      Real *ta,     Integer *iter)
+                                                      Real *ta, Integer *iter)
 {
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::ComputeMeanToTrueAnomaly() entered, maRadians=%.10f, ecc=%.10f, tol=%.15f\n",
+       maRadians, ecc, tol);
+   #endif
+   
    Real temp, temp2;
    Real rm,   e,     e1,  e2,  c,  f,  f1,   f2,    g;
    Real ztol = 1.0e-30;
-   int done;
-
+   bool done = false;
+   
    rm = maRadians;
    *iter = 0;
 
@@ -5737,28 +5831,33 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
       //---------------------------------------------------------
 
       e2 = rm + ecc * Sin(rm);
-      done = 0;
-
+      done = false;
+      
+      #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("   e2 = %.15f\n", ecc);
+      #endif
+      
       while (!done)
       {
          *iter = *iter + 1;
          temp = 1.0 - ecc * Cos(e2);
+                  
          if (temp == 0.0)
          {
             throw UtilityException("Cannot convert Mean to True Anomaly - computed temp is zero.\n");
          }
-
+         
          if (Abs(temp) < ztol)
             return (3);
-
+         
          e1 = e2 - (e2 - ecc * Sin(e2) - rm)/temp;
-
+         
          if (Abs(e2-e1) < tol)
          {
-            done = 1;
+            done = true;
             e2 = e1;
          }
-
+         
          if (!done)
          {
             *iter = *iter + 1;
@@ -5766,14 +5865,26 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
 
             if (Abs(temp) < ztol)
                return (4);
-
+            
             e2 = e1 - (e1 - ecc * Sin(e1) - rm)/temp;
-
+            
             if( Abs(e1-e2) < tol)
-               done = 1;
+               done = true;
          }
-      }
-
+         
+         if (*iter > 1000)
+         {
+            throw UtilityException
+               ("ComputeMeanToTrueAnomaly() Stuck in infinite loop in ellitical "
+                "orbit computation using tolerance of " + GmatStringUtil::ToString(tol, 16) +
+                ". Current iteration: " + GmatStringUtil::ToString(*iter) + "\n");
+         }
+      } // while (!done)
+      
+      #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("   After While (!done), e2 = %.15f\n", e2);
+      #endif
+      
       e = e2;
 
       if (e < 0.0)
@@ -5817,8 +5928,8 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
          rm = rm - TWO_PI;
 
       f2 = ecc * Sinh(rm) - rm;
-      done = 0;
-
+      done = false;
+      
       while (!done)
       {
          *iter = *iter + 1;
@@ -5831,7 +5942,7 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
 
          if (Abs(f2-f1) < tol)
          {
-            done = 1;
+            done = true;
             f2 = f1;
          }
 
@@ -5846,7 +5957,7 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
             f2 = f1 - (ecc * Sinh(f1) - f1 - rm) / temp;
 
             if ( Abs(f1-f2) < tol)
-               done = 1;
+               done = true;
          }
 
          if (*iter > 1000)

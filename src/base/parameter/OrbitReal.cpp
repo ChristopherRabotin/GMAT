@@ -140,16 +140,29 @@ OrbitReal::~OrbitReal()
 //------------------------------------------------------------------------------
 Real OrbitReal::EvaluateReal()
 {
-//    try
-//    {
+   //===================================
+   #ifdef DEBUG_EVAL_REAL
+   //===================================
+   try
+   {
       Evaluate();
-//    }
-//    catch (BaseException &e)
-//    {
-//       throw ParameterException
-//          ("OrbitReal::EvaluateReal() for parameter " +  this->GetTypeName() + ":" +
-//           instanceName + "\n" + e.GetDetails());
-//    }
+   }
+   catch (BaseException &e)
+   {
+      throw ParameterException
+         ("OrbitReal::EvaluateReal() for parameter " +  this->GetTypeName() + ":" +
+          instanceName + "\n" + e.GetDetails());
+   }
+   
+   //===================================
+   #else
+   //===================================
+   
+   Evaluate();
+   
+   //===================================
+   #endif
+   //===================================
    
    return mRealValue;
 }
