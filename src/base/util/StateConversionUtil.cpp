@@ -52,6 +52,8 @@
 //#define DEBUG_MODKEP_TO_KEP
 //#define DEBUG_CONVERT_ERRORS
 //#define DEBUG_SC_CONVERT_VALIDATE
+//#define DEBUG_BROUWER_SHORT
+//#define DEBUG_BROUWER_LONG
 
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
@@ -84,34 +86,45 @@ const std::string  StateConversionUtil::STATE_TYPE_TEXT[StateTypeCount] =
    "Equinoctial",
    "ModifiedEquinoctial", // Modified by M.H.
    "Delaunay",
-   "Planetodetic"
+   "Planetodetic",
+   "IncomingAsymptote",
+   "OutgoingAsymptote",
+   "BrouwerMeanShort",
+   "BrouwerMeanLong",
 };
 
 const bool         StateConversionUtil::REQUIRES_CB_ORIGIN[StateTypeCount] =
 {
-   false,
-   true,
-   true,
-   false,
-   false,
-   true,
-   // Modified by M.H.
-   true,
-   true,
-   true
+   false, // "Cartesian"
+   true,  // "Keplerian"
+   true,  // "ModifiedKeplerian"
+   false, // "SphericalAZFPA"
+   false, // "SphericalRADEC"
+   true,  // "Equinoctial"
+   true,  // "ModifiedEquinoctial"
+   true,  // "Delaunay"
+   true,  // "Planetodetic"
+   true,  // "OutgoingAsymptote"
+   true,  // "IncomingAsymptote"
+   true,  // "BrouwerMeanShort"
+   true,  // "BrouwerMeanLong"
 };
 
 const bool         StateConversionUtil::REQUIRES_FIXED_CS[StateTypeCount] =
 {
-   false,
-   false,
-   false,
-   false,
-   false,
-   false,
-   false,
-   false,
-   true
+   false, // "Cartesian"
+   false, // "Keplerian"
+   false, // "ModifiedKeplerian"
+   false, // "SphericalAZFPA"
+   false, // "SphericalRADEC"
+   false, // "Equinoctial"
+   false, // "ModifiedEquinoctial"
+   false, // "Delaunay"
+   true,  // "Planetodetic"
+   false, // "OutgoingAsymptote"
+   false, // "IncomingAsymptote"
+   false, // "BrouwerMeanShort"
+   false, // "BrouwerMeanLong"
 };
 
 
@@ -227,6 +240,22 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             outState = CartesianToPlanetodetic(state, flattening, eqRadius);
          }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, state);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, state);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            outState = CartesianToBrouwerMeanShort(mu, state);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            outState = CartesianToBrouwerMeanLong(mu, state);
+         }
          else
          {
             throw UtilityException
@@ -265,7 +294,7 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
             Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
             outState = CartesianToModEquinoctial(cartesian, mu);
          }
-         else if ( toType == "Delaunay" )// Modified by M.H.
+         else if ( toType == "Delaunay" ) // Modified by M.H.
          {
             outState = KeplerianToDelaunay(state, mu);
          }
@@ -273,6 +302,26 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
             outState = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToOutgoingAsymptote(mu, cartesian);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToIncomingAsymptote(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanShort(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanLong(mu, cartesian);
          }
          else
          {
@@ -322,6 +371,26 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
             Rvector6 cartesian = KeplerianToCartesian(mu, keplerian, anomalyType);
             outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToOutgoingAsymptote(mu, cartesian);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToIncomingAsymptote(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanShort(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanLong(mu, cartesian);
+         }
          else
          {
             throw UtilityException
@@ -366,6 +435,26 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Planetodetic") // Modified by M.H.
          {
             outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToOutgoingAsymptote(mu, cartesian);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToIncomingAsymptote(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanShort(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            Rvector6 cartesian = KeplerianToCartesian(mu, state, anomalyType);
+            outState = CartesianToBrouwerMeanLong(mu, cartesian);
          }
          else
          {
@@ -412,6 +501,22 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          {
             outState           = CartesianToPlanetodetic(cartesian, flattening, eqRadius);
          }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, cartesian);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            outState = CartesianToBrouwerMeanShort(mu, cartesian);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            outState = CartesianToBrouwerMeanLong(mu, cartesian);
+         }
          else
          {
             throw UtilityException
@@ -456,6 +561,22 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
          else if (toType == "Planetodetic") // Modified by M.H.
          {
             outState           = CartesianToPlanetodetic(cartState, flattening, eqRadius);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, state);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, state);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            outState = CartesianToBrouwerMeanShort(mu, state);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            outState = CartesianToBrouwerMeanLong(mu, state);
          }
          else
          {
@@ -602,6 +723,166 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
                 "\". \"" + toType + " is Unknown State Type\n");
          }
       }  // fromType == "Planetodetic"
+      else if (fromType == "OutgoingAsymptote")
+      {
+         Rvector6 cartState = OutgoingAsymptoteToCartesian(mu, state);
+         
+         if (toType == "Cartesian")
+         {
+            outState = cartState;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cartState);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cartState);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, cartState);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "OutgoingAsymptote"
+      else if (fromType == "IncomingAsymptote")
+      {
+         Rvector6 cartState = IncomingAsymptoteToCartesian(mu, state);
+
+         if (toType == "Cartesian")
+         {
+            outState = cartState;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cartState);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cartState);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, cartState);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "IncomingAsymptote"
+      else if (fromType == "BrouwerMeanShort")
+      {
+         Rvector6 cartState = BrouwerMeanShortToCartesian(mu, state);
+
+         if (toType == "Cartesian")
+         {
+            outState = cartState;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cartState);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cartState);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, cartState);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, cartState);
+         }
+         else if (toType == "BrouwerMeanLong") // YK
+         {
+            outState = CartesianToBrouwerMeanLong(mu, cartState);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "BrouwerMeanShort"
+      else if (fromType == "BrouwerMeanLong")
+      {
+         Rvector6 cartState = BrouwerMeanLongToCartesian(mu, state);
+
+         if (toType == "Cartesian")
+         {
+            outState = cartState;
+         }
+         else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
+         {
+            Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+
+            if (toType == "ModifiedKeplerian")
+               outState =  KeplerianToModKeplerian(kepl);
+            else
+               outState = kepl;
+         }
+         else if (toType == "SphericalAZFPA")
+         {
+            outState =  CartesianToSphericalAZFPA(cartState);
+         }
+         else if (toType == "SphericalRADEC")
+         {
+            outState = CartesianToSphericalRADEC(cartState);
+         }
+         else if (toType == "OutgoingAsymptote") // YK
+         {
+            outState = CartesianToOutgoingAsymptote(mu, cartState);
+         }
+         else if (toType == "IncomingAsymptote") // YK
+         {
+            outState = CartesianToIncomingAsymptote(mu, cartState);
+         }
+         else if (toType == "BrouwerMeanShort") // YK
+         {
+            outState = CartesianToBrouwerMeanShort(mu, cartState);
+         }
+         else
+         {
+            throw UtilityException
+               ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+                "\". \"" + toType + " is Unknown State Type\n");
+         }
+      }  // fromType == "BrouwerMeanLong"
       else
       {
          throw UtilityException
@@ -1101,6 +1382,1489 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
    
    return cartesian;
 }
+
+// modified by YK
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToIncomingAsymptote(Real mu, const Rvector6& cartesian)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Cartesian to Incoming Asymptote.
+ *
+ * @param <mu>            Gravitational constant for the central body
+ * @param <cartesian>     Cartesian state
+ *
+ * @return Spacecraft orbit state converted from Cartesian to Incoming Asymptote
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToIncomingAsymptote(Real mu, const Rvector6& cartesian)
+{
+   #ifdef DEBUG_INCOMING_ASYMPTOTE
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToIncomingAsymptote() entered\n   mu = %.12f\n   "
+       "cartesian = %s", mu, cartesian.ToString().c_str());
+   #endif
+   
+	// Calculate the magnitude of the position vector, right ascension, and declination
+	Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
+	Rvector3 vel(cartesian[3], cartesian[4], cartesian[5]);
+
+	Real     rMag    =  pos.GetMagnitude();
+	Real     vMag    =  vel.GetMagnitude();
+
+	Rvector3 hVec    =  Cross( pos, vel );
+	Real	   hMag    =  hVec.GetMagnitude();
+	Rvector3 eccVec  =  CartesianToEccVector(mu, pos, vel);
+	Real	   ecc	  =  eccVec.GetMagnitude();
+   
+	Real     c3      =  vMag * vMag - 2 * mu / rMag;
+
+   #ifdef DEBUG_INCOMING_ASYMPTOTE
+   MessageInterface::ShowMessage("   ecc = %.12f, c3 = %.12f\n", ecc, c3);
+   #endif
+   
+	if (Abs(c3) < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << "A nearly parabolic orbit";
+      errmsg << " (ECC = " << ecc << ") was encountered";
+      errmsg << " while converting from the Cartesian to"; 
+      errmsg << " the Incoming Asymptote elements.";
+      errmsg << " The Incoming Asymptote elements are";
+      errmsg << " undefined for a parabolic orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
+   
+   if (ecc <= 1E-7)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(16);
+		errmsg << "A nearly circular orbit";
+		errmsg << " (ECC = " << ecc << ") was encountered";
+		errmsg << " while converting from the Cartesian to"; 
+		errmsg << " the Incoming Asymptote elements.";
+		errmsg << " The Incoming Asymptote elements are";
+		errmsg << " undefined for a circular orbit." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Real     sma    =   -mu/c3;
+	Real     radPer =   sma*(1 - ecc);
+	Real	   fac1	 = 1/(1 + c3*hMag*hMag/mu/mu); 
+	Rvector3	sVHat; 
+   // sVHat is the asymptote vector of position 
+   if (c3 > 1E-7)
+   {
+      // Is spec correct? GMAT IncomingDHA does not match with STK, it is 180 deg off
+      sVHat = fac1*(-Sqrt(c3)/mu*Cross(hVec, eccVec) - eccVec); 
+   }
+   else if (c3 < -1E-7)
+   {
+      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+      MessageInterface::ShowMessage(warn);
+      
+      sVHat = -eccVec/ecc;
+      //
+      //  The two options below are really hacks, the asymptote doesn't exist.  However,
+      //  having a definition that is unique and has an inverse computation is
+      //  useful, especially when numeric solvers change regimes during
+      //  iterative processes. - SPH
+      //
+      //  If orbit is elliptic, use apsides vector	
+   }
+   
+   #ifdef DEBUG_INCOMING_ASYMPTOTE
+   MessageInterface::ShowMessage("   sVHat = %s", sVHat.ToString().c_str());
+   #endif
+   
+	Rvector3 uz(0.0, 0.0, 1.0); // inertial north direction of the coordinate system
+	if (ACos(Abs(sVHat*uz)) < 1E-7) // 1e-7, 1e-11, criteria??
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(18);
+		errmsg << " Error in Cart2IncomingAsymptote:";
+		errmsg << " Cannot convert from  Cartestion to Incoming Asymptote Elements";
+		errmsg << " because Incoming Asymptote vector is aligned with z-direction." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Rvector3  eaVec	=	Cross(uz,sVHat); 
+	Rvector3  eaVhat	=	eaVec/eaVec.GetMagnitude(); 
+	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
+	Rvector3  bVec    =  Cross( hVec, sVHat );
+	Real      sinBVA	=	(bVec*eaVhat)/hMag;
+	Real      cosBVA	=	(bVec*-noVhat)/hMag;
+	Real	    bva		=	ATan2(sinBVA,cosBVA);
+
+	if (bva < 0.0)
+		bva   =   bva + TWO_PI;
+  
+	Real dha  =   ASin(sVHat[2]);
+	Real rha  =   ATan2(sVHat[1],sVHat[0]);
+	if (rha < 0.0)
+		rha   =   rha + TWO_PI;
+ 
+	Real trueAnom = ACos( (eccVec*pos)/(ecc*rMag) );
+	if (pos*vel < 0)
+		trueAnom = TWO_PI - trueAnom;
+   
+	Rvector6 elem(radPer, c3, rha*DEG_PER_RAD, dha*DEG_PER_RAD, bva*DEG_PER_RAD, trueAnom*DEG_PER_RAD);
+   
+   #ifdef DEBUG_INCOMING_ASYMPTOTE
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToIncomingAsymptote() returning\n   %s\n", elem.ToString().c_str());
+   #endif
+   
+	return elem;
+}
+//------------------------------------------------------------------------------
+// Rvector6 IncomingAymptoteToCartesian(Real mu, const Rvector6& inasym)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Incoming Aymptote to Cartesian.
+ *
+ * @param <mu>         Gravitational constant for the central body
+ * @param <inasym>     Incoming Asymptote state
+ *
+ * @return Spacecraft orbit state converted from Incoming Aymptote to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvector6& inasym)
+{
+	Real radPer   = inasym[0]; 
+	Real c3       = inasym[1];
+	Real rha      = inasym[2] * RAD_PER_DEG; 
+	Real dha      = inasym[3] * RAD_PER_DEG; 
+	Real bva      = inasym[4] * RAD_PER_DEG; 
+	Real trueAnom = inasym[5] * RAD_PER_DEG; 
+   
+	if (c3 < 1E-7)
+	{
+		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+		MessageInterface::ShowMessage(warn);
+	}
+   
+	Real sma =  -mu/c3;
+	Real ecc =  1 - radPer/sma;
+   
+	if (Abs(c3) < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(19); // what is it precision(16) ?
+      errmsg << "A nearly parabolic orbit";
+      errmsg << " (ECC = " << ecc << ") was encountered";
+      errmsg << " while converting from the Cartesian to"; 
+      errmsg << " the Incoming Asymptote elements.";
+      errmsg << " The Incoming Asymptote elements are";
+      errmsg << " undefined for a parabolic orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
+   
+	if (ecc < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(20); // what is it precision(16) ?
+      errmsg << "A nearly circular orbit";
+      errmsg << " (ECC = " << ecc << ") was encountered";
+      errmsg << " while converting from the the Incoming Asymptote elements to"; 
+      errmsg << " the Cartesian.";
+      errmsg << " The Incoming Asymptote elements are";
+      errmsg << " undefined for a circular orbit." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Real sVHatx  =   Cos(dha)*Cos(rha);
+	Real sVHaty  =   Cos(dha)*Sin(rha);
+	Real sVHatz  =   Sin(dha);
+	Rvector3 sVHat(sVHatx,sVHaty,sVHatz);
+	Rvector3 uz(0.0,0.0,1.0);
+	Rvector3 ux(1.0,0.0,0.0);
+   
+	if (ACos(Abs(sVHat*uz)) < 1E-11) // 1e-7, 1e-11, criteria??
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the the Incoming Asymptote elements to";
+		errmsg << " the Cartesian.";
+		errmsg << " The Incoming Asymptote vector is aligned with z-direction." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Rvector3  eaVec	=	Cross(uz,sVHat); 
+	Rvector3  eaVhat	=	eaVec/eaVec.GetMagnitude(); 
+	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
+	Real	    ami	=	TWO_PI/4 - bva; // angular azimuth at infinity 
+	Rvector3  hVHat	=	Sin(ami)*eaVhat + Cos(ami)*noVhat;
+   Rvector3  nodeVec =   Cross(uz, hVHat);
+	Real      nMag    =   nodeVec.GetMagnitude();
+	Rvector3  eccVHat;
+   
+	if (c3 <= -1E-7)
+	{
+		eccVHat = -sVHat;
+	}
+	else if (c3 >= 1E-7)
+	{
+		Real     taMax   =   ACos(-1/ecc);
+		Rvector3 oVHat   =   Cross(hVHat,sVHat);
+		eccVHat =   Sin(taMax)*oVHat + Cos(taMax)*sVHat; 
+	}
+
+	Real inc = ACos(uz*hVHat);
+	Real raan;
+	Real argPeriapsis;
+   
+	if ( ecc >= 1E-11 && inc >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+	{
+		if (nMag == 0.0)
+		{
+			throw UtilityException("Cannot convert from Incoming asymptote elements to "
+                                "Cartesian elements - line-of-nodes vector is a zero vector.\n");
+		}
+		raan = ACos( nodeVec.Get(0)/nMag );
+		if (nodeVec.Get(1) < 0)
+			raan = TWO_PI - raan;
+      
+		argPeriapsis = ACos( (nodeVec*eccVHat)/nMag );
+		if (eccVHat.Get(2) < 0)
+			argPeriapsis = TWO_PI - argPeriapsis;
+	}
+   
+	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	{
+		raan = 0;
+		argPeriapsis = ACos(eccVHat.Get(0));
+		if (eccVHat.Get(1) < 0)
+			argPeriapsis = TWO_PI - argPeriapsis;
+
+	}
+   
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	{
+		raan = ACos(eccVHat(1));
+		argPeriapsis = 0;
+		if (eccVHat.Get(1) < 0)
+			raan = TWO_PI - raan;
+	}
+   
+	Real kepl[6];
+	kepl[0]	=	sma;
+	kepl[1]	=	ecc;
+	kepl[2]	=	inc*DEG_PER_RAD;
+	kepl[3]	=	raan*DEG_PER_RAD;
+	kepl[4]	=	argPeriapsis*DEG_PER_RAD;
+	kepl[5]	=	trueAnom*DEG_PER_RAD;
+	Real pos[3];
+	Real vel[3];
+   
+	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
+	AnomalyType type = GetAnomalyType("TA");
+	Integer errorCode = ComputeKeplToCart(mu, kepl, pos, vel, type);
+	if (errorCode > 0)
+	{
+		if (errorCode == 2)
+      {
+			std::stringstream errmsg("");
+         errmsg.precision(16);
+         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
+         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
+         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
+         throw UtilityException(errmsg.str());
+      }
+      else
+      {
+         //  Hope we never hit this.  This is a last resort, something went wrong.
+         throw UtilityException
+            ("Unable to convert Keplerian elements to Cartesian state.\n");
+		}
+	}
+   
+	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
+   
+	return cart;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToOutgoingAsymptote(Real mu, const Rvector6& cartesian)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Cartesian to Outgoing Asymptote.
+ *
+ * @param <mu>            Gravitational constant for the central body
+ * @param <cartesian>     Cartesian state
+ *
+ * @return Spacecraft orbit state converted from Cartesian to Outgoing Asymptote
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToOutgoingAsymptote(Real mu, const Rvector6& cartesian)
+{
+	// Calculate the magnitude of the position vector, right ascension, and declination
+	Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
+	Rvector3 vel(cartesian[3], cartesian[4], cartesian[5]);
+	Real     rMag    =   pos.GetMagnitude();
+	Real     vMag    =   vel.GetMagnitude();
+   
+	Rvector3 hVec    =   Cross( pos, vel);
+	Real	   hMag    =   hVec.GetMagnitude();
+           
+	Rvector3 eccVec  =   CartesianToEccVector(mu, pos, vel);
+	Real	   ecc	  =	eccVec.GetMagnitude();
+	Real     c3      =   vMag * vMag - 2 * mu / rMag;
+   
+	if (Abs(c3) < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << "A nearly parabolic orbit";
+      errmsg << " (ECC = " << ecc << ") was encountered";
+      errmsg << " while converting from the Cartesian to"; 
+      errmsg << " the Outgoing Asymptote elements.";
+      errmsg << " The Outgoing Asymptote elements are";
+      errmsg << " undefined for a parabolic orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
+   
+   if (ecc <= 1E-7)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(16);
+		errmsg << " A nearly circular orbit";
+		errmsg << " (ECC = " << ecc << ") was encountered";
+		errmsg << " while converting from the Cartesian to"; 
+		errmsg << " the Outgoing asymptote elements.";
+		errmsg << " The Outgoing asymptote elements are";
+		errmsg << " undefined for a circular orbit." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+
+	Real     sma     =   -mu/c3;
+	Real     radPer  =   sma*(1 - ecc);
+
+	Real fac1  = 1/(1 + c3*(hMag*hMag)/(mu*mu));
+	Rvector3	sVHat;
+   
+   if (c3 > 1E-7)
+      sVHat = fac1*(Sqrt(c3)/mu*Cross(hVec,eccVec) - eccVec); 
+   else if (c3 < -1E-7)
+   {
+      
+      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+      MessageInterface::ShowMessage(warn);
+      sVHat = -eccVec/ecc;
+      //
+      //  The two options below are really hacks, the asymptote doesn't exist.  However,
+      //  having a definition that is unique and has an inverse computation is
+      //  useful, especially when numeric solvers change regimes during
+      //  iterative processes. - SPH
+      //
+      //  If orbit is elliptic, use apsides vector
+   }
+   
+   
+	Rvector3 uz(0.0, 0.0, 1.0); // inertial north direction of the coordinate system
+	if (ACos(Abs(sVHat*uz)) < 1E-7) // 1e-7, 1e-11, criteria??
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(18);
+		errmsg << " Error in Cart2OutgoingAsymptote:";
+		errmsg << " Cannot convert from  Cartestion to Outgoing Asymptote Elements";
+		errmsg << " because Outgoing Asymptote vector is aligned with z-direction." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+   
+	Rvector3  eaVec	=	Cross(uz,sVHat); 
+	Rvector3  eaVhat	=	eaVec/eaVec.GetMagnitude(); 
+	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
+	Rvector3  bVec    = Cross( hVec, sVHat );
+	Real      sinBVA	=	(bVec*eaVhat)/hMag;
+	Real      cosBVA	=	(bVec*-noVhat)/hMag;
+	Real		 bva		=	ATan2(sinBVA,cosBVA);
+   
+	if (bva < 0.0)
+		bva   =   bva + TWO_PI;
+	Real dha  =   ASin(sVHat[2]);
+	Real rha  =   ATan2(sVHat[1],sVHat[0]);
+	if (rha < 0.0)
+		rha   =   rha + TWO_PI;
+   
+	Real trueAnom = ACos( (eccVec*pos)/(ecc*rMag) );
+	if (pos*vel < 0)
+		trueAnom = TWO_PI - trueAnom;
+	Rvector6 elem(radPer, c3, rha*DEG_PER_RAD, dha*DEG_PER_RAD, bva*DEG_PER_RAD, trueAnom*DEG_PER_RAD);
+   
+	return elem;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 OutgoingAymptoteToCartesian(Real mu, const Rvector6& outasym)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Outgoing Aymptote to Cartesian.
+ *
+ * @param <mu>          Gravitational constant for the central body
+ * @param <outasym>     Outgoing Asymptote state
+ *
+ * @return Spacecraft orbit state converted from Outgoing Aymptote to  Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvector6& outasym)
+{ 
+	Real     radPer   = outasym[0]; 
+	Real     c3       = outasym[1];
+	Real     rha      = outasym[2] * RAD_PER_DEG; 
+	Real     dha      = outasym[3] * RAD_PER_DEG; 
+	Real     bva      = outasym[4] * RAD_PER_DEG; 
+	Real     trueAnom = outasym[5] * RAD_PER_DEG; 
+   
+	if (c3 < -1E-7)
+	{
+		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+		MessageInterface::ShowMessage(warn);
+	}
+
+	Real     sma      =   -mu/c3;
+	Real     ecc      =   1 - radPer/sma;
+   
+   
+	if (Abs(c3) < 1E-7)
+	{
+		std::stringstream errmsg("");
+      errmsg.precision(19); // what is it precision(16) ?
+      errmsg << "A nearly parabolic orbit";
+      errmsg << " (ECC = " << ecc << ") was encountered";
+      errmsg << " while converting from the Cartesian to"; 
+      errmsg << " the Outgoing Asymptote elements.";
+      errmsg << " The Outgoing Asymptote elements are";
+      errmsg << " undefined for a parabolic orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
+   
+	if (ecc < 1E-7)
+	{
+        std::stringstream errmsg("");
+        errmsg.precision(20); // what is it precision(16) ?
+        errmsg << "A nearly circular orbit";
+        errmsg << " (ECC = " << ecc << ") was encountered";
+        errmsg << " while converting from the the Outgoing Asymptote elements to"; 
+        errmsg << " the Cartesian.";
+        errmsg << " The Outgoing Asymptote elements are";
+        errmsg << " undefined for a circular orbit." << std::endl;
+        throw UtilityException(errmsg.str());
+	}
+   
+	Real sVHatx  =   Cos(dha)*Cos(rha);
+	Real sVHaty  =   Cos(dha)*Sin(rha);
+	Real sVHatz  =   Sin(dha);
+	Rvector3 sVHat(sVHatx,sVHaty,sVHatz);
+	Rvector3 uz(0.0,0.0,1.0);
+	Rvector3 ux(1.0,0.0,0.0);
+   
+	if (ACos(Abs(sVHat*uz)) < 1E-7) // 1e-7, 1e-11, criteria??
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the Outgoing Asymptote elements to";
+		errmsg << " the Cartesian.";
+		errmsg << " The Outgoing Asymptote vector is aligned with z-direction." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Rvector3  eaVec	=	Cross(uz,sVHat); 
+	Rvector3  eaVhat	=	eaVec/eaVec.GetMagnitude(); 
+	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
+	Real	    ami	   =	TWO_PI/4 - bva; // angular azimuth at infinity 
+	Rvector3  hVHat	=	sin(ami)*eaVhat + cos(ami)*noVhat;
+   Rvector3  nodeVec =  Cross(uz, hVHat);
+	Real      nMag    =  nodeVec.GetMagnitude();
+	Rvector3  eccVHat;
+   
+	if (c3 <= -1E-7)
+		eccVHat = -sVHat;
+	else if (c3 >= 1E-7)
+	{
+		Real     taMax   =   ACos(-1/ecc);
+		Rvector3 oVHat   =   Cross(hVHat,sVHat);
+		eccVHat =  -Sin(taMax)*oVHat + Cos(taMax)*sVHat; 
+	}
+
+	Real inc = ACos(uz*hVHat);
+	Real raan;
+	Real argPeriapsis;
+   
+	if ( ecc >= 1E-11 && inc >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+	{
+		if (nMag == 0.0)
+		{
+			throw UtilityException("Cannot convert from Outgoing asymptote elements to "
+                                "Cartesian elements - line-of-nodes vector is a zero vector.\n");
+		}
+		raan = ACos( nodeVec.Get(0)/nMag );
+		if (nodeVec.Get(1) < 0)
+			raan = TWO_PI - raan;
+      
+		argPeriapsis = ACos( (nodeVec*eccVHat)/nMag );
+		if (eccVHat.Get(2) < 0)
+			argPeriapsis = TWO_PI - argPeriapsis;
+	}
+	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	{
+		raan = 0;
+		argPeriapsis = ACos(eccVHat.Get(0));
+		if (eccVHat.Get(1) < 0)
+			argPeriapsis = TWO_PI - argPeriapsis;
+	}
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	{
+		raan = ACos(eccVHat(1));
+		argPeriapsis = 0;
+		if (eccVHat.Get(1) < 0)
+			raan = TWO_PI - raan;
+	}
+   
+	Real kepl[6];
+	kepl[0]	=	sma;
+	kepl[1]	=	ecc;
+	kepl[2]	=	inc*DEG_PER_RAD;
+	kepl[3]	=	raan*DEG_PER_RAD;
+	kepl[4]	=	argPeriapsis*DEG_PER_RAD;
+	kepl[5]	=	trueAnom*DEG_PER_RAD;
+	Real pos[3];
+	Real vel[3];         
+   
+	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
+	
+	AnomalyType type = GetAnomalyType("TA");
+	Integer errorCode	=	ComputeKeplToCart(mu, kepl, pos, vel, type);
+	if (errorCode > 0)
+	{
+		if (errorCode == 2)
+      {
+			std::stringstream errmsg("");
+         errmsg.precision(16);
+         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
+         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
+         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
+         throw UtilityException(errmsg.str());
+      }
+      else
+      {
+         //  Hope we never hit this.  This is a last resort, something went wrong.
+         throw UtilityException
+            ("Unable to convert Keplerian elements to Cartesian state.\n");
+		}
+	}
+   
+	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
+	return cart;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Outgoing Aymptote to Cartesian.
+ *
+ * @param <mu>           Gravitational constant for the central body
+ * @param <cartesian>    Cartesian state
+ *
+ * @return Spacecraft orbit state converted from Cartesian to BrouwerMeanShort
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian)
+{ 
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToBrouwerMeanShort() entered, mu = %.10f\n   cartesian = %s",
+       mu, cartesian.ToString().c_str());
+   #endif
+   
+	Real	 mu_Earth= 398600.4418;
+   // Changed abs() to Abs() (LOJ: 2014.01.07)
+	//if (abs(mu - mu_Earth) > 1.0)
+	if (Abs(mu - mu_Earth) > 1.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian.";
+		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+	
+	Real	tol = 1.0E-8;
+	Integer	maxiter = 75;
+	Rvector6 cart = cartesian;
+	AnomalyType type  = GetAnomalyType("TA");
+	AnomalyType type2 = GetAnomalyType("MA");
+   
+	Rvector6 kep = CartesianToKeplerian(mu, cart, type);
+	if (kep[1] >= 0.97)
+	{
+		std::string warn = "Warning: Orbit is nearly parabolic or hyperbolic. So, GMAT cannot calculate mean elements.\n";
+		MessageInterface::ShowMessage(warn);
+		Rvector6 blmean(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);	 
+		return blmean;
+	}
+   
+	kep[5] = kep[5] * RAD_PER_DEG;
+	kep[5] = TrueToMeanAnomaly(kep[5],kep[1]);
+	kep[5] = kep[5] * DEG_PER_RAD;
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage("   tol : %.10f, maxiter: %d", tol, maxiter);
+   MessageInterface::ShowMessage("   cart: %s", cart.ToString().c_str());
+   MessageInterface::ShowMessage("   kep : %s", kep.ToString().c_str());
+	#endif
+	Integer pseudostate=0;
+	if (kep[2] > 177.0)
+	{
+		kep[2] = 180.0 - kep[2]; // INC = 180 - INC
+		kep[3] = -kep[3]; // RAAN = - RAAN
+		cart = KeplerianToCartesian(mu, kep, type);	
+		pseudostate = 1;
+	}
+   
+	Rvector6 blmean = kep;
+	Rvector6 kep2	= BrouwerMeanShortToOsculatingElements(mu, kep);
+	Rvector6 blmean2;
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage("   kep2: %s", kep2.ToString().c_str());
+	#endif
+	
+	for (unsigned int jj = 0; jj < 6; jj++)
+		blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+   
+	Real emag = 1.0;
+	Integer ii = 0;
+	Rvector6	temp;
+	Rvector6	cart2;
+   
+	while (emag > tol)
+	{
+		#ifdef DEBUG_BROUWER_SHORT
+      MessageInterface::ShowMessage
+         ("   ==> iteration: %d, emag: %.10f > tol: %.10f\n", ii, emag, tol);
+		#endif
+      
+		blmean = blmean2;
+		
+		#ifdef DEBUG_BROUWER_SHORT
+      MessageInterface::ShowMessage
+         ("   blmean: %s   Calling BrouwerMeanShortToOsculatingElements()\n", blmean.ToString().c_str());
+		#endif
+      
+		kep2	= BrouwerMeanShortToOsculatingElements(mu, blmean);
+		
+		for (unsigned int jj = 0; jj < 6; jj++)
+			blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+      
+		temp	= cart - KeplerianToCartesian(mu, kep2, type2);
+		cart2	= KeplerianToCartesian(mu, kep2, type2);
+      
+		for (unsigned int jj = 0; jj < 6; jj++)
+			temp[jj]	= cart2[jj] - cart[jj] ;
+      
+      #ifdef DEBUG_BROUWER_SHORT
+      MessageInterface::ShowMessage("   temp  : %s", temp.ToString().c_str());
+      MessageInterface::ShowMessage("   cart  : %s", cart.ToString().c_str());
+      #endif
+      
+      // Should the 2nd and 3rd temp[0] be temp[1] and temp[2]?
+      // Changed to temp[1] and temp[2] (LOJ: 2014.01.08)
+		//emag = Sqrt(pow(temp[0],2.0) + pow(temp[0],2.0) + pow(temp[0],2.0)) /
+      //       Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) 
+		emag = Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0)) /
+             Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) +
+             Sqrt(pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
+             Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+      
+		#ifdef DEBUG_BROUWER_SHORT
+      MessageInterface::ShowMessage("   emag  : %.10f\n", emag);
+		#endif
+		if (ii > maxiter)
+		{		
+			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
+			break;
+		}
+		ii = ii + 1;
+	} // while (emag > tol)
+   
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage("   ==> emag: %.10f <= tol: %.10f\n", emag, tol);
+	#endif
+   
+	for (unsigned int jj = 0; jj < 6; jj++)
+		blmean[jj]	= blmean2[jj] ;
+   
+	if (pseudostate != 0)
+	{
+		blmean[2] = 180.0 - blmean[2];
+		blmean[3] = - blmean[3];
+	}
+   
+	if (blmean[1] < 0.0)
+	{
+		blmean[1] = -blmean[1];
+		blmean[4] = blmean[4] - 180.0;
+		blmean[5] = blmean[5] + 180.0;
+	}
+   
+	blmean[3] = Mod(blmean[3], 360.0);
+	blmean[4] = Mod(blmean[4], 360.0);
+	blmean[5] = Mod(blmean[5], 360.0);
+   
+	if (blmean[3] <0.0)
+		blmean[3]=blmean[3] + 360.0;
+   
+	if (blmean[4] <0.0)
+		blmean[4]=blmean[4] + 360.0;
+   
+	if (blmean[5] <0.0)
+		blmean[5]=blmean[5] + 360.0;
+   
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToBrouwerMeanShort() returning\n   %s",
+       blmean.ToString().c_str());
+   #endif
+	return blmean;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6& blms)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Brouwer-Lyddane Mean Elements (short period terms only) to 
+ * Osculating Keplerian Elements.
+ *
+ * @param <blms>    Brouwer-Lyddane Mean Elements (short period terms only)
+ *
+ * @return Spacecraft orbit state converted from BrouwerMeanShort to Keplerian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6& blms)
+{ 
+	Real	 mu_Earth= 398600.4418;
+   // Changed abs() to Abs() (LOJ: 2014.01.07)
+	//if (abs(mu - mu_Earth) > 1.0)
+	if (Abs(mu - mu_Earth) > 1.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort  to";
+		errmsg << " the Cartesian.";
+		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Real	 re		 = 6378.1363; // Earth radius
+	Real	 j2		 = 1.082626925638815E-03;
+	//Real	 ae		 = 1.0;
+	Real   smap     = blms[0] / re; 
+	Real   eccp     = blms[1];
+	Real   incp     = blms[2] * RAD_PER_DEG; 
+	Real   raanp    = blms[3] * RAD_PER_DEG; 
+	Real   aopp     = blms[4] * RAD_PER_DEG; 
+	Real   meanAnom = blms[5] * RAD_PER_DEG;  
+   
+	raanp	= Mod(raanp,TWO_PI);
+	aopp	= Mod(aopp,TWO_PI);
+	meanAnom= Mod(meanAnom,TWO_PI);
+	
+	if (raanp < 0.0)
+	{
+		raanp	= raanp + TWO_PI;
+	}
+	if (aopp < 0.0)
+	{
+		aopp	= aopp + TWO_PI;
+	}	
+	if (meanAnom < 0.0)
+	{
+		meanAnom= meanAnom + TWO_PI;
+	}
+	
+	if (eccp >= 0.97)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian.";
+		errmsg << " BrouwerMeanShort is applicable";
+		errmsg << " only if ECCP is equal to or smaller than 0.97." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+
+	Real	eta	= Sqrt(1.0-pow(eccp,2.0));
+	Real	theta	= Cos(incp);
+	Real	p		= smap*pow(eta,2.0);
+	Real	k2		= 1.0/2.0*j2; // pow(ae,2) = 0 ?? wierd  
+	Real	gm2	= k2/pow(smap,2.0);
+	Real	gm2p	= gm2/pow(eta,4.0);
+
+	Real	tap	= MeanToTrueAnomaly(meanAnom, eccp, 1.0E-8);
+	
+	Real	rp		= p/(1.0 + eccp*Cos(tap));
+	Real	adr		= smap/rp;
+	
+	Real	sma1	=	smap + smap*gm2*((pow(adr,3.0)-1.0/pow(eta,3.0))*(-1.0+3.0*pow(theta,2.0))+3.0*(1.0-pow(theta,2.0))*pow(adr,3.0)*Cos(2.0*aopp+2.0*tap));
+
+	Real	decc	=	pow(eta,2.0)/2.0*((3.0*(1.0/pow(eta,6.0))*gm2*(1.0-pow(theta,2.0))*Cos(2.0*aopp+2.0*tap)*(3.0*eccp*pow(Cos(tap),2.0)+3.0*Cos(tap)+pow(eccp,2.0)*pow(Cos(tap),3.0)+eccp))
+						- gm2p*(1.0-pow(theta,2.0))*(3.0*Cos(2.0*aopp+tap)+Cos(3.0*tap+2.0*aopp))+(3.0*pow(theta,2.0)-1.0)*gm2/pow(eta,6.0)*(eccp*eta+eccp/(1+eta)+3.0*eccp*pow(Cos(tap),2.0)
+						+ 3.0*Cos(tap)+pow(eccp,2.0)*pow(Cos(tap),3.0)));
+      
+	Real	dinc	=	gm2p/2.0*theta*Sin(incp)*(3.0*Cos(2.0*aopp+2.0*tap)+3.0*eccp*Cos(2.0*aopp+tap)+eccp*Cos(2.0*aopp+3.0*tap));
+
+	Real	draan	=	-gm2p/2.0*theta*(6.0*(tap-meanAnom+eccp*Sin(tap)) - 3.0*Sin(2.0*aopp+2.0*tap) - 3.0*eccp*Sin(2.0*aopp+tap) - eccp*Sin(2.0*aopp+3.0*tap));
+	
+	Real	aop1	=	aopp+ 3.0*j2/2.0/pow(p,2.0)*((2.0-5.0/2.0*pow(Sin(incp),2.0))*(tap-meanAnom+eccp*Sin(tap)) 
+						+ (1.0-3.0/2.0*pow(Sin(incp),2.0))*(1.0/eccp*(1.0-1.0/4.0*pow(eccp,2.0))*Sin(tap)+1.0/2.0*Sin(2.0*tap)+eccp/12.0*Sin(3.0*tap)) 
+						- 1.0/eccp*(1.0/4.0*pow(Sin(incp),2.0) + (1.0/2.0-15.0/16.0*pow(Sin(incp),2.0))*pow(eccp,2.0))*Sin(tap+2.0*aopp) 
+						+ eccp/16.0*pow(Sin(incp),2.0)*Sin(tap-2.0*aopp) -1.0/2.0*(1.0-5.0/2.0*pow(Sin(incp),2.0))*Sin(2.0*tap+2.0*aopp) 
+						+ 1.0/eccp*(7.0/12.0*pow(Sin(incp),2.0)-1.0/6.0*(1.0-19.0/8.0*pow(Sin(incp),2.0))*pow(eccp,2.0))*Sin(3.0*tap+2.0*aopp) 
+					    + 3.0/8.0*pow(Sin(incp),2.0)*Sin(4.0*tap+2.0*aopp) + eccp/16.0*pow(Sin(incp),2.0)*Sin(5.0*tap+2.0*aopp));
+
+	Real	ma1		=	meanAnom + 3.0*j2*eta/2.0/eccp/pow(p,2)*(-(1.0-3.0/2.0*pow(Sin(incp),2.0))*((1.0-pow(eccp,2.0)/4.0)*Sin(tap)+eccp/2.0*Sin(2.0*tap)+pow(eccp,2.0)/12.0*Sin(3.0*tap)) 
+						+ pow(Sin(incp),2.0)*(1.0/4.0*(1.0+5.0/4.0*pow(eccp,2.0))*Sin(tap+2.0*aopp)-pow(eccp,2.0)/16.0*Sin(tap-2.0*aopp) -7.0/12.0*(1.0-pow(eccp,2.0)/28.0)*Sin(3.0*tap+2.0*aopp) 
+						-3.0*eccp/8.0*Sin(4.0*tap+2.0*aopp)-pow(eccp,2.0)/16.0*Sin(5.0*tap+2.0*aopp)));
+
+	Real	lgh		=	raanp+aopp+meanAnom+gm2p/4.0*(6.0*(-1.0-2.0*theta+5.0*pow(theta,2.0))*(tap-meanAnom+eccp*Sin(tap)) 
+						+ (3.0 + 2.0*theta- 5.0*pow(theta,2.0))*(3.0*Sin(2.0*aopp+2.0*tap)+3.0*eccp*Sin(2.0*aopp+tap)+eccp*Sin(2.0*aopp+3.0*tap))) 
+						+ gm2p/4.0*pow(eta,2.0)/(eta+1.0)*eccp*(3.0*(1.0-pow(theta,2.0))*(Sin(3.0*tap+2.0*aopp)*(1.0/3.0+pow(adr,2.0)*pow(eta,2.0)+adr)
+						+ Sin(2.0*aopp+tap)*(1.0-pow(adr,2.0)*pow(eta,2.0)-adr))+2.0*Sin(tap)*(3.0*pow(theta,2.0)-1.0)*(1.0+pow(adr,2.0)*pow(eta,2.0)+adr));
+
+
+
+	Real	eccpdl	=	-pow(eta,3.0)/4.0*gm2p*(2.0*(-1.0+3.0*pow(theta,2.0))*(pow(adr,2.0)*pow(eta,2.0)+adr+1.0)*Sin(tap) 
+						+ 3.0*(1.0-pow(theta,2.0))*((-pow(adr,2.0)*pow(eta,2.0)-adr+1.0)*Sin(2.0*aopp+tap) + (pow(adr,2.0)*pow(eta,2.0)+adr+1.0/3.0)*Sin(2.0*aopp+3.0*tap)));
+	Real	ecosl	=	(eccp+decc)*Cos(meanAnom)-eccpdl*Sin(meanAnom);
+	Real	esinl	=	(eccp+decc)*Sin(meanAnom)+eccpdl*Cos(meanAnom);
+	Real	ecc1	=	sqrt(pow(ecosl,2.0)+pow(esinl,2.0));
+	if (ecc1 < 1.0E-11)
+	{
+		ma1=0.0;
+	}
+   else
+	{
+		ma1=ATan2(esinl,ecosl);
+		if (ma1 < 0.0)
+		{
+			ma1 = ma1 + TWO_PI;
+		}
+	}
+
+	Real	sinhalfisinh	=	(Sin(0.5*incp)+Cos(0.5*incp)*0.5*dinc)*Sin(raanp)+1.0/2.0*Sin(incp)/Cos(incp/2.0)*draan*Cos(raanp);
+	Real	sinhalficosh	=	(Sin(0.5*incp)+Cos(0.5*incp)*0.5*dinc)*Cos(raanp)-1.0/2.0*Sin(incp)/Cos(incp/2.0)*draan*Sin(raanp);
+	Real	inc1	=	2.0*ASin(Sqrt(pow(sinhalfisinh,2.0)+pow(sinhalficosh,2.0)));
+   Real raan1;
+   
+	if (inc1 ==0.0)
+	{
+		raan1=0.0;
+	}
+   else
+	{
+		raan1=ATan2(sinhalfisinh,sinhalficosh);
+		if (raan1<0.0)
+		{
+			raan1 = raan1 + TWO_PI;
+		}
+	}
+   
+	aop1=lgh-ma1-raan1;
+	aop1=Mod(aop1,TWO_PI);
+   
+	if (aop1 < 0.0)
+	{
+		aop1=aop1+TWO_PI;
+	}
+
+	Real kepl[6];
+	kepl[0]	=	sma1*re;
+	kepl[1]	=	ecc1;
+	kepl[2]	=	inc1*DEG_PER_RAD;
+	kepl[3]	=	raan1*DEG_PER_RAD;
+	kepl[4]	=	aop1*DEG_PER_RAD;
+	kepl[5]	=	ma1*DEG_PER_RAD;
+	
+	return kepl;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 BrouwerMeanShortToCartersian(Real mu, const Rvector6& blms)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Brouwer-Lyddane Mean Elements (short period terms only) to Cartesian.
+ *
+ * @param <blms>    Brouwer-Lyddane Mean Elements (short period terms only)
+ *
+ * @return Spacecraft orbit state converted from BrouwerMeanShort to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::BrouwerMeanShortToCartesian(Real mu, const Rvector6& blms)
+{ 
+	Rvector6 kepl=BrouwerMeanShortToOsculatingElements(mu, blms);
+
+	AnomalyType type = GetAnomalyType("MA");
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
+	return cart;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Brouwer-Lyddane Mean Elements (short and long period terms) to Cartesian.
+ *
+ * @param <cartesian> Cartesian state
+ *
+ * @return Spacecraft orbit state converted from Cartesian to BrouwerMeanLong
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian)
+{
+   #ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage
+      ("\nStateConversionUtil::CartesianToBrouwerMeanLong() entered, mu = %.10f\n   cartesian = %s",
+       mu, cartesian.ToString().c_str());
+   #endif
+   
+	Real	 mu_Earth= 398600.4418;
+   // Changed abs() to Abs() (LOJ: 2014.01.07)
+	//if (abs(mu - mu_Earth) > 1.0)
+	if (Abs(mu - mu_Earth) > 1.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian.";
+		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
+		throw UtilityException(errmsg.str());
+	}
+	
+	Real	tol=1.0E-8;
+	Integer	maxiter=75;
+	Rvector6 cart = cartesian;
+	AnomalyType type = GetAnomalyType("TA");
+	AnomalyType type2= GetAnomalyType("MA");
+
+	Rvector6 kep = CartesianToKeplerian(mu, cart, type);
+	if (kep[1] >= 0.97)
+	{
+		std::string warn = "Warning: Orbit is nearly parabolic or hyperbolic. So, GMAT cannot calculate mean elements.\n";
+		MessageInterface::ShowMessage(warn);
+		Rvector6 blmean(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);	 
+		return blmean;
+	}
+   
+	kep[5] = kep[5] * RAD_PER_DEG;
+	kep[5] = TrueToMeanAnomaly(kep[5],kep[1]);
+	kep[5] = kep[5] * DEG_PER_RAD;
+   
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage("   tol : %.10f, maxiter: %d", tol, maxiter);
+   MessageInterface::ShowMessage("   cart: %s", cart.ToString().c_str());
+   MessageInterface::ShowMessage("   kep : %s", kep.ToString().c_str());
+	#endif
+   
+	Integer pseudostate=0;
+	if (kep[2] > 177.0)
+	{
+		kep[2] = 180.0 - kep[2]; // INC = 180 - INC
+		kep[3] = -kep[3]; // RAAN = - RAAN
+		cart = KeplerianToCartesian(mu, kep, type);	
+		pseudostate = 1;
+	}
+   
+	Rvector6 blmean = kep;
+	Rvector6 kep2	= BrouwerMeanLongToOsculatingElements(mu, kep);
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage("   kep2: %s", kep2.ToString().c_str());
+	#endif
+	Rvector6 blmean2;
+	
+	for (unsigned int jj = 0; jj < 6; jj++)
+		blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+   
+	Real emag = 1.0;
+	Integer ii = 0;
+	Rvector6	temp;
+	Rvector6	cart2;
+   
+	while (emag > tol)
+	{
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage
+         ("   ==> iteration: %d, emag: %.10f > tol: %.10f\n", ii, emag, tol);
+		#endif
+      
+		blmean	= blmean2;
+		
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage
+         ("   blmean: %s   Calling BrouwerMeanLongToOsculatingElements()\n", blmean.ToString().c_str());
+		#endif
+      
+		kep2	= BrouwerMeanLongToOsculatingElements(mu, blmean);
+		
+		for (unsigned int jj = 0; jj < 6; jj++)
+			blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+      
+		temp	= cart - KeplerianToCartesian(mu, kep2, type2);
+		cart2	= KeplerianToCartesian(mu, kep2, type2);
+      
+		for (unsigned int jj = 0; jj < 6; jj++)
+			temp[jj]	= cart2[jj] - cart[jj] ;
+      
+      // Should the 2nd and 3rd temp[0] be temp[1] and temp[2]?
+      // Changed to temp[1] and temp[2] (LOJ: 2014.01.13)
+		//emag	= Sqrt(pow(temp[0],2.0) + pow(temp[0],2.0) + pow(temp[0],2.0)) /
+		emag	= Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0)) /
+              Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) +
+              Sqrt(pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
+              Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+		
+		#ifdef DEBUG_BROUWER_LONG
+      MessageInterface::ShowMessage("   emag  : %.10f\n", emag);
+		#endif
+		if (ii > maxiter)
+		{		
+			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
+			break;
+		}
+		ii = ii + 1;
+	} // while (emag > tol)
+   
+	#ifdef DEBUG_BROUWER_SHORT
+   MessageInterface::ShowMessage("   ==> emag: %.10f <= tol: %.10f\n", emag, tol);
+	#endif
+
+	for (unsigned int jj = 0; jj < 6; jj++)
+		blmean[jj]	= blmean2[jj] ;
+   
+	if (pseudostate != 0)
+	{
+		blmean[2] = 180.0 - blmean[2];
+		blmean[3] = - blmean[3];
+	}
+   
+	if (blmean[1] < 0.0)
+	{
+		blmean[1] = -blmean[1];
+		blmean[4] = blmean[4] - 180.0;
+		blmean[5] = blmean[5] + 180.0;
+	}
+
+	blmean[3] = Mod(blmean[3], 360.0);
+	blmean[4] = Mod(blmean[4], 360.0);
+	blmean[5] = Mod(blmean[5], 360.0);
+   
+	if (blmean[3] < 0.0)
+		blmean[3] = blmean[3] + 360.0;
+   
+	if (blmean[4] < 0.0)
+		blmean[4] = blmean[4] + 360.0;
+   
+	if (blmean[5] < 0.0)
+		blmean[5] = blmean[5] + 360.0;
+   
+	#ifdef DEBUG_BROUWER_LONG
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::CartesianToBrouwerMeanLong() returning\n   %s",
+       blmean.ToString().c_str());
+   #endif
+	return blmean;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6& blml)
+//------------------------------------------------------------------------------
+/**
+ * Converts from BrouwerMeanLong to Osculating Keplerian Elements.
+ *
+ * @param <blml> Brouwer-Lyddane Mean Elements (short and long period terms)
+ *
+ * @return Spacecraft orbit state converted from Keplerian to BrouwerMeanLong
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml)
+{
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::BrouwerMeanLongToOsculatingElements() entered, mu = %.10f\n   blml = %s",
+       mu, blml.ToString().c_str());
+   #endif
+   
+	Real	 mu_Earth= 398600.4418;
+   // Changed abs() to Abs() (LOJ: 2014.01.07)
+	//if (abs(mu - mu_Earth) > 1.0)
+	if (Abs(mu - mu_Earth) > 1.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort  to";
+		errmsg << " the Cartesian.";
+		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG_OSKEP
+      MessageInterface::ShowMessage
+         ("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
+		throw UtilityException(errmsg.str());
+	}
+
+	Real	 re		 = 6378.1363; // Earth radius
+	Real	 j2		 = 1.082626925638815E-03;
+	Real	 j3       = -0.2532307818191774E-5;
+	Real	 j4       = -0.1620429990000000E-5;
+	Real	 j5       = -0.2270711043920343E-6;
+	Real	 ae		 = 1.0;
+	Real   smadp    = blml[0] / re; 
+	Real   eccdp    = blml[1];
+	Real   incdp    = blml[2] * RAD_PER_DEG; 
+	Real   raandp   = blml[3] * RAD_PER_DEG; 
+	Real   aopdp    = blml[4] * RAD_PER_DEG; 
+	Real   meanAnom = blml[5] * RAD_PER_DEG;  
+	
+	// negative eccentricity aviodance lines
+   
+	if (eccdp < 0.0)
+	{
+		eccdp = eccdp * -1.0;
+		aopdp = aopdp - TWO_PI/2;
+		meanAnom= meanAnom + TWO_PI/2;
+	}
+
+	if (eccdp >= 0.97)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanLong to";
+		errmsg << " the Cartesian.";
+		errmsg << " BrouwerMeanLong is applicable";
+		errmsg << " only if ECCDP is equal to or smaller than 0.97." << std::endl;
+      #ifdef DEBUG_BROUWER_LONG_OSKEP
+      MessageInterface::ShowMessage
+         ("==> Throwing exception: %s\n", errmsg.str().c_str());
+      #endif
+		throw UtilityException(errmsg.str());
+	}
+   
+	raandp	= Mod(raandp,TWO_PI);
+	aopdp	   = Mod(aopdp,TWO_PI);
+	meanAnom = Mod(meanAnom,TWO_PI);
+	
+	if (raandp < 0.0)
+	{
+		raandp	= raandp + TWO_PI;
+	}
+	if (aopdp < 0.0)
+	{
+		aopdp	= aopdp + TWO_PI;
+	}	
+	if (meanAnom < 0.0)
+	{
+		meanAnom= meanAnom + TWO_PI;
+	}
+	
+	if (Abs(eccdp-1.0) < 1.0E-6)
+	{
+		std::string warn = "Warning: Orbit is nealy parabolic, a possible inaccuracy exists.\n";
+		MessageInterface::ShowMessage(warn);
+	}
+	
+   #ifdef DEBUG_BROUWER_OSKEP
+   MessageInterface::ShowMessage
+      ("   raandp = %.10f, aopdp = %.10f, eccdp = %.10f,  meanAnom = %.10f\n", raandp, aopdp,
+       eccdp, meanAnom);
+   #endif
+   
+   Real    bk2=(1.0/2.0)*(j2*ae*ae);
+   Real    bk3=-j3*pow(ae,3);
+   Real    bk4=-(3.0/8.0)*j4*pow(ae,4);
+   Real    bk5=-j5*pow(ae,5);
+   Real    eccdp2=eccdp*eccdp;
+   Real    cn2=1.0-eccdp2;
+   Real    cn=Sqrt(cn2);
+   Real    gm2=bk2/pow(smadp,2);
+   Real    gmp2=gm2/(cn2*cn2);
+   Real    gm4=bk4/pow(smadp,4);
+   Real    gmp4=gm4/pow(cn,8);
+   Real    theta=Cos(incdp);
+   Real    theta2=theta*theta;
+   Real    theta4=theta2*theta2;
+   
+	Real    gm3=bk3/pow(smadp,3);
+   Real    gmp3=gm3/(cn2*cn2*cn2);
+   Real    gm5=bk5/pow(smadp,5);
+   Real    gmp5=gm5/pow(cn,10);
+	
+   Real    g3dg2=gmp3/gmp2;
+   Real    g4dg2=gmp4/gmp2;
+   Real    g5dg2=gmp5/gmp2;
+
+	Real    sinMADP=Sin(meanAnom);
+   Real    cosMADP=Cos(meanAnom);
+   Real    sinraandp=Sin(raandp);
+   Real    cosraandp=Cos(raandp);
+	
+   //-------------------------------------I
+   // COMPUTE TRUE ANOMALY(DOUBLE PRIMED) I
+   //-------------------------------------I
+   
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute true anomaly double primed\n");
+   #endif
+   
+   // Changed tolerance to 1.E-8 to avoid infinite loop in ComputeMeanToTrueAnomaly()
+   // (LOJ: Fix for GMT-4362 2013.01.13)
+	//Real	  tadp = MeanToTrueAnomaly(meanAnom, eccdp, 0.5E-15);
+	Real	  tadp = MeanToTrueAnomaly(meanAnom, eccdp, 1.E-8);
+	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   tadp = %.10f\n", tadp);
+   #endif
+   
+	Real	  rp = smadp*(1.0-eccdp*eccdp)/(1.0 + eccdp*Cos(tadp));
+	Real	  adr	= smadp/rp;
+   Real    sinta=Sin(tadp);
+   Real    costa=Cos(tadp);
+   Real    cs2gta=Cos(2.0*aopdp+2.0*tadp);
+   Real    adr2=adr*adr;
+   Real    adr3=adr2*adr;
+   Real    costa2=costa*costa;
+	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute a1-a8 terms\n");
+   #endif
+   Real    a1=((1.0/8.0)*gmp2*cn2)*(1.0-11.0*theta2-((40.0*theta4)/(1.0-5.0*theta2)));
+   Real    a2=((5.0/12.0)*g4dg2*cn2)*(1.0-((8.0*theta4)/(1.0-5.0*theta2))-3.0*theta2);
+   Real    a3=g5dg2*((3.0*eccdp2)+4.0);
+   Real    a4=g5dg2*(1.0-(24.0*theta4)/(1.0-5.0*theta2)-9.0*theta2);
+   Real    a5=(g5dg2*(3.0*eccdp2+4.0))*(1.0-(24.0*theta4)/(1.0-5.0*theta2)-9.0*theta2);
+   Real    a6=g3dg2*(1.0/4.0);
+   Real    sinI=Sin(incdp);
+   Real    a10=cn2*sinI;
+   Real    a7=a6*a10;
+   Real    a8p=g5dg2*eccdp*(1.0-(16.0*theta4)/(1.0-5.0*theta2)-5.0*theta2);
+   Real    a8=a8p*eccdp;
+	
+   Real    b13=eccdp*(a1-a2);
+   Real    b14=a7+(5.0/64.0)*a5*a10;
+   Real    b15=a8*a10*(35.0/384.0); 
+   
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute a11-a27 terms\n");
+   #endif
+   Real    a11=2.0+eccdp2;
+   Real    a12=3.0*eccdp2+2.0;
+   Real    a13=theta2*a12;
+   Real    a14=(5.0*eccdp2+2.0)*(theta4/(1.0-5.0*theta2));
+   Real    a17=theta4/((1.0-5.0*theta2)*(1.0-5.0*theta2));
+   Real    a15=(eccdp2*theta4*theta2)/((1.0-5.0*theta2)*(1.0-5.0*theta2));
+   Real    a16=theta2/(1.0-5.0*theta2);
+   Real    a18=eccdp*sinI;
+   Real    a19=a18/(1.0+cn);
+   Real    a21=eccdp*theta;
+   Real    a22=eccdp2*theta;
+   Real    sinI2=Sin(incdp/2.0);
+   Real    cosI2=Cos(incdp/2.0);
+   Real    tanI2=Tan(incdp/2.0);
+   Real    a26=16.0*a16+40.0*a17+3.0;
+   Real    a27=a22*(1.0/8.0)*(11.0+200.0*a17+80.0*a16);
+	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute b1-b12 termm\n");
+   #endif
+   Real    b1=cn*(a1-a2)-((a11-400.0*a15-40.0*a14-11.0*a13)*(1.0/16.0)+(11.0+200.0*a17+80.0*a16)*a22*(1.0/8.0))*gmp2+((-80.0*a15-8.0*a14-3.0*a13+a11)*(5.0/24.0)+(5.0/12.0)*a26*a22)*g4dg2;
+   Real    b2=a6*a19*(2.0+cn-eccdp2)+(5.0/64.0)*a5*a19*cn2-(15.0/32.0)*a4*a18*cn*cn2+((5.0/64.0)*a5+a6)*a21*tanI2+(9.0*eccdp2+26.0)*(5.0/64.0)*a4*a18+(15.0/32.0)*a3*a21*a26*sinI*(1.0-theta);
+   Real    b3=((80.0*a17+5.0+32.0*a16)*a22*sinI*(theta-1.0)*(35.0/576.0)*g5dg2*eccdp)-((a22*tanI2+(2.0*eccdp2+3.0*(1.0-cn2*cn))*sinI)*(35.0/1152.0)*a8p);
+   Real    b4=cn*eccdp*(a1-a2);
+   Real    b5=((9.0*eccdp2+4.0)*a10*a4*(5.0/64.0)+a7)*cn;
+   Real    b6=(35.0/384.0)*a8*cn2*cn*sinI;
+   Real    b7=((cn2*a18)/(1.0-5.0*theta2))*((1.0/8.0)*gmp2*(1.0-15.0*theta2)+(1.0-7.0*theta2)*g4dg2*(-(5.0/12.0)));
+   Real    b8=(5.0/64.0)*(a3*cn2*(1.0-9.0*theta2-(24.0*theta4/(1.0-5.0*theta2))))+a6*cn2;
+   Real    b9=a8*(35.0/384.0)*cn2;
+   Real    b10=sinI*(a22*a26*g4dg2*(5.0/12.0)-a27*gmp2);
+   Real    b11=a21*(a5*(5.0/64.0)+a6+a3*a26*(15.0/32.0)*sinI*sinI);
+   Real    b12=-((80.0*a17+32.0*a16+5.0)*(a22*eccdp*sinI*sinI*(35.0/576.0)*g5dg2)+(a8*a21*(35.0/1152.0)));
+	
+   //----------------------------I
+   // COMPUTE (SEMI-MAJOR AXIS)  I
+   //----------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute semi-major axis\n");
+   #endif
+    Real    sma=smadp*(1.0+gm2*((3.0*theta2-1.0)*(eccdp2/(cn2*cn2*cn2))*(cn+(1.0/(1.0+cn)))+((3.0*theta2-1.0)/(cn2*cn2*cn2))*(eccdp*costa)*(3.0+3.0*eccdp*costa+eccdp2*costa2)+3.0*(1.0-theta2)*adr3*cs2gta));
+    Real    sn2gta=Sin(2.0*aopdp+2.0*tadp);
+    Real    snf2gd=Sin(2.0*aopdp+tadp);
+    Real    csf2gd=Cos(2.0*aopdp+tadp);
+    Real    sn2gd=Sin(2.0*aopdp);
+    Real    cs2gd=Cos(2.0*aopdp);
+    Real    sin3gd=Sin(3.0*aopdp);
+    Real    cs3gd=Cos(3.0*aopdp);
+    Real    sn3fgd=Sin(3.0*tadp+2.0*aopdp);
+    Real    cs3fgd=Cos(3.0*tadp+2.0*aopdp);
+    Real    sinGD=Sin(aopdp);
+    Real    cosGD=Cos(aopdp);
+    Real    dlt1e=b14*sinGD+b13*cs2gd-b15*sin3gd;
+    
+   //------------------------I
+   // COMPUTE (L+G+H) PRIMED I
+   //------------------------I
+    
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute L+G+H Primed\n");
+   #endif
+   Real    blghp=raandp+aopdp+meanAnom+b3*cs3gd+b1*sn2gd+b2*cosGD;
+   blghp = Mod(blghp,(TWO_PI));
+   if (blghp < 0.0)
+   { 
+		blghp=blghp+(TWO_PI);
+   }
+   Real    eccdpdl=b4*sn2gd-b5*cosGD+b6*cs3gd-(1.0/4.0)*cn2*cn*gmp2*(2.0*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)*sinta+3.0*(1.0-theta2)*((-adr2*cn2-adr+1.0)*snf2gd+(adr2*cn2+adr+(1.0/3.0))*sn3fgd));
+   Real    dltI=(1.0/2.0)*theta*gmp2*sinI*(eccdp*cs3fgd+3.0*(eccdp*csf2gd+cs2gta))-(a21/cn2)*(b8*sinGD+b7*cs2gd-b9*sin3gd);
+   Real    sinDH=(1.0/cosI2)*((1.0/2.0)*(b12*cs3gd+b11*cosGD+b10*sn2gd-((1.0/2.0)*gmp2*theta*sinI*(6.0*(eccdp*sinta-meanAnom+tadp)-(3.0*(sn2gta+eccdp*snf2gd)+eccdp*sn3fgd)))));
+   
+   //-----------------I
+   // COMPUTE (L+G+H) I
+   //-----------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute L+G+H\n");
+   #endif
+	Real    blgh=blghp+((1.0/(cn+1.0))*(1.0/4.0)*eccdp*gmp2*cn2*(3.0*(1.0-theta2)*(sn3fgd*((1.0/3.0)+adr2*cn2+adr)+snf2gd*(1.0-(adr2*cn2+adr)))+2.0*sinta*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)))
+            +gmp2*(3.0/2.0)*((-2.0*theta-1.0+5.0*theta2)*(eccdp*sinta+tadp-meanAnom))+(3.0+2.0*theta-5.0*theta2)*(gmp2*(1.0/4.0)*(eccdp*sn3fgd+3.0*(sn2gta+eccdp*snf2gd)));
+   blgh = Mod(blgh,(TWO_PI));
+   if (blgh < 0.0)
+	{
+		blgh=blgh+(TWO_PI);
+	}
+    
+   Real    dlte=dlt1e+((1.0/2.0)*cn2*((3.0*(1.0/(cn2*cn2*cn2))*gm2*(1.0-theta2)*cs2gta*(3.0*eccdp*costa2+3.0*costa+eccdp2*costa*costa2+eccdp))
+            -(gmp2*(1.0-theta2)*(3.0*csf2gd+cs3fgd))+(3.0*theta2-1.0)*gm2*(1.0/(cn2*cn2*cn2))*(eccdp*cn+(eccdp/(1.0+cn))+3.0*eccdp*costa2+3.0*costa+eccdp2*costa*costa2)));
+   Real    eccdpdl2=eccdpdl*eccdpdl;
+   Real    eccdpde2=(eccdp+dlte)*(eccdp+dlte);
+
+   //-------------------------I
+   // COMPUTE ECC             I
+   //-------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute eccentricity\n");
+   #endif
+   Real    ecc=sqrt(eccdpdl2+eccdpde2);
+   Real    sinDH2=sinDH*sinDH;
+   Real    squar=(dltI*cosI2*(1.0/2.0)+sinI2)*(dltI*cosI2*(1.0/2.0)+sinI2);
+   Real    sqrI=sqrt(sinDH2+squar);
+	
+   //--------------------------I
+   // COMPUTE (INCLINATION)    I
+   //--------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute inclination\n");
+   #endif
+   Real    inc=2*ASin(sqrI);
+   inc = Mod(inc,(TWO_PI));
+   
+   //-------------------------I
+   // COMPUTE (MEAN ANOMALY)  I
+   //-------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute mean anomaly\n");
+   #endif
+	Real ma;
+	if (ecc <= 1.0E-11)
+	{
+		ma=0.0;
+	} 
+	else
+	{
+		Real    arg1=eccdpdl*cosMADP+(eccdp+dlte)*sinMADP;
+		Real    arg2=(eccdp+dlte)*cosMADP-(eccdpdl*sinMADP);
+		ma = ATan2(arg1,arg2);
+		ma = Mod(ma,(TWO_PI));
+	}
+   if (ma < 0.0)
+	{
+		ma = ma + TWO_PI;
+	}
+
+   //---------------------------------------I
+   // COMPUTE (LONGITUDE OF ASCENDING NODE) I
+   //---------------------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute longitude of ascending node\n");
+   #endif
+	Real	raan;
+	if (inc <= 1.0E-11)
+	{    
+		raan=0.0;
+	} 
+	else
+	{
+		Real    arg1=sinDH*cosraandp+sinraandp*((1.0/2.0)*dltI*cosI2+sinI2);
+		Real    arg2=cosraandp*((1.0/2.0)*dltI*cosI2+sinI2)-(sinDH*sinraandp);
+      raan=ATan2(arg1,arg2);
+      raan=Mod(raan,(TWO_PI));
+	}
+   if (raan < 0)
+	{
+		raan=raan+(TWO_PI);
+	}
+	
+   //---------------------------------I
+   // COMPUTE (ARGUMENT  OF PERIGEE)  I
+   //---------------------------------I
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage("   Compute argument of perigee\n");
+   #endif
+	Real aop;
+   
+	aop = blgh-ma-raan;
+   aop=Mod(aop,(TWO_PI));
+	if (aop < 0.0)
+	{
+		aop = aop + TWO_PI;
+	}
+
+	Real kepl[6];
+	kepl[0]	=	sma * re;
+	kepl[1]	=	ecc;
+	kepl[2]	=	inc * DEG_PER_RAD;
+	kepl[3]	=	raan * DEG_PER_RAD;
+	kepl[4]	=	aop * DEG_PER_RAD;
+	kepl[5]	=	ma * DEG_PER_RAD;
+	
+   #ifdef DEBUG_BROUWER_LONG_OSKEP
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::BrouwerMeanLongToOsculatingElements() returning "
+       "%.10f %.10f %.10f %.10f %.10f %.10f\n", kepl[0], kepl[1], kepl[2], kepl[3],
+       kepl[4], kepl[5]);
+   #endif
+	return kepl;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 BrouwerMeanLongToCartersian(Real mu, const Rvector6& blms)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Brouwer-Lyddane Mean Elements to Cartesian.
+ *
+ * @param <blms>    Brouwer-Lyddane Mean Elements
+ *
+ * @return Spacecraft orbit state converted from BrouwerMeanLong to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::BrouwerMeanLongToCartesian(Real mu, const Rvector6& blms)
+{ 
+	Rvector6 kepl=BrouwerMeanLongToOsculatingElements(mu, blms);
+
+	AnomalyType type = GetAnomalyType("MA");
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
+	return cart;
+}
+
 
 //---------------------------------------------------------------------------
 //  Rvector6 Convert(Real mu,
@@ -2341,15 +4105,15 @@ Real StateConversionUtil::MeanToTrueAnomaly(Real maRadians, Real ecc, Real tol)
 {
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage
-      ("MeanToTrueAnomaly() maRadians=%f, ecc=%f\n", maRadians, ecc);
+      ("MeanToTrueAnomaly() maRadians=%.10f, ecc=%.10f, tol=%.15f\n", maRadians, ecc, tol);
    #endif
-
+   
    Real ta;
    Integer iter;
    Integer ret;
 
    ret = ComputeMeanToTrueAnomaly(maRadians, ecc, tol, &ta, &iter);
-
+   
    if (ret == 0)
    {
       #ifdef DEBUG_ANOMALY
@@ -2358,7 +4122,11 @@ Real StateConversionUtil::MeanToTrueAnomaly(Real maRadians, Real ecc, Real tol)
 
       return ta;
    }
-
+   
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("MeanToTrueAnomaly() Throwing a exception - error converting MA to TA\n");
+   #endif
    throw UtilityException("MeanToTrueAnomaly() Error converting "
                           " Mean Anomaly to True Anomaly\n");
 }
@@ -4040,13 +5808,19 @@ Integer StateConversionUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3
  */
 //------------------------------------------------------------------------------
 Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, Real tol,
-                                                      Real *ta,     Integer *iter)
+                                                      Real *ta, Integer *iter)
 {
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("StateConversionUtil::ComputeMeanToTrueAnomaly() entered, maRadians=%.10f, ecc=%.10f, tol=%.15f\n",
+       maRadians, ecc, tol);
+   #endif
+   
    Real temp, temp2;
    Real rm,   e,     e1,  e2,  c,  f,  f1,   f2,    g;
    Real ztol = 1.0e-30;
-   int done;
-
+   bool done = false;
+   
    rm = maRadians;
    *iter = 0;
 
@@ -4057,28 +5831,33 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
       //---------------------------------------------------------
 
       e2 = rm + ecc * Sin(rm);
-      done = 0;
-
+      done = false;
+      
+      #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("   e2 = %.15f\n", ecc);
+      #endif
+      
       while (!done)
       {
          *iter = *iter + 1;
          temp = 1.0 - ecc * Cos(e2);
+                  
          if (temp == 0.0)
          {
             throw UtilityException("Cannot convert Mean to True Anomaly - computed temp is zero.\n");
          }
-
+         
          if (Abs(temp) < ztol)
             return (3);
-
+         
          e1 = e2 - (e2 - ecc * Sin(e2) - rm)/temp;
-
+         
          if (Abs(e2-e1) < tol)
          {
-            done = 1;
+            done = true;
             e2 = e1;
          }
-
+         
          if (!done)
          {
             *iter = *iter + 1;
@@ -4086,14 +5865,26 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
 
             if (Abs(temp) < ztol)
                return (4);
-
+            
             e2 = e1 - (e1 - ecc * Sin(e1) - rm)/temp;
-
+            
             if( Abs(e1-e2) < tol)
-               done = 1;
+               done = true;
          }
-      }
-
+         
+         if (*iter > 1000)
+         {
+            throw UtilityException
+               ("ComputeMeanToTrueAnomaly() Stuck in infinite loop in ellitical "
+                "orbit computation using tolerance of " + GmatStringUtil::ToString(tol, 16) +
+                ". Current iteration: " + GmatStringUtil::ToString(*iter) + "\n");
+         }
+      } // while (!done)
+      
+      #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("   After While (!done), e2 = %.15f\n", e2);
+      #endif
+      
       e = e2;
 
       if (e < 0.0)
@@ -4137,8 +5928,8 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
          rm = rm - TWO_PI;
 
       f2 = ecc * Sinh(rm) - rm;
-      done = 0;
-
+      done = false;
+      
       while (!done)
       {
          *iter = *iter + 1;
@@ -4151,7 +5942,7 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
 
          if (Abs(f2-f1) < tol)
          {
-            done = 1;
+            done = true;
             f2 = f1;
          }
 
@@ -4166,7 +5957,7 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
             f2 = f1 - (ecc * Sinh(f1) - f1 - rm) / temp;
 
             if ( Abs(f1-f2) < tol)
-               done = 1;
+               done = true;
          }
 
          if (*iter > 1000)

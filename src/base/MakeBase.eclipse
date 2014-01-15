@@ -394,6 +394,8 @@ OBJECTS = \
     parameter/BplaneData.o \
     parameter/BplaneParameters.o \
     parameter/BplaneReal.o \
+    parameter/BrouwerMeanLongParameters.o \
+    parameter/BrouwerMeanShortParameters.o \
     parameter/BurnData.o \
     parameter/BurnParameters.o \
     parameter/BurnReal.o \
@@ -406,6 +408,7 @@ OBJECTS = \
     parameter/ExpressionParser.o \
     parameter/HardwareReal.o \
     parameter/HardwareParameters.o \
+    parameter/IncomingAsymptoteParameters.o \
     parameter/KeplerianParameters.o \
     parameter/ModEquinoctialParameters.o \
     parameter/NumberWrapper.o \
@@ -419,6 +422,7 @@ OBJECTS = \
     parameter/OrbitRmat66.o \
     parameter/OrbitRvec6.o \
     parameter/OrbitStmParameters.o \
+    parameter/OutgoingAsymptoteParameters.o \
     parameter/ParameterDatabase.o \
     parameter/ParameterInfo.o \
     parameter/Parameter.o \

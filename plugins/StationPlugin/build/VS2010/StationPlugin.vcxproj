@@ -116,7 +116,7 @@
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\application\debug</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -1,5 +1,5 @@
 stk.v.10.0
-WrittenBy    STK_v10.0.0
+WrittenBy    STK_v10.0.2
 
 BEGIN ReportStyle
 
@@ -86,14 +86,14 @@ BEGIN Element
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-X
+	Name		Astrogator Values-Cartesian Elems-X(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		X
+	Title		X(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		X
+	Element		X(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -117,14 +117,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Y
+	Name		Astrogator Values-Cartesian Elems-Y(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Y
+	Title		Y(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Y
+	Element		Y(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -148,14 +148,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Z
+	Name		Astrogator Values-Cartesian Elems-Z(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Z
+	Title		Z(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Z
+	Element		Z(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -179,14 +179,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vx
+	Name		Astrogator Values-Cartesian Elems-Vx(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vx
+	Title		Vx(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vx
+	Element		Vx(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -210,14 +210,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vy
+	Name		Astrogator Values-Cartesian Elems-Vy(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vy
+	Title		Vy(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vy
+	Element		Vy(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -241,14 +241,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vz
+	Name		Astrogator Values-Cartesian Elems-Vz(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vz
+	Title		Vz(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vz
+	Element		Vz(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -374,14 +374,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_RA
+	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_RA(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Asymptote_RA
+	Title		Outgoing_Asymptote_RA(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Asymptote_RA
+	Element		Outgoing_Asymptote_RA(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -408,14 +408,14 @@ END Units
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_Dec
+	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_Dec(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Asymptote_Dec
+	Title		Outgoing_Asymptote_Dec(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Asymptote_Dec
+	Element		Outgoing_Asymptote_Dec(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -442,14 +442,14 @@ END Units
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Vel_Az_at_Periapsis
+	Name		Astrogator Values-Target Vector-Outgoing_Vel_Az_at_Periapsis(Earth(J2000))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Vel_Az_at_Periapsis
+	Title		Outgoing_Vel_Az_at_Periapsis(Earth(J2000))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Vel_Az_at_Periapsis
+	Element		Outgoing_Vel_Az_at_Periapsis(Earth(J2000))
 	Format		%.14e
 	SumAllowedMask		1559
 	SummaryOnly		No

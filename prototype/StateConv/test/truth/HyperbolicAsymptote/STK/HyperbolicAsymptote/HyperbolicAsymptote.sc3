@@ -285,9 +285,6 @@ VO_V100
                         End
                         InBase Yes
                         BaseOn Yes
-                        ReaderProgID 
-                        BeginUserData
-                        EndUserData
                     End
                 EndCentralBody
             End Globe

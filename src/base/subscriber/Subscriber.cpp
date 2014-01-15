@@ -40,7 +40,7 @@
 #include "StringUtil.hpp"          // for Replace()
 #include "MessageInterface.hpp"
 
-// Cloning wrapper is not ready
+// Uncomment this line if cloning wrapper code is ready
 #define __ENABLE_CLONING_WRAPPERS__
 
 //#define DEBUG_SUBSCRIBER

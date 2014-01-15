@@ -82,7 +82,10 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
    // parameters that have been modified by the user to a script; and we don't
    // want to include the Create line either.  This will not be true for user-defined
    // CalculatedPoints (LOJ: 2013.12.17)
-   cloaking = true;
+//   cloaking = true; // by default, calculated points are user-defined; the
+                      // built-in SSB will have its isBuiltin flag set by a
+                      // call to SetIsBuiltIn, where the cloaking flag will
+                      // be set properly.   (WCS: 2014.01.10)
 }
 
 //------------------------------------------------------------------------------
@@ -212,6 +215,9 @@ void CalculatedPoint::SetIsBuiltIn(bool builtIn, const std::string &ofType)
 {
    isBuiltIn   = builtIn;
    builtInType = ofType;
+   // Don't cloak the user-defined calculated points!
+   if (isBuiltIn) cloaking  =  true;
+   else           cloaking  =  false;
 }
 
 //------------------------------------------------------------------------------

@@ -3673,6 +3673,10 @@ void MissionTree::OnDelete(wxCommandEvent &event)
       return;
    }
    
+   int answer = wxMessageBox(wxT("Are you sure you want to delete " + cmdName + "?"),
+                         wxT("Please confirm"), wxYES_NO);
+   if (answer == wxNO) return;
+
    DeleteCommand(cmdName);
    
 }
