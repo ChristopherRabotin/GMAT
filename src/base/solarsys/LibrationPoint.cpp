@@ -29,6 +29,7 @@
 #include "Rmatrix33.hpp"
 #include "MessageInterface.hpp"
 #include "GmatDefaults.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 #include <iostream>
 
@@ -85,6 +86,9 @@ secondaryBody       (NULL)
    objectTypes.push_back(Gmat::LIBRATION_POINT);
    objectTypeNames.push_back("LibrationPoint");
    parameterCount = LibrationPointParamCount;
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::GREEN_YELLOW, GmatColor::DARK_GRAY);
 }
 
 //------------------------------------------------------------------------------

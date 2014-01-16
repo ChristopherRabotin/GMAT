@@ -48,7 +48,7 @@
 //#define DEBUG_SS_INIT
 //#define DEBUG_PLANETARY_SPK
 //#define DEBUG_SS_GET
-
+//#define DEBUG_DEFAULT_COLORS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -548,8 +548,9 @@ SolarSystem::SolarSystem(std::string withName) :
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now about to create the Barycenter special point ...\n");
    #endif
-   // 1. Create the SolarSystemBarycenter
+   // 1. Create the built-in SolarSystemBarycenter to be used in SolarSystemBarycenter
    SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
+   MessageInterface::ShowMessage("==> SpecialCelestialPoint ssb = <%p>'%s' created\n", ssb, ssb->GetName().c_str());
    // Set default orbit and target colors
    SetDefaultSpacePointColors(ssb);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
@@ -557,7 +558,7 @@ SolarSystem::SolarSystem(std::string withName) :
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");
    #endif
-
+      
 
    if (!theEarth)
       throw SolarSystemException("The Earth not defined.\n");
@@ -3579,8 +3580,18 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 // void SetDefaultSpacePointColors(SpacePoint *sp)
 //------------------------------------------------------------------------------
+/**
+ * Sets default colors for built-in celetial bodies.
+ */
+//------------------------------------------------------------------------------
 void SolarSystem::SetDefaultSpacePointColors(SpacePoint *sp)
 {
+   #ifdef DEBUG_DEFAULT_COLORS
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetDefaultSpacePointColors() entered, sp=<%p>'%s'\n", sp,
+       sp->GetName().c_str());
+   #endif
+   
    std::string spName = sp->GetName();
    
    if (spName == SUN_NAME)
@@ -3597,8 +3608,23 @@ void SolarSystem::SetDefaultSpacePointColors(SpacePoint *sp)
       sp->SetDefaultColors(GmatColor::ORANGE, GmatColor::DARK_GRAY);
    else if (spName == JUPITER_NAME)
       sp->SetDefaultColors(GmatColor::DARK_GOLDEN_ROD, GmatColor::DARK_GRAY);
-   else if (spName == SOLAR_SYSTEM_BARYCENTER_NAME)
-      sp->SetDefaultColors(GmatColor::MAROON, GmatColor::DARK_GRAY);
-   else
+   else if (spName == SATURN_NAME)
       sp->SetDefaultColors(GmatColor::BROWN, GmatColor::DARK_GRAY);
+   else if (spName == URANUS_NAME)
+      sp->SetDefaultColors(GmatColor::BLUE, GmatColor::DARK_GRAY);
+   else if (spName == NEPTUNE_NAME)
+      sp->SetDefaultColors(GmatColor::LIGHT_BLUE, GmatColor::DARK_GRAY);
+   else if (spName == PLUTO_NAME)
+      sp->SetDefaultColors(GmatColor::PURPLE, GmatColor::DARK_GRAY);
+   else if (spName == SOLAR_SYSTEM_BARYCENTER_NAME)
+      sp->SetDefaultColors(GmatColor::TEAL, GmatColor::DARK_GRAY);
+   else
+      ; // Do not set default color
+   
+   #ifdef DEBUG_DEFAULT_COLORS
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetDefaultSpacePointColors() leaving, sp=<%p>'%s', "
+       "OrbitColor=%s, TargetColor=%s\n", sp, sp->GetName().c_str(),
+       sp->GetOrbitColorString().c_str(), sp->GetTargetColorString().c_str());
+   #endif
 }
