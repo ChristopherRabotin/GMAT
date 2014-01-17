@@ -550,7 +550,9 @@ SolarSystem::SolarSystem(std::string withName) :
    #endif
    // 1. Create the built-in SolarSystemBarycenter to be used in SolarSystemBarycenter
    SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
-   MessageInterface::ShowMessage("==> SpecialCelestialPoint ssb = <%p>'%s' created\n", ssb, ssb->GetName().c_str());
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+   MessageInterface::ShowMessage("SpecialCelestialPoint ssb = <%p>'%s' created\n", ssb, ssb->GetName().c_str());
+   #endif
    // Set default orbit and target colors
    SetDefaultSpacePointColors(ssb);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
