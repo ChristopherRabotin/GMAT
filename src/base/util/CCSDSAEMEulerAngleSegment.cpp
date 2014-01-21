@@ -113,6 +113,14 @@ bool CCSDSAEMEulerAngleSegment::Validate(bool checkData)
       errmsg += "Required field EULER_ROT_SEQ is missing.\n";
       throw UtilityException(errmsg);
    }
+   if (interpolationMethod != "LAGRANGE")
+   {
+      std::string errmsg = segError;
+      errmsg += "Interpolation type \"";
+      errmsg += interpolationMethod + "\" is not valid for Attitude type ";
+      errmsg += "EULER_ANGLE.  The only supported value is \"LAGRANGE\".\n";
+      throw UtilityException(errmsg);
+   }
 
    return CCSDSAEMSegment::Validate(checkData);
 }
