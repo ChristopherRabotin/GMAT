@@ -30,6 +30,7 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"       // for IsNaN() and IsInf()
 #include <sstream>                 // for <<
+#include "FormationInterface.hpp"           // To allow formation member state updates
 
 //#define DEBUG_STATE_CONSTRUCTION
 //#define DUMP_STATE
@@ -450,6 +451,16 @@ bool PropagationStateManager::MapObjectsToVector()
    #endif
 
    Real value;
+
+   // Refresh formation data
+   for (UnsignedInt i = 0; i < objects.size(); ++i)
+   {
+      if (objects[i]->IsOfType(Gmat::FORMATION))
+      {
+         // Refresh the formation state data from the formation members
+         ((FormationInterface*)(objects[i]))->UpdateState();
+      }
+   }
 
    for (Integer index = 0; index < stateSize; ++index)
    {
