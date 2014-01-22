@@ -181,6 +181,11 @@ Rmatrix33 CCSDSAEMEulerAngleSegment::GetState(Real atEpoch)
    // to the requested time
    Rvector  eulerAngles(3);
    eulerAngles = DetermineState(atEpoch);
+   #ifdef DEBUG_AEM_EULER_GET_STATE
+      MessageInterface::ShowMessage("          eulerAngles from DetermineState are: %12.10f  %12.10f  %12.10f\n",
+            eulerAngles[0],eulerAngles[1],eulerAngles[2]);
+      MessageInterface::ShowMessage("          and euler sequence is: %d   %d   %d\n", euler1, euler2, euler3);
+   #endif
 
    // Conversion method has to have an Rvector3
    Rvector3  theEulerAngles(eulerAngles(0), eulerAngles(1), eulerAngles(2));
