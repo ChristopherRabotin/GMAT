@@ -117,5 +117,6 @@
       <xi:include href="System_MatlabInterface.xml" />
       <xi:include href="System_ScriptLanguage.xml" />
       <xi:include href="System_StartupFile.xml" />
+	  <xi:include href="System_SettingColors.xml" />
     </reference>
 </part>
