@@ -36,11 +36,12 @@
     as well. You can set colors to spacecraft orbital trajectories and any
     perturbing trajectories that are drawn during iterative processes. See
     <xref linkend="Setting_Colors"/> documentation for general details on how
-    to set orbital colors using Spacecraft object fields. Also see the <xref
-    linkend="SpacecraftVisProp_Fields" xrefstyle="select:title"/> section
-    below for spacecraft visualization properties and orbit color options. The
-    Spacecraft visualization properties can be configured either through
-    GMAT’s GUI or the script interface.</para>
+    to set orbital colors using <guilabel>Spacecraft</guilabel> object fields.
+    Also see the <xref linkend="SpacecraftVisProp_Fields"
+    xrefstyle="select:title"/> section below for spacecraft visualization
+    properties and orbit color options. The Spacecraft visualization
+    properties can be configured either through GMAT’s GUI or the script
+    interface.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="OrbitView"/>, <xref linkend="Setting_Colors"/></para>
@@ -515,9 +516,10 @@
             <entry><para>Allows you to select available colors for spacecraft
             orbits. The colors can be identified through a string or an
             integer array. Ex. Setting spacecraft's orbit color to red can be
-            done in following two ways: DefaultSC.OrbitColor = Red or
-            DefaultSC.OrbitColor = [255 0 0]. This field can be modified in
-            the Mission Sequence as well.</para> <variablelist>
+            done in following two ways: <literal>DefaultSC.OrbitColor =
+            Red</literal> or <literal>DefaultSC.OrbitColor = [255 0
+            0]</literal>. This field can be modified in the Mission Sequence
+            as well.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -577,9 +579,10 @@
             Correction or Optimization. The target color can be identified
             through a string or an integer array. Ex. Setting spacecraft's
             perturbing trajectories to yellow color can be done in following
-            two ways: DefaultSC.TargetColor = Yellow or DefaultSC.TargetColor
-            = [255 255 0] . This field can be modified in the Mission Sequence
-            as well.</para> <variablelist>
+            two ways: <literal>DefaultSC.TargetColor = Yellow</literal> or
+            <literal>DefaultSC.TargetColor = [255 255 0]</literal> . This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -592,7 +595,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color
+                    <para>Any color available from the Target Color
                     selectbox</para>
                   </listitem>
                 </varlistentry>
