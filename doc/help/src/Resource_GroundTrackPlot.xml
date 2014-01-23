@@ -46,7 +46,7 @@
     stations onto the texture map of the central body.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Toggle"/>, <xref linkend="GroundStation"/></para>
+    linkend="Toggle"/>, <xref linkend="GroundStation"/>, <xref linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection>
@@ -362,63 +362,7 @@
               </variablelist></entry>
           </row>
 
-          <row>
-            <entry><guilabel>OrbitColor</guilabel></entry>
-
-            <entry><para>Allows the user to be able to select colors for
-            spacecraft trajectories. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer Array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from the Orbit Color
-                    selectbox</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 255 32768 ]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
+          
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
@@ -666,64 +610,6 @@
               </variablelist></entry>
           </row>
 
-          <row>
-            <entry><guilabel>TargetColor</guilabel></entry>
-
-            <entry><para>Allows the user to select any available color for
-            perturbing trajectories during iterative processes such as
-            <guilabel>Differential Correction</guilabel> or
-            <guilabel>Optimization</guilabel>. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from Target Color select
-                    box</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 16777215 0]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
 
           <row>
             <entry><guilabel>TextureMap</guilabel></entry>
@@ -912,7 +798,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_GroundTrackPlot_3.png"
+                     fileref="files/images/Resource_GroundTrackPlot_4.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
