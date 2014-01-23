@@ -35,7 +35,7 @@
     Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CoordinateSystem"/></para>
+    linkend="CoordinateSystem"/>, <xref linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection>
@@ -588,6 +588,63 @@
           </row>
 
           <row>
+            <entry><guilabel>OrbitColor</guilabel></entry>
+
+            <entry><para>Allows you to select available colors for a user-defined <guilabel>GroundStation</guilabel>. The colors can be identified through a string or an integer
+array. Ex. Setting groundstation's color to red can be done in following two ways: <literal>GroundStation.OrbitColor = Red</literal> or <literal>GroundStation.OrbitColor =
+[255 0 0]</literal>. This field can be modified in the Mission Sequence as well.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Orbit Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Thistle</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+		  
+          <row>
             <entry><guilabel>StateType</guilabel></entry>
 
             <entry><para>The type of state used to define the location of the
@@ -644,6 +701,66 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+		  
+          <row>
+            <entry><guilabel>TargetColor</guilabel></entry>
+
+            <entry><para>Allows you to select available colors for a user-defined <guilabel>GroundStation</guilabel> object 
+			during iterative processes such as Differential Correction or Optimization. The target color can be identified through a 
+			string or an integer array. Ex. Setting groundstation's target color to yellow color can be done in following two ways: 
+			<literal>GroundStation.TargetColor = Yellow</literal> or <literal>GroundStation.TargetColor = [255 255 0]</literal>. This field can be modified in the Mission Sequence as well.</para> 
+			<variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Target Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DarkGray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row> 
+
         </tbody>
       </tgroup>
     </informaltable>
