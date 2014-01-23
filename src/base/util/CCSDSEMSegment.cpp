@@ -37,6 +37,8 @@
 //#define DEBUG_USABLE
 //#define DEBUG_EM_VALIDATE
 //#define DEBUG_INTERP_DATA
+//#define DEBUG_INTERP_DATA_DETAIL
+//#define DEBUG_DETERMINE_STATE
 
 //------------------------------------------------------------------------------
 // static data
@@ -596,6 +598,9 @@ Real CCSDSEMSegment::GetStopTime() const
 //------------------------------------------------------------------------------
 Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
 {
+   #ifdef DEBUG_DETERMINE_STATE
+      MessageInterface::ShowMessage("In DetermineState, epoch = %12.10f\n", atEpoch);
+   #endif
    // Make sure that if we are using usable times, we only check times
    // between usableStartTime and usableStopTime
    if (usesUsableTimes &&
@@ -648,7 +653,12 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
    if (exactMatchFound || (interpolationDegree == 0))
       return (dataStore.at(matchPos))->data;
    else
+   {
+      #ifdef DEBUG_DETERMINE_STATE
+         MessageInterface::ShowMessage("In DetermineState, about to interpolate\n", atEpoch);
+      #endif
       return Interpolate(atEpoch);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -725,6 +735,11 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    // Sanity Checks
    Real minEpoch = dataStore.at(firstUsable)->epoch;
    Real maxEpoch = dataStore.at(lastUsable)->epoch;
+   #ifdef DEBUG_INTERP_DATA
+      MessageInterface::ShowMessage("\n n         = %d, ", n);
+      MessageInterface::ShowMessage("   min epoch = %12.10f", minEpoch);
+      MessageInterface::ShowMessage("   max epoch = %12.10f", maxEpoch);
+   #endif
    if ((atEpoch < (minEpoch - EPOCH_MATCH_TOLERANCE)) ||
        (atEpoch > (maxEpoch + EPOCH_MATCH_TOLERANCE)))
    {
@@ -736,6 +751,9 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
 //   Integer numStates = dataStore.size();
    // The number of usable states we have
    Integer numStates = lastUsable - firstUsable + 1;
+   #ifdef DEBUG_INTERP_DATA
+      MessageInterface::ShowMessage("\n numStates = %d, ", numStates);
+   #endif
    if (n >= numStates)
    {
       std::string errmsg = "Insufficient usable data for LAGRANGE interpolation.\n";
@@ -761,10 +779,10 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Integer initIndex = -1;
    // pick starting point for interpolation data
    // (region ending just before epoch's position in the ephemeris)
-   if (n+1 >= (epochPos - firstUsable))  // was just epochPos
-       initIndex = firstUsable + 1;      // was 1
+   if (n >= (epochPos - firstUsable))  // was n + 1 and just epochPos
+       initIndex = firstUsable; //  + 1; was +1     // was 1
    else
-       initIndex = epochPos - (n+1);
+       initIndex = epochPos - n; // was - (n+1);
    #ifdef DEBUG_INTERP_DATA
       MessageInterface::ShowMessage("first epoch > input epoch is at index %d\n", epochPos);
       MessageInterface::ShowMessage("initIndex =  %d\n", initIndex);
@@ -776,17 +794,20 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Real    pDiff = GmatRealConstants::REAL_MAX;
    Integer q     = -1;;
    Real    diff  = -999.99;
-   for (Integer ii = initIndex; ii <= (numStates-n); ii++)
+   for (Integer ii = initIndex; ii < (numStates-n); ii++) // was <= (numStates-n); ii++)
    {
       Real dataEpoch     = dataStore.at(ii)->epoch;
       Real dataEpochN    = dataStore.at(ii+n)->epoch;
       diff = GmatMathUtil::Abs((dataEpoch + dataEpochN) / 2 - atEpoch);
-      #ifdef DEBUG_INTERP_DATA
+      #ifdef DEBUG_INTERP_DATA_DETAIL
+      if (atEpoch > 21545.070626)
+      {
          MessageInterface::ShowMessage("--- ii = %d\n", ii);
          MessageInterface::ShowMessage("----- epoch at ii = %12.10f\n", dataEpoch);
          MessageInterface::ShowMessage("----- epoch at ii+n = %12.10f\n", dataEpochN);
-         MessageInterface::ShowMessage("----- pDiff= %d\n", pDiff);
+         MessageInterface::ShowMessage("----- pDiff= %12.10f\n", pDiff);
          MessageInterface::ShowMessage("----- diff = %12.10f\n", diff);
+      }
       #endif
       if (diff > pDiff) break;
       else              q = ii;
@@ -804,11 +825,15 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    {
       t1      = dataStore.at(ii)->epoch;
       d1      = dataStore.at(ii)->data;
-      #ifdef DEBUG_INTERP_DATA
+      #ifdef DEBUG_INTERP_DATA_DETAIL
+      if (atEpoch > 21545.070626)
+      {
+
          MessageInterface::ShowMessage("Using epoch %12.10f and data: ", t1);
          for (Integer nn = 0; nn < dataSize; nn++)
             MessageInterface::ShowMessage("   %12.10f ", d1[nn] * GmatMathConstants::DEG_PER_RAD);
          MessageInterface::ShowMessage("\n");
+      }
       #endif
       for (Integer jj = q; jj <= q+n; jj++)
       {

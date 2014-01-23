@@ -86,6 +86,8 @@
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_PARAMETER_INITIALIZATION
 //#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
+//#define DEBUG_SATELLITE_PARAMETER_UPDATES
+//#define DEBUG_FORMATION_PROPERTIES
 
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
@@ -1939,6 +1941,11 @@ std::string ODEModel::BuildPropertyName(GmatBase *ownedObj)
 //------------------------------------------------------------------------------
 void ODEModel::UpdateInitialData(bool dynamicOnly)
 {
+   #ifdef DEBUG_SATELLITE_PARAMETER_UPDATES
+      MessageInterface::ShowMessage("ODEModel::UpdateInitialData(%s): \n",
+            (dynamicOnly ? "true" : "false"));
+   #endif
+
    PhysicalModel *current; // = forceList[cf];  // waw: added 06/04/04
 
    // Variables used to set spacecraft parameters
@@ -2140,6 +2147,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
          
          if (sat->GetType() == Gmat::SPACECRAFT)
          { 
+            #ifdef DEBUG_FORMATION_PROPERTIES
+               MessageInterface::ShowMessage("Working on Spacecraft %s",
+                     sat->GetName().c_str());
+            #endif
+
             #ifdef DEBUG_SATELLITE_PARAMETERS
                MessageInterface::ShowMessage(
                    "ODEModel '%s', Member %s: %s->ParmsChanged = %s, "
@@ -2232,6 +2244,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
          }
          else if (sat->GetType() == Gmat::FORMATION) 
          {
+            #ifdef DEBUG_FORMATION_PROPERTIES
+               MessageInterface::ShowMessage("Working on Formation %s",
+                     sat->GetName().c_str());
+            #endif
+
             ObjectArray formSats;
             ObjectArray elements = sat->GetRefObjectArray("SpaceObject");
             for (ObjectArray::iterator n = elements.begin(); n != elements.end();
@@ -2254,6 +2271,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
    
    #ifdef DEBUG_SPACECRAFT_PROPERTIES
       MessageInterface::ShowMessage("   ---> %d returned\n", i);
+   #endif
+
+   #ifdef DEBUG_FORMATION_PROPERTIES
+      MessageInterface::ShowMessage("\n");
    #endif
 
    return i;

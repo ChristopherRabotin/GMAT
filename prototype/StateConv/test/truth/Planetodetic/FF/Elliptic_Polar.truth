@@ -3,6 +3,6 @@
            None                   None                   None                   None                   None                   None
    2564.3942873381898000   -8064.0758607839407000   10294.9783136918670000    -1.9316168540010326     4.0136923243516502     3.3353801863429049
 
-   Spacecraft1.LatLongRadius   Spacecraft1.Latitude   Spacecraft1.Longitude   Spacecraft1.LatLongVi   Spacecraft1.LatLongAzimuth   Spacecraft1.HorizontalFPA
-              km                       deg                     deg                    km/s                       deg                          deg
-     13326.3654470687630000      50.6715405901094440   287.6407812087340400     5.5295359748406367        0.0000000000000000         -2.3196283054131328
+     planetodetic[0]        planetodetic[1]        planetodetic[2]        planetodetic[3]        planetodetic[4]        planetodetic[5]
+           None                   None                   None                   None                   None                   None
+   13326.3654470675870000    50.6858350342531520   325.1412132069644400     5.5646770555593816   353.5517416176120900    -2.3049718594799913

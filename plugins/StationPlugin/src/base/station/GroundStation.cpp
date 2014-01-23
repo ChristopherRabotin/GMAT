@@ -31,6 +31,7 @@
 #include "GroundStation.hpp"
 #include "MessageInterface.hpp"
 #include "AssetException.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 
 //#define DEBUG_OBJECT_MAPPING
@@ -80,7 +81,10 @@ GroundStation::GroundStation(const std::string &itsName) :
 {
    objectTypeNames.push_back("GroundStation");
    parameterCount = GroundStationParamCount;
-
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::THISTLE, GmatColor::DARK_GRAY);
+   
    bfcsName   = "EarthFixed";
    mj2kcsName = "EarthMJ2000Eq";
 }

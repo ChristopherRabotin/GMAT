@@ -26,6 +26,7 @@
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 //#define DEBUG_COMET 1
 
@@ -53,6 +54,9 @@ Comet::Comet(std::string name) :
 {
    objectTypeNames.push_back("Comet"); 
    parameterCount      = CometParamCount;
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::PINK, GmatColor::DARK_GRAY);
    
    theCentralBodyName  = SolarSystem::SUN_NAME; 
    bodyType            = Gmat::COMET;

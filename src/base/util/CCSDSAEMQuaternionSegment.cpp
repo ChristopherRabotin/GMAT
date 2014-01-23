@@ -103,6 +103,14 @@ bool CCSDSAEMQuaternionSegment::Validate(bool checkData)
       errmsg += "Required field QUATERNION_TYPE is missing.\n";
       throw UtilityException(errmsg);
    }
+   if (interpolationMethod != "LINEAR")
+   {
+      std::string errmsg = segError;
+      errmsg += "Interpolation type \"";
+      errmsg += interpolationMethod + "\" is not valid for Attitude type ";
+      errmsg += "QUATERNION.  The only supported value is \"LINEAR\".\n";
+      throw UtilityException(errmsg);
+   }
 
    #ifdef DEBUG_AEM_QUAT_VALIDATE
       MessageInterface::ShowMessage("EXITing CCSDSAEMQuaternionSegment::Validate\n");

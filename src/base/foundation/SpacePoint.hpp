@@ -82,10 +82,12 @@ public:
    UnsignedInt        GetDefaultTargetColor();
    UnsignedInt        GetCurrentOrbitColor();
    UnsignedInt        GetCurrentTargetColor();
+   std::string        GetOrbitColorString();
+   std::string        GetTargetColorString();
    void               SetCurrentOrbitColor(UnsignedInt color);
    void               SetCurrentTargetColor(UnsignedInt color);
    void               SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor);
-   void               SetDefaultColors();
+   void               SetSpacecraftDefaultColors();
    // static method to clear instance count
    static void ClearInstanceCount();
    
