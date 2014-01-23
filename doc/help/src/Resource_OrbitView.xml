@@ -36,7 +36,8 @@
     by using either the GUI or script interface of GMAT.
     <guilabel>OrbitView</guilabel> plots also come with multiple options that
     allow you to customize the view of spacecraft’s trajectories. See the
-    Fields section below for detailed discussion on available plotting and
+    <xref
+    linkend="Fields_Section" xrefstyle="select:title"/> section below for detailed discussion on available plotting and
     drawing options.</para>
 
     <para>GMAT also provides the option of when to start and stop plotting
