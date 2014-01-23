@@ -42,7 +42,7 @@
     <para>GMAT also provides the option of when to start and stop plotting
     spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
     through the <guilabel>Toggle On/Off</guilabel> command. See the <xref
-    linkend="Orbitview_Remarks" xrefstyle="select:title"/> section below for
+    linkend="Orbitview_Remarks222" xrefstyle="select:title"/> section below for
     detailed discussion of the interaction between an
     <guilabel>OrbitView</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. GMAT’s
@@ -57,7 +57,7 @@
     linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
   </refsection>
 
-  <refsection xml:id="Fields_Section">
+  <refsection xml:id="Fields_Section222">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -1956,7 +1956,7 @@
     </refsection>
   </refsection>
 
-  <refsection xml:id="Orbitview_Remarks">
+  <refsection xml:id="Orbitview_Remarks222">
     <title>Remarks</title>
 
     <refsection>
