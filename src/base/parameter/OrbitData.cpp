@@ -2580,7 +2580,8 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
 
    // ModifiedEquinoctial;Modified by M.H.
    case MOD_EQ_P:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemiLatusRectum"), rval);
+      //mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemiLatusRectum"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemilatusRectum"), rval);
       break;
    case MOD_EQ_F:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialF"), rval);

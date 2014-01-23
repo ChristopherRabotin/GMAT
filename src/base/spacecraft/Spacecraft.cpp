@@ -232,7 +232,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "EquinoctialQ",
    "MLONG",
    // ModifiedEquinoctial	 ; Modified by M.H.
-   "SemiLatusRectum",
+   "SemilatusRectum",
    "ModEquinoctialF",
    "ModEquinoctialG",
    "ModEquinoctialH",
@@ -5899,7 +5899,7 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
    // Modified by M.H.
    if (displayStateType == "ModifiedEquinoctial")
    {
-      stateElementLabel[0] = "SemiLatusRectum";
+      stateElementLabel[0] = "SemilatusRectum";
       stateElementLabel[1] = "ModEquinoctialF";
       stateElementLabel[2] = "ModEquinoctialG";
       stateElementLabel[3] = "ModEquinoctialH";
@@ -6536,7 +6536,7 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
 
    // Modified by M.H. and YK
    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG" ||
-       label == "SemiLatusRectum" || label == "Delaunayl" || label == "PlanetodeticRMAG" ||
+       label == "SemilatusRectum" || label == "Delaunayl" || label == "PlanetodeticRMAG" ||
        label == "BrouwerShortSMA"  || label == "BrouwerLongSMA")
       retval = ELEMENT1_ID;
    
@@ -6627,7 +6627,7 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["MLONG"]        = "Equinoctial";
 
       // Modified by M.H.
-      elementLabelMap["SemiLatusRectum"] = "ModifiedEquinoctial";
+      elementLabelMap["SemilatusRectum"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialF"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialG"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialH"] = "ModifiedEquinoctial";
@@ -6891,7 +6891,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
        (label == "ECC")             || (label == "RadApo")           || (label == "AZI")              ||
        (label == "FPA")             || (label == "RAV")              || (label == "DECV")             ||
        (label == "EquinoctialH")    || (label == "EquinoctialK")     || (label == "EquinoctialP")     ||
-       (label == "EquinoctialQ")    || (label == "MLONG")            || (label == "SemiLatusRectum")  ||
+       (label == "EquinoctialQ")    || (label == "MLONG")            || (label == "SemilatusRectum")  ||
        (label == "ModEquinoctialF") || (label == "ModEquinoctialG")  || (label == "ModEquinoctialH")  ||
        (label == "ModEquinoctialK") || (label == "TLONG")            || (label == "Delaunayl")        ||
        (label == "Delaunayg")       || (label == "Delaunayh")        || (label == "DelaunayL")        ||
