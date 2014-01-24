@@ -814,7 +814,12 @@ bool DragForce::Initialize()
                atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
             if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
                atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
-			atmos->SetStringParameter("DensityModel", densityModel);	// made changes by TUAN NGUYEN		for GMT-4299
+			try
+			{
+			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes by TUAN NGUYEN		for GMT-4299
+			} catch (...)
+			{
+			}
 			atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
          }
          else
