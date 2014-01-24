@@ -37,16 +37,17 @@
     the GUI or script interface of GMAT. GMAT also provides the option of when
     to plot and stop plotting ground track of a spacecraft to a
     <guilabel>GroundTrackPlot</guilabel> through the <guilabel>Toggle
-    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref linkend="GroundTrackPlot_Remarks"
-    xrefstyle="select:title"/> section
-    below for detailed discussion of the interaction between
+    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref
+    linkend="GroundTrackPlot_Remarks" xrefstyle="select:title"/> section below
+    for detailed discussion of the interaction between
     <guilabel>GroundTrackPlot</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. <guilabel>GroundTrackPlot</guilabel>
     resource also allows you to display any number of user-defined ground
     stations onto the texture map of the central body.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Toggle"/>, <xref linkend="GroundStation"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="Toggle"/>, <xref linkend="GroundStation"/>, <xref
+    linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection>
@@ -72,9 +73,13 @@
 
             <entry><para>Allows the user to pick selected resources such as
             <guilabel>Spacecraft(s)</guilabel> or
-            <guilabel>GroundStation(s)</guilabel> whose ground track is drawn
-            in <guilabel>GroundTrackPlot</guilabel>. To select multiple
-            <guilabel>Spacecrafts</guilabel> or
+            <guilabel>GroundStation(s)</guilabel>. The
+            <guilabel>GroundTrackPlot</guilabel> object is used to draw
+            spacecraft's longtitude and latitude time-history on a
+            two-dimensional texture map of a central body that you select.
+            After creating <guilabel>GroundStation</guilabel> object, you can
+            also add ground stations onto the the texture map of the central
+            body. To select multiple <guilabel>Spacecrafts</guilabel> or
             <guilabel>GroundStations</guilabel>, seperate the list by comma
             and enclose the list in curly brackets. For Example:
             <literal>DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
@@ -362,7 +367,6 @@
               </variablelist></entry>
           </row>
 
-          
           <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
@@ -601,6 +605,7 @@
 
                 <varlistentry>
                   <term>Interfaces</term>
+
                   <term>Interfaces</term>
 
                   <listitem>
@@ -609,7 +614,6 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-
 
           <row>
             <entry><guilabel>TextureMap</guilabel></entry>

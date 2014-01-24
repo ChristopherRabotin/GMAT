@@ -35,9 +35,9 @@
     GMAT lets you set orbit colors via the spacecraft visualization properties
     as well. You can set colors to spacecraft orbital trajectories and any
     perturbing trajectories that are drawn during iterative processes. See
-    <xref linkend="Setting_Colors"/> documentation for general details on how
-    to set orbital colors using <guilabel>Spacecraft</guilabel> object fields.
-    Also see the <xref linkend="SpacecraftVisProp_Fields"
+    <xref linkend="Setting_Colors"/> documentation for discussion and examples
+    on how to set orbital colors using <guilabel>Spacecraft</guilabel> object
+    fields. Also see the <xref linkend="SpacecraftVisProp_Fields"
     xrefstyle="select:title"/> section below for spacecraft visualization
     properties and orbit color options. The Spacecraft visualization
     properties can be configured either through GMAT’s GUI or the script

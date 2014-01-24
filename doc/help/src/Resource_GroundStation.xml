@@ -590,9 +590,14 @@
           <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
-            <entry><para>Allows you to select available colors for a user-defined <guilabel>GroundStation</guilabel>. The colors can be identified through a string or an integer
-array. Ex. Setting groundstation's color to red can be done in following two ways: <literal>GroundStation.OrbitColor = Red</literal> or <literal>GroundStation.OrbitColor =
-[255 0 0]</literal>. This field can be modified in the Mission Sequence as well.</para> <variablelist>
+            <entry><para>Allows you to select available colors for a
+            user-defined <guilabel>GroundStation</guilabel>. The colors can be
+            identified through a string or an integer array. For example:
+            Setting groundstation's color to red can be done in following two
+            ways: <literal>GroundStation.OrbitColor = Red</literal> or
+            <literal>GroundStation.OrbitColor = [255 0 0]</literal>. This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -643,7 +648,7 @@ array. Ex. Setting groundstation's color to red can be done in following two way
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
+
           <row>
             <entry><guilabel>StateType</guilabel></entry>
 
@@ -701,15 +706,20 @@ array. Ex. Setting groundstation's color to red can be done in following two way
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
+
           <row>
             <entry><guilabel>TargetColor</guilabel></entry>
 
-            <entry><para>Allows you to select available colors for a user-defined <guilabel>GroundStation</guilabel> object 
-			during iterative processes such as Differential Correction or Optimization. The target color can be identified through a 
-			string or an integer array. Ex. Setting groundstation's target color to yellow color can be done in following two ways: 
-			<literal>GroundStation.TargetColor = Yellow</literal> or <literal>GroundStation.TargetColor = [255 255 0]</literal>. This field can be modified in the Mission Sequence as well.</para> 
-			<variablelist>
+            <entry><para>Allows you to select available colors for a
+            user-defined <guilabel>GroundStation</guilabel> object during
+            iterative processes such as Differential Correction or
+            Optimization. The target color can be identified through a string
+            or an integer array. For example: Setting groundstation's target
+            color to yellow color can be done in following two ways:
+            <literal>GroundStation.TargetColor = Yellow</literal> or
+            <literal>GroundStation.TargetColor = [255 255 0]</literal>. This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -759,8 +769,7 @@ array. Ex. Setting groundstation's color to red can be done in following two way
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
-          </row> 
-
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -851,6 +860,17 @@ array. Ex. Setting groundstation's color to red can be done in following two way
     <guilabel>Sphere</guilabel> representations, GMAT uses the physical
     properties - flattening and radius for example - defined on the
     <guilabel>CelestialBody</guilabel> resource.</para>
+
+    <refsection>
+      <title>Setting Colors On a Ground Station Facility</title>
+
+      <para>GMAT allows you to set colors on a ground station facility that
+      you create. The <guilabel>GroundStation</guilabel> object's
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields are used to set colors on a ground station facility. See <xref
+      linkend="Setting_Colors"/> documentation for discussion and examples on
+      how to set colors on a ground station facility.</para>
+    </refsection>
   </refsection>
 
   <refsection>
