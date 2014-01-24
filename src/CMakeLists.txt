@@ -109,12 +109,6 @@ if(UNIX)
 	SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 endif()
 
-# check ffriend-injection flag is allowed
-CHECK_CXX_COMPILER_FLAG("-ffriend-injection" GCC_FFRIEND_INJECTION)
-if( GCC_FFRIEND_INJECTION )
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffriend-injection")
-endif()
-
 # check fPIC flag is allowed
 CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
 if( GCC_PIC )

@@ -95,7 +95,7 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
    "Integer",     "UnsignedInt", "UnsignedIntArray", "IntegerArray", "Real",
    "RealElement", "String",      "StringArray",      "Boolean",      "BooleanArray",
    "Rvector",     "Rmatrix",     "Time",             "Object",       "ObjectArray",
-   "OnOff",       "Enumeration", "Filename"
+   "OnOff",       "Enumeration", "Filename",         "Color"
 };
 
 /**
@@ -1076,27 +1076,37 @@ bool GmatBase::IsLocal() const
 //------------------------------------------------------------------------------
 bool GmatBase::IsObjectCloaked() const
 {
-   if (!cloaking) return false;
-   
    #ifdef DEBUG_CLOAKING
       MessageInterface::ShowMessage(
-            "Entering GmatBase::IsObjectCloaked for object %s - there are %d parameters\n",
-            instanceName.c_str(), parameterCount);
+         "\nEntering GmatBase::IsObjectCloaked for object <%p>%s\n", this, instanceName.c_str());
    #endif
+      
+   if (!cloaking)
+   {
+      #ifdef DEBUG_CLOAKING
+      MessageInterface::ShowMessage(
+         "Exiting  GmatBase::IsObjectCloaked for object <%p>%s - object is not cloaked\n",
+         this, instanceName.c_str());
+      #endif
+      return false;
+   }
+   
    for (Integer ii = 0; ii < parameterCount; ii++)
       if (!IsParameterCloaked(ii))
       {
          #ifdef DEBUG_CLOAKING
             MessageInterface::ShowMessage(
-                  "in GmatBase::IsObjectCloaked for object %s - parameter %d (%s) is not cloaked\n",
-                  instanceName.c_str(), ii, (GetParameterText(ii)).c_str());
+               "Exiting  GmatBase::IsObjectCloaked for object <%p>%s - parameter %d (%s) is not cloaked\n",
+               this, instanceName.c_str(), ii, (GetParameterText(ii)).c_str());
          #endif
          return false; 
       }
-      #ifdef DEBUG_CLOAKING
-         MessageInterface::ShowMessage(
-               "Exiting GmatBase::IsObjectCloaked returning true, as all parameters are cloaked\n");
-      #endif
+   
+   #ifdef DEBUG_CLOAKING
+      MessageInterface::ShowMessage(
+         "Exiting  GmatBase::IsObjectCloaked for object %s - returning true, as all parameters are cloaked\n",
+         instanceName.c_str());
+   #endif
    return true;
 }
 
@@ -3425,8 +3435,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    #ifdef DEBUG_GENERATING_STRING
    MessageInterface::ShowMessage
       ("GmatBase::GetGeneratingString() <%p><%s>'%s' entered, mode=%d, prefix='%s', "
-       "useName='%s', \n", this, GetTypeName().c_str(), GetName().c_str(), mode,
-       prefix.c_str(), useName.c_str());
+       "useName='%s', cloaking=%s\n", this, GetTypeName().c_str(), GetName().c_str(), mode,
+       prefix.c_str(), useName.c_str(), cloaking ? "true" : "false");
    MessageInterface::ShowMessage
       ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
        "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
@@ -3497,7 +3507,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
             data << "Create " << tname << " " << nomme << ";";
          else
             data << "";
-
+         
          if (showInlineComment)
          {
             if ((inlineComment != "") &&
@@ -3505,11 +3515,17 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
                  (mode == Gmat::SHOW_SCRIPT)))
                data << inlineComment << "\n";
             else
-               data << "\n";
+            {
+               // Do not write extra line here for cloaked object (LOJ: 2013.12.17)
+               if (!cloaking)
+                  data << "\n";
+            }
          }
          else
          {
-            data << "\n";
+            // Do not write extra line here for cloaked object (LOJ: 2013.12.17)
+           if (!cloaking)
+               data << "\n";
          }
          
          // We now write out GMAT prefix on option from the startup file (see GMT-3233)
@@ -3527,7 +3543,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       preface = prefix;
       nomme = "";
    }
-
+      
    preface += nomme;
    WriteParameters(mode, preface, data);
    
@@ -3535,7 +3551,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    
    #ifdef DEBUG_GENERATING_STRING
    MessageInterface::ShowMessage
-      ("GmatBase::GetGeneratingString() returning\n%s\n", generatingString.c_str());
+      ("GmatBase::GetGeneratingString() returning\n'%s'\n", generatingString.c_str());
    #endif
    
    return generatingString;
@@ -4264,8 +4280,9 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    
    switch (tid)
    {
-   // Objects write out a string without quotes
+   // Objects and colors write out a string without quotes
    case Gmat::OBJECT_TYPE:
+   case Gmat::COLOR_TYPE:
       if (inMatlabMode)
          stream << "'";
       stream << GetStringParameter(id);

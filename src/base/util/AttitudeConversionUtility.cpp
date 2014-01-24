@@ -28,6 +28,26 @@
 #include "UtilityException.hpp"
 
 //------------------------------------------------------------------------------
+//  static data
+//------------------------------------------------------------------------------
+const std::string AttitudeConversionUtility::VALID_EULER_SEQUENCES[12] =
+{
+   "123",
+   "231",
+   "312",
+   "132",
+   "321",
+   "213",
+   "121",
+   "232",
+   "313",
+   "131",
+   "323",
+   "212"
+};
+
+
+//------------------------------------------------------------------------------
 //  Rmatrix33   ToCosineMatrix(const Rvector &quat1)  [static]
 //------------------------------------------------------------------------------
  /**
@@ -1077,4 +1097,23 @@ void AttitudeConversionUtility::DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
    return;
 }
 
+//------------------------------------------------------------------------------
+//  bool  IsValidEulerSequence(const std::string &theSeq)             [static]
+//------------------------------------------------------------------------------
+/**
+ * This method determines of the input string represents a valid
+ * Euler Rotation Sequence.
+ *
+ * @param <theSeq>  euler sequence string
+ *
+ * @return  true if input is a valid euler sequence; false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool AttitudeConversionUtility::IsValidEulerSequence(const std::string &theSeq)
+{
+   for (Integer i=0; i<12; i++)
+      if (theSeq == VALID_EULER_SEQUENCES[i])  return true;
+   return false;
+}
 

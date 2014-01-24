@@ -53,6 +53,10 @@ enum StateType
    MOD_EQUINOCTIAL, // Modifed by M.H.
    DELAUNAY,
    PLANETODETIC,
+   OUT_ASYM,
+   IN_ASYM,
+   BROLYD_SHORT,
+   BROLYD_LONG,
    StateTypeCount
 };
 
@@ -130,6 +134,21 @@ static Rvector6 DelaunayToKeplerian(const Rvector6& delaunay, const Real& mu);
 
 static Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian, Real flattening, Real eqRadius); // MODIFIED BY M.H.
 static Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic, Real flattening, Real eqRadius);
+
+// modified by YK
+static Rvector6 CartesianToIncomingAsymptote(Real mu, const Rvector6& cartesian);
+static Rvector6 IncomingAsymptoteToCartesian(Real mu, const Rvector6& inasym);
+
+static Rvector6 CartesianToOutgoingAsymptote(Real mu, const Rvector6& cartesian);
+static Rvector6 OutgoingAsymptoteToCartesian(Real mu, const Rvector6& outasym);
+
+static Rvector6 CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian);
+static Rvector6 BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6 &blms); // Anomaly Type is fixed to "MA"
+static Rvector6 BrouwerMeanShortToCartesian(Real mu, const Rvector6 &blms);
+
+static Rvector6 CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian);
+static Rvector6 BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml); // Anomaly Type is fixed to "MA"
+static Rvector6 BrouwerMeanLongToCartesian(Real mu, const Rvector6 &blml);
 
 //------------------------------------------------------------------------------
 // anomaly conversion methods

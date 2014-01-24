@@ -96,6 +96,7 @@ typedef std::vector<ElementWrapper*>           WrapperArray;
 typedef std::vector<Rvector6*>                 StateArray;
 typedef std::vector<A1Mjd*>                    EpochArray;
 typedef std::map<std::string, Integer>         IntegerMap;
+typedef std::map<std::string, UnsignedInt>     ColorMap;
 typedef std::map<std::string, GmatBase*>       ObjectMap;
 typedef std::map<std::string, ElementWrapper*> WrapperMap;
 typedef std::stack<ObjectMap*>                 ObjectMapStack;
@@ -232,6 +233,7 @@ namespace Gmat
       ON_OFF_TYPE,
       ENUMERATION_TYPE,
       FILENAME_TYPE,
+      COLOR_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1,
       PARAMETER_REMOVED = -3,   // For parameters will be removed in the future

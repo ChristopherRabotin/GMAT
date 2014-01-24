@@ -167,7 +167,9 @@ CPP = g++
 C = gcc
 PROFILE_FLAGS = -pg
 
-SOME_OPTIMIZATIONS = -O3 -funroll-loops -fno-rtti  -ffriend-injection
+SOME_OPTIMIZATIONS = -O3 -funroll-loops -fno-rtti 
+# No longer used:
+# -ffriend-injection
 
 ifeq ($(USE_PROFILING), 1)
 OPTIMIZATIONS = $(SOME_OPTIMIZATIONS) $(PROFILE_FLAGS)

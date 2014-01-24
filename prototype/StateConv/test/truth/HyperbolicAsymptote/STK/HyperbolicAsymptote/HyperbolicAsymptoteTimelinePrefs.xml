@@ -1,5 +1,5 @@
 <?xml version = "1.0" standalone = "yes"?>
-<TimelineLine_Prefs STK_version = "10.0.0">
+<TimelineLine_Prefs STK_version = "10.0.2">
     <Views Type = "Content">
         <ContentView Name = "Scenario Availability">
             <Row ComponentName = "AvailabilityIntervals" DisplayName = "HyperbolicAsymptote AvailabilityIntervals" IsDefaultName = "True" IsExpanded = "False" IsGroup = "False" IsHidden = "False" Path = "/Application/STK/Scenario/HyperbolicAsymptote" Type = "IntervalList" />

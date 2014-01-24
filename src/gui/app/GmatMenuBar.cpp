@@ -86,7 +86,7 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open...\tCtrl+O"), wxT(""));   
    fileMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, wxT("Open &Recent"), wxT(""));
    fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save...\tCtrl+Shift+S"), wxT(""));
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save...\tCtrl+S"), wxT(""));
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT_AS, wxT("Save As...\tF12"), wxT(""));
    
    if (runMode == GmatGlobal::TESTING || runMode == GmatGlobal::TESTING_NO_PLOTS)

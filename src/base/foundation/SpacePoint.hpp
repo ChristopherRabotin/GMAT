@@ -77,6 +77,20 @@ public:
    virtual bool       HasAttitude() const;
    virtual const Rmatrix33& GetAttitude(Real a1mjdTime);
    
+   // methods for accessing colors
+   UnsignedInt        GetDefaultOrbitColor();
+   UnsignedInt        GetDefaultTargetColor();
+   UnsignedInt        GetCurrentOrbitColor();
+   UnsignedInt        GetCurrentTargetColor();
+   std::string        GetOrbitColorString();
+   std::string        GetTargetColorString();
+   void               SetCurrentOrbitColor(UnsignedInt color);
+   void               SetCurrentTargetColor(UnsignedInt color);
+   void               SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor);
+   void               SetSpacecraftDefaultColors();
+   // static method to clear instance count
+   static void ClearInstanceCount();
+   
    //---------------------------------------------------------------------------
    //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
    //---------------------------------------------------------------------------
@@ -143,7 +157,8 @@ public:
 
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
-
+   virtual bool            IsParameterCommandModeSettable(const Integer id) const;
+   
    virtual Integer         GetIntegerParameter(const Integer id) const;
    virtual Integer         GetIntegerParameter(const std::string &label) const;
    virtual Integer         SetIntegerParameter(const Integer id,
@@ -173,15 +188,14 @@ public:
                                               const Integer index);
    const StringArray&      GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
-                        GetStringArrayParameter(const std::string &label) const;
+                           GetStringArrayParameter(const std::string &label) const;
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name, 
                                         const Integer index);
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name, 
                                         const Integer index);
-   
-   
+      
 protected:
 
    enum
@@ -194,6 +208,8 @@ protected:
       SC_CLOCK_SPICE_KERNEL_NAME,
       FRAME_SPICE_KERNEL_NAME,
       EPOCH_PARAM,
+      ORBIT_COLOR,
+      TARGET_COLOR,
       SpacePointParamCount
    };
    
@@ -231,8 +247,8 @@ protected:
    Integer         default_naifIdRefFrame;
    
    /// flag indicating whether or not the SPICE code is setup
-   bool                   spiceSetupDone;
-
+   bool            spiceSetupDone;
+   
    /// Orbit SPICE kernel name(s)
    StringArray     orbitSpiceKernelNames;
    /// Attitude SPICE kernel name(s)
@@ -250,7 +266,23 @@ protected:
    /// Current rotation matrix (from inertial to body)
    bool      hasAttitude;
    Rmatrix33 cosineMat;
-
+   
+   /// orbit and target color (LOJ added 2013.10.22)
+   static Integer spacecraftInstanceCount;
+   bool useOrbitColorName;
+   bool useTargetColorName;
+   UnsignedInt defaultOrbitColor;
+   UnsignedInt defaultTargetColor;
+   UnsignedInt orbitColor;
+   UnsignedInt targetColor;
+   std::string orbitColorStr;
+   std::string targetColorStr;
+   
+   /// Automatic default orbit and target colors
+   const static int MAX_SP_COLOR = 20;
+   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
+   static const UnsignedInt DEFAULT_TARGET_COLOR[MAX_SP_COLOR];
+   
    std::string ParseKernelName(const std::string &kernel);
    void        ValidateKernel(const std::string &kName,
                               const std::string label  = "OrbitSpiceKernelName",

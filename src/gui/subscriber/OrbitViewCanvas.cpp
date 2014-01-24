@@ -138,7 +138,7 @@ const Real OrbitViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
 const Real OrbitViewCanvas::DEFAULT_DISTANCE = 30000.0;
 
 // color
-static int *sIntColor = new int;
+static unsigned int *sIntColor = new unsigned int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
 
 //------------------------------------------------------------------------------
@@ -603,15 +603,16 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
 //                  const std::vector<SpacePoint*> &objArray)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::SetGlObject(const StringArray &objNames,
-                                  const UnsignedIntArray &objOrbitColors,
+                                  //const UnsignedIntArray &objOrbitColors,
                                   const std::vector<SpacePoint*> &objArray)
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::SetGlObject() '%s' entered\n", mPlotName.c_str());
    #endif
-
-   ViewCanvas::SetGlObject(objNames, objOrbitColors, objArray);
+   
+   //ViewCanvas::SetGlObject(objNames, objOrbitColors, objArray);
+   ViewCanvas::SetGlObject(objNames, objArray);
    
    // We don't want do set default view here since SetDefaultViewPoint() resets
    // mViewPointInitialized to false which makes mUseInitialViewPoint flag useless
@@ -2056,10 +2057,14 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glDisable(GL_LIGHTING);
       glDisable(GL_LIGHT0);
       
+      // Now colors for all other bodies are also saved (LOJ: 2013.11.25)
+      *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
+      #if 0
       if (drawingSpacecraft)
          *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
       else
-         *sIntColor = mObjectColorMap[objName].GetIntColor();
+         *sIntColor = mObjectOrbitColorMap[objName].GetIntColor();
+      #endif
       
       glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
       DrawStringAt(objName, 0, 0, 0, 1);
@@ -2264,12 +2269,13 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          else
          {
             // We are drawing some other trajectory, say for a planet.
-            *sIntColor = mObjectColorMap[objName].GetIntColor();
+            //*sIntColor = mObjectOrbitColorMap[objName].GetIntColor(); //LOJ: 2013.11.25
+            *sIntColor = mObjectOrbitColorMap[objName.c_str()];
          }
          
          #ifdef DEBUG_ORBIT_LINES
          MessageInterface::ShowMessage
-            ("   colorIndex=%4d, sIntColor=%6d, sGlColor=%u\n", colorIndex,
+            ("   colorIndex=%4d, sIntColor=%06X, sGlColor=%06X\n", colorIndex,
              *sIntColor, sGlColor);
          #endif
          

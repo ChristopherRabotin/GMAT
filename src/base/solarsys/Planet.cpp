@@ -31,6 +31,7 @@
 #include "StateConversionUtil.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 //#define DEBUG_PLANET 1
 //#define DEBUG_PLANET_TWO_BODY
@@ -74,7 +75,10 @@ Planet::Planet(std::string name) :
 {   
    objectTypeNames.push_back("Planet");
    parameterCount      = PlanetParamCount;
-
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::ORCHID, GmatColor::DARK_GRAY);
+   
    theCentralBodyName  = SolarSystem::SUN_NAME;
    bodyType            = Gmat::PLANET;
    bodyNumber          = 1;

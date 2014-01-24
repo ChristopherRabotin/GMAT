@@ -29,6 +29,7 @@
 #include "StringUtil.hpp"              // for ReplaceName()
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
+#include <stdlib.h>                    // for atof
 
 
 //#define DEBUG_STOPCOND_INIT
@@ -712,7 +713,8 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
    bool retval = false;
    
    Real epoch = 0.0;
-   Real currentParmValue, goalValue;
+   Real currentParmValue;
+   //Real goalValue;
    Real stopEpoch; //in A1Mjd
    
    // evaluate goal
@@ -728,7 +730,7 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
       else
          currentGoalValue = initialGoalValue;
    }
-   goalValue = currentGoalValue;
+   // goalValue = currentGoalValue;
 
    // set current epoch
    if (mUseInternalEpoch)

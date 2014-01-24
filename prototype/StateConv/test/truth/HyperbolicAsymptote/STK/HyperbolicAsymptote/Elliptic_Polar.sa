@@ -1,5 +1,5 @@
 stk.v.10.0
-WrittenBy    STK_v10.0.0
+WrittenBy    STK_v10.0.2
 
 BEGIN Satellite
 
@@ -341,12 +341,12 @@ BEGIN VehiclePath
             <OBJECT Class = "AttrCon" Name = "FinalState">
                 <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                     <OBJECT Class = "container" Name = "Cartesian">
-                        <OBJECT Class = "double" Name = "X"> 162966156.7324426 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Y"> 481630610.7737814 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Vx"> -2974.722564021571 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vy"> -408.016754566363 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vz"> 0 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "X"> -2873795.328059257 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Y"> -7955385.269491484 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Z"> 10297823.15128838 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Vx"> 1498.793292037471 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vy"> 4149.035236110482 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vz"> 3333.900624540855 m*sec^-1 </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "CoordSysRep">
@@ -372,12 +372,12 @@ BEGIN VehiclePath
             <OBJECT Class = "AttrCon" Name = "InitialState">
                 <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                     <OBJECT Class = "container" Name = "Cartesian">
-                        <OBJECT Class = "double" Name = "X"> 162966156.7324426 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Y"> 481630610.7737814 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Vx"> -2974.722564021571 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vy"> -408.016754566363 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vz"> 0 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "X"> -2873795.328059257 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Y"> -7955385.269491484 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Z"> 10297823.15128838 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Vx"> 1498.793292037471 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vy"> 4149.035236110482 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vz"> 3333.900624540855 m*sec^-1 </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "CoordSysRep">
@@ -447,12 +447,12 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "FinalState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> 162966156.7324426 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> 481630610.7737814 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> -2974.722564021571 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -408.016754566363 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> -2873795.328059257 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> -7955385.269491484 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 10297823.15128838 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 1498.793292037471 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 4149.035236110482 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3333.900624540855 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
@@ -540,12 +540,12 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "FinalState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> 162966156.7324426 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> 481630610.7737814 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> -2974.722564021571 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -408.016754566363 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> -2873795.328059257 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> -7955385.269491484 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 10297823.15128838 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 1498.793292037471 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 4149.035236110482 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3333.900624540855 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
@@ -570,12 +570,12 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "InitialState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> 162966156.7324426 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> 481630610.7737814 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> -2974.722564021571 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -408.016754566363 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> -2873795.328059257 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> -7955385.269491484 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 10297823.15128838 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 1498.793292037471 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 4149.035236110482 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3333.900624540855 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
@@ -1212,10 +1212,6 @@ BEGIN Extensions
     END ObjectCoverage
     
     BEGIN Desc
-        ShortText    0
-
-        LongText    0
-
     END Desc
     
     BEGIN Ellipse

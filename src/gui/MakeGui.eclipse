@@ -213,6 +213,7 @@ OBJECTS = \
     forcemodel/DragInputsDialog.o \
     foundation/ArraySetupDialog.o \
     foundation/ArraySetupPanel.o \
+    foundation/GmatColorPanel.o \
     foundation/GmatDialog.o \
     foundation/GmatMdiChildFrame.o \
     foundation/GmatPanel.o \
@@ -353,8 +354,12 @@ endif
 
 macrez:
 	@echo "linking Carbon and wx resource files ......."
-	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
+
+# Used to be:
+#	@echo "linking Carbon and wx resource files ......."
+#	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
+#	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 
 macosx: 
 	@echo "building Mac application bundle ......."

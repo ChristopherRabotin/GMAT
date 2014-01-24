@@ -106,4 +106,28 @@ protected:
   
 };
 
+// Inject the friend function names into the namespace
+Real GMAT_API JulianDate(YearNumber year, MonthOfYear month,
+                       DayOfMonth day, Integer hour, Integer minute,
+                       Real second);
+Real GMAT_API ModifiedJulianDate(YearNumber year, MonthOfYear month,
+                               DayOfMonth day, Integer hour, Integer minute,
+                               Real second, Real refEpochJD);
+void GMAT_API UnpackDate(Real packedDate, Integer& year, Integer& month,
+                       Integer& day);        // input in YYYYMMDD.
+void GMAT_API UnpackDateWithDOY(Real packedDate, Integer& year, Integer& day);
+void GMAT_API UnpackTime(Real packedTime, Integer& hour, Integer& minute,
+                       Real& second);        // input in hhmmssnnn.
+void GMAT_API ToMonthDayFromYearDOY(Integer year, Integer dayOfYear,
+                                  Integer& month, Integer& day);
+Integer GMAT_API ToDOYFromYearMonthDay(Integer year, Integer month,
+                                     Integer day);
+Real GMAT_API ToSecondsOfDayFromHMS(Integer hour, Integer minute,
+                                  Real second);
+void GMAT_API ToHMSFromSecondsOfDay(Real secsOfDay, Integer& hour,
+                                  Integer& minute, Real& second);
+bool GMAT_API IsValidTime(Integer year, Integer month, Integer day,
+                        Integer hour, Integer minute, Real second);
+bool GMAT_API IsLeapYear(Integer year);
+
 #endif

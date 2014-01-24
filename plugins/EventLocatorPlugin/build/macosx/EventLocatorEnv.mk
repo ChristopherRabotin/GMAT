@@ -46,9 +46,9 @@ PROFILE_FLAGS =
 endif
 
 ifeq ($(DEBUG_BUILD), 1)
-OPTIMIZATIONS = -fno-strict-aliasing -funroll-loops -fno-rtti  -ffriend-injection
+OPTIMIZATIONS = -fno-strict-aliasing -funroll-loops -fno-rtti
 else
-OPTIMIZATIONS = -O3 -fno-strict-aliasing -funroll-loops -fno-rtti  -ffriend-injection
+OPTIMIZATIONS = -O3 -fno-strict-aliasing -funroll-loops -fno-rtti
 endif
 
 PLATFORM_FLAGS=-fPIC

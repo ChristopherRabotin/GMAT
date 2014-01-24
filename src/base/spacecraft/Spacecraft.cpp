@@ -36,6 +36,7 @@
 #include "Spinner.hpp"               // for command mode attitude creation
 #include "PrecessingSpinner.hpp"
 #include "NadirPointing.hpp"
+#include "CCSDSAttitude.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
@@ -231,26 +232,48 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "EquinoctialQ",
    "MLONG",
    // ModifiedEquinoctial	 ; Modified by M.H.
-   "SemiLatusRectum",
+   "SemilatusRectum",
    "ModEquinoctialF",
    "ModEquinoctialG",
    "ModEquinoctialH",
    "ModEquinoctialK",
    "TLONG",
-   // Delaunay				 ; Modified by M.H.
+   // Delaunay				    ; Modified by M.H.
    "Delaunayl",
    "Delaunayg",
    "Delaunayh",
    "DelaunayL",
    "DelaunayG",
    "DelaunayH",
-   // Planetodetic			; Modified by M.H.
+   // Planetodetic			 ; Modified by M.H.
    "PlanetodeticRMAG",
    "PlanetodeticLON",
    "PlanetodeticLAT",
    "PlanetodeticVMAG",
    "PlanetodeticAZI",
    "PlanetodeticHFPA",
+   // YK, Hyperbolic Asymptotes
+   "C3Energy",
+   "IncomingRHA",
+   "IncomingDHA",
+   "IncomingBVAZI",
+   "OutgoingRHA",
+   "OutgoingDHA",
+   "OutgoingBVAZI",
+   // YK, Brouwer-Lyddane Mean Elements (short term)
+   "BrouwerShortSMA", 
+   "BrouwerShortECC",
+   "BrouwerShortINC",
+   "BrouwerShortRAAN",
+   "BrouwerShortAOP",
+   "BrouwerShortMA",
+   // YK, Brouwer-Lyddane Mean Elements (long term)
+   "BrouwerLongSMA",
+   "BrouwerLongECC",
+   "BrouwerLongINC",
+   "BrouwerLongRAAN",
+   "BrouwerLongAOP",
+   "BrouwerLongMA",
 };
 
 const Integer  Spacecraft::ATTITUDE_ID_OFFSET  = 20000;
@@ -314,12 +337,12 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft() <%p>'%s' entered\n", this, name.c_str());
    #endif
-
+   
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
-
+      
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -368,6 +391,10 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("ModifiedEquinoctial"); // Modified by M.H.
    representations.push_back("Delaunay");
    representations.push_back("Planetodetic");
+   representations.push_back("IncomingAsymptote");   // Mod by YK
+   representations.push_back("OutgoingAsymptote");   // Mod by YK
+   representations.push_back("BrouwerMeanShort");    // Mod by YK
+   representations.push_back("BrouwerMeanLong");     // Mod by YK
 
    // initialize possible input state types to be any type
    for (unsigned int ii = 0; ii < representations.size(); ii++)
@@ -1735,6 +1762,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                "------ error setting ref object %s on attitude\n",
                name.c_str());
             #endif
+            throw;
          }
       }
 
@@ -1994,32 +2022,37 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "RMAG" || str == "Delaunayl" || str == "PlanetodeticRMAG")
+          str == "RMAG" || str == "Delaunayl" || str == "PlanetodeticRMAG" ||
+          str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
          retval =  ELEMENT1_ID;
 
       else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
                str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
-               str == "Delaunayg" || str == "PlanetodeticLON")
+               str == "Delaunayg" || str == "PlanetodeticLON" || str == "C3Energy" ||
+               str == "BrouwerShortECC" || str == "BrouwerLongECC")
          retval =  ELEMENT2_ID;
 
       else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
                str == "PEX" || str == "EquinoctialK" || str == "ModEquinoctialG" ||
-               str == "Delaunayh" || str == "PlanetodeticLAT")
+               str == "Delaunayh" || str == "PlanetodeticLAT" || str == "IncomingRHA" ||
+               str == "OutgoingRHA" || str == "BrouwerShortINC" || str == "BrouwerLongINC")
          retval =  ELEMENT3_ID;
 
       else if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
                str == "PNY" || str == "EquinoctialP" || str == "ModEquinoctialH" ||
-               str == "DelaunayL" || str == "PlanetodeticVMAG")
+               str == "DelaunayL" || str == "PlanetodeticVMAG" || str == "IncomingDHA" ||
+               str == "OutgoingDHA" || str == "BrouwerShortRAAN" || str == "BrouwerLongRAAN")
          retval =  ELEMENT4_ID;
 
       else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
                str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
-               str == "ModEquinoctialH" || str == "DelaunayL" || str == "PlanetodeticVMAG")
+               str == "ModEquinoctialH" || str == "DelaunayL" || str == "PlanetodeticVMAG" ||
+               str == "IncomingBVAZI", str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
          retval =  ELEMENT5_ID;
 
       else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
                str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG" ||
-               str == "DelaunayH" || str == "PlanetodeticHFPA")
+               str == "DelaunayH" || str == "PlanetodeticHFPA" || str == "BrouwerShortMA" || str == "BrouwerLongMA")
          retval =  ELEMENT6_ID;
       
       #ifdef DEBUG_GET_REAL
@@ -3139,6 +3172,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             newAtt = new PrecessingSpinner();
          else if (newAttType == "NadirPointing")
             newAtt = new NadirPointing();
+         else if (newAttType == "CCSDS-AEM")
+            newAtt = new CCSDSAttitude();
          #ifdef __USE_SPICE__
          else if (newAttType == "SpiceAttitude")
             newAtt = new SpiceAttitude();
@@ -3232,10 +3267,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
           "instead.\n" );
 
       // Check for invalid input then return unknown value from GmatBase
-      if (value != "Cartesian" && value != "Keplerian" &&
-          value != "ModifiedKeplerian" && value != "SphericalAZFPA" &&
-          value != "SphericalRADEC" && value != "Equinoctial" &&
-          value != "ModifiedEquinoctial" && value != "Delaunay" && value != "Planetodetic") // Modified by M.H.
+      if (value != "Cartesian" && value != "Keplerian" && value != "ModifiedKeplerian" &&
+          value != "SphericalAZFPA" && value != "SphericalRADEC" && value != "Equinoctial" &&
+          value != "ModifiedEquinoctial" && value != "Delaunay" && value != "Planetodetic" &&
+          value != "IncomingAsymptote" && value != "OutgoingAsymptote" &&
+          value != "BrouwerMeanShort" && value != "BrouwerMeanLong")
       {
          throw SpaceObjectException("Unknown state element representation: " +
             value);
@@ -5742,7 +5778,6 @@ void Spacecraft::UpdateElementLabels()
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels(std::string displayStateType)
 {
-   //if (stateType == "Cartesian")
    if (displayStateType == "Cartesian")
    {
       stateElementLabel[0] = "X";
@@ -5762,7 +5797,6 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "Keplerian")
    if (displayStateType == "Keplerian")
    {
       stateElementLabel[0] = "SMA";
@@ -5782,7 +5816,6 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "ModifiedKeplerian")
    if (displayStateType == "ModifiedKeplerian")
    {
       stateElementLabel[0] = "RadPer";
@@ -5802,7 +5835,6 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "SphericalAZFPA")
    if (displayStateType == "SphericalAZFPA")
    {
       stateElementLabel[0] = "RMAG";
@@ -5822,7 +5854,6 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "SphericalRADEC")
    if (displayStateType == "SphericalRADEC")
    {
       stateElementLabel[0] = "RMAG";
@@ -5842,7 +5873,6 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "Equinoctial")
    if (displayStateType == "Equinoctial")
    {
       stateElementLabel[0] = "SMA";
@@ -5866,10 +5896,10 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
 
-   //if (stateType == "ModifiedEquinoctial") ; Modified by M.H.
+   // Modified by M.H.
    if (displayStateType == "ModifiedEquinoctial")
    {
-      stateElementLabel[0] = "SemiLatusRectum";
+      stateElementLabel[0] = "SemilatusRectum";
       stateElementLabel[1] = "ModEquinoctialF";
       stateElementLabel[2] = "ModEquinoctialG";
       stateElementLabel[3] = "ModEquinoctialH";
@@ -5886,7 +5916,7 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
    
-   //if (stateType == "Delaunay") ; Modified by M.H.
+   // Modified by M.H.
    if (displayStateType == "Delaunay")
    {
       stateElementLabel[0] = "Delaunayl";
@@ -5906,7 +5936,7 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
       return;
    }
    
-   //if (stateType == "Planetodetic") ; Modified by M.H.
+   // Modified by M.H.
    if (displayStateType == "Planetodetic")
    {
       stateElementLabel[0] = "PlanetodeticRMAG";
@@ -5925,6 +5955,83 @@ void Spacecraft::UpdateElementLabels(std::string displayStateType)
 
       return;
    }
+   
+   // mod by YK
+   if (displayStateType == "IncomingAsymptote")
+   {
+      stateElementLabel[0] = "RadPer";
+      stateElementLabel[1] = "C3Energy";
+      stateElementLabel[2] = "IncomingRHA";
+      stateElementLabel[3] = "IncomingDHA";
+      stateElementLabel[4] = "IncomingBVAZI";
+      stateElementLabel[5] = "TA";
+      
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "km^2/sec^2";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+   
+   if (displayStateType == "OutgoingAsymptote")
+   {
+      stateElementLabel[0] = "RadPer";
+      stateElementLabel[1] = "C3Energy";
+      stateElementLabel[2] = "OutgoingRHA";
+      stateElementLabel[3] = "OutgoingDHA";
+      stateElementLabel[4] = "OutgoingBVAZI";
+      stateElementLabel[5] = "TA";
+      
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "km^2/sec^2";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+   
+   if (displayStateType == "BrouwerMeanShort")
+   {
+      stateElementLabel[0] = "BrouwerShortSMA";
+      stateElementLabel[1] = "BrouwerShortECC";
+      stateElementLabel[2] = "BrouwerShortINC";
+      stateElementLabel[3] = "BrouwerShortRAAN";
+      stateElementLabel[4] = "BrouwerShortAOP";
+      stateElementLabel[5] = "BrouwerShortMA";
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+   
+   if (displayStateType == "BrouwerMeanLong")
+   {
+      stateElementLabel[0] = "BrouwerLongSMA";
+      stateElementLabel[1] = "BrouwerLongECC";
+      stateElementLabel[2] = "BrouwerLongINC";
+      stateElementLabel[3] = "BrouwerLongRAAN";
+      stateElementLabel[4] = "BrouwerLongAOP";
+      stateElementLabel[5] = "BrouwerLongMA";
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }   
 }
 
 
@@ -6187,7 +6294,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          // 2007.05.24 - wcs - Bug 875 - because some elements are the same for
          // Keplerian and ModifiedKeplerian, make sure it only changes when it should
          if ( (stateType == "ModifiedKeplerian") && (rep == "Keplerian") &&
-            (label != "SMA") && (label != "ECC") )
+              (label != "SMA") && (label != "ECC") )
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
                MessageInterface::ShowMessage
@@ -6196,7 +6303,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             // leave stateType as ModifiedKeplerian
          }
          else if ( (stateType == "SphericalRADEC") && (rep == "SphericalAZFPA") &&
-                  (label != "AZI") && (label != "FPA") )
+                   (label != "AZI") && (label != "FPA") )
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
                MessageInterface::ShowMessage
@@ -6206,14 +6313,58 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          }
          /// 2010.03.22 - wcs - SMA could also be Equinoctial
          else if ( (stateType == "Equinoctial") && (rep == "Keplerian") &&
-                  (label == "SMA") )
-            // leave type as Equinoctial
+                   (label == "SMA") )
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
                MessageInterface::ShowMessage
                   (" ************ In SC::SetElement, leaving stateType as Equinoctial\n");
             #endif
             // leave state as Equinoctial
+         }
+         else if ( (stateType == "IncomingAsymptote") && (rep == "Keplerian") &&
+                   (label == "TA") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
+            #endif
+            // leave it as IncomingAsymptote
+         }
+         else if ( (stateType == "OutgoingAsymptote") && (rep == "Keplerian") &&
+                   (label == "TA") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
+            #endif
+            // leave it as OutgoingAsymptote
+         }
+         else if ( (stateType == "IncomingAsymptote") && (rep == "ModifiedKeplerian") &&
+                   (label == "RadPer") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
+            #endif
+            // leave it as IncomingAsymptote
+         }
+         else if ( (stateType == "OutgoingAsymptote") && (rep == "ModifiedKeplerian") &&
+                   (label == "RadPer") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
+            #endif
+            // leave it as OutgoingAsymptote
+         }
+         else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
+                   (label == "C3Energy") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
+            #endif
+            // leave it as IncomingAsymptote
          }
          else
          {
@@ -6236,6 +6387,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             }
          }
       }
+      
       // Has the state type has been fully determined or not?  Only worry about this before the CS has been applied
       if (!csSet)
          SetPossibleInputTypes(label, stateType);
@@ -6382,34 +6534,39 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       return ELEMENT6_ID;
    }
 
-   // Modified by M.H.
+   // Modified by M.H. and YK
    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG" ||
-	   label == "SemiLatusRectum" || label == "Delaunayl" || label == "PlanetodeticRMAG" )
+       label == "SemilatusRectum" || label == "Delaunayl" || label == "PlanetodeticRMAG" ||
+       label == "BrouwerShortSMA"  || label == "BrouwerLongSMA")
       retval = ELEMENT1_ID;
-
+   
    else if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA" ||
             label == "PEY" || label == "EquinoctialH" || label == "ModEquinoctialF" ||
-            label == "Delaunayg" || label == "PlanetodeticLON" )
+            label == "Delaunayg" || label == "PlanetodeticLON" || label == "C3Energy" ||
+            label == "BrouwerShortECC" || label == "BrouwerLongECC" )
       retval = ELEMENT2_ID;
 
    else if (label == "Z" || label == "INC" || label == "DEC" || label == "PEX" ||
             label == "EquinoctialK" || label == "ModEquinoctialG" || label == "Delaunayh" ||
-            label == "PlanetodeticLAT")
+            label == "PlanetodeticLAT" || label == "OutgoingRHA" || label == "IncomingRHA" ||
+            label == "BrouwerShortINC" || label == "BrouwerLongINC")
       retval = ELEMENT3_ID;
 
    else if (label == "VX" || label == "RAAN" || label == "VMAG" || label == "PNY" ||
             label == "EquinoctialP" || label == "ModEquinoctialH" || label == "DelaunayL" ||
-            label == "PlanetodeticVMAG")
+            label == "PlanetodeticVMAG" ||  label == "IncomingDHA" || label == "OutgoingDHA" ||
+            label == "BrouwerShortRAAN" || label == "BrouwerLongRAAN")
       retval = ELEMENT4_ID;
 
    else if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV" ||
             label == "PNX" || label == "EquinoctialQ" || label == "ModEquinoctialK" ||
-            label == "DelaunayG" || label == "PlanetodeticAZI")
+            label == "DelaunayG" || label == "PlanetodeticAZI" || label == "IncomingBVAZI" ||
+            label == "OutgoingBVAZI" || label == "BrouwerShortAOP" || label == "BrouwerLongAOP")
       retval = ELEMENT5_ID;
 
    else if (label == "VZ" || StateConversionUtil::IsValidAnomalyType(label) ||
             label == "FPA" || label == "DECV" || label == "MLONG" || label == "TLONG" ||
-            label == "DelaunayH" || label == "PlanetodeticHFPA")
+            label == "DelaunayH" || label == "PlanetodeticHFPA" || label == "BrouwerShortMA" || label == "BrouwerLongMA")
       retval = ELEMENT6_ID;
 
    rep = elementLabelMap[label];
@@ -6470,7 +6627,7 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["MLONG"]        = "Equinoctial";
 
       // Modified by M.H.
-      elementLabelMap["SemiLatusRectum"] = "ModifiedEquinoctial";
+      elementLabelMap["SemilatusRectum"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialF"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialG"] = "ModifiedEquinoctial";
       elementLabelMap["ModEquinoctialH"] = "ModifiedEquinoctial";
@@ -6490,6 +6647,30 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["PlanetodeticVMAG"] = "Planetodetic";
       elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
       elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
+      
+      //elementLabelMap["C3Energy"]      = "OutgoingAsymptote";
+      elementLabelMap["C3Energy"]      = "IncomingAsymptote";
+      elementLabelMap["IncomingRHA"]   = "IncomingAsymptote";
+      elementLabelMap["IncomingDHA"]   = "IncomingAsymptote";
+      elementLabelMap["IncomingBVAZI"] = "IncomingAsymptote";
+      
+      elementLabelMap["OutgoingRHA"]   = "OutgoingAsymptote";
+      elementLabelMap["OutgoingDHA"]   = "OutgoingAsymptote";
+      elementLabelMap["OutgoingBVAZI"] = "OutgoingAsymptote";
+      
+      elementLabelMap["BrouwerShortSMA"]  = "BrouwerMeanShort";
+      elementLabelMap["BrouwerShortECC"]  = "BrouwerMeanShort";
+      elementLabelMap["BrouwerShortINC"]  = "BrouwerMeanShort";
+      elementLabelMap["BrouwerShortRAAN"] = "BrouwerMeanShort";
+      elementLabelMap["BrouwerShortAOP"]  = "BrouwerMeanShort";
+      elementLabelMap["BrouwerShortMA"]   = "BrouwerMeanShort";
+      
+      elementLabelMap["BrouwerLongSMA"]  = "BrouwerMeanLong";
+      elementLabelMap["BrouwerLongECC"]  = "BrouwerMeanLong";
+      elementLabelMap["BrouwerLongINC"]  = "BrouwerMeanLong";
+      elementLabelMap["BrouwerLongRAAN"] = "BrouwerMeanLong";
+      elementLabelMap["BrouwerLongAOP"]  = "BrouwerMeanLong";
+      elementLabelMap["BrouwerLongMA"]   = "BrouwerMeanLong";
    }
 }
 
@@ -6679,46 +6860,59 @@ Integer Spacecraft::NumStateElementsSet()
 void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::string &rep)
 {
    #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage("Entering SetPossibleInputTypes: spacecraft = %s, label = %s, rep = %s\n",
+      MessageInterface::ShowMessage("\nEntering SetPossibleInputTypes: spacecraft = '%s', label = '%s', rep = '%s'\n",
             instanceName.c_str(), label.c_str(), rep.c_str());
       MessageInterface::ShowMessage("possibleInputTypes are:\n");
       for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
-         MessageInterface::ShowMessage("      %d    %s\n", ii, possibleInputTypes.at(ii).c_str());
+         MessageInterface::ShowMessage("      %2d    %s\n", ii, possibleInputTypes.at(ii).c_str());
    #endif
 
    if (std::find(possibleInputTypes.begin(), possibleInputTypes.end(), rep) ==
          possibleInputTypes.end())
    {
+      #ifdef DEBUG_SC_INPUT_TYPES
+      MessageInterface::ShowMessage
+         ("**** ERROR The label '%s' is not allowed in the the rep '%s', so throwing exception\n",
+          label.c_str(), rep.c_str());
+      #endif
       std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
       errmsg += "This is only allowed after the BeginMissionSequence command.\n";
       throw SpaceObjectException(errmsg);
    }
-
+  
    // determine the possible types
 
    // When there is only one possible type, reset the array to that one
-
-   // Modified by M.H.
-   if ((label == "X")            || (label == "Y")            || (label == "Z")            ||
-       (label == "VX")           || (label == "VY")           || (label == "VZ")           ||
-       (label == "ECC")          || (label == "RadPer")       || (label == "RadApo")       ||
-       (label == "AZI")          || (label == "FPA")          ||
-       (label == "RAV")          || (label == "DECV") ||
-       (label == "EquinoctialH") || (label == "EquinoctialK") || (label == "EquinoctialP") ||
-       (label == "EquinoctialQ") || (label == "MLONG") ||
-       (label == "SemiLatusRectum") ||
-       (label == "ModEquinoctialF") || (label == "ModEquinoctialG") || (label == "ModEquinoctialH") ||
-       (label == "ModEquinoctialK") || (label == "TLONG") || (label == "Delaunayl") ||
-       (label == "Delaunayg") || (label == "Delaunayh") || (label == "DelaunayL") ||
-       (label == "DelaunayG") || (label == "DelaunayH") || (label == "PlanetodeticRMAG") ||
-       (label == "PlanetodeticLON") || (label == "PlanetodeticLAT") || (label == "PlanetodeticVMAG") ||
-       (label == "PlanetodeticAZI") || (label == "PlanetodeticHFPA") )
+   
+   // Modified by M.H. and YK
+   // mod. by YK. "RadPer" is removed becuase hyperbolic asymptotes uses "RadPer".
+   if ((label == "X")               || (label == "Y")                || (label == "Z")                ||
+       (label == "VX")              || (label == "VY")               || (label == "VZ")               ||
+       (label == "ECC")             || (label == "RadApo")           || (label == "AZI")              ||
+       (label == "FPA")             || (label == "RAV")              || (label == "DECV")             ||
+       (label == "EquinoctialH")    || (label == "EquinoctialK")     || (label == "EquinoctialP")     ||
+       (label == "EquinoctialQ")    || (label == "MLONG")            || (label == "SemilatusRectum")  ||
+       (label == "ModEquinoctialF") || (label == "ModEquinoctialG")  || (label == "ModEquinoctialH")  ||
+       (label == "ModEquinoctialK") || (label == "TLONG")            || (label == "Delaunayl")        ||
+       (label == "Delaunayg")       || (label == "Delaunayh")        || (label == "DelaunayL")        ||
+       (label == "DelaunayG")       || (label == "DelaunayH")        || (label == "PlanetodeticRMAG") ||
+       (label == "PlanetodeticLON") || (label == "PlanetodeticLAT")  || (label == "PlanetodeticVMAG") ||
+       (label == "PlanetodeticAZI") || (label == "PlanetodeticHFPA") || (label == "IncomingRHA")      ||
+       (label == "IncomingDHA")     || (label == "IncomingBVAZI")    || (label == "OutgoingRHA")      ||
+       (label == "OutgoingDHA")     || (label == "OutgoingBVAZI")    || (label == "BrouwerShortSMA")  ||
+       (label == "BrouwerShortECC") || (label == "BrouwerShortINC")  || (label == "BrouwerShortRAAN") ||
+       (label == "BrouwerShortAOP") || (label == "BrouwerShortMA")   || (label == "BrouwerLongSMA")   ||
+       (label == "BrouwerLongECC")  || (label == "BrouwerLongINC")   || (label == "BrouwerLongRAAN")  ||
+       (label == "BrouwerLongAOP")  || (label == "BrouwerLongMA"))
    {
+      #ifdef DEBUG_SC_INPUT_TYPES
+      MessageInterface::ShowMessage
+         ("   The label '%s' is unique, so adding the rep '%s' to possibleInputTypes\n", label.c_str(), rep.c_str());
+      #endif
       possibleInputTypes.clear();
       possibleInputTypes.push_back(rep);
    }
-
-
+   
    // Remove impossible types from the array
 
    // 1) It could be Keplerian or Eauinoctial
@@ -6728,24 +6922,34 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-	  // Modified by M.H.
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // Modified by M.H.
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // mod by YK
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    }
    // 2) It could be Keplerian or ModifiedKeplerian
    else if ((label == "INC") || (label == "RAAN") || (label == "AOP") ||
-            (label == "TA")  || (label == "EA")   || (label == "MA")  ||
+            (label == "EA")   || (label == "MA")  || //mod by YK, TA is removed because TA can be used in Incoming/OutoingAsymptote.
             (label == "HA"))
    {
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-	  // Modified by M.H.
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // Modified by M.H.
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // mod by YK
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    }
    // 3) It could be SphericalAZFPA or SphericalRADEC
    else if ((label == "RMAG") || (label == "RA") || (label == "DEC") || (label == "VMAG"))
@@ -6754,12 +6958,59 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-	  // Modified by M.H.
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-	  possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // Modified by M.H.
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      // mod by YK
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    }
-
+   // 4) It could be ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
+   else if ((label == "RadPer"))
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   }
+   // 5) It could be Keplerian, ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
+   else if ((label == "TA"))
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   }
+   // 6) It could be IncomingAsymptote or OutgoingAsymptote (mod by YK)
+   else if ((label == "C3Energy"))
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   }
+   
    if (possibleInputTypes.size() < 1)
    {
       throw SpaceObjectException("Error determining input state type.\n");

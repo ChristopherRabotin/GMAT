@@ -46,10 +46,11 @@ protected:
       NadirPointingParamCount = KinematicParamCount
    };
    
+   static const Real DENOMINATOR_TOLERANCE;
 
    Rmatrix33 TRIAD(Rvector3& V1, Rvector3& V2, Rvector3& W1, Rvector3& W2);
 
-   virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);   
+   virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);
 
 private:
    // Default constructor - not implemented

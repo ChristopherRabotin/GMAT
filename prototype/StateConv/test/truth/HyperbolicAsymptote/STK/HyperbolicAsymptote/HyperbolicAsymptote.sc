@@ -1,5 +1,5 @@
 stk.v.10.0
-WrittenBy    STK_v10.0.0
+WrittenBy    STK_v10.0.2
 BEGIN Scenario
     Name            HyperbolicAsymptote
 
@@ -72,7 +72,6 @@ END StarCollection
 BEGIN ScenarioLicenses
     Module    ASTGv10.0
     Module    AnalysisWBv10.0
-    Module    COVv10.0
     Module    STKIntegrationv10.0
     Module    STKProfessionalv10.0
     Module    STKv10.0
@@ -1010,6 +1009,10 @@ END MapData
 	SaveScenFolder	No
 	BEGIN ExternalFileTypes
 	    BEGIN Type
+		FileType  Calculation Scalar
+		Include    No
+	    END Type
+	    BEGIN Type
 		FileType  Celestial Image
 		Include    Yes
 	    END Type
@@ -1062,11 +1065,15 @@ END MapData
 		Include    Yes
 	    END Type
 	    BEGIN Type
+		FileType  Scalar Calculation File
+		Include    No
+	    END Type
+	    BEGIN Type
 		FileType  Terrain
 		Include    Yes
 	    END Type
 	    BEGIN Type
-		FileType  Volume Metric File
+		FileType  Volumetric File
 		Include    No
 	    END Type
 	    BEGIN Type

@@ -1154,7 +1154,7 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
 /**==========================================================================**/
 void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 {
-   register double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
+   register double    A[50]   , /*B[50] ,*/ Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
                       T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
    register int       i , j;
    register long int  C , G , N , offset = 0;
@@ -1175,7 +1175,7 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
    for ( i=0 ; i<50 ; i++ )
    {
       A[i] = 0.0;
-      B[i] = 0.0;
+//      B[i] = 0.0;
    }
 
    /*--------------------------------------------------------------------------*/
@@ -1319,7 +1319,7 @@ double DeFile::Find_Value( char    name[],
                    double  value_array[400]  ) 
 {
    double value = 0.0;
-   int    found = FALSE;
+   //int    found = FALSE;
    char   target[7];
    int    i, j;
 
@@ -1333,7 +1333,7 @@ double DeFile::Find_Value( char    name[],
       if ( !strcmp(name,target) )
       {
          value = value_array[i];
-         found = TRUE;
+         //found = TRUE;
          break;                                /* No need to keep looking */
       }                                       /*   once a match is found */
    }

@@ -1317,14 +1317,14 @@ ObjectMap* Moderator::GetConfiguredObjectMap()
 
 //------------------------------------------------------------------------------
 // const StringArray& GetListOfObjects(Gmat::ObjectType type,
-//                                     bool excludeDefaultObjects)
+//                                     bool excludeDefaultObjects = false)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
  *
  * @param <type> object type
  * @param <excludeDefaultObjects> set this flag to true if default objects
- *           should be execluded, such as  default coordinate systems
+ *           should be execluded, such as  default coordinate systems [false]
  *
  * @return array of configured item names of the type; return empty array if none
  *  return all configured item if type is UNKNOWN_OBJECT
@@ -3379,6 +3379,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    
    if (param == NULL)
    {
+      #if DEBUG_CREATE_PARAMETER
+      MessageInterface::ShowMessage
+         ("   The type '%s' is not in the creatable list.\n", newType.c_str());
+      #endif
       throw GmatBaseException
          ("The Moderator cannot create a Parameter type \"" + newType +
           "\" named \"" + name + "\"\n");
@@ -7250,6 +7254,10 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    // Set object manage option to configuration
    objectManageOption = 1;
    
+   // Clear SpacePoint instance count so that Spacecraft color starts from the
+   // same color for each run
+   SpacePoint::ClearInstanceCount();
+   
    // Clear command sequence before resource (loj: 2008.07.10)
    if (clearObjs)
    {
@@ -7692,7 +7700,7 @@ void Moderator::CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultBarycenter()
 {
-   #if DEBUG_INITIALIZE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
       ("Moderator checking if default barycenter should be created...\n");
@@ -7701,21 +7709,21 @@ void Moderator::CreateDefaultBarycenter()
    try
    {
       SolarSystem *ss = GetSolarSystemInUse();
-
-      // Solar System Barycenter
+      
+      // Create BuiltIn Solar System Barycenter
       Barycenter *bary = (Barycenter*) GetCalculatedPoint(GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME);
       if (bary == NULL)
       {
          bary = (Barycenter*) CreateCalculatedPoint("Barycenter", GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME, false);
 
-         #if DEBUG_INITIALIZE
+         #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
@@ -7806,7 +7814,9 @@ void Moderator::CreateDefaultParameters()
    
    // Modified by M.H.
    // ModEquinoctial parameters
-   CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   // Changed SemiLatusRectum to SemilatusRectum (lowwer case L)
+   //CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   CreateParameter("SemilatusRectum", "DefaultSC.EarthMJ2000Eq.SemilatusRectum");
    CreateParameter("ModEquinoctialF", "DefaultSC.EarthMJ2000Eq.ModEquinoctialF");
    CreateParameter("ModEquinoctialG", "DefaultSC.EarthMJ2000Eq.ModEquinoctialG");
    CreateParameter("ModEquinoctialH", "DefaultSC.EarthMJ2000Eq.ModEquinoctialH");
@@ -7838,6 +7848,54 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
 
+   // Modified by YK
+   // IncomingAsymptote parameters
+   CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
+   CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
+   CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default IncomingAsymptote parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // OutgoingAsymptote parameters
+   CreateParameter("OutgoingRHA", "DefaultSC.EarthMJ2000Eq.OutgoingRHA");
+   CreateParameter("OutgoingDHA", "DefaultSC.EarthMJ2000Eq.OutgoingDHA");
+   CreateParameter("OutgoingBVAZI", "DefaultSC.EarthMJ2000Eq.OutgoingBVAZI");
+
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default OutgoingAsymptote parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // BrouwerMeanShort parameters
+   // In averaging process, osculating AOP relates to every elements.
+   // Therefore, averaged elements have coordinate dependecy.
+   // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+   CreateParameter("BrouwerShortSMA", "DefaultSC.EarthMJ2000Eq.BrouwerShortSMA");
+   CreateParameter("BrouwerShortECC", "DefaultSC.EarthMJ2000Eq.BrouwerShortECC");
+   CreateParameter("BrouwerShortINC", "DefaultSC.EarthMJ2000Eq.BrouwerShortINC");
+   CreateParameter("BrouwerShortRAAN", "DefaultSC.EarthMJ2000Eq.BrouwerShortRAAN");
+   CreateParameter("BrouwerShortAOP", "DefaultSC.EarthMJ2000Eq.BrouwerShortAOP");
+   CreateParameter("BrouwerShortMA", "DefaultSC.EarthMJ2000Eq.BrouwerShortMA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default BrouwerMeanShort parameters created\n");
+   #endif
+   
+   // Modified by YK
+   // BrouwerMeanLong parameters
+   // In averaging process, osculating AOP relates to every elements.
+   // Therefore, averaged elements have coordinate dependecy.
+   CreateParameter("BrouwerLongSMA", "DefaultSC.EarthMJ2000Eq.BrouwerLongSMA");
+   CreateParameter("BrouwerLongECC", "DefaultSC.EarthMJ2000Eq.BrouwerLongECC");
+   CreateParameter("BrouwerLongINC", "DefaultSC.EarthMJ2000Eq.BrouwerLongINC");
+   CreateParameter("BrouwerLongRAAN", "DefaultSC.EarthMJ2000Eq.BrouwerLongRAAN");
+   CreateParameter("BrouwerLongAOP", "DefaultSC.EarthMJ2000Eq.BrouwerLongAOP");
+   CreateParameter("BrouwerLongMA", "DefaultSC.EarthMJ2000Eq.BrouwerLongMA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default BrouwerMeanLong parameters created\n");
+   #endif
+   
    // Orbital parameters
    CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
    CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
@@ -7866,7 +7924,9 @@ void Moderator::CreateDefaultParameters()
    #endif
    
    // Angular parameters
-   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
+   // Changed to create SemilatusRectum as part of ModEquinoctial Parameter above
+   // (LOJ: 2014.01.22)
+   //CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
    CreateParameter("HMAG", "DefaultSC.HMAG");
    CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
    CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
@@ -8075,6 +8135,10 @@ void Moderator::CreateDefaultMission()
    
    try
    {
+      // Clear SpacePoint instance count so that Spacecraft color starts from the
+      // same color for each run
+      SpacePoint::ClearInstanceCount();
+      
       //----------------------------------------------------
       // Create default resource
       //----------------------------------------------------

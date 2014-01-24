@@ -1296,6 +1296,42 @@
     <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp">
+      <Filter>Source Files\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2548,6 +2584,42 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp">
+      <Filter>Source Files\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

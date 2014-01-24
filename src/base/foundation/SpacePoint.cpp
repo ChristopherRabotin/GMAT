@@ -34,6 +34,10 @@
 #include "FileManager.hpp"
 #include "FileUtil.hpp"
 #include "CoordinateConverter.hpp"      // for Convert()
+#include "GmatDefaults.hpp"             // for GmatSolarSystemDefaults::
+#include "RgbColor.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
+#include "ColorDatabase.hpp"
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
 #ifdef __USE_SPICE__
@@ -42,11 +46,13 @@
 
 
 //#define DEBUG_J2000_STATE
-//#define DEBUG_SPACE_POINT_CLOAKING
+//#define DEBUG_SP_CLOAKING
 //#define DEBUG_SPICE_KERNEL
 //#define DEBUG_SPACE_POINT_ORBIT_KERNELS
 //#define DEBUG_ATTITUDE
 //#define DEBUG_KERNEL_VALIDATE
+//#define DEBUG_SET_STRING
+//#define DEBUG_COLOR
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -71,6 +77,8 @@ SpacePoint::PARAMETER_TEXT[SpacePointParamCount - GmatBaseParamCount] =
    "SCClockSpiceKernelName",
    "FrameSpiceKernelName",
    "A1Epoch",
+   "OrbitColor",
+   "TargetColor",
 };
 
 const Gmat::ParameterType
@@ -84,6 +92,8 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
    Gmat::STRINGARRAY_TYPE,  // "SCClockSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "FrameSpiceKernelName"
    Gmat::REAL_TYPE,         // "A1Epoch"
+   Gmat::COLOR_TYPE,        // "OrbitColor"
+   Gmat::COLOR_TYPE,        // "TargetColor"
 };
 
 #ifdef __USE_SPICE__
@@ -94,6 +104,28 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
    const Integer SpacePoint::UNDEFINED_NAIF_ID_REF_FRAME = -123456789;
 #endif
 
+/// initialize the Spacecraft instances counter
+Integer SpacePoint::spacecraftInstanceCount = 0;
+
+// For automatic default colors
+const UnsignedInt
+SpacePoint::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
+{
+   GmatColor::RED,       GmatColor::GREEN,        GmatColor::YELLOW,     GmatColor::BLUE,
+   GmatColor::PINK,      GmatColor::LIME,         GmatColor::GOLD,       GmatColor::NAVY,
+   GmatColor::PURPLE,    GmatColor::OLIVE,        GmatColor::BEIGE,      GmatColor::CYAN,
+   GmatColor::FUCHSIA,   GmatColor::SEA_GREEN,    GmatColor::PERU,       GmatColor::SLATE_BLUE,  
+   GmatColor::ORCHID,    GmatColor::SPRING_GREEN, GmatColor::TAN,        GmatColor::TURQUOISE,
+};
+const UnsignedInt
+SpacePoint::DEFAULT_TARGET_COLOR[MAX_SP_COLOR] =
+{
+   GmatColor::TEAL,             GmatColor::LIGHT_GRAY,   GmatColor::DARK_GRAY,  GmatColor::DIM_GRAY,
+   GmatColor::DARK_SLATE_GRAY,  GmatColor::LIGHT_GRAY,   GmatColor::DARK_GRAY,  GmatColor::DIM_GRAY,
+   GmatColor::DARK_SLATE_GRAY,  GmatColor::LIGHT_GRAY,   GmatColor::DARK_GRAY,  GmatColor::DIM_GRAY,
+   GmatColor::DARK_SLATE_GRAY,  GmatColor::LIGHT_GRAY,   GmatColor::DARK_GRAY,  GmatColor::DIM_GRAY,
+   GmatColor::DARK_SLATE_GRAY,  GmatColor::LIGHT_GRAY,   GmatColor::DARK_GRAY,  GmatColor::DIM_GRAY,
+};
 
 //------------------------------------------------------------------------------
 // public methods
@@ -118,20 +150,38 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
 SpacePoint::SpacePoint(Gmat::ObjectType ofType, const std::string &itsType,
                        const std::string &itsName) :
 GmatBase(ofType,itsType,itsName),
-theSolarSystem (NULL),
-inertialCS     (NULL),
-bodyFixedCS    (NULL),
-j2000Body      (NULL),
-j2000BodyName  ("Earth"),
-naifId         (UNDEFINED_NAIF_ID),
-naifIdRefFrame (UNDEFINED_NAIF_ID),
-naifIdObserver (UNDEFINED_NAIF_ID),
-spiceSetupDone (false),
-hasAttitude    (false)
+theSolarSystem     (NULL),
+inertialCS         (NULL),
+bodyFixedCS        (NULL),
+j2000Body          (NULL),
+j2000BodyName      ("Earth"),
+naifId             (UNDEFINED_NAIF_ID),
+naifIdRefFrame     (UNDEFINED_NAIF_ID),
+naifIdObserver     (UNDEFINED_NAIF_ID),
+spiceSetupDone     (false),
+hasAttitude        (false),
+useOrbitColorName  (true),
+useTargetColorName (true),
+defaultOrbitColor  (GmatColor::WHITE),
+defaultTargetColor (GmatColor::WHITE),
+orbitColor         (0),
+targetColor        (0),
+orbitColorStr      (""),
+targetColorStr     ("")
 {
    objectTypes.push_back(Gmat::SPACE_POINT);
    objectTypeNames.push_back("SpacePoint");
-
+   
+   // Derived classes must override these colors as necessary
+   SetDefaultColors(GmatColor::WHITE, GmatColor::WHITE);
+   
+   // Increment the spacecraft instance count and set default colors
+   if (ofType == Gmat::SPACECRAFT)
+   {
+      ++spacecraftInstanceCount;
+      SetSpacecraftDefaultColors();
+   }
+   
    /// derived classes must override this, as necessary, to point to
    /// the correct path
    theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
@@ -166,7 +216,15 @@ attitudeSpiceKernelNames (sp.attitudeSpiceKernelNames),
 scClockSpiceKernelNames  (sp.scClockSpiceKernelNames),
 frameSpiceKernelNames    (sp.frameSpiceKernelNames),
 theSpkPath               (sp.theSpkPath),
-hasAttitude              (false)
+hasAttitude              (false),
+useOrbitColorName        (sp.useOrbitColorName),
+useTargetColorName       (sp.useTargetColorName),
+defaultOrbitColor        (sp.defaultOrbitColor),
+defaultTargetColor       (sp.defaultTargetColor),
+orbitColor               (sp.orbitColor),
+targetColor              (sp.targetColor),
+orbitColorStr            (sp.orbitColorStr),
+targetColorStr           (sp.targetColorStr)
 {
 }
 
@@ -205,9 +263,18 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    default_naifId           = sp.default_naifId;
    theSpkPath               = sp.theSpkPath;
    hasAttitude              = false;
-
+   useOrbitColorName        = sp.useOrbitColorName;
+   useTargetColorName       = sp.useTargetColorName;
+   defaultOrbitColor        = sp.defaultOrbitColor;
+   defaultTargetColor       = sp.defaultTargetColor;
+   orbitColor               = sp.orbitColor;
+   targetColor              = sp.targetColor;
+   orbitColorStr            = sp.orbitColorStr;
+   targetColorStr           = sp.targetColorStr;
+   
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~SpacePoint(void)
 //---------------------------------------------------------------------------
@@ -356,19 +423,59 @@ void SpacePoint::SetJ2000Body(SpacePoint* toBody)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCloaked(const Integer id) const
+//------------------------------------------------------------------------------
 bool SpacePoint::IsParameterCloaked(const Integer id) const
 {
-   #ifdef DEBUG_SPACE_POINT_CLOAKING
-      MessageInterface::ShowMessage("In SpacePoint:IsParameterCloaked with id = %d %s)\n",
-            id, (GetParameterText(id)).c_str());
+   #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' entered, id = %2d %s, cloaking = %s\n",
+          this, GetName().c_str(), id, (GetParameterText(id)).c_str(), cloaking ? "true" : "false");
    #endif
-   if (!cloaking) return false;
-   if (id >= GmatBaseParamCount && id < SpacePointParamCount)
-      return IsParameterEqualToDefault(id);
+   if (!cloaking)
+   {
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning false\n", this, GetName().c_str());
+      #endif
+      return false;
+   }
    
-   return GmatBase::IsParameterCloaked(id);
+   // if it's read-only, we'll cloak it
+   if (IsParameterReadOnly(id))
+   {
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning true - parameter is read-only\n",
+          this, GetName().c_str());
+      #endif
+      return true;
+   }
+   
+   if (id >= GmatBaseParamCount && id < SpacePointParamCount)
+   {
+      bool equalToDefault = IsParameterEqualToDefault(id);
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+          equalToDefault ? "true" : "false");
+      #endif
+      return equalToDefault;
+   }
+   
+   bool isCloaked = GmatBase::IsParameterCloaked(id);
+   #ifdef DEBUG_SP_CLOAKING
+   MessageInterface::ShowMessage
+      ("SpacePoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+       isCloaked ? "true" : "false");
+   #endif
+   return isCloaked;
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterEqualToDefault(const Integer id) const
+//------------------------------------------------------------------------------
 bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
 {
    if (id == J2000_BODY_NAME)
@@ -382,6 +489,19 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
    if (id == NAIF_ID_REFERENCE_FRAME)
    {
       return (default_naifIdRefFrame == naifIdRefFrame);
+   }
+   if (id == ORBIT_COLOR)
+   {
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterEqualToDefault() '%s', defaultOrbitColor=%06X, orbitColor=%06X\n",
+          GetName().c_str(), defaultOrbitColor, orbitColor);
+      #endif
+      return (defaultOrbitColor == orbitColor);
+   }
+   if (id == TARGET_COLOR)
+   {
+      return (defaultTargetColor == targetColor);
    }
    return GmatBase::IsParameterEqualToDefault(id);    
 }
@@ -514,7 +634,160 @@ const Rmatrix33& SpacePoint::GetAttitude(Real a1mjdTime)
    return cosineMat;
 }
 
+//------------------------------------------------------------------------------
+// UnsignedInt GetDefaultOrbitColor()
+//------------------------------------------------------------------------------
+UnsignedInt SpacePoint::GetDefaultOrbitColor()
+{
+   return defaultOrbitColor;
+}
 
+//------------------------------------------------------------------------------
+// UnsignedInt GetDefaultTargetColor()
+//------------------------------------------------------------------------------
+UnsignedInt SpacePoint::GetDefaultTargetColor()
+{
+   return defaultTargetColor;
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetCurrentOrbitColor()
+//------------------------------------------------------------------------------
+UnsignedInt SpacePoint::GetCurrentOrbitColor()
+{
+   return orbitColor;
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetCurrentTargetColor()
+//------------------------------------------------------------------------------
+UnsignedInt SpacePoint::GetCurrentTargetColor()
+{
+   return targetColor;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetOrbitColorString()
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetOrbitColorString()
+{
+   return orbitColorStr;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetTargetColorString()
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetTargetColorString()
+{
+   return targetColorStr;
+}
+
+//------------------------------------------------------------------------------
+// void SetCurrentOrbitColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void SpacePoint::SetCurrentOrbitColor(UnsignedInt color)
+{
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetCurrentOrbitColor() setting color = %06X\n", color);
+   #endif
+   
+   orbitColor = color;
+}
+
+//------------------------------------------------------------------------------
+// void SetCurrentTargetColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void SpacePoint::SetCurrentTargetColor(UnsignedInt color)
+{
+   targetColor = color;
+}
+
+//------------------------------------------------------------------------------
+// void SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
+//------------------------------------------------------------------------------
+void SpacePoint::SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
+{
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetDefaultColors() <%p>'%s' entered, orbColor=%06X, targColor=%06X, "
+       "useOrbitColorName=%d, useTargetColorName=%d\n", this, GetName().c_str(), orbColor,
+       targColor, useOrbitColorName, useTargetColorName);
+   #endif
+   
+   defaultOrbitColor = orbColor;
+   defaultTargetColor = targColor;
+   orbitColor = orbColor;
+   targetColor = targColor;
+   orbitColorStr = RgbColor::ToRgbString(orbColor);
+   targetColorStr = RgbColor::ToRgbString(targColor);
+   
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("   orbitColorStr=%s, targetColorStr=%s\n", orbitColorStr.c_str(), targetColorStr.c_str());
+   #endif
+   
+   // Get predefined color name
+   try
+   {
+      ColorDatabase *colordb = ColorDatabase::Instance();
+      if (useOrbitColorName)
+         orbitColorStr = colordb->GetColorName(orbitColor);
+      if (useTargetColorName)
+         targetColorStr = colordb->GetColorName(targetColor);
+   }
+   catch (BaseException &be)
+   {
+      throw;
+   }
+
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetDefaultColors() '%s' leaving, orbitColorStr=%s, targetColorStr=%s\n",
+       GetName().c_str(), orbitColorStr.c_str(), targetColorStr.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSpacecraftDefaultColors()
+//------------------------------------------------------------------------------
+/**
+ * Sets spacecraft default colors from the predefined color list
+ */
+//------------------------------------------------------------------------------
+void SpacePoint::SetSpacecraftDefaultColors()
+{
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetSpacecraftDefaultColors() <%p>'%s' entered, "
+       "spacecraftInstanceCount = %d\n", this, GetName().c_str(),
+       spacecraftInstanceCount);
+   #endif
+   
+   Integer index = spacecraftInstanceCount-1 % MAX_SP_COLOR;
+   UnsignedInt orbColor = DEFAULT_ORBIT_COLOR[index];
+   UnsignedInt targColor = DEFAULT_TARGET_COLOR[index];
+   SetDefaultColors(orbColor, targColor);
+   
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetSpacecraftDefaultColors() <%p>'%s' leaving\n",
+       this, GetName().c_str());
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// static void SpacePoint::ClearInstanceCount()
+//------------------------------------------------------------------------------
+void SpacePoint::ClearInstanceCount()
+{
+   spacecraftInstanceCount = 0;
+}
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Acceleration(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
 const Rvector3 SpacePoint::GetMJ2000Acceleration(const A1Mjd &atTime)
 {
    return Rvector3(0.0,0.0,0.0);
@@ -696,6 +969,25 @@ bool SpacePoint::IsParameterReadOnly(const std::string &label) const
 }
 
 //------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool SpacePoint::IsParameterCommandModeSettable(const Integer id) const
+{
+   if ((id == ORBIT_COLOR) || (id == TARGET_COLOR))
+      return true;
+
+   return GmatBase::IsParameterCommandModeSettable(id);
+}
+
+//------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -832,6 +1124,15 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       return kernelArrayString;
    }
 
+   if (id == ORBIT_COLOR || id == TARGET_COLOR)
+   {
+      if (id == ORBIT_COLOR)
+         return orbitColorStr;
+      
+      if (id == TARGET_COLOR)
+         return targetColorStr;
+   }
+   
    return GmatBase::GetStringParameter(id);
 }
 
@@ -849,12 +1150,17 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-
- bool SpacePoint::SetStringParameter(const Integer id, 
-                                     const std::string &value)
+bool SpacePoint::SetStringParameter(const Integer id, 
+                                    const std::string &value)
 {
-    // this is also handled in CelestialBody and Spacecraft
-    // it is caught here if not handled there for some reason
+   #ifdef DEBUG_SET_STRING
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetStringParameter() <%p>'%s' entered, id=%d, value='%s'\n",
+       this, GetName().c_str(), id, value.c_str());
+   #endif
+   
+   // this is also handled in CelestialBody and Spacecraft
+   // it is caught here if not handled there for some reason
    if (id == J2000_BODY_NAME) 
    {
       static bool writeIgnoredMessage = true;
@@ -996,8 +1302,79 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       spiceSetupDone = false;
       return true;
    }
-
-
+   
+   // Set colors (LOJ: 2013.11.05)
+   if (id == ORBIT_COLOR || id == TARGET_COLOR)
+   {
+      #ifdef DEBUG_SET_STRING
+      MessageInterface::ShowMessage("   orbitColor  = %06X\n", orbitColor);
+      MessageInterface::ShowMessage("   targetColor = %06X\n", targetColor);
+      #endif
+      bool useColorName = true;
+      UnsignedInt intColor;
+      std::string colorStr = value;
+      // Check if RGB value is used
+      if (GmatStringUtil::IsEnclosedWithBrackets(value))
+      {
+         useColorName = false;
+         try
+         {
+            // Convert RGB value to unsigned integer
+            intColor = RgbColor::ToIntColor(value);
+         }
+         catch (BaseException &be)
+         {
+            throw;
+         }
+      }
+      
+      // Check if color is in the database
+      if (useColorName)
+      {
+         // Get corresponding UnsignedInt color
+         try
+         {
+            intColor = ColorDatabase::Instance()->GetIntColor(value);
+         }
+         catch (BaseException &be)
+         {
+            throw;
+         }
+      }
+      
+      // Save as unsigned integer
+      if (id == ORBIT_COLOR)
+      {
+         useOrbitColorName = useColorName;
+         orbitColor = intColor;
+         if (useColorName)
+            orbitColorStr = colorStr;
+         else
+            orbitColorStr = RgbColor::ToRgbString(intColor);
+      }
+      else if (id == TARGET_COLOR)
+      {
+         useTargetColorName = useColorName;
+         targetColor = intColor;
+         if (useColorName)
+            targetColorStr = colorStr;
+         else
+            targetColorStr = RgbColor::ToRgbString(intColor);
+      }
+      
+      #ifdef DEBUG_SET_STRING
+      MessageInterface::ShowMessage
+         ("   useColorName = %d, cloaking = %d\n", useColorName, cloaking);
+      MessageInterface::ShowMessage
+         ("   orbitColor  = %06X, orbitColorStr='%s'\n", orbitColor, orbitColorStr.c_str());
+      MessageInterface::ShowMessage
+         ("   targetColor = %06X, targetColorStr='%s'\n", targetColor, targetColorStr.c_str());
+      MessageInterface::ShowMessage
+         ("SpacePoint::SetStringParameter() '%s' returning true\n", GetName().c_str());
+      #endif
+      return true;
+   }
+   
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -1458,3 +1835,4 @@ void SpacePoint::ValidateKernel(const std::string &kName, const std::string labe
       }
    #endif
 }
+

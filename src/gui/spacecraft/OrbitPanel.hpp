@@ -98,7 +98,7 @@ private:
    std::string mFromAnomalyTypeStr;
    std::string mFromEpochFormat;
    
-   std::string mElements[6];
+   std::string mElementStrs[6];
    std::string mEpochStr;
    std::string mTaiMjdStr;
    std::string mAnomalyType;
@@ -128,14 +128,24 @@ private:
    bool IsStateModified();
    void ResetStateFlags(bool discardEdits = false);
    
-   bool CheckState(Rvector6 &state);
-   bool CheckCartesian(Rvector6 &state);
-   bool CheckKeplerian(Rvector6 &state);
-   bool CheckModKeplerian(Rvector6 &state);
-   bool CheckSpherical(Rvector6 &state, const wxString &stateType);
-   bool CheckEquinoctial(Rvector6 &state);
-   bool CheckAnomaly(Rvector6 &state);
-   bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
+   bool CheckState(Rvector6 &outState);
+   bool CheckCartesian(Rvector6 &outState);
+   bool CheckKeplerian(Rvector6 &outState);
+   bool CheckModKeplerian(Rvector6 &outState);
+   bool CheckSpherical(Rvector6 &outState, const wxString &stateType);
+   bool CheckEquinoctial(Rvector6 &outState);
+   
+   bool CheckModifiedEquinoctial(Rvector6 &outState);
+   bool CheckDelaunay(Rvector6 &outState);
+   bool CheckPlanetodetic(Rvector6 &outState);
+   
+   bool CheckOutgoingAsymptote(Rvector6 &outState); // mod by YK
+   bool CheckIncomingAsymptote(Rvector6 &outState);
+   bool CheckBrouwerMeanShort(Rvector6 &outState); 
+   bool CheckBrouwerMeanLong(Rvector6 &outState);
+   
+   bool CheckAnomaly();
+   bool ComputeTrueAnomaly(Rvector6 &inState, const std::string &stateType);
    
    Real GetOriginData(GmatBase *fromObject, const std::string &whichData = "mu");
 

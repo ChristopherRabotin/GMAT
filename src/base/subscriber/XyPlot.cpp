@@ -1721,6 +1721,11 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // put yvals in the order of parameters added
          for (int i=0; i<mNumYParams; i++)
          {
+            #if DEBUG_XYPLOT_UPDATE
+            MessageInterface::ShowMessage
+               ("XyPlot::Distribute() yParamWrappers[%d]=<%p>, Calling yParamWrappers[%d]->EvaluateReal()\n",
+                i, yParamWrappers[i], i);
+            #endif
             // Now using wrappers (LOJ: 2012.08.02)
             if (yParamWrappers[i] == NULL)
             {

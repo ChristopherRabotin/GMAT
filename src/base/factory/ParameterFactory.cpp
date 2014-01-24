@@ -37,6 +37,11 @@
 #include "ModEquinoctialParameters.hpp"
 #include "DelaunayParameters.hpp"
 #include "PlanetodeticParameters.hpp"
+// Modified by YK
+#include "IncomingAsymptoteParameters.hpp"
+#include "OutgoingAsymptoteParameters.hpp"
+#include "BrouwerMeanShortParameters.hpp"
+#include "BrouwerMeanLongParameters.hpp"
 //
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
@@ -70,6 +75,12 @@
 Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
                                              const std::string &withName)
 {
+   #ifdef DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("ParameterFactory::CreateParameter() entered, type = '%s', name = '%s'\n",
+       ofType.c_str(), withName.c_str());
+   #endif
+   
    // User defined parameters
    if (ofType == "Variable")
       return new Variable(withName);
@@ -187,9 +198,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new EquinMlong(withName);
    if (ofType == "Equinoctial")
       return new EquinState(withName);
-
+   
    // ModifiedEquinoctial parameters; Modified by M.H.
-   if (ofType == "SemiLatusRectum")
+   // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173)
+   //if (ofType == "SemiLatusRectum")
+   if (ofType == "SemilatusRectum")
       return new ModEquinP(withName);
    if (ofType == "ModEquinoctialF")
       return new ModEquinF(withName);
@@ -236,6 +249,52 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "Planetodetic")
       return new PldState(withName);
 
+   // IncomingAsymptote parameters; Modified by YK
+   if (ofType == "IncomingBVAZI")
+      return new IncAsymBVAZI(withName);
+   if (ofType == "IncomingRHA")
+      return new IncAsymRHA(withName);
+   if (ofType == "IncomingDHA")
+      return new IncAsymDHA(withName);
+   
+   // OutgoingAsymptote parameters; Modified by YK
+   if (ofType == "OutgoingBVAZI")
+      return new OutAsymBVAZI(withName);
+   if (ofType == "OutgoingRHA")
+      return new OutAsymRHA(withName);
+   if (ofType == "OutgoingDHA")
+      return new OutAsymDHA(withName);
+
+   // Brouwer Mean Short parameters; Modified by YK
+   // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+   if (ofType == "BrouwerShortSMA")
+      return new BLshortSMAP(withName);
+   if (ofType == "BrouwerShortECC")
+      return new BLshortECCP(withName);
+   if (ofType == "BrouwerShortINC")
+      return new BLshortINCP(withName);
+   if (ofType == "BrouwerShortRAAN")
+      return new BLshortRAANP(withName);
+   if (ofType == "BrouwerShortAOP")
+      return new BLshortAOPP(withName);
+   if (ofType == "BrouwerShortMA")
+      return new BLshortMAP(withName);
+   
+   // BrouwerMeanLong parameters; Modified by YK
+   // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+   if (ofType == "BrouwerLongSMA")
+      return new BLlongSMADP(withName);
+   if (ofType == "BrouwerLongECC")
+      return new BLlongECCDP(withName);
+   if (ofType == "BrouwerLongINC")
+      return new BLlongINCDP(withName);
+   if (ofType == "BrouwerLongRAAN")
+      return new BLlongRAANDP(withName);
+   if (ofType == "BrouwerLongAOP")
+      return new BLlongAOPDP(withName);
+   if (ofType == "BrouwerLongMA")
+      return new BLlongMADP(withName);
+   
    // Orbital parameters
    if (ofType == "VelApoapsis")
       return new VelApoapsis(withName);
@@ -257,8 +316,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Energy(withName);
 
    // Angular parameters
-   if (ofType == "SemilatusRectum")
-      return new SemilatusRectum(withName);
+   // Changed to create ModEquinP() since it is settable Parameter
+   // Fix for GMT-4173 (LOJ: 2014.01.22)
+   //if (ofType == "SemilatusRectum")
+   //   return new SemilatusRectum(withName);
    if (ofType == "HMAG")
       return new AngularMomentumMag(withName);
    if (ofType == "HX")
@@ -510,44 +571,73 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Altitude");
 
       // Equinoctial parameters
-//      creatables.push_back("h");
-//      creatables.push_back("k");
-//      creatables.push_back("p");
-//      creatables.push_back("q");
       creatables.push_back("EquinoctialH");
       creatables.push_back("EquinoctialK");
       creatables.push_back("EquinoctialP");
       creatables.push_back("EquinoctialQ");
       creatables.push_back("MLONG");
       creatables.push_back("Equinoctial");
-
-	  // ModifedEquinoctial parameters ; Modified by M.H.
-	  creatables.push_back("SemiLatusRectum");
+      
+      // ModifedEquinoctial parameters ; Modified by M.H.
+      // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173 (LOJ: 2014.01.22))
+      creatables.push_back("SemilatusRectum");
       creatables.push_back("ModEquinoctialF");
       creatables.push_back("ModEquinoctialG");
       creatables.push_back("ModEquinoctialH");
-	  creatables.push_back("ModEquinoctialK");
+      creatables.push_back("ModEquinoctialK");
       creatables.push_back("TLONG");
       creatables.push_back("ModEquinoctial");
 
-	  // Delaunay parameters ; Modified by M.H.
-	  creatables.push_back("Delaunayl");
+      // Delaunay parameters ; Modified by M.H.
+      creatables.push_back("Delaunayl");
       creatables.push_back("Delaunayg");
       creatables.push_back("Delaunayh");
       creatables.push_back("DelaunayL");
-	  creatables.push_back("DelaunayG");
+      creatables.push_back("DelaunayG");
       creatables.push_back("DelaunayH");
       creatables.push_back("Delaunay");
-	  
-	  // Planetodetic parameters ; Modified by M.H.
-	  creatables.push_back("PlanetodeticRMAG");
+      
+      // Planetodetic parameters ; Modified by M.H.
+      creatables.push_back("PlanetodeticRMAG");
       creatables.push_back("PlanetodeticLON");
       creatables.push_back("PlanetodeticLAT");
       creatables.push_back("PlanetodeticVMAG");
-	  creatables.push_back("PlanetodeticAZI");
+      creatables.push_back("PlanetodeticAZI");
       creatables.push_back("PlanetodeticHFPA");
       creatables.push_back("Planetodetic");
 
+      // IncomingAsymptote parameters ; Modified by YK
+      creatables.push_back("IncomingRHA");
+      creatables.push_back("IncomingDHA");
+      creatables.push_back("IncomingBVAZI");
+      creatables.push_back("IncomingAsymptote");
+      
+      // OutgoingAsymptote parameters ; Modified by YK
+      creatables.push_back("OutgoingRHA");
+      creatables.push_back("OutgoingDHA");
+      creatables.push_back("OutgoingBVAZI");
+      creatables.push_back("OutgoingAsymptote");
+      
+      // BrourMeanShort parameters ; Modified by YK
+      // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+      creatables.push_back("BrouwerShortSMA");
+      creatables.push_back("BrouwerShortECC");
+      creatables.push_back("BrouwerShortINC");
+      creatables.push_back("BrouwerShortRAAN");
+      creatables.push_back("BrouwerShortAOP");
+      creatables.push_back("BrouwerShortMA");
+      creatables.push_back("BrouwerMeanShort");
+      
+      // BrouwerMeanLong parameters ; Modified by YK
+      // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
+      creatables.push_back("BrouwerLongSMA");
+      creatables.push_back("BrouwerLongECC");
+      creatables.push_back("BrouwerLongINC");
+      creatables.push_back("BrouwerLongRAAN");
+      creatables.push_back("BrouwerLongAOP");
+      creatables.push_back("BrouwerLongMA");
+      creatables.push_back("BrouwerMeanLong");
+      
       // Orbital parameters
       creatables.push_back("VelApoapsis");
       creatables.push_back("VelPeriapsis");
@@ -556,9 +646,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("OrbitPeriod");
       creatables.push_back("C3Energy");
       creatables.push_back("Energy");
-
+      
       // Angular parameters
-      creatables.push_back("SemilatusRectum");
+      // Changed SemiLatusRectum to SemilatusRectum above
+      // and commented out this (LOJ: 2013.01.22)
+      //creatables.push_back("SemilatusRectum");
       creatables.push_back("HMAG");
       creatables.push_back("HX");
       creatables.push_back("HY");

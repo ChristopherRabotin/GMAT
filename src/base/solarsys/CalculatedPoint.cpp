@@ -33,6 +33,7 @@
 //#define DEBUG_CP_SET_STRING
 //#define DEBUG_CP_ACTION
 //#define DEBUG_CP_RENAME
+//#define DEBUG_CP_CLOAKING
 
 //---------------------------------
 // static data
@@ -77,6 +78,15 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
    parameterCount = CalculatedPointParamCount;
+
+   // we want to cloak the DEFAULT CalculatedPoint data; i.e. we want to write only those
+   // parameters that have been modified by the user to a script; and we don't
+   // want to include the Create line either.  This will not be true for user-defined
+   // CalculatedPoints (LOJ: 2013.12.17)
+//   cloaking = true; // by default, calculated points are user-defined; the
+                      // built-in SSB will have its isBuiltin flag set by a
+                      // call to SetIsBuiltIn, where the cloaking flag will
+                      // be set properly.   (WCS: 2014.01.10)
 }
 
 //------------------------------------------------------------------------------
@@ -206,6 +216,9 @@ void CalculatedPoint::SetIsBuiltIn(bool builtIn, const std::string &ofType)
 {
    isBuiltIn   = builtIn;
    builtInType = ofType;
+   // Don't cloak the user-defined calculated points!
+   if (isBuiltIn) cloaking  =  true;
+   else           cloaking  =  false;
 }
 
 //------------------------------------------------------------------------------
@@ -371,6 +384,64 @@ bool CalculatedPoint::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCloaked(const Integer id) const
+//------------------------------------------------------------------------------
+bool CalculatedPoint::IsParameterCloaked(const Integer id) const
+{
+   #ifdef DEBUG_CP_CLOAKING
+   MessageInterface::ShowMessage
+      ("CalculatedPoint::IsParameterCloaked() <%p><%s>'%s' entered, id = %2d %s, cloaking = %s, "
+       "isBuiltIn = %s\n",  this, GetTypeName().c_str(), GetName().c_str(), id,
+       (GetParameterText(id)).c_str(), cloaking ? "true" : "false", isBuiltIn ? "true" : "false");
+   #endif
+   
+   if (!cloaking)
+   {
+      #ifdef DEBUG_CP_CLOAKING
+      MessageInterface::ShowMessage
+         ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning false - object is not cloaked\n",
+          this, GetName().c_str());
+      #endif
+      return false;
+   }
+   
+   // if it's read-only, we'll cloak it
+   if (IsParameterReadOnly(id))
+   {
+      #ifdef DEBUG_CP_CLOAKING
+      MessageInterface::ShowMessage
+         ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning true - parameter %d (%s) is read-only\n",
+          this, GetName().c_str(), id, (GetParameterText(id)).c_str());
+      #endif
+      return true;
+   }
+   
+   if (id >= SpacePointParamCount && id < CalculatedPointParamCount)
+   {
+      if (id == BODY_NAMES)
+      {
+         // If built-in calculated point, BodyNames are cloaked
+         if (isBuiltIn)
+         {
+            #ifdef DEBUG_CP_CLOAKING
+            MessageInterface::ShowMessage
+               ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning true - "
+                "it is built-in point\n", this, GetName().c_str());
+            #endif
+            return true;
+         }
+      }
+   }
+   
+   bool isCloaked = SpacePoint::IsParameterCloaked(id);
+   #ifdef DEBUG_CP_CLOAKING
+   MessageInterface::ShowMessage
+      ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+       isCloaked ? "true" : "false");
+   #endif
+   return isCloaked;
+}
 
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const Integer id) const

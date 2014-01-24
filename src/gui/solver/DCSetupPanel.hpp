@@ -46,6 +46,7 @@ private:
    wxStaticText *maxStaticText;
    wxStaticText *reportfileStaticText;  // wxStaticText *textfileStaticText;
    wxStaticText *reportStyleStaticText;
+   wxStaticText *algorithmStaticText;
    wxStaticText *derivativeMethodStaticText;
    
    wxTextCtrl *maxTextCtrl;
@@ -55,6 +56,7 @@ private:
 //   wxCheckBox *centralDifferencesCheckBox;
       
    wxComboBox *styleComboBox;
+   wxComboBox *algorithmComboBox;
    wxComboBox *derivativeMethodComboBox;
          
    wxBitmapButton       *browseButton;

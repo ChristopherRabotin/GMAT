@@ -44,6 +44,7 @@
 
 #ifdef __MAC__
 #include <mach-o/dyld.h>
+#include <unistd.h>                // for getcwd
 #endif
 
 #ifdef __linux__
@@ -2261,8 +2262,8 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, RealArray &realArray,
    char buffer[BUFFER_SIZE];
    bool dataFound = false;
    bool alphaFound = false;
-   Real rval;
-   int colCount = 0, fileCols = 0;
+   //Real rval;
+   //int colCount = 0, fileCols = 0;
    char ch;
    StringTokenizer stk;
    std::string line;

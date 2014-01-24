@@ -988,8 +988,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    //-------------------------------------------------------------------
    bool isLeftValid = true;
    ElementWrapper *leftEw = NULL;
-   static bool writeWarning = true; // To write warning message per session
    
+   // not used -- see commented code below
+//   static bool writeWarning = true; // To write warning message per session
+
    try
    {         
       #if DBGLVL_WRAPPERS > 1
@@ -1070,6 +1072,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       if (leftEw == NULL)
       {
          isLeftValid = false;
+         // Added to show LHS error message (LOJ: 2013.12.03)
+         // When lhs object does not exist, it said that there was an error but
+         // no error message was written out
+         HandleError(false);
       }
       //if (leftEw != NULL)
       else
@@ -1682,6 +1688,8 @@ ElementWrapper* Validator::CreateWrapperWithDot(bool parametersFirst, Integer ma
    // we cannot continue, so just return NULL (loj: 2008.07.24)
    if (obj == NULL && manage == 1)
    {
+      theErrorMsg = "The object \"" + owner + "\" does not exist";
+      
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
          ("Validator::CreateWrapperWithDot() returning NULL, the configured "

@@ -754,7 +754,7 @@ Real GmatMathUtil::Ran ()
 //------------------------------------------------------------------------------
 void GmatMathUtil::SetRanKey(Real k) 
 {
-   Real dummy = 0.0;
+   //Real dummy = 0.0;
    if (k==0) 
    {
       key::x = 10001;
@@ -767,7 +767,8 @@ void GmatMathUtil::SetRanKey(Real k)
       Integer loop = Integer(k-Real(Integer(fabs(k)/31270.0)*31270.0))%31270;
       
       for (i=1; i<=loop;i++) 
-         dummy = GmatMathUtil::Ran();
+         //dummy =
+         GmatMathUtil::Ran();
    }
 }
 

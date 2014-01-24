@@ -20,6 +20,7 @@
  */
 //------------------------------------------------------------------------------
 #include "BarycenterPanel.hpp"
+#include "GmatColorPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "MessageInterface.hpp"
 
@@ -56,11 +57,12 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
 {
    theBarycenter =
       (Barycenter*)theGuiInterpreter->GetConfiguredObject(name.c_str());
+   theClonedBarycenter = (Barycenter*)(theBarycenter->Clone());
    mIsBuiltIn    = theBarycenter->IsBuiltIn();
-
+   
    mBodyNames.Clear();
    mIsBodySelected = false;
-
+   
    Create();
    Show();
 }
@@ -75,6 +77,7 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
 BarycenterPanel::~BarycenterPanel()
 {
    theGuiManager->UnregisterListBox("CelestialBody", bodyListBox, &mExcludedCelesBodyList);
+   delete theClonedBarycenter;
 }
 
 //-------------------------------------------
@@ -123,8 +126,12 @@ void BarycenterPanel::Create()
    GmatStaticBoxSizer * bodiesStaticBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Bodies");
    bodiesStaticBoxSizer->Add(bodyGridSizer, 0, wxALIGN_CENTER|wxALL, borderSize);
    
-   // 5. Add to parent sizer:
+   // 5. Create color panel
+   theColorPanel = new GmatColorPanel(this, this, theClonedBarycenter);
+   
+   // 6. Add to parent sizer:
    theMiddleSizer->Add(bodiesStaticBoxSizer, 0, wxEXPAND|wxALL, borderSize);
+   theMiddleSizer->Add(theColorPanel, 0, wxEXPAND|wxALL, borderSize);
 }
 
 
@@ -142,14 +149,14 @@ void BarycenterPanel::LoadData()
       StringArray selectedBodies;
       if (mIsBuiltIn)
       {
-         selectedBodies = theBarycenter->GetBuiltInNames();
+         selectedBodies = theClonedBarycenter->GetBuiltInNames();
       }
       else
       {
-         selectedBodies= theBarycenter->
+         selectedBodies= theClonedBarycenter->
             GetStringArrayParameter("BodyNames");
          if (selectedBodies.empty())
-            selectedBodies = theBarycenter->GetDefaultBodies();
+            selectedBodies = theClonedBarycenter->GetDefaultBodies();
       }
       for (unsigned int i=0; i<selectedBodies.size(); i++)
       {
@@ -172,7 +179,7 @@ void BarycenterPanel::LoadData()
    }
    
    // Activate "ShowScript"
-   mObject = theBarycenter;
+   mObject = theClonedBarycenter;
 
    /// don't allow the user to modify the built-in Barycenter(s)
    if (mIsBuiltIn)
@@ -196,11 +203,18 @@ void BarycenterPanel::LoadData()
 void BarycenterPanel::SaveData()
 {
    canClose = true;
+
+   // Save color if changed
+   if (theColorPanel->HasColorChanged())
+   {
+      // Copy cloned object to actual object
+      theBarycenter->Copy(theClonedBarycenter);
+   }
+   
    if (mIsBuiltIn) return;
    
    try
    {
-
       Integer count = bodySelectedListBox->GetCount();
   
       if (count == 0)
@@ -211,7 +225,7 @@ void BarycenterPanel::SaveData()
          return;
       }
       
-      theBarycenter->TakeAction("ClearBodies");
+      theClonedBarycenter->TakeAction("ClearBodies");
       
       // get Earth pointer as J2000Body
       CelestialBody *j2000body =
@@ -222,7 +236,7 @@ void BarycenterPanel::SaveData()
       for (Integer i = 0; i < count; i++)
       {
          bodyName = bodySelectedListBox->GetString(i).c_str();
-         theBarycenter->SetStringParameter("BodyNames", bodyName, i);
+         theClonedBarycenter->SetStringParameter("BodyNames", bodyName, i);
          
          body = (CelestialBody*)theGuiInterpreter->GetConfiguredObject(bodyName);
          
@@ -230,15 +244,18 @@ void BarycenterPanel::SaveData()
          if (body->GetJ2000Body() == NULL)
             body->SetJ2000Body(j2000body);
          
-         theBarycenter->SetRefObject(body, Gmat::SPACE_POINT, bodyName);
+         theClonedBarycenter->SetRefObject(body, Gmat::SPACE_POINT, bodyName);
          
          #if DEBUG_BARYCENTER_PANEL
          MessageInterface::ShowMessage
             ("BarycenterPanel::SaveData() body[%d]=%d, name=%s, J2000Body=%d\n",
              i, body, bodyName.c_str(), j2000body);
          #endif
-         
       }
+      
+      // Copy cloned object to actual object
+      theBarycenter->Copy(theClonedBarycenter);
+      EnableUpdate(false);
    }
    catch (BaseException &e)
    {

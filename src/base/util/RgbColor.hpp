@@ -30,12 +30,12 @@ public:
 
    RgbColor();
    RgbColor(const Byte red, const Byte green, const Byte blue, const Byte alpha = 0);
-   RgbColor(const UnsignedInt rgb);
-   RgbColor(const RgbColor &copy);
-   RgbColor& operator=(const RgbColor &right);
+   RgbColor(const UnsignedInt intColor);
+   RgbColor(const RgbColor &rgbColor);
+   RgbColor& operator=(const RgbColor &rgbColor);
    virtual ~RgbColor();
    
-   UnsignedInt GetIntColor();
+   UnsignedInt GetIntColor() const;
    Byte Red();
    Byte Green();
    Byte Blue();
@@ -43,6 +43,10 @@ public:
    
    void Set(const Byte red, const Byte green, const Byte blue, const Byte alpha = 0);
    void Set(const UnsignedInt rgb);
+   
+   // static methods
+   static UnsignedInt ToIntColor(const std::string &colorString);
+   static std::string ToRgbString(const UnsignedInt &intColor);
    
 private:
    struct RgbType
@@ -53,9 +57,19 @@ private:
       unsigned alpha    : 8;
    } rgbType;
    
+   // Reverse for intel storage order
+   struct BgrType
+   {
+      unsigned blue     : 8;
+      unsigned green    : 8;
+      unsigned red      : 8;
+      unsigned alpha    : 8;
+   } bgrType;
+   
    union ColorType
    {
       RgbType rgbColor;
+      BgrType bgrColor;
       UnsignedInt intColor;
    } colorType;
    

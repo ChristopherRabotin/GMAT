@@ -450,24 +450,53 @@ bool ViewCanvas::InitOpenGL()
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-// virtual void SetObjectColors(const wxStringColorMap &objectColorMap)
+// virtual void SetObjectOrbitColors(const ColorMap &orbitColorMap)
 //------------------------------------------------------------------------------
-void ViewCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
+void ViewCanvas::SetObjectOrbitColors(const ColorMap &orbitColorMap)
 {
-   mObjectColorMap = objectColorMap;
+   mObjectOrbitColorMap = orbitColorMap;
+   
+   #if 0
+   ColorMap::const_iterator iter = intOrbitColorMap.begin();
+   while (iter != intOrbitColorMap.end())
+   {
+      wxString objName = (iter->first).c_str();
+      UnsignedInt intColor = iter->second;
+      RgbColor rgb = RgbColor(intColor);
+      mObjectOrbitColorMap[objName] = rgb;
+      ++iter;
+   }
+   #endif
 }
 
+//------------------------------------------------------------------------------
+// virtual void SetObjectTargetColors(const ColorMap &targetColorMap)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetObjectTargetColors(const ColorMap &targetColorMap)
+{
+   mObjectTargetColorMap = targetColorMap;
+   
+   #if 0
+   ColorMap::const_iterator iter = intTargetColorMap.begin();
+   while (iter != intTargetColorMap.end())
+   {
+      wxString objName = (iter->first).c_str();
+      UnsignedInt intColor = iter->second;
+      RgbColor rgb = RgbColor(intColor);
+      mObjectTargetColorMap[objName] = rgb;
+      iter++;
+   }
+   #endif
+}
 
 //------------------------------------------------------------------------------
-// virtual void SetShowObjects(const wxStringColorMap &objectColorMap)
+// virtual void SetShowObjects(const wxStringBoolMap &objectColorMap)
 //------------------------------------------------------------------------------
 void ViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 {
    mShowObjectMap = showObjMap;
 }
-
 
 //------------------------------------------------------------------------------
 // void SetGlObject(const StringArray &objNames,
@@ -475,22 +504,22 @@ void ViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 //                  const std::vector<SpacePoint*> &objArray)
 //------------------------------------------------------------------------------
 void ViewCanvas::SetGlObject(const StringArray &objNames,
-                             const UnsignedIntArray &objOrbitColors,
+                             //const UnsignedIntArray &objOrbitColors,
                              const std::vector<SpacePoint*> &objArray)
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, colorCount=%d, "
-		 "objArrayCount=%d\n", mPlotName.c_str(), objNames.size(), objOrbitColors.size(),
-		 objArray.size());
+      ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, objArrayCount=%d\n",
+       mPlotName.c_str(), objNames.size(), objArray.size());
    #endif
    
    mObjectArray = objArray;
    wxArrayString tempList;
    int scCount = 0;
    
-   if (objNames.size() == objOrbitColors.size() &&
-       objNames.size() == objArray.size())
+   //if (objNames.size() == objOrbitColors.size() &&
+   //    objNames.size() == objArray.size())
+   if (objNames.size() == objArray.size())
    {      
       for (UnsignedInt i=0; i<objNames.size(); i++)
       {
@@ -510,7 +539,7 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
          #endif
       }
       
-      AddObjectList(tempList, objOrbitColors);
+      AddObjectList(tempList);
    }
    else
    {
@@ -856,8 +885,11 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                             const RealArray &posX, const RealArray &posY,
                             const RealArray &posZ, const RealArray &velX,
                             const RealArray &velY, const RealArray &velZ,
-                            const UnsignedIntArray &scColors, bool solving,
-                            Integer solverOption, bool drawing, bool inFunction)
+                            //const UnsignedIntArray &scColors,
+                            const ColorMap &orbitColorMap,
+                            const ColorMap &targetColorMap,
+                            bool solving, Integer solverOption,
+                            bool drawing, bool inFunction)
 {
    if (IsFrozen())
       Thaw();
@@ -870,6 +902,23 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    mIsSolving = solving;
    mScCount = scNames.size();
    mScNameArray = scNames;
+   UnsignedIntArray scColors;
+   
+   // Build spacecraft colors
+   for (int i = 0; i < mScCount; i++)
+   {
+      //@todo If color not found, throw an exception?
+      UnsignedInt intColor = 0XFFFFFF; // Temporarily set to white
+      if (solving)
+         intColor = targetColorMap.at(scNames[i]);
+      else
+         intColor = orbitColorMap.at(scNames[i]);
+      scColors.push_back(intColor);
+   }
+   
+   // Set object color map
+   SetObjectOrbitColors(orbitColorMap);
+   SetObjectTargetColors(targetColorMap);
    
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
@@ -878,9 +927,16 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       ("ViewCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d, "
        "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().c_str(),
        time, mNumData, mScCount, solving, solverOption, drawing, inFunction);
+   ColorMap::const_iterator iter = orbitColorMap.begin();
+   while (iter != orbitColorMap.end())
+   {
+      MessageInterface::ShowMessage
+         ("orbitColorMap[%s] = %06X\n", (iter->first).c_str(), iter->second);
+      iter++;
+   }
    for (int i = 0; i < mScCount; i++)
       MessageInterface::ShowMessage
-         ("   posX:%12.5f, posY:%12.5f, posZ:%12.5f, scColor:%u\n", posX[i], posY[i],
+         ("   posX:%12.5f, posY:%12.5f, posZ:%12.5f, scColor:%06X\n", posX[i], posY[i],
           posZ[i], scColors[i]);
    #endif
    
@@ -958,17 +1014,14 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
 
 
 //---------------------------------------------------------------------------
-// void AddObjectList(wxArrayString &objNames, UnsignedIntArray &objColors,
-//                    bool clearList=true)
+// void AddObjectList(wxArrayString &objNames, bool clearList=true)
 //---------------------------------------------------------------------------
-void ViewCanvas::AddObjectList(const wxArrayString &objNames,
-                               const UnsignedIntArray &objColors,
-                               bool clearList)
+void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::AddObjectList() '%s' entered, object count=%d, color count=%d, "
-       "clearList=%d\n", mPlotName.c_str(), objNames.GetCount(), objColors.size(), clearList);
+      ("ViewCanvas::AddObjectList() '%s' entered, object count=%d, clearList=%d\n",
+       mPlotName.c_str(), objNames.GetCount(), clearList);
    #endif
    
    // clear bodies
@@ -993,11 +1046,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       
       // initialize show object
       mShowObjectMap[objNames[i]] = true;
-      
-      // initialize object color
-      rgb.Set(objColors[i]);
-      mObjectColorMap[objNames[i]] = rgb;
-      
+            
       // set real object radius, if it is CelestialBody
       if (mObjectArray[i]->IsOfType(Gmat::CELESTIAL_BODY))
       {
@@ -1012,9 +1061,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       
       #if DEBUG_OBJECT > 1
       MessageInterface::ShowMessage
-         ("   objNames[%d]=%s, objRadius=%f, objColor=%u, rgb=[%u,%u,%u]\n",
-          i, objNames[i].c_str(), mObjectRadius[i], objColors[i], rgb.Red(),
-          rgb.Green(), rgb.Blue());
+         ("   objNames[%d]=%s, objRadius=%f\n", i, objNames[i].c_str(), mObjectRadius[i]);
       #endif
    }
    
@@ -2159,7 +2206,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          if (mNumData < sNumDebugOutput)
          {
             MessageInterface::ShowMessage
-               ("   satId=%d, object=%s, colorIndex=%u, color=%u\n", satId,
+               ("   satId=%d, object=%s, colorIndex=%u, color=%06X\n", satId,
                 mObjectNames[satId].c_str(), colorIndex, mObjectOrbitColor[colorIndex]);
             MessageInterface::ShowMessage
                ("   satId:%d posIndex=%d, gcipos = %f, %f, %f\n", satId,
@@ -2239,6 +2286,7 @@ void ViewCanvas::UpdateOtherData(const Real &time)
       if (otherObj != NULL && otherObj->GetType() != Gmat::SPACECRAFT)
       {
          int objId = GetObjectId(mObjectNames[obj]);
+         wxString objName = mObjectNames[objId].c_str();
          
          #if DEBUG_UPDATE_OBJECT
          MessageInterface::ShowMessage
@@ -2254,6 +2302,13 @@ void ViewCanvas::UpdateOtherData(const Real &time)
                mDrawOrbitFlag[colorIndex] = false;
             else
                mDrawOrbitFlag[colorIndex] = true;
+            
+            //LOJ: 2013.11.25
+            // Set orbit or target color
+            if (mIsSolving)
+               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.c_str()];
+            else
+               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.c_str()];
             
             Rvector6 objMjEqState;
             try

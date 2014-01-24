@@ -145,7 +145,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    #endif
    
    // add run tools
-   toolBar->AddTool(TOOL_RUN, _T("Run"), *bitmaps[8], _T("Run (Ctrl+F5)"));
+   toolBar->AddTool(TOOL_RUN, _T("Run"), *bitmaps[8], _T("Run (F5)"));
    toolBar->AddTool(TOOL_PAUSE, _T("Pause"), *bitmaps[9], _T("Pause"));
    toolBar->AddTool(TOOL_STOP, _T("Stop"), *bitmaps[10], _T("Stop"));
    toolBar->AddTool(TOOL_SCREENSHOT, _T("Screenshot"), *bitmaps[16], _T("Screenshot (F10)"));

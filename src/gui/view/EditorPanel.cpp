@@ -135,23 +135,23 @@ void EditorPanel::Create()
    //------------------------------------------------------
    mSaveSyncButton =
       new wxButton(this, ID_SYNC_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
-   mSaveSyncButton->SetToolTip("Save,Sync (Ctrl+Shift+F5)");
+   mSaveSyncButton->SetToolTip("Save,Sync (Ctrl+Shift+S)");
    mSaveSyncRunButton =
-      new wxButton(this, ID_SYNC_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
-   mSaveSyncRunButton->SetToolTip("Save,Sync,Run (Shift+F5)");
+      new wxButton(this, ID_SYNC_RUN_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
+   mSaveSyncRunButton->SetToolTip("Save,Sync,Run (Ctrl+Shift+F5)");
    
    // shortcut keys
-   wxAcceleratorEntry entries[9];
+   wxAcceleratorEntry entries[8];
    entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);
    entries[1].Set(wxACCEL_NORMAL,  WXK_F7, ID_BUTTON_SCRIPT);
    entries[2].Set(wxACCEL_CTRL,  (int) 'W', ID_BUTTON_CLOSE);
-   entries[3].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_F5, ID_SYNC_BUTTON);
-   entries[4].Set(wxACCEL_ALT | wxACCEL_CTRL,  WXK_F5, ID_SYNC_RUN_BUTTON);
-   entries[5].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'D', ID_BUTTON_SAVE);
-   entries[6].Set(wxACCEL_SHIFT,  WXK_F12, ID_BUTTON_SAVE_AS);
-   entries[7].Set(wxACCEL_CTRL,  WXK_TAB, ID_TAB_NEXT);
-   entries[8].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_TAB, ID_TAB_PREV);
-   wxAcceleratorTable accel(9, entries);
+   entries[3].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'S', ID_SYNC_BUTTON);
+   entries[4].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_F5, ID_SYNC_RUN_BUTTON);
+//   entries[5].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'D', ID_BUTTON_SAVE); 
+   entries[5].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_F12, ID_BUTTON_SAVE_AS);
+   entries[6].Set(wxACCEL_CTRL,  WXK_TAB, ID_TAB_NEXT);
+   entries[7].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  WXK_TAB, ID_TAB_PREV);
+   wxAcceleratorTable accel(8, entries);
    this->SetAcceleratorTable(accel);
 
    //------------------------------------------------------

@@ -58,7 +58,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\application\debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>

@@ -1331,7 +1331,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    //-----------------------------------
    // Celestial Bodies (for now, only user-defined or modified ones)
    //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::CELESTIAL_BODY);
+   objs = theModerator->GetListOfObjects(Gmat::CELESTIAL_BODY);   
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d CelestialBodys\n", objs.size());
    #endif
@@ -1377,13 +1377,55 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #ifdef DEBUG_SCRIPT_WRITING
       MessageInterface::ShowMessage("   About to ask Moderator for list of Calculated Points\n");
    #endif
-   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT, true);
+   // Write default calculated points if parameter modified.
+   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT, false);
    #ifdef DEBUG_SCRIPT_WRITING
       MessageInterface::ShowMessage("   Found %d Calculated Points\n", objs.size());
    #endif
    if (objs.size() > 0)
-      WriteObjects(objs, "Calculated Points", mode);
-   
+   {
+      bool        foundUserDefinedCalPoints = false;
+      bool        foundModifiedCalPoints    = false;
+      StringArray userDefinedCalPoints;
+      StringArray modifiedCalPoints;
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         #ifdef DEBUG_SCRIPT_WRITING
+         MessageInterface::ShowMessage("      calculated point name = '%s'\n", (*current).c_str());
+         #endif
+         
+         object = FindObject(*current);
+         if (object == NULL)
+            throw InterpreterException("Cannot write NULL object \"" + (*current) + "\"");
+         
+         if (!(object->IsOfType("CalculatedPoint")))
+            throw InterpreterException("Error writing invalid calculated point \"" + (*current) + "\"");
+         
+         CalculatedPoint *theCalPt = (CalculatedPoint*) object;
+         if (!theCalPt->IsBuiltIn())
+         {
+            #ifdef DEBUG_SCRIPT_WRITING
+            MessageInterface::ShowMessage
+               ("      %s is user-defined\n", theCalPt->GetName().c_str());
+            #endif
+            foundUserDefinedCalPoints = true;
+            userDefinedCalPoints.push_back(*current);
+         }
+         else if (!theCalPt->IsObjectCloaked())
+         {
+            #ifdef DEBUG_SCRIPT_WRITING
+            MessageInterface::ShowMessage
+               ("      %s is built-in and modified\n", theCalPt->GetName().c_str());
+            #endif
+            foundModifiedCalPoints = true;
+            modifiedCalPoints.push_back(*current);
+         }
+      }
+      if (foundModifiedCalPoints)  
+         WriteObjects(modifiedCalPoints, "User-Modified Built-in Calculated Points", mode);
+      if (foundUserDefinedCalPoints) 
+         WriteObjects(userDefinedCalPoints, "User-Defined Calculated Points", mode);
+   }
    
    //-----------------------------------
    // Spacecraft
@@ -2072,8 +2114,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             {
                Gmat::ParameterType paramType = obj->GetParameterType(paramID);
                // Since string can have minus sign, check it first
-               if (paramType != Gmat::STRING_TYPE && paramType != Gmat::ENUMERATION_TYPE &&
-                   paramType != Gmat::FILENAME_TYPE)
+               if ((paramType != Gmat::STRING_TYPE && paramType != Gmat::ENUMERATION_TYPE &&
+                   paramType != Gmat::FILENAME_TYPE) || paramType == Gmat::COLOR_TYPE)
                   inCommandMode = true;
             }
             else

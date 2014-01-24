@@ -53,6 +53,7 @@ using namespace GmatTimeConstants;   // for JD offsets, etc.
 //#define DEBUG_BF_EPOCHS
 //#define DEBUG_BF_SC
 //#define DEBUG_BFA_INIT
+//#define DEBUG_SET_REF
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -281,14 +282,15 @@ GmatBase* BodyFixedAxes::Clone() const
 bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                  const std::string &name)
 {
+   #ifdef DEBUG_SET_REF
+   MessageInterface::ShowMessage
+      ("BodyFixedAxes::SetRefObject() <%s>, obj=<%p>'%s', name=%s\n", GetName().c_str(),
+       obj, obj ? obj->GetName().c_str() : "NULL",  name.c_str());
+   #endif
+   
    if (obj == NULL)
       return false;
 
-   #ifdef DEBUG_SET_REF
-   MessageInterface::ShowMessage
-      ("BodyFixedAxes::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
-       obj, name.c_str());
-   #endif
    if (name == originName)
    {
       if ((!obj->IsOfType("CelestialBody")) && (!obj->IsOfType("Spacecraft")))
@@ -300,6 +302,10 @@ bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          throw cse;
       }
    }
+   #ifdef DEBUG_SET_REF
+   MessageInterface::ShowMessage
+      ("BodyFixedAxes::SetRefObject() returning GmatBase::SetRefObject()\n");
+   #endif
    return DynamicAxes::SetRefObject(obj, type, name);
 }
 
