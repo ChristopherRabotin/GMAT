@@ -515,11 +515,12 @@
 
             <entry><para>Allows you to select available colors for spacecraft
             orbits. The colors can be identified through a string or an
-            integer array. Ex. Setting spacecraft's orbit color to red can be
-            done in following two ways: <literal>DefaultSC.OrbitColor =
-            Red</literal> or <literal>DefaultSC.OrbitColor = [255 0
-            0]</literal>. This field can be modified in the Mission Sequence
-            as well.</para> <variablelist>
+            integer array. For example: Setting spacecraft's orbit color to
+            red can be done in following two ways:
+            <literal>DefaultSC.OrbitColor = Red</literal> or
+            <literal>DefaultSC.OrbitColor = [255 0 0]</literal>. This field
+            can be modified in the Mission Sequence as well.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -577,12 +578,12 @@
             <entry><para>Allows you to select available colors for perturbing
             trajectories during iterative processes such as Differential
             Correction or Optimization. The target color can be identified
-            through a string or an integer array. Ex. Setting spacecraft's
-            perturbing trajectories to yellow color can be done in following
-            two ways: <literal>DefaultSC.TargetColor = Yellow</literal> or
-            <literal>DefaultSC.TargetColor = [255 255 0]</literal> . This
-            field can be modified in the Mission Sequence as well.</para>
-            <variablelist>
+            through a string or an integer array. For example: Setting
+            spacecraft's perturbing trajectories to yellow color can be done
+            in following two ways: <literal>DefaultSC.TargetColor =
+            Yellow</literal> or <literal>DefaultSC.TargetColor = [255 255
+            0]</literal> . This field can be modified in the Mission Sequence
+            as well.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
