@@ -38,10 +38,11 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="SolarSystem"/>, <xref linkend="Barycenter"/>, <xref
-    linkend="LibrationPoint"/>, <xref linkend="CoordinateSystem"/></para>
+    linkend="LibrationPoint"/>, <xref linkend="CoordinateSystem"/>, <xref
+    linkend="Setting_Colors"/></para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="CelestialBody_Resource_Fields">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -441,6 +442,74 @@
 
                   <listitem>
                     <para>sec.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>OrbitColor</guilabel></entry>
+
+            <entry><para>Allows you to set available colors for built-in or
+            user-defined <guilabel>CelestialBody</guilabel> orbits that are
+            drawn on the 3D <guilabel>OrbitView</guilabel> graphics displays.
+            Colors on a <guilabel>CelestialBody</guilabel> object can be set
+            through a string or an integer array. For example: Setting a
+            celestial body's orbit color to red can be done in the following
+            two ways: <literal>CelestialBody.OrbitColor = Red</literal> or
+            <literal>Celestialbody.OrbitColor = [255 0 0]</literal>. This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Orbit Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Orchid for user-defined
+                    <guilabel>CelestialBody</guilabel>, Pink for user-defined
+                    <guilabel>Comet</guilabel>, Salmon for user-defined
+                    <guilabel>Asteroid</guilabel> and Tan for user-defined
+                    <guilabel>Moon</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1024,6 +1093,73 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>TargetColor</guilabel></entry>
+
+            <entry><para>Allows you to select available colors for perturbing
+            <guilabel>CelestialBody</guilabel> orbital trajectories that are
+            drawn during iterative processes such as Differential Correction
+            or Optimization. The target color can be identified through a
+            string or an integer array. For example: Setting a celestial
+            body's perturbing trajectory color to yellow can be done in
+            following two ways: <literal>Celestialbody.TargetColor =
+            Yellow</literal> or <literal>Celestialbody.TargetColor = [255 255
+            0]</literal> . This field can be modified in the Mission Sequence
+            as well.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Target Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Dark Gray for built-in or user-defined
+                    <guilabel>CelestialBody</guilabel>,
+                    <guilabel>Comet</guilabel>, <guilabel>Asteroid</guilabel>
+                    and <guilabel>Moon</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -1083,7 +1219,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_CelestialBody_GUI_2.png"
+                     fileref="files/images/Resource_CelestialBody_GUI_1A.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -1216,6 +1352,24 @@ Vesta.RotationRate        = 1617.332776</code></programlisting>
       respectively and the field is displayed for information purposes only.
       Future versions of GMAT will support DE421 for Luna and IAU-2000A theory
       for Earth.</para>
+
+      <refsection>
+        <title>Setting Colors On Orbits Of Celestial Bodies</title>
+
+        <para>GMAT allows you to assign colors to orbits of celestial bodies
+        that are drawn in the <guilabel>OrbitView</guilabel> graphics display
+        windows. GMAT also allows you to assign colors to perturbing celestial
+        body orbital trajectories drawn during iterative processes such as
+        differential correction or optimization. The
+        <guilabel>CelestialBody</guilabel> object's
+        <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+        fields are used to assign colors to both orbital and perturbing
+        trajectories. See the <xref linkend="CelestialBody_Resource_Fields"
+        xrefstyle="select:title"/> section for description of these two
+        fields. Also see <xref linkend="Setting_Colors"/> documentation for
+        discussion and examples on how to set colors on a celestial
+        body.</para>
+      </refsection>
     </refsection>
   </refsection>
 

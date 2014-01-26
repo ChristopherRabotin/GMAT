@@ -72,8 +72,8 @@
             <entry><guilabel>Add</guilabel></entry>
 
             <entry><para>Allows the user to pick selected resources such as
-            <guilabel>Spacecraft(s)</guilabel> or
-            <guilabel>GroundStation(s)</guilabel>. The
+            <guilabel>Spacecrafts</guilabel> or
+            <guilabel>GroundStations</guilabel>. The
             <guilabel>GroundTrackPlot</guilabel> object is used to draw
             spacecraft's longtitude and latitude time-history on a
             two-dimensional texture map of a central body that you select.
