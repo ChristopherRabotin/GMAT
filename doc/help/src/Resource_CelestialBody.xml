@@ -458,8 +458,8 @@
           <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
-            <entry><para>Allows you to set available colors for built-in or
-            user-defined <guilabel>CelestialBody</guilabel> orbits that are
+            <entry><para>Allows you to set available colors on built-in or
+            user-defined <guilabel>CelestialBody</guilabel> objects that are
             drawn on the 3D <guilabel>OrbitView</guilabel> graphics displays.
             Colors on a <guilabel>CelestialBody</guilabel> object can be set
             through a string or an integer array. For example: Setting a
@@ -497,11 +497,10 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>Orchid for user-defined
-                    <guilabel>CelestialBody</guilabel>, Pink for user-defined
-                    <guilabel>Comet</guilabel>, Salmon for user-defined
-                    <guilabel>Asteroid</guilabel> and Tan for user-defined
-                    <guilabel>Moon</guilabel></para>
+                    <para>Orchid for user-defined <guilabel>Planet</guilabel>,
+                    Pink for user-defined <guilabel>Comet</guilabel>, Salmon
+                    for user-defined <guilabel>Asteroid</guilabel> and Tan for
+                    user-defined <guilabel>Moon</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -1137,9 +1136,9 @@
 
                   <listitem>
                     <para>Dark Gray for built-in or user-defined
-                    <guilabel>CelestialBody</guilabel>,
-                    <guilabel>Comet</guilabel>, <guilabel>Asteroid</guilabel>
-                    and <guilabel>Moon</guilabel></para>
+                    <guilabel>Planet</guilabel>, <guilabel>Comet</guilabel>,
+                    <guilabel>Asteroid</guilabel> and
+                    <guilabel>Moon</guilabel></para>
                   </listitem>
                 </varlistentry>
 
