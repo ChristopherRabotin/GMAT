@@ -40,7 +40,7 @@
     object's <guilabel>OrbitColor</guilabel> and
     <guilabel>TargetColor</guilabel> fields. Also see the <xref
     linkend="SpacecraftVisProp_Fields" xrefstyle="select:title"/> section
-    below for description of these two fields. The Spacecraft visualization
+    below to read more about these two fields. The Spacecraft visualization
     properties can be configured either through GMAT’s GUI or the script
     interface.</para>
 
