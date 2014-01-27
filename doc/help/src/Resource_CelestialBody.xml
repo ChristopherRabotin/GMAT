@@ -1096,16 +1096,17 @@
           <row>
             <entry><guilabel>TargetColor</guilabel></entry>
 
-            <entry><para>Allows you to select available colors for perturbing
-            <guilabel>CelestialBody</guilabel> orbital trajectories that are
-            drawn during iterative processes such as Differential Correction
-            or Optimization. The target color can be identified through a
-            string or an integer array. For example: Setting a celestial
-            body's perturbing trajectory color to yellow can be done in
-            following two ways: <literal>Celestialbody.TargetColor =
-            Yellow</literal> or <literal>Celestialbody.TargetColor = [255 255
-            0]</literal> . This field can be modified in the Mission Sequence
-            as well.</para> <variablelist>
+            <entry><para>Allows you to set available colors on
+            <guilabel>CelestialBody</guilabel> object's perturbing orbital
+            trajectories that are drawn during iterative processes such as
+            Differential Correction or Optimization. The target color can be
+            identified through a string or an integer array. For example:
+            Setting a celestial body's perturbing trajectory color to yellow
+            can be done in following two ways:
+            <literal>Celestialbody.TargetColor = Yellow</literal> or
+            <literal>Celestialbody.TargetColor = [255 255 0]</literal> . This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

@@ -870,8 +870,9 @@
       <para>GMAT allows you to set colors on a ground station facility that
       you create. The <guilabel>GroundStation</guilabel> object's
       <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
-      fields are used to set colors on a ground station facility. See the <xref linkend="GroundStation_Resource_Fields"
-    xrefstyle="select:title"/> section for description of these two fields. Also See <xref
+      fields are used to set colors on a ground station facility. See the
+      <xref linkend="GroundStation_Resource_Fields" xrefstyle="select:title"/>
+      section to read more about these two fields. Also See <xref
       linkend="Setting_Colors"/> documentation for discussion and examples on
       how to set colors on a ground station facility.</para>
     </refsection>
