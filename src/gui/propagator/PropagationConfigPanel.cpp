@@ -2241,9 +2241,10 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
 
       // Current code always enables Setup for any model; disabled for "None"
 //      if (currentBodyName == "Earth")
-      theDragSetupButton->Enable(true);  // Is this right?
-//      else
-//         theDragSetupButton->Enable(false);  // Is this right?
+      if (currentBodyName == "Mars")
+         theDragSetupButton->Enable(false);  // Is this right?
+      else
+         theDragSetupButton->Enable(true);  // Is this right?
    }
    else
    {
@@ -2270,7 +2271,10 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
          if (primaryBodyData->dragType == dragModelArray[i])
             set = i;
       theAtmosModelComboBox->SetSelection(set);
-      theDragSetupButton->Enable(true);
+      if (primaryBodyData->bodyName == "Mars")
+         theDragSetupButton->Enable(false);
+      else
+         theDragSetupButton->Enable(true);
    }
 }
 
@@ -2363,9 +2367,10 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       if (atmosCount > 0)
       {
          theAtmosModelComboBox->Enable(true);
-         if (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] //||
+         if ((primaryBodyData->bodyName == "Mars") ||
+             (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] //||
              //theAtmosModelComboBox->GetValue() == dragModelArray[EXPONENTIAL]
-             )
+             ))
          {
             theDragSetupButton->Enable(false);
          }
@@ -2416,6 +2421,8 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
    }
+   if (primaryBodyString == "Mars")
+      theDragSetupButton->Enable(false);
 }
 
 
@@ -3138,6 +3145,8 @@ void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
    }
+   if (thePrimaryBodyComboBox->GetValue() == "Mars")
+      theDragSetupButton->Enable(false);
 
    EnableUpdate(true);
 }
