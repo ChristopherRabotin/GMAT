@@ -16,8 +16,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -60,6 +58,18 @@ or
 
 <literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>){<replaceable>StopCond</replaceable>};
     </synopsis>
+	
+	    <para>In GMAT, syntax for setting orbit color on a <guilabel>Propagate</guilabel> command for a single <guilabel>Spacecraft</guilabel> propagating 
+		forward to a single stopping condition can be done by either identifying orbit color through ColorName or via RGB triplet value:</para>
+	
+	    <synopsis>
+<literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>),{<replaceable>StopCond, OrbitColor = ColorName</replaceable>};
+
+or
+
+<literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>),{<replaceable>StopCond, OrbitColor = [RGB triplet value]</replaceable>};
+    </synopsis>
+	
   </refsynopsisdiv>
 
   <refsection>
@@ -109,7 +119,7 @@ or
     linkend="Formation"/></para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="Propagate_Options">
     <title>Options</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -533,6 +543,70 @@ or
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>OrbitColor</guilabel></entry>
+
+            <entry><para>Sets orbit color on a <guilabel>Propagate</guilabel>
+            command. Default color on <guilabel>Propagate</guilabel> segment
+            is seeded from color that is set on
+            <guilabel>Spacecraft.OrbitColor</guilabel> field. To set unique
+            colors to <guilabel>Propagate</guilabel> command in script mode:
+            Enter ColorName or RGB triplet value for the color of your choice.
+            In GUI mode, select unique color of your choice by clicking on
+            Orbit Color Selectbox. For Example: Setting yellow color to
+            <guilabel>Propagate</guilabel> segment in script mode can be done
+            in following two ways: <literal>Propagate DefaultProp(DefaultSC)
+            {DefaultSC.Earth.Apoapsis, OrbitColor = Yellow}</literal> or
+            <literal>Propagate DefaultProp(DefaultSC)
+            {DefaultSC.Earth.Apoapsis, OrbitColor = [255 255
+            0]}</literal>.</para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>
+                      Any color available from the Orbit Color
+                      selectbox
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Default color on <guilabel>Propagate</guilabel>
+                    command is color that is first set on
+                    <guilabel>Spacecraft.OrbitColor</guilabel> field</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>no</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -588,7 +662,7 @@ BeginMissionSequence</code>r</programlisting>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Command_Propagate_GUI_1.png"
+                       fileref="files/images/Command_Propagate_GUI_1A.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
@@ -638,7 +712,7 @@ BeginMissionSequence</code>r</programlisting>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Command_Propagate_GUI_3.png"
+                       fileref="files/images/Command_Propagate_GUI_3A.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
@@ -706,7 +780,7 @@ BeginMissionSequence</code>r</programlisting>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Command_Propagate_GUI_5.png"
+                       fileref="files/images/Command_Propagate_GUI_5A.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
@@ -852,7 +926,7 @@ Prop3(aFormation){Sat1.Earth.Periapsis}</code></programlisting>
 
         <para>This is NOT supported!</para>
 
-        <para> <literal>Propagate numProp(numSat)
+        <para><literal>Propagate numProp(numSat)
         spkProp(spkSat1,spkSat2)</literal></para>
       </warning>
     </refsection>
