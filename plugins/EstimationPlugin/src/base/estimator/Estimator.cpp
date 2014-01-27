@@ -1521,8 +1521,20 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 }
 
 
-///// These methods need to be commented
 // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
+//                    Real inputStateElement, Real* outputStateElement)
+//------------------------------------------------------------------------------
+/**
+ * Method used to convert result of a state's element in A1mjd to participant's coordinate system
+ *
+ * @param infor					information about state's element
+ * @param epoch					the epoch at which the state is converted it's coordinate system
+ * @param inputStateElement		state's element in GMAT internal coordinate system (A1Mjd)
+ * @param outputStateElemnet	state's element in participant's coordinate system
+ *
+*/
 bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
 {
 
@@ -1568,6 +1580,16 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 
 
 // made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// void Estimator::GetEstimationState(GmatState& outputState)
+//-------------------------------------------------------------------------
+/**
+ * This Method used to convert result of estimation state to participants'
+ * coordinate system
+ *
+ * @param outState		estimation state in participants' coordinate systems
+ *
+*/
 void Estimator::GetEstimationState(GmatState& outputState)
 {
 	const std::vector<ListItem*> *map = esm.GetStateMap();

@@ -591,10 +591,15 @@ void MeasurementManager::LoadObservations()
       DataFileAdapter dfa;
    #endif
 
+   std::vector<ObservationData>     obsTable;				// made changes by TUAN NGUYEN
+   std::vector<UnsignedInt>         startIndexes;			// made changes by TUAN NGUYEN
+   std::vector<UnsignedInt>         endIndexes;				// made changes by TUAN NGUYEN
    observations.clear();
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
+      startIndexes.push_back(obsTable.size());				// made changes by TUAN NGUYEN
+
       ObservationData *od;
 ///// TBD: Look at file handlers here once data file pieces are designed
 	  ObservationData od_old;
@@ -637,11 +642,12 @@ void MeasurementManager::LoadObservations()
 			   {
 				   if (od_old.epoch < od->epoch)
 				  {
-                     observations.push_back(*od);
+                     // observations.push_back(*od);		// made changes by TUAN NGUYEN
+					 obsTable.push_back(*od);				// made changes by TUAN NGUYEN
 
                      #ifdef DEBUG_LOAD_OBSERVATIONS
-					 MessageInterface::ShowMessage(" A1MJD epoch: %.15lf   participants: %s   %s   observation data: %.12lf  dopplerCountInterval = %lf  band = %d\n", od->epoch, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0], od->dopplerCountInterval, od->uplinkBand);
-//					 MessageInterface::ShowMessage(" A1MJD epoch: %.15lf   participants: %s   %s   observation data: %.12lf\n", od->epoch, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//					 MessageInterface::ShowMessage(" A1MJD epoch: %.15lf   participants: %s   %s   observation data: %.12lf  dopplerCountInterval = %lf  band = %d\n", od->epoch, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0], od->dopplerCountInterval, od->uplinkBand);
+					 MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                      #endif
 
 					 od_old = *od;
@@ -649,14 +655,14 @@ void MeasurementManager::LoadObservations()
 				  else
 				  {
                      #ifdef DEBUG_LOAD_OBSERVATIONS
-				     MessageInterface::ShowMessage(" A1MJD epoch: %.15lf   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", od->epoch, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+				     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                      #endif
 				  }
 			   }
 			   else
 			   {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" A1MJD epoch: %.15lf   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", od->epoch, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
 			   }
                od = streamList[i]->ReadObservation();
@@ -664,7 +670,47 @@ void MeasurementManager::LoadObservations()
          }
       #endif
 	  }
+
+	  endIndexes.push_back(obsTable.size()-1);				// made changes by TUAN NGUYEN
    }
+
+   
+   // Sort observation data by epoch due to observations table is required to have an epoch ascending order
+   bool completed = false;
+   while (!completed)
+   {
+      UnsignedInt minIndex = streamList.size();
+      for (UnsignedInt i = 0; i < streamList.size(); ++i)
+      {
+		 if (startIndexes[i] > endIndexes[i])
+            continue;
+
+		 if (minIndex == streamList.size())
+            minIndex = i;
+		 else
+		 {
+		    if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
+               minIndex = i;
+		 }
+	  }
+	  
+	  if (minIndex < streamList.size())
+	  {
+	     observations.push_back(obsTable[startIndexes[minIndex]]);
+		 startIndexes[minIndex]++;
+	  }
+	  else
+		 completed = true;
+
+   }
+
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+   for (UnsignedInt i = 0; i < observations.size(); ++i)
+	   MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+   #endif
+
+
+   
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
@@ -1115,6 +1161,13 @@ bool MeasurementManager::CalculateMeasurements(bool withEvents)
       MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(%s)\n", (withEvents?"true":"false"));
    #endif
 
+   // Specify observation data for measurement
+   ObservationData* od;															// made changes by TUAN NGUYEN
+   if (observations.empty())													// made changes by TUAN NGUYEN
+      return false;																// made changes by TUAN NGUYEN
+   else																			// made changes by TUAN NGUYEN
+	  od = &(*currentObs);														// made changes by TUAN NGUYEN
+
    bool retval = false;
 
    eventCount = 0;
@@ -1122,8 +1175,25 @@ bool MeasurementManager::CalculateMeasurements(bool withEvents)
    for (UnsignedInt j = 0; j < models.size(); ++j)
    {
       #ifdef DEBUG_FLOW
-	     MessageInterface::ShowMessage(" Measurement %d: models[%d] name = '%s'\n", j, j, models[j]->GetName().c_str());
+	     MessageInterface::ShowMessage(" Measurement models[%d] name = '%s'    measurement type = '%s'\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
+		 MessageInterface::ShowMessage(" Observation data: Measurement type = '%s'\n", od->typeName.c_str()); 
       #endif
+      // Verify observation data belonging to the measurement model jth
+      if (models[j]->GetStringParameter("Type") != od->typeName)
+      {
+		 measurements[j].typeName		= models[j]->GetStringParameter("Type");
+	     measurements[j].epoch			= od->epoch;
+	     measurements[j].epochSystem	= od->epochSystem;
+		 measurements[j].isFeasible		= false;
+	     measurements[j].covariance		= NULL;
+	     measurements[j].eventCount		= 0;
+	     measurements[j].feasibilityValue = 0.0;
+	     measurements[j].value.clear();
+
+		 continue;
+      }
+      
+
 
 ///// TBD: Do we want something more generic here?
       // Specify ramp table associated with measurement model models[j]:					// made changes by TUAN NGUYEN
@@ -1134,9 +1204,9 @@ bool MeasurementManager::CalculateMeasurements(bool withEvents)
 	     rt = &(rampTables[sr[0]]);															// made changes by TUAN NGUYEN
 
 	  // Specify observation data for measurement. If no observation data used, it passes a NULL pointer.
-	  ObservationData* od = NULL;															// made changes by TUAN NGUYEN
-	  if (!observations.empty())															// made changes by TUAN NGUYEN
-	     od = &(*currentObs);																// made changes by TUAN NGUYEN
+//	  ObservationData* od = NULL;															// made changes by TUAN NGUYEN
+//	  if (!observations.empty())															// made changes by TUAN NGUYEN
+//	     od = &(*currentObs);																// made changes by TUAN NGUYEN
 
 //      measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
 	  measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
