@@ -258,18 +258,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    // Spacecraft
    mScCount = 0;
-   
-   // All in ViewCanvas
-   #if 0
-   // Coordinate System
-   pInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
-   mInternalCoordSysName = wxString(pInternalCoordSystem->GetName().c_str());
-   mViewCoordSysName = "";
-   pViewCoordSystem = NULL;
-   // For CoordinateSystem conversion
-   mViewCsIsInternalCs = true;
-   #endif
-      
+    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
       ("   pInternalCoordSystem=<%p>'%s', pViewCoordSystem=<%p>'%s'\n",
@@ -2059,12 +2048,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       
       // Now colors for all other bodies are also saved (LOJ: 2013.11.25)
       *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
-      #if 0
-      if (drawingSpacecraft)
-         *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
-      else
-         *sIntColor = mObjectOrbitColorMap[objName].GetIntColor();
-      #endif
       
       glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
       DrawStringAt(objName, 0, 0, 0, 1);
@@ -2261,17 +2244,8 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       int colorIndex = objId * MAX_DATA + i;
       if (mDrawOrbitFlag[colorIndex])
       {
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
-         {
-            // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];
-         }
-         else
-         {
-            // We are drawing some other trajectory, say for a planet.
-            //*sIntColor = mObjectOrbitColorMap[objName].GetIntColor(); //LOJ: 2013.11.25
-            *sIntColor = mObjectOrbitColorMap[objName.c_str()];
-         }
+         // Now colors for all drawing objects are saved (LOJ: 2014.01.24)
+         *sIntColor = mObjectOrbitColor[colorIndex];
          
          #ifdef DEBUG_ORBIT_LINES
          MessageInterface::ShowMessage
