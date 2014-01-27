@@ -868,7 +868,7 @@
       <title>Setting Colors On a Ground Station Facility</title>
 
       <para>GMAT allows you to set colors on a ground station facility that
-      you create. The <guilabel>GroundStation</guilabel> object's
+      you create. The <guilabel>GroundStations</guilabel> are drawn on the <guilabel>GroundTrackPlot</guilabel> 2D graphics display. The <guilabel>GroundStation</guilabel> object's
       <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
       fields are used to set colors on a ground station facility. See the
       <xref linkend="GroundStation_Resource_Fields" xrefstyle="select:title"/>
