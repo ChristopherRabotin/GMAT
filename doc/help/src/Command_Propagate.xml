@@ -58,18 +58,20 @@ or
 
 <literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>){<replaceable>StopCond</replaceable>};
     </synopsis>
-	
-	    <para>In GMAT, syntax for setting orbit color on a <guilabel>Propagate</guilabel> command for a single <guilabel>Spacecraft</guilabel> propagating 
-		forward to a single stopping condition can be done by either identifying orbit color through ColorName or via RGB triplet value:</para>
-	
-	    <synopsis>
+
+    <para>In GMAT, syntax for setting orbit color on a
+    <guilabel>Propagate</guilabel> command for a single
+    <guilabel>Spacecraft</guilabel> propagating forward to a single stopping
+    condition can be done by either identifying orbit color through ColorName
+    or via RGB triplet value:</para>
+
+    <synopsis>
 <literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>),{<replaceable>StopCond, OrbitColor = ColorName</replaceable>};
 
 or
 
 <literal>Propagate</literal> <replaceable>PropagatorName</replaceable>(<replaceable>SatName</replaceable>),{<replaceable>StopCond, OrbitColor = [RGB triplet value]</replaceable>};
     </synopsis>
-	
   </refsynopsisdiv>
 
   <refsection>
@@ -112,11 +114,17 @@ or
         <para>Propagation of STM and computation of state Jacobian
         (A-matrix)</para>
       </listitem>
+
+      <listitem>
+        <para>Setting unique colors on different
+        <guilabel>Spacecraft</guilabel> trajectory segments through
+        <guilabel>Propagate</guilabel> commands</para>
+      </listitem>
     </itemizedlist>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Propagator"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="Formation"/></para>
+    linkend="Formation"/>, <xref linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection xml:id="Propagate_Options">
@@ -553,8 +561,9 @@ or
             <guilabel>Spacecraft.OrbitColor</guilabel> field. To set unique
             colors to <guilabel>Propagate</guilabel> command in script mode:
             Enter ColorName or RGB triplet value for the color of your choice.
-            In GUI mode, select unique color of your choice by clicking on
-            Orbit Color Selectbox. For Example: Setting yellow color to
+            In GUI mode, select unique color of your choice on the
+            <guilabel>Propagate</guilabel> command by clicking on Orbit Color
+            Selectbox. For Example: Setting yellow color to
             <guilabel>Propagate</guilabel> segment in script mode can be done
             in following two ways: <literal>Propagate DefaultProp(DefaultSC)
             {DefaultSC.Earth.Apoapsis, OrbitColor = Yellow}</literal> or
@@ -573,10 +582,8 @@ or
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>
-                      Any color available from the Orbit Color
-                      selectbox
-                    </para>
+                    <para>Any color available from the Orbit Color
+                    selectbox</para>
                   </listitem>
                 </varlistentry>
 
@@ -1093,6 +1100,23 @@ Propagate Backprop numProp(numSat){numSat.Periapsis}</code></programlisting>
           values are only accessible via the C-Interface.</para>
         </listitem>
       </itemizedlist>
+    </refsection>
+
+    <refsection>
+      <title>Setting Colors on the Propagate Command</title>
+
+      <para>GMAT allows you to assign unique colors to
+      <guilabel>Spacecraft</guilabel> trajectory segments by setting orbital
+      colors on each <guilabel>Propagate</guilabel> command. If you do not set
+      unique colors on each <guilabel>Propagate</guilabel> command, then By
+      default, the color on each propagate segment is seeded from color that
+      is set on <guilabel>Spacecraft.OrbitColor</guilabel> field. See the
+      <xref linkend="Propagate_Options" xrefstyle="select:title"/> section for
+      <guilabel>OrbitColor</guilabel> option that lets you set colors on the
+      <guilabel>Propagate</guilabel> command. Also see <xref
+      linkend="Setting_Colors"/> documentation for discussion and examples on
+      how to set unique colors on orbital trajectory segments through GMAT's
+      <guilabel>Propagate</guilabel> command.</para>
     </refsection>
   </refsection>
 
