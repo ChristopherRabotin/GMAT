@@ -44,10 +44,6 @@ Options:
 END
 }
 
-# File sources
-gmatrepo='ssh://gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmat.git'
-internalrepo='ssh://gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmatinternal.git'
-
 # Argument handling
 while getopts b:d:lmp:t:u:w o
 do
@@ -58,11 +54,15 @@ do
         m) LINUX=false; MAC=true; WINDOWS=false;;
         p) pw="$OPTARG";;
         t) TYPE=`echo "$OPTARG" | tr '[:upper:]' '[:lower:]'`;;
-        u) user="$OPTARG";;
+        u) user="${OPTARG}@";;
         w) LINUX=false; MAC=false; WINDOWS=true;;
         ?) usage; exit 1;;
     esac
 done
+
+# File sources
+gmatrepo="ssh://${user}gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmat.git"
+internalrepo="ssh://${user}gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmatinternal.git"
 
 # Platform-dependent stuff
 if $WINDOWS
