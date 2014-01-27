@@ -559,11 +559,11 @@ or
             command. Default color on <guilabel>Propagate</guilabel> segment
             is seeded from color that is set on
             <guilabel>Spacecraft.OrbitColor</guilabel> field. To set unique
-            colors to <guilabel>Propagate</guilabel> command in script mode:
+            colors on <guilabel>Propagate</guilabel> command in script mode:
             Enter ColorName or RGB triplet value for the color of your choice.
             In GUI mode, select unique color of your choice on the
             <guilabel>Propagate</guilabel> command by clicking on Orbit Color
-            Selectbox. For Example: Setting yellow color to
+            Selectbox. For Example: Setting yellow color on
             <guilabel>Propagate</guilabel> segment in script mode can be done
             in following two ways: <literal>Propagate DefaultProp(DefaultSC)
             {DefaultSC.Earth.Apoapsis, OrbitColor = Yellow}</literal> or
@@ -1108,7 +1108,7 @@ Propagate Backprop numProp(numSat){numSat.Periapsis}</code></programlisting>
       <para>GMAT allows you to assign unique colors to
       <guilabel>Spacecraft</guilabel> trajectory segments by setting orbital
       colors on each <guilabel>Propagate</guilabel> command. If you do not set
-      unique colors on each <guilabel>Propagate</guilabel> command, then By
+      unique colors on each <guilabel>Propagate</guilabel> command, then by
       default, the color on each propagate segment is seeded from color that
       is set on <guilabel>Spacecraft.OrbitColor</guilabel> field. See the
       <xref linkend="Propagate_Options" xrefstyle="select:title"/> section for
