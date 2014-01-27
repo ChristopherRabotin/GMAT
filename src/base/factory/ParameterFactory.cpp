@@ -198,9 +198,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new EquinMlong(withName);
    if (ofType == "Equinoctial")
       return new EquinState(withName);
-
+   
    // ModifiedEquinoctial parameters; Modified by M.H.
-   if (ofType == "SemiLatusRectum")
+   // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173)
+   //if (ofType == "SemiLatusRectum")
+   if (ofType == "SemilatusRectum")
       return new ModEquinP(withName);
    if (ofType == "ModEquinoctialF")
       return new ModEquinF(withName);
@@ -314,8 +316,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Energy(withName);
 
    // Angular parameters
-   if (ofType == "SemilatusRectum")
-      return new SemilatusRectum(withName);
+   // Changed to create ModEquinP() since it is settable Parameter
+   // Fix for GMT-4173 (LOJ: 2014.01.22)
+   //if (ofType == "SemilatusRectum")
+   //   return new SemilatusRectum(withName);
    if (ofType == "HMAG")
       return new AngularMomentumMag(withName);
    if (ofType == "HX")
@@ -575,7 +579,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Equinoctial");
       
       // ModifedEquinoctial parameters ; Modified by M.H.
-      creatables.push_back("SemiLatusRectum");
+      // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173 (LOJ: 2014.01.22))
+      creatables.push_back("SemilatusRectum");
       creatables.push_back("ModEquinoctialF");
       creatables.push_back("ModEquinoctialG");
       creatables.push_back("ModEquinoctialH");
@@ -643,7 +648,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Energy");
       
       // Angular parameters
-      creatables.push_back("SemilatusRectum");
+      // Changed SemiLatusRectum to SemilatusRectum above
+      // and commented out this (LOJ: 2013.01.22)
+      //creatables.push_back("SemilatusRectum");
       creatables.push_back("HMAG");
       creatables.push_back("HX");
       creatables.push_back("HY");

@@ -919,11 +919,11 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesian, const Real& mu)
 {
-   //#ifdef DEBUG_MODEQUINOCTIAL
-      //MessageInterface::ShowMessage("Converting from Cartesian to ModEquinoctial: \n");
-      //MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
-      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
-   //#endif
+   #ifdef DEBUG_MODEQUINOCTIAL
+   MessageInterface::ShowMessage("Converting from Cartesian to ModEquinoctial: \n");
+   MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
+   MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   #endif
    
    Real p_mee, f_mee, g_mee, h_mee, k_mee, L_mee; // modequinoctial elements
    Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
@@ -977,16 +977,18 @@ Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesia
    
    Real j = 1;
    Real denom = ( 1 + hHat[2]*j );
-
+   
+   // Throw an exception when singularity condition (Fix for GMT-4174)
    if ( Abs(denom) < 1.0E-7 )
    {
-      std::string warn = "Warning: Singularity may occur during calculate Modified Equinoctial element h and k.";
-      MessageInterface::PopupMessage(Gmat::WARNING_, warn);
-   }
-   else if ( Abs(denom ) < 1.0E-16 )
-   {
+      //std::string warn = "Warning: Singularity may occur during calculate Modified Equinoctial element h and k.";
+      //MessageInterface::PopupMessage(Gmat::WARNING_, warn);
       throw UtilityException("Singularity occurs during calculate Modified Equinoctial element h and k.\n");
    }
+   //else if ( Abs(denom ) < 1.0E-16 )
+   //{
+   //   throw UtilityException("Singularity occurs during calculate Modified Equinoctial element h and k.\n");
+   //}
    
    // Define modequinoctial coordinate system
    Rvector3 f;
@@ -1038,11 +1040,12 @@ Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesia
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu)
 {
-   //#ifdef DEBUG_MODEQUINOCTIAL
-      //MessageInterface::ShowMessage("Converting from Modified Equinoctial to Cartesian: \n");
-      //MessageInterface::ShowMessage("   input Modified Equinoctial is: %s\n", modequinoctial.ToString().c_str());
-      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
-   //#endif
+   #ifdef DEBUG_MODEQUINOCTIAL
+   MessageInterface::ShowMessage("Converting from Modified Equinoctial to Cartesian: \n");
+   MessageInterface::ShowMessage("   input Modified Equinoctial is: %s\n", modequinoctial.ToString().c_str());
+   MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   #endif
+   
    Rvector3 pos;
    Rvector3 vel; // Cartesian elements
 
@@ -1959,6 +1962,8 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 	return cart;
 }
 
+
+
 //------------------------------------------------------------------------------
 // Rvector6 CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian)
 //------------------------------------------------------------------------------
@@ -1980,31 +1985,44 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
    #endif
    
 	Real	 mu_Earth= 398600.4418;
-   // Changed abs() to Abs() (LOJ: 2014.01.07)
-	//if (abs(mu - mu_Earth) > 1.0)
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
-		errmsg << " while converting from the BrouwerMeanShort to";
-		errmsg << " the Cartesian.";
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanShort, an error has been encountered.";
 		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
 		throw UtilityException(errmsg.str());
 	}
 	
-	Real	tol = 1.0E-8;
-	Integer	maxiter = 75;
+	Real	tol=1.0E-6;
+	Integer	maxiter=120;
 	Rvector6 cart = cartesian;
 	AnomalyType type  = GetAnomalyType("TA");
 	AnomalyType type2 = GetAnomalyType("MA");
    
 	Rvector6 kep = CartesianToKeplerian(mu, cart, type);
-	if (kep[1] >= 0.97)
+	if (kep[1] >= 0.99)
 	{
-		std::string warn = "Warning: Orbit is nearly parabolic or hyperbolic. So, GMAT cannot calculate mean elements.\n";
-		MessageInterface::ShowMessage(warn);
-		Rvector6 blmean(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);	 
-		return blmean;
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanShort, an error has been encountered.";
+		errmsg << " BrouwerMeanShort is applicable";
+		errmsg << " only if eccentricity is smaller than 0.99." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Real indicator = (kep[0]*(1.0-kep[1]));
+	if (indicator < 1000.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanShort, an error has been encountered.";
+		errmsg << " BrouwerMeanShort is applicable";
+		errmsg << " only if RadPer is Larger than 1000." << std::endl;
+		throw UtilityException(errmsg.str());
 	}
    
 	kep[5] = kep[5] * RAD_PER_DEG;
@@ -2015,6 +2033,7 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
    MessageInterface::ShowMessage("   cart: %s", cart.ToString().c_str());
    MessageInterface::ShowMessage("   kep : %s", kep.ToString().c_str());
 	#endif
+   
 	Integer pseudostate=0;
 	if (kep[2] > 177.0)
 	{
@@ -2032,9 +2051,13 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 	#endif
 	
 	for (unsigned int jj = 0; jj < 6; jj++)
-		blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+		blmean2[jj] = blmean[jj] + (kep[jj] - kep2[jj]);
    
-	Real emag = 1.0;
+	if (blmean2[2] < 0.0)
+		blmean2[2] = 0.0; 
+	
+	Real emag = 0.9;
+	Real emag_old = 1.0;
 	Integer ii = 0;
 	Rvector6	temp;
 	Rvector6	cart2;
@@ -2054,10 +2077,6 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 		#endif
       
 		kep2	= BrouwerMeanShortToOsculatingElements(mu, blmean);
-		
-		for (unsigned int jj = 0; jj < 6; jj++)
-			blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
-      
 		temp	= cart - KeplerianToCartesian(mu, kep2, type2);
 		cart2	= KeplerianToCartesian(mu, kep2, type2);
       
@@ -2067,23 +2086,48 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
       #ifdef DEBUG_BROUWER_SHORT
       MessageInterface::ShowMessage("   temp  : %s", temp.ToString().c_str());
       MessageInterface::ShowMessage("   cart  : %s", cart.ToString().c_str());
+      MessageInterface::ShowMessage("   kep2  : %s", kep2.ToString().c_str());
+      MessageInterface::ShowMessage("   cart2 : %s", cart2.ToString().c_str());
       #endif
       
-      // Should the 2nd and 3rd temp[0] be temp[1] and temp[2]?
-      // Changed to temp[1] and temp[2] (LOJ: 2014.01.08)
-		//emag = Sqrt(pow(temp[0],2.0) + pow(temp[0],2.0) + pow(temp[0],2.0)) /
-      //       Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) 
-		emag = Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0)) /
-             Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) +
-             Sqrt(pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
-             Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+      emag	= Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0) +
+                   pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
+              Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0) +
+                   pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
       
-		#ifdef DEBUG_BROUWER_SHORT
-      MessageInterface::ShowMessage("   emag  : %.10f\n", emag);
+      if (emag_old > emag)
+		{	
+			emag_old = emag;
+		}
+		else
+		{
+			MessageInterface::ShowMessage
+            ("Warning : the iterative algorithm converting from Cartesian to "
+             "BrouwerMeanShort is not converging. So, it has been interrupted. "
+             "The current relative error is %12.10f \n", emag_old);
+			for (unsigned int jj = 0; jj < 6; jj++)
+			{
+				blmean2[jj] = blmean[jj]; // does not update current state
+			}
+			break;
+		}
+      
+		for (unsigned int jj = 0; jj < 6; jj++)
+			blmean2[jj]= blmean[jj] + (kep[jj] - kep2[jj]);
+      
+		if (blmean2[2] < 0.0)
+			blmean2[2] = 0.0;
+      
+      #ifdef DEBUG_BROUWER_SHORT
+      MessageInterface::ShowMessage("   blmean2  : %s", blmean2.ToString().c_str());      
+      MessageInterface::ShowMessage("   emag     : %.10f\n", emag);
+      MessageInterface::ShowMessage("   emag_old : %.10f\n", emag_old);
 		#endif
+      
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
+			MessageInterface::ShowMessage
+            ("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
 			break;
 		}
 		ii = ii + 1;
@@ -2145,21 +2189,20 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6& blms)
 { 
 	Real	 mu_Earth= 398600.4418;
-   // Changed abs() to Abs() (LOJ: 2014.01.07)
-	//if (abs(mu - mu_Earth) > 1.0)
+	
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
-		errmsg << " while converting from the BrouwerMeanShort  to";
-		errmsg << " the Cartesian.";
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian, an error has been encountered.";
 		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
 		throw UtilityException(errmsg.str());
 	}
    
 	Real	 re		 = 6378.1363; // Earth radius
 	Real	 j2		 = 1.082626925638815E-03;
-	//Real	 ae		 = 1.0;
+	//Real	 ae		 = 1.0; // ae is not used
 	Real   smap     = blms[0] / re; 
 	Real   eccp     = blms[1];
 	Real   incp     = blms[2] * RAD_PER_DEG; 
@@ -2167,9 +2210,46 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	Real   aopp     = blms[4] * RAD_PER_DEG; 
 	Real   meanAnom = blms[5] * RAD_PER_DEG;  
    
+	Integer	 psuedostate = 0;
+	if (incp > 177.0* RAD_PER_DEG)
+	{
+		incp  = TWO_PI/2-incp;// INC = 180 - INC
+		raanp = -raanp; // RAAN = -RAAN
+		psuedostate = 1;
+	}
+   if (incp < 0.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " mean inclination should be larger than 0 or equal to deg." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+	if (incp > TWO_PI/2)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " mean inclination should be smaller than or equal to 180 deg." << std::endl;
+		throw UtilityException(errmsg.str());
+	}	
+	Real indicator= blms[0] * (1.0 - blms[1]);
+	if (indicator < 1000.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanShort to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " BrouwerMeanShort is applicable";
+		errmsg << " only if mean RadPer is Larger than 1000." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
 	raanp	= Mod(raanp,TWO_PI);
 	aopp	= Mod(aopp,TWO_PI);
-	meanAnom= Mod(meanAnom,TWO_PI);
+	meanAnom = Mod(meanAnom,TWO_PI);
 	
 	if (raanp < 0.0)
 	{
@@ -2183,15 +2263,15 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	{
 		meanAnom= meanAnom + TWO_PI;
 	}
-	
-	if (eccp >= 0.97)
+   
+	if (eccp >= 0.99)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
 		errmsg << " while converting from the BrouwerMeanShort to";
-		errmsg << " the Cartesian.";
+		errmsg << " the Cartesian, an error has been encountered.";
 		errmsg << " BrouwerMeanShort is applicable";
-		errmsg << " only if ECCP is equal to or smaller than 0.97." << std::endl;
+		errmsg << " only if mean eccentricity is smaller than 0.99." << std::endl;
 		throw UtilityException(errmsg.str());
 	}
 
@@ -2205,7 +2285,7 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	Real	tap	= MeanToTrueAnomaly(meanAnom, eccp, 1.0E-8);
 	
 	Real	rp		= p/(1.0 + eccp*Cos(tap));
-	Real	adr		= smap/rp;
+	Real	adr	= smap/rp;
 	
 	Real	sma1	=	smap + smap*gm2*((pow(adr,3.0)-1.0/pow(eta,3.0))*(-1.0+3.0*pow(theta,2.0))+3.0*(1.0-pow(theta,2.0))*pow(adr,3.0)*Cos(2.0*aopp+2.0*tap));
 
@@ -2242,7 +2322,7 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	Real	ecc1	=	sqrt(pow(ecosl,2.0)+pow(esinl,2.0));
 	if (ecc1 < 1.0E-11)
 	{
-		ma1=0.0;
+		ma1 = 0.0;
 	}
    else
 	{
@@ -2257,28 +2337,33 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	Real	sinhalficosh	=	(Sin(0.5*incp)+Cos(0.5*incp)*0.5*dinc)*Cos(raanp)-1.0/2.0*Sin(incp)/Cos(incp/2.0)*draan*Sin(raanp);
 	Real	inc1	=	2.0*ASin(Sqrt(pow(sinhalfisinh,2.0)+pow(sinhalficosh,2.0)));
    Real raan1;
-   
-	if (inc1 ==0.0)
+
+	if ((inc1 == 0.0) && (psuedostate == 0))
 	{
-		raan1=0.0;
+		raan1 = 0.0;
+		aop1 = lgh-ma1-raan1;
+	}
+   else if ((inc1 == 0.0) && (psuedostate != 0))
+	{
+		aop1 = 0.0;
+		raan1 = lgh-ma1-aop1;
 	}
    else
 	{
-		raan1=ATan2(sinhalfisinh,sinhalficosh);
-		if (raan1<0.0)
-		{
-			raan1 = raan1 + TWO_PI;
-		}
+		raan1 = ATan2(sinhalfisinh,sinhalficosh);
+		aop1 = lgh-ma1-raan1;
 	}
    
-	aop1=lgh-ma1-raan1;
-	aop1=Mod(aop1,TWO_PI);
-   
+	aop1 = Mod(aop1,TWO_PI);
+	if (raan1 < 0.0)
+	{
+		raan1 = raan1 + TWO_PI;
+	}
 	if (aop1 < 0.0)
 	{
-		aop1=aop1+TWO_PI;
+		aop1 = aop1 + TWO_PI;
 	}
-
+   
 	Real kepl[6];
 	kepl[0]	=	sma1*re;
 	kepl[1]	=	ecc1;
@@ -2286,7 +2371,12 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	kepl[3]	=	raan1*DEG_PER_RAD;
 	kepl[4]	=	aop1*DEG_PER_RAD;
 	kepl[5]	=	ma1*DEG_PER_RAD;
-	
+   
+	if ((psuedostate != 0))
+	{
+		kepl[2] = 180.0 - kepl[2]; // INC = 180 - INC
+		kepl[3] = -kepl[3];
+	}
 	return kepl;
 }
 
@@ -2303,10 +2393,10 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanShortToCartesian(Real mu, const Rvector6& blms)
 { 
-	Rvector6 kepl=BrouwerMeanShortToOsculatingElements(mu, blms);
+	Rvector6 kepl = BrouwerMeanShortToOsculatingElements(mu, blms);
 
 	AnomalyType type = GetAnomalyType("MA");
-	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
+	Rvector6 cart = KeplerianToCartesian(mu, kepl, type);
 	return cart;
 }
 
@@ -2330,34 +2420,48 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
    #endif
    
 	Real	 mu_Earth= 398600.4418;
-   // Changed abs() to Abs() (LOJ: 2014.01.07)
-	//if (abs(mu - mu_Earth) > 1.0)
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
-		errmsg << " while converting from the BrouwerMeanShort to";
-		errmsg << " the Cartesian.";
-		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanLong, an error has been encountered.";
+		errmsg << " Currently, BrouwerMeanLong is applicable only to the Earth." << std::endl;
       #ifdef DEBUG_BROUWER_LONG
       MessageInterface::ShowMessage("==> Throwing exception: %s\n", errmsg.str().c_str());
       #endif
 		throw UtilityException(errmsg.str());
 	}
-	
-	Real	tol=1.0E-8;
-	Integer	maxiter=75;
-	Rvector6 cart = cartesian;
-	AnomalyType type = GetAnomalyType("TA");
-	AnomalyType type2= GetAnomalyType("MA");
 
+	Real	tol = 1.0E-6;
+	Integer	maxiter = 120;
+	Rvector6 cart = cartesian;
+	AnomalyType type  = GetAnomalyType("TA");
+	AnomalyType type2 = GetAnomalyType("MA");
+   
 	Rvector6 kep = CartesianToKeplerian(mu, cart, type);
-	if (kep[1] >= 0.97)
+
+	if (kep[1] >= 0.99)
 	{
-		std::string warn = "Warning: Orbit is nearly parabolic or hyperbolic. So, GMAT cannot calculate mean elements.\n";
-		MessageInterface::ShowMessage(warn);
-		Rvector6 blmean(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);	 
-		return blmean;
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanLong, an error has been encountered.";
+		errmsg << " BrouwerMeanLong is applicable";
+		errmsg << " only if eccentricity is smaller than 0.99." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	Real indicator = (kep[0]*(1.0-kep[1]));
+	if (indicator < 1000.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the Cartesian to";
+		errmsg << " the BrouwerMeanLong, an error has been encountered.";
+		errmsg << " BrouwerMeanLong is applicable";
+		errmsg << " only if RadPer is Larger than 1000." << std::endl;
+		throw UtilityException(errmsg.str());
 	}
    
 	kep[5] = kep[5] * RAD_PER_DEG;
@@ -2380,16 +2484,20 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 	}
    
 	Rvector6 blmean = kep;
-	Rvector6 kep2	= BrouwerMeanLongToOsculatingElements(mu, kep);
+	Rvector6 kep2	= BrouwerMeanLongToOsculatingElements(mu, blmean);
 	#ifdef DEBUG_BROUWER_LONG
    MessageInterface::ShowMessage("   kep2: %s", kep2.ToString().c_str());
 	#endif
 	Rvector6 blmean2;
 	
 	for (unsigned int jj = 0; jj < 6; jj++)
-		blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
+		blmean2[jj]= blmean[jj] + (kep[jj] - kep2[jj]);
    
-	Real emag = 1.0;
+   if (blmean2[2] < 0.0)
+		blmean2[2] = 0.0;
+   
+	Real emag = 0.9;
+	Real emag_old = 1.0;
 	Integer ii = 0;
 	Rvector6	temp;
 	Rvector6	cart2;
@@ -2401,7 +2509,7 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
          ("   ==> iteration: %d, emag: %.10f > tol: %.10f\n", ii, emag, tol);
 		#endif
       
-		blmean	= blmean2;
+		blmean = blmean2;
 		
 		#ifdef DEBUG_BROUWER_LONG
       MessageInterface::ShowMessage
@@ -2409,30 +2517,47 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 		#endif
       
 		kep2	= BrouwerMeanLongToOsculatingElements(mu, blmean);
-		
-		for (unsigned int jj = 0; jj < 6; jj++)
-			blmean2[jj]= blmean[jj] + 0.3*(kep[jj] - kep2[jj]);
-      
 		temp	= cart - KeplerianToCartesian(mu, kep2, type2);
 		cart2	= KeplerianToCartesian(mu, kep2, type2);
       
 		for (unsigned int jj = 0; jj < 6; jj++)
 			temp[jj]	= cart2[jj] - cart[jj] ;
       
-      // Should the 2nd and 3rd temp[0] be temp[1] and temp[2]?
-      // Changed to temp[1] and temp[2] (LOJ: 2014.01.13)
-		//emag	= Sqrt(pow(temp[0],2.0) + pow(temp[0],2.0) + pow(temp[0],2.0)) /
-		emag	= Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0)) /
-              Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0)) +
-              Sqrt(pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
-              Sqrt(pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+		emag	= Sqrt(pow(temp[0],2.0) + pow(temp[1],2.0) + pow(temp[2],2.0) +
+                   pow(temp[3],2.0) + pow(temp[4],2.0) + pow(temp[5],2.0)) /
+              Sqrt(pow(cart[0],2.0) + pow(cart[1],2.0) + pow(cart[2],2.0) +
+                   pow(cart[3],2.0) + pow(cart[4],2.0) + pow(cart[5],2.0));
+      
+		if (emag_old > emag)
+		{	
+			emag_old=emag;
+		}
+		else
+		{
+			MessageInterface::ShowMessage
+            ("Warning : the iterative algorithm converting from Cartesian to "
+             "BrouwerMeanLong is not converging. So, it has been interrupted. "
+             "The current relative error is %12.10f \n", emag_old);
+			for (unsigned int jj = 0; jj < 6; jj++)
+			{
+				blmean2[jj]= blmean[jj]; // does not update current state
+			}
+			break;
+		}
 		
+		for (unsigned int jj = 0; jj < 6; jj++)
+			blmean2[jj]= blmean[jj] + (kep[jj] - kep2[jj]);
+      
+		if (blmean2[2] < 0.0)
+			blmean2[2] = 0.0;
+      
 		#ifdef DEBUG_BROUWER_LONG
       MessageInterface::ShowMessage("   emag  : %.10f\n", emag);
 		#endif
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
+			MessageInterface::ShowMessage
+            ("Warning : Maximum iteration number has been reached. There is a possible inaccuracy\n");
 			break;
 		}
 		ii = ii + 1;
@@ -2499,15 +2624,13 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    #endif
    
 	Real	 mu_Earth= 398600.4418;
-   // Changed abs() to Abs() (LOJ: 2014.01.07)
-	//if (abs(mu - mu_Earth) > 1.0)
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
-		errmsg << " while converting from the BrouwerMeanShort  to";
-		errmsg << " the Cartesian.";
-		errmsg << " Currently, BrouwerMeanShort is applicable only to the Earth." << std::endl;
+		errmsg << " while converting from the BrouwerMeanLong to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " Currently, BrouwerMeanLong is applicable only to the Earth." << std::endl;
       #ifdef DEBUG_BROUWER_LONG_OSKEP
       MessageInterface::ShowMessage
          ("==> Throwing exception: %s\n", errmsg.str().c_str());
@@ -2515,6 +2638,8 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 		throw UtilityException(errmsg.str());
 	}
 
+	Integer pseudostate = 0;
+   
 	Real	 re		 = 6378.1363; // Earth radius
 	Real	 j2		 = 1.082626925638815E-03;
 	Real	 j3       = -0.2532307818191774E-5;
@@ -2527,28 +2652,65 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	Real   raandp   = blml[3] * RAD_PER_DEG; 
 	Real   aopdp    = blml[4] * RAD_PER_DEG; 
 	Real   meanAnom = blml[5] * RAD_PER_DEG;  
-	
-	// negative eccentricity aviodance lines
    
+	if (incdp > 177.0* RAD_PER_DEG)
+	{
+		incdp = TWO_PI/2-incdp;// INC = 180 - INC
+		raandp = -raandp; // RAAN = -RAAN
+		pseudostate = 1;
+	}
+   
+	// negative eccentricity aviodance lines
 	if (eccdp < 0.0)
 	{
 		eccdp = eccdp * -1.0;
 		aopdp = aopdp - TWO_PI/2;
 		meanAnom= meanAnom + TWO_PI/2;
 	}
-
-	if (eccdp >= 0.97)
+   
+	Real indicator= blml[0] * (1.0 - blml[1]);
+	if (indicator < 1000.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
 		errmsg << " while converting from the BrouwerMeanLong to";
-		errmsg << " the Cartesian.";
+		errmsg << " the Cartesian, an error has been encountered.";
 		errmsg << " BrouwerMeanLong is applicable";
-		errmsg << " only if ECCDP is equal to or smaller than 0.97." << std::endl;
+		errmsg << " only if mean RadPer is Larger than 1000." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+   
+	if (eccdp >= 0.99)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanLong to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " BrouwerMeanLong is applicable";
+		errmsg << " only if mean eccentricity is smaller than 0.99." << std::endl;
       #ifdef DEBUG_BROUWER_LONG_OSKEP
       MessageInterface::ShowMessage
          ("==> Throwing exception: %s\n", errmsg.str().c_str());
       #endif
+		throw UtilityException(errmsg.str());
+	}
+   
+   if (incdp < 0.0)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanLong to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " mean inclination should be larger than or equal to 0 deg." << std::endl;
+		throw UtilityException(errmsg.str());
+	}
+	if (incdp > TWO_PI/2)
+	{
+		std::stringstream errmsg("");
+		errmsg.precision(21);
+		errmsg << " while converting from the BrouwerMeanLong to";
+		errmsg << " the Cartesian, an error has been encountered.";
+		errmsg << " mean inclination should be smaller than or equal to 180 deg." << std::endl;
 		throw UtilityException(errmsg.str());
 	}
    
@@ -2557,24 +2719,14 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	meanAnom = Mod(meanAnom,TWO_PI);
 	
 	if (raandp < 0.0)
-	{
 		raandp	= raandp + TWO_PI;
-	}
+   
 	if (aopdp < 0.0)
-	{
 		aopdp	= aopdp + TWO_PI;
-	}	
+   
 	if (meanAnom < 0.0)
-	{
 		meanAnom= meanAnom + TWO_PI;
-	}
-	
-	if (Abs(eccdp-1.0) < 1.0E-6)
-	{
-		std::string warn = "Warning: Orbit is nealy parabolic, a possible inaccuracy exists.\n";
-		MessageInterface::ShowMessage(warn);
-	}
-	
+   	
    #ifdef DEBUG_BROUWER_OSKEP
    MessageInterface::ShowMessage
       ("   raandp = %.10f, aopdp = %.10f, eccdp = %.10f,  meanAnom = %.10f\n", raandp, aopdp,
@@ -2582,24 +2734,24 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    #endif
    
    Real    bk2=(1.0/2.0)*(j2*ae*ae);
-   Real    bk3=-j3*pow(ae,3);
-   Real    bk4=-(3.0/8.0)*j4*pow(ae,4);
-   Real    bk5=-j5*pow(ae,5);
+   Real    bk3=-j3*pow(ae,3.0);
+   Real    bk4=-(3.0/8.0)*j4*pow(ae,4.0);
+   Real    bk5=-j5*pow(ae,5.0);
    Real    eccdp2=eccdp*eccdp;
    Real    cn2=1.0-eccdp2;
    Real    cn=Sqrt(cn2);
-   Real    gm2=bk2/pow(smadp,2);
+   Real    gm2=bk2/pow(smadp,2.0);
    Real    gmp2=gm2/(cn2*cn2);
-   Real    gm4=bk4/pow(smadp,4);
-   Real    gmp4=gm4/pow(cn,8);
+   Real    gm4=bk4/pow(smadp,4.0);
+   Real    gmp4=gm4/pow(cn,8.0);
    Real    theta=Cos(incdp);
    Real    theta2=theta*theta;
    Real    theta4=theta2*theta2;
    
-	Real    gm3=bk3/pow(smadp,3);
+	Real    gm3=bk3/pow(smadp,3.0);
    Real    gmp3=gm3/(cn2*cn2*cn2);
-   Real    gm5=bk5/pow(smadp,5);
-   Real    gmp5=gm5/pow(cn,10);
+   Real    gm5=bk5/pow(smadp,5.0);
+   Real    gmp5=gm5/pow(cn,10.0);
 	
    Real    g3dg2=gmp3/gmp2;
    Real    g4dg2=gmp4/gmp2;
@@ -2709,7 +2861,6 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
     Real    cs3fgd=Cos(3.0*tadp+2.0*aopdp);
     Real    sinGD=Sin(aopdp);
     Real    cosGD=Cos(aopdp);
-    Real    dlt1e=b14*sinGD+b13*cs2gd-b15*sin3gd;
     
    //------------------------I
    // COMPUTE (L+G+H) PRIMED I
@@ -2718,15 +2869,38 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
    #ifdef DEBUG_BROUWER_LONG_OSKEP
    MessageInterface::ShowMessage("   Compute L+G+H Primed\n");
    #endif
-   Real    blghp=raandp+aopdp+meanAnom+b3*cs3gd+b1*sn2gd+b2*cosGD;
-   blghp = Mod(blghp,(TWO_PI));
-   if (blghp < 0.0)
-   { 
-		blghp=blghp+(TWO_PI);
-   }
-   Real    eccdpdl=b4*sn2gd-b5*cosGD+b6*cs3gd-(1.0/4.0)*cn2*cn*gmp2*(2.0*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)*sinta+3.0*(1.0-theta2)*((-adr2*cn2-adr+1.0)*snf2gd+(adr2*cn2+adr+(1.0/3.0))*sn3fgd));
-   Real    dltI=(1.0/2.0)*theta*gmp2*sinI*(eccdp*cs3fgd+3.0*(eccdp*csf2gd+cs2gta))-(a21/cn2)*(b8*sinGD+b7*cs2gd-b9*sin3gd);
-   Real    sinDH=(1.0/cosI2)*((1.0/2.0)*(b12*cs3gd+b11*cosGD+b10*sn2gd-((1.0/2.0)*gmp2*theta*sinI*(6.0*(eccdp*sinta-meanAnom+tadp)-(3.0*(sn2gta+eccdp*snf2gd)+eccdp*sn3fgd)))));
+   
+   Real	bisubc = pow((1.0-5.0*theta2),-2.0)*((25.0*theta4*theta)*(gmp2*eccdp2));
+   Real	blghp;
+	Real  eccdpdl;
+	Real  dltI;
+	Real  sinDH;
+	Real  dlt1e;
+	if (bisubc >= 0.1)
+	{	// modifications for critical inclination
+		MessageInterface::ShowMessage
+         ("Warning : Mean inclination is close to critical inclination. There is a possible inaccuracy\n");
+		dlt1e = 0.0;
+		blghp = 0.0;
+		eccdpdl= 0.0;
+		dltI = 0.0;
+		sinDH = 0.0;
+	} 
+	else
+	{
+		blghp=raandp+aopdp+meanAnom+b3*cs3gd+b1*sn2gd+b2*cosGD;
+		blghp = Mod(blghp,(TWO_PI));
+		if (blghp < 0.0)
+		{ 
+			blghp=blghp+(TWO_PI);
+		}
+		dlt1e=b14*sinGD+b13*cs2gd-b15*sin3gd;
+		eccdpdl=b4*sn2gd-b5*cosGD+b6*cs3gd-(1.0/4.0)*cn2*cn*gmp2*(2.0*(3.0*theta2-1.0)*(adr2*cn2+adr+1.0)*sinta+3.0*(1.0-theta2)*((-adr2*cn2-adr+1.0)*snf2gd+(adr2*cn2+adr+(1.0/3.0))*sn3fgd));
+		dltI=(1.0/2.0)*theta*gmp2*sinI*(eccdp*cs3fgd+3.0*(eccdp*csf2gd+cs2gta))-(a21/cn2)*(b8*sinGD+b7*cs2gd-b9*sin3gd);
+		sinDH=(1.0/cosI2)*((1.0/2.0)*(b12*cs3gd+b11*cosGD+b10*sn2gd-((1.0/2.0)*gmp2*theta*sinI*(6.0*(eccdp*sinta-meanAnom+tadp)-(3.0*(sn2gta+eccdp*snf2gd)+eccdp*sn3fgd)))));
+	}
+   //----------
+   
    
    //-----------------I
    // COMPUTE (L+G+H) I
@@ -2789,45 +2963,47 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	{
 		ma = ma + TWO_PI;
 	}
-
-   //---------------------------------------I
-   // COMPUTE (LONGITUDE OF ASCENDING NODE) I
-   //---------------------------------------I
+   
+   //------------------------------------------------------------------I
+   // COMPUTE (LONGITUDE OF ASCENDING NODE) and (ARGUMENT  OF PERIGEE) I
+   //------------------------------------------------------------------I
    #ifdef DEBUG_BROUWER_LONG_OSKEP
-   MessageInterface::ShowMessage("   Compute longitude of ascending node\n");
+   MessageInterface::ShowMessage
+      ("   Compute longitude of ascending node and arg of perigee\n");
    #endif
+   
 	Real	raan;
-	if (inc <= 1.0E-11)
+	Real	aop;
+	if ((inc <= 1.0E-11) && pseudostate == 0)
 	{    
-		raan=0.0;
+		raan = 0.0;
+		aop = blgh-ma-raan;
+	} 
+	else if ((inc <= 1.0E-11) && pseudostate != 0)
+	{    
+		aop = 0.0;
+		raan = blgh-ma-aop;
 	} 
 	else
 	{
-		Real    arg1=sinDH*cosraandp+sinraandp*((1.0/2.0)*dltI*cosI2+sinI2);
-		Real    arg2=cosraandp*((1.0/2.0)*dltI*cosI2+sinI2)-(sinDH*sinraandp);
-      raan=ATan2(arg1,arg2);
-      raan=Mod(raan,(TWO_PI));
+		Real arg1 = sinDH*cosraandp+sinraandp*((1.0/2.0)*dltI*cosI2+sinI2);
+		Real arg2 = cosraandp*((1.0/2.0)*dltI*cosI2+sinI2)-(sinDH*sinraandp);
+      raan = ATan2(arg1,arg2);
+		aop  = blgh-ma-raan;
 	}
+   
+   raan = Mod(raan,(TWO_PI));
    if (raan < 0)
 	{
 		raan=raan+(TWO_PI);
 	}
-	
-   //---------------------------------I
-   // COMPUTE (ARGUMENT  OF PERIGEE)  I
-   //---------------------------------I
-   #ifdef DEBUG_BROUWER_LONG_OSKEP
-   MessageInterface::ShowMessage("   Compute argument of perigee\n");
-   #endif
-	Real aop;
    
-	aop = blgh-ma-raan;
-   aop=Mod(aop,(TWO_PI));
+   aop = Mod(aop,(TWO_PI));
 	if (aop < 0.0)
 	{
 		aop = aop + TWO_PI;
 	}
-
+   
 	Real kepl[6];
 	kepl[0]	=	sma * re;
 	kepl[1]	=	ecc;
@@ -2835,7 +3011,13 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	kepl[3]	=	raan * DEG_PER_RAD;
 	kepl[4]	=	aop * DEG_PER_RAD;
 	kepl[5]	=	ma * DEG_PER_RAD;
-	
+   
+	if (pseudostate != 0)
+	{
+		kepl[2] = 180.0 - kepl[2];
+		kepl[3] = - kepl[3];
+	}
+   
    #ifdef DEBUG_BROUWER_LONG_OSKEP
    MessageInterface::ShowMessage
       ("StateConversionUtil::BrouwerMeanLongToOsculatingElements() returning "
@@ -5014,10 +5196,11 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
 {
    #ifdef DEBUG_SC_CONVERT_VALIDATE
       MessageInterface::ShowMessage(
-            "Entering SCU::ValidateValue with label = %s, value = %le, errorMsgFmt = %s, dataPrecision = %d, compareTo = %s, compareValue = %le\n",
-            label.c_str(), value, errorMsgFmt.c_str(), dataPrecision, compareTo.c_str(), compareValue);
+         "SCU::ValidateValue() entered with label = %s, value = %le\n   "
+         "errorMsgFmt = %s, dataPrecision = %d, compareTo = %s, compareValue = %le\n",
+         label.c_str(), value, errorMsgFmt.c_str(), dataPrecision, compareTo.c_str(), compareValue);
    #endif
-
+      
    std::string labelUpper   = GmatStringUtil::ToUpper(label);
    std::string compareUpper = GmatStringUtil::ToUpper(compareTo);
    #ifdef DEBUG_SC_CONVERT_VALIDATE
@@ -5025,16 +5208,20 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             "SCU::ValidateValue:  labelUpper = %s, compareUpper = %s\n", labelUpper.c_str(), compareUpper.c_str());
    #endif
 
-   // these are only limited by the upper and lower limits of the compiler's Real type
-   if ((labelUpper == "X")                     || (labelUpper == "Y")                  || (labelUpper == "Z")                        ||
-       (labelUpper == "VX")                    || (labelUpper == "VY")                 || (labelUpper == "VZ")                       ||
-       (labelUpper == "AOP")                   || (labelUpper == "AZI")                || (labelUpper == "EquinoctialP")             ||
-       (labelUpper == "EquinoctialQ")          || (labelUpper == "RA")                 || (labelUpper == "RAAN")                     ||
-       (labelUpper == "RAV")                   || (labelUpper == "TA"))
-   {
-      return true;
-   }
-   else if (labelUpper == "RADAPO")
+   // These are only limited by the upper and lower limits of the compiler's Real type
+   // Now handled in else part so that we don't need to keep updating this (LOJ: 2014.01.17)
+   // if ((labelUpper == "X")              || (labelUpper == "Y")           || (labelUpper == "Z")                 ||
+   //     (labelUpper == "VX")             || (labelUpper == "VY")          || (labelUpper == "VZ")                ||
+   //     (labelUpper == "AOP")            || (labelUpper == "AZI")         || (labelUpper == "EQUINOCTIALP")      ||
+   //     (labelUpper == "EQUINOCTIALQ")   || (labelUpper == "RA")          || (labelUpper == "RAAN")              ||
+   //     (labelUpper == "RAV")            || (labelUpper == "TA"))
+   // {
+   //    return true;
+   // }
+   // else if (labelUpper == "RADAPO")
+   
+   // Add here if any real number is not allowed
+   if (labelUpper == "RADAPO")
    {
       if (GmatMathUtil::Abs(value) < .001)
       {
@@ -5101,6 +5288,18 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          }
       }
    }
+   else if (label == "BrouwerShortECC" || label == "BrouwerLongECC")
+   {
+      // range: 0.99 > BrouwerECC >= 0
+      if (value < 0 || value >= 0.99)
+      {
+         std::string range = "0 >= Real Number < 0.99";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), range.c_str());
+         throw ue;
+      }
+   }
    else if (labelUpper == "SMA")
    {
       if (IsEqual(value, 0.0, SINGULAR_TOL))
@@ -5132,7 +5331,23 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          }
       }
    }
-   else if (labelUpper == "INC")
+   else if (label == "BrouwerShortSMA" || label == "BrouwerLongSMA")
+   {
+      if (GmatStringUtil::EndsWith(compareTo, "ECC"))
+      {
+         // range: SMA >= 1000 / (1 - ECC);
+         if (value < (1000 / (1 - compareValue)))
+         {
+            std::string rangeMsg = "Real Number >= 1000 / (1 - " + compareTo;
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          label.c_str(), rangeMsg.c_str());
+            throw ue;
+         }
+      }
+   }
+   else if (labelUpper == "INC" || labelUpper == "FPA" ||
+            label == "BrouwerShortINC" || label == "BrouwerLongINC") // 0 =< value <= 180
    {
       if ((value < 0.0 - ANGLE_TOL) || (value > 180.0 + ANGLE_TOL))
       {
@@ -5146,27 +5361,19 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (labelUpper == "RMAG")
+   else if (labelUpper == "RMAG" || label == "PlanetodeticRMAG" ||
+            labelUpper == "VMAG" || label == "PlanetodeticVMAG") // value >= 1.0e-10
    {
       if (value < 1.0e-10)
       {
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "RMAG", "Real Number > 1.0e-10");
+                       label.c_str(), "Real Number > 1.0e-10");
          throw ue;
       }
    }
-   else if (labelUpper == "VMAG")
-   {
-      if (value < 1.0e-10)
-      {
-         UtilityException ue;
-         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "VMAG", "Real Number > 1.0e-10");
-         throw ue;
-      }
-   }
-   else if (labelUpper == "DEC")
+   else if (labelUpper == "DEC" || label == "PlanetodeticHFPA" ||
+            labelUpper == "DECV" || label == "PlanetodeticLAT") // -90 <= value <= 90
    {
       if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
       {
@@ -5176,39 +5383,25 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "DEC", rangeMsg.str().c_str());
+                       label.c_str(), rangeMsg.str().c_str());
          throw ue;
       }
    }
-   else if (labelUpper == "DECV")
+   else if (label == "PlanetodeticLON") // -180 <= value <= 180
    {
-      if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
+      if ((value < -180.0 - ANGLE_TOL) || (value > 180.0 + ANGLE_TOL))
       {
          std::stringstream rangeMsg;
-         rangeMsg << "-90.0 <= Real Number <= 90.0";
+         rangeMsg << "-180.0 <= Real Number <= 180.0";
          if (ANGLE_TOL != 0.0)
             rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "DECV", rangeMsg.str().c_str());
+                       label.c_str(), rangeMsg.str().c_str());
          throw ue;
       }
    }
-   else if (labelUpper == "FPA")
-   {
-      if ((value < 0 - ANGLE_TOL) || (value > 180 + ANGLE_TOL))
-      {
-         std::stringstream rangeMsg;
-         rangeMsg << "0.0 <= Real Number <= 180.0";
-         if (ANGLE_TOL != 0.0)
-            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
-         UtilityException ue;
-         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "FPA", rangeMsg.str().c_str());
-         throw ue;
-      }
-   }
-   else if (labelUpper == "EQUINOCTIALK")
+   else if (labelUpper == "EQUINOCTIALK" || label == "ModEqunoctialK")
    {
       if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
       {
@@ -5218,16 +5411,16 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             rangeMsg << " (tolerance = " << EQUINOCTIAL_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "EquinoctialK", rangeMsg.str().c_str());
+                       label.c_str(), rangeMsg.str().c_str());
          throw ue;
       }
-      if (compareUpper == "EQUINOCTIALH")
+      if (compareUpper == "EQUINOCTIALH" || label == "ModEqunoctialH")
       {
          if (GmatMathUtil::Sqrt(value * value + compareValue * compareValue) > 1.0 - EQUINOCTIAL_TOL)
          {
             UtilityException ue;
             ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                          "EquinoctialK", "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
+                          label.c_str(), "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
             throw ue;
          }
       }
@@ -5242,7 +5435,7 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             rangeMsg << " (tolerance = " << EQUINOCTIAL_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "EquinoctialH", rangeMsg.str().c_str());
+                       label.c_str(), rangeMsg.str().c_str());
          throw ue;
       }
       if (compareUpper == "EQUINOCTIALK")
@@ -5251,12 +5444,12 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          {
             UtilityException ue;
             ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                          "EquinoctialH", "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
+                          label.c_str(), "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
             throw ue;
          }
       }
    }
-   else if (labelUpper == "MLONG")
+   else if (labelUpper == "MLONG") // -360 <= value <= 360
    {
       if ((value < -360.0 - ANGLE_TOL) || (value > 360.0 + ANGLE_TOL))
       {
@@ -5266,10 +5459,60 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "MLONG", rangeMsg.str().c_str());
+                       label.c_str(), rangeMsg.str().c_str());
          throw ue;
       }
    }
+   else if (labelUpper == "TLONG" || label == "Delaunayl" ||
+            label == "Delaunayg" || label == "Delaunayh") // 0 <= value <= 360
+   {
+      if ((value < -ANGLE_TOL) || (value > 360.0 + ANGLE_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "0 <= Real Number <= 360.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else if (labelUpper == "SEMILATUSRECTUM") // value >= 1.e-7
+   {
+      if (value < 1.E-7)
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "1.0e-7 <= Real Number";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else if (label == "DelaunayL" || label == "DelaunayG") // value >= 0
+   {
+      if (value < 0)
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "0 <= Real Number";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_SC_CONVERT_VALIDATE
+      MessageInterface::ShowMessage
+         ("SCU::ValidateValue() state label '%s' can be any real number\n", label.c_str());
+      #endif
+   }
+   
+   #ifdef DEBUG_SC_CONVERT_VALIDATE
+   MessageInterface::ShowMessage("SCU::ValidateValue() returning true for label: %s\n", label.c_str());
+   #endif
    return true;
 }
 

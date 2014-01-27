@@ -456,18 +456,6 @@ bool ViewCanvas::InitOpenGL()
 void ViewCanvas::SetObjectOrbitColors(const ColorMap &orbitColorMap)
 {
    mObjectOrbitColorMap = orbitColorMap;
-   
-   #if 0
-   ColorMap::const_iterator iter = intOrbitColorMap.begin();
-   while (iter != intOrbitColorMap.end())
-   {
-      wxString objName = (iter->first).c_str();
-      UnsignedInt intColor = iter->second;
-      RgbColor rgb = RgbColor(intColor);
-      mObjectOrbitColorMap[objName] = rgb;
-      ++iter;
-   }
-   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -476,18 +464,6 @@ void ViewCanvas::SetObjectOrbitColors(const ColorMap &orbitColorMap)
 void ViewCanvas::SetObjectTargetColors(const ColorMap &targetColorMap)
 {
    mObjectTargetColorMap = targetColorMap;
-   
-   #if 0
-   ColorMap::const_iterator iter = intTargetColorMap.begin();
-   while (iter != intTargetColorMap.end())
-   {
-      wxString objName = (iter->first).c_str();
-      UnsignedInt intColor = iter->second;
-      RgbColor rgb = RgbColor(intColor);
-      mObjectTargetColorMap[objName] = rgb;
-      iter++;
-   }
-   #endif
 }
 
 //------------------------------------------------------------------------------

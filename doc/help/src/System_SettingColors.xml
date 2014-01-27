@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="OrbitView"
+<refentry version="5.0" xml:id="Setting_Colors"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -12,7 +12,7 @@
   </indexterm>
 
   <refmeta>
-    <refentrytitle>OrbitView</refentrytitle>
+    <refentrytitle>SettingColors</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -42,7 +42,7 @@
     <para>GMAT also provides the option of when to start and stop plotting
     spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
     through the <guilabel>Toggle On/Off</guilabel> command. See the <xref
-    linkend="Orbitview_Remarks" xrefstyle="select:title"/> section below for
+    linkend="Orbitview_Remarks222" xrefstyle="select:title"/> section below for
     detailed discussion of the interaction between an
     <guilabel>OrbitView</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. GMAT’s
@@ -54,11 +54,10 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="SolarSystem"/>, <xref
-    linkend="CoordinateSystem"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
   </refsection>
 
-  <refsection xml:id="Fields_Section">
+  <refsection xml:id="Fields_Section222">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -1957,7 +1956,7 @@
     </refsection>
   </refsection>
 
-  <refsection xml:id="Orbitview_Remarks">
+  <refsection xml:id="Orbitview_Remarks222">
     <title>Remarks</title>
 
     <refsection>

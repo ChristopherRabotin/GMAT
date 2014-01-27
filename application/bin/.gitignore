@@ -8,3 +8,4 @@
 /lib/
 /*.sh*
 /gmat_startup_file.txt~
+/GmatTester
