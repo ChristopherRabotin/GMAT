@@ -201,9 +201,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    
    // ModifiedEquinoctial parameters; Modified by M.H.
    // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173)
+   // It will create SemilatusRectum Parameter due to issues (2014.01.28)
    //if (ofType == "SemiLatusRectum")
-   if (ofType == "SemilatusRectum")
-      return new ModEquinP(withName);
+   //   return new ModEquinP(withName);
    if (ofType == "ModEquinoctialF")
       return new ModEquinF(withName);
    if (ofType == "ModEquinoctialG")
@@ -318,8 +318,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    // Angular parameters
    // Changed to create ModEquinP() since it is settable Parameter
    // Fix for GMT-4173 (LOJ: 2014.01.22)
-   //if (ofType == "SemilatusRectum")
-   //   return new SemilatusRectum(withName);
+   // Changed back to create SemilatusRectum due to issues (LOJ: 2014.01.28)
+   if (ofType == "SemilatusRectum")
+      return new SemilatusRectum(withName);
    if (ofType == "HMAG")
       return new AngularMomentumMag(withName);
    if (ofType == "HX")
