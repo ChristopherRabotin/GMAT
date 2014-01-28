@@ -565,9 +565,9 @@ or
             <guilabel>Propagate</guilabel> command by clicking on Orbit Color
             Selectbox. For Example: Setting yellow color on
             <guilabel>Propagate</guilabel> segment in script mode can be done
-            in following two ways: <literal>Propagate DefaultProp(DefaultSC)
-            {DefaultSC.Earth.Apoapsis, OrbitColor = Yellow}</literal> or
-            <literal>Propagate DefaultProp(DefaultSC)
+            in either of the following two ways: <literal>Propagate
+            DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis, OrbitColor =
+            Yellow}</literal> or <literal>Propagate DefaultProp(DefaultSC)
             {DefaultSC.Earth.Apoapsis, OrbitColor = [255 255
             0]}</literal>.</para> <variablelist>
                 <varlistentry>
@@ -593,7 +593,10 @@ or
                   <listitem>
                     <para>Default color on <guilabel>Propagate</guilabel>
                     command is color that is first set on
-                    <guilabel>Spacecraft.OrbitColor</guilabel> field</para>
+                    <guilabel>Spacecraft.OrbitColor</guilabel> field. Default
+                    color on <guilabel>Spacecraft.OrbitColor</guilabel> is
+                    Red. Therefore default color for
+                    <guilabel>Propagate</guilabel> command is Red.</para>
                   </listitem>
                 </varlistentry>
 
