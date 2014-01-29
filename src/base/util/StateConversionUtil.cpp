@@ -919,11 +919,11 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesian, const Real& mu)
 {
-   //#ifdef DEBUG_MODEQUINOCTIAL
-      //MessageInterface::ShowMessage("Converting from Cartesian to ModEquinoctial: \n");
-      //MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
-      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
-   //#endif
+   #ifdef DEBUG_MODEQUINOCTIAL
+   MessageInterface::ShowMessage("Converting from Cartesian to ModEquinoctial: \n");
+   MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
+   MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   #endif
    
    Real p_mee, f_mee, g_mee, h_mee, k_mee, L_mee; // modequinoctial elements
    Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
@@ -977,16 +977,18 @@ Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesia
    
    Real j = 1;
    Real denom = ( 1 + hHat[2]*j );
-
+   
+   // Throw an exception when singularity condition (Fix for GMT-4174)
    if ( Abs(denom) < 1.0E-7 )
    {
-      std::string warn = "Warning: Singularity may occur during calculate Modified Equinoctial element h and k.";
-      MessageInterface::PopupMessage(Gmat::WARNING_, warn);
-   }
-   else if ( Abs(denom ) < 1.0E-16 )
-   {
+      //std::string warn = "Warning: Singularity may occur during calculate Modified Equinoctial element h and k.";
+      //MessageInterface::PopupMessage(Gmat::WARNING_, warn);
       throw UtilityException("Singularity occurs during calculate Modified Equinoctial element h and k.\n");
    }
+   //else if ( Abs(denom ) < 1.0E-16 )
+   //{
+   //   throw UtilityException("Singularity occurs during calculate Modified Equinoctial element h and k.\n");
+   //}
    
    // Define modequinoctial coordinate system
    Rvector3 f;
@@ -1038,11 +1040,12 @@ Rvector6 StateConversionUtil::CartesianToModEquinoctial(const Rvector6& cartesia
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu)
 {
-   //#ifdef DEBUG_MODEQUINOCTIAL
-      //MessageInterface::ShowMessage("Converting from Modified Equinoctial to Cartesian: \n");
-      //MessageInterface::ShowMessage("   input Modified Equinoctial is: %s\n", modequinoctial.ToString().c_str());
-      //MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
-   //#endif
+   #ifdef DEBUG_MODEQUINOCTIAL
+   MessageInterface::ShowMessage("Converting from Modified Equinoctial to Cartesian: \n");
+   MessageInterface::ShowMessage("   input Modified Equinoctial is: %s\n", modequinoctial.ToString().c_str());
+   MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   #endif
+   
    Rvector3 pos;
    Rvector3 vel; // Cartesian elements
 

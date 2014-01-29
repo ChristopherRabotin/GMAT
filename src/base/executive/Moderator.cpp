@@ -7814,7 +7814,9 @@ void Moderator::CreateDefaultParameters()
    
    // Modified by M.H.
    // ModEquinoctial parameters
-   CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   // Changed SemiLatusRectum to SemilatusRectum (lowwer case L)
+   //CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   CreateParameter("SemilatusRectum", "DefaultSC.EarthMJ2000Eq.SemilatusRectum");
    CreateParameter("ModEquinoctialF", "DefaultSC.EarthMJ2000Eq.ModEquinoctialF");
    CreateParameter("ModEquinoctialG", "DefaultSC.EarthMJ2000Eq.ModEquinoctialG");
    CreateParameter("ModEquinoctialH", "DefaultSC.EarthMJ2000Eq.ModEquinoctialH");
@@ -7922,7 +7924,9 @@ void Moderator::CreateDefaultParameters()
    #endif
    
    // Angular parameters
-   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
+   // Changed to create SemilatusRectum as part of ModEquinoctial Parameter above
+   // (LOJ: 2014.01.22)
+   //CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
    CreateParameter("HMAG", "DefaultSC.HMAG");
    CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
    CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");

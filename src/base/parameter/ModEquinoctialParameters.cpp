@@ -33,10 +33,14 @@
 // ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "SemiLatusRectum", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
+   // Changed SemiLatusRectum to SemilatusRectum and ORIGIN dependent (Fix for GMT-4173)
+   //: OrbitReal(name, "SemiLatusRectum", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
+   : OrbitReal(name, "SemilatusRectum", obj, "ModEquinoctial P", "km", GmatParam::ORIGIN, MOD_EQ_P, true)
 {
-   mDepObjectName = "EarthMJ2000Eq";
-   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   //mDepObjectName = "EarthMJ2000Eq";
+   //SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, mDepObjectName);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -73,9 +77,6 @@ ModEquinP::~ModEquinP()
 //------------------------------------------------------------------------------
 bool ModEquinP::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquinReal("EquinSma");
-   //why SMA? Changed to EQ_SMA (LOJ: 2012.02.08)
-   //mRealValue = OrbitData::GetEquinReal(SMA);
    mRealValue = OrbitData::GetModEquinReal(MOD_EQ_P);
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)

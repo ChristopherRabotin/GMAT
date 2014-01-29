@@ -54,7 +54,7 @@
 //#define DEBUG_CLONE_UPDATES
 //#define DEBUG_VALIDATION
 //#define DEBUG_SETTABILITY
-
+//#define DEBUG_PROPERTY_CHANGE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2241,7 +2241,7 @@ void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
 {
    #ifdef DEBUG_PROPERTY_CHANGE
    MessageInterface::ShowMessage
-      ("Assignment::HandleObjectPropertyChange() entered, lhsWrapper='%s'\n",
+      ("\nAssignment::HandleObjectPropertyChange() entered, lhsWrapper='%s'\n",
        lhsWrapper->GetDescription().c_str());
    #endif
    
