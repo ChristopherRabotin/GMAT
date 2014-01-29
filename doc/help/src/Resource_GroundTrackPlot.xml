@@ -37,16 +37,17 @@
     the GUI or script interface of GMAT. GMAT also provides the option of when
     to plot and stop plotting ground track of a spacecraft to a
     <guilabel>GroundTrackPlot</guilabel> through the <guilabel>Toggle
-    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref linkend="GroundTrackPlot_Remarks"
-    xrefstyle="select:title"/> section
-    below for detailed discussion of the interaction between
+    On</guilabel>/<guilabel>Off</guilabel> command. See the <xref
+    linkend="GroundTrackPlot_Remarks" xrefstyle="select:title"/> section below
+    for detailed discussion of the interaction between
     <guilabel>GroundTrackPlot</guilabel> resource and the
     <guilabel>Toggle</guilabel> command. <guilabel>GroundTrackPlot</guilabel>
     resource also allows you to display any number of user-defined ground
     stations onto the texture map of the central body.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Toggle"/>, <xref linkend="GroundStation"/></para>
+    linkend="Toggle"/>, <xref linkend="GroundStation"/>, <xref
+    linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection>
@@ -71,10 +72,14 @@
             <entry><guilabel>Add</guilabel></entry>
 
             <entry><para>Allows the user to pick selected resources such as
-            <guilabel>Spacecraft(s)</guilabel> or
-            <guilabel>GroundStation(s)</guilabel> whose ground track is drawn
-            in <guilabel>GroundTrackPlot</guilabel>. To select multiple
             <guilabel>Spacecrafts</guilabel> or
+            <guilabel>GroundStations</guilabel>. The
+            <guilabel>GroundTrackPlot</guilabel> object is used to draw
+            spacecraft's longtitude and latitude time-history on a
+            two-dimensional texture map of a central body that you select.
+            After creating <guilabel>GroundStation</guilabel> object, you can
+            also add ground stations onto the the texture map of the central
+            body. To select multiple <guilabel>Spacecrafts</guilabel> or
             <guilabel>GroundStations</guilabel>, seperate the list by comma
             and enclose the list in curly brackets. For Example:
             <literal>DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
@@ -363,63 +368,6 @@
           </row>
 
           <row>
-            <entry><guilabel>OrbitColor</guilabel></entry>
-
-            <entry><para>Allows the user to be able to select colors for
-            spacecraft trajectories. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer Array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from the Orbit Color
-                    selectbox</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 255 32768 ]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
             <entry><para>Allows the user to select which
@@ -657,65 +605,7 @@
 
                 <varlistentry>
                   <term>Interfaces</term>
-                  <term>Interfaces</term>
 
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>TargetColor</guilabel></entry>
-
-            <entry><para>Allows the user to select any available color for
-            perturbing trajectories during iterative processes such as
-            <guilabel>Differential Correction</guilabel> or
-            <guilabel>Optimization</guilabel>. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from Target Color select
-                    box</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 16777215 0]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
                   <term>Interfaces</term>
 
                   <listitem>
@@ -912,7 +802,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_GroundTrackPlot_3.png"
+                     fileref="files/images/Resource_GroundTrackPlot_4.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>

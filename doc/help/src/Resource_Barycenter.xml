@@ -37,11 +37,12 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="LibrationPoint"/>, <xref linkend="CoordinateSystem"/>, <xref
-    linkend="CelestialBody"/>, <xref linkend="SolarSystem"/></para>
+    linkend="CelestialBody"/>, <xref linkend="SolarSystem"/>, <xref
+    linkend="Setting_Colors"/></para>
   </refsection>
 
-  <refsection>
-    <title>Options</title>
+  <refsection xml:id="Barycenter_Resource_Fields">
+    <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
@@ -51,7 +52,7 @@
 
         <thead>
           <row>
-            <entry>Option</entry>
+            <entry>Field</entry>
 
             <entry>Description</entry>
           </row>
@@ -117,6 +118,134 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>OrbitColor</guilabel></entry>
+
+            <entry><para>Allows you to set available colors on user-defined
+            <guilabel>Barycenter</guilabel> object orbits. The barycenter
+            orbits are drawn using the <guilabel>OrbitView</guilabel> graphics
+            resource. Colors on <guilabel>Barycenter</guilabel> object can be
+            set through a string or an integer array. For example: Setting a
+            barycenter's orbit color to red can be done in the following two
+            ways: <literal>Barycenter.OrbitColor = Red</literal> or
+            <literal>Barycenter.OrbitColor = [255 0 0]</literal>. This field
+            can be modified in the Mission Sequence as well.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Orbit Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Gold</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>TargetColor</guilabel></entry>
+
+            <entry><para>Allows you to select available colors for
+            <guilabel>Barycenter</guilabel> object's perturbing orbital
+            trajectories that are drawn during iterative processes such as
+            Differential Correction or Optimization. The target color can be
+            identified through a string or an integer array. For example:
+            Setting a barycenter's perturbing trajectory color to yellow can
+            be done in following two ways: <literal>Barycenter.TargetColor =
+            Yellow</literal> or <literal>Barycenter.TargetColor = [255 255
+            0]</literal>. This field can be modified in the Mission Sequence
+            as well.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Target Color
+                    selectbox</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>DarkGray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -129,7 +258,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_Barycenter_BarycenterObjectDialogBox.jpeg"
+                     fileref="files/images/Resource_Barycenter_BarycenterObjectDialogBox.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -149,7 +278,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_Barycenter_SSBDialogBox.jpeg"
+                     fileref="files/images/Resource_Barycenter_SSBDialogBox.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -211,6 +340,23 @@
         </imageobject>
       </mediaobject>
     </screenshot>
+	
+	    <refsection>
+      <title>Setting Colors On Barycenter Orbits</title>
+
+      <para>GMAT allows you to assign colors to barycenter orbits that
+      are drawn using the <guilabel>OrbitView</guilabel> graphics resource. GMAT also allows you to assign colors to perturbing barycenter
+      orbital trajectories which are drawn during iterative processes
+      such as differential correction or optimization. The
+      <guilabel>Barycenter</guilabel> object's
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields are used to assign colors to both orbital and perturbing
+      trajectories. See the <xref linkend="Barycenter_Resource_Fields"
+      xrefstyle="select:title"/> section to learn more about these two fields.
+      Also see <xref linkend="Setting_Colors"/> documentation for discussion
+      and examples on how to set colors on a barycenter orbit.</para>
+    </refsection>
+	
   </refsection>
 
   <refsection>
