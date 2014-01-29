@@ -36,7 +36,7 @@
     the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Propagate"/></para>
+    linkend="Propagate"/>, <xref linkend="Setting_Colors"/></para>
   </refsection>
 
   <refsection xml:id="Formation_Resource_Fields">
@@ -346,7 +346,9 @@ Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</computeroutput></pro
       both orbital and perturbing trajectories of spacecrafts in formation
       flight. See the <xref linkend="Formation_Resource_Fields"
       xrefstyle="select:title"/> section to learn more about these two
-      fields.</para>
+      fields. Also see <xref
+      linkend="Setting_Colors"/> documentation for discussion and examples on
+      how to set unique colors on orbital trajectory segments.</para>
     </refsection>
   </refsection>
 
