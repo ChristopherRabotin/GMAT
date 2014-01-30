@@ -4201,7 +4201,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    }
    else
    {
-      // If firist RHS char is "-" sign, use without it in finding name.
+      // If first RHS char is "-" sign, use without it in finding name.
       // This is due to backward propagation. For example,
       // Propagate -prop(Sat1, Sat2, {Sat1.Periapsis})
       std::string newName = rhs;
@@ -6898,29 +6898,14 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else if (pmType == "SRP" || pmType == "RelativisticCorrection")
    {
-      if (pmType == "SRP")
-      {
-         id = obj->GetParameterID("SRP");
-         type = obj->GetParameterType(id);
-         retval = SetPropertyValue(obj, id, type, value);
-         
-         if (retval && value != "On")
-            return true;
-         else if (!retval)
-            return false;
-      }
-      
-      if (pmType == "RelativisticCorrection")
-      {
-         id = obj->GetParameterID("RelativisticCorrection");
-         type = obj->GetParameterType(id);
-         retval = SetPropertyValue(obj, id, type, value);
+      id     = obj->GetParameterID(pmType);
+      type   = obj->GetParameterType(id);
+      retval = SetPropertyValue(obj, id, type, value);
 
-         if (retval && value != "On")
-            return true;
-         else if (!retval)
-            return false;
-      }
+      if (retval && value != "On")
+         return true;
+      else if (!retval)
+         return false;
       
       // Create PhysicalModel
       std::string forceName = pmType + "." + centralBodyName;
@@ -7004,6 +6989,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
 
    if (FindPropertyID(forceModel, propName, &owner, propId, propType))
    {
+      #ifdef DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage
+            ("   Found property ID = %d\n", propId);
+      #endif
       id = owner->GetParameterID(propName);
       type = owner->GetParameterType(id);
 
@@ -7052,6 +7041,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else
    {
+      #ifdef DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage
+            ("   Trying owned objects from ODEModel ... \n");
+      #endif
       // Try owned object from ODEModel
       for (int i = 0; i < forceModel->GetOwnedObjectCount(); i++)
       {
