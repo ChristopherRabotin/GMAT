@@ -26,16 +26,17 @@
     Commands</refpurpose>
   </refnamediv>
 
-  <refsection>
+  <refsection xml:id="SettingColors_Description">
     <title>Description</title>
 
     <para>GMAT lets you assign different colors to orbital trajectory segments
     that are drawn by <guilabel>Spacecraft</guilabel>, spacecrafts in
     <guilabel>Formation</guilabel>, <guilabel>CelestialBody</guilabel>,
-    <guilabel>LibrationPoint</guilabel> and Barycenter resources. You can also
-    assign unique colors to <guilabel>Spacecraft</guilabel> orbital trajectory
-    segments by setting colors through the <guilabel>Propagate</guilabel>
-    command. The orbital trajectories of these resources are drawn using the
+    <guilabel>LibrationPoint</guilabel> and <guilabel>Barycenter</guilabel>
+    resources. You can also assign unique colors to
+    <guilabel>Spacecraft</guilabel> orbital trajectory segments by setting
+    colors through the <guilabel>Propagate</guilabel> command. The orbital
+    trajectories of these resources are drawn using the
     <guilabel>OrbitView</guilabel> 3D graphics resource. Additionally, GMAT
     allows you set colors on <guilabel>GroundStation</guilabel> facilities
     that are drawn on a spacecraft’s ground track plot created by
@@ -555,2529 +556,357 @@
 
             <entry><para>154 205 50</para></entry>
           </row>
-
         </tbody>
       </tgroup>
     </informaltable>
-
-    <para>GMAT also provides the option of when to start and stop plotting
-    spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
-    through the <guilabel>Toggle On/Off</guilabel> command. See the <xref
-    linkend="SettingColors_Remarks" xrefstyle="select:title"/> section below
-    for detailed discussion of the interaction between an
-    <guilabel>OrbitView</guilabel> resource and the
-    <guilabel>Toggle</guilabel> command. GMAT’s
-    <guilabel>Spacecraft</guilabel>, <guilabel>SolarSystem</guilabel> and
-    <guilabel>OrbitView</guilabel> resources also interact with each other
-    throughout the entire mission duration. Discussion of the interaction
-    between these resources is also mentioned in the <xref
-    linkend="Orbitview_Remarks" xrefstyle="select:title"/> section.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
-  </refsection>
-
-  <refsection xml:id="Fields_Section222">
-    <title>Fields</title>
-
-    <informaltable colsep="0" frame="topbot">
-      <tgroup cols="2">
-        <colspec colnum="1" colwidth="1.25*"/>
-
-        <colspec colnum="2" colwidth="3*"/>
-
-        <thead>
-          <row>
-            <entry>Field</entry>
-
-            <entry>Description</entry>
-          </row>
-        </thead>
-
-        <tbody>
-          <row>
-            <entry><guilabel>Add</guilabel></entry>
-
-            <entry><para>This field allows you to add a
-            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
-            body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel> to a plot. When creating a plot,
-            the <guilabel>Earth</guilabel> is added as a default body and may
-            be removed at any time. You can add a
-            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
-            body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel> to a plot by using the name used
-            to create the resource. The GUI's <guilabel>Selected</guilabel>
-            field is the equivalent of the script's <guilabel>Add</guilabel>
-            field. In the event of no <guilabel>Add</guilabel> command or no
-            resources in the <guilabel>Selected</guilabel> field, GMAT should
-            run without the <guilabel>OrbitView</guilabel> plot and a warning
-            message will be displayed in the message window. The following
-            warning message is sufficient: The OrbitView named
-            "DefaultOrbitView" will be turned off. No SpacePoints were added
-            to plot. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Reference Array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>Spacecraft</guilabel>,
-                    <guilabel>CelestialBody</guilabel>,
-                    <guilabel>LibrationPoint</guilabel>,
-                    <guilabel>Barycenter</guilabel></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para><guilabel>DefaultSC</guilabel>,
-                    <guilabel>Earth</guilabel></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Axes</guilabel></entry>
-
-            <entry><para>Allows you to draw the Cartesian axis system
-            associated with the coordinate system selected under the
-            <guilabel>CoordinateSystem</guilabel> field of an
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>EclipticPlane</guilabel></entry>
-
-            <entry><para>Allows you to draw a grid representing the
-            <guilabel>Ecliptic Plane</guilabel> in an
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>CoordinateSystem</guilabel></entry>
-
-            <entry><para>Allows you to select which <guilabel>coordinate
-            system</guilabel> to use to draw the plot data. A
-            <guilabel>coordinate system</guilabel> is defined as an
-            <guilabel>origin</guilabel> and an <guilabel>axis
-            system</guilabel>. The <guilabel>CoordinateSystem</guilabel> field
-            allows you to determine the <guilabel>origin</guilabel> and
-            <guilabel>axis system</guilabel> of an
-            <guilabel>OrbitView</guilabel> plot. See the
-            <guilabel>CoordinateSystem</guilabel> resource fields for
-            information of defining different types of <guilabel>coordinate
-            systems</guilabel>. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>CoordinateSystem</guilabel>
-                    resource</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>EarthMJ2000Eq</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DataCollectFrequency</guilabel></entry>
-
-            <entry><para>Allows you to define how data is collected for
-            plotting. It is often inefficient to draw every ephemeris point
-            associated with a trajectory. Often, drawing a smaller subset of
-            the data still results in smooth trajectory plots, while executing
-            more quickly. The <guilabel>DataCollectFrequency</guilabel> is an
-            integer that represents how often to collect data and store for
-            plotting. If <guilabel>DataCollectFrequency</guilabel> is set to
-            10, then data is collected every 10 integration steps. This field
-            cannot be modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Integer ≥ 1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DrawObject</guilabel></entry>
-
-            <entry><para> The <guilabel>DrawObject</guilabel> field allows you
-            the option of displaying <guilabel>Spacecraft</guilabel> or
-            <guilabel>Celestial</guilabel> resources on the
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>true, false</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[true true]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>EnableConstellations </guilabel></entry>
-
-            <entry><para>Allows you the option of displaying star
-            constellations on the <guilabel>OrbitView</guilabel> Plot. This
-            field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>EnableStars </guilabel></entry>
-
-            <entry><para>This field gives you the option of displaying stars
-            on the <guilabel>OrbitView</guilabel> Plot. When the
-            <guilabel>EnableStars</guilabel> field is turned off, then
-            <guilabel>EnableConstellations</guilabel> field is automatically
-            diabled. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Grid </guilabel></entry>
-
-            <entry><para>Allows you to draw a grid representing the longitude
-            and latitude lines on the celestial bodies added to an
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Maximized</guilabel></entry>
-
-            <entry><para>Allows you to maximize the
-            <guilabel>OrbitView</guilabel> plot window. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>True, False</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>false</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>NumPointsToRedraw</guilabel></entry>
-
-            <entry><para> When <guilabel>NumPointsToRedraw</guilabel> field is
-            set to zero, all ephemeris points are drawn. When
-            <guilabel>NumPointsToRedraw</guilabel> is set to a positive
-            integer, say 10 for example, only the last 10 collected data
-            points are drawn. See <guilabel>DataCollectFrequency</guilabel>
-            for explanation of how data is collected for an
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Integer ≥ 1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>RelativeZOrder</guilabel></entry>
-
-            <entry><para>Allows you to select which
-            <guilabel>OrbitView</guilabel> window to display first on the
-            screen. The <guilabel> OrbitViewPlot</guilabel> with lowest
-            <guilabel>RelativeZOrder</guilabel> value will be displayed last
-            while <guilabel>OrbitViewPlot</guilabel> with highest
-            <guilabel>RelativeZOrder</guilabel> value will be displayed first.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Integer ≥ 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ShowPlot</guilabel></entry>
-
-            <entry><para>Allows you to turn off a plot for a particular run,
-            without deleting the plot, or removing it from the script. If you
-            select true, then the plot will be shown. If you select false,
-            then the plot will not be shown. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>True, False</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>True</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ShowLabels</guilabel></entry>
-
-            <entry><para>Allows you to turn on or off spacecraft and celestial
-            body Object labels. If you select true, then spacecraft and
-            celestial body object labels will show up in orbit view plot. If
-            you select false, then spacecraft and celestial body labels will
-            not be shown in the orbit plot. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>True, False</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>True</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Size</guilabel></entry>
-
-            <entry><para>Allows you to control the display size of
-            <guilabel>OrbitViewPlot</guilabel> window. First value in [0 0]
-            matrix controls horizonal size and second value controls vertical
-            size of <guilabel>OrbitViewPlot</guilabel> display window. This
-            field cannot be modified in the Mission Sequence. </para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any Real number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[0 0]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>SolverIterations</guilabel></entry>
-
-            <entry><para>This field determines whether or not data associated
-            with perturbed trajectories during a solver
-            (<guilabel>Targeter</guilabel>, <guilabel>Optimize</guilabel>)
-            sequence is plotted to <guilabel>OrbitView</guilabel>. When
-            <guilabel>SolverIterations</guilabel> is set to
-            <guilabel>All</guilabel>, all perturbations/iterations are plotted
-            to an <guilabel>OrbitView</guilabel> plot. When
-            <guilabel>SolverIterations</guilabel> is set to
-            <guilabel>Current</guilabel>, only current solution is plotted to
-            an <guilabel>OrbitView</guilabel>. When
-            <guilabel>SolverIterations</guilabel> is set to
-            <guilabel>None</guilabel>, this shows only final solution after
-            the end of an iterative process and draws only final trajectory to
-            an <guilabel>OrbitView</guilabel> plot. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Enumeration</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>All</guilabel>,
-                    <guilabel>Current</guilabel>,
-                    <guilabel>None</guilabel></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>Current</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>StarCount</guilabel></entry>
-
-            <entry><para>Allows you to enter the number of stars that need to
-            be displayed in an <guilabel>OrbitView</guilabel> plot. This field
-            cannot be modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Integer ≥ 1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>7000</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>SunLine</guilabel></entry>
-
-            <entry><para>Allows you to draw a line that starts at the center
-            of central body and points towards the <guilabel>Sun</guilabel>.
-            This field cannot be modified in the Mission Sequence. </para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>UpdatePlotFrequency</guilabel></entry>
-
-            <entry><para>This field lets you specify how often to update an
-            <guilabel>OrbitView</guilabel> plot is updated with new data
-            collected during the process of propagating spacecraft and running
-            a mission. Data is collected for a plot according to the value
-            defined by <guilabel>DataCollectFrequency</guilabel>. An
-            <guilabel>OrbitView</guilabel> plot is updated with the new data,
-            according to the value set in
-            <guilabel>UpdatePlotFrequency</guilabel>. If
-            <guilabel>UpdatePlotFrequency</guilabel> is set to 10 and
-            <guilabel>DataCollectFrequency</guilabel> is set to 2, then the
-            plot is updated with new data every 20 (10*2) integration steps.
-            This field cannot be modified in the Mission Sequence. </para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Integer ≥ 1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>50</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>UpperLeft</guilabel></entry>
-
-            <entry><para>Allows you to pan the <guilabel>OrbitView
-            </guilabel>plot window in any direction. First value in [0 0]
-            matrix helps to pan the <guilabel>OrbitView</guilabel> window
-            horizontally and second value helps to pan the window vertically.
-            This field cannot be modified in the Mission Sequence. </para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any Real number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[0 0]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>UseInitialView</guilabel></entry>
-
-            <entry><para>This field lets you control the view of an
-            <guilabel>OrbitView</guilabel> plot between multiple runs of a
-            mission sequence. The first time a specific
-            <guilabel>OrbitView</guilabel> plot is created, GMAT will
-            automatically use the view as defined by the fields associated
-            with <guilabel>View Definition</guilabel>, <guilabel>View Up
-            Direction</guilabel>, and <guilabel>View Option</guilabel>.
-            However, if you change the view using the mouse, GMAT will retain
-            this view upon rerunning the mission as long as
-            <guilabel>UseInitialView</guilabel> is set to false. If
-            <guilabel>UseInitialView</guilabel> is set to true, the view for
-            an <guilabel>OrbitView</guilabel> plot will be returned to the
-            view defined by the initial settings. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewDirection</guilabel></entry>
-
-            <entry><para>Allows you to select the direction of view in an
-            <guilabel>OrbitView</guilabel> plot. You can specify the view
-            direction by choosing a resource to point at such as a
-            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
-            body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel>. Alternatively, you can also
-            specify a vector of the form [x y z]. If the user specification of
-            <guilabel>ViewDirection</guilabel>,
-            <guilabel>ViewPointReference</guilabel>, and
-            <guilabel>ViewPointVector</guilabel> results in a zero vector,
-            GMAT uses [0 0 10000] for <guilabel>ViewDirection</guilabel>. This
-            field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Reference array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>Spacecraft</guilabel>,
-                    <guilabel>CelestialBody</guilabel>,
-                    <guilabel>LibrationPoint</guilabel>,
-                    <guilabel>Barycenter</guilabel>, or a 3-vector of
-                    numerical values</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Earth</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km or N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewPointReference</guilabel></entry>
-
-            <entry><para>This optional field allows you to change the
-            reference point from which <guilabel>ViewPointVector</guilabel> is
-            measured. <guilabel>ViewPointReference</guilabel> defaults to the
-            origin of the coordinate system for the plot. A
-            <guilabel>ViewPointReference</guilabel> can be any
-            <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
-            body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel>. This field cannot be modified in
-            the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Reference array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>Spacecraft</guilabel>,
-                    <guilabel>CelestialBody</guilabel>,
-                    <guilabel>LibrationPoint</guilabel>,
-                    <guilabel>Barycenter</guilabel>, or a 3-vector of
-                    numerical values</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Earth</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km or N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewPointVector</guilabel></entry>
-
-            <entry><para> The product of <guilabel>ViewScaleFactor</guilabel>
-            and <guilabel>ViewPointVector</guilabel> field determines the view
-            point location with respect to
-            <guilabel>ViewPointReference</guilabel>.
-            <guilabel>ViewPointVector</guilabel> can be a vector, or any of
-            the following resources: <guilabel>Spacecraft</guilabel>,
-            <guilabel>Celestial body</guilabel>, <guilabel>Libration
-            Point</guilabel>, or <guilabel>Barycenter</guilabel>. The location
-            of the view point in three-dimensional space is defined as the
-            vector addition of <guilabel>ViewPointReference</guilabel> and the
-            vector defined by product of <guilabel>ViewScaleFactor</guilabel>
-            and <guilabel>ViewPointVector</guilabel> in the coordinate system
-            chosen by you. This field cannot be modified in the Mission
-            Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Reference array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>Spacecraft</guilabel>,
-                    <guilabel>CelestialBody</guilabel>,
-                    <guilabel>LibrationPoint</guilabel>,
-                    <guilabel>Barycenter</guilabel>, or a 3-vector of
-                    numerical values</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[30000 0 0]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km or N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewScaleFactor</guilabel></entry>
-
-            <entry><para>This field scales
-            <guilabel>ViewPointVector</guilabel> before adding it to
-            <guilabel>ViewPointReference</guilabel>. The
-            <guilabel>ViewScaleFactor</guilabel> allows you to back away from
-            an object to fit in the field of view. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real Number ≥ 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>1</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewUpAxis</guilabel></entry>
-
-            <entry><para>This field lets you define which axis of the
-            <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as
-            the up direction in an <guilabel>OrbitView</guilabel> plot. See
-            the comments under <guilabel>ViewUpCoordinateSystem</guilabel> for
-            more details of fields used to determine the up direction in an
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Enumeration</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>X </guilabel>, <guilabel>-X</guilabel> ,
-                    <guilabel>Y</guilabel> , <guilabel>-Y</guilabel>
-                    ,<guilabel> Z</guilabel> , <guilabel>-Z</guilabel></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>Z</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>ViewUpCoordinateSystem</guilabel></entry>
-
-            <entry><para> The <guilabel>ViewUpCoordinateSystem</guilabel> and
-            <guilabel>ViewUpAxis</guilabel> fields are used to determine which
-            direction appears as up in an <guilabel>OrbitView</guilabel> plot
-            and together with the fields associated the the <guilabel>View
-            Direction</guilabel>, uniquely define the view. The fields
-            associated with the <guilabel>View Definition</guilabel> allows
-            you to define the point of view in three-dimensional space, and
-            the direction of the line of sight. However, this information
-            alone is not enough to uniquely define the view. We also must
-            provide how the view is oriented about the line of sight. This is
-            accomplished by defining what direction should appear as the up
-            direction in the plot and is configured using the
-            <guilabel>ViewUpCoordinateSystem</guilabel> field and the
-            <guilabel>ViewUpAxis</guilabel> field. The
-            <guilabel>ViewUpCoordinateSystem</guilabel> allows you to select a
-            coordinate system to define the up direction. Most of the time
-            this system will be the same as the coordinate system chosen under
-            the <guilabel>CoordinateSystem</guilabel> field. This field cannot
-            be modified in the Mission Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>CoordinateSystem</guilabel>
-                    resource</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>EarthMJ2000Eq</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>WireFrame</guilabel></entry>
-
-            <entry><para> When the <guilabel>WireFrame</guilabel> field is set
-            to <guilabel>On</guilabel>, celestial bodies are drawn using a
-            wireframe model. When the <guilabel>WireFrame</guilabel> field is
-            set to <guilabel>Off</guilabel>, then celestial bodies are drawn
-            using a full map. This field cannot be modified in the Mission
-            Sequence. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Off, On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>XYPlane</guilabel></entry>
-
-            <entry><para>Allows you to draw a grid representing the
-            <guilabel>XY-plane</guilabel> of the coordinate system selected
-            under the <guilabel>CoordinateSystem</guilabel> field of the
-            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Boolean</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>On, Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>On</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+    linkend="SpacecraftVisualizationProperties"/>, <xref
+    linkend="Formation"/>, <xref linkend="CelestialBody"/>, <xref
+    linkend="LibrationPoint"/>, <xref linkend="Barycenter"/>, <xref
+    linkend="GroundStation"/>, <xref linkend="Propagate"/></para>
   </refsection>
 
   <refsection xml:id="SettingColor_GUI">
     <title>GUI</title>
 
-    <para>The figure below shows the default settings for the
-    <guilabel>OrbitView</guilabel> resource:</para>
+    <para>Setting colors on <guilabel>Spacecraft</guilabel>,
+    <guilabel>GroundStation</guilabel>, <guilabel>Formation</guilabel>,
+    <guilabel>CelestialBody</guilabel>, <guilabel>LibrationPoint</guilabel>
+    and <guilabel>Barycenter</guilabel> resources’
+    <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+    fields via GMAT’s GUI mode is very easy. Since the procedure for setting
+    colors on these six resources is the same, hence only one GUI example is
+    given below using the <guilabel>Spacecraft</guilabel> resource:</para>
+
+    <para>After opening the <guilabel>Spacecraft</guilabel> resource, click on
+    Visualization tab.</para>
 
     <screenshot>
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_OrbitView_GUI_4.png"
+                     fileref="files/images/Resource_SpaceraftVisualProp_SettingColors_1.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
 
-    <refsection>
-      <title>OrbitView Window Mouse Controls</title>
+    <para>In the Visualization window, you will see Orbit Color and Target
+    Color Select boxes. You can choose colors for
+    <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+    fields by clicking on the Orbit Color and Target Color select boxes
+    respectively. For example, clicking either on the Orbit Color or Target
+    Color select box opens the Color panel seen below. Using this Color panel,
+    you can select basic colors, create custom colors of your choice and add
+    custom colors to the list of available colors.</para>
 
-      <para>The list of controls in the table below helps you navigate through
-      the <guilabel>OrbitView</guilabel> graphics window.
-      "<guilabel>Left</guilabel>" and "<guilabel>Right</guilabel>" designate
-      the mouse button which have to be pressed.</para>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_SpaceraftVisualProp_SettingColors_2.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-      <informaltable colsep="0" frame="topbot">
-        <tgroup cols="2">
-          <colspec colnum="1" colwidth=".75*"/>
+    <para>Selecting colors on <guilabel>Propagate</guilabel> command’s
+    <guilabel>OrbitColor</guilabel> option through the GUI mode is also very
+    easy. Open any <guilabel>Propagate</guilabel> command. Below is screenshot
+    of GMAT’s default <guilabel>Propagate</guilabel> command:</para>
 
-          <colspec colnum="2" colwidth="3*"/>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_Propagate_SettingColors_1.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-          <thead>
-            <row>
-              <entry>Control</entry>
+    <para>In GMAT, the default orbit color on any
+    <guilabel>Propagate</guilabel> command is the color that is set on
+    <guilabel>Spacecraft</guilabel> resource’s <guilabel>OrbitColor</guilabel>
+    field (i.e. <guilabel>Spacecraft.OrbitColor</guilabel>). Whenever you do
+    not set a unique color on the <guilabel>Propagate</guilabel> command's
+    <guilabel>OrbitColor</guilabel> option, hence the color on the
+    <guilabel>Propagate</guilabel> command will always be the color that is
+    set on <guilabel>Spacecraft</guilabel> object's
+    <guilabel>OrbitColor</guilabel> field.</para>
 
-              <entry>Description</entry>
-            </row>
-          </thead>
+    <para>To set your own unique colors to the <guilabel>Propagate</guilabel>
+    command, click and check the <guilabel>Override Color For This
+    Segment</guilabel> box. This makes the Orbit Color select box active.
+    Clicking on the Orbit Color select box opens the Color panel shown
+    below:</para>
 
-          <tbody>
-            <row>
-              <entry><guilabel>Left Drag</guilabel></entry>
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_SpaceraftVisualProp_SettingColors_2.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
 
-              <entry><para> Helps to change camera orientation. Camera
-              orientation can be changed in
-              <guilabel>Up</guilabel>/<guilabel>Down</guilabel>/<guilabel>Left</guilabel>/<guilabel>Right</guilabel>
-              directions. </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>Right Drag</guilabel></entry>
-
-              <entry><para> Helps to zoom in and out of the graphics window.
-              Moving the cursor in <guilabel>Up</guilabel> direction leads to
-              zoom out of the graphics window. Moving the cursor in
-              <guilabel>Down</guilabel> direction helps to zoom into the
-              graphics window. </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>Shift+Right Drag</guilabel></entry>
-
-              <entry><para> Helps to adjust the <guilabel>Field of
-              View</guilabel>. </para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </refsection>
+    <para>Using this Color panel, you can select basic colors, create custom
+    colors of your choice and add custom colors to the list of available
+    colors and set them on the <guilabel>Propagate</guilabel> command’s
+    <guilabel>OrbitColor</guilabel> option.</para>
   </refsection>
 
   <refsection xml:id="SettingColors_Remarks">
     <title>Remarks</title>
 
     <refsection>
-      <title>Behavior when using OrbitView Resource &amp; Toggle
-      Command</title>
+      <title>Configuring Orbit and Target Colors on Spacecraft Resource</title>
 
-      <para>The <guilabel>OrbitView</guilabel> resource plots spacecraft’s
-      trajectory at each propagation step of the entire mission duration. If
-      you want to report data to an <guilabel>OrbitView</guilabel> plot at
-      specific points in your mission, then a <guilabel>Toggle</guilabel>
-      <guilabel>On</guilabel>/<guilabel>Off</guilabel> command can be inserted
-      into the mission sequence to control when <guilabel>OrbitView</guilabel>
-      is to plot a given trajectory. When <guilabel>Toggle Off</guilabel>
-      command is issued for an <guilabel>OrbitView</guilabel>, no trajectory
-      is drawn until a <guilabel>Toggle On</guilabel> command is issued.
-      Similarly, when a <guilabel>Toggle On</guilabel> command is used,
-      trajectory is plotted at each integration step until a <guilabel>Toggle
-      Off</guilabel> command is used.</para>
+	  
+<para>You can set unique colors of your choice on orbital trajectories of a <guilabel>Spacecraft</guilabel> by assigning colors
+ to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field. As long as you do not reset or reassign orbit color on the
+ <guilabel>Propagate</guilabel> command, then all spacecraft trajectory colors that GMAT draws will be the same color that
+ you first set on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field. The default color on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
+ field is set to red.  With this default setting of red color to <guilabel>OrbitColor</guilabel> field, all <guilabel>Spacecraft</guilabel> trajectories
+ will be drawn in red color as long as you do not reset orbit color on any of the <guilabel>Propagate</guilabel> commands. 
+ Now for example, if you want all <guilabel>Spacecraft</guilabel> orbital trajectories to be drawn in yellow color alone, 
+ the script snippet below demonstrates two acceptable methods of setting yellow color to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field:</para>
+
 
       <programlisting><code>Create Spacecraft aSat
-Create Propagator aProp
+aSat.OrbitColor = Yellow       % ColorName method
+% or
+aSat.OrbitColor = [255 255 0]  % RGB triplet value method</code></programlisting>
 
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth}
+<para>Similarly, setting colors of your choice on spacecraft’s perturbing trajectories that may be 
+drawn during iterative processes such as differential correction or optimization can be done
+ by assigning unique colors to <guilabel>Spacecraft</guilabel> object’s <guilabel>TargetColor</guilabel> field. Setting colors on the 
+ <guilabel>TargetColor</guilabel> field is only useful when you want to assign colors on perturbed trajectories 
+ generated during iterative processes. Both <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields of <guilabel>Spacecraft</guilabel> 
+ object can also be used and modified in the Mission Sequence as well. The example script 
+ snippet below shows two acceptable methods of setting blue violet color to <guilabel>Spacecraft</guilabel> 
+ resource’s <guilabel>TargetColor</guilabel> field:</para> 
+ 
+       <programlisting><code>Create Spacecraft aSat
+aSat.TargetColor = BlueViolet    % ColorName method
+% or
+aSat.TargetColor = [138 43 226]  % RGB triplet value method</code></programlisting>
 
-BeginMissionSequence
+<para>The list of available colors that you can set on <guilabel>Spacecraft</guilabel> object's <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields are tabulated in the table in
+ <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. You can assign colors either via the ColorName or RGB triplet value input method. Also see
+ the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample scripts that 
+ show how to use <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields.</para>
 
-Toggle anOrbitView Off
-Propagate aProp(aSat) {aSat.ElapsedDays = 2}
-Toggle anOrbitView On
-Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
+
+
     </refsection>
-
-    <refsection>
-      <title>Behavior when using OrbitView, Spacecraft and SolarSystem
-      Resources</title>
-
-      <para><guilabel>Spacecraft</guilabel> resource contains information
-      about spacecraft’s orbit. <guilabel>Spacecraft</guilabel> resource
-      interacts with <guilabel>OrbitView</guilabel> throughout the entire
-      mission duration. The trajectory data retrieved from the spacecraft is
-      what gets plotted at each propagation step of the entire mission
-      duration. Similarly, the sun and all other planets available under the
-      <guilabel>SolarSystem</guilabel> resource may be plotted or referenced
-      in the <guilabel>OrbitView</guilabel> resource as well.</para>
-    </refsection>
-
-    <refsection>
-      <title>Behavior when reporting data in Iterative Processes</title>
-
-      <para>GMAT allows you to specify how trajectories are plotted during
-      iterative processes such as differential correction or optimization. The
-      <guilabel>SolverIterations</guilabel> field of
-      <guilabel>OrbitView</guilabel> resource supports 3 options which are
-      described in the table below:</para>
-
-      <informaltable colsep="0" frame="topbot">
-        <tgroup cols="2">
-          <colspec colnum="1" colwidth="0.75*"/>
-
-          <colspec colnum="2" colwidth="3*"/>
-
-          <thead>
-            <row>
-              <entry>SolverIterations options</entry>
-
-              <entry>Description</entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry><guilabel>Current</guilabel></entry>
-
-              <entry><para> Shows only current iteration/perturbation in an
-              iterative process and plots current trajectory. </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>All</guilabel></entry>
-
-              <entry><para> Shows all iterations/perturbations in an iterative
-              process and plots all perturbed trajectories. </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>None</guilabel></entry>
-
-              <entry><para> Shows only the final solution after the end of an
-              iterative process and plots only that final trajectory.
-              </para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </refsection>
-
-    <refsection>
-      <title>Behavior when plotting multiple spacecrafts</title>
-
-      <para>GMAT allows you to plot trajectories of any number of spacecrafts
-      when using the <guilabel>OrbitView</guilabel> resource. The initial
-      epoch of all the spacecrafts must be same in order to plot the
-      trajectories. If initial epoch of one of the spacecrafts does not match
-      with initial epoch of other spacecrafts, then GMAT throws in an error
-      alerting you that there is a coupled propagation error mismatch between
-      the spacecrafts. GMAT also allows you to propagate trajectories of
-      spacecrafts using any combination of the propagators that you may
-      create.</para>
-
-      <para>Below is an example script snippet that shows how to plot
-      trajectories of multiple spacecrafts that use different
-      propagators:</para>
-
-      <programlisting><code>Create Spacecraft aSat aSat2 aSat3
-aSat2.INC = 45.0
-aSat3.INC = 90.0
-aSat3.SMA = 9000
-
-Create Propagator aProp
-Create Propagator bProp
-
-Create OrbitView anOrbitView anOrbitView2
-
-anOrbitView.Add = {aSat, aSat2, Earth}
-anOrbitView2.Add = {aSat3, Earth}
-
-BeginMissionSequence
-
-Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></programlisting>
-    </refsection>
-
-    <refsection>
-      <title>OrbitView View Definition Controls</title>
-
-      <para>GMAT is capable of drawing orbit plots that allow you to visualize
-      the motion of spacecraft and celestial bodies throughout the mission
-      sequence. Here we discuss the options you can use in setting up and
-      viewing Orbit plots. You can choose many properties including the
-      coordinate system of the orbit view plot and the view location and
-      direction from where visualizations can be seen. The script snippet
-      below shows how to create <guilabel>OrbitView</guilabel> resource that
-      includes key view definition controls fields as well. Detailed
-      definitions of all fields for <guilabel>OrbitView</guilabel> resource
-      can be found in <xref linkend="Fields_Section"
-      xrefstyle="select:title"/> section.</para>
-
-      <programlisting><code>Create OrbitView PlotName
-PlotName.CoordinateSystenm      = CoordinateSystemName
-PlotName.Add                    = [SpacecraftName, BodyName, ... 
-                                  LibrationPoint, Barycenter]
-PlotName.ViewPointReference     = [ObjectName, VectorName]
-PlotName.ViewPointVector        = [ObjectName, VectorName]
-PlotName.ViewDirection          = [ObjectName, VectorName]
-PlotName.ViewScaleFactor        = [Real Number]
-PlotName.ViewUpCoordinateSystem = CoordinateSystemName
-PlotName.ViewUpAxis             = [X,-X,Y,-Y,Z,-Z];</code></programlisting>
-
-      <para>You can specify the view location and direction of
-      <guilabel>OrbitView</guilabel> plot object by using the
-      <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel>,
-      <guilabel>ViewDirection</guilabel>,
-      <guilabel>ViewUpCoordinateSystem</guilabel> and
-      <guilabel>ViewUpAxis</guilabel> fields. Figure below shows a graphical
-      definition of <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel>, and
-      <guilabel>ViewDirection</guilabel> fields and how they determine the
-      actual view location and view direction. You can supply
-      <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel> and
-      <guilabel>ViewDirection</guilabel> fields by either giving a vector in
-      the format [x y z] or by specifying an object name. If a vector is given
-      for one of the quantities, then we simply use it in its appropriate
-      place in the computations below. If an object is given, we must
-      determine the vector associated with it. The rest of this section is
-      devoted in determining <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel> and
-      <guilabel>ViewDirection</guilabel> fields if you specify an
-      object.</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_OrbitView ViewDirection Diagram.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para><guilabel>ViewPointReference</guilabel> field defines the point
-      from which <guilabel>ViewPointVector</guilabel> is measured. If an
-      object is given for <guilabel>ViewPointReference</guilabel> field, i.e.
-      when you have the following in the sample script:</para>
-
-      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
-MyOrbitViewPlot.ViewPointReference   = ViewRefObject</code></programlisting>
-
-      <para>then we need to determine
-      <guilabel>r</guilabel><subscript>r</subscript> as illustrated in above
-      figure. If ViewRefObject is the same as the origin of MyCoordSys, then
-      <guilabel>r</guilabel><subscript>r</subscript> = [0 0 0]. Otherwise
-      <guilabel>r</guilabel><subscript>r</subscript> is the cartesian position
-      of <guilabel>ViewPointReference</guilabel> in MyCoordSys.</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_OrbitView_Equation1.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para><guilabel>ViewPointVector</guilabel> field points from
-      <guilabel>ViewPointReference</guilabel>
-      (<guilabel>r</guilabel><subscript>r</subscript>) in the direction of the
-      view point location. If an object is given for
-      <guilabel>ViewPointVector</guilabel> field, i.e. you have the following
-      in the sample script:</para>
-
-      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
-MyOrbitViewPlot.ViewPointVector      = ViewPointObject</code></programlisting>
-
-      <para>then we need to determine
-      <guilabel>r</guilabel><subscript>v</subscript> as illustrated in above
-      figure by using the coordinate system conversion routine to calculate
-      the following:</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_OrbitView_Equation2.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>We now know everything to calculate the location of the view point
-      in the desired coordinate system. From inspection of the above figure,
-      we see that the relation is:</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_OrbitView_Equation4.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>Now that we know the view point location, we need to determine the
-      ViewDirection: <guilabel>r</guilabel><subscript>d</subscript> as
-      illustrated in above figure. If a vector was specified for
-      <guilabel>ViewDirection</guilabel> field, then no computations are
-      required. However, if an object was given as shown in the following
-      sample script:</para>
-
-      <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
-MyOrbitViewPlot.ViewDiection         = ViewDirectionObject</code></programlisting>
-
-      <para>then we calculate <guilabel>r</guilabel><subscript>d</subscript>
-      from the following:</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_OrbitView_Equation3.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>Note that ViewDirection vector
-      <guilabel>r</guilabel><subscript>d</subscript> must not be zero vector
-      [0 0 0].</para>
-
-      <para><guilabel>ViewUpCoordinateSystem</guilabel> and
-      <guilabel>ViewUpAxis</guilabel> fields are used to determine which
-      direction appears as up in an <guilabel>OrbitView</guilabel> plot. Most
-      of the time, coordinate system chosen under
-      <guilabel>ViewUpCoordinateSystem</guilabel> field will be the same as
-      the coordinate system selected under the
-      <guilabel>CoordinateSystem</guilabel> field.
-      <guilabel>ViewUpAxis</guilabel> field allows you to define which axis of
-      the <guilabel>ViewUpCoordinateSystem</guilabel> field will appear as the
-      up direction in an orbit plot.</para>
-
-      <para>Below are some examples that show how to generate
-      <guilabel>OrbitView</guilabel> plots using different View Definition
-      Controls configurations:</para>
-
-      <para>Earth Inertial view with spacecraft: This example shows orbit view
-      plot with Earth and a spacecraft. Since
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      Earth), hence ViewPointRef vector in above figure is [0 0 0] in
-      EarthMJ2000Eq coordinate system. The
-      <guilabel>ViewPointVector</guilabel> field is set to a vector ( i.e. set
-      to [0 0 40000] ). This means that the view is from 40000 km above the
-      Earth's equatorial plane on the z-axis of the EarthMJ2000Eq coordinate
-      system. The view direction (specified in
-      <guilabel>ViewDirection</guilabel> field) is towards the earth.</para>
-
-      <programlisting><code>Create Spacecraft aSat
-
-Create Propagator aProp
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth}
-
-anOrbitView.CoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewPointReference = Earth
-anOrbitView.ViewPointVector = [ 0 0 40000 ]
-anOrbitView.ViewDirection = Earth
-anOrbitView.ViewScaleFactor = 1
-anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewUpAxis = Z
-
-BeginMissionSequence
-
-Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
-
-      <para>Earth Inertial view with spacecraft and Luna: This example shows
-      orbit view plot with Earth, spacecraft and Moon. Note
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      Earth), hence ViewPointRef vector in above figure = [0 0 0] in
-      EarthMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
-      field is still set to a vector ( i.e. set to [0 0 500000] ). This means
-      that the view is from 500000 km above the Earth's equatorial plane on
-      the z-axis of the EarthMJ2000Eq coordinate system.
-      <guilabel>ViewDirection</guilabel> field defines the view direction
-      which is set towards the earth.</para>
-
-      <programlisting><code>Create Spacecraft aSat
-
-Create Propagator aProp
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth, Luna}
-
-anOrbitView.CoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewPointReference = Earth
-anOrbitView.ViewPointVector = [ 0 0 500000 ]
-anOrbitView.ViewDirection = Earth
-anOrbitView.ViewScaleFactor = 1
-anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewUpAxis = Z
-
-BeginMissionSequence
-
-Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
-
-      <para>View of spacecraft from Luna in Earth inertial frame: This example
-      of an orbit view plot shows spacecraft as viewed from Luna orbiting
-      around Earth in an inertial reference frame.
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      Earth), hence ViewPointRef vector is [0 0 0] in EarthMJ2000Eq coordinate
-      system. This time <guilabel>ViewPointVector</guilabel> field is set to
-      an object (i.e. Luna ). This means that the spacecraft will be seen from
-      the vantage point of Luna. Note that <guilabel>ViewDirection</guilabel>
-      field is set to spacecraft (aSat). This means that view direction as
-      seen from Luna is towards the spacecraft. After you run this example,
-      re-run this example but this time with
-      <guilabel>ViewScaleFactor</guilabel> field set to 2 and see what
-      happens. You'll notice that <guilabel>ViewScaleFactor</guilabel> simply
-      scales <guilabel>ViewPointVector</guilabel> field.</para>
-
-      <programlisting><code>Create Spacecraft aSat
-
-Create Propagator aProp
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth, Luna}
-
-anOrbitView.CoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewPointReference = Earth
-anOrbitView.ViewPointVector = Luna
-anOrbitView.ViewDirection = aSat
-anOrbitView.ViewScaleFactor = 1
-anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewUpAxis = Z
-
-BeginMissionSequence
-
-Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
-
-      <para>View towards Luna from Earth as spacecraft orbits around Luna in
-      inertial frame: This example of an orbit view plot shows view of Luna
-      from vantage point of Earth as a spacecraft orbits around Luna.
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      Luna), hence ViewPointRef vector in above figure is [0 0 0] in
-      LunaMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
-      field is set to an object (i.e. Earth ). This means that the camera or
-      vantage point is located at Earth. <guilabel>ViewDirection</guilabel>
-      field is also set to an object (i.e. Luna). This means that view
-      direction as seen from Earth is towards Luna.</para>
-
-      <programlisting><code>Create Spacecraft aSat
-
-Create CoordinateSystem LunaMJ2000Eq
-LunaMJ2000Eq.Origin = Luna
-LunaMJ2000Eq.Axes = MJ2000Eq
-
-aSat.CoordinateSystem = LunaMJ2000Eq
-aSat.SMA = 7300
-aSat.ECC = 0.4
-aSat.INC = 90
-aSat.RAAN = 270
-aSat.AOP = 315
-aSat.TA = 180
-
-Create ForceModel aFM
-aFM.CentralBody = Luna
-aFM.PointMasses = {Luna}
-
-Create Propagator aProp
-aProp.FM = aFM
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Luna, Earth}
-anOrbitView.CoordinateSystem = LunaMJ2000Eq
-anOrbitView.ViewPointReference = Luna
-anOrbitView.ViewPointVector = Earth
-anOrbitView.ViewDirection = Luna
-anOrbitView.ViewScaleFactor = 1;
-anOrbitView.ViewUpCoordinateSystem = LunaMJ2000Eq;
-anOrbitView.ViewUpAxis = Z;
-
-BeginMissionSequence
-Propagate aProp(aSat) {aSat.ElapsedDays = 5}</code></programlisting>
-
-      <para>View towards spacecraft1 from spacecraft2 in inertial frame: This
-      example of an orbit view plot shows spacecraft1 (aSat1) being viewed
-      from spacecraft2 (aSat2) as they move in inertial reference frame.
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      Earth), hence ViewPointRef vector in above figure is [0 0 0] in
-      EarthMJ2000Eq coordinate system. <guilabel>ViewPointVector</guilabel>
-      field is set to an object (i.e. aSat2 ) and
-      <guilabel>ViewDirection</guilabel> field is also set to an object (i.e.
-      aSat1). This means that aSat1 will be viewed from the vantage point of
-      aSat2.</para>
-
-      <programlisting><code>Create Spacecraft aSat aSat2
-
-aSat2.X = 19500
-aSat2.Z = 10000
-
-Create Propagator aProp
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, aSat2, Earth,}
-
-anOrbitView.CoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewPointReference = Earth
-anOrbitView.ViewPointVector = aSat2
-anOrbitView.ViewDirection = aSat
-anOrbitView.ViewScaleFactor = 1.0
-anOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq
-anOrbitView.ViewUpAxis = Z
-
-BeginMissionSequence
-
-Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}</code></programlisting>
-
-      <para>Orbit view plot of Sun-Earth-Moon L1 Rotating System: This example
-      of an orbit view plot shows the Earth and spacecraft in the
-      Sun-Earth-Moon rotating coordinate system.
-      <guilabel>ViewPointReference</guilabel> field is set to an object (i.e.
-      ESL1), hence ViewPointRef vector in above figure is [0 0 0] in
-      SunEarthMoonL1 rotating coordinate system.
-      <guilabel>ViewPointVector</guilabel> field is set to a vector (i.e. [0 0
-      30000] ). This means that the view is taken from 30000 km above the
-      SunEarthMoonL1 coordinate system's XY plane on the z-axis of the
-      SunEarthMoonL1 coordinate system. <guilabel>ViewDirection</guilabel>
-      field is also set to an object (i.e. ESL1). This means that view
-      direction as seen from 30000 km above the SunEarthMoonL1 coordinate
-      system's XY plane is towards ESL1. Note that in this example,
-      <guilabel>ViewScaleFactor</guilabel> is set to 25. This simply scales or
-      amplifies <guilabel>ViewPointVector</guilabel> field 25 times its
-      original value.</para>
-
-      <programlisting><code>Create Spacecraft aSat
-
-GMAT aSat.DateFormat = UTCGregorian;
-GMAT aSat.Epoch = '01 Apr 2013 00:00:00.000' 
-GMAT aSat.CoordinateSystem = EarthMJ2000Eq
-GMAT aSat.DisplayStateType = Cartesian
-GMAT aSat.X = 1429457.8833484
-GMAT aSat.Y = 147717.32846679
-GMAT aSat.Z = -86529.655549364
-GMAT aSat.VX = -0.037489820883615                     
-GMAT aSat.VY = 0.32032521614858
-GMAT aSat.VZ = 0.15762889268226
-
-Create Barycenter EarthMoonBarycenter
-GMAT EarthMoonBarycenter.BodyNames = {Earth, Luna}
-
-Create LibrationPoint ESL1
-GMAT ESL1.Primary = Sun
-GMAT ESL1.Secondary = EarthMoonBarycenter
-GMAT ESL1.Point = L1
-
-Create ForceModel aFM
-aFM.CentralBody = Earth
-aFM.PointMasses = {Luna, Sun}
-
-Create Propagator aProp
-aProp.FM = aFM
-
-Create CoordinateSystem SunEarthMoonL1
-GMAT SunEarthMoonL1.Origin = ESL1
-GMAT SunEarthMoonL1.Axes = ObjectReferenced
-GMAT SunEarthMoonL1.XAxis = R
-GMAT SunEarthMoonL1.ZAxis = N
-GMAT SunEarthMoonL1.Primary = Sun
-GMAT SunEarthMoonL1.Secondary = EarthMoonBarycenter
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth, Sun}
-anOrbitView.CoordinateSystem = SunEarthMoonL1
-anOrbitView.ViewPointReference = ESL1
-anOrbitView.ViewPointVector = [ 0 0 30000 ]
-anOrbitView.ViewDirection = ESL1
-anOrbitView.ViewScaleFactor = 25
-anOrbitView.ViewUpCoordinateSystem = SunEarthMoonL1
-anOrbitView.ViewUpAxis = Z
-
-BeginMissionSequence
-Propagate aProp(aSat) {aSat.ElapsedDays = 15}</code></programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Behavior when using View Definition panel of OrbitView
-      Resource</title>
-
-      <para>Currently in <guilabel>OrbitView</guilabel> resource’s View
-      Definition panel, fields like <guilabel>ViewPointReference</guilabel>,
-      <guilabel>ViewPointVector</guilabel> and
-      <guilabel>ViewDirection</guilabel> are initialized but not dynamically
-      updated during a mission run. <guilabel>OrbitView</guilabel> resource’s
-      View Definition panel sets up geometry at initial epoch and then mouse
-      controls geometry of the simulation from that point on.</para>
-    </refsection>
-
-    <refsection>
-      <title>Spacecraft Model Considerations in GMAT's OrbitView</title>
-
-      <para>GMAT displays spacecraft models by reading model data from 3D
-      Studio files describing the spacecraft shape and colors. These files
-      have the file extension .3ds, and are generally called 3ds files. 3ds
-      files contain data that defines the 3-dimensional coordinates of
-      vertices outlining the spacecraft, a mapping of those vertices into
-      triangles used to create the displayed surface of the spacecraft, and
-      information about the colors and texture maps used to fill in the
-      displayed triangles.</para>
-
-      <para>GMAT's implementation of the spacecraft model can display models
-      consisting of up to 200,000 vertices that map up to 100,000 triangles.
-      The GMAT model can use up 500 separate color or texture maps to fill in
-      these triangles.</para>
-    </refsection>
-
-    <refsection>
-      <title>Behavior When Specifying Empty Brackets in OrbitView's Add
-      Field</title>
-
-      <para>When using <guilabel>OrbitView.Add</guilabel> field, if brackets
-      are not populated with user-defined spacecrafts, then GMAT turns off
-      <guilabel>OrbitView</guilabel> resource and no plot is generated. If you
-      run the script with <guilabel>Add</guilabel> field having empty
-      brackets, then GMAT throws in a warning message in the Message Window
-      indicating that <guilabel>OrbitView</guilabel> resource will be turned
-      off since no SpacePoints were added to the plot. Below is a sample
-      script snippet that generates such a warning message:</para>
-
-      <programlisting><code>Create Spacecraft aSat aSat2
-Create Propagator aProp
-
-Create OrbitView anOrbitView
-anOrbitView.Add = {}
-
-BeginMissionSequence
-Propagate aProp(aSat, aSat2){aSat.ElapsedSecs = 12000.0}</code></programlisting>
-    </refsection>
+	
+
+<refsection>
+      <title>Setting Colors on Ground Station Resource</title>
+
+	  
+<para>GMAT allows you to set unique colors of your choice on <guilabel>GroundStation</guilabel> object's 
+<guilabel>OrbitColor</guilabel> or <guilabel>TargetColor</guilabel> fields. The list of available colors that you can set are 
+tabulated in the table in <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. You can assign colors either via the 
+ColorName or RGB triplet value method. The custom ground station facility that you 
+create shows up on the ground track plot of a spacecraft that is drawn on a 2D texture
+ map of a central body. The colors that are assigned on <guilabel>GroundStation</guilabel> object's <guilabel>TargetColor</guilabel>
+ field are only used whenever <guilabel>GroundStation</guilabel> object is drawn during iterative processes 
+ such as differential correction or optimization. The script snippet below shows how to 
+ set colors on <guilabel>GroundStation's</guilabel> <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields using either the ColorName
+ or RGB method:</para>
+
+
+      <programlisting><code>Create GroundStation aGroundStation 
+aGroundStation.OrbitColor = Aqua          % ColorName method
+% or
+aGroundStation.OrbitColor = [0 255 255]   % RGB method</code></programlisting>
+ 
+       <programlisting><code>Create GroundStation aGroundStation 
+aGroundStation.TargetColor = Black     % ColorName method
+% or
+aGroundStation.TargetColor = [0 0 0]   % RGB method</code></programlisting>
+
+<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample script that shows how to use <guilabel>GroundStation</guilabel> object’s <guilabel>OrbitColor</guilabel>
+ field.</para>
+
+
+</refsection>
+
+
+<refsection>
+      <title>Configuring Orbit and Target Colors on Celestial Body Resource</title>
+
+<para>GMAT allows you to set available colors to orbits of built-in or custom-defined celestial bodies.
+ GMAT contains built-in models for the Sun, the 8 planets, Earth's moon, and Pluto. You can create
+ a custom <guilabel>CelestialBody</guilabel> resource to model a planet, asteroid, comet, or moon. The orbit colors on 
+ <guilabel>CelestialBody</guilabel> objects are set through the <guilabel>OrbitColor</guilabel> field. You can also set colors to a celestial body's
+ perturbing trajectories that are generated during iterative processes such as differential correction or
+ optimization. This is done by setting colors to <guilabel>CelestialBody</guilabel> object's <guilabel>TargetColor</guilabel> field. Setting colors 
+ on the <guilabel>TargetColor</guilabel> field is only useful when you want to assign colors on perturbed trajectories that are
+ generated during iterative processes. The list of available colors that you can set on <guilabel>OrbitColor</guilabel> and 
+ <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. To assign colors, you 
+ can either use the ColorName or RGB triplet value method. Both <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields of the
+ <guilabel>CelestialBody</guilabel> object can also be used and modified in the Mission Sequence as well. The script snippet 
+ below shows how to set colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields on a custom-built celestial body 
+ using either the ColorName or RGB method:
+ </para>
+	  
+
+      <programlisting><code>Create CelestialBody aPlanet 
+aPlanet.OrbitColor = CornflowerBlue   % ColorName method
+% or
+aPlanet.OrbitColor = [100 149 237]    % RGB method</code></programlisting>
+ 
+       <programlisting><code>Create CelestialBody aPlanet 
+aPlanet.TargetColor = DarkBlue     % ColorName method
+% or
+aPlanet.TargetColor = [0 0 139]    % RGB method</code></programlisting>
+
+<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample scripts that show how to use <guilabel>CelestialBody</guilabel> 
+object’s <guilabel>OrbitColor</guilabel> field</para>
+
+ 
+</refsection>
+
+
+<refsection>
+      <title>Configuring Orbit and Target Colors on Libration Point Resource</title>
+
+<para>GMAT lets you set available colors on an orbit that is drawn by a libration point.
+ In order to see orbital trajectory that a libration point draws in space, you must draw
+ the Lagrange points in an inertial space. The orbit colors on <guilabel>LibrationPoint</guilabel> resources
+ are set through the <guilabel>OrbitColor</guilabel> field. GMAT also allows you to set colors on a libration
+ point's perturbing trajectories that are drawn during iterative processes such as differential
+ correction or optimization. Setting colors on perturbing libration point trajectories is done
+ via the <guilabel>TargetColor</guilabel> field. Setting colors on the <guilabel>TargetColor</guilabel> field is only useful whenever perturbed
+ libration point trajectories are generated during iterative processes. The available colors that can
+ be set on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section.
+ You can either use the ColorName or RGB triplet value method to assign colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+ fields. These two fields of <guilabel>LibrationPoint</guilabel> resource can also be used and modified to set colors in the 
+ Mission Sequence as well. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+ fields using either the ColorName or RGB method: </para>
+ 
+
+      <programlisting><code>Create LibrationPoint ESL1 
+ESL1.OrbitColor = Magenta           % ColorName method
+% or
+ESL1.OrbitColor = [255 0 255]       % RGB method</code></programlisting>
+ 
+       <programlisting><code>Create LibrationPoint ESL1 
+ESL1.TargetColor = Orchid           % ColorName method
+% or
+ESL1.TargetColor = [218 112 214]    % RGB method</code></programlisting>
+
+
+<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
+script that shows how to use <guilabel>LibrationPoint</guilabel> object’s <guilabel>OrbitColor</guilabel> field.</para>
+
+ 
+</refsection>
+
+
+<refsection>
+      <title>Configuring Orbit and Target Colors on Barycenter Resource</title>
+	  
+<para>In GMAT, you can assign available colors on an orbit that is drawn by a
+ barycenter point. Since a barycenter is a center of mass of a set of celestial bodies,
+ hence in order to see its orbital trajectory, the barycenters must be plotted in an 
+ inertial space. You can set orbit colors on GMAT’s both built-in <guilabel>SolarSystemBarycenter</guilabel>
+ resource or custom barycenters that you create through the <guilabel>Barycenter</guilabel> object. The orbit
+ colors on <guilabel>Barycenter</guilabel> resources are set through the <guilabel>OrbitColor</guilabel> field. GMAT also allows 
+ you to set colors on a barycenter's perturbing trajectories that are drawn during 
+ iterative processes such as differential correction or optimization. Setting colors
+ on perturbing barycenter trajectories is done via the <guilabel>TargetColor</guilabel> field. Setting 
+ colors on the <guilabel>TargetColor</guilabel> field is only useful whenever you want to set different
+ colors on the perturbing trajectories. The available colors that can be set on 
+ OrbitColor and <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/>
+ section. You can either use the ColorName or RGB triplet value color input 
+ method to assign colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields. These two fields
+ of <guilabel>Barycenter</guilabel> resource can also be used and modified in the Mission Sequence 
+ as well. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> 
+ and <guilabel>TargetColor</guilabel> fields using either the ColorName or RGB method:</para>
+
+ 
+
+      <programlisting><code>Create Barycenter EarthMoonBarycenter
+EarthMoonBarycenter.OrbitColor = Violet         % ColorName method
+% or
+EarthMoonBarycenter.OrbitColor = [238 130 238]  % RGB method</code></programlisting>
+ 
+       <programlisting><code>Create Barycenter EarthMoonBarycenter
+EarthMoonBarycenter.TargetColor = Silver         % ColorName method
+% or
+EarthMoonBarycenter.TargetColor = [192 192 192]  % RGB method</code></programlisting>
+
+
+<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
+script that shows how to use <guilabel>Barycenter</guilabel> object’s <guilabel>OrbitColor</guilabel> field.</para>
+
+ 
+</refsection>
+
+
+<refsection>
+      <title>Configuring Orbit Colors on Propagate Command</title>
+	 
+<para>In GMAT, you can set unique colors on different <guilabel>Spacecraft</guilabel> trajectory
+ segments by setting orbital colors on <guilabel>Propagate</guilabel> commands. If you do not 
+ select unique colors on each <guilabel>Propagate</guilabel> command, then by default, the color
+ on all <guilabel>Propagate</guilabel> commands is seeded from color that is set on <guilabel>Spacecraft</guilabel> 
+ object's <guilabel>OrbitColor</guilabel> field. You can set orbit colors on each <guilabel>Propagate</guilabel> command
+ through the <guilabel>OrbitColor</guilabel> option. The available colors that can be set on <guilabel>Propagate</guilabel>
+ command's <guilabel>OrbitColor</guilabel> option are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section.
+ You can either use the ColorName or RGB triplet value input method to assign colors on
+ <guilabel>OrbitColor</guilabel> option. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> option
+ using either the ColorName or RGB method: </para>
+  
+
+      <programlisting><code>% ColorName method:
+Propagate aProp(aSat) {aSat.ElapsedSecs = 500, OrbitColor = Gold}
+% or RGB method:
+Propagate aProp(aSat) {aSat.ElapsedSecs = 500, OrbitColor = [255 215 0]}</code></programlisting>
+ 
+
+<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
+scripts that show how to use <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option.</para>
+
+ 
+</refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="SettingColors_Examples">
     <title>Examples</title>
 
     <informalexample>
-      <para>Propagate spacecraft for 1 day and plot the orbit at every
-      integrator step:</para>
+      <para>Set non-default sky blue color to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
+	  field through both ColorName and RGB triplet value methods. 
+	  Both methods draw spacecraft orbital trajectory in sky blue color.
+Note: Since orbit color was not re-set in the <guilabel>Propagate</guilabel> command, 
+hence entire spacecraft orbital trajectory is drawn in sky blue color:</para>
 
       <programlisting><code>Create Spacecraft aSat
+aSat.OrbitColor = SkyBlue   % ColorName method
 Create Propagator aProp
 
 Create OrbitView anOrbitView
-anOrbitView.Add = {aSat, Earth}
+GMAT anOrbitView.Add = {aSat, Earth}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+% or
+
+Create Spacecraft aSat
+aSat.OrbitColor = [135 206 235]   % RGB triplet value method
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+GMAT anOrbitView.Add = {aSat, Earth}
 
 BeginMissionSequence
 
@@ -3085,166 +914,371 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Plotting orbit during an iterative process. Notice
-      <guilabel>SolverIterations</guilabel> field is selected as
-      <guilabel>All</guilabel>. This means all iterations/perturbations will
-      be plotted.</para>
+      <para>Set unique colors on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field 
+	  multiple times through combination of both ColorName and RGB method. 
+	  Notice that <guilabel>Spacecraft.OrbitColor</guilabel> is used and modified in the Mission Sequence as well: </para>
 
       <programlisting>Create Spacecraft aSat
+aSat.OrbitColor = Yellow   % ColorName method
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+GMAT anOrbitView.Add = {aSat, Earth}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}
+aSat.OrbitColor = Green   % ColorName method
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}
+aSat.OrbitColor = [255 165 0 ]   % RGB value for Orange
+Propagate aProp(aSat) {aSat.ElapsedSecs = 2000}</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Set non-default yellow color on <guilabel>Spacecraft</guilabel> object’s <guilabel>TargetColor</guilabel> field. 
+	  Setting color on the <guilabel>TargetColor</guilabel> field is only useful when perturbed trajectories
+	  are generated during iterative processes such as differential correction. Note yellow color was set via the ColorName method.
+	  It could’ve been also set through the RGB triplet value method as well.</para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.OrbitColor = Red       % Default OrbitColor
+aSat.TargetColor = Yellow  % ColorName method
+
 Create Propagator aProp
 
 Create ImpulsiveBurn TOI
+
 Create DifferentialCorrector aDC
 
 Create OrbitView anOrbitView
 anOrbitView.Add = {aSat, Earth}
 anOrbitView.SolverIterations = All
+anOrbitView.ViewScaleFactor = 2
+
 
 BeginMissionSequence
 
 Propagate aProp(aSat) {aSat.Earth.Periapsis}
 
-Target aDC
-  Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
-  Upper = 3.14159, MaxStep = 0.5})
-  Maneuver TOI(aSat)
-  Propagate aProp(aSat) {aSat.Earth.Apoapsis}
-  Achieve aDC(aSat.Earth.RMAG = 42165)
-EndTarget</programlisting>
+Target aDC;
+Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat);
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+ Achieve aDC(aSat.Earth.RMAG = 20000)
+EndTarget
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
+</programlisting>
+
     </informalexample>
 
     <informalexample>
-      <para>Plotting spacecraft’s trajectory around non-default central body.
-      This example shows how to plot a spacecraft’s trajectory around
-      Luna:</para>
+      <para>Set non-default colors on multiple <guilabel>GroundStation</guilabel> objects 
+	  through the <guilabel>OrbitColor</guilabel> field. The colors are assigned through
+	  combination of both ColorName and RGB input methods:
+</para>
 
       <programlisting>Create Spacecraft aSat
-  
-Create CoordinateSystem LunaMJ2000Eq
-LunaMJ2000Eq.Origin = Luna
-LunaMJ2000Eq.Axes = MJ2000Eq
-
-aSat.CoordinateSystem = LunaMJ2000Eq
-aSat.SMA = 7300
-aSat.ECC = 0.4
-aSat.INC = 90
-aSat.RAAN = 270
-aSat.AOP = 315
-aSat.TA = 180
-
-Create ForceModel aFM
-aFM.CentralBody = Luna
-aFM.PointMasses = {Luna}
-
 Create Propagator aProp
-aProp.FM = aFM
 
-Create OrbitView anOrbitView
+Create GroundStation aGroundStation aGroundStation2 aGroundStation3
 
-anOrbitView.Add = {aSat, Luna}
-anOrbitView.CoordinateSystem = LunaMJ2000Eq
-anOrbitView.ViewPointReference = Luna
-anOrbitView.ViewDirection = Luna
+aGroundStation.StateType = Spherical
+aGroundStation.Latitude = 45
+aGroundStation.OrbitColor = Black
+
+aGroundStation2.StateType = Spherical
+aGroundStation2.Longitude = 20
+aGroundStation2.OrbitColor = [165 42 42]  % RGB value for Brown
+
+aGroundStation3.StateType = Spherical
+aGroundStation3.Latitude = 30
+aGroundStation3.Longitude = 45
+aGroundStation3.OrbitColor = [255 127 80]  % RGB value for Coral
+
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat, aGroundStation, aGroundStation2, ...
+aGroundStation3 }
 
 BeginMissionSequence
 
-Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25 }</programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Plotting spacecraft’s trajectory around non-default central body.
-      This example shows how to plot a spacecraft’s trajectory around
-      Mars:</para>
+      <para>Set non-default colors on built-in celestial body orbits. In this example, <guilabel>CelestialBody</guilabel> object’s 
+<guilabel>OrbitColor</guilabel> field is assigned colors through mixture of both ColorName and RGB triplet value
+methods. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
 
       <programlisting>Create Spacecraft aSat
+aSat.CoordinateSystem = SunMJ2000Ec
+aSat.DisplayStateType = Keplerian
+aSat.SMA = 150000000
 
-Create CoordinateSystem MarsMJ2000Eq
-MarsMJ2000Eq.Origin = Mars
-MarsMJ2000Eq.Axes = MJ2000Eq
+Mercury.OrbitColor = Orange
+Venus.OrbitColor = [255 255 0]  % RGB value for Yellow
+Earth.OrbitColor = Cyan
+Mars.OrbitColor = [0 128 0]  % RGB value for Green
 
-aSat.CoordinateSystem = MarsMJ2000Eq
-aSat.SMA = 7300
-aSat.ECC = 0.4
-aSat.INC = 90
-aSat.RAAN = 270
-aSat.AOP = 315
-aSat.TA = 180
-
-Create ForceModel aFM
-aFM.CentralBody = Mars
-aFM.PointMasses = {Mars}
-
-Create Propagator aProp
-aProp.FM = aFM
-
-Create OrbitView anOrbitView
-
-anOrbitView.Add = {aSat, Mars}
-anOrbitView.CoordinateSystem = MarsMJ2000Eq
-anOrbitView.ViewPointReference = Mars
-anOrbitView.ViewDirection = Mars
-
-BeginMissionSequence
-
-Propagate aProp(aSat) {aSat.ElapsedDays = 1}</programlisting>
-    </informalexample>
-
-    <informalexample>
-      <para>Plotting spacecraft’s trajectory around non-default central body.
-      This example shows how to plot a spacecraft’s trajectory around Sun.
-      This is an interplanetary trajectory. Spacecraft is shown on an
-      out-going hyperbolic trajectory in an EarthView and then an
-      interplanetary trajectory is drawn around Sun in a SunView. Mars Orbit
-      around Sun is also shown:</para>
-
-      <programlisting>Create Spacecraft aSat
-
-aSat.CoordinateSystem = EarthMJ2000Eq
-aSat.DateFormat = UTCGregorian
-aSat.Epoch = '18 Nov 2013 20:26:24.315'
-
-aSat.X = 3728.345810006184
-aSat.Y = 4697.943961035268
-aSat.Z = -2784.040094879185
-aSat.VX = -9.502477543864449
-aSat.VY = 5.935188001372066
-aSat.VZ = -2.696272103530009
+Create CoordinateSystem SunMJ2000Ec
+SunMJ2000Ec.Origin = Sun
+SunMJ2000Ec.Axes = MJ2000Ec
 
 Create ForceModel aFM
-aFM.CentralBody = Earth
-aFM.PointMasses = {Earth}
-
-Create ForceModel bFM
 aFM.CentralBody = Sun
 aFM.PointMasses = {Sun}
 
 Create Propagator aProp
 aProp.FM = aFM
 
-Create Propagator bProp
-aProp.FM = bFM
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth, Venus, Mars, Mercury}
+anOrbitView.CoordinateSystem = SunMJ2000Ec
+anOrbitView.ViewPointReference = Sun
+anOrbitView.ViewPointVector = [0 0 150000000]
+anOrbitView.ViewDirection = Sun
+anOrbitView.ViewScaleFactor = 6
+anOrbitView.ViewUpCoordinateSystem = SunMJ2000Ec
 
-Create CoordinateSystem SunEcliptic
-SunEcliptic.Origin = Sun
-SunEcliptic.Axes = MJ2000Ec
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 150}</programlisting>
+    </informalexample>
+	
+	
 
-Create OrbitView EarthView SunView
+    <informalexample>
+      <para>Set unique non-default orbit colors on built-in <guilabel>CelestialBody</guilabel> object’s 
+	  <guilabel>OrbitColor</guilabel> field multiple times through combination of both ColorName and RGB
+	  triplet value methods. Notice that <guilabel>CelestialBody.OrbitColor</guilabel> is used and modified
+	  in the Mission Sequence as well: </para>
 
-EarthView.Add = {aSat, Earth}
-EarthView.CoordinateSystem = EarthMJ2000Eq
-EarthView.ViewPointReference = Earth
-EarthView.ViewDirection = Earth
+      <programlisting>Create Spacecraft aSat
+aSat.CoordinateSystem = SunMJ2000Ec
+aSat.DisplayStateType = Keplerian
+aSat.SMA = 150000000
 
-SunView.Add = {aSat, Mars, Sun}
-SunView.CoordinateSystem = SunEcliptic
-SunView.ViewPointReference = Sun
-SunView.ViewDirection = Sun
-SunView.ViewPointVector = [ 0 0 500000000 ]
+Mars.OrbitColor = Orange
+
+Create CoordinateSystem SunMJ2000Ec
+SunMJ2000Ec.Origin = Sun
+SunMJ2000Ec.Axes = MJ2000Ec
+
+Create ForceModel aFM
+aFM.CentralBody = Sun
+aFM.PointMasses = {Sun}
+
+Create Propagator aProp
+aProp.FM = aFM
+aProp.MaxStep = 20000
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Mars}
+anOrbitView.CoordinateSystem = SunMJ2000Ec
+anOrbitView.ViewPointReference = Sun
+anOrbitView.ViewPointVector = [0 0 150000000]
+anOrbitView.ViewDirection = Sun
+anOrbitView.ViewScaleFactor = 6
+anOrbitView.ViewUpCoordinateSystem = SunMJ2000Ec
 
 BeginMissionSequence
 
-Propagate aProp(aSat) {aSat.ElapsedDays = 3}
-Propagate bProp(aSat) {aSat.ElapsedDays = 225}</programlisting>
+Propagate aProp(aSat) {aSat.ElapsedDays = 150}
+Mars.OrbitColor = [255 255 0]  % RGB value for Yellow
+Propagate aProp(aSat) {aSat.ElapsedDays = 150}
+Mars.OrbitColor = Cyan
+Propagate aProp(aSat) {aSat.ElapsedDays = 150}
+Mars.OrbitColor = [0 128 0]   % RGB value for Green
+Propagate aProp(aSat) {aSat.ElapsedDays = 150}</programlisting>
+    </informalexample>
+	
+	
+    <informalexample>
+      <para>Set unique non-default orbit colors on Earth-Sun L1 libration point orbit. ESL1 libration point is plotted 
+in an inertial space in order to see its orbit around sun.The orbit colors on <guilabel>LibrationPoint</guilabel> object’s
+<guilabel>OrbitColor</guilabel> field are set multiple times through combination of both ColorName and RGB triplet value input methods.
+ Notice that in this example, <guilabel>LibrationPoint.OrbitColor</guilabel> is also set in the Mission Sequence as well. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.CoordinateSystem = SunMJ2000Ec
+aSat.DisplayStateType = Keplerian
+aSat.SMA = 150000000
+
+Create LibrationPoint ESL1
+ESL1.OrbitColor = Orange
+ESL1.Primary = Sun
+ESL1.Secondary = Earth
+ESL1.Point = L1
+
+Create CoordinateSystem SunMJ2000Ec
+SunMJ2000Ec.Origin = Sun
+SunMJ2000Ec.Axes = MJ2000Ec
+
+Create ForceModel aFM
+aFM.CentralBody = Sun
+aFM.PointMasses = {Sun}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, ESL1}
+anOrbitView.CoordinateSystem = SunMJ2000Ec
+anOrbitView.ViewPointReference = Sun
+anOrbitView.ViewPointVector = [0 0 150000000]
+anOrbitView.ViewDirection = Sun
+anOrbitView.ViewScaleFactor = 3
+anOrbitView.ViewUpCoordinateSystem = SunMJ2000Ec
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+ESL1.OrbitColor = [255 255 0]  % RGB value for Yellow
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+ESL1.OrbitColor = Cyan
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+ESL1.OrbitColor = [0 128 0]   % RGB value for Green
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}</programlisting>
+    </informalexample>
+	
+    <informalexample>
+      <para>Set unique non-default orbit colors on Earth-Moon barycenter. 
+	  The Earth Moon barycenter had to be plotted in an inertial space in 
+	  order to see its orbit around the sun. The orbit colors on <guilabel>Barycenter</guilabel> object’s 
+	  <guilabel>OrbitColor</guilabel> field are set multiple times through combination of both ColorName 
+	  and RGB triplet value input methods. Notice that in this example, <guilabel>Barycenter.OrbitColor</guilabel>
+	  is also set in the Mission Sequence as well. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.CoordinateSystem = SunMJ2000Ec
+aSat.DisplayStateType = Keplerian
+aSat.SMA = 150000000
+
+Create Barycenter EarthMoonBarycenter
+EarthMoonBarycenter.OrbitColor = Cyan
+EarthMoonBarycenter.BodyNames = {Earth, Luna}
+
+Create CoordinateSystem SunMJ2000Ec
+SunMJ2000Ec.Origin = Sun
+SunMJ2000Ec.Axes = MJ2000Ec
+
+Create ForceModel aFM
+aFM.CentralBody = Sun
+aFM.PointMasses = {Sun}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, EarthMoonBarycenter}
+anOrbitView.CoordinateSystem = SunMJ2000Ec
+anOrbitView.ViewPointReference = Sun
+anOrbitView.ViewPointVector = [0 0 150000000]
+anOrbitView.ViewDirection = Sun
+anOrbitView.ViewScaleFactor = 4
+anOrbitView.ViewUpCoordinateSystem = SunMJ2000Ec
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+EarthMoonBarycenter.OrbitColor = [255 255 0]  % RGB value for Yellow
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+EarthMoonBarycenter.OrbitColor = Orange
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}
+EarthMoonBarycenter.OrbitColor = [250 128 114]   % RGB value for Salmon
+Propagate aProp(aSat) {aSat.ElapsedDays = 75}</programlisting>
+    </informalexample>
+	
+	
+    <informalexample>
+      <para>Set unique colors on spacecraft’s various trajectory segments
+	  through <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option. The colors are set through
+	  combination of both ColorName and RGB input methods. Notice that although by default,
+	  red color is set on <guilabel>aSat.OrbitColor</guilabel> field, however since orbit color has been 
+	  reset on all <guilabel>Propagate</guilabel> commands, hence red color is never drawn:</para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.OrbitColor = Red
+aSat.X = 10000
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+GMAT anOrbitView.Add = {aSat, Earth}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Yellow}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Cyan}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = [154 205 50]}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = [255 0 255]}</programlisting>
+    </informalexample>
+	
+    <informalexample>
+      <para>Set colors on spacecraft’s various trajectory segments through 
+	  <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option. This time, colors are only set 
+	  through ColorName input method. Default color set on <guilabel>aSat.OrbitColor</guilabel> 
+	  field is red. Notice that the orbit color has been reset on only the 
+	  first three <guilabel>Propagate</guilabel> commands. However since <guilabel>OrbitColor</guilabel> option has not
+	  been used on the last <guilabel>Propagate</guilabel> command, therefore the trajectory drawn
+	  by the last <guilabel>Propagate</guilabel> command is in red color which is the color assigned on <guilabel>aSat.OrbitColor</guilabel> field: </para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.OrbitColor = Red
+aSat.X = 10000
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+GMAT anOrbitView.Add = {aSat, Earth}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Orange}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Blue}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Yellow}
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}</programlisting>
+    </informalexample>
+	
+	
+    <informalexample>
+      <para>Set colors on <guilabel>Propagate</guilabel> commands when used with <guilabel>Target</guilabel> resource
+	  and during differential correction iterative process. This time, since
+	  colors have been set on all <guilabel>Propagate</guilabel> commands, hence default color of
+	  red which is set on <guilabel>aSat.OrbitColor</guilabel> field is never plotted. Also notice
+	  that although <guilabel>aSat.TargetColor</guilabel> is set to Yellow, but since <guilabel>anOrbitView.SolverIterations</guilabel>
+	  is set to None, hence perturbed trajectories that are drawn during iterative process
+	  are not plotted and only final solution is plotted</para>
+
+      <programlisting>Create Spacecraft aSat
+aSat.OrbitColor = Red       
+aSat.TargetColor = Yellow  
+
+Create Propagator aProp
+
+Create ImpulsiveBurn TOI
+
+Create DifferentialCorrector aDC
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
+anOrbitView.SolverIterations = None %Set to 'All' to see perturbations
+anOrbitView.ViewScaleFactor = 2
+
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.Earth.Periapsis, OrbitColor = Salmon}
+
+Target aDC;
+Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat);
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis, OrbitColor = Blue}
+ Achieve aDC(aSat.Earth.RMAG = 20000)
+EndTarget
+
+Propagate aProp(aSat) {aSat.Earth.Periapsis, OrbitColor = Orange}</programlisting>
     </informalexample>
   </refsection>
 </refentry>
