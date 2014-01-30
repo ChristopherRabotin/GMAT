@@ -100,6 +100,16 @@ public:
    virtual Integer             GetIntegerParameter(const Integer id) const;
    virtual Integer             SetIntegerParameter(const Integer id, const Integer value);
    
+   virtual std::string         GetStringParameter(const Integer id) const;
+   virtual std::string         GetStringParameter(const std::string &label) const;
+   virtual bool                SetStringParameter(const Integer id,
+                                                  const std::string &value);
+   virtual bool                SetStringParameter(const std::string &label,
+                                                  const std::string &value);
+   virtual const StringArray&
+                               GetPropertyEnumStrings(const Integer id) const;
+
+
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const Real parm,
@@ -109,6 +119,8 @@ public:
                                       const Real parm);
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    
+   virtual void SetSpaceObject(const Integer i, GmatBase *obj);
+
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
@@ -167,10 +179,14 @@ protected:
    std::vector<Real> area;
    /// Mass of the body, in kg
    std::vector<Real> mass;
+   /// Pointers to the spacecraft
+   std::vector<GmatBase*> scObjs;
    /// Solar flux, in W/m^2
    Real flux;
    /// Solar flux, in N/m^2
    Real fluxPressure;
+   // the model to use - Spherical or SPADFile
+   std::string srpModel;
    /// Distance from the Sun, currently set to a dummy value
    Real sunDistance;
    /// Nominal distance to the Sun used in the model: 1 AU
@@ -229,6 +245,7 @@ private:
       MASS,
       FLUX,
       FLUX_PRESSURE,
+      SRP_MODEL,
       SUN_DISTANCE,
       NOMINAL_SUN,
       PSUNRAD,

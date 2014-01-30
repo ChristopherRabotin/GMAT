@@ -134,8 +134,10 @@ private:
    bool isSpkBodyChanged;
    bool isSpkEpFormatChanged;
    bool isSpkEpochChanged;
+   bool isSRPModelChanged;
 
    wxFlexGridSizer *intFlexGridSizer;
+   wxFlexGridSizer *srpRCFlexSizer;
    GmatStaticBoxSizer *intStaticSizer;
    GmatStaticBoxSizer *fmStaticSizer;
    GmatStaticBoxSizer *magfStaticSizer;      // So it can be hidden
@@ -152,6 +154,7 @@ private:
    wxStaticText *maxStepStaticText;
    wxStaticText *unitsMaxStepStaticText;
    wxStaticText *maxStepAttemptStaticText;
+   wxStaticText *srpModelStaticText;
 
 
    wxTextCtrl *initialStepSizeTextCtrl;
@@ -176,6 +179,7 @@ private:
    wxComboBox *theAtmosModelComboBox;
    wxComboBox *theMagfModelComboBox;
    wxComboBox *theErrorComboBox;
+   wxComboBox *theSRPModelComboBox;
    
    wxBitmapButton *theGravModelSearchButton;
    wxButton *theDragSetupButton;
@@ -218,6 +222,7 @@ private:
    wxString dragTypeName;
    wxString propOriginName;
    wxString errorControlTypeName;
+   wxString srpModelName;
    
    wxArrayString integratorTypeArray;
    wxArrayString earthGravModelArray;
@@ -228,6 +233,7 @@ private:
    wxArrayString dragModelArray;
    wxArrayString magfModelArray;
    wxArrayString errorControlArray;
+   wxArrayString srpModelArray;
    
    std::map<wxString, wxString> theFileMap;
    
@@ -345,6 +351,8 @@ private:
    void OnPropOriginComboBox(wxCommandEvent &);
    void OnPropEpochComboBox(wxCommandEvent &);
    void OnStartEpochComboBox(wxCommandEvent &);
+   void OnSRPModelComboBox(wxCommandEvent &event);
+
    void OnStartEpochTextChange(wxCommandEvent &);
 
    
@@ -395,6 +403,7 @@ private:
       ID_CB_ATMOS,
       ID_CB_MAG,
       ID_CB_ERROR,
+      ID_CB_SRP_MODEL,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_SETUP,

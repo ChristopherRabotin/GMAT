@@ -76,6 +76,7 @@ SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount - PhysicalModelParamCount] 
     "Mass",
     "Flux",
     "Flux_Pressure",
+    "SRPModel",
     "Sun_Distance",
     "Nominal_Sun",
     "PSunRad",
@@ -97,6 +98,7 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::ENUMERATION_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
@@ -128,6 +130,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    hasMoons            (false),
    flux                (1367.0),                  // W/m^2, IERS 1996
    fluxPressure        (flux / GmatPhysicalConstants::c),   // converted to N/m^2
+   srpModel            ("Spherical"),
    sunDistance         (149597870.691),
    nominalSun          (149597870.691),
    bodyIsTheSun        (false),
@@ -168,6 +171,7 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    mass                (srp.mass),
    flux                (srp.flux),           // W/m^2, IERS 1996
    fluxPressure        (srp.fluxPressure),   // converted to N/m^2
+   srpModel            (srp.srpModel),
    sunDistance         (srp.sunDistance),
    nominalSun          (srp.nominalSun),
    bodyIsTheSun        (srp.bodyIsTheSun),
@@ -207,8 +211,10 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       cr           = srp.cr;
       area         = srp.area;
       mass         = srp.mass;
+      scObjs       = srp.scObjs;
       flux         = srp.flux;           // W/m^2, IERS 1996
       fluxPressure = srp.fluxPressure;   // converted to N/m^2
+      srpModel     = srp.srpModel;
       sunDistance  = srp.sunDistance;
       nominalSun   = srp.nominalSun;
       bodyIsTheSun = srp.bodyIsTheSun;
@@ -321,7 +327,7 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
 // All read only for now
 bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == FLUX) || (id == NOMINAL_SUN))
+   if ((id == FLUX) || (id == NOMINAL_SUN) || (id == SRP_MODEL))
       return false;
    
    return true;
@@ -519,6 +525,45 @@ Integer SolarRadiationPressure::SetIntegerParameter(const Integer id, const Inte
    return PhysicalModel::SetIntegerParameter(id, value);
 }
 
+std::string SolarRadiationPressure::GetStringParameter(const Integer id) const
+{
+   if (id == SRP_MODEL)  return srpModel;
+
+   return PhysicalModel::GetStringParameter(id);
+}
+
+std::string SolarRadiationPressure::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+bool SolarRadiationPressure::SetStringParameter(const Integer id,
+                                                const std::string &value)
+{
+   if (id == SRP_MODEL)
+   {
+      if ((value != "Spherical") && (value != "SPADFile"))
+      {
+         ODEModelException odee("");
+         odee.SetDetails(errorMessageFormat.c_str(),
+                        value.c_str(),
+                        "SrpModel", "\"Spherical\" or \"SPADFile\"");
+         throw odee;
+      }
+      srpModel = value;
+      return true;
+   }
+
+   return PhysicalModel::SetStringParameter(id, value);
+}
+
+bool SolarRadiationPressure::SetStringParameter(const std::string &label,
+                                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
 //------------------------------------------------------------------------------
 // bool SolarRadiationPressure::Initialize()
 //------------------------------------------------------------------------------
@@ -684,6 +729,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(msg.str());
    }
 
+   if ((Integer)scObjs.size() != satCount)
+   {
+      std::stringstream msg;
+      msg << "Mismatch between satellite count (" << satCount
+          << ") and object count (" << scObjs.size() << ")";
+      throw ODEModelException(msg.str());
+   }
+
    Real distancefactor = 1.0, mag, sSquared;
    bool inSunlight = true, inShadow = false;
 
@@ -722,6 +775,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    Integer i6;
    Real sunSat[3];
+   Rvector3 spadArea;
     
    if (fillCartesian)
    {
@@ -775,22 +829,52 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!inShadow) 
          {
             // Montenbruck and Gill, eq. 3.75
-            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
+            mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];
-
-            if (order == 1) 
+            if (srpModel == "Spherical")
             {
-               deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
-               deriv[i6 + 3] = mag * forceVector[0];
-               deriv[i6 + 4] = mag * forceVector[1];
-               deriv[i6 + 5] = mag * forceVector[2];
+               mag *= cr[i] * area[i];
+               if (order == 1)
+               {
+                  deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                  deriv[i6 + 3] = mag * forceVector[0];
+                  deriv[i6 + 4] = mag * forceVector[1];
+                  deriv[i6 + 5] = mag * forceVector[2];
+               }
+               else
+               {
+                  deriv[ i6 ] = mag * forceVector[0];
+                  deriv[i6+1] = mag * forceVector[1];
+                  deriv[i6+2] = mag * forceVector[2];
+                  deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               }
             }
-            else 
+            else  // SPADFile
             {
-               deriv[ i6 ] = mag * forceVector[0];
-               deriv[i6+1] = mag * forceVector[1];
-               deriv[i6+2] = mag * forceVector[2];
-               deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               if (!scObjs.at(i)->IsOfType("Spacecraft"))
+               {
+                  std::stringstream msg;
+                  msg << "Satellite " << scObjs.at(i)->GetName();
+                  msg << " is not of type Spacecraft.  SPAD SRP area cannot ";
+                  msg << "be obtained.\n";
+                  throw ODEModelException(msg.str());
+               }
+               Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);  // need to modify for performance?
+               spadArea = ((Spacecraft*) scObjs.at(i))->GetSPADSRPArea(ep, sunSC);
+               if (order == 1)
+               {
+                  deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                  deriv[i6 + 3] = mag * spadArea[0];
+                  deriv[i6 + 4] = mag * spadArea[1];
+                  deriv[i6 + 5] = mag * spadArea[2];
+               }
+               else
+               {
+                  deriv[ i6 ] = mag * spadArea[0];
+                  deriv[i6+1] = mag * spadArea[1];
+                  deriv[i6+2] = mag * spadArea[2];
+                  deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               }
             }
          }
          else 
@@ -1122,16 +1206,32 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
        percentSun = 1.0;
    }
 
+   Rvector3 spadArea;
    if (!inShadow)
    {
-      // Montenbruck and Gill, eq. 3.75
-      mag = percentSun * cr * fluxPressure * area * distancefactor /
-                          mass;
+      if (srpModel == "Spherical")
+      {
+         // Montenbruck and Gill, eq. 3.75
+         mag = percentSun * cr * fluxPressure * area * distancefactor /
+                             mass;
+         dv[0] = dv[1] = dv[2] = 0.0;
+         dv[3] = mag * forceVector[0];
+         dv[4] = mag * forceVector[1];
+         dv[5] = mag * forceVector[2];
+      }
+      else   // SPADFile
+      {
+         // Montenbruck and Gill, eq. 3.75
+         mag = percentSun * fluxPressure * distancefactor /
+                             mass;
+         Rvector3 sunSC(sunSat[0],sunSat[1],sunSat[2]);
+         spadArea = sc->GetSPADSRPArea(ep,sunSC);
+         dv[0] = dv[1] = dv[2] = 0.0;
+         dv[3] = mag * spadArea[0];
+         dv[4] = mag * spadArea[1];
+         dv[5] = mag * spadArea[2];
+      }
 
-      dv[0] = dv[1] = dv[2] = 0.0;
-      dv[3] = mag * forceVector[0];
-      dv[4] = mag * forceVector[1];
-      dv[5] = mag * forceVector[2];
    }
    else
    {
@@ -1326,6 +1426,31 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
     return 1.0 - area / (M_PI * a2);
 }
 
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& SolarRadiationPressure::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case SRP_MODEL:
+      enumStrings.clear();
+      enumStrings.push_back("Spherical");
+      enumStrings.push_back("SPADFile");
+      return enumStrings;
+   default:
+      return PhysicalModel::GetPropertyEnumStrings(id);
+   }
+}
 
 //------------------------------------------------------------------------------
 // void SetSatelliteParameter(const Integer i, const std::string parmName, 
@@ -1453,8 +1578,29 @@ void SolarRadiationPressure::ClearSatelliteParameters(
       cr.clear();
    if ((parmName == "SRPArea") || (parmName == ""))
       area.clear();
+   if ((parmName == "scObjs")  || (parmName == ""))
+      scObjs.clear();
 }
 
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft pointers to the force model.
+ *
+ * @param i   ID for the spacecraft
+ * @param obj pointer to the Spacecraft
+ */
+//------------------------------------------------------------------------------
+void SolarRadiationPressure::SetSpaceObject(const Integer i, GmatBase *obj)
+{
+   unsigned parmNumber = (unsigned)(i);
+
+   if (parmNumber < scObjs.size())
+      scObjs[i] = obj;
+   else
+      scObjs.push_back(obj);
+}
 
 //------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)

@@ -181,6 +181,8 @@ public:
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const std::string parm);
+   virtual void SetSpaceObject(const Integer i, GmatBase *obj);
+
    virtual bool UsesSpacecraftOrigin();
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    virtual bool StateChanged(bool reset = true);
