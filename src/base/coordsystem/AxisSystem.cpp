@@ -46,7 +46,7 @@ using namespace GmatTimeConstants;      // for SECS_PER_DAY
 
 
 
-//#define USE_NUTATION_SOURCE_1980				// make changes by TUAN NGUYEN  for NUTAION SOURCE 1980
+#define USE_NUTATION_SOURCE_1980				// make changes by TUAN NGUYEN  for NUTAION SOURCE 1980
 
 
 
