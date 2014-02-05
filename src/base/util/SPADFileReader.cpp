@@ -249,6 +249,10 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
 {
    #ifdef DEBUG_SPAD_FILE_AREA
       MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea\n");
+      MessageInterface::ShowMessage("   azStepSize = %d\n", azStepSize);
+      MessageInterface::ShowMessage("   elStepSize = %d\n", elStepSize);
+      MessageInterface::ShowMessage("   sunVector  = %12.10f  %12.10f  %12.10f\n",
+            sunVector[0], sunVector[1], sunVector[2]);
    #endif
    Rvector3 result;
 
@@ -291,6 +295,19 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
    Rvector3 lowHigh  = GetForceAt(azLow,  elHigh);
    Rvector3 highLow  = GetForceAt(azHigh, elLow);
    Rvector3 highHigh = GetForceAt(azHigh, elHigh);
+   #ifdef DEBUG_SPAD_FILE_AREA
+      MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, az = %12.10f,  el = %12.10f\n",
+            azimuth, elevation);
+      MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, four points used for interpolation are:\n");
+      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
+            azLow, elLow, lowLow[0], lowLow[1], lowLow[2]);
+      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
+            azLow, elHigh, lowHigh[0], lowHigh[1], lowHigh[2]);
+      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
+            azHigh, elLow, highLow[0], highLow[1], highLow[2]);
+      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
+            azHigh, elHigh, highHigh[0], highHigh[1], highHigh[2]);
+   #endif
 
    Real interp1, interp2;
 
@@ -302,7 +319,9 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
    }
 
    #ifdef DEBUG_SPAD_FILE_AREA
-      MessageInterface::ShowMessage("EXITing SPADFileReader::GetSRPArea\n");
+      MessageInterface::ShowMessage(
+            "EXITing SPADFileReader::GetSRPArea, returning %12.10f  %12.10f  %12.10f\n",
+            result[0], result[1], result[2]);
    #endif
 
    return result;
@@ -674,12 +693,12 @@ bool SPADFileReader::ParseFile()
                errmsg            += " is not a valid Real number.\n";
                throw UtilityException(errmsg);
             }
-            // Convert the force to the proper units
-            if (xUnits == "mm^2")      xVal *= 1.0e-12;
-            else if (xUnits == "m^2")  xVal *= 1.0e-06;
-            else if (xUnits == "cm^2") xVal *= 1.0e-10;
-            else if (xUnits == "in^2") xVal *= 6.4516e-10;
-            else if (xUnits == "ft^2") xVal *= 9.290304e-08;
+            // Convert the force to the proper units (m^2)
+            if (xUnits == "mm^2")      xVal *= 1.0e-06;
+            else if (xUnits == "m^2")  xVal *= 1.0;
+            else if (xUnits == "cm^2") xVal *= 1.0e-04;
+            else if (xUnits == "in^2") xVal *= 6.4516e-04;
+            else if (xUnits == "ft^2") xVal *= 9.290304e-02;
             else
             {
                std::string errmsg = "Error reading SPAD file ";
@@ -689,11 +708,11 @@ bool SPADFileReader::ParseFile()
                errmsg            += "[mm^2  m^2  cm^2  in^2  ft^2].\n";
                throw UtilityException(errmsg);
             }
-            if (yUnits == "mm^2")      yVal *= 1.0e-12;
-            else if (yUnits == "m^2")  yVal *= 1.0e-06;
-            else if (yUnits == "cm^2") yVal *= 1.0e-10;
-            else if (yUnits == "in^2") yVal *= 6.4516e-10;
-            else if (yUnits == "ft^2") yVal *= 9.290304e-08;
+            if (yUnits == "mm^2")      yVal *= 1.0e-06;
+            else if (yUnits == "m^2")  yVal *= 1.0;
+            else if (yUnits == "cm^2") yVal *= 1.0e-04;
+            else if (yUnits == "in^2") yVal *= 6.4516e-04;
+            else if (yUnits == "ft^2") yVal *= 9.290304e-02;
             else
             {
                std::string errmsg = "Error reading SPAD file ";
@@ -703,11 +722,11 @@ bool SPADFileReader::ParseFile()
                errmsg            += "[mm^2  m^2  cm^2  in^2  ft^2].\n";
                throw UtilityException(errmsg);
             }
-            if (zUnits == "mm^2")      zVal *= 1.0e-12;
-            else if (zUnits == "m^2")  zVal *= 1.0e-06;
-            else if (zUnits == "cm^2") zVal *= 1.0e-10;
-            else if (zUnits == "in^2") zVal *= 6.4516e-10;
-            else if (zUnits == "ft^2") zVal *= 9.290304e-08;
+            if (zUnits == "mm^2")      zVal *= 1.0e-06;
+            else if (zUnits == "m^2")  zVal *= 1.0;
+            else if (zUnits == "cm^2") zVal *= 1.0e-04;
+            else if (zUnits == "in^2") zVal *= 6.4516e-04;
+            else if (zUnits == "ft^2") zVal *= 9.290304e-02;
             else
             {
                std::string errmsg = "Error reading SPAD file ";

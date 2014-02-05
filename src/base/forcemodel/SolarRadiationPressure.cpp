@@ -56,6 +56,8 @@
 //#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
 //#define DEBUG_A_MATRIX
 
+//#define DEBUG_SPAD_DATA
+
 //#define IGNORE_SHADOWS
 
 
@@ -829,6 +831,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!inShadow) 
          {
             // Montenbruck and Gill, eq. 3.75
+            #ifdef DEBUG_SPAD_DATA
+            MessageInterface::ShowMessage(" --- now using spad data for %s\n",
+                  scObjs.at(i)->GetName().c_str());
+            MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
+            MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
+            MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
+            MessageInterface::ShowMessage("   mass           = %12.10f\n", mass[i]);
+            #endif
             mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];
             if (srpModel == "Spherical")
@@ -851,6 +861,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             }
             else  // SPADFile
             {
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage("in SRP, using SPAD file and mag = %12.10f \n", mag);
+               #endif
                if (!scObjs.at(i)->IsOfType("Spacecraft"))
                {
                   std::stringstream msg;
@@ -861,6 +874,10 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                }
                Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);  // need to modify for performance?
                spadArea = ((Spacecraft*) scObjs.at(i))->GetSPADSRPArea(ep, sunSC);
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage("in SRP, SPAD area from file = %12.10f  %12.10f  %12.10f\n",
+                        spadArea[0],spadArea[1],spadArea[2]);
+               #endif
                if (order == 1)
                {
                   deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;

@@ -1059,7 +1059,7 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
    }
    // Convert the sun vector to the spacecraft body frame
    Rvector6 sunBody;
-   Rvector6 sunSC(-sunVector[0], -sunVector[1], -sunVector[2], 0.0, 0.0, 0.0);
+   Rvector6 sunSC(sunVector[0], sunVector[1], sunVector[2], 0.0, 0.0, 0.0);
    coordConverter.Convert(ep, sunSC, internalCoordSystem, sunBody,
       spadBFCS);
    Rvector3 sunBody3(sunBody[0], sunBody[1], sunBody[2]);
