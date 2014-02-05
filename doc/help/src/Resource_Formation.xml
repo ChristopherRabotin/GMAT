@@ -112,132 +112,6 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-
-          <row>
-            <entry><guilabel>OrbitColor</guilabel></entry>
-
-            <entry><para>Allows you to set available colors on orbits of
-            spacecrafts that are in formation flight<guilabel/>. The orbit
-            colors can be identified through a string or an integer array. For
-            example: Setting a formation's orbit color to red can be done in
-            following two ways: <literal>Formation1.OrbitColor = Red</literal>
-            or <literal>Formation1.OrbitColor = [255 0 0]</literal>. This
-            field can be modified in the Mission Sequence as well.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer Array or String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from the Orbit Color
-                    selectbox</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>White</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>TargetColor</guilabel></entry>
-
-            <entry><para>Allows you to select available colors for perturbing
-            trajectories of spacecrafts in the <guilabel>Formation</guilabel>
-            during iterative processes such as Differential Correction or
-            Optimization. The target color can be identified through a string
-            or an integer array. For example: Setting a formation's perturbing
-            trajectories to yellow color can be done in following two ways:
-            <literal>Formation1.TargetColor = Yellow</literal> or
-            <literal>Formation1.TargetColor = [255 255 0]</literal> . This
-            field can be modified in the Mission Sequence as well.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer Array or String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from the Target Color
-                    selectbox</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>White</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -281,7 +155,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resources_Formation_GUIHelp2.png"
+                     fileref="files/images/Resources_Formation_GUIHelp.png"
                      scalefit="1" width="60%"/>
         </imageobject>
       </mediaobject>
@@ -332,23 +206,15 @@ Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</computeroutput></pro
     will stop.</para>
 
     <refsection>
-      <title>Setting Colors On a Formation of Spacecrafts</title>
+      <title>Setting Colors On Spacecrafts In Formation Resource</title>
 
-      <para>GMAT allows you to assign orbit colors to a
-      <guilabel>Formation</guilabel> resource that may contain number of
-      spacecrafts. The <guilabel>Formation</guilabel> of spacecrafts is drawn
-      using the <guilabel>OrbitView</guilabel> graphics display window. GMAT
-      also allows you to assign colors to perturbing trajectories of
-      spacecrafts in the <guilabel>Formation</guilabel> during iterative
-      processes such as Differential Correction or Optimization. The
-      <guilabel>Formation</guilabel> object’s <guilabel>OrbitColor</guilabel>
-      and <guilabel>TargetColor</guilabel> fields are used to assign colors to
-      both orbital and perturbing trajectories of spacecrafts in formation
-      flight. See the <xref linkend="Formation_Resource_Fields"
-      xrefstyle="select:title"/> section to learn more about these two
-      fields. Also see <xref
+      <para>If you want to set unique colors on spacecraft trajectories that
+      are nested in the <guilabel>Formation</guilabel> resource, then change
+      colors through either the <guilabel>Spacecraft</guilabel> resource or
+      the <guilabel>Propagate</guilabel> command. See the <xref
       linkend="Setting_Colors"/> documentation for discussion and examples on
-      how to set unique colors on orbital trajectory segments.</para>
+      how to set unique colors on <guilabel>Spacecraft</guilabel> resource and
+      <guilabel>Propagate</guilabel> command.</para>
     </refsection>
   </refsection>
 
