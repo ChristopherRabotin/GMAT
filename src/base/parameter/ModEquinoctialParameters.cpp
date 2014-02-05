@@ -29,18 +29,22 @@
 // To use preset colors, uncomment this line:
 //#define USE_PREDEFINED_COLORS
 
+//@note The ModEquinP class is no longer used in the ParameterFactory
+//      The SemilausRectum is used as originally designed (LOJ: 2014.01.29)
 //------------------------------------------------------------------------------
 // ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
    // Changed SemiLatusRectum to SemilatusRectum and ORIGIN dependent (Fix for GMT-4173)
    //: OrbitReal(name, "SemiLatusRectum", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
-   : OrbitReal(name, "SemilatusRectum", obj, "ModEquinoctial P", "km", GmatParam::ORIGIN, MOD_EQ_P, true)
+   //: OrbitReal(name, "SemilatusRectum", obj, "ModEquinoctial P", "km", GmatParam::ORIGIN, MOD_EQ_P, true)
+   // Changed to ModEquinoctialP to avoid confusion and changed back to CoordianteSystem dependent (LOJ: 2014.01.29)
+   : OrbitReal(name, "ModEquinoctialP", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
 {
-   //mDepObjectName = "EarthMJ2000Eq";
-   //SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, mDepObjectName);
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   //mDepObjectName = "Earth";
+   //SetRefObjectName(Gmat::SPACE_POINT, mDepObjectName);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif

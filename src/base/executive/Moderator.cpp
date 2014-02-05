@@ -7816,7 +7816,9 @@ void Moderator::CreateDefaultParameters()
    // ModEquinoctial parameters
    // Changed SemiLatusRectum to SemilatusRectum (lowwer case L)
    //CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
-   CreateParameter("SemilatusRectum", "DefaultSC.EarthMJ2000Eq.SemilatusRectum");
+   //CreateParameter("SemilatusRectum", "DefaultSC.EarthMJ2000Eq.SemilatusRectum");
+   // Changed SemilatusRectum to origin dependent (LOJ: 2014.01.29)
+   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
    CreateParameter("ModEquinoctialF", "DefaultSC.EarthMJ2000Eq.ModEquinoctialF");
    CreateParameter("ModEquinoctialG", "DefaultSC.EarthMJ2000Eq.ModEquinoctialG");
    CreateParameter("ModEquinoctialH", "DefaultSC.EarthMJ2000Eq.ModEquinoctialH");
@@ -7825,8 +7827,15 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default modequinoctial parameters created\n");
    #endif
-
-   // Delaunay parameters
+   
+   // Alternate Equinoctial parameters by HYKim
+   CreateParameter("AltEquinoctialP", "DefaultSC.EarthMJ2000Eq.AltEquinoctialP");
+   CreateParameter("AltEquinoctialQ", "DefaultSC.EarthMJ2000Eq.AltEquinoctialQ");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default alternate equinoctial parameters created\n");
+   #endif
+   
+   // Delaunay parameters by M.H.
    CreateParameter("Delaunayl", "DefaultSC.EarthMJ2000Eq.Delaunayl");
    CreateParameter("Delaunayg", "DefaultSC.EarthMJ2000Eq.Delaunayg");
    CreateParameter("Delaunayh", "DefaultSC.EarthMJ2000Eq.Delaunayh");
@@ -7836,8 +7845,8 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default delaunay parameters created\n");
    #endif
-
-   // Planetodetic parameters
+   
+   // Planetodetic parameters by M.H.
    CreateParameter("PlanetodeticRMAG", "DefaultSC.EarthMJ2000Eq.PlanetodeticRMAG");
    CreateParameter("PlanetodeticLON", "DefaultSC.EarthMJ2000Eq.PlanetodeticLON");
    CreateParameter("PlanetodeticLAT", "DefaultSC.EarthMJ2000Eq.PlanetodeticLAT");
@@ -7848,8 +7857,7 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
 
-   // Modified by YK
-   // IncomingAsymptote parameters
+   // IncomingAsymptote parameters by YK
    CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
    CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
    CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");
@@ -7857,8 +7865,7 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default IncomingAsymptote parameters created\n");
    #endif
    
-   // Modified by YK
-   // OutgoingAsymptote parameters
+   // OutgoingAsymptote parameters by YK
    CreateParameter("OutgoingRHA", "DefaultSC.EarthMJ2000Eq.OutgoingRHA");
    CreateParameter("OutgoingDHA", "DefaultSC.EarthMJ2000Eq.OutgoingDHA");
    CreateParameter("OutgoingBVAZI", "DefaultSC.EarthMJ2000Eq.OutgoingBVAZI");

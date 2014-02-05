@@ -22,7 +22,6 @@
 #ifndef Spacecraft_hpp
 #define Spacecraft_hpp
 
-//#include <valarray>
 #include "SpaceObject.hpp"
 #include "Rvector6.hpp"
 #include "GmatState.hpp"
@@ -33,8 +32,6 @@
 #include "TimeSystemConverter.hpp"
 #include "Attitude.hpp"
 #include "SPADFileReader.hpp"
-
-//#include <map>
 
 class GMAT_API Spacecraft : public SpaceObject
 {
@@ -59,6 +56,7 @@ public:
    virtual GmatState&   GetState();
    virtual Rvector6     GetState(std::string rep);
    virtual Rvector6     GetState(Integer rep);
+   StringArray          GetStateElementLabels(const std::string &stateType);
    Rvector6             GetCartesianState();
    Rvector6             GetKeplerianState();
    Rvector6             GetModifiedKeplerianState();
@@ -226,10 +224,10 @@ public:
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
-         Integer updatedParameterId);
+                                            Integer updatedParameterId);
 
    virtual void      UpdateElementLabels();
-   virtual void      UpdateElementLabels(std::string displayStateType);
+   virtual void      UpdateElementLabels(const std::string &displayStateType);
 
 protected:
    enum SC_Param_ID
@@ -342,6 +340,9 @@ protected:
       MOD_EQ_H,		
       MOD_EQ_K,		
       MOD_EQ_TLONG,
+      // Alternate Equinoctial by HYKim
+      ALT_EQ_P,
+      ALT_EQ_Q,
       // Delaunay; Modified by M.H.
       DEL_DELA_l,
       DEL_DELA_g,
@@ -399,6 +400,7 @@ protected:
       SPHERICAL_RADEC_ID,
       EQUINOCTIAL_ID,
       MODIFIED_EQUINOCTIAL_ID,   // Modified by M.H.
+      ALTERNATE_EQUINOCTIAL_ID,  // Modified by HYKim
       DELAUNAY_ID,	            // Modified by M.H.
       PLANETODETIC_ID,           // Modified by M.H.
       IN_ASYM_ID,	               // Mod by YK
@@ -413,6 +415,9 @@ protected:
    std::map <std::string, std::string> elementLabelMap;
    std::map <std::string, std::string> attribCommentLineMap;
    std::map <std::string, std::string> inlineAttribCommentMap;
+   std::map <std::string, StringArray> stateElementLabelsMap;
+   std::map <std::string, StringArray> stateElementUnitsMap;
+   std::multimap <std::string, std::string> allElementLabelsMultiMap;
    
    /// State element labels
    StringArray       stateElementLabel;
@@ -472,7 +477,9 @@ protected:
    bool              coordSysSet;
    /// Flag indicating whether or not the epoch has been set by the user
    bool              epochSet;
-
+   /// Flag indicating whether or not unique state element found
+   bool              uniqueStateTypeFound;
+   
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
 
@@ -559,6 +566,7 @@ private:
    bool              ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue, bool checkCoupled = true);
 
    bool              SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt, bool deleteOldAtt = false);
+   void              BuildStateElementLabelsAndUnits();
 };
 
 #endif // Spacecraft_hpp

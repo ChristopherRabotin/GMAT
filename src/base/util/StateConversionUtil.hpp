@@ -50,7 +50,8 @@ enum StateType
    SPH_AZFPA,
    SPH_RADEC,
    EQUINOCTIAL,
-   MOD_EQUINOCTIAL, // Modifed by M.H.
+   MOD_EQUINOCTIAL,  // Modifed by M.H.
+   ALT_EQUINOCTIAL,  // Alternate Equinoctial by HYKim
    DELAUNAY,
    PLANETODETIC,
    OUT_ASYM,
@@ -69,33 +70,113 @@ enum AnomalyType
    AnomalyTypeCount
 };
 
+#define EARTH_MU GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]
+#define EARTH_FLATTENING GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH]
+#define EARTH_EQ_RADIUS GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]
+
 //------------------------------------------------------------------------------
 // general state conversion methods
 //------------------------------------------------------------------------------
-//static Rvector6 Convert(Real mu,                     const Rvector6 &state,
-//                        const std::string &fromType, const std::string &toType,
-//                        const std::string &anomalyType = "TA");
-//static Rvector6 Convert(Real mu,                     const Real *state,
-//                        const std::string &fromType, const std::string &toType,
-//                        const std::string &anomalyType = "TA");
 
-static Rvector6 Convert(const Rvector6 &state,
-                        const std::string &fromType, const std::string &toType,
-                        Real mu         = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH],
-                        Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH],
-                        Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
-                        const std::string &anomalyType = "TA");
 static Rvector6 Convert(const Real *state,
                         const std::string &fromType, const std::string &toType,
                         Real mu         = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH],
                         Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH],
                         Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
                         const std::string &anomalyType = "TA");
-
+static Rvector6 Convert(const Rvector6 &state,
+                        const std::string &fromType, const std::string &toType,
+                        Real mu         = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH],
+                        Real flattening = GmatSolarSystemDefaults::PLANET_FLATTENING[GmatSolarSystemDefaults::EARTH],
+                        Real eqRadius   = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
+                        const std::string &anomalyType = "TA");
 
 //------------------------------------------------------------------------------
 // specific state conversion methods
 //------------------------------------------------------------------------------
+static Rvector6 ConvertFromCartesian(const std::string &toType, const Rvector6 &state,
+                                     Real mu = EARTH_MU,
+                                     const std::string &anomalyType = "TA",
+                                     Real flattening =  EARTH_FLATTENING,
+                                     Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromKeplerian(const std::string &toType, const Rvector6 &state, 
+                                     Real mu = EARTH_MU,
+                                     const std::string &anomalyType = "TA",
+                                     Real flattening =  EARTH_FLATTENING,
+                                     Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromModKeplerian(const std::string &toType, const Rvector6 &state,
+                                        Real mu = EARTH_MU,
+                                        const std::string &anomalyType = "TA",
+                                        Real flattening =  EARTH_FLATTENING,
+                                        Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromSphericalAZFPA(const std::string &toType, const Rvector6 &state, 
+                                          Real mu = EARTH_MU,
+                                          const std::string &anomalyType = "TA",
+                                          Real flattening =  EARTH_FLATTENING,
+                                          Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromSphericalRADEC(const std::string &toType, const Rvector6 &state,
+                                          Real mu = EARTH_MU,
+                                          const std::string &anomalyType = "TA",
+                                          Real flattening =  EARTH_FLATTENING,
+                                          Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromEquinoctial(const std::string &toType, const Rvector6 &state,
+                                       Real mu = EARTH_MU,
+                                       const std::string &anomalyType = "TA",
+                                       Real flattening =  EARTH_FLATTENING,
+                                       Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromModEquinoctial(const std::string &toType, const Rvector6 &state,
+                                          Real mu = EARTH_MU,
+                                          const std::string &anomalyType = "TA",
+                                          Real flattening =  EARTH_FLATTENING,
+                                          Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromAltEquinoctial(const std::string &toType, const Rvector6 &state,
+                                          Real mu = EARTH_MU,
+                                          const std::string &anomalyType = "TA",
+                                          Real flattening =  EARTH_FLATTENING,
+                                          Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromDelaunay(const std::string &toType, const Rvector6 &state,
+                                    Real mu = EARTH_MU,
+                                    const std::string &anomalyType = "TA",
+                                    Real flattening =  EARTH_FLATTENING,
+                                    Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromPlanetodetic(const std::string &toType, const Rvector6 &state,
+                                        Real mu = EARTH_MU,
+                                        const std::string &anomalyType = "TA",
+                                        Real flattening =  EARTH_FLATTENING,
+                                        Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromIncomingAsymptote(const std::string &toType, const Rvector6 &state,
+                                             Real mu = EARTH_MU,
+                                             const std::string &anomalyType = "TA",
+                                             Real flattening =  EARTH_FLATTENING,
+                                             Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromOutgoingAsymptote(const std::string &toType, const Rvector6 &state,
+                                             Real mu = EARTH_MU,
+                                             const std::string &anomalyType = "TA",
+                                             Real flattening =  EARTH_FLATTENING,
+                                             Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromBrouwerMeanShort(const std::string &toType, const Rvector6 &state,
+                                            Real mu = EARTH_MU,
+                                            const std::string &anomalyType = "TA",
+                                            Real flattening =  EARTH_FLATTENING,
+                                            Real eqRadius = EARTH_EQ_RADIUS);
+
+static Rvector6 ConvertFromBrouwerMeanLong(const std::string &toType, const Rvector6 &state,
+                                           Real mu = EARTH_MU,
+                                           const std::string &anomalyType = "TA",
+                                           Real flattening =  EARTH_FLATTENING,
+                                           Real eqRadius = EARTH_EQ_RADIUS);
 
 static Rvector6 CartesianToKeplerian(Real mu, const Rvector3 &pos,
                                      const Rvector3 &vel,
@@ -114,9 +195,6 @@ static Rvector6 KeplerianToCartesian(Real mu, const Rvector6 &state,
 static Rvector6 KeplerianToCartesian(Real mu, const Rvector6 &state,
                                      const std::string &anomalyType = "TA");
 
-static Rvector6 CartesianToEquinoctial(const Rvector6& cartesian,   const Real& mu);
-static Rvector6 EquinoctialToCartesian(const Rvector6& equinoctial, const Real& mu);
-
 static Rvector6 CartesianToSphericalAZFPA(const Rvector6& cartesian);
 static Rvector6 SphericalAZFPAToCartesian(const Rvector6& spherical);
 
@@ -125,6 +203,9 @@ static Rvector6 SphericalRADECToCartesian(const Rvector6& spherical);
 
 static Rvector6 KeplerianToModKeplerian(const Rvector6& keplerian);
 static Rvector6 ModKeplerianToKeplerian(const Rvector6& modKeplerian);
+
+static Rvector6 CartesianToEquinoctial(const Rvector6& cartesian,   const Real& mu);
+static Rvector6 EquinoctialToCartesian(const Rvector6& equinoctial, const Real& mu);
 
 static Rvector6 CartesianToModEquinoctial(const Rvector6& cartesian,   const Real& mu); // MODIFIED BY M.H.
 static Rvector6 ModEquinoctialToCartesian(const Rvector6& modequinoctial, const Real& mu);
@@ -150,6 +231,11 @@ static Rvector6 CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian);
 static Rvector6 BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml); // Anomaly Type is fixed to "MA"
 static Rvector6 BrouwerMeanLongToCartesian(Real mu, const Rvector6 &blml);
 
+// Alternate Equinoctial by HYKim 
+static Rvector6 EquinoctialToAltEquinoctial(const Rvector6& equinoctial);
+static Rvector6 AltEquinoctialToEquinoctial(const Rvector6& altequinoctial);
+
+
 //------------------------------------------------------------------------------
 // anomaly conversion methods
 //------------------------------------------------------------------------------
@@ -161,10 +247,10 @@ static Real     MeanToTrueAnomaly(Real maRadians,        Real ecc, Real tol     
 static Real     EccentricToTrueAnomaly(Real eaRadians,   Real ecc, bool modBy2Pi = false);
 static Real     HyperbolicToTrueAnomaly(Real haRadians,  Real ecc, bool modBy2Pi = false);
 
-static Real     ConvertFromTrueAnomaly(const std::string toType, Real taRadians, Real ecc, bool modBy2Pi = false);
-static Real     ConvertFromTrueAnomaly(AnomalyType toType,       Real taRadians, Real ecc, bool modBy2Pi = false);
-static Real     ConvertToTrueAnomaly(const std::string fromType, Real taRadians, Real ecc, bool modBy2Pi = false);
-static Real     ConvertToTrueAnomaly(AnomalyType fromType,       Real taRadians, Real ecc, bool modBy2Pi = false);
+static Real     ConvertFromTrueAnomaly(const std::string &toType, Real taRadians, Real ecc, bool modBy2Pi = false);
+static Real     ConvertFromTrueAnomaly(AnomalyType toType,        Real taRadians, Real ecc, bool modBy2Pi = false);
+static Real     ConvertToTrueAnomaly(const std::string &fromType, Real taRadians, Real ecc, bool modBy2Pi = false);
+static Real     ConvertToTrueAnomaly(AnomalyType fromType,        Real taRadians, Real ecc, bool modBy2Pi = false);
 
 static Real     CartesianToTA(Real mu, const Rvector3 &pos,
                               const Rvector3 &vel, bool inRadian = false);

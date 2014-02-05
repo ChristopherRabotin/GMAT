@@ -2283,6 +2283,12 @@
     <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4345,6 +4351,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
       <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp">
+      <Filter>Source Files\base\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -380,6 +380,7 @@ OBJECTS = \
     math/Tan.o \
     math/Tanh.o \
     math/Transpose.o \
+    parameter/AlternateEquinoctialParameters.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/ArrayWrapper.o \

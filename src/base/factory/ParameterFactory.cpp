@@ -33,16 +33,15 @@
 #include "KeplerianParameters.hpp"
 #include "SphericalParameters.hpp"
 #include "EquinoctialParameters.hpp"
-// Modified by M.H.
 #include "ModEquinoctialParameters.hpp"
+#include "AlternateEquinoctialParameters.hpp"
 #include "DelaunayParameters.hpp"
 #include "PlanetodeticParameters.hpp"
-// Modified by YK
 #include "IncomingAsymptoteParameters.hpp"
 #include "OutgoingAsymptoteParameters.hpp"
 #include "BrouwerMeanShortParameters.hpp"
 #include "BrouwerMeanLongParameters.hpp"
-//
+
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 #include "EnvParameters.hpp"
@@ -216,7 +215,15 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ModEquinTLONG(withName);
    if (ofType == "ModifiedEquinoctial")
       return new ModEquinState(withName);
-
+   
+   // Alternate Equinoctial parameters by HYKim
+   if (ofType == "AltEquinoctialP")
+      return new AltEquinP(withName);
+   if (ofType == "AltEquinoctialQ")
+      return new AltEquinQ(withName);
+   if (ofType == "AltEquinoctial")
+      return new AltEquinState(withName);
+   
    // Delaunay parameters; Modified by M.H.
    if (ofType == "Delaunayl")
       return new Delal(withName);
@@ -588,7 +595,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ModEquinoctialK");
       creatables.push_back("TLONG");
       creatables.push_back("ModEquinoctial");
-
+      
+      // Alternate Equinoctial parameters by HYKim
+      creatables.push_back("AltEquinoctialP");
+      creatables.push_back("AltEquinoctialQ");
+      
       // Delaunay parameters ; Modified by M.H.
       creatables.push_back("Delaunayl");
       creatables.push_back("Delaunayg");
