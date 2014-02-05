@@ -2180,6 +2180,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                      "Setting parameters for %s using data from %s\n",
                      pm->GetTypeName().c_str(), sat->GetName().c_str());
                #endif
+               // pass the actual satellite pointer first
+               // (currently only needed by SRP)
+               pm->SetSpaceObject(i, sat);
+
                
                // ... Coordinate System ...
                stringParm = sat->GetStringParameter(satIds[1]);

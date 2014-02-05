@@ -558,6 +558,7 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp" />
@@ -989,6 +990,7 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp" />

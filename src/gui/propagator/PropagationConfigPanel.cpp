@@ -47,6 +47,7 @@
 //#define DEBUG_PROP_PANEL_ERROR
 //#define DEBUG_PROP_INTEGRATOR
 //#define DEBUG_PROP_PROPAGATOR
+//#define DEBUG_PROP_PANEL_SAVE_SRP
 
 
 // Hard coded drag enumeration replaced by dynamic version, so set NONE_DM here
@@ -75,6 +76,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBox)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravityModelComboBox)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
+   EVT_COMBOBOX(ID_CB_SRP_MODEL, PropagationConfigPanel::OnSRPModelComboBox)
    EVT_CHECKBOX(ID_SRP_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
    EVT_CHECKBOX(ID_REL_CORRECTION_CHECKBOX, PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange)
    EVT_CHECKBOX(ID_STOP_CHECKBOX, PropagationConfigPanel::OnStopCheckBoxChange)
@@ -617,6 +619,19 @@ void PropagationConfigPanel::Create()
                       wxDefaultPosition, wxDefaultSize, 0 );
    theSrpCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseSolarRadiationPressureHint")));
 
+   srpModelStaticText = new wxStaticText( this, ID_TEXT,
+                        wxT(GUI_ACCEL_KEY"SRP Model"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   theSRPModelComboBox =
+      new wxComboBox( this, ID_CB_SRP_MODEL, srpModelArray[0],
+                      wxDefaultPosition, wxSize(100,-1),
+                      srpModelArray, wxCB_DROPDOWN|wxCB_READONLY );
+   theSRPModelComboBox->SetToolTip(pConfig->Read(_T("ForceModelSRPModelHint")));
+
+   wxFlexGridSizer *theSRPSizer = new wxFlexGridSizer( 2, 0, 2 );
+   theSRPSizer->Add( srpModelStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   theSRPSizer->Add( theSRPModelComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+
    //-----------------------------------------------------------------
    // Relativistic Correction
    //-----------------------------------------------------------------
@@ -624,6 +639,16 @@ void PropagationConfigPanel::Create()
       new wxCheckBox( this, ID_REL_CORRECTION_CHECKBOX, wxT(GUI_ACCEL_KEY"Relativistic Correction"),
                       wxDefaultPosition, wxDefaultSize, 0 );
    theRelativisticCorrectionCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseRelativisticCorrectionHint")));
+
+   //-----------------------------------------------------------------
+   // put SRP and RC stuff together
+   //-----------------------------------------------------------------
+   srpRCFlexSizer = new wxFlexGridSizer( 2, 0, 0 );
+   srpRCFlexSizer->AddGrowableCol(1);
+   srpRCFlexSizer->Add( theSrpCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( theSRPSizer, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( theRelativisticCorrectionCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( 80, 10, 0, wxGROW|wxALIGN_LEFT|wxALL, 5);
 
    //-----------------------------------------------------------------
    // Primary Bodies
@@ -643,8 +668,9 @@ void PropagationConfigPanel::Create()
    fmStaticSizer->Add( centralBodySizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    fmStaticSizer->Add( primaryStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    fmStaticSizer->Add( pointMassSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-   fmStaticSizer->Add( theRelativisticCorrectionCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   fmStaticSizer->Add( srpRCFlexSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   fmStaticSizer->Add( theRelativisticCorrectionCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
 
    //-----------------------------------------------------------------
    // Add panelSizer
@@ -1067,6 +1093,12 @@ void PropagationConfigPanel::PopulateForces()
             }
             else if (wxForceType == "SolarRadiationPressure")
             {
+               theSRP = (SolarRadiationPressure*) force;
+               std::string theSRPModel = "Spherical";
+               if (usePropOriginForSrp)
+                  theSRPModel = theSRP->GetStringParameter("SRPModel");
+               srpModelName = theSRPModel.c_str();
+
                // Currently SRP can only be applied to force model central body,
                // so we don't need to set to primary body list (loj:2007.10.19)
                //currentBodyId = FindPrimaryBody(wxBodyName);
@@ -1101,6 +1133,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
    MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
    MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
+   MessageInterface::ShowMessage("   isSrpModelChanged=%d\n", isSrpModelChanged);
    #endif
 
    canClose = true;
@@ -1405,11 +1438,15 @@ void PropagationConfigPanel::SaveData()
 
             paramId= newFm->GetParameterID("SRP");
 
+            #ifdef DEBUG_PROP_PANEL_SAVE_SRP
+               MessageInterface::ShowMessage("SaveData() saving SRP: usePropOriginForSrp = %s\n", (usePropOriginForSrp? "true" : "false"));
+            #endif
             if (usePropOriginForSrp)
             {
                theSRP = new SolarRadiationPressure();
                bodyName = propOriginName;
                theSRP->SetStringParameter("BodyName", bodyName);
+               theSRP->SetStringParameter("SRPModel", srpModelName.c_str());
                newFm->AddForce(theSRP);
                newFm->SetOnOffParameter(paramId, "On");
             }
@@ -1792,6 +1829,12 @@ void PropagationConfigPanel::Initialize()
    errorControlArray.Add("RSSState");
    errorControlArray.Add("LargestStep");
    errorControlArray.Add("LargestState");
+
+   // initialize SRP Model type array
+   srpModelArray.Add("Spherical");
+   srpModelArray.Add("SPADFile");
+
+   srpModelName = "Spherical";
 
    // for actual file keyword used in FileManager
    theFileMap["JGM-2"] = "JGM2_FILE";
@@ -2312,6 +2355,11 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 void PropagationConfigPanel::DisplaySRPData()
 {
    theSrpCheckBox->SetValue(usePropOriginForSrp);
+   theSRPModelComboBox->SetValue(srpModelName);
+   if (usePropOriginForSrp)
+      theSRPModelComboBox->Enable(true);
+   else
+      theSRPModelComboBox->Enable(false);
 }
 
 
@@ -3461,6 +3509,26 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
    EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnSRPModelComboBox(wxCommandEvent &)
+//------------------------------------------------------------------------------
+/**
+ * Tells the GUI that the start epoch combobox has changed
+ */
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnSRPModelComboBox(wxCommandEvent &)
+{
+   wxString modelSelection = theSRPModelComboBox->GetStringSelection();
+
+   if (!srpModelName.IsSameAs(modelSelection))
+   {
+      isSRPModelChanged   = true;
+      isForceModelChanged = true;
+      srpModelName        = theSRPModelComboBox->GetValue();
+      EnableUpdate(true);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void OnStartEpochTextChange(wxCommandEvent &)
@@ -3818,6 +3886,11 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {
    usePropOriginForSrp = theSrpCheckBox->GetValue();
    isForceModelChanged = true;
+   // enable or disable the SRP Model combo box here
+   if (usePropOriginForSrp)
+      theSRPModelComboBox->Enable(true);
+   else
+      theSRPModelComboBox->Enable(false);
    EnableUpdate(true);
 }
 
@@ -3833,7 +3906,7 @@ void PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange(wxCommandEve
 
 
 //------------------------------------------------------------------------------
-// void OnSRPCheckBoxChange(wxCommandEvent &event)
+// void OnStopCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnStopCheckBoxChange(wxCommandEvent &event)
 {

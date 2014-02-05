@@ -550,6 +550,7 @@ OBJECTS = \
     util/Rvector3.o \
     util/Rvector6.o \
     util/Rvector.o \
+    util/SPADFileReader.o \
     util/StateConversionUtil.o \
     util/StringTokenizer.o \
     util/StringUtil.o \

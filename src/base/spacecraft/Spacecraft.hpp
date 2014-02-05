@@ -32,6 +32,7 @@
 #include "CoordinateConverter.hpp"
 #include "TimeSystemConverter.hpp"
 #include "Attitude.hpp"
+#include "SPADFileReader.hpp"
 
 //#include <map>
 
@@ -72,6 +73,8 @@ public:
    const UnsignedIntArray&
                         GetEulerAngleSequence() const;
    
+   Rvector3             GetSPADSRPArea(const Real ep, const Rvector3 &sunVector);
+
    // The ID of the model that the spacecraft uses, and the filename as well
    std::string          modelFile;
    int                  modelID;
@@ -262,6 +265,10 @@ protected:
       ORBIT_STM,
       ORBIT_A_MATRIX,
 //      ORBIT_COVARIANCE,
+
+      // SPAD SRP parameters
+      SPAD_SRP_FILE,
+      SPAD_SRP_SCALE_FACTOR,
 
       // Hidden parameters used by the PSM
       CARTESIAN_X,
@@ -503,6 +510,15 @@ protected:
    Rmatrix           orbitSTM;
    /// The orbit State A Matrix
    Rmatrix           orbitAMatrix;
+
+   /// The name of the SPAD SRP file
+   std::string       spadSRPFile;
+   /// the scale factor to use for the SSPAD SRP data
+   Real              spadSRPScaleFactor;
+   /// the SPADFileReader
+   SPADFileReader    *spadSRPReader;
+   /// Body-fixed coordinate system used for SPAD SRP calculations
+   CoordinateSystem  *spadBFCS;
 
    /// Toggle to making Cart state dynamic; Integer to handle multiple includes
    Integer           includeCartesianState;

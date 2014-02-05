@@ -44,6 +44,7 @@ using namespace GmatTimeConstants;      // for SECS_PER_DAY
 
 //static Integer visitCount = 0;
 
+
 //#define DEBUG_ROT_MATRIX 1
 //#define DEBUG_UPDATE
 //#define DEBUG_FIRST_CALL
@@ -1927,14 +1928,34 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       else
          MessageInterface::ShowMessage("firstCallFired set to TRUE!!!!\n");
    #endif
+   
+   // Updated coefficients for GMT-4295.  Vallado's text is incorrect 
+   // and updated based on Supplement to the Astronomical Almanac. - TDN 
+   Real const125, const134, const357, const93, const297;
+   if (nutationSrc == GmatItrf::NUTATION_1980)
+   {
+      const125 = 125.04452222*RAD_PER_DEG;
+      const134 = 134.96298139*RAD_PER_DEG;
+      const357 = 357.52772333*RAD_PER_DEG;
+      const93  =  93.27191028*RAD_PER_DEG;
+      const297 = 297.85036306*RAD_PER_DEG;
+   }
+   else if (nutationSrc == GmatItrf::NUTATION_1996)
+   {
+      const125 = 125.04455501*RAD_PER_DEG;
+      const134 = 134.96340251*RAD_PER_DEG;
+      const357 = 357.52910918*RAD_PER_DEG;
+      const93  =  93.27209062*RAD_PER_DEG;
+      const297 = 297.85019547*RAD_PER_DEG;
+   }
+   else
+   {
+      throw CoordinateSystemException("Error: code to calculate nutation matrix for the current nutation source is not implemented\n"); 
+   }
 
-   static const Real const125 = 125.04455501*RAD_PER_DEG;
-   static const Real const134 = 134.96340251*RAD_PER_DEG;
-   static const Real const357 = 357.52910918*RAD_PER_DEG;
-   static const Real const93  =  93.27209062*RAD_PER_DEG;
-   static const Real const297 = 297.85019547*RAD_PER_DEG;
+
    #ifdef DEBUG_UPDATE
-      MessageInterface::ShowMessage("static consts computed ... \n");
+      MessageInterface::ShowMessage("consts computed ... \n");
       MessageInterface::ShowMessage("  const125 = %12.10f\n", const125);
       MessageInterface::ShowMessage("  const134 = %12.10f\n", const134);
       MessageInterface::ShowMessage("  const357 = %12.10f\n", const357);
@@ -1954,23 +1975,31 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    #ifdef DEBUG_UPDATE
       if (nutationSrc == GmatItrf::NUTATION_1980)
          MessageInterface::ShowMessage("NUTATION_1980\n");
-	  else if (nutationSrc == GmatItrf::NUTATION_1996)
+      else if (nutationSrc == GmatItrf::NUTATION_1996)
          MessageInterface::ShowMessage("NUTATION_1996\n");
-	  else
+      else
          MessageInterface::ShowMessage("NUTAION other\n");
 
       MessageInterface::ShowMessage("registers set up\n");
-	  MessageInterface::ShowMessage("  tTDB  = %.15lf\n", tTDB);
+      MessageInterface::ShowMessage("  tTDB  = %.15lf\n", tTDB);
       MessageInterface::ShowMessage("  tTDB2 = %.15lf\n", tTDB2);
       MessageInterface::ShowMessage("  tTDB3 = %.15lf\n", tTDB3);
       MessageInterface::ShowMessage("  tTDB4 = %.15lf\n", tTDB4);
    #endif
 
    // Compute values to be passed out first ... 
-   longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
+   // Updated coefficients for GMT-4295.  Vallado's text is incorrect 
+   // and updated based on Supplement to the Astronomical Almanac. - TDN 
+   if (nutationSrc == GmatItrf::NUTATION_1980)
+      longAscNodeLunar  = const125 + (  -6962890.5390*tTDB
+                       + 7.455*tTDB2 + 0.008*tTDB3)
+                       * RAD_PER_ARCSEC;
+   else if (nutationSrc == GmatItrf::NUTATION_1996)
+      longAscNodeLunar  = const125 + (  -6962890.2665*tTDB
                        + 7.4722*tTDB2 + 0.007702*tTDB3 - 0.00005939*tTDB4)
                        * RAD_PER_ARCSEC;
-   longAscNodeLunar = longAscNodeLunar - ((int)(longAscNodeLunar/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;	// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+
+   longAscNodeLunar = longAscNodeLunar - ((int)(longAscNodeLunar/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;	
    
    Real Epsbar       = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 
                         + 0.001813*tTDB3) * RAD_PER_ARCSEC;
@@ -2012,18 +2041,35 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - taken from Steve Queen's code - he has apparently converted
    // the values in degrees (from Vallado Eq. 3-54) to arcsec before
    // performing these computations
-   register Real meanAnomalyMoon   = const134 + (1717915923.2178*tTDB 
+
+   register Real meanAnomalyMoon, meanAnomalySun, argLatitudeMoon, meanElongationSun;
+   if (nutationSrc == GmatItrf::NUTATION_1980)
+   {
+      meanAnomalyMoon   = const134 + (1717915922.6330*tTDB 
+        + 31.310*tTDB2 + 0.064*tTDB3)*RAD_PER_ARCSEC;
+      meanAnomalySun    = const357 + ( 129596581.2240*tTDB 
+        -  0.577*tTDB2 - 0.012*tTDB3)*RAD_PER_ARCSEC;
+      argLatitudeMoon   =  const93 + (1739527263.1370*tTDB 
+        - 13.257*tTDB2 + 0.011*tTDB3)*RAD_PER_ARCSEC;
+      meanElongationSun = const297 + (1602961601.3280*tTDB 
+        -  6.891*tTDB2 + 0.019*tTDB3)*RAD_PER_ARCSEC;
+   }
+   else if (nutationSrc == GmatItrf::NUTATION_1996)
+   {
+      meanAnomalyMoon   = const134 + (1717915923.2178*tTDB 
         + 31.8792*tTDB2 + 0.051635*tTDB3 - 0.00024470*tTDB4)*RAD_PER_ARCSEC;
-   register Real meanAnomalySun    = const357 + ( 129596581.0481*tTDB 
+      meanAnomalySun    = const357 + ( 129596581.0481*tTDB 
         -  0.5532*tTDB2 - 0.000136*tTDB3 - 0.00001149*tTDB4)*RAD_PER_ARCSEC;
-   register Real argLatitudeMoon   =  const93 + (1739527262.8478*tTDB 
+      argLatitudeMoon   =  const93 + (1739527262.8478*tTDB 
         - 12.7512*tTDB2 + 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
-   register Real meanElongationSun = const297 + (1602961601.2090*tTDB 
+      meanElongationSun = const297 + (1602961601.2090*tTDB 
         -  6.3706*tTDB2 + 0.006593*tTDB3 - 0.00003169*tTDB4)*RAD_PER_ARCSEC;
-   meanAnomalyMoon = meanAnomalyMoon - ((int)(meanAnomalyMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;			// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
-   meanAnomalySun = meanAnomalySun - ((int)(meanAnomalySun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;				// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
-   argLatitudeMoon = argLatitudeMoon - ((int)(argLatitudeMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;			// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
-   meanElongationSun = meanElongationSun - ((int)(meanElongationSun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI;	// made change by TUAN NGUYEN (apply equations used in Matlab prototype)
+   }
+   // Apply equations used in Matlab prototype - TDN
+   meanAnomalyMoon = meanAnomalyMoon - ((int)(meanAnomalyMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI; 
+   meanAnomalySun = meanAnomalySun - ((int)(meanAnomalySun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI; 
+   argLatitudeMoon = argLatitudeMoon - ((int)(argLatitudeMoon/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI; 
+   meanElongationSun = meanElongationSun - ((int)(meanElongationSun/(2*GmatMathConstants::PI)))*2*GmatMathConstants::PI; 
 
    // Now, sum using nutation coefficients  (Vallado Eq. 3-60)
    Integer i  = 0;

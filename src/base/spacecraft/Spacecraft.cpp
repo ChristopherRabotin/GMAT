@@ -124,6 +124,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
+      Gmat::STRING_TYPE,      // SPADSRPFile
+      Gmat::REAL_TYPE,        // SPADSRPScaleFactor
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
       Gmat::REAL_TYPE,        // CartesianZ
@@ -175,6 +177,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Attitude",
       "OrbitSTM",
       "OrbitAMatrix",
+      "SPADSRPFile",
+      "SPADSRPScaleFactor",
       "CartesianX",
       "CartesianY",
       "CartesianZ",
@@ -331,6 +335,10 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    isThrusterSettingMode(false),
    orbitSTM             (6,6),
    orbitAMatrix         (6,6),
+   spadSRPFile          (""),
+   spadSRPScaleFactor   (1.0),
+   spadSRPReader        (NULL),
+   spadBFCS             (NULL),
    includeCartesianState(0)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -468,6 +476,9 @@ Spacecraft::~Spacecraft()
    //@see ObjectInitializer::BuildAssociations()
    DeleteOwnedObjects(true, true, true, true);
 
+   if (spadSRPReader)  delete spadSRPReader;
+   if (spadBFCS)       delete spadBFCS;
+
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::~Spacecraft() <%p>'%s' exiting\n", this, GetName().c_str());
@@ -529,6 +540,10 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    isThrusterSettingMode(a.isThrusterSettingMode),
    orbitSTM             (a.orbitSTM),
    orbitAMatrix         (a.orbitAMatrix),
+   spadSRPFile          (a.spadSRPFile),
+   spadSRPScaleFactor   (a.spadSRPScaleFactor),
+   spadSRPReader        (NULL),
+   spadBFCS             (NULL),
    includeCartesianState(a.includeCartesianState)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -680,6 +695,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    orbitSTM = a.orbitSTM;
    orbitAMatrix = a.orbitAMatrix;
+
+   spadSRPFile        = a.spadSRPFile;
+   spadSRPScaleFactor = a.spadSRPScaleFactor;
+   spadSRPReader      = NULL;
+   spadBFCS           = NULL;
+
 //   orbitSpiceKernelNames = a.orbitSpiceKernelNames;
    includeCartesianState = a.includeCartesianState;
 
@@ -1009,6 +1030,44 @@ const UnsignedIntArray& Spacecraft::GetEulerAngleSequence() const
       throw SpaceObjectException(errmsg);
    }
 }
+
+//------------------------------------------------------------------------------
+// Rvector3 GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
+//------------------------------------------------------------------------------
+Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
+{
+   if (spadSRPReader == NULL)
+   {
+      if (spadSRPFile == "")
+      {
+         std::string errmsg = "SPAD data requested for Spacecraft ";
+         errmsg            += instanceName + " but no SPAD file ";
+         errmsg            += "has been provided.\n";
+         throw SpaceObjectException(errmsg);
+      }
+      else
+      {
+         spadSRPReader = new SPADFileReader();
+         spadSRPReader->SetFile(spadSRPFile);
+         spadSRPReader->Initialize();
+      }
+   }
+   if (spadBFCS == NULL)
+   {
+      spadBFCS  = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", this,
+                                    NULL, NULL, GetJ2000Body(), solarSystem);
+   }
+   // Convert the sun vector to the spacecraft body frame
+   Rvector6 sunBody;
+   Rvector6 sunSC(-sunVector[0], -sunVector[1], -sunVector[2], 0.0, 0.0, 0.0);
+   coordConverter.Convert(ep, sunSC, internalCoordSystem, sunBody,
+      spadBFCS);
+   Rvector3 sunBody3(sunBody[0], sunBody[1], sunBody[2]);
+   Rvector3 result = spadSRPScaleFactor * spadSRPReader->GetSRPArea(sunBody3);
+
+   return result;
+}
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
@@ -2474,6 +2533,8 @@ Real Spacecraft::GetRealParameter(const Integer id) const
          return attitude->GetRealParameter(id - ATTITUDE_ID_OFFSET);
       }
 
+   if (id == SPAD_SRP_SCALE_FACTOR) return spadSRPScaleFactor;
+
    if (id == MODEL_OFFSET_X)     return modelOffsetX;
    if (id == MODEL_OFFSET_Y)     return modelOffsetY;
    if (id == MODEL_OFFSET_Z)     return modelOffsetZ;
@@ -2625,6 +2686,12 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
    {
       state[5] = value;
       return state[5];
+   }
+
+   if (id == SPAD_SRP_SCALE_FACTOR)
+   {
+      spadSRPScaleFactor = value;
+      return spadSRPScaleFactor;
    }
 
 
@@ -3000,6 +3067,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
           return attitude->GetStringParameter(id - ATTITUDE_ID_OFFSET);
        }
 
+    if (id == SPAD_SRP_FILE)
+       return spadSRPFile;
+
     if (id == MODEL_FILE)
        return modelFile;
 
@@ -3359,6 +3429,15 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       {
          thrusterNames.push_back(value);
       }
+   }
+   else if (id == SPAD_SRP_FILE)
+   {
+      if (value != spadSRPFile)
+      {
+         delete spadSRPReader;
+         spadSRPReader = NULL;
+      }
+      spadSRPFile = value;
    }
    else if (id == MODEL_FILE)
    {

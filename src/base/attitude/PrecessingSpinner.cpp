@@ -157,26 +157,23 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    // Error message and vector normalization
    if ( bsMag < 1.0e-5 )
    {
-	   throw AttitudeException(
-	         "The size of BodySpinVector for PrecessingSpinner attitude "
-	         "is too small");
+      std::string errmsg = "PrecessingSpinner attitude model is singular ";
+      errmsg            += "and/or undefined for Spacecraft ";
+      errmsg            += owningSC->GetName() + ".  Magnitude of ";
+      errmsg            += "BodySpinVector must be >= 1e-5\n";
+      throw AttitudeException(errmsg);
    }
    if ( nrMag < 1.0e-5 )
    {
-      throw AttitudeException(
-            "The size of NutationReferenceVector for PrecessingSpinner "
-            "attitude is too small");
+      std::string errmsg = "PrecessingSpinner attitude model is singular ";
+      errmsg            += "and/or undefined for Spacecraft ";
+      errmsg            += owningSC->GetName() + ".  Magnitude of ";
+      errmsg            += "NutationReferenceVector must be >= 1e-5\n";
+      throw AttitudeException(errmsg);
    }
 
    bodySpinAxisNormalized            = bodySpinAxis / bsMag;
    nutationReferenceVectorNormalized = nutationReferenceVector / nrMag;
-
-   static bool nutationWarningWritten = false;
-   if ( (abs(nutationAngle) < 1.0e-5 ) && !nutationWarningWritten)
-   {
-	   MessageInterface::ShowMessage("Warning - Nutation angle is nearly zero\n");
-	   nutationWarningWritten = true;
-   }
 
    #ifdef DEBUG_PRECESSING_SPINNER
       MessageInterface::ShowMessage(
@@ -211,14 +208,14 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    Rvector3 rvectorAlign = Cross(bodySpinAxisNormalized, nutationReferenceVectorNormalized);
    Rmatrix33 rmatrixInit(true);  // identity matrix, by default
    Real alignMag = rvectorAlign.GetMagnitude();
-   if(alignMag < 1.0e-5)
+   Real angleAlign = GmatMathUtil::ACos(bodySpinAxisNormalized * nutationReferenceVectorNormalized);  //in radian
+   if(angleAlign < 1.0e-16)
    {
-	   // Let RmatrixInit as identity
+	   // Leave RmatrixInit as identity
    }
    else
    {
 	   Rvector3 rvectorAlignNormalized = rvectorAlign / alignMag;
-	   Real angleAlign = GmatMathUtil::ACos(bodySpinAxisNormalized * nutationReferenceVectorNormalized);	//in radian
 	   rmatrixInit = AttitudeConversionUtility::EulerAxisAndAngleToDCM(rvectorAlignNormalized, angleAlign);
    }
 
