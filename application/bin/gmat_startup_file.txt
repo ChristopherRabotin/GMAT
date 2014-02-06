@@ -80,11 +80,9 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 EPHEM_PATH             = OUTPUT_PATH/
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
-GMAT_FUNCTION_PATH     = C:/Projects/GMAT/RoutineTests/GmatFunctions
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
-MATLAB_FUNCTION_PATH   = C:/Projects/GMAT/RoutineTests/MatlabFunctions
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------
@@ -153,9 +151,9 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 # Debug options
 #-----------------------------------------------------------
-RUN_MODE              = TESTING
+#RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
 #DEBUG_PARAMETERS      = OFF
 #HIDE_SAVEMISSION      = TRUE
-PLOT_MODE             = TILE
+#PLOT_MODE             = TILE

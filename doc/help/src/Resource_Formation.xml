@@ -36,10 +36,10 @@
     the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Propagate"/></para>
+    linkend="Propagate"/>, <xref linkend="Setting_Colors"/></para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="Formation_Resource_Fields">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -204,6 +204,18 @@ Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</computeroutput></pro
     <guilabel>Formation</guilabel> are not equivalent to a tolerance of a few
     microseconds, <guilabel>GMAT</guilabel> will throw an error and execution
     will stop.</para>
+
+    <refsection>
+      <title>Setting Colors On Spacecrafts In Formation Resource</title>
+
+      <para>If you want to set unique colors on spacecraft trajectories that
+      are nested in the <guilabel>Formation</guilabel> resource, then change
+      colors through either the <guilabel>Spacecraft</guilabel> resource or
+      the <guilabel>Propagate</guilabel> command. See the <xref
+      linkend="Setting_Colors"/> documentation for discussion and examples on
+      how to set unique colors on <guilabel>Spacecraft</guilabel> resource and
+      <guilabel>Propagate</guilabel> command.</para>
+    </refsection>
   </refsection>
 
   <refsection>

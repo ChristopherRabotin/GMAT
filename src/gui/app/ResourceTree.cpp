@@ -4578,10 +4578,20 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptNames = "";
       msg1.Printf("Script errors found in the following %d script(s):\n",
                   mBuildErrorCount);
-      for (int i = 0; i < mBuildErrorCount; i++)
-         scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
       
-      msg1 = msg1 + scriptNames;
+      // Will this fix allocation error in the MessageInterface
+      if (mBuildErrorCount <= 50)
+      {
+         for (int i = 0; i < mBuildErrorCount; i++)
+            scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
+         
+         msg1 = msg1 + scriptNames;
+      }
+      else
+      {
+         for (int i = 0; i < mBuildErrorCount; i++)
+            MessageInterface::ShowMessage("%s\n", mFailedScriptsList[i].c_str());
+      }
    }
    
    if (initTimeErrors.GetCount() > 0)
@@ -4672,7 +4682,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       // Log run folder summary report to a separate file
       std::string summaryFile = currOutPath.c_str();
-      summaryFile += "GmatFolderRunSummary.txt";
+      summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
       MessageInterface::LogMessage(msg);

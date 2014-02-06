@@ -45,11 +45,15 @@ private:
    bool dataChanged;
    bool canClose;
    
+   bool spadFileChanged;
+
    void Create();
     
    // Event Handling
    DECLARE_EVENT_TABLE();
    void OnTextChange(wxCommandEvent &event);
+   void OnSPADTextChange(wxCommandEvent &event);
+   void OnBrowseButton(wxCommandEvent& event);
     
    Spacecraft *theSpacecraft;
 
@@ -61,11 +65,21 @@ private:
    wxTextCtrl *dragAreaTextCtrl;
    wxTextCtrl *srpAreaTextCtrl;
 
+   wxTextCtrl *spadSrpFileTextCtrl;
+   wxTextCtrl *spadSrpScaleFactorTextCtrl;
+
+   wxBitmapButton *spadBrowseButton;
+
+   std::string    theSpadSrpFile;
+   std::string    prevSpadSrpFile;
+
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 30100,
       ID_TEXTCTRL,
+      ID_SPAD_TEXTCTRL,
+      ID_SPAD_BUTTON_BROWSE,
    };
 };
 #endif

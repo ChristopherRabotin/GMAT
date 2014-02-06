@@ -132,13 +132,14 @@ private:
    bool CheckCartesian(Rvector6 &outState);
    bool CheckKeplerian(Rvector6 &outState);
    bool CheckModKeplerian(Rvector6 &outState);
-   bool CheckSpherical(Rvector6 &outState, const wxString &stateType);
+   //bool CheckSpherical(Rvector6 &outState, const wxString &stateType);
+   bool CheckSphericalAZFPA(Rvector6 &outState);
+   bool CheckSphericalRADEC(Rvector6 &outState);
    bool CheckEquinoctial(Rvector6 &outState);
-   
    bool CheckModifiedEquinoctial(Rvector6 &outState);
+   bool CheckAlternateEquinoctial(Rvector6 &outState);
    bool CheckDelaunay(Rvector6 &outState);
    bool CheckPlanetodetic(Rvector6 &outState);
-   
    bool CheckOutgoingAsymptote(Rvector6 &outState); // mod by YK
    bool CheckIncomingAsymptote(Rvector6 &outState);
    bool CheckBrouwerMeanShort(Rvector6 &outState); 

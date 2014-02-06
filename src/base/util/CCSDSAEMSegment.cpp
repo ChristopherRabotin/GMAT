@@ -205,7 +205,7 @@ bool CCSDSAEMSegment::SetMetaData(const std::string &fieldName,
 //      }
       return true;
    }
-   // We are ignoring this for now; we use Linear (SLERP) or Lagrange interpolation
+   // We use Linear (SLERP) or Lagrange interpolation
    else if (fieldName == "INTERPOLATION_METHOD")
    {
       interpolationMethod = GmatStringUtil::ToUpper(value);

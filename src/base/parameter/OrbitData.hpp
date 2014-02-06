@@ -50,11 +50,10 @@ public:
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
    Rvector6 GetEquinState();
-   // Modified by M.H.
    Rvector6 GetModEquinState();
+   Rvector6 GetAltEquinState();
    Rvector6 GetDelaState();
    Rvector6 GetPlanetodeticState();
-   // Modified by YK
    Rvector6 GetIncAsymState();
    Rvector6 GetOutAsymState();
    Rvector6 GetBLshortState();
@@ -94,6 +93,10 @@ public:
    Real GetModEquinReal(Integer item);
    Real GetModEquinReal(const std::string &str);
 
+   // AlternateEquinoctial by HYKim
+   Real GetAltEquinReal(Integer item);
+   Real GetAltEquinReal(const std::string &str);
+   
    Real GetDelaReal(Integer item);
    Real GetDelaReal(const std::string &str);
 
@@ -206,9 +209,9 @@ protected:
    // Orbit STM items
    enum {ORBIT_STM = Item7Count, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D,
          Item8Count};
-   // Modified by M.H.
-   // ModifiedEquinoctial items
-   enum {MOD_EQ_P = Item8Count, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, Item9Count};
+   // Modified by M.H. and HYKim
+   // ModifiedEquinoctial and AlternateEquinoctial items
+   enum {MOD_EQ_P = Item8Count, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, ALT_EQ_P, ALT_EQ_Q, Item9Count};
    
    // Modified by M.H.
    // Delaunay items

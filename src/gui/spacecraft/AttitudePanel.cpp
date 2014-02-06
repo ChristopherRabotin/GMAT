@@ -884,19 +884,19 @@ void AttitudePanel::LoadData()
       MessageInterface::ShowMessage("   attitudeModel = '%s'\n", attitudeModel.c_str());
       #endif
       
-      //LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
-      // I think DisplayDataForModel() handles loading also, so commented out (LOJ: 2013.12.18)
-      // if (attitudeModel == "PrecessingSpinner")
-      //    LoadPrecessingSpinnerData();
-      // else if (attitudeModel == "NadirPointing")
-      // {
-      //    LoadNadirPointingData();
-      //    #ifdef DEBUG_ATTITUDE_LOAD
-      //       MessageInterface::ShowMessage("   NadirPointing data loaded\n");
-      //    #endif
-      // }
-      // else if (attitudeModel == "CCSDS-AEM")
-      //    LoadCCSDSAttitudeData();
+//      LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
+//       I think DisplayDataForModel() handles loading also, so commented out (LOJ: 2013.12.18)
+//       if (attitudeModel == "PrecessingSpinner")
+//          LoadPrecessingSpinnerData();
+//       else if (attitudeModel == "NadirPointing")
+//       {
+//          LoadNadirPointingData();
+//          #ifdef DEBUG_ATTITUDE_LOAD
+//             MessageInterface::ShowMessage("   NadirPointing data loaded\n");
+//          #endif
+//       }
+//       else if (attitudeModel == "CCSDS-AEM")
+//          LoadCCSDSAttitudeData();
             
       if (attStateType == "EulerAngles")
       {
@@ -3010,16 +3010,20 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
       bool        success = true;
       std::string strVal, strValX, strValY, strValZ;
       Real        theReal, theX, theY, theZ;
+      bool        xOK = true;
+      bool        yOK = true;
+      bool        zOK = true;
       // Set new spin axis value
       if (spinAxisModified)
       {
          strValX = (spinAxis1TextCtrl->GetValue()).c_str();
          strValY = (spinAxis2TextCtrl->GetValue()).c_str();
          strValZ = (spinAxis3TextCtrl->GetValue()).c_str();
+         xOK = theScPanel->CheckReal(theX, strValX, "BodySpinAxisX", "Real Number");
+         yOK = theScPanel->CheckReal(theY, strValY, "BodySpinAxisY", "Real Number");
+         zOK = theScPanel->CheckReal(theZ, strValZ, "BodySpinAxisZ", "Real Number");
          // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "BodySpinAxisX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "BodySpinAxisY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "BodySpinAxisZ", "Real Number")))
+         if (xOK && yOK && zOK)
          {
             useAttitude->SetRealParameter("BodySpinAxisX", theX);
             useAttitude->SetRealParameter("BodySpinAxisY", theY);
@@ -3036,9 +3040,10 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
          strValY = (nutRefVec2TextCtrl->GetValue()).c_str();
          strValZ = (nutRefVec3TextCtrl->GetValue()).c_str();
          // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "NutationReferenceVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "NutationReferenceVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "NutationReferenceVectorZ", "Real Number")))
+         xOK = theScPanel->CheckReal(theX, strValX, "NutationReferenceVectorX", "Real Number");
+         yOK = theScPanel->CheckReal(theY, strValY, "NutationReferenceVectorY", "Real Number");
+         zOK = theScPanel->CheckReal(theZ, strValZ, "NutationReferenceVectorZ", "Real Number");
+         if (xOK && yOK && zOK)
          {
             useAttitude->SetRealParameter("NutationReferenceVectorX", theX);
             useAttitude->SetRealParameter("NutationReferenceVectorY", theY);
@@ -3180,15 +3185,19 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
       bool        success = true;
       std::string strValX, strValY, strValZ;
       Real        theX, theY, theZ;
+      bool        xOK = true;
+      bool        yOK = true;
+      bool        zOK = true;
       if (bodyAlignVectorModified)
       {
          strValX = (bodyAlignVectorXTextCtrl->GetValue()).c_str();
          strValY = (bodyAlignVectorYTextCtrl->GetValue()).c_str();
          strValZ = (bodyAlignVectorZTextCtrl->GetValue()).c_str();
+         xOK = theScPanel->CheckReal(theX, strValX, "BodyAlignmentVectorX", "Real Number");
+         yOK = theScPanel->CheckReal(theY, strValY, "BodyAlignmentVectorY", "Real Number");
+         zOK = theScPanel->CheckReal(theZ, strValZ, "BodyAlignmentVectorZ", "Real Number");
          // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "BodyAlignmentVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "BodyAlignmentVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "BodyAlignmentVectorZ", "Real Number")))
+         if (xOK && yOK && zOK)
          {
             useAttitude->SetRealParameter("BodyAlignmentVectorX", theX);
             useAttitude->SetRealParameter("BodyAlignmentVectorY", theY);
@@ -3203,10 +3212,11 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
          strValX = (bodyConstraintVectorXTextCtrl->GetValue()).c_str();
          strValY = (bodyConstraintVectorYTextCtrl->GetValue()).c_str();
          strValZ = (bodyConstraintVectorZTextCtrl->GetValue()).c_str();
+         xOK = theScPanel->CheckReal(theX, strValX, "BodyConstraintVectorX", "Real Number");
+         yOK = theScPanel->CheckReal(theY, strValY, "BodyConstraintVectorY", "Real Number");
+         zOK = theScPanel->CheckReal(theZ, strValZ, "BodyConstraintVectorZ", "Real Number");
          // Check if strings are real numbers and convert wxString to Real
-         if ((theScPanel->CheckReal(theX, strValX, "BodyConstraintVectorX", "Real Number")) &&
-             (theScPanel->CheckReal(theY, strValY, "BodyConstraintVectorY", "Real Number")) &&
-             (theScPanel->CheckReal(theZ, strValZ, "BodyConstraintVectorZ", "Real Number")))
+         if (xOK && yOK && zOK)
          {
             useAttitude->SetRealParameter("BodyConstraintVectorX", theX);
             useAttitude->SetRealParameter("BodyConstraintVectorY", theY);

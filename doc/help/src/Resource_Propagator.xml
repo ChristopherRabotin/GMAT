@@ -1109,7 +1109,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
       linkend="Propagator"/></para>
     </refsection>
 
-    <refsection>
+    <refsection xml:id="Propagator_ForceModel_Fields">
       <title>Fields</title>
 
       <informaltable colsep="0" frame="topbot">
@@ -1194,11 +1194,11 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
             </row>
 
             <row>
-              <entry><guilabel>Drag.AtmosphereModel </guilabel></entry>
+              <entry><guilabel>Drag.AtmosphereModel</guilabel></entry>
 
               <entry><para>Specifies the atmosphere model used in the drag
               force. This field is only active if there is a
-              <guilabel>PrimaryBody</guilabel>. </para><variablelist>
+              <guilabel>PrimaryBody</guilabel>.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -1211,11 +1211,16 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>None</guilabel>,
-                      <guilabel>JacchiaRoberts</guilabel>,
-                      <guilabel>MSISE86</guilabel>,
-                      <guilabel>MSISE90</guilabel>, <guilabel>NRLMSISE00.
-                      </guilabel></para>
+                      <para>If <guilabel>PrimaryBody</guilabel> is
+                    <guilabel>Earth</guilabel>: <guilabel>None</guilabel>,
+                    <guilabel>JacchiaRoberts</guilabel>,
+                    <guilabel>MSISE86</guilabel>, <guilabel>MSISE90</guilabel>
+                    (with plugin), <guilabel>NRLMSISE00</guilabel> (with
+                    plugin)</para>
+
+                    <para>If <guilabel>PrimaryBody</guilabel> is
+                    <guilabel>Mars</guilabel>: <guilabel>None</guilabel>,
+                    <guilabel>MarsGRAM2005</guilabel> (with plugin)</para>
                     </listitem>
                   </varlistentry>
 
@@ -1231,7 +1236,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para><guilabel>MSISE90</guilabel></para>
+                      <para><guilabel>None</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -1252,6 +1257,69 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                   </varlistentry>
                 </variablelist></entry>
             </row>
+
+            <row>
+            <entry><guilabel>Drag.DensityModel</guilabel></entry>
+
+            <entry><para>Enabled when
+            <guilabel>Drag.AtmosphereModel</guilabel> is
+            <guilabel>MarsGRAM2005</guilabel>. Specifies the Mars-GRAM density
+            model to use. <guilabel>Mean</guilabel> is mean density with any
+            optional wave model perturbations enabled by the input file.
+            <guilabel>High</guilabel> is <guilabel>Mean</guilabel> density
+            plus 1 standard deviation. <guilabel>Low</guilabel> is
+            <guilabel>Mean</guilabel> density minus 1 standard
+            deviation.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>High</guilabel>, <guilabel>Low</guilabel>,
+                    <guilabel>Mean</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>Mean</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
 
             <row>
               <entry><guilabel>Drag.F107</guilabel></entry>
@@ -1367,6 +1435,67 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                   </varlistentry>
                 </variablelist></entry>
             </row>
+
+            <row>
+            <entry><guilabel>Drag.InputFile</guilabel></entry>
+
+            <entry><para>Enabled when
+            <guilabel>Drag.AtmosphereModel</guilabel> is
+            <guilabel>MarsGRAM2005</guilabel>. Path to the Mars-GRAM input
+            namelist file that configures the model. See the <link
+            linkend="Propagator_ForceModel_Remarks_ConfiguringDragModels_MarsGRAM2005">MarsGRAM2005
+            section</link> for details on the individual settings in this file
+            and how they are used by GMAT. Relative paths are relative to the
+            GMAT <filename>bin</filename> directory.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Valid path to a Mars-GRAM input namelist file</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><literal>'../data/atmosphere/MarsGRAM2005/inputstd0.txt'</literal></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
 
             <row>
               <entry><guilabel>Drag.MagneticIndex</guilabel></entry>
@@ -2229,7 +2358,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
       <para>Settings for the<guilabel> ForceModel</guilabel> object.</para>
     </refsection>
 
-    <refsection>
+    <refsection xml:id="Propagator_ForceModel_Remarks">
       <title>Remarks</title>
 
       <para><emphasis>Overview of Primary Body/Central Body and Field
@@ -2401,6 +2530,211 @@ GMAT aForceModel.Drag.MagneticIndex = 4
           </tbody>
         </tgroup>
       </informaltable>
+
+      <para
+    xml:id="Propagator_ForceModel_Remarks_ConfiguringDragModels_MarsGRAM2005"><emphasis>MarsGRAM2005</emphasis></para>
+
+    <para>When <guilabel>PrimaryBody</guilabel> is <guilabel>Mars</guilabel>,
+    you can choose Mars-GRAM 2005 as your atmosphere model. This model is only
+    available when the <filename>libMarsGRAM</filename> plugin is available
+    and enabled in the GMAT startup file.</para>
+
+    <para>When using the <guilabel>MarsGRAM2005</guilabel> atmosphere model,
+    three new fields are available in the script language (but not the
+    GUI):<itemizedlist spacing="compact">
+        <listitem>
+          <para><guilabel>Drag.InputFile</guilabel></para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Drag.DensityModel</guilabel></para>
+        </listitem>
+      </itemizedlist></para>
+
+    <para>See the <link linkend="Propagator_ForceModel_Fields">Fields section</link> for
+    details on these fields.</para>
+
+    <para>In addition, the space weather fields are treated as
+    follows:<itemizedlist spacing="compact">
+        <listitem>
+          <para><guilabel>Drag.F107</guilabel>: value of 10.7 cm solar flux at
+          1 AU, as documented in the <link linkend="Propagator_ForceModel_Fields">Fields
+          section</link></para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Drag.F107A</guilabel>: not used</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Drag.MagneticIndex</guilabel>: not used</para>
+        </listitem>
+      </itemizedlist></para>
+
+    <para>The Mars-GRAM 2005 input file is a text file in FORTRAN NAMELIST
+    format. Most variables in this file are passed directly to the Mars-GRAM
+    model and are used as intended. However, some are replaced internally by
+    GMAT-supplied values. The following table lists those input variables that
+    are handled specially.</para>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="0.5*"/>
+
+        <thead>
+          <row>
+            <entry>Input Variable</entry>
+
+            <entry>GMAT usage</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>(Unlisted)</entry>
+
+            <entry>Passed through to Mars-GRAM 2005 model</entry>
+          </row>
+
+          <row>
+            <entry><literal>DATADIR</literal></entry>
+
+            <entry>Always
+            <literal>'../data/atmosphere/MarsGRAM2005/binFiles'</literal></entry>
+          </row>
+
+          <row>
+            <entry><literal>GCMDIR</literal></entry>
+
+            <entry>Always
+            <literal>'../data/atmosphere/MarsGRAM2005/binFiles'</literal></entry>
+          </row>
+
+          <row>
+            <entry><literal>IERT</literal></entry>
+
+            <entry>Always 1 (Earth-receive time)</entry>
+          </row>
+
+          <row>
+            <entry><literal>IUTC</literal></entry>
+
+            <entry>Always 0 (TT time)</entry>
+          </row>
+
+          <row>
+            <entry><literal>MONTH</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>MDAY</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>MYEAR</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>NPOS</literal></entry>
+
+            <entry>Always 1</entry>
+          </row>
+
+          <row>
+            <entry><literal>IHR</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>IMIN</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>ISEC</literal></entry>
+
+            <entry>Replaced by current propagation epoch</entry>
+          </row>
+
+          <row>
+            <entry><literal>LonEW</literal></entry>
+
+            <entry>Always 1 (positive East)</entry>
+          </row>
+
+          <row>
+            <entry><literal>F107</literal></entry>
+
+            <entry>Replaced by value of <guilabel>Drag.F107</guilabel></entry>
+          </row>
+
+          <row>
+            <entry><literal>FLAT</literal></entry>
+
+            <entry>Replaced by current propagation state</entry>
+          </row>
+
+          <row>
+            <entry><literal>FLON</literal></entry>
+
+            <entry>Replaced by current propagation state</entry>
+          </row>
+
+          <row>
+            <entry><literal>FHGT</literal></entry>
+
+            <entry>Replaced by current propagation state</entry>
+          </row>
+
+          <row>
+            <entry><literal>MOLAhgts</literal></entry>
+
+            <entry>Always 0 (reference ellipsoid)</entry>
+          </row>
+
+          <row>
+            <entry><literal>iup</literal></entry>
+
+            <entry>Always 0 (no output)</entry>
+          </row>
+
+          <row>
+            <entry><literal>ipclat</literal></entry>
+
+            <entry>Always 0 (planetographic input)</entry>
+          </row>
+
+          <row>
+            <entry><literal>requa</literal></entry>
+
+            <entry>Replaced by value of
+            <guilabel>Mars.EquatorialRadius</guilabel></entry>
+          </row>
+
+          <row>
+            <entry><literal>rpole</literal></entry>
+
+            <entry>Replaced by GMAT's value of Mars polar radius (calculated
+            from <guilabel>Mars.EquatorialRadius</guilabel> and
+            <guilabel>Mars.Flattening</guilabel>)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>The input file is read by the Mars-GRAM 2005 model code, which has
+    limited error checking. If the input file or data files are incorrect or
+    missing, GMAT may exhibit unintended behavior. Note that local winds
+    returned by the Mars-GRAM 2005 model are not included in GMAT's drag
+    model.</para>
 
       <para><emphasis>Configuring an SRP Model</emphasis></para>
 

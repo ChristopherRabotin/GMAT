@@ -33,16 +33,15 @@
 #include "KeplerianParameters.hpp"
 #include "SphericalParameters.hpp"
 #include "EquinoctialParameters.hpp"
-// Modified by M.H.
 #include "ModEquinoctialParameters.hpp"
+#include "AlternateEquinoctialParameters.hpp"
 #include "DelaunayParameters.hpp"
 #include "PlanetodeticParameters.hpp"
-// Modified by YK
 #include "IncomingAsymptoteParameters.hpp"
 #include "OutgoingAsymptoteParameters.hpp"
 #include "BrouwerMeanShortParameters.hpp"
 #include "BrouwerMeanLongParameters.hpp"
-//
+
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 #include "EnvParameters.hpp"
@@ -201,9 +200,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    
    // ModifiedEquinoctial parameters; Modified by M.H.
    // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173)
+   // It will create SemilatusRectum Parameter due to issues (2014.01.28)
    //if (ofType == "SemiLatusRectum")
-   if (ofType == "SemilatusRectum")
-      return new ModEquinP(withName);
+   //   return new ModEquinP(withName);
    if (ofType == "ModEquinoctialF")
       return new ModEquinF(withName);
    if (ofType == "ModEquinoctialG")
@@ -216,7 +215,15 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ModEquinTLONG(withName);
    if (ofType == "ModifiedEquinoctial")
       return new ModEquinState(withName);
-
+   
+   // Alternate Equinoctial parameters by HYKim
+   if (ofType == "AltEquinoctialP")
+      return new AltEquinP(withName);
+   if (ofType == "AltEquinoctialQ")
+      return new AltEquinQ(withName);
+   if (ofType == "AltEquinoctial")
+      return new AltEquinState(withName);
+   
    // Delaunay parameters; Modified by M.H.
    if (ofType == "Delaunayl")
       return new Delal(withName);
@@ -318,8 +325,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    // Angular parameters
    // Changed to create ModEquinP() since it is settable Parameter
    // Fix for GMT-4173 (LOJ: 2014.01.22)
-   //if (ofType == "SemilatusRectum")
-   //   return new SemilatusRectum(withName);
+   // Changed back to create SemilatusRectum due to issues (LOJ: 2014.01.28)
+   if (ofType == "SemilatusRectum")
+      return new SemilatusRectum(withName);
    if (ofType == "HMAG")
       return new AngularMomentumMag(withName);
    if (ofType == "HX")
@@ -587,7 +595,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ModEquinoctialK");
       creatables.push_back("TLONG");
       creatables.push_back("ModEquinoctial");
-
+      
+      // Alternate Equinoctial parameters by HYKim
+      creatables.push_back("AltEquinoctialP");
+      creatables.push_back("AltEquinoctialQ");
+      
       // Delaunay parameters ; Modified by M.H.
       creatables.push_back("Delaunayl");
       creatables.push_back("Delaunayg");

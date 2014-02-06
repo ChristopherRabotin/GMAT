@@ -319,7 +319,10 @@ void UnpackDateWithDOY (Real packedDate, Integer& year, Integer& day)
    remainder = Mod (packedDate, 1000.0);
    day = (Integer)(GmatMathUtil::Floor(remainder + 0.5));
 
-   if ( day < 0 || day > 366)
+   Integer daysInYear = 365;
+   if (IsLeapYear(year))  daysInYear = 366;
+
+   if ( day < 0 || day > daysInYear)
       throw Date::TimeRangeError();
 }
 
@@ -367,10 +370,14 @@ void ToMonthDayFromYearDOY (Integer year, Integer dayOfYear, Integer& month,
    Integer i;
    const Integer *ptrDaysList;
 
-   if ( dayOfYear < 0 || dayOfYear > 366 )
+   bool isLeap            = IsLeapYear(year);
+   Integer daysInYear     = 365;
+   if (isLeap) daysInYear = 366;
+
+   if ( dayOfYear < 0 || dayOfYear > daysInYear )
       throw Date::TimeRangeError();
 
-   if (IsLeapYear(year))
+   if (isLeap)
       ptrDaysList = GmatTimeConstants::LEAP_YEAR_DAYS_BEFORE_MONTH;
    else
       ptrDaysList = GmatTimeConstants::DAYS_BEFORE_MONTH;

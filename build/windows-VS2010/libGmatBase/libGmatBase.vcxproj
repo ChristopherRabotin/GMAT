@@ -381,6 +381,7 @@
     <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AngularParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Array.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ArrayElementWrapper.cpp" />
@@ -558,6 +559,7 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp" />
@@ -799,6 +801,7 @@
     <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AngularParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Array.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ArrayElementWrapper.hpp" />
@@ -989,6 +992,7 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp" />
