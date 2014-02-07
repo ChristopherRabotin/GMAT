@@ -408,6 +408,9 @@ bool Formation::IsParameterReadOnly(const Integer id) const
        (id <= FORMATION_CARTESIAN_STATE + dimension))
       return true;
 
+   if (id == ORBIT_COLOR || id == TARGET_COLOR)
+      return true;
+   
    return FormationInterface::IsParameterReadOnly(id);
 }
 
