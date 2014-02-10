@@ -74,6 +74,7 @@
 //#define DEBUG_GEN_STRING
 //#define DEBUG_SC_ATTITUDE_DATA
 //#define DEBUG_MULTIMAP
+//#define DEBUG_SPAD_DATA
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -1095,13 +1096,25 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
       spadBFCS  = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", this,
                                     NULL, NULL, GetJ2000Body(), solarSystem);
    }
-   // Convert the sun vector to the spacecraft body frame
-   Rvector6 sunBody;
+   #ifdef DEBUG_SPAD_DATA
+      MessageInterface::ShowMessage(" -------> in SC, input to GetSPADSRPArea sun-to-sat  = %12.10f  %12.10f  %12.10f\n",
+         sunVector[0], sunVector[1], sunVector[2]);
+   #endif
+   // Convert the sun-to-sat input vector to sat-to-sun
+   Rvector6 sunBody, resI;
    Rvector6 sunSC(-sunVector[0], -sunVector[1], -sunVector[2], 0.0, 0.0, 0.0);
-   coordConverter.Convert(ep, sunSC, internalCoordSystem, sunBody,
-      spadBFCS);
+   // Convert the sat-to-sun vector to the body frame
+   coordConverter.Convert(ep, sunSC, internalCoordSystem, sunBody, spadBFCS, true, true);
    Rvector3 sunBody3(sunBody[0], sunBody[1], sunBody[2]);
-   Rvector3 result = spadSRPScaleFactor * spadSRPReader->GetSRPArea(sunBody3);
+   #ifdef DEBUG_SPAD_DATA
+      MessageInterface::ShowMessage(" -------> in SC, after conversion to BFCS, sat-to-sun-in-body = %12.10f  %12.10f  %12.10f\n",
+            sunBody3[0], sunBody3[1], sunBody3[2]);
+   #endif
+   Rvector3 result1 = spadSRPScaleFactor * spadSRPReader->GetSRPArea(sunBody3);
+   Rvector6 res6(result1[0], result1[1], result1[2], 0.0,0.0,0.0);
+   // Convert the result back to inertial
+   coordConverter.Convert(ep, res6, spadBFCS, resI, internalCoordSystem, true, true);
+   Rvector3 result(resI[0], resI[1], resI[2]);
 
    return result;
 }
