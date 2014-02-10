@@ -602,6 +602,24 @@ Rvector6 OrbitData::GetModEquinState()
    return modEquinState;
 }
 
+// AlternateEquinoctial by HYKim
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetAltEquinState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetAltEquinState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+      
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 altEquinState =
+      StateConversionUtil::Convert(state, "Cartesian", "AlternateEquinoctial",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   return altEquinState;
+}
+
 // Modified by M.H.
 //------------------------------------------------------------------------------
 // Rvector6 OrbitData::GetDelaState()
@@ -1245,6 +1263,60 @@ Real OrbitData::GetModEquinReal(Integer item)
                                GmatRealUtil::ToString(item));
    }
 }
+
+// AlternateEquinoctial by HYKim
+//------------------------------------------------------------------------------
+// Real GetAltEquinReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Alternate Equinoctial element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetAltEquinReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetAltEquinReal() item=%d\n", item);
+   #endif
+   
+   Rvector6 state = GetCartState();
+   
+   if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
+      throw ParameterException
+         ("*** Error *** Cannot convert from Cartesian to Alternate Equinoctial "
+          "because position vector is a zero vector.");
+   
+   switch (item)
+   {
+   case ALT_EQ_P:
+   {
+      Rvector6 altequiState = GetAltEquinState();
+      // I think the index should be 3 (LOJ: 2014.01.29)
+      //return altequiState[1];
+      return altequiState[3];
+   }
+   case ALT_EQ_Q:
+   {
+      Rvector6 altequiState = GetAltEquinState();
+      // I think the index should be 4 (LOJ: 2014.01.29)
+      //return altequiState[2];
+      return altequiState[4];
+   }
+   
+   default:
+      throw ParameterException("OrbitData::GetAltEquinReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
 
 // Modified by M.H.
 //------------------------------------------------------------------------------
@@ -2598,7 +2670,15 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    case MOD_EQ_TLONG:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TLONG"), rval);
       break;
-
+      
+   // Alternate Equinoctial by HYKim
+   case ALT_EQ_P:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AltEquinoctialP"), rval);
+      break;
+   case ALT_EQ_Q:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AltEquinoctialQ"), rval);
+      break;
+      
    // Delaunay;Modified by M.H.
    case DEL_DELA_SL:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayl"), rval);

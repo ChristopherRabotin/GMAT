@@ -31,6 +31,7 @@
 #include <cmath>
 
 // Uncomment to generate drag model data for debugging:
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZE
 //#define DEBUG_DRAGFORCE_DENSITY
 //#define DEBUG_DRAGFORCE_PARAM
@@ -80,7 +81,6 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
    "FixedCoordinateSystem",         // FIXED_COORD_SYSTEM  (Read-only parameter)
    "AngularMomentumUpdateInterval", // W_UPDATE_INTERVAL (in days, Read-only)
    "KpToApMethod",                  // KP2AP_METHOD (Read-only)
-   "DensityModel",					// DENSITY_MODEL							// made changes by TUAN NGUYEN	for GMT-4299
 };
 
 const Gmat::ParameterType
@@ -96,7 +96,6 @@ DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
    Gmat::STRING_TYPE,   // "FixedCoordinateSystem"
    Gmat::REAL_TYPE,     // "AngularMomentumUpdateInterval"
    Gmat::INTEGER_TYPE,  // "KpToApMethod"
-   Gmat::STRING_TYPE,	// "DensityModel"										// made changes by TUAN NGUYEN	for GMT-4299
 };
 
 //------------------------------------------------------------------------------
@@ -143,8 +142,12 @@ DragForce::DragForce(const std::string &name) :
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (0),
-   densityModel            ("Mean")								// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel            (""),									// made changes by TUAN NGUYEN	for GMT-4299
+   inputFile               ("")										// made changes by TUAN NGUYEN	for GMT-4299
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DragForce default construction <'%s',%p>\n", GetName().c_str(), this);
+#endif
    dimension = 6;
    parameterCount = DragForceParamCount;
    objectTypeNames.push_back("DragForce");
@@ -278,8 +281,12 @@ DragForce::DragForce(const DragForce& df) :
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (df.kpApConversion),
-   densityModel            (df.densityModel)							// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel            (df.densityModel),							// made changes by TUAN NGUYEN	for GMT-4299
+   inputFile               (df.inputFile)								// made changes by TUAN NGUYEN	for GMT-4299
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
+#endif
    internalAtmos = NULL;
    if (df.internalAtmos)
    {
@@ -313,6 +320,34 @@ DragForce::DragForce(const DragForce& df) :
    area.clear();
    mass.clear();
    dragCoeff.clear();
+
+   if (internalAtmos != NULL)													// made changes by TUAN NGUYEN	for GMT-4299
+   {																			// made changes by TUAN NGUYEN	for GMT-4299
+	   try																		// made changes by TUAN NGUYEN	for GMT-4299
+	   {																		// made changes by TUAN NGUYEN	for GMT-4299
+	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes by TUAN NGUYEN	for GMT-4299
+		  inputFile    = internalAtmos->GetStringParameter("InputFile");		// made changes by TUAN NGUYEN	for GMT-4299
+	   }																		// made changes by TUAN NGUYEN	for GMT-4299
+	   catch(...){};															// made changes by TUAN NGUYEN	for GMT-4299
+   }																			// made changes by TUAN NGUYEN	for GMT-4299
+   
+#ifdef DEBUG_CONSTRUCTION
+   if (df.atmos == NULL)
+	   MessageInterface::ShowMessage("$$$ df.atmos = NULL\n");
+   else
+      MessageInterface::ShowMessage("$$$   df.atmos = <'%s',%p>\n", df.atmos->GetName().c_str(), df.atmos);
+
+   if (df.internalAtmos == NULL)
+	   MessageInterface::ShowMessage("$$$ df.internalAtmos = NULL\n");
+   else
+   {
+	   MessageInterface::ShowMessage("$$$   df.internalAtmos = <'%s',%p>  df.internalAtmos.densitymodel = %s\n", df.internalAtmos->GetName().c_str(), df.internalAtmos, df.internalAtmos->GetStringParameter("DensityModel").c_str());
+	   MessageInterface::ShowMessage("$$$   internalAtmos = <'%s',%p>  internalAtmos.densitymodel = %s\n", internalAtmos->GetName().c_str(), internalAtmos, internalAtmos->GetStringParameter("DensityModel").c_str());
+   }
+//   MessageInterface::ShowMessage("densityModel = '%s'\n",densityModel.c_str());
+//   MessageInterface::ShowMessage("inputFile = '%s'\n",inputFile.c_str());
+   MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   exit\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
+#endif
 }
 
 
@@ -329,6 +364,10 @@ DragForce::DragForce(const DragForce& df) :
 //------------------------------------------------------------------------------
 DragForce& DragForce::operator=(const DragForce& df)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DragForce operator =\n");
+#endif
+
    if (this == &df)
       return *this;
    
@@ -415,6 +454,7 @@ DragForce& DragForce::operator=(const DragForce& df)
    fillCartesian = df.fillCartesian;
 
    densityModel = df.densityModel;							// made changes by TUAN NGUYEN	for GMT-4299
+   inputFile    = df.inputFile;								// made changes by TUAN NGUYEN	for GMT-4299
 
    return *this;
 }
@@ -431,6 +471,10 @@ DragForce& DragForce::operator=(const DragForce& df)
 //------------------------------------------------------------------------------
 GmatBase* DragForce::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DragForce::Clone()\n");
+#endif
+
    return (new DragForce(*this));
 }
 
@@ -640,7 +684,9 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
 bool DragForce::Initialize()
 {
 #ifdef DEBUG_INITIALIZE
-	MessageInterface::ShowMessage("Start DragForce::Initialze():  drag force <%p,'%s'>\n", this, GetName().c_str());
+	MessageInterface::ShowMessage("Start DragForce::Initialize():  drag force <'%s',%p>\n", GetName().c_str(), this);
+//	MessageInterface::ShowMessage("   densityModel = '%s'\n", densityModel.c_str());
+//	MessageInterface::ShowMessage("   inputFile    = '%s'\n", inputFile.c_str());
 #endif
 
    #ifdef DEBUG_DRAGFORCE_DENSITY
@@ -786,6 +832,13 @@ bool DragForce::Initialize()
          
          if (atmos)
          {
+            // Verify DragForce's central body is the same as atmosphere's central body 
+            if (body == NULL)
+               throw ODEModelException("No central body is defined for DragForce\n");
+
+            if (body->GetName() != atmos->GetCentralBodyName())
+				throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
+
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
             atmos->SetCentralBody(centralBody);
@@ -816,10 +869,11 @@ bool DragForce::Initialize()
                atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
 			try
 			{
+//				MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
 			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes by TUAN NGUYEN		for GMT-4299
-			} catch (...)
-			{
-			}
+			   atmos->SetStringParameter("InputFile", inputFile);		// made changes by TUAN NGUYEN		for GMT-4299
+			} catch (...){}
+
 			atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
          }
          else
@@ -842,7 +896,10 @@ bool DragForce::Initialize()
    #endif
 
 #ifdef DEBUG_INITIALIZE
-	MessageInterface::ShowMessage("End DragForce::Initialze():  drag force <%p,'%s'>\n", this, GetName().c_str());
+	MessageInterface::ShowMessage("******* Script for <%s,%p>:\n%s\n", GetName().c_str(), this, GetGeneratingString().c_str());
+	MessageInterface::ShowMessage("   densityModel = '%s'\n", densityModel.c_str());
+	MessageInterface::ShowMessage("   inputFile    = '%s'\n", inputFile.c_str());
+	MessageInterface::ShowMessage("End DragForce::Initialize():  drag force <%p,'%s'>\n\n", this, GetName().c_str());
 #endif
    
    return retval;
@@ -1600,9 +1657,6 @@ std::string DragForce::GetStringParameter(const Integer id) const
    if (id == FIXED_COORD_SYSTEM)
       return bodyName + "Fixed";
 
-   if (id == DENSITY_MODEL)								// made changes by TUAN NGUYEN	for GMT-4299
-      return densityModel;								// made changes by TUAN NGUYEN	for GMT-4299
-
    return PhysicalModel::GetStringParameter(id);
 }
 
@@ -1695,14 +1749,6 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   if (id == DENSITY_MODEL)																// made changes by TUAN NGUYEN	for GMT-4299
-   {																					// made changes by TUAN NGUYEN	for GMT-4299
-      if ((value != "High")&&(value != "Low")&&(value != "Mean"))						// made changes by TUAN NGUYEN	for GMT-4299
-         return false;																	// made changes by TUAN NGUYEN	for GMT-4299
-
-	  densityModel = value;																// made changes by TUAN NGUYEN	for GMT-4299
-	  return true;																		// made changes by TUAN NGUYEN	for GMT-4299
-   }																					// made changes by TUAN NGUYEN	for GMT-4299
 
    return PhysicalModel::SetStringParameter(id, value);
 }

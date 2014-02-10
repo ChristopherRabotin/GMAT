@@ -42,7 +42,8 @@
  */
 //------------------------------------------------------------------------------
 SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN)
+   : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN,
+               SEMILATUS_RECTUM, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");

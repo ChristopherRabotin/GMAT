@@ -381,6 +381,7 @@
     <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AngularParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Array.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ArrayElementWrapper.cpp" />
@@ -800,6 +801,7 @@
     <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AngularParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Array.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ArrayElementWrapper.hpp" />

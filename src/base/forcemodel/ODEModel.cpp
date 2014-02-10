@@ -269,6 +269,9 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    j2kBody           (NULL),
    transientCount    (0)
 {
+#ifdef DEBUG_ODEMODEL
+	MessageInterface::ShowMessage("ODEModel default construction <'%s',%p>\n", GetName().c_str(), this);
+#endif
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
    
@@ -364,7 +367,7 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    transientCount             (fdf.transientCount)
 {
    #ifdef DEBUG_ODEMODEL
-   MessageInterface::ShowMessage("ODEModel copy constructor entered\n");
+   MessageInterface::ShowMessage("ODEModel copy constructor (from <'%s',%p> to <'%s',%p>) entered\n", fdf.GetName().c_str(), &fdf, GetName().c_str(), &(*this));
    #endif
    
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
@@ -404,6 +407,10 @@ ODEModel::ODEModel(const ODEModel& fdf) :
           "*newPm = (*pm)->Clone()", this);
       #endif
    }
+
+   #ifdef DEBUG_ODEMODEL
+   MessageInterface::ShowMessage("ODEModel copy constructor (from <'%s',%p> to <'%s',%p>) exit\n\n", fdf.GetName().c_str(), &fdf, GetName().c_str(), &(*this));
+   #endif
 }
 
 
@@ -421,8 +428,8 @@ ODEModel::ODEModel(const ODEModel& fdf) :
 ODEModel& ODEModel::operator=(const ODEModel& fdf)
 {
    #ifdef DEBUG_ODEMODEL
-      MessageInterface::ShowMessage("ODEModel <%p> Assignment Operator "
-            "entered\n", this);
+      MessageInterface::ShowMessage("ODEModel <'%s',%p> Assignment Operator "
+            "entered\n", GetName(), this);
    #endif
 
    if (&fdf == this)
@@ -1448,7 +1455,7 @@ bool ODEModel::CheckQualifier(const std::string &qualifier,
 bool ODEModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("ODEModel::Initialize() entered\n");
+      MessageInterface::ShowMessage("ODEModel::Initialize() (for <'%s',%p>) entered\n", GetName().c_str(), this);
    #endif
 
 //   Integer stateSize = 6;      // Will change if we integrate more variables
@@ -1653,9 +1660,9 @@ bool ODEModel::Initialize()
    // Set flag stating that Initialize was successful once
    forceMembersNotInitialized = false;
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("ODEModel::Initialize() complete\n");
-   #endif
+//   #ifdef DEBUG_INITIALIZATION
+//      MessageInterface::ShowMessage("ODEModel::Initialize() complete\n");
+//   #endif
 
 //   modelState = state->GetState();
 
@@ -1684,6 +1691,10 @@ bool ODEModel::Initialize()
          MessageInterface::ShowMessage("   %s at <%p> named '%s'\n",
                (*current)->GetTypeName().c_str(), *current,
                (*current)->GetName().c_str());
+   #endif
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("ODEModel::Initialize() (for <'%s',%p>) exit\n\n", GetName().c_str(), this);
    #endif
 
    return true;

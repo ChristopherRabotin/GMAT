@@ -72,6 +72,8 @@ public:
    void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetCentralBody(CelestialBody *cb);
+   std::string  GetCentralBodyName();						// made changes by TUAN NGUYEN
+
    void         SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetCbJ2000CoordinateSystem(CoordinateSystem *cs);

@@ -1202,3 +1202,9 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
 
    return geoHeight;
 }
+
+
+std::string AtmosphereModel::GetCentralBodyName()
+{
+   return centralBody;
+}
