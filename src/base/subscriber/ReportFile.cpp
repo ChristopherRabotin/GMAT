@@ -562,6 +562,10 @@ bool ReportFile::Initialize()
        active, isInitialized, mNumParams, usedByReport, filename.c_str());
    #endif
    
+   // delete old file on initialization
+   if (GmatFileUtil::DoesFileExist(GetPathAndFileName()))
+	   DeleteFile(GetPathAndFileName().c_str());
+
    // Check if there are parameters selected for report
    if (active)
    {
