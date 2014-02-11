@@ -2741,6 +2741,14 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id == SPAD_SRP_SCALE_FACTOR)
    {
+      if (value < (-GmatRealConstants::REAL_EPSILON))
+      {
+         SpaceObjectException soe("");
+         soe.SetDetails(errorMessageFormat.c_str(),
+                        GmatStringUtil::ToString(value, 16).c_str(),
+                        "SPADSRPScaleFactor", "Real Number >= 0.0");
+         throw soe;
+      }
       spadSRPScaleFactor = value;
       return spadSRPScaleFactor;
    }
