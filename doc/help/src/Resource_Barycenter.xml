@@ -144,8 +144,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color
-                    selectbox</para>
+                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -208,8 +207,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Target Color
-                    selectbox</para>
+                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 

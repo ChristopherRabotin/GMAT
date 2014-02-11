@@ -119,7 +119,13 @@ bool PrecessingSpinner::Initialize()
 {
    if (!Kinematic::Initialize()) return false;
 
-   // check the norm of two vectors
+   // Cannot check bodySpinAxis or nutationReferenceVector values here,
+   // as Initialize is called on Attitude when getting any data value,
+   // including when the SpacecraftPanel is brought up; this happens before
+   // the reference body pointer has been set on the Attitude, so an error
+   // message here would be generated each time the panel is opened.
+   // We can wait until the attitude is computed to do this check.
+
 
    return true;
 }
@@ -154,6 +160,15 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    Real bsMag = bodySpinAxis.GetMagnitude();
    Real nrMag = nutationReferenceVector.GetMagnitude();
 
+   #ifdef DEBUG_PRECESSING_SPINNER
+      MessageInterface::ShowMessage(
+      "Entering PrecessingSpinner::BodySpinAxis = [ %.10f %.10f %.10f]\n",
+      bodySpinAxis(0), bodySpinAxis(1), bodySpinAxis(2));
+
+      MessageInterface::ShowMessage("NutationReferenceVector = [ %.10f %.10f %.10f]\n",
+            nutationReferenceVector(0), nutationReferenceVector(1), nutationReferenceVector(2));
+    #endif
+
    // Error message and vector normalization
    if ( bsMag < 1.0e-5 )
    {
@@ -177,19 +192,20 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 
    #ifdef DEBUG_PRECESSING_SPINNER
       MessageInterface::ShowMessage(
-      "Entering PrecessingSpinner::BodySpinAxis = [ %.3f %.3f %.3f]\n",
-      BodySpinAxisNormalized(0), BodySpinAxisNormalized(1), BodySpinAxisNormalized(2));
+      "Entering PrecessingSpinner::BodySpinAxis = [ %.10f %.10f %.10f]\n",
+      bodySpinAxisNormalized(0), bodySpinAxisNormalized(1), bodySpinAxisNormalized(2));
 
-      MessageInterface::ShowMessage("NutationReferenceVector = [ %.3f %.3f %.3f]\n",
-      NutationReferenceVectorNormalized(0), NutationReferenceVectorNormalized(1), NutationReferenceVectorNormalized(2));
+      MessageInterface::ShowMessage("NutationReferenceVector = [ %.10f %.10f %.10f]\n",
+            nutationReferenceVectorNormalized(0), nutationReferenceVectorNormalized(1),
+            nutationReferenceVectorNormalized(2));
 
-      MessageInterface::ShowMessage("InitialPrecessionAngle = %.3f , PrecessionRate = %.3f\n",
-         InitialPrecessionAngle*GmatMathConstants::DEG_PER_RAD, PrecessionRate*GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("InitialPrecessionAngle = %.10f , PrecessionRate = %.10f\n",
+         initialPrecessionAngle*GmatMathConstants::DEG_PER_RAD, precessionRate*GmatMathConstants::DEG_PER_RAD);
 
-      MessageInterface::ShowMessage("NutationAngle = %.3f\n" , NutationAngle*GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("NutationAngle = %.10f\n" , nutationAngle*GmatMathConstants::DEG_PER_RAD);
 
-      MessageInterface::ShowMessage("InitialSpinAngle = %.3f , SpinRate = %.3f\n",
-         InitialSpinAngle*GmatMathConstants::DEG_PER_RAD, SpinRate*GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("InitialSpinAngle = %.10f , SpinRate = %.10f\n",
+         initialSpinAngle*GmatMathConstants::DEG_PER_RAD, spinRate*GmatMathConstants::DEG_PER_RAD);
    #endif
 
    // Calculate RBIt, where t = atTime

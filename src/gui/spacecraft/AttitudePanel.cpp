@@ -3025,9 +3025,8 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
          // Check if strings are real numbers and convert wxString to Real
          if (xOK && yOK && zOK)
          {
-            useAttitude->SetRealParameter("BodySpinAxisX", theX);
-            useAttitude->SetRealParameter("BodySpinAxisY", theY);
-            useAttitude->SetRealParameter("BodySpinAxisZ", theZ);
+            Rvector bsa(3,theX, theY, theZ);
+            useAttitude->SetRvectorParameter("BodySpinAxis", bsa);
             spinAxisModified       = false;
          }
          else
@@ -3045,9 +3044,8 @@ void AttitudePanel::SavePrecessingSpinnerData(Attitude *useAttitude)
          zOK = theScPanel->CheckReal(theZ, strValZ, "NutationReferenceVectorZ", "Real Number");
          if (xOK && yOK && zOK)
          {
-            useAttitude->SetRealParameter("NutationReferenceVectorX", theX);
-            useAttitude->SetRealParameter("NutationReferenceVectorY", theY);
-            useAttitude->SetRealParameter("NutationReferenceVectorZ", theZ);
+            Rvector nrf(3,theX, theY, theZ);
+            useAttitude->SetRvectorParameter("NutationReferenceVector", nrf);
             nutRefVecModified      = false;
          }
          else
