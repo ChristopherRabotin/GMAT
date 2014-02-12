@@ -4051,7 +4051,7 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 { 
 	
 	Real	 mu_Earth= 398600.4418;
-	if (abs(mu - mu_Earth) > 1.0)
+	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
