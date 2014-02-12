@@ -21,6 +21,9 @@
  */
 //------------------------------------------------------------------------------
 
+#include <stdio.h>
+#include <iomanip>
+#include <sstream>
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"           // for Instance()
@@ -29,8 +32,6 @@
 #include "StringUtil.hpp"          // for GetArrayName()
 #include "FileUtil.hpp"            // for GmatFileUtil::
 #include "RealUtilities.hpp"
-#include <iomanip>
-#include <sstream>
 
 //#define DEBUG_REPORTFILE_OPEN
 //#define DEBUG_REPORTFILE_SET
@@ -564,7 +565,7 @@ bool ReportFile::Initialize()
    
    // delete old file on initialization
    if (GmatFileUtil::DoesFileExist(GetPathAndFileName()))
-	   DeleteFile(GetPathAndFileName().c_str());
+	   remove(GetPathAndFileName().c_str());
 
    // Check if there are parameters selected for report
    if (active)
