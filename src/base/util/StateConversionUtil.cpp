@@ -263,13 +263,13 @@ Rvector6 StateConversionUtil::Convert(const Rvector6 &state,
       else if (fromType == "Planetodetic")
          outState = ConvertFromPlanetodetic(toType, state, mu, anomalyType, flattening, eqRadius);
       else if (fromType == "OutgoingAsymptote")
-         outState = ConvertFromPlanetodetic(toType, state, mu, anomalyType, flattening, eqRadius);
+         outState = ConvertFromOutgoingAsymptote(toType, state, mu, anomalyType, flattening, eqRadius);
       else if (fromType == "IncomingAsymptote")
-         outState = ConvertFromPlanetodetic(toType, state, mu, anomalyType, flattening, eqRadius);
+         outState = ConvertFromIncomingAsymptote(toType, state, mu, anomalyType, flattening, eqRadius);
       else if (fromType == "BrouwerMeanShort")
-         outState = ConvertFromPlanetodetic(toType, state, mu, anomalyType, flattening, eqRadius);
+         outState = ConvertFromBrouwerMeanShort(toType, state, mu, anomalyType, flattening, eqRadius);
       else if (fromType == "BrouwerMeanLong")
-         outState = ConvertFromPlanetodetic(toType, state, mu, anomalyType, flattening, eqRadius);
+         outState = ConvertFromBrouwerMeanLong(toType, state, mu, anomalyType, flattening, eqRadius);
       else
       {
          throw UtilityException
