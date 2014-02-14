@@ -834,6 +834,15 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             #ifdef DEBUG_SPAD_DATA
             MessageInterface::ShowMessage(" --- now using spad data for %s\n",
                   scObjs.at(i)->GetName().c_str());
+            MessageInterface::ShowMessage("   nominalSun     = %12.10f\n", nominalSun);
+            MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+            MessageInterface::ShowMessage("   state          = %12.10f  %12.10f  %12.10f\n",
+                  state[i6], state[i6+1], state[i6+2]);
+            MessageInterface::ShowMessage("   cbSunVector    = %12.10f  %12.10f  %12.10f\n",
+                  cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+            MessageInterface::ShowMessage("   sunSat    = %12.10f  %12.10f  %12.10f\n",
+                  sunSat[0], sunSat[1], sunSat[2]);
+            MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
             MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
             MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
             MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
@@ -862,7 +871,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             else  // SPADFile
             {
                #ifdef DEBUG_SPAD_DATA
-                  MessageInterface::ShowMessage("in SRP, using SPAD file and mag = %12.10f \n", mag);
+                  MessageInterface::ShowMessage("in SRP, using SPAD file and mag = %12.15f \n", mag);
                #endif
                if (!scObjs.at(i)->IsOfType("Spacecraft"))
                {
@@ -875,7 +884,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);  // need to modify for performance?
                spadArea = ((Spacecraft*) scObjs.at(i))->GetSPADSRPArea(ep, sunSC);
                #ifdef DEBUG_SPAD_DATA
-                  MessageInterface::ShowMessage("in SRP, SPAD area from file = %12.10f  %12.10f  %12.10f\n",
+                  MessageInterface::ShowMessage("in SRP, SPAD area from spacecraft (which calls filereader) = %12.10f  %12.10f  %12.10f\n",
                         spadArea[0],spadArea[1],spadArea[2]);
                #endif
                if (order == 1)
@@ -1241,8 +1250,28 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
          // Montenbruck and Gill, eq. 3.75
          mag = percentSun * fluxPressure * distancefactor /
                              mass;
+         #ifdef DEBUG_SPAD_DATA
+         MessageInterface::ShowMessage(" --- now using spad data (per SC) for %s\n",
+               sc->GetName().c_str());
+         MessageInterface::ShowMessage("   nominalSun     = %12.10f\n", nominalSun);
+         MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+         MessageInterface::ShowMessage("   state          = %12.10f  %12.10f  %12.10f\n",
+               state[0], state[1], state[2]);
+         MessageInterface::ShowMessage("   cbSunVector    = %12.10f  %12.10f  %12.10f\n",
+                cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+         MessageInterface::ShowMessage("   sunSat    = %12.10f  %12.10f  %12.10f\n",
+               sunSat[0], sunSat[1], sunSat[2]);
+         MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
+         MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
+         MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
+         MessageInterface::ShowMessage("   mass           = %12.10f\n", mass);
+         #endif
          Rvector3 sunSC(sunSat[0],sunSat[1],sunSat[2]);
          spadArea = sc->GetSPADSRPArea(ep,sunSC);
+         #ifdef DEBUG_SPAD_DATA
+            MessageInterface::ShowMessage("in SRP, SPAD area (per SC) from file = %12.10f  %12.10f  %12.10f\n",
+                  spadArea[0],spadArea[1],spadArea[2]);
+         #endif
          dv[0] = dv[1] = dv[2] = 0.0;
          dv[3] = mag * spadArea[0];
          dv[4] = mag * spadArea[1];

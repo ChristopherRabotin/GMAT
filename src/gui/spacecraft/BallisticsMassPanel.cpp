@@ -210,7 +210,7 @@ void BallisticsMassPanel::Create()
                             wxDefaultPosition, wxDefaultSize, 0 );
     spadFlexSizer->Add( srpScaleFactorStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
-    spadSrpScaleFactorTextCtrl = new wxTextCtrl( this, ID_SPAD_TEXTCTRL, wxT(""),
+    spadSrpScaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
                             wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
     spadSrpScaleFactorTextCtrl->SetToolTip(pConfig->Read(_T("SPADSRPScaleFactorHint")));
     spadFlexSizer->Add( spadSrpScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
@@ -469,6 +469,7 @@ void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
    if (dryMassTextCtrl->IsModified()       || dragCoeffTextCtrl->IsModified()   ||
        dragAreaTextCtrl->IsModified()      || srpAreaTextCtrl->IsModified()     ||
+       spadSrpScaleFactorTextCtrl->IsModified()                                 ||
        reflectCoeffTextCtrl->IsModified())
    {
       dataChanged = true;

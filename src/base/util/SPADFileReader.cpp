@@ -90,6 +90,7 @@ SPADFileReader::SPADFileReader(const SPADFileReader &copy) :
       Rvector3 xyz = copy.spadData.at(ii)->force;
       AddDataRecord(az, el, xyz);
    }
+
    spadMotion.clear();
    for (unsigned int ii = 0; ii < copy.spadMotion.size(); ii++)
    {
@@ -295,6 +296,7 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
    Rvector3 lowHigh  = GetForceAt(azLow,  elHigh);
    Rvector3 highLow  = GetForceAt(azHigh, elLow);
    Rvector3 highHigh = GetForceAt(azHigh, elHigh);
+
    #ifdef DEBUG_SPAD_FILE_AREA
       MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, az = %12.10f,  el = %12.10f\n",
             azimuth, elevation);
@@ -867,13 +869,14 @@ void SPADFileReader::ValidateData()
    // Check data for extremes of ranges
    for (unsigned int ii = 0; ii < spadData.size(); ii++)
    {
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->azimuth, -180.0))
+      SPADDataRecord *sData = spadData.at(ii);
+      if (GmatMathUtil::IsEqual(sData->azimuth, -180.0))
          lowAzFound  = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->azimuth, 180.0))
+      if (GmatMathUtil::IsEqual(sData->azimuth, 180.0))
          highAzFound = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->elevation, -90.0))
+      if (GmatMathUtil::IsEqual(sData->elevation, -90.0))
          lowElFound  = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->elevation, 90.0))
+      if (GmatMathUtil::IsEqual(sData->elevation, 90.0))
          highElFound = true;
    }
    if (!lowAzFound || !highAzFound)

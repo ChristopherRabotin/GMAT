@@ -30,45 +30,44 @@
     <title>Description</title>
 
     <para>GMAT lets you assign different colors to orbital trajectory segments
-    that are drawn by <guilabel>Spacecraft</guilabel>, spacecrafts in
-    <guilabel>Formation</guilabel>, <guilabel>CelestialBody</guilabel>,
-    <guilabel>LibrationPoint</guilabel> and <guilabel>Barycenter</guilabel>
-    resources. You can also assign unique colors to
-    <guilabel>Spacecraft</guilabel> orbital trajectory segments by setting
-    colors through the <guilabel>Propagate</guilabel> command. The orbital
-    trajectories of these resources are drawn using the
+    that are drawn by <guilabel>Spacecraft</guilabel>,
+    <guilabel>CelestialBody</guilabel>, <guilabel>LibrationPoint</guilabel>
+    and <guilabel>Barycenter</guilabel> resources. You can also assign unique
+    colors to <guilabel>Spacecraft</guilabel> orbital trajectory segments by
+    setting colors through the <guilabel>Propagate</guilabel> command. The
+    orbital trajectories of these resources are drawn using the
     <guilabel>OrbitView</guilabel> 3D graphics resource. Additionally, GMAT
     allows you set colors on <guilabel>GroundStation</guilabel> facilities
     that are drawn on a spacecraft’s ground track plot created by
     <guilabel>GroundTrackPlot</guilabel> 2D graphics resource.</para>
 
     <para>In addition to setting colors on orbital trajectory segments of the
-    following six resources and single command:
-    <guilabel>Spacecraft</guilabel>, <guilabel>Formation</guilabel>,
-    <guilabel>CelestialBody</guilabel>, <guilabel>LibrationPoint</guilabel>,
-    <guilabel>Barycenter</guilabel>, <guilabel>GroundStation</guilabel> and
-    <guilabel>Propagate</guilabel>, GMAT also allows you to assign colors to
-    perturbing trajectories that may be drawn by the above six resources.
-    These perturbing trajectories are drawn during iterative processes such as
-    differential correction or optimization. The above six resources and
-    single <guilabel>Propagate</guilabel> command each have a common field
-    called <guilabel>OrbitColor</guilabel>. The
-    <guilabel>OrbitColor</guilabel> field is used to set colors on orbital
-    trajectory segments drawn by these resources and single command.
-    Similarly, these six resources also have a common field called
-    <guilabel>TargetColor</guilabel>. The <guilabel>Propagate</guilabel>
-    command does not have a <guilabel>TargetColor</guilabel> field. The
-    <guilabel>TargetColor</guilabel> field of these six resources can be used
+    following five resources and single command:
+    <guilabel>Spacecraft</guilabel>, <guilabel>CelestialBody</guilabel>,
+    <guilabel>LibrationPoint</guilabel>, <guilabel>Barycenter</guilabel>,
+    <guilabel>GroundStation</guilabel> and <guilabel>Propagate</guilabel>,
+    GMAT also allows you to assign colors to perturbing trajectories that may
+    be drawn by the above five resources. These perturbing trajectories are
+    drawn during iterative processes such as differential correction or
+    optimization. The above five resources and single
+    <guilabel>Propagate</guilabel> command each have a common field called
+    <guilabel>OrbitColor</guilabel>. The <guilabel>OrbitColor</guilabel> field
+    is used to set colors on orbital trajectory segments drawn by these
+    resources and single command. Similarly, these five resources also have a
+    common field called <guilabel>TargetColor</guilabel>. The
+    <guilabel>Propagate</guilabel> command does not have a
+    <guilabel>TargetColor</guilabel> field. The
+    <guilabel>TargetColor</guilabel> field of these five resources can be used
     to set colors on perturbing trajectories that may be drawn during
     iterative processes.</para>
 
-    <para>You can set colors on the above six resources and
+    <para>You can set colors on the above five resources and
     <guilabel>Propagate</guilabel> command either via the GUI or script
-    interface of GMAT. Setting colors on these six resources and single
-    command via the GUI mode is very easy: After opening any of the six
+    interface of GMAT. Setting colors on these five resources and single
+    command via the GUI mode is very easy: After opening any of the five
     resources or <guilabel>Propagate</guilabel> command, you can choose colors
     for <guilabel>OrbitColor</guilabel> field by clicking on any available
-    colors from Orbit Color selectbox. Similarly, for the six resources, you
+    colors from Orbit Color selectbox. Similarly, for the five resources, you
     can select colors for the <guilabel>TargetColor</guilabel> field by
     choosing any available colors from the Target Color selectbox. See the
     <xref linkend="SettingColor_GUI" xrefstyle="select:title"/> section below
@@ -83,13 +82,13 @@
     triplet value. The table below shows a list of 75 colors that are
     available for you to select from. Each row of the table lists an available
     color's ColorName and an equivalent RGB triplet value. Refer to the Fields
-    section of the above six resources and <guilabel>Propagate</guilabel>
+    section of the above five resources and <guilabel>Propagate</guilabel>
     command's Options section to learn more about
     <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
     fields and how to set colors. Also see the <xref
     linkend="SettingColors_Remarks" xrefstyle="select:title"/> section below
     for additional script snippets that show how to assign colors through
-    either ColorName or RGB triplet value input method for the above six
+    either ColorName or RGB triplet value input method for the above five
     resources and single command.</para>
 
     <informaltable colsep="0" frame="topbot">
@@ -561,8 +560,7 @@
     </informaltable>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="SpacecraftVisualizationProperties"/>, <xref
-    linkend="Formation"/>, <xref linkend="CelestialBody"/>, <xref
+    linkend="SpacecraftVisualizationProperties"/>, <xref linkend="CelestialBody"/>, <xref
     linkend="LibrationPoint"/>, <xref linkend="Barycenter"/>, <xref
     linkend="GroundStation"/>, <xref linkend="Propagate"/></para>
   </refsection>
@@ -571,12 +569,12 @@
     <title>GUI</title>
 
     <para>Setting colors on <guilabel>Spacecraft</guilabel>,
-    <guilabel>GroundStation</guilabel>, <guilabel>Formation</guilabel>,
+    <guilabel>GroundStation</guilabel>,
     <guilabel>CelestialBody</guilabel>, <guilabel>LibrationPoint</guilabel>
     and <guilabel>Barycenter</guilabel> resources’
     <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
     fields via GMAT’s GUI mode is very easy. Since the procedure for setting
-    colors on these six resources is the same, hence only one GUI example is
+    colors on these five resources is the same, hence only one GUI example is
     given below using the <guilabel>Spacecraft</guilabel> resource:</para>
 
     <para>After opening the <guilabel>Spacecraft</guilabel> resource, click on
@@ -662,231 +660,281 @@
     <title>Remarks</title>
 
     <refsection>
-      <title>Configuring Orbit and Target Colors on Spacecraft Resource</title>
+      <title>Configuring Orbit and Target Colors on Spacecraft
+      Resource</title>
 
-	  
-<para>You can set unique colors of your choice on orbital trajectories of a <guilabel>Spacecraft</guilabel> by assigning colors
- to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field. As long as you do not reset or reassign orbit color on the
- <guilabel>Propagate</guilabel> command, then all spacecraft trajectory colors that GMAT draws will be the same color that
- you first set on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field. The default color on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
- field is set to red.  With this default setting of red color to <guilabel>OrbitColor</guilabel> field, all <guilabel>Spacecraft</guilabel> trajectories
- will be drawn in red color as long as you do not reset orbit color on any of the <guilabel>Propagate</guilabel> commands. 
- Now for example, if you want all <guilabel>Spacecraft</guilabel> orbital trajectories to be drawn in yellow color alone, 
- the script snippet below demonstrates two acceptable methods of setting yellow color to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field:</para>
-
+      <para>You can set unique colors of your choice on orbital trajectories
+      of a <guilabel>Spacecraft</guilabel> by assigning colors to
+      <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
+      field. As long as you do not reset or reassign orbit color on the
+      <guilabel>Propagate</guilabel> command, then all spacecraft trajectory
+      colors that GMAT draws will be the same color that you first set on
+      <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
+      field. The default color on <guilabel>Spacecraft</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field is set to red. With this default
+      setting of red color to <guilabel>OrbitColor</guilabel> field, all
+      <guilabel>Spacecraft</guilabel> trajectories will be drawn in red color
+      as long as you do not reset orbit color on any of the
+      <guilabel>Propagate</guilabel> commands. Now for example, if you want
+      all <guilabel>Spacecraft</guilabel> orbital trajectories to be drawn in
+      yellow color alone, the script snippet below demonstrates two acceptable
+      methods of setting yellow color to <guilabel>Spacecraft</guilabel>
+      object’s <guilabel>OrbitColor</guilabel> field:</para>
 
       <programlisting><code>Create Spacecraft aSat
 aSat.OrbitColor = Yellow       % ColorName method
 % or
 aSat.OrbitColor = [255 255 0]  % RGB triplet value method</code></programlisting>
 
-<para>Similarly, setting colors of your choice on spacecraft’s perturbing trajectories that may be 
-drawn during iterative processes such as differential correction or optimization can be done
- by assigning unique colors to <guilabel>Spacecraft</guilabel> object’s <guilabel>TargetColor</guilabel> field. Setting colors on the 
- <guilabel>TargetColor</guilabel> field is only useful when you want to assign colors on perturbed trajectories 
- generated during iterative processes. Both <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields of <guilabel>Spacecraft</guilabel> 
- object can also be used and modified in the Mission Sequence as well. The example script 
- snippet below shows two acceptable methods of setting blue violet color to <guilabel>Spacecraft</guilabel> 
- resource’s <guilabel>TargetColor</guilabel> field:</para> 
- 
-       <programlisting><code>Create Spacecraft aSat
+      <para>Similarly, setting colors of your choice on spacecraft’s
+      perturbing trajectories that may be drawn during iterative processes
+      such as differential correction or optimization can be done by assigning
+      unique colors to <guilabel>Spacecraft</guilabel> object’s
+      <guilabel>TargetColor</guilabel> field. Setting colors on the
+      <guilabel>TargetColor</guilabel> field is only useful when you want to
+      assign colors on perturbed trajectories generated during iterative
+      processes. Both <guilabel>OrbitColor</guilabel> and
+      <guilabel>TargetColor</guilabel> fields of
+      <guilabel>Spacecraft</guilabel> object can also be used and modified in
+      the Mission Sequence as well. The example script snippet below shows two
+      acceptable methods of setting blue violet color to
+      <guilabel>Spacecraft</guilabel> resource’s
+      <guilabel>TargetColor</guilabel> field:</para>
+
+      <programlisting><code>Create Spacecraft aSat
 aSat.TargetColor = BlueViolet    % ColorName method
 % or
 aSat.TargetColor = [138 43 226]  % RGB triplet value method</code></programlisting>
 
-<para>The list of available colors that you can set on <guilabel>Spacecraft</guilabel> object's <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields are tabulated in the table in
- <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. You can assign colors either via the ColorName or RGB triplet value input method. Also see
- the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample scripts that 
- show how to use <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields.</para>
-
-
-
+      <para>The list of available colors that you can set on
+      <guilabel>Spacecraft</guilabel> object's <guilabel>OrbitColor</guilabel>
+      and <guilabel>TargetColor</guilabel> fields are tabulated in the table
+      in <xref linkend="SettingColors_Description" xrefstyle="select:title"/>
+      section. You can assign colors either via the ColorName or RGB triplet
+      value input method. Also see the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample scripts
+      that show how to use <guilabel>Spacecraft</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields.</para>
     </refsection>
-	
 
-<refsection>
+    <refsection>
       <title>Setting Colors on Ground Station Resource</title>
 
-	  
-<para>GMAT allows you to set unique colors of your choice on <guilabel>GroundStation</guilabel> object's 
-<guilabel>OrbitColor</guilabel> or <guilabel>TargetColor</guilabel> fields. The list of available colors that you can set are 
-tabulated in the table in <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. You can assign colors either via the 
-ColorName or RGB triplet value method. The custom ground station facility that you 
-create shows up on the ground track plot of a spacecraft that is drawn on a 2D texture
- map of a central body. The colors that are assigned on <guilabel>GroundStation</guilabel> object's <guilabel>TargetColor</guilabel>
- field are only used whenever <guilabel>GroundStation</guilabel> object is drawn during iterative processes 
- such as differential correction or optimization. The script snippet below shows how to 
- set colors on <guilabel>GroundStation's</guilabel> <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields using either the ColorName
- or RGB method:</para>
-
+      <para>GMAT allows you to set unique colors of your choice on
+      <guilabel>GroundStation</guilabel> object's
+      <guilabel>OrbitColor</guilabel> or <guilabel>TargetColor</guilabel>
+      fields. The list of available colors that you can set are tabulated in
+      the table in <xref linkend="SettingColors_Description"
+      xrefstyle="select:title"/> section. You can assign colors either via the
+      ColorName or RGB triplet value method. The custom ground station
+      facility that you create shows up on the ground track plot of a
+      spacecraft that is drawn on a 2D texture map of a central body. The
+      colors that are assigned on <guilabel>GroundStation</guilabel> object's
+      <guilabel>TargetColor</guilabel> field are only used whenever
+      <guilabel>GroundStation</guilabel> object is drawn during iterative
+      processes such as differential correction or optimization. The script
+      snippet below shows how to set colors on
+      <guilabel>GroundStation's</guilabel> <guilabel>OrbitColor</guilabel> and
+      <guilabel>TargetColor</guilabel> fields using either the ColorName or
+      RGB method:</para>
 
       <programlisting><code>Create GroundStation aGroundStation 
 aGroundStation.OrbitColor = Aqua          % ColorName method
 % or
 aGroundStation.OrbitColor = [0 255 255]   % RGB method</code></programlisting>
- 
-       <programlisting><code>Create GroundStation aGroundStation 
+
+      <programlisting><code>Create GroundStation aGroundStation 
 aGroundStation.TargetColor = Black     % ColorName method
 % or
 aGroundStation.TargetColor = [0 0 0]   % RGB method</code></programlisting>
 
-<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample script that shows how to use <guilabel>GroundStation</guilabel> object’s <guilabel>OrbitColor</guilabel>
- field.</para>
+      <para>See the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample script that
+      shows how to use <guilabel>GroundStation</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field.</para>
+    </refsection>
 
+    <refsection>
+      <title>Configuring Orbit and Target Colors on Celestial Body
+      Resource</title>
 
-</refsection>
-
-
-<refsection>
-      <title>Configuring Orbit and Target Colors on Celestial Body Resource</title>
-
-<para>GMAT allows you to set available colors to orbits of built-in or custom-defined celestial bodies.
- GMAT contains built-in models for the Sun, the 8 planets, Earth's moon, and Pluto. You can create
- a custom <guilabel>CelestialBody</guilabel> resource to model a planet, asteroid, comet, or moon. The orbit colors on 
- <guilabel>CelestialBody</guilabel> objects are set through the <guilabel>OrbitColor</guilabel> field. You can also set colors to a celestial body's
- perturbing trajectories that are generated during iterative processes such as differential correction or
- optimization. This is done by setting colors to <guilabel>CelestialBody</guilabel> object's <guilabel>TargetColor</guilabel> field. Setting colors 
- on the <guilabel>TargetColor</guilabel> field is only useful when you want to assign colors on perturbed trajectories that are
- generated during iterative processes. The list of available colors that you can set on <guilabel>OrbitColor</guilabel> and 
- <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section. To assign colors, you 
- can either use the ColorName or RGB triplet value method. Both <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields of the
- <guilabel>CelestialBody</guilabel> object can also be used and modified in the Mission Sequence as well. The script snippet 
- below shows how to set colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields on a custom-built celestial body 
- using either the ColorName or RGB method:
- </para>
-	  
+      <para>GMAT allows you to set available colors to orbits of built-in or
+      custom-defined celestial bodies. GMAT contains built-in models for the
+      Sun, the 8 planets, Earth's moon, and Pluto. You can create a custom
+      <guilabel>CelestialBody</guilabel> resource to model a planet, asteroid,
+      comet, or moon. The orbit colors on <guilabel>CelestialBody</guilabel>
+      objects are set through the <guilabel>OrbitColor</guilabel> field. You
+      can also set colors to a celestial body's perturbing trajectories that
+      are generated during iterative processes such as differential correction
+      or optimization. This is done by setting colors to
+      <guilabel>CelestialBody</guilabel> object's
+      <guilabel>TargetColor</guilabel> field. Setting colors on the
+      <guilabel>TargetColor</guilabel> field is only useful when you want to
+      assign colors on perturbed trajectories that are generated during
+      iterative processes. The list of available colors that you can set on
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields are tabulated in the table shown in the <xref
+      linkend="SettingColors_Description" xrefstyle="select:title"/> section.
+      To assign colors, you can either use the ColorName or RGB triplet value
+      method. Both <guilabel>OrbitColor</guilabel> and
+      <guilabel>TargetColor</guilabel> fields of the
+      <guilabel>CelestialBody</guilabel> object can also be used and modified
+      in the Mission Sequence as well. The script snippet below shows how to
+      set colors on <guilabel>OrbitColor</guilabel> and
+      <guilabel>TargetColor</guilabel> fields on a custom-built celestial body
+      using either the ColorName or RGB method:</para>
 
       <programlisting><code>Create CelestialBody aPlanet 
 aPlanet.OrbitColor = CornflowerBlue   % ColorName method
 % or
 aPlanet.OrbitColor = [100 149 237]    % RGB method</code></programlisting>
- 
-       <programlisting><code>Create CelestialBody aPlanet 
+
+      <programlisting><code>Create CelestialBody aPlanet 
 aPlanet.TargetColor = DarkBlue     % ColorName method
 % or
 aPlanet.TargetColor = [0 0 139]    % RGB method</code></programlisting>
 
-<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample scripts that show how to use <guilabel>CelestialBody</guilabel> 
-object’s <guilabel>OrbitColor</guilabel> field</para>
+      <para>See the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample scripts
+      that show how to use <guilabel>CelestialBody</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field</para>
+    </refsection>
 
- 
-</refsection>
+    <refsection>
+      <title>Configuring Orbit and Target Colors on Libration Point
+      Resource</title>
 
-
-<refsection>
-      <title>Configuring Orbit and Target Colors on Libration Point Resource</title>
-
-<para>GMAT lets you set available colors on an orbit that is drawn by a libration point.
- In order to see orbital trajectory that a libration point draws in space, you must draw
- the Lagrange points in an inertial space. The orbit colors on <guilabel>LibrationPoint</guilabel> resources
- are set through the <guilabel>OrbitColor</guilabel> field. GMAT also allows you to set colors on a libration
- point's perturbing trajectories that are drawn during iterative processes such as differential
- correction or optimization. Setting colors on perturbing libration point trajectories is done
- via the <guilabel>TargetColor</guilabel> field. Setting colors on the <guilabel>TargetColor</guilabel> field is only useful whenever perturbed
- libration point trajectories are generated during iterative processes. The available colors that can
- be set on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section.
- You can either use the ColorName or RGB triplet value method to assign colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
- fields. These two fields of <guilabel>LibrationPoint</guilabel> resource can also be used and modified to set colors in the 
- Mission Sequence as well. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
- fields using either the ColorName or RGB method: </para>
- 
+      <para>GMAT lets you set available colors on an orbit that is drawn by a
+      libration point. In order to see orbital trajectory that a libration
+      point draws in space, you must draw the Lagrange points in an inertial
+      space. The orbit colors on <guilabel>LibrationPoint</guilabel> resources
+      are set through the <guilabel>OrbitColor</guilabel> field. GMAT also
+      allows you to set colors on a libration point's perturbing trajectories
+      that are drawn during iterative processes such as differential
+      correction or optimization. Setting colors on perturbing libration point
+      trajectories is done via the <guilabel>TargetColor</guilabel> field.
+      Setting colors on the <guilabel>TargetColor</guilabel> field is only
+      useful whenever perturbed libration point trajectories are generated
+      during iterative processes. The available colors that can be set on
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields are tabulated in the table shown in the <xref
+      linkend="SettingColors_Description" xrefstyle="select:title"/> section.
+      You can either use the ColorName or RGB triplet value method to assign
+      colors on <guilabel>OrbitColor</guilabel> and
+      <guilabel>TargetColor</guilabel> fields. These two fields of
+      <guilabel>LibrationPoint</guilabel> resource can also be used and
+      modified to set colors in the Mission Sequence as well. The script
+      snippet below shows how to set colors on <guilabel>OrbitColor</guilabel>
+      and <guilabel>TargetColor</guilabel> fields using either the ColorName
+      or RGB method:</para>
 
       <programlisting><code>Create LibrationPoint ESL1 
 ESL1.OrbitColor = Magenta           % ColorName method
 % or
 ESL1.OrbitColor = [255 0 255]       % RGB method</code></programlisting>
- 
-       <programlisting><code>Create LibrationPoint ESL1 
+
+      <programlisting><code>Create LibrationPoint ESL1 
 ESL1.TargetColor = Orchid           % ColorName method
 % or
 ESL1.TargetColor = [218 112 214]    % RGB method</code></programlisting>
 
+      <para>See the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample script that
+      shows how to use <guilabel>LibrationPoint</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field.</para>
+    </refsection>
 
-<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
-script that shows how to use <guilabel>LibrationPoint</guilabel> object’s <guilabel>OrbitColor</guilabel> field.</para>
+    <refsection>
+      <title>Configuring Orbit and Target Colors on Barycenter
+      Resource</title>
 
- 
-</refsection>
-
-
-<refsection>
-      <title>Configuring Orbit and Target Colors on Barycenter Resource</title>
-	  
-<para>In GMAT, you can assign available colors on an orbit that is drawn by a
- barycenter point. Since a barycenter is a center of mass of a set of celestial bodies,
- hence in order to see its orbital trajectory, the barycenters must be plotted in an 
- inertial space. You can set orbit colors on GMAT’s both built-in <guilabel>SolarSystemBarycenter</guilabel>
- resource or custom barycenters that you create through the <guilabel>Barycenter</guilabel> object. The orbit
- colors on <guilabel>Barycenter</guilabel> resources are set through the <guilabel>OrbitColor</guilabel> field. GMAT also allows 
- you to set colors on a barycenter's perturbing trajectories that are drawn during 
- iterative processes such as differential correction or optimization. Setting colors
- on perturbing barycenter trajectories is done via the <guilabel>TargetColor</guilabel> field. Setting 
- colors on the <guilabel>TargetColor</guilabel> field is only useful whenever you want to set different
- colors on the perturbing trajectories. The available colors that can be set on 
- OrbitColor and <guilabel>TargetColor</guilabel> fields are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/>
- section. You can either use the ColorName or RGB triplet value color input 
- method to assign colors on <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel> fields. These two fields
- of <guilabel>Barycenter</guilabel> resource can also be used and modified in the Mission Sequence 
- as well. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> 
- and <guilabel>TargetColor</guilabel> fields using either the ColorName or RGB method:</para>
-
- 
+      <para>In GMAT, you can assign available colors on an orbit that is drawn
+      by a barycenter point. Since a barycenter is a center of mass of a set
+      of celestial bodies, hence in order to see its orbital trajectory, the
+      barycenters must be plotted in an inertial space. You can set orbit
+      colors on GMAT’s both built-in
+      <guilabel>SolarSystemBarycenter</guilabel> resource or custom
+      barycenters that you create through the <guilabel>Barycenter</guilabel>
+      object. The orbit colors on <guilabel>Barycenter</guilabel> resources
+      are set through the <guilabel>OrbitColor</guilabel> field. GMAT also
+      allows you to set colors on a barycenter's perturbing trajectories that
+      are drawn during iterative processes such as differential correction or
+      optimization. Setting colors on perturbing barycenter trajectories is
+      done via the <guilabel>TargetColor</guilabel> field. Setting colors on
+      the <guilabel>TargetColor</guilabel> field is only useful whenever you
+      want to set different colors on the perturbing trajectories. The
+      available colors that can be set on OrbitColor and
+      <guilabel>TargetColor</guilabel> fields are tabulated in the table shown
+      in the <xref linkend="SettingColors_Description"
+      xrefstyle="select:title"/> section. You can either use the ColorName or
+      RGB triplet value color input method to assign colors on
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields. These two fields of <guilabel>Barycenter</guilabel> resource can
+      also be used and modified in the Mission Sequence as well. The script
+      snippet below shows how to set colors on <guilabel>OrbitColor</guilabel>
+      and <guilabel>TargetColor</guilabel> fields using either the ColorName
+      or RGB method:</para>
 
       <programlisting><code>Create Barycenter EarthMoonBarycenter
 EarthMoonBarycenter.OrbitColor = Violet         % ColorName method
 % or
 EarthMoonBarycenter.OrbitColor = [238 130 238]  % RGB method</code></programlisting>
- 
-       <programlisting><code>Create Barycenter EarthMoonBarycenter
+
+      <programlisting><code>Create Barycenter EarthMoonBarycenter
 EarthMoonBarycenter.TargetColor = Silver         % ColorName method
 % or
 EarthMoonBarycenter.TargetColor = [192 192 192]  % RGB method</code></programlisting>
 
+      <para>See the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample script that
+      shows how to use <guilabel>Barycenter</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field.</para>
+    </refsection>
 
-<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
-script that shows how to use <guilabel>Barycenter</guilabel> object’s <guilabel>OrbitColor</guilabel> field.</para>
-
- 
-</refsection>
-
-
-<refsection>
+    <refsection>
       <title>Configuring Orbit Colors on Propagate Command</title>
-	 
-<para>In GMAT, you can set unique colors on different <guilabel>Spacecraft</guilabel> trajectory
- segments by setting orbital colors on <guilabel>Propagate</guilabel> commands. If you do not 
- select unique colors on each <guilabel>Propagate</guilabel> command, then by default, the color
- on all <guilabel>Propagate</guilabel> commands is seeded from color that is set on <guilabel>Spacecraft</guilabel> 
- object's <guilabel>OrbitColor</guilabel> field. You can set orbit colors on each <guilabel>Propagate</guilabel> command
- through the <guilabel>OrbitColor</guilabel> option. The available colors that can be set on <guilabel>Propagate</guilabel>
- command's <guilabel>OrbitColor</guilabel> option are tabulated in the table shown in the <xref linkend="SettingColors_Description" xrefstyle="select:title"/> section.
- You can either use the ColorName or RGB triplet value input method to assign colors on
- <guilabel>OrbitColor</guilabel> option. The script snippet below shows how to set colors on <guilabel>OrbitColor</guilabel> option
- using either the ColorName or RGB method: </para>
-  
+
+      <para>In GMAT, you can set unique colors on different
+      <guilabel>Spacecraft</guilabel> trajectory segments by setting orbital
+      colors on <guilabel>Propagate</guilabel> commands. If you do not select
+      unique colors on each <guilabel>Propagate</guilabel> command, then by
+      default, the color on all <guilabel>Propagate</guilabel> commands is
+      seeded from color that is set on <guilabel>Spacecraft</guilabel>
+      object's <guilabel>OrbitColor</guilabel> field. You can set orbit colors
+      on each <guilabel>Propagate</guilabel> command through the
+      <guilabel>OrbitColor</guilabel> option. The available colors that can be
+      set on <guilabel>Propagate</guilabel> command's
+      <guilabel>OrbitColor</guilabel> option are tabulated in the table shown
+      in the <xref linkend="SettingColors_Description"
+      xrefstyle="select:title"/> section. You can either use the ColorName or
+      RGB triplet value input method to assign colors on
+      <guilabel>OrbitColor</guilabel> option. The script snippet below shows
+      how to set colors on <guilabel>OrbitColor</guilabel> option using either
+      the ColorName or RGB method:</para>
 
       <programlisting><code>% ColorName method:
 Propagate aProp(aSat) {aSat.ElapsedSecs = 500, OrbitColor = Gold}
 % or RGB method:
 Propagate aProp(aSat) {aSat.ElapsedSecs = 500, OrbitColor = [255 215 0]}</code></programlisting>
- 
 
-<para>See the <xref linkend="SettingColors_Examples" xrefstyle="select:title"/> section below for complete sample 
-scripts that show how to use <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option.</para>
-
- 
-</refsection>
+      <para>See the <xref linkend="SettingColors_Examples"
+      xrefstyle="select:title"/> section below for complete sample scripts
+      that show how to use <guilabel>Propagate</guilabel> command’s
+      <guilabel>OrbitColor</guilabel> option.</para>
+    </refsection>
   </refsection>
 
   <refsection xml:id="SettingColors_Examples">
     <title>Examples</title>
 
     <informalexample>
-      <para>Set non-default sky blue color to <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel>
-	  field through both ColorName and RGB triplet value methods. 
-	  Both methods draw spacecraft orbital trajectory in sky blue color.
-Note: Since orbit color was not re-set in the <guilabel>Propagate</guilabel> command, 
-hence entire spacecraft orbital trajectory is drawn in sky blue color:</para>
+      <para>Set non-default sky blue color to <guilabel>Spacecraft</guilabel>
+      object’s <guilabel>OrbitColor</guilabel> field through both ColorName
+      and RGB triplet value methods. Both methods draw spacecraft orbital
+      trajectory in sky blue color. Note: Since orbit color was not re-set in
+      the <guilabel>Propagate</guilabel> command, hence entire spacecraft
+      orbital trajectory is drawn in sky blue color:</para>
 
       <programlisting><code>Create Spacecraft aSat
 aSat.OrbitColor = SkyBlue   % ColorName method
@@ -914,9 +962,11 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Set unique colors on <guilabel>Spacecraft</guilabel> object’s <guilabel>OrbitColor</guilabel> field 
-	  multiple times through combination of both ColorName and RGB method. 
-	  Notice that <guilabel>Spacecraft.OrbitColor</guilabel> is used and modified in the Mission Sequence as well: </para>
+      <para>Set unique colors on <guilabel>Spacecraft</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field multiple times through combination
+      of both ColorName and RGB method. Notice that
+      <guilabel>Spacecraft.OrbitColor</guilabel> is used and modified in the
+      Mission Sequence as well:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.OrbitColor = Yellow   % ColorName method
@@ -935,10 +985,13 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 2000}</programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Set non-default yellow color on <guilabel>Spacecraft</guilabel> object’s <guilabel>TargetColor</guilabel> field. 
-	  Setting color on the <guilabel>TargetColor</guilabel> field is only useful when perturbed trajectories
-	  are generated during iterative processes such as differential correction. Note yellow color was set via the ColorName method.
-	  It could’ve been also set through the RGB triplet value method as well.</para>
+      <para>Set non-default yellow color on <guilabel>Spacecraft</guilabel>
+      object’s <guilabel>TargetColor</guilabel> field. Setting color on the
+      <guilabel>TargetColor</guilabel> field is only useful when perturbed
+      trajectories are generated during iterative processes such as
+      differential correction. Note yellow color was set via the ColorName
+      method. It could’ve been also set through the RGB triplet value method
+      as well.</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.OrbitColor = Red       % Default OrbitColor
@@ -970,14 +1023,13 @@ EndTarget
 
 Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
 </programlisting>
-
     </informalexample>
 
     <informalexample>
-      <para>Set non-default colors on multiple <guilabel>GroundStation</guilabel> objects 
-	  through the <guilabel>OrbitColor</guilabel> field. The colors are assigned through
-	  combination of both ColorName and RGB input methods:
-</para>
+      <para>Set non-default colors on multiple
+      <guilabel>GroundStation</guilabel> objects through the
+      <guilabel>OrbitColor</guilabel> field. The colors are assigned through
+      combination of both ColorName and RGB input methods:</para>
 
       <programlisting>Create Spacecraft aSat
 Create Propagator aProp
@@ -1007,9 +1059,11 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 0.25 }</programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Set non-default colors on built-in celestial body orbits. In this example, <guilabel>CelestialBody</guilabel> object’s 
-<guilabel>OrbitColor</guilabel> field is assigned colors through mixture of both ColorName and RGB triplet value
-methods. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
+      <para>Set non-default colors on built-in celestial body orbits. In this
+      example, <guilabel>CelestialBody</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field is assigned colors through mixture
+      of both ColorName and RGB triplet value methods. By default, GMAT sets
+      <guilabel>Spacecraft</guilabel> orbit color to red:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.CoordinateSystem = SunMJ2000Ec
@@ -1044,14 +1098,14 @@ anOrbitView.ViewUpCoordinateSystem = SunMJ2000Ec
 BeginMissionSequence
 Propagate aProp(aSat) {aSat.ElapsedDays = 150}</programlisting>
     </informalexample>
-	
-	
 
     <informalexample>
-      <para>Set unique non-default orbit colors on built-in <guilabel>CelestialBody</guilabel> object’s 
-	  <guilabel>OrbitColor</guilabel> field multiple times through combination of both ColorName and RGB
-	  triplet value methods. Notice that <guilabel>CelestialBody.OrbitColor</guilabel> is used and modified
-	  in the Mission Sequence as well: </para>
+      <para>Set unique non-default orbit colors on built-in
+      <guilabel>CelestialBody</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field multiple times through combination
+      of both ColorName and RGB triplet value methods. Notice that
+      <guilabel>CelestialBody.OrbitColor</guilabel> is used and modified in
+      the Mission Sequence as well:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.CoordinateSystem = SunMJ2000Ec
@@ -1091,13 +1145,18 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 150}
 Mars.OrbitColor = [0 128 0]   % RGB value for Green
 Propagate aProp(aSat) {aSat.ElapsedDays = 150}</programlisting>
     </informalexample>
-	
-	
+
     <informalexample>
-      <para>Set unique non-default orbit colors on Earth-Sun L1 libration point orbit. ESL1 libration point is plotted 
-in an inertial space in order to see its orbit around sun.The orbit colors on <guilabel>LibrationPoint</guilabel> object’s
-<guilabel>OrbitColor</guilabel> field are set multiple times through combination of both ColorName and RGB triplet value input methods.
- Notice that in this example, <guilabel>LibrationPoint.OrbitColor</guilabel> is also set in the Mission Sequence as well. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
+      <para>Set unique non-default orbit colors on Earth-Sun L1 libration
+      point orbit. ESL1 libration point is plotted in an inertial space in
+      order to see its orbit around sun.The orbit colors on
+      <guilabel>LibrationPoint</guilabel> object’s
+      <guilabel>OrbitColor</guilabel> field are set multiple times through
+      combination of both ColorName and RGB triplet value input methods.
+      Notice that in this example,
+      <guilabel>LibrationPoint.OrbitColor</guilabel> is also set in the
+      Mission Sequence as well. By default, GMAT sets
+      <guilabel>Spacecraft</guilabel> orbit color to red:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.CoordinateSystem = SunMJ2000Ec
@@ -1140,14 +1199,17 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 75}
 ESL1.OrbitColor = [0 128 0]   % RGB value for Green
 Propagate aProp(aSat) {aSat.ElapsedDays = 75}</programlisting>
     </informalexample>
-	
+
     <informalexample>
-      <para>Set unique non-default orbit colors on Earth-Moon barycenter. 
-	  The Earth Moon barycenter had to be plotted in an inertial space in 
-	  order to see its orbit around the sun. The orbit colors on <guilabel>Barycenter</guilabel> object’s 
-	  <guilabel>OrbitColor</guilabel> field are set multiple times through combination of both ColorName 
-	  and RGB triplet value input methods. Notice that in this example, <guilabel>Barycenter.OrbitColor</guilabel>
-	  is also set in the Mission Sequence as well. By default, GMAT sets <guilabel>Spacecraft</guilabel> orbit color to red:</para>
+      <para>Set unique non-default orbit colors on Earth-Moon barycenter. The
+      Earth Moon barycenter had to be plotted in an inertial space in order to
+      see its orbit around the sun. The orbit colors on
+      <guilabel>Barycenter</guilabel> object’s <guilabel>OrbitColor</guilabel>
+      field are set multiple times through combination of both ColorName and
+      RGB triplet value input methods. Notice that in this example,
+      <guilabel>Barycenter.OrbitColor</guilabel> is also set in the Mission
+      Sequence as well. By default, GMAT sets <guilabel>Spacecraft</guilabel>
+      orbit color to red:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.CoordinateSystem = SunMJ2000Ec
@@ -1188,14 +1250,16 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 75}
 EarthMoonBarycenter.OrbitColor = [250 128 114]   % RGB value for Salmon
 Propagate aProp(aSat) {aSat.ElapsedDays = 75}</programlisting>
     </informalexample>
-	
-	
+
     <informalexample>
       <para>Set unique colors on spacecraft’s various trajectory segments
-	  through <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option. The colors are set through
-	  combination of both ColorName and RGB input methods. Notice that although by default,
-	  red color is set on <guilabel>aSat.OrbitColor</guilabel> field, however since orbit color has been 
-	  reset on all <guilabel>Propagate</guilabel> commands, hence red color is never drawn:</para>
+      through <guilabel>Propagate</guilabel> command’s
+      <guilabel>OrbitColor</guilabel> option. The colors are set through
+      combination of both ColorName and RGB input methods. Notice that
+      although by default, red color is set on
+      <guilabel>aSat.OrbitColor</guilabel> field, however since orbit color
+      has been reset on all <guilabel>Propagate</guilabel> commands, hence red
+      color is never drawn:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.OrbitColor = Red
@@ -1213,15 +1277,19 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Cyan}
 Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = [154 205 50]}
 Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = [255 0 255]}</programlisting>
     </informalexample>
-	
+
     <informalexample>
-      <para>Set colors on spacecraft’s various trajectory segments through 
-	  <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel> option. This time, colors are only set 
-	  through ColorName input method. Default color set on <guilabel>aSat.OrbitColor</guilabel> 
-	  field is red. Notice that the orbit color has been reset on only the 
-	  first three <guilabel>Propagate</guilabel> commands. However since <guilabel>OrbitColor</guilabel> option has not
-	  been used on the last <guilabel>Propagate</guilabel> command, therefore the trajectory drawn
-	  by the last <guilabel>Propagate</guilabel> command is in red color which is the color assigned on <guilabel>aSat.OrbitColor</guilabel> field: </para>
+      <para>Set colors on spacecraft’s various trajectory segments through
+      <guilabel>Propagate</guilabel> command’s <guilabel>OrbitColor</guilabel>
+      option. This time, colors are only set through ColorName input method.
+      Default color set on <guilabel>aSat.OrbitColor</guilabel> field is red.
+      Notice that the orbit color has been reset on only the first three
+      <guilabel>Propagate</guilabel> commands. However since
+      <guilabel>OrbitColor</guilabel> option has not been used on the last
+      <guilabel>Propagate</guilabel> command, therefore the trajectory drawn
+      by the last <guilabel>Propagate</guilabel> command is in red color which
+      is the color assigned on <guilabel>aSat.OrbitColor</guilabel>
+      field:</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.OrbitColor = Red
@@ -1239,16 +1307,18 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Blue}
 Propagate aProp(aSat) {aSat.ElapsedSecs = 1000, OrbitColor = Yellow}
 Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}</programlisting>
     </informalexample>
-	
-	
+
     <informalexample>
-      <para>Set colors on <guilabel>Propagate</guilabel> commands when used with <guilabel>Target</guilabel> resource
-	  and during differential correction iterative process. This time, since
-	  colors have been set on all <guilabel>Propagate</guilabel> commands, hence default color of
-	  red which is set on <guilabel>aSat.OrbitColor</guilabel> field is never plotted. Also notice
-	  that although <guilabel>aSat.TargetColor</guilabel> is set to Yellow, but since <guilabel>anOrbitView.SolverIterations</guilabel>
-	  is set to None, hence perturbed trajectories that are drawn during iterative process
-	  are not plotted and only final solution is plotted</para>
+      <para>Set colors on <guilabel>Propagate</guilabel> commands when used
+      with <guilabel>Target</guilabel> resource and during differential
+      correction iterative process. This time, since colors have been set on
+      all <guilabel>Propagate</guilabel> commands, hence default color of red
+      which is set on <guilabel>aSat.OrbitColor</guilabel> field is never
+      plotted. Also notice that although <guilabel>aSat.TargetColor</guilabel>
+      is set to Yellow, but since
+      <guilabel>anOrbitView.SolverIterations</guilabel> is set to None, hence
+      perturbed trajectories that are drawn during iterative process are not
+      plotted and only final solution is plotted</para>
 
       <programlisting>Create Spacecraft aSat
 aSat.OrbitColor = Red       

@@ -59,6 +59,10 @@ const Integer     CCSDSEMSegment::UNSET_INTEGER  = -999;
 //------------------------------------------------------------------------------
 Real CCSDSEMSegment::ParseEpoch(const std::string &epochString)
 {
+   #ifdef DEBUG_PARSE_EPOCH
+      MessageInterface::ShowMessage("ParseEpoch -- epochString = \"%s\"\n",
+            epochString.c_str());
+   #endif
    // The epochs can be in either of two formats:
    // YYYY-MM-DDThh:mm:ss.mmm
    // YYYY-DOYThh:mm:ss
@@ -149,11 +153,19 @@ Real CCSDSEMSegment::ParseEpoch(const std::string &epochString)
    if (doyUsed)
    {
       UtcDate utc(year, day, hour, minute, seconds);
+      #ifdef DEBUG_PARSE_EPOCH
+         MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
+               utc.ToPackedCalendarString().c_str());
+      #endif
       return utc.ToA1Mjd();
    }
    else
    {
       UtcDate utc(year, month, day, hour, minute, seconds);
+      #ifdef DEBUG_PARSE_EPOCH
+         MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
+               utc.ToPackedCalendarString().c_str());
+      #endif
       return utc.ToA1Mjd();
    }
 
@@ -621,8 +633,7 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
       Real theTime = (dataStore.at(ii))->epoch;
 
       #ifdef DEBUG_EM_FIND_EXACT_MATCH
-         MessageInterface::ShowMessage("FindExactEpochMatch data entry %d "
-               "epoch = %12.10f\n",
+         MessageInterface::ShowMessage("----  data epoch(%d) = %12.10f \n",
                ii, theTime);
       #endif
       if (GmatMathUtil::IsEqual(theTime, atEpoch, EPOCH_MATCH_TOLERANCE))
@@ -630,7 +641,7 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
          exactMatchFound = true;
          matchPos        = ii;
          #ifdef DEBUG_EM_FIND_EXACT_MATCH
-            MessageInterface::ShowMessage("In FindExactEpochMatch exact match to epoch = %12.10f\n",
+            MessageInterface::ShowMessage("---- EXACT MATCH to epoch = %12.10f\n",
                   (dataStore.at(ii))->epoch);
           #endif
          break;
@@ -655,7 +666,7 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
    else
    {
       #ifdef DEBUG_DETERMINE_STATE
-         MessageInterface::ShowMessage("In DetermineState, about to interpolate\n", atEpoch);
+         MessageInterface::ShowMessage("In DetermineState, about to interpolate to time %12.10f\n", atEpoch);
       #endif
       return Interpolate(atEpoch);
    }
@@ -819,7 +830,19 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Real    t1, t2;
 
    #ifdef DEBUG_INTERP_DATA
-      MessageInterface::ShowMessage("\n q = %d\n", q);
+      MessageInterface::ShowMessage("\n Interpolating over %d (q) to %d (q+n)\n", q, (q+n));
+      MessageInterface::ShowMessage("   epoch and Data at those points are:\n");
+      for (Integer jj = q; jj <= q+n; jj++)
+      {
+         // this is specific to Euler angles here ...
+         Rvector theAngles = dataStore.at(jj)->data;
+         Real    theEpoch  = dataStore.at(jj)->epoch;
+         MessageInterface::ShowMessage("   %d     %12.10f       %12.10f  %12.10f  %12.10f\n",
+               jj,  theEpoch,
+               theAngles[0] * GmatMathConstants::DEG_PER_RAD,
+               theAngles[1] * GmatMathConstants::DEG_PER_RAD,
+               theAngles[2] * GmatMathConstants::DEG_PER_RAD);
+      }
    #endif
    for (Integer ii = q; ii <= q+n; ii++)
    {
