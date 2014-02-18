@@ -297,6 +297,15 @@ bool Solver::Initialize()
       MessageInterface::ShowMessage(
          "In Solver::Initialize - about to set default values\n");
    #endif
+      variable.clear();
+      variableInitialValues.clear();
+      variableMinimum.clear();
+      variableMaximum.clear();
+      variableMaximumStep.clear();
+      perturbation.clear();
+      pertDirection.clear();
+      unscaledVariable.clear();
+
       for (Integer i = 0; i < localVariableCount; ++i)
       {
          variable.push_back(0.0);
