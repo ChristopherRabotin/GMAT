@@ -1307,52 +1307,62 @@ GmatBase* Quat4::Clone(void) const
 {
    return new Quat4(*this);
 }
+
+
+// Changed Quaternion to be Rvector Parameter instead of String Parameter
+// (LOJ: 2014.02.10)
 //------------------------------------------------------------------------------
 // Quaternion(const std::string &name = "", GmatBase *obj = NULL)
 //------------------------------------------------------------------------------
 Quaternion::Quaternion(const std::string &name, GmatBase *obj)
-   : AttitudeString(name, "Quaternion", obj, "Quaternion", "", true)
+   : AttitudeRvector(name, "Quaternion", obj, "Quaternion", "", true, 4)
 {
 }
+
 //------------------------------------------------------------------------------
 // Quaternion(const Quaternion &copy)
 //------------------------------------------------------------------------------
 Quaternion::Quaternion(const Quaternion &copy)
-   : AttitudeString(copy)
+   : AttitudeRvector(copy)
 {
 }
+
 //------------------------------------------------------------------------------
 // Quaternion& operator=(const Quaternion &right)
 //------------------------------------------------------------------------------
 Quaternion& Quaternion::operator=(const Quaternion &right)
 {
    if (this != &right)
-      AttitudeString::operator=(right);
+      AttitudeRvector::operator=(right);
    
    return *this;
 }
+
 //------------------------------------------------------------------------------
 // ~Quaternion()
 //------------------------------------------------------------------------------
 Quaternion::~Quaternion()
 {
 }
+
 //------------------------------------------------------------------------------
 // bool Evaluate()
 //------------------------------------------------------------------------------
 bool Quaternion::Evaluate()
 {
-   mStringValue = AttitudeData::GetString(QUATERNION);
+   mRvectorValue = AttitudeData::GetRvector(QUATERNION);
    return true;
 }
+
 //------------------------------------------------------------------------------
-// void SetString(const Rvector6 &val)
+// void SetRvector(const Rvector &val)
 //------------------------------------------------------------------------------
-void Quaternion::SetString(const std::string &val)
+void Quaternion::SetRvector(const Rvector &val)
 {
-   AttitudeData::SetString(QUATERNION, val);
-   StringVar::SetString(val);
+   AttitudeData::SetRvector(QUATERNION, val);
+   RvectorVar::SetRvector(val);
 }
+
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
 //------------------------------------------------------------------------------

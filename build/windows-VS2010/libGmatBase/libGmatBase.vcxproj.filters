@@ -1338,6 +1338,12 @@
     <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2631,6 +2637,12 @@
       <Filter>Source Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp">
       <Filter>Source Files\parameter</Filter>
     </ClInclude>
   </ItemGroup>

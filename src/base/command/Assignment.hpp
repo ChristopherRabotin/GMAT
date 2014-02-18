@@ -121,8 +121,10 @@ protected:
    Integer              lhsOwnerID;
    
    // methods
-   bool ValidateArrayElement(ElementWrapper *lhsWrapper,
-                             ElementWrapper *rhsWrapper);
+   bool ValidateArrayElement(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper);
+   bool ValidateRmatrix(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper);
+   bool ValidateRvector(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper);
+   
    void ClearMathTree();
    ElementWrapper* RunMathTree();
    void HandleObjectPropertyChange(ElementWrapper *lhsWrapper);

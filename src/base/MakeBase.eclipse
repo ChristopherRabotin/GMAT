@@ -388,6 +388,7 @@ OBJECTS = \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
     parameter/AttitudeReal.o \
+    parameter/AttitudeRvector.o \
     parameter/AttitudeString.o \
     parameter/BallisticMassParameters.o \
     parameter/BallisticMassReal.o \
@@ -437,6 +438,7 @@ OBJECTS = \
     parameter/Rmat33Var.o \
     parameter/Rmat66Var.o \
     parameter/Rvec6Var.o \
+    parameter/RvectorVar.o \
     parameter/SpacecraftData.o \
     parameter/SphericalParameters.o \
     parameter/StringWrapper.o \

@@ -129,6 +129,8 @@ public:
    
    virtual const Rmatrix&  EvaluateArray() const;
    virtual bool            SetArray(const Rmatrix &toValue); 
+   virtual const Rvector&  EvaluateRvector() const;
+   virtual bool            SetRvector(const Rvector &toValue); 
    virtual std::string     EvaluateString() const;
    virtual bool            SetString(const std::string &toValue); 
    virtual std::string     EvaluateOnOff() const;

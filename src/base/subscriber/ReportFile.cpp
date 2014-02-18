@@ -460,6 +460,14 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
                   break;
                }
+            case Gmat::RVECTOR_TYPE:
+               {
+                  Rmatrix rmat;
+                  Rvector rvec = wrapperArray[i]->EvaluateRvector();
+                  rmat.MakeOneRowMatrix(rvec);
+                  colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
+                  break;
+               }
             case Gmat::STRING_TYPE:
                {
                   sval = wrapperArray[i]->EvaluateString();
@@ -467,8 +475,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   break;
                }
             default:
-               throw GmatBaseException
-                  ("Cannot write \"" + desc + "\" due to unimplemented "
+               throw SubscriberException
+                  ("ReportFile cannot write \"" + desc + "\" due to unimplemented "
                    "Parameter data type");
             }
             break;
