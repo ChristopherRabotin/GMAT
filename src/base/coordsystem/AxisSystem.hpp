@@ -59,6 +59,8 @@ public:
    virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
    virtual bool                           RequiresCelestialBodyOrigin() const;
    virtual bool                           HasCelestialBodyOrigin() const;
+   virtual void                           SetAllowWithoutRates(bool allow);
+   virtual bool                           AllowWithoutRates() const;
 
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
@@ -203,6 +205,7 @@ protected:
    std::string               epochFormat;
    
    bool                      needsCBOrigin;
+   bool                      allowNoRates;
 
    Real                      updateInterval;
    Real                      updateIntervalToUse;

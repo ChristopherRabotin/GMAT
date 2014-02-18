@@ -3887,9 +3887,9 @@ aSat.AttitudeFileName = myFile.aem</code></programlisting></entry>
               ephemeris data immediately following this metadata block. The
               START_TIME time tag at a new block of attitude ephemeris data
               must be equal to or greater than the STOP_TIME time tag of the
-              previous block. GMAT requires time to be in the following format
-              1996-12-18T14:28:15.117 Note: precision in the seconds place is
-              only preserved to a few microseconds.
+              previous block. See the CREATION_DATE specification for detailed
+              information on time formats. Note: precision in the seconds
+              place is only preserved to a few microseconds.
               </para><para>Example:</para><para>START_TIME =
               1996-12-18T14:28:15.117</para></entry>
             </row>
@@ -3910,8 +3910,8 @@ aSat.AttitudeFileName = myFile.aem</code></programlisting></entry>
               START/STOP_TIME time tags. If this is provided, GMAT only uses
               data in the USEABLE timespan for interpolation. If it is not
               provided, GMAT uses the data in the START_TIME/STOP_TIME segment
-              for interpolation. GMAT requires time to be in the following
-              format 1996-12-18T14:28:15.117
+              for interpolation. See the CREATION_DATE specification for
+              detailed information on time formats.
               </para><para>Example:</para><para>USEABLE_ START_TIME =
               1996-12-18T14:28:15.117</para><para>USEABLE_ STOP_TIME =
               1996-12-18T14:28:15.117</para></entry>
@@ -3926,9 +3926,9 @@ aSat.AttitudeFileName = myFile.aem</code></programlisting></entry>
               ephemeris data immediately following this metadata block. The
               STOP_TIME time tag for the block of attitude ephemeris data must
               be equal to or less than the START_TIME time tag of the next
-              block. GMAT requires time to be in the following format
-              1996-12-18T14:28:15.117 Note: precision in the seconds place is
-              only preserved to a few microseconds.
+              block. See the CREATION_DATE specification for detailed
+              information on time formats. Note: precision in the seconds
+              place is only preserved to a few microseconds.
               </para><para>Example:</para><para>STOP_TIME =
               1996-12-18T14:28:15.117</para></entry>
             </row>
@@ -4075,6 +4075,30 @@ aSat.AttitudeFileName = myFile.aem</code></programlisting></entry>
               file parsing). This keyword must appear on a line by itself.
               </para></entry>
             </row>
+
+            <row>
+              <entry><guilabel>QUATERNION</guilabel></entry>
+
+              <entry><para>SR</para></entry>
+
+              <entry><para>Required when ATTITUDE_TYPE = QUATERNION. The
+              general format of a quaternion data line is: Epoch, QC, Q1, Q2,
+              Q3 or Epoch, Q1, Q2, Q3,
+              QC</para><para>Example:</para><para>2000-01-01T11:59:28.000
+              0.195286 -0.079460 0.3188764 0.92404936</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>EULER ANGLE</guilabel></entry>
+
+              <entry><para>SR</para></entry>
+
+              <entry><para>Required when ATTITUDE_TYPE = EULER_ANGLE. The
+              general format of an Euler angle data line is: Epoch, X_Angle,
+              Y_Angle, Z_Angle.
+              </para><para>Example:</para><para>2000-001T11:59:28.000 35.45409
+              -15.74726 18.803877</para></entry>
+            </row>
           </tbody>
         </tgroup>
       </informaltable>
@@ -4124,8 +4148,7 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 3600};</code></programlisting>
         attitude when the spin axis is aligned, or nearly aligned, with the
         inertial x-axis, a different reference vector is used in that case. In
         the event that the cross product of <guilabel>BodySpinAxis</guilabel>
-        and the inertial x-axis is less than 1e-5, the cross product of the
-        <guilabel>BodySpinAxis</guilabel> axis and the inertial y-axis is used
+        and the inertial x-axis is less than 1e-5, the inertial y-axis is used
         as the reference vector. For further details see the
         engineering/mathematical specifications.</para>
       </note>
