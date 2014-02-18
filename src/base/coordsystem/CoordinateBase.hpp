@@ -118,6 +118,10 @@ public:
    virtual bool                  IsBuiltIn() const;
 
    virtual bool                  RequiresCelestialBodyOrigin() const = 0;
+   // We need these extra methods to manage the case where the origin is a
+   // Spacecraft but we don't need to worry about attitude rates
+   virtual void                  SetAllowWithoutRates(bool allow) = 0;
+   virtual bool                  AllowWithoutRates() const = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -177,10 +181,10 @@ protected:
    /// pointer to the solar system
    SolarSystem     *solar;
    /// flag indicating whether or not this CoordinateBase object is a built-in one
-   bool          isBuiltIn;
+   bool            isBuiltIn;
    /// flag indicating whether or not this CS can currently be modified (generally
    /// only set to false for built-in CSs when the script is being interpreted)
-   bool          allowModify;
+   bool            allowModify;
 
    /// Method for setting J2000Body for other reference objects
    void SetJ2000BodyForOtherRefObjects();

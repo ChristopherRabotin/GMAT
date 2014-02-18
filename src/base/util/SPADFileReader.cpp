@@ -60,8 +60,8 @@ SPADFileReader::SPADFileReader() :
    numData       (0),
    azCount       (0),
    elCount       (0),
-   azStepSize    (0),
-   elStepSize    (0)
+   azStepSize    (-999),
+   elStepSize    (-999)
 {
    spadData.clear();
    spadMotion.clear();
@@ -225,6 +225,12 @@ void SPADFileReader::Initialize()
    {
       std::string errmsg = "\"Record count\" value from SPAD file ";
       errmsg += spadFile + "\" does not match the number of data records read.\n";
+      throw UtilityException(errmsg);
+   }
+   if ((azCount * elCount) != recordCount)
+   {
+      std::string errmsg = "\"Record count\" value from SPAD file ";
+      errmsg += spadFile + "\" does not match the number of data records expected.\n";
       throw UtilityException(errmsg);
    }
 
@@ -567,6 +573,13 @@ bool SPADFileReader::ParseFile()
                   errmsg            += part2 + " to an Integer.\n";
                   throw UtilityException(errmsg);
                }
+               if ((theID != 1) && (theID != 2))
+               {
+                  std::string errmsg = "Only allowed values for \"Motion\" ";
+                  errmsg            += "field in SPAD file meta data are ";
+                  errmsg            += "\"1\" or \"2\"\n";
+                  throw UtilityException(errmsg);
+               }
                numMotion++;
                newSpadMotion = new SPADMotionRecord(theID);
                #ifdef DEBUG_MOTION_RECORDS
@@ -603,9 +616,16 @@ bool SPADFileReader::ParseFile()
             }
             else if (part1 == "Step")
             {
-               Real theStep;
-               GmatStringUtil::ToReal(part2, theStep);
-               newSpadMotion->itsStep = theStep;
+               Integer theStep;
+               GmatStringUtil::ToInteger(part2, theStep);
+               if (theStep <= 0)
+               {
+                  std::string errmsg = "Only allowed value for \"Step\" ";
+                  errmsg            += "field in SPAD file meta data is ";
+                  errmsg            += "a positive, non-zero Integer\n";
+                  throw UtilityException(errmsg);
+               }
+               newSpadMotion->itsStep = (Real) theStep;
             }
             else if (part1 == "Record count")
             {
@@ -832,6 +852,13 @@ void SPADFileReader::ValidateMetaData()
 
    azStepSize = az->itsStep;
    elStepSize = el->itsStep;
+   if ((azStepSize == -999) || (elStepSize == -999))
+   {
+      std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
+      errmsg += "is missing on SPAD file ";
+      errmsg += spadFile + ".\n";
+      throw UtilityException(errmsg);
+   }
 
    azCount    = 360./ azStepSize + 1;
    elCount    = 180./ elStepSize + 1;
@@ -903,6 +930,20 @@ void SPADFileReader::ValidateData()
          errmsg         += "step size.";
       }
       errmsg            += "\n";
+      throw UtilityException(errmsg);
+   }
+   // Check to see if the data really has the step sizes it says it has
+   try
+   {
+      Real     nextAz     = -180.00 + azStepSize;
+      Real     nextEl     = -90.00  + elStepSize;
+      Rvector3 nextAzEl   = GetForceAt(nextAz, nextEl);
+   }
+   catch (UtilityException &ue)
+   {
+      std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
+      errmsg += "does not equal the actual step size between data records on ";
+      errmsg += "SPAD file " + spadFile + ".\n";
       throw UtilityException(errmsg);
    }
 }

@@ -54,6 +54,7 @@ using namespace GmatTimeConstants;      // for SECS_PER_DAY
 //#define DEBUG_DESTRUCTION
 //#define DEBUG_AXIS_SYSTEM_INIT
 //#define DEBUG_AXIS_SYSTEM_EOP
+//#define DEBUG_ALLOW_NO_RATES
 
 
 //#ifndef DEBUG_MEMORY
@@ -120,6 +121,7 @@ eop              (NULL),
 itrf             (NULL),
 epochFormat      ("A1ModJulian"),
 needsCBOrigin    (false),
+allowNoRates     (false),
 updateInterval   (60.0), 
 updateIntervalToUse    (60.0), 
 overrideOriginInterval (false),
@@ -177,6 +179,7 @@ eop               (axisSys.eop),
 itrf              (axisSys.itrf),
 epochFormat       (axisSys.epochFormat),
 needsCBOrigin     (axisSys.needsCBOrigin),
+allowNoRates      (axisSys.allowNoRates),
 updateInterval    (axisSys.updateInterval),
 updateIntervalToUse    (axisSys.updateIntervalToUse),
 overrideOriginInterval (axisSys.overrideOriginInterval),
@@ -232,6 +235,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    itrf              = axisSys.itrf;
    epochFormat       = axisSys.epochFormat;
    needsCBOrigin     = axisSys.needsCBOrigin;
+   allowNoRates      = axisSys.allowNoRates;
    updateInterval    = axisSys.updateInterval;
    updateIntervalToUse    = axisSys.updateIntervalToUse;
    overrideOriginInterval = axisSys.overrideOriginInterval;
@@ -543,6 +547,22 @@ bool AxisSystem::HasCelestialBodyOrigin() const
    if (origin && origin->IsOfType("CelestialBody")) return true;
    return false;
 }
+
+void AxisSystem::SetAllowWithoutRates(bool allow)
+{
+   #ifdef DEBUG_ALLOW_NO_RATES
+      MessageInterface::ShowMessage(
+            "Setting allowNoRates for %s to %s\n",
+            coordName.c_str(), (allow? "true" : "false"));
+   #endif
+   allowNoRates = allow;
+}
+
+bool AxisSystem::AllowWithoutRates() const
+{
+   return allowNoRates;
+}
+
 
 
 // methods to set parameters for the AxisSystems - AxisSystems that need these
