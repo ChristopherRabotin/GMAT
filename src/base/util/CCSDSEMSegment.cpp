@@ -152,12 +152,24 @@ Real CCSDSEMSegment::ParseEpoch(const std::string &epochString)
 
    if (doyUsed)
    {
-      UtcDate utc(year, day, hour, minute, seconds);
-      #ifdef DEBUG_PARSE_EPOCH
-         MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
-               utc.ToPackedCalendarString().c_str());
-      #endif
-      return utc.ToA1Mjd();
+      try
+      {
+         UtcDate utc(year, day, hour, minute, seconds);
+         #ifdef DEBUG_PARSE_EPOCH
+            MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
+                  utc.ToPackedCalendarString().c_str());
+         #endif
+         return utc.ToA1Mjd();
+      }
+      catch (Date::LeapYearError &lye)
+      {
+         std::ostringstream errmsg;
+
+         errmsg << "Cannot read CCSDS file.  File contains time \"";
+         errmsg << epochString << "\", which specifies day number ";
+         errmsg << day << " for a non-leap year.\n";
+         throw UtilityException(errmsg.str());
+      }
    }
    else
    {
