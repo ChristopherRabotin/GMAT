@@ -319,6 +319,9 @@ void UnpackDateWithDOY (Real packedDate, Integer& year, Integer& day)
    remainder = Mod (packedDate, 1000.0);
    day = (Integer)(GmatMathUtil::Floor(remainder + 0.5));
 
+   if ((day > 365) && !IsLeapYear(year))
+      throw Date::LeapYearError();
+
    Integer daysInYear = 365;
    if (IsLeapYear(year))  daysInYear = 366;
 
@@ -371,6 +374,9 @@ void ToMonthDayFromYearDOY (Integer year, Integer dayOfYear, Integer& month,
    const Integer *ptrDaysList;
 
    bool isLeap            = IsLeapYear(year);
+   if (!isLeap && (dayOfYear > 365))
+      throw Date::LeapYearError();
+
    Integer daysInYear     = 365;
    if (isLeap) daysInYear = 366;
 

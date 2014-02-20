@@ -2606,6 +2606,232 @@ Rvector6 StateConversionUtil::DelaunayToKeplerian(const Rvector6& delaunay, cons
    return Rvector6( sma, ecc, inc, raan, aop, ta );
 }
 
+
+
+// Modified by M.H. 2014.01.08
+//------------------------------------------------------------------------------
+// Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian, Real flattening,
+//                                  Real eqRadius)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Planetocentric to Cartesian.
+ *
+ * @param <cartesian>   Cartesian state
+ * @param <flattening>  flattening coefficient for the central body
+ * @param <eqRadius>    equatorial radius for the central body
+ *
+ * @return Spacecraft orbit state converted from Cartesian to Planetodetic
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian,
+                                                      Real flattening, Real eqRadius)
+{
+   // Convert Cartesian state to Planetocentric state
+   Rvector6 planetocentric= CartesianToSphericalAZFPA(cartesian);
+   
+   //Real Req = 6378.1363; // equatorial radius
+   //Real f = 0.0033527; // flattening coefficients
+   Real Req = eqRadius; // equatorial radius
+   Real f = flattening; // flattening coefficients
+   
+   Real rMag = planetocentric[0];
+   Real lon = planetocentric[1]; // longitude
+   Real latg = planetocentric[2] * RAD_PER_DEG; // planetocentric latitude
+   Real vMag = planetocentric[3];
+   Real azi = planetocentric[4];
+   Real vfpa = planetocentric[5]; // vertical flight path angle
+   Real hfpa = 90 - vfpa;// horizontal flight path angle
+   
+   
+   // Convert planetocentric latitude to Planetodetic latitude
+   Real r_z = cartesian[2];
+   Real r_xy = Sqrt(cartesian[0]*cartesian[0] + cartesian[1]*cartesian[1]);
+   Real latd = latg;
+   Real e2 = 2*f - f*f;
+   Real tol = 1;
+   
+   while( tol >= 1e-13)
+   {
+	   // If latitude is close to 90 deg
+	   /*if ( Abs(latd - PI/2) < (0.001*RAD_PER_DEG) )
+	   {
+		   MessageInterface::ShowMessage("Latitude is close to 90 deg within 1e-3 deg \n");
+		   MessageInterface::ShowMessage("Therefore Planetodetic latitude is equal to Planetocentric latitude \n");
+		   break;
+	   }*/
+      Real latd_old = latd;
+      Real C = Req / Sqrt( 1 - e2*Sin(latd_old)*Sin(latd_old) );
+      latd = ATan( (r_z + C*e2*Sin(latd_old))/r_xy );
+      
+      tol = Abs(latd - latd_old);
+   }
+   
+   return Rvector6(rMag, lon, latd * DEG_PER_RAD, vMag, azi, hfpa);
+   
+} // CartesianToPlanetodetic()
+
+// Modified by M.H.
+//------------------------------------------------------------------------------
+// Rvector6 PlanetodeticToCartesian(const Rvector6& planetodetic, Real flattening,
+//                                  Real eqRadius)
+//------------------------------------------------------------------------------
+/**
+ * Converts from Planetodetic to Cartesian.
+ *
+ * @param <planetodetic>  Planetodetic state
+ * @param <flattening>    flattening coefficient for the central body
+ * @param <eqRadius>      equatorial radius for the central body
+ *
+ * @return Spacecraft orbit state converted from Planetodetic to Cartesian
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodetic,
+                                                      Real flattening, Real eqRadius)
+{
+   //Real Req = 6378.1363;
+   //Real f = 0.0033527;
+   Real Req = eqRadius;
+   Real f = flattening;
+   
+   Real rMag = planetodetic[0];
+   Real lon = planetodetic[1];
+   Real latd = planetodetic[2];
+   Real vMag = planetodetic[3];
+   Real azi = planetodetic[4];
+   Real hfpa = planetodetic[5];
+
+// Check input value
+	// 1) -180 deg <= lon <= 180
+   while ( (lon < -180) || (lon > 180) )
+   {
+	   if (lon > 180)
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Longitude value has to be smaller than 180 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+	   else
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Longitude value has to be bigger than -180 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+   }
+   // 2) -90 deg <= latd <= 90
+   while ( (latd < -90) || (latd > 90) )
+   {
+	   if (latd > 90)
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Planetodetic latitude value has to be smaller than 90 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+	   else
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Planetodetic latitude value has to be bigger than -90 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+   }
+
+   // 3) -90 deg <= hfpa <= 90
+   while ( (hfpa < -90 ) || (hfpa > 90) )
+   {
+	   if (hfpa > 90)
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Horizontal FPA value has to be smaller than 90 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+	   else
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Horizontal FPA value has to be bigger than -90 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+   }
+   // 4) -180 deg <= azi <= 180
+   while ( (azi < -180) || (azi > 180) )
+   {
+	   if (azi > 180)
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Azimuth value has to be smaller than 180 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+	   else
+	   {
+		   std::stringstream errmsg("");
+		   errmsg << "Converting from Planetodetic to Cartesian: ";
+		   errmsg << "Input Azimuth value has to be bigger than -180 deg"<< std::endl;
+		   throw UtilityException(errmsg.str());
+	   }
+   }
+   
+   lon = lon * RAD_PER_DEG;
+   latd = latd * RAD_PER_DEG;
+
+   Real vfpa = 90 - hfpa;
+   
+// convert plantodetic latitude to planetocentric latitude
+   Real e2 = 2*f - f*f;
+   Real tol = 1;
+   Real latg = latd;
+   
+   while(tol >= 1e-13)
+   {
+	   // If latitude is close to 90 deg
+	   if ( Abs(latg - PI/2) < (0.001*RAD_PER_DEG) )
+	   {
+		   MessageInterface::ShowMessage("Latitude is close to 90 deg within 1e-3 deg \n");
+		   MessageInterface::ShowMessage("Therefore Planetocentric latitude is equal to Planetodetic latitude \n");
+		   break;
+	   }
+      Real latg_old = latg;
+      
+      Real x = rMag * Cos(latg_old) * Cos(lon);
+      Real y = rMag * cos(latg_old) * Sin(lon);
+      
+      Real r_xy = Sqrt(x*x + y*y);
+      Real alt = r_xy/Cos(latd) - Req/Sqrt(1-e2*Sin(latd)*Sin(latd));
+      
+      Real Sin2 = Sin(2*latd);
+      Real Sin4 = Sin(4*latd);
+      Real h_hat = alt/Req;
+      Real denom = ( h_hat + 1);
+      
+      latg = latd + (-Sin2/denom)*f + ( (-Sin2)/(2*denom*denom) + (1/(4*denom*denom) + 1/(4*denom))*Sin4 )*f*f;
+      
+      tol = Abs(latg - latg_old);
+   }
+   
+   Rvector6 planetocentric;
+   planetocentric[0] =  rMag; 
+   planetocentric[1] = lon*DEG_PER_RAD;
+   planetocentric[2] = latg*DEG_PER_RAD;
+   planetocentric[3] = vMag;
+   planetocentric[4] = azi;
+   planetocentric[5] = vfpa;
+   
+   // convert planetocentric to cartesian state
+   Rvector6 cartesian = SphericalAZFPAToCartesian(planetocentric);
+   
+   return cartesian;
+} // PlanetodeticToCartesian()
+
+
+
+
+
+//================================ Begin of old code ===========================
+#if 0
 // Modified by M.H.
 //------------------------------------------------------------------------------
 // Rvector6 CartesianToPlanetodetic(const Rvector6& cartesian, Real flattening,
@@ -2659,7 +2885,8 @@ Rvector6 StateConversionUtil::CartesianToPlanetodetic(const Rvector6& cartesian,
    
    return Rvector6(rMag, lon, latd * DEG_PER_RAD, vMag, azi, hfpa);
    
-}
+} // CartesianToPlanetodetic()
+
 
 // Modified by M.H.
 //------------------------------------------------------------------------------
@@ -2730,7 +2957,10 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
    Rvector6 cartesian = SphericalAZFPAToCartesian(planetocentric);
    
    return cartesian;
-}
+} // PlanetodeticToCartesian()
+#endif
+//================================ End of old code ===========================
+
 
 // modified by YK
 //------------------------------------------------------------------------------
