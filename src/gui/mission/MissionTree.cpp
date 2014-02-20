@@ -468,6 +468,12 @@ void MissionTree::ChangeNodeLabel(const wxString &oldLabel)
 //------------------------------------------------------------------------------
 void MissionTree::ChangeNodeColor(const wxTreeItemId &nodeId, UnsignedInt intColor)
 {
+   // Do not change node color for Propagate command for now (LOJ: 2014.02.20)
+   // @todo Need better way to change Propatate command node color since
+   //       some color makes hard to read item text. The better way would be
+   //       changing the background color of icon. (See GMT-4330)
+   #ifdef __CHANGE_NODE_COLOR__
+   
    #ifdef DEBUG_NODE_COLOR
    MessageInterface::ShowMessage
       ("MissionTree::ChangeNodeColor() entered, nodeId=<%p>, intColor=%06X\n",
@@ -483,6 +489,8 @@ void MissionTree::ChangeNodeColor(const wxTreeItemId &nodeId, UnsignedInt intCol
       Refresh();
       Update();
    }
+   
+   #endif
 }
 
 
@@ -4969,6 +4977,12 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
 //------------------------------------------------------------------------------
 void MissionTree::ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
 {
+   // Do not change node color for Propagate command(LOJ: 2014.02.20)
+   // @todo Need better way to change propatate command node color since
+   //       some color makes hard to read item text. The better way would be
+   //       changing the background color of icon. (See GMT-4330)
+   #ifdef __CHANGE_NODE_COLOR__
+   
    std::string cmdTypeName = cmd->GetTypeName();
    
    if (cmdTypeName == "Propagate")
@@ -4989,6 +5003,8 @@ void MissionTree::ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
          Update();
       }
    }
+   
+   #endif
 }
 
 // For Debug
