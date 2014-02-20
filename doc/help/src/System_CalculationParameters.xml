@@ -455,7 +455,7 @@
                     <term>Units</term>
 
                     <listitem>
-                      <para>kg/m^3</para>
+                      <para>kg/km^3</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
