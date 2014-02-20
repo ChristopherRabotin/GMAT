@@ -1094,7 +1094,12 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
    if (spadBFCS == NULL)
    {
       spadBFCS  = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", this,
-                                    NULL, NULL, GetJ2000Body(), solarSystem);
+                                    NULL, NULL, GetJ2000Body(), solarSystem, false);
+      spadBFCS->SetAllowWithoutRates(true);
+      spadBFCS->Initialize();
+      #ifdef DEBUG_SPAD_DATA
+         MessageInterface::ShowMessage(" -------> in SC, just created spadBFCS\n");
+      #endif
    }
    #ifdef DEBUG_SPAD_DATA
       MessageInterface::ShowMessage(" -------> in SC, input to GetSPADSRPArea sun-to-sat  = %12.10f  %12.10f  %12.10f\n",
@@ -2741,6 +2746,14 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id == SPAD_SRP_SCALE_FACTOR)
    {
+      if (value < (-GmatRealConstants::REAL_EPSILON))
+      {
+         SpaceObjectException soe("");
+         soe.SetDetails(errorMessageFormat.c_str(),
+                        GmatStringUtil::ToString(value, 16).c_str(),
+                        "SPADSRPScaleFactor", "Real Number >= 0.0");
+         throw soe;
+      }
       spadSRPScaleFactor = value;
       return spadSRPScaleFactor;
    }

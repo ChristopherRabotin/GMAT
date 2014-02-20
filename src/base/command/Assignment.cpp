@@ -647,7 +647,7 @@ bool Assignment::Validate()
    bool retval = true;
 
    #ifdef DEBUG_VALIDATION
-      MessageInterface::ShowMessage("Assignment::Validate() '%s' entered\n",
+      MessageInterface::ShowMessage("\nAssignment::Validate() '%s' entered\n",
             (lhs + " = " + rhs).c_str());
       MessageInterface::ShowMessage("Assignment command has lhs = %s, "
             "rhs = %s\n", lhs.c_str(), rhs.c_str());
@@ -781,41 +781,11 @@ bool Assignment::Validate()
                }
                else if (lhsDataType == Gmat::RMATRIX_TYPE)
                {
-                  retval = false;
-                  if ((rhsDataType != Gmat::STRING_TYPE) &&
-                      (rhsDataType != Gmat::RMATRIX_TYPE))
-                  {
-                     if (rhsDataType == Gmat::REAL_TYPE)
-                     {
-                        retval = true;
-                        // Check if LHS is 1x1 array
-                        if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
-                        {
-                           Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
-                           #ifdef DEBUG_VALIDATION
-                           MessageInterface::ShowMessage
-                              ("   Checking LHS for 1x1 array, lhsArr=<%p>\n", lhsArr);
-                           #endif
-                           if (lhsArr)
-                           {
-                              #ifdef DEBUG_VALIDATION
-                              MessageInterface::ShowMessage
-                                 ("   rowCount=%d, colCount=%d\n", lhsArr->GetRowCount(), lhsArr->GetColCount());
-                              #endif
-                              if (lhsArr->GetRowCount() != 1 || lhsArr->GetColCount() != 1)
-                              {
-                                 lastErrorMessage = "Left of the equal sign is not 1x1 Array.";
-                                 retval = false;
-                              }
-                           }
-                           else
-                           {
-                              lastErrorMessage = "Left of the equal sign is not valid.";
-                              retval = false;
-                           }
-                        }
-                     }
-                  }
+                  retval = ValidateRmatrix(lhsWrapper, rhsWrapper);
+               }
+               else if (lhsDataType == Gmat::RVECTOR_TYPE) // LOJ: added 2014.02.11
+               {
+                  retval = ValidateRvector(lhsWrapper, rhsWrapper);
                }
                else if (lhsDataType == Gmat::INTEGER_TYPE)
                {
@@ -2065,6 +2035,210 @@ bool Assignment::ValidateArrayElement(ElementWrapper *lhsWrapper,
    }
    return retval;
 }
+
+
+//------------------------------------------------------------------------------
+// bool ValidateRmatrix(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper)
+//------------------------------------------------------------------------------
+bool Assignment::ValidateRmatrix(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage("   LHS is Rmatrix\n");
+   #endif
+   
+   bool retval = false;
+   Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
+   Gmat::ParameterType rhsDataType = rhsWrapper->GetDataType();
+   
+   if ((rhsDataType != Gmat::STRING_TYPE) &&
+       (rhsDataType != Gmat::RMATRIX_TYPE))
+   {
+      if (rhsDataType == Gmat::REAL_TYPE)
+      {
+         retval = true;
+         // Check if LHS is 1x1 array
+         if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+         {
+            Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage
+               ("   Checking LHS for 1x1 array, lhsArr=<%p>\n", lhsArr);
+            #endif
+            if (lhsArr)
+            {
+               #ifdef DEBUG_VALIDATION
+               MessageInterface::ShowMessage
+                  ("   rowCount=%d, colCount=%d\n",
+                   lhsArr->GetRowCount(), lhsArr->GetColCount());
+               #endif
+               //Should || be &&? (LOJ: 2014.02.11)
+               //if (lhsArr->GetRowCount() != 1 || lhsArr->GetColCount() != 1)
+               if (lhsArr->GetRowCount() != 1 && lhsArr->GetColCount() != 1)
+               {
+                  lastErrorMessage = "Left of the equal sign is not 1x1 Array.";
+                  retval = false;
+               }
+            }
+            else
+            {
+               lastErrorMessage = "Left of the equal sign is not valid.";
+               retval = false;
+            }
+         }
+      } // if (rhsDataType == Gmat::REAL_TYPE)
+      else if (rhsDataType == Gmat::RVECTOR_TYPE) // LOJ: added 2014.02.11
+      {
+         retval = true;
+         // Check if LHS is one column or row matrix
+         if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+         {
+            Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage
+               ("   Checking LHS for Mx1 or 1xN array, lhsArr=<%p>\n", lhsArr);
+            #endif
+            if (lhsArr)
+            {
+               Integer rowCount = lhsArr->GetRowCount();
+               Integer colCount = lhsArr->GetColCount();
+               #ifdef DEBUG_VALIDATION
+               MessageInterface::ShowMessage
+                  ("   rowCount=%d, colCount=%d\n", rowCount, colCount);
+               #endif
+               if (rowCount == 1 || colCount == 1)
+               {
+                  // Check if RHS vector has the same size as LHS matrix
+                  if (rhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
+                  {
+                     Parameter *param = (Parameter*)(rhsWrapper->GetRefObject());
+                     Integer vectorSize = param->GetIntegerParameter("VectorSize");
+                     Integer arraySize = rowCount > colCount ? rowCount : colCount;
+                     #ifdef DEBUG_VALIDATION
+                     MessageInterface::ShowMessage
+                        ("   vectorSize=%d, arraySize=%d\n", vectorSize, arraySize);
+                     #endif
+                     if (vectorSize != arraySize)
+                     {
+                        std::string sizeStr = GmatStringUtil::ToString(vectorSize, 1);
+                        lastErrorMessage = "Left of the equal sign is not " + sizeStr + 
+                           "x1 or 1x" + sizeStr + " Array.";
+                        retval = false;
+                     }
+                  }
+               }
+               else
+               {
+                  lastErrorMessage = "Left of the equal sign is not Mx1 or 1xN Array.";
+                  retval = false;
+               }
+            }
+            else
+            {
+               lastErrorMessage = "Left of the equal sign is not valid.";
+               retval = false;
+            }
+         }
+      } // else if (rhsDataType == Gmat::RVECTOR_TYPE)
+   }
+   
+   return retval;
+} // ValidateRmatrix()
+
+
+//------------------------------------------------------------------------------
+// bool ValidateRvector(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper)
+//------------------------------------------------------------------------------
+bool Assignment::ValidateRvector(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage("   LHS is Rvector\n");
+   #endif
+   
+   bool retval = false;
+   Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
+   Gmat::ParameterType rhsDataType = rhsWrapper->GetDataType();
+   
+   if (rhsDataType == Gmat::STRING_TYPE)
+   {
+      // Check if RHS has vector string form such as [0 0 0 1]
+      RealArray arr = GmatStringUtil::ToRealArray(rhs);
+      Integer rhsSize = arr.size();
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   RHS is a string: %s\n", rhs.c_str());
+      MessageInterface::ShowMessage("   RHS has %d elements\n", rhsSize);
+      #endif
+      
+      if (rhsSize > 0)
+      {
+         retval = true;
+      }
+      else
+      {
+         std::string sizeStr = GmatStringUtil::ToString(rhsSize, 1);
+         lastErrorMessage = "Right of the equal sign is not " + sizeStr + 
+            " element Vector.";
+         retval = false;
+      }
+   }
+   else
+   {
+      if (rhsDataType == Gmat::RMATRIX_TYPE) 
+      {
+         retval = true;
+         // Check if RHS is one column or row matrix
+         if (rhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+         {
+            Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage
+               ("   Checking RHS for Mx1 or 1xN array, rhsArr=<%p>\n", rhsArr);
+            #endif
+            if (rhsArr)
+            {
+               Integer rowCount = rhsArr->GetRowCount();
+               Integer colCount = rhsArr->GetColCount();
+               #ifdef DEBUG_VALIDATION
+               MessageInterface::ShowMessage
+                  ("   rowCount=%d, colCount=%d\n", rowCount, colCount);
+               #endif
+               if (rowCount == 1 || colCount == 1)
+               {
+                  // Check if LHS vector has the same size as RHS matrix
+                  if (lhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
+                  {
+                     Parameter *param = (Parameter*)(lhsWrapper->GetRefObject());
+                     Integer vectorSize = param->GetIntegerParameter("VectorSize");
+                     Integer arraySize = rowCount > colCount ? rowCount : colCount;
+                     #ifdef DEBUG_VALIDATION
+                     MessageInterface::ShowMessage
+                        ("   vectorSize=%d, arraySize=%d\n", vectorSize, arraySize);
+                     #endif
+                     if (vectorSize != arraySize)
+                     {
+                        std::string sizeStr = GmatStringUtil::ToString(vectorSize, 1);
+                        lastErrorMessage = "Left of the equal sign is not " + sizeStr + 
+                           "x1 or 1x" + sizeStr + " Array.";
+                        retval = false;
+                     }
+                  }
+               }
+               else
+               {
+                  lastErrorMessage = "Left of the equal sign is not Mx1 or 1xN Array.";
+                  retval = false;
+               }
+            }
+            else
+            {
+               lastErrorMessage = "Left of the equal sign is not valid.";
+               retval = false;
+            }
+         }
+      } // else if (rhsDataType == Gmat::RVECTOR_TYPE)
+   }
+   
+   return retval;
+} // ValidateRvector()
 
 
 //------------------------------------------------------------------------------

@@ -297,6 +297,8 @@ protected:
        MRPS,					   // Dunn Added
        DIRECTION_COSINE_MATRIX,
        ANGULAR_VELOCITY,           // degrees/second
+       BODY_SPIN_AXIS,             // PrecessingSpinner
+       NUTATION_REFERENCE_VECTOR,  // PrecessingSpinner
        EndOtherReps
    };
    

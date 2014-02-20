@@ -61,6 +61,10 @@ public:
    virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
    virtual bool                           RequiresCelestialBodyOrigin() const;
    virtual bool                           HasCelestialBodyOrigin() const;
+   // We need these extra methods to manage the case where the origin is a
+   // Spacecraft but we don't need to worry about attitude rates
+   virtual void                           SetAllowWithoutRates(bool allow);
+   virtual bool                           AllowWithoutRates() const;
 
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
@@ -169,7 +173,7 @@ public:
                             const std::string &csName, const std::string &axesType,
                             SpacePoint *origin, SpacePoint *primary,
                             SpacePoint *secondary, SpacePoint *j2000Body,
-                            SolarSystem *solarSystem);
+                            SolarSystem *solarSystem, bool initializeIt = true);
    
 protected:
 

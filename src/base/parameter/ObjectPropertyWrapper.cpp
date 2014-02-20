@@ -455,6 +455,49 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    return true;
 }
 
+
+//---------------------------------------------------------------------------
+//  bool SetRvector(const Rvector &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Real value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetRvector(const Rvector &toValue)
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRvector, about to set value to %s\n", toValue.ToString().c_str());
+      #endif
+      object->SetRvectorParameter(propID, toValue);
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRvector, value has been set to %s\n", toValue.ToString().c_str());
+      #endif
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      std::stringstream errmsg;
+      errmsg << be.GetFullMessage() << std::endl;
+      throw ParameterException(errmsg.str());
+   }
+   
+   return true;
+}
+
+
 //---------------------------------------------------------------------------
 // std::string EvaluateString() const
 //---------------------------------------------------------------------------

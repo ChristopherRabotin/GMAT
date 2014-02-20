@@ -33,11 +33,16 @@ class GMAT_API Date
 public:
    
     // exception(s)
-    class TimeRangeError : public BaseException
-          { public:  TimeRangeError(const std::string& message =
-           "Date error: date or time out of specified range")
-           : BaseException(message) {}; };
-   
+   class TimeRangeError : public BaseException
+         { public:  TimeRangeError(const std::string& message =
+          "Date error: date or time out of specified range")
+          : BaseException(message) {}; };
+
+   class LeapYearError : public BaseException
+         { public:  LeapYearError(const std::string& message =
+          "Date error: day number is invalid for specified year")
+          : BaseException(message) {}; };
+
     Integer GetYear() const;
     Integer GetMonth() const;
     Integer GetDay() const;

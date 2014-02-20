@@ -123,6 +123,10 @@ public:
    
    Rvector GetRow(int r) const;
    Rvector GetColumn(int c) const;
+   Rvector GetRowOrColumn() const;
+   
+   void    MakeOneRowMatrix(const Rvector &vec);
+   void    MakeOneColumnMatrix(const Rvector &vec);
    
    const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
                                     Integer w = GmatGlobal::DATA_WIDTH);

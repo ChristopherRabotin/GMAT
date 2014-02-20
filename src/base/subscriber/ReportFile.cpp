@@ -21,6 +21,9 @@
  */
 //------------------------------------------------------------------------------
 
+#include <stdio.h>
+#include <iomanip>
+#include <sstream>
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"           // for Instance()
@@ -29,8 +32,6 @@
 #include "StringUtil.hpp"          // for GetArrayName()
 #include "FileUtil.hpp"            // for GmatFileUtil::
 #include "RealUtilities.hpp"
-#include <iomanip>
-#include <sstream>
 
 //#define DEBUG_REPORTFILE_OPEN
 //#define DEBUG_REPORTFILE_SET
@@ -459,6 +460,14 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
                   break;
                }
+            case Gmat::RVECTOR_TYPE:
+               {
+                  Rmatrix rmat;
+                  Rvector rvec = wrapperArray[i]->EvaluateRvector();
+                  rmat.MakeOneRowMatrix(rvec);
+                  colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
+                  break;
+               }
             case Gmat::STRING_TYPE:
                {
                   sval = wrapperArray[i]->EvaluateString();
@@ -466,8 +475,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   break;
                }
             default:
-               throw GmatBaseException
-                  ("Cannot write \"" + desc + "\" due to unimplemented "
+               throw SubscriberException
+                  ("ReportFile cannot write \"" + desc + "\" due to unimplemented "
                    "Parameter data type");
             }
             break;
@@ -562,6 +571,10 @@ bool ReportFile::Initialize()
        active, isInitialized, mNumParams, usedByReport, filename.c_str());
    #endif
    
+   // delete old file on initialization
+   if (GmatFileUtil::DoesFileExist(GetPathAndFileName()))
+	   remove(GetPathAndFileName().c_str());
+
    // Check if there are parameters selected for report
    if (active)
    {

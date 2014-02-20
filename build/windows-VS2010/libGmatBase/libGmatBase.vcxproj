@@ -389,6 +389,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassReal.cpp" />
@@ -438,6 +439,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\Rmat33Var.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Rmat66Var.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Rvec6Var.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\SpacecraftData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\SphericalParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\StringObjectWrapper.cpp" />
@@ -809,6 +811,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassReal.hpp" />
@@ -861,6 +864,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\Rmat33Var.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Rmat66Var.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Rvec6Var.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\SpacecraftData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\SphericalParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\StringObjectWrapper.hpp" />

@@ -60,8 +60,8 @@ SPADFileReader::SPADFileReader() :
    numData       (0),
    azCount       (0),
    elCount       (0),
-   azStepSize    (0),
-   elStepSize    (0)
+   azStepSize    (-999),
+   elStepSize    (-999)
 {
    spadData.clear();
    spadMotion.clear();
@@ -90,6 +90,7 @@ SPADFileReader::SPADFileReader(const SPADFileReader &copy) :
       Rvector3 xyz = copy.spadData.at(ii)->force;
       AddDataRecord(az, el, xyz);
    }
+
    spadMotion.clear();
    for (unsigned int ii = 0; ii < copy.spadMotion.size(); ii++)
    {
@@ -226,6 +227,12 @@ void SPADFileReader::Initialize()
       errmsg += spadFile + "\" does not match the number of data records read.\n";
       throw UtilityException(errmsg);
    }
+   if ((azCount * elCount) != recordCount)
+   {
+      std::string errmsg = "\"Record count\" value from SPAD file ";
+      errmsg += spadFile + "\" does not match the number of data records expected.\n";
+      throw UtilityException(errmsg);
+   }
 
    isInitialized = true;
 }
@@ -295,6 +302,7 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
    Rvector3 lowHigh  = GetForceAt(azLow,  elHigh);
    Rvector3 highLow  = GetForceAt(azHigh, elLow);
    Rvector3 highHigh = GetForceAt(azHigh, elHigh);
+
    #ifdef DEBUG_SPAD_FILE_AREA
       MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, az = %12.10f,  el = %12.10f\n",
             azimuth, elevation);
@@ -565,6 +573,13 @@ bool SPADFileReader::ParseFile()
                   errmsg            += part2 + " to an Integer.\n";
                   throw UtilityException(errmsg);
                }
+               if ((theID != 1) && (theID != 2))
+               {
+                  std::string errmsg = "Only allowed values for \"Motion\" ";
+                  errmsg            += "field in SPAD file meta data are ";
+                  errmsg            += "\"1\" or \"2\"\n";
+                  throw UtilityException(errmsg);
+               }
                numMotion++;
                newSpadMotion = new SPADMotionRecord(theID);
                #ifdef DEBUG_MOTION_RECORDS
@@ -601,9 +616,16 @@ bool SPADFileReader::ParseFile()
             }
             else if (part1 == "Step")
             {
-               Real theStep;
-               GmatStringUtil::ToReal(part2, theStep);
-               newSpadMotion->itsStep = theStep;
+               Integer theStep;
+               GmatStringUtil::ToInteger(part2, theStep);
+               if (theStep <= 0)
+               {
+                  std::string errmsg = "Only allowed value for \"Step\" ";
+                  errmsg            += "field in SPAD file meta data is ";
+                  errmsg            += "a positive, non-zero Integer\n";
+                  throw UtilityException(errmsg);
+               }
+               newSpadMotion->itsStep = (Real) theStep;
             }
             else if (part1 == "Record count")
             {
@@ -830,6 +852,13 @@ void SPADFileReader::ValidateMetaData()
 
    azStepSize = az->itsStep;
    elStepSize = el->itsStep;
+   if ((azStepSize == -999) || (elStepSize == -999))
+   {
+      std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
+      errmsg += "is missing on SPAD file ";
+      errmsg += spadFile + ".\n";
+      throw UtilityException(errmsg);
+   }
 
    azCount    = 360./ azStepSize + 1;
    elCount    = 180./ elStepSize + 1;
@@ -867,13 +896,14 @@ void SPADFileReader::ValidateData()
    // Check data for extremes of ranges
    for (unsigned int ii = 0; ii < spadData.size(); ii++)
    {
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->azimuth, -180.0))
+      SPADDataRecord *sData = spadData.at(ii);
+      if (GmatMathUtil::IsEqual(sData->azimuth, -180.0))
          lowAzFound  = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->azimuth, 180.0))
+      if (GmatMathUtil::IsEqual(sData->azimuth, 180.0))
          highAzFound = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->elevation, -90.0))
+      if (GmatMathUtil::IsEqual(sData->elevation, -90.0))
          lowElFound  = true;
-      if (GmatMathUtil::IsEqual(spadData.at(ii)->elevation, 90.0))
+      if (GmatMathUtil::IsEqual(sData->elevation, 90.0))
          highElFound = true;
    }
    if (!lowAzFound || !highAzFound)
@@ -900,6 +930,20 @@ void SPADFileReader::ValidateData()
          errmsg         += "step size.";
       }
       errmsg            += "\n";
+      throw UtilityException(errmsg);
+   }
+   // Check to see if the data really has the step sizes it says it has
+   try
+   {
+      Real     nextAz     = -180.00 + azStepSize;
+      Real     nextEl     = -90.00  + elStepSize;
+      Rvector3 nextAzEl   = GetForceAt(nextAz, nextEl);
+   }
+   catch (UtilityException &ue)
+   {
+      std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
+      errmsg += "does not equal the actual step size between data records on ";
+      errmsg += "SPAD file " + spadFile + ".\n";
       throw UtilityException(errmsg);
    }
 }

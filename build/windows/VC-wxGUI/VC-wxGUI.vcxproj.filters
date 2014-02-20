@@ -2289,6 +2289,12 @@
     <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4357,6 +4363,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp">
       <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
+      <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

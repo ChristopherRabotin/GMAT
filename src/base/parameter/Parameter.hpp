@@ -119,6 +119,7 @@ public:
    virtual const std::string& GetString() const;
    
    virtual void               SetReal(Real val);
+   virtual void               SetRvector(const Rvector &val);
    virtual void               SetRvector6(const Rvector6 &val);
    virtual void               SetRmatrix66(const Rmatrix66 &mat);
    virtual void               SetRmatrix33(const Rmatrix33 &mat);
@@ -126,6 +127,7 @@ public:
    virtual void               SetString(const std::string &val);
    
    virtual Real               EvaluateReal();
+   virtual const Rvector&     EvaluateRvector();
    virtual const Rvector6&    EvaluateRvector6();
    virtual const Rmatrix66&   EvaluateRmatrix66();
    virtual const Rmatrix33&   EvaluateRmatrix33();

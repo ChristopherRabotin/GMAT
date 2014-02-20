@@ -42,8 +42,8 @@ public:
    
    Real GetReal(Integer item);
    void SetReal(Integer item, Real value);
-   std::string GetString(Integer item);
-   void        SetString(Integer item, const std::string &value);
+   Rvector GetRvector(Integer item);
+   void SetRvector(Integer item, const Rvector &value);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);

@@ -1117,22 +1117,30 @@ std::string FminconOptimizer::GetProgressString()
 
          case FINISHED:
             if (converged)
+            {
                progress << "\n*** Optimization Completed in " << iterationsTaken
                         << " passes through the Solver Control Sequence\n"
                         << "*** The Optimizer Converged!";
+
+               status = CONVERGED;
+            }
             else
+            {
                progress << "\n*** Optimization did not converge in "
                         << iterationsTaken
                         << " passes through the Solver Control Sequence";
-                     
+               status = FAILED;
+            }         
             if ((iterationsTaken >= maxIterations) && (converged == false))
+            {
                progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                         << "!!! WARNING: Optimizer did NOT converge in "
                         << maxIterations << " iterations!"
                         << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-            
+               status = EXCEEDED_ITERATIONS;
+            }
             progress << "\nFinal Variable values:\n";
             // Iterate through the variables, writing them to the string
             for (current = variableNames.begin(), i = 0;

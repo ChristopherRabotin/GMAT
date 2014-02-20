@@ -59,6 +59,9 @@ public:
    virtual const Rmatrix&      EvaluateArray() const;
    virtual bool                SetArray(const Rmatrix &toValue);
    
+   virtual const Rvector&      EvaluateRvector() const;
+   virtual bool                SetRvector(const Rvector &toValue);
+   
    virtual GmatBase*           EvaluateObject() const;
    virtual bool                SetObject(const GmatBase* obj);
    

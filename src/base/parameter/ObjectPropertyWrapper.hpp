@@ -55,6 +55,7 @@ public:
    
    virtual Real                EvaluateReal() const;
    virtual bool                SetReal(const Real toValue);
+   virtual bool                SetRvector(const Rvector &toValue);
    virtual std::string         EvaluateString() const;
    virtual bool                SetString(const std::string &toValue); 
    virtual std::string         EvaluateOnOff() const;

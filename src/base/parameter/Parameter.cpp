@@ -710,6 +710,24 @@ void Parameter::SetReal(Real val)
 
 
 //------------------------------------------------------------------------------
+// void SetRvector(const Rvector &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets Rvector value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetRvector(const Rvector &val)
+{
+   throw ParameterException
+      ("Parameter: SetRvector6(): " + this->GetTypeName() + " has no "
+       "implementation of SetRvector6().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
 // void SetRvector6(const Rvector6 &val)
 //------------------------------------------------------------------------------
 /**
@@ -813,6 +831,24 @@ Real Parameter::EvaluateReal()
    throw ParameterException
       ("Parameter: EvaluateReal(): " + this->GetTypeName() + " has no "
        "implementation of EvaluateReal().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// const Rvector& EvaluateRvector()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated parameter value.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+const Rvector& Parameter::EvaluateRvector()
+{
+   throw ParameterException
+      ("Parameter: EvaluateRvector(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateRvector().\nMay be an invalid call to this "
        "function.\n");
 }
 

@@ -1352,6 +1352,67 @@ Rvector Rmatrix::GetColumn(int c) const
    return rvec;
 }
 
+//------------------------------------------------------------------------------
+// Rvector GetRowOrColumn() const
+//------------------------------------------------------------------------------
+/**
+ * Returns row or column vector if matrix is one dimensional array (1xN or Mx1 matrix)
+ */
+//------------------------------------------------------------------------------
+Rvector Rmatrix::GetRowOrColumn() const
+{
+   Rvector rvec;
+   if (GetNumRows() == 1 || GetNumColumns() == 1)
+   {
+      if (GetNumRows() == 1)
+         rvec = GetRow(0);
+      else
+         rvec = GetColumn(0);
+   }
+   else
+      throw UtilityException
+         ("Rmatrix::GetRowOrColumn() The matrix has more than one row and column");
+   
+   return rvec;
+}
+
+//------------------------------------------------------------------------------
+// void MakeOneRowMatrix(const Rvector &vec)
+//------------------------------------------------------------------------------
+/*
+ * Makes one row matrix by resizing the matrix to the size of input
+ * vector and copying the value
+ *
+ */
+//------------------------------------------------------------------------------
+void Rmatrix::MakeOneRowMatrix(const Rvector &vec)
+{
+   // Reset size to match input vector
+   Integer vecSize = vec.GetSize();
+   SetSize(1, vecSize);
+   for (Integer j = 0; j < vecSize; j++)
+      SetElement(0, j, vec(j));
+}
+
+
+//------------------------------------------------------------------------------
+// void MakeOneColumnMatrix(const Rvector &vec)
+//------------------------------------------------------------------------------
+/*
+ * Makes one column matrix by resizing the matrix to the size of input
+ * vector and copying the value
+ *
+ */
+//------------------------------------------------------------------------------
+void Rmatrix::MakeOneColumnMatrix(const Rvector &vec)
+{
+   // Reset size to match input vector
+   Integer vecSize = vec.GetSize();
+   SetSize(vecSize, 1);
+   for (Integer i = 0; i < vecSize; i++)
+      SetElement(i, 0, vec(i));
+}
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
