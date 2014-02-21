@@ -99,6 +99,7 @@ ObTypeFactory::ObTypeFactory(const ObTypeFactory& fact) :
    {
       creatables.push_back("GMATInternal");
 	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
+	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
 	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
    }
 }
