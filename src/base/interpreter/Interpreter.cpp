@@ -7514,7 +7514,10 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
       if (obs != NULL)
       {
          if (obs->IsOfType(Gmat::OBTYPE))
+		 {
+			obj->SetStringParameter("Format", value1);									// made changes by TUAN NGUYEN		fix Bug 12 in ticket GMT-4314
             retval = obj->SetRefObject(obs, Gmat::OBTYPE);
+		 }
       }
       else
          throw InterpreterException("Failed to create a " + value +
