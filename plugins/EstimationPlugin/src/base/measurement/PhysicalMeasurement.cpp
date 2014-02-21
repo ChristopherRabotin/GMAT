@@ -893,13 +893,23 @@ void PhysicalMeasurement::SetHardwareDelays(bool loadEvents)
 ///// These methods need to be documented
 Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
 {
+   if (rampTB == NULL)
+	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   if ((*rampTB).size() == 0)
+	   throw MeasurementException("Error: No data is in ramp table\n");
+
+   if (t <= (*rampTB)[0].epoch)
+	   return (*rampTB)[0].uplinkBand;
+   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+	   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+
    // search for interval which contains time t:
    Real upBand = 0;
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
    {
       if (t < (*rampTB)[i].epoch)
 	  {
-         upBand = (*rampTB)[i-1].uplinkBand;      
+         upBand = (*rampTB)[i-1].uplinkBand;
 		 break;
 	  }
    }
@@ -909,6 +919,16 @@ Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
 
 Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
 {
+   if (rampTB == NULL)
+	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   if ((*rampTB).size() == 0)
+	   throw MeasurementException("Error: No data is in Ramp table\n");
+
+   if (t <= (*rampTB)[0].epoch)
+	   return (*rampTB)[0].rampFrequency;
+   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+	   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+
    // search for interval which contains time t:
    UnsignedInt interval_index = 0;
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
