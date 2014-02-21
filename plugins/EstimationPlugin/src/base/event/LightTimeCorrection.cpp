@@ -161,8 +161,9 @@ Real LightTimeCorrection::Evaluate()
 
    Real vals;
 
+   Real tolerance1 = 1.0e-10;
+
    oldRange = range;
-//   MessageInterface::ShowMessage("------------Evaluate-------------\n");
    range = CalculateRange();
 
    // Alternative approach: Difference the range from light distance
@@ -180,20 +181,13 @@ Real LightTimeCorrection::Evaluate()
    #endif
 
    // Located if magnitude of the event function is smaller than tolerance
-   if (GmatMathUtil::Abs(vals) < tolerance)
+   if (GmatMathUtil::Abs(vals) < max(tolerance, tolerance1*range))
    {
       status = LOCATED;
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("Event located; "
                "status is %d\n", status);
       #endif
-
-
-//      Real epoch;
-//      if (participants[0]->IsOfType(Gmat::SPACEOBJECT))
-//         epoch = ((SpaceObject*)participants[0])->GetEpoch();
-//      else
-//         epoch = ((SpaceObject*)participants[1])->GetEpoch();
    }
 
    #ifdef DEBUG_LIGHTTIME
