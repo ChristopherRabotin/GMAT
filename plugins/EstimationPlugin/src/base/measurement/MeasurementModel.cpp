@@ -35,7 +35,7 @@
 //#define DEBUG_HARDWARE
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_SET_CORRECTION
-//#define DEBUG_MEASUREMENT_CALCULATION							// made changes by TUAN NGUYEN
+//#define DEBUG_MEASUREMENT_CALCULATION								// made changes by TUAN NGUYEN
 //#define DEBUG_BIAS
 //#define DEBUG_SET_REF_OBJECT
 //#define DEBUG_CONSTRUCTION
@@ -146,6 +146,7 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    observationStreamName   (mm.observationStreamName),
    rampTableStreamName     (mm.rampTableStreamName),			// made changes by TUAN NGUYEN
    participantNames        (mm.participantNames),
+   participants            (mm.participants),					// made changes by TUAN NGUYEN for Bug 12 in ticket GMT-4314
    participantHardwareNames(mm.participantHardwareNames),
    measurementType         (mm.measurementType),
    theData                 (NULL),
@@ -173,6 +174,7 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
 
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("MeasurementModel copy construction <%p> name = '%s':   measurement<%p '%s'>\n", this, this->GetName().c_str(), measurement, measurement->GetName().c_str());
+   MessageInterface::ShowMessage("participants.size() = %d\n",participants.size());
 #endif
 
 }
@@ -200,6 +202,7 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       observationStreamName   = mm.observationStreamName;
 	  rampTableStreamName     = mm.rampTableStreamName;				// made changes by TUAN NGUYEN
       participantNames        = mm.participantNames;
+	  participants            = mm.participants;					// made changes by TUAN NGUYEN   for Bug 12 in ticket GMT-4314
       participantHardwareNames= mm.participantHardwareNames;
       measurementType         = mm.measurementType;
       theData                 = NULL;
@@ -1785,7 +1788,8 @@ Integer MeasurementModel::GetOwnedObjectCount()
 //------------------------------------------------------------------------------
 ObjectArray& MeasurementModel::GetRefObjectArray(const std::string & typeString)
 {
-   return GmatBase::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));				// made changes by TUAN NGUYEN for Bug 12 in ticket GMT-4314
+//   return GmatBase::GetRefObjectArray(typeString);
 }
 
 
@@ -1849,6 +1853,9 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
 {
+   if (Gmat::SPACEOBJECT)								// made changes by TUAN NGUYEN  for Bug 12 in ticket GMT-4314
+	   return participants;								// made changes by TUAN NGUYEN
+   
    return GmatBase::GetRefObjectArray(type);
 }
 
@@ -1951,36 +1958,36 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
    if (measurement->IsOfType("PhysicalMeasurement"))
    {
       // Passing ramp table to measurement object
-      ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);										// made changes by TUAN NGUYEN
+      ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);									// made changes by TUAN NGUYEN
 
       // Passing observation data to measurement object
-      ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);					// made changes by TUAN NGUYEN
+      ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);				// made changes by TUAN NGUYEN
    }
-
+   
    if (forObservation != NULL)
    {
-	  if (forObservation->dataFormat == "GMAT_OD")												// made changes by TUAN NGUYEN
+	  if (forObservation->dataFormat == "GMAT_OD")													// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	
          ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);		// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN 
 	  }
-	  else 
-	  if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
+	  else if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
 		 ((AveragedDoppler*)measurement)->SetRealParameter("AveragingInterval", forObservation->dopplerCountInterval);		// made changes by TUAN NGUYEN
 	  }
+      
 	  if (measurement->IsOfType("PhysicalMeasurement"))
       {
          ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);					// made changes by TUAN NGUYEN
       }
    }
 
-
+   
    // Specifying the value of calculated measurement C:
    measurement->CalculateMeasurement(withEvents);
-
+   
    // Add in the Biases if the measurement was feasible
    if (theData->isFeasible)
    {
@@ -2310,3 +2317,4 @@ void MeasurementModel::SetCorrection(const std::string& correctionName,
       ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName);
    }
 }
+
