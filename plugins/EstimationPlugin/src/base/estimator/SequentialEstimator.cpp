@@ -300,7 +300,11 @@ void SequentialEstimator::CompleteInitialization()
 
    // Now load up the observations
    measManager.PrepareForProcessing();
-   measManager.LoadObservations();
+//   measManager.LoadObservations();
+   UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
+   if (numRec == 0)														// made changes by TUAN NGUYEN
+     throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
+
 ///// Make more generic?
    measManager.LoadRampTables();											// made changes by TUAN NGUYEN
 
