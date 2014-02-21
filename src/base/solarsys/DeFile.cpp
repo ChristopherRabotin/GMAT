@@ -34,6 +34,7 @@
 #include "DeFile.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>
 
 //#define __UNIT_TEST__
 
@@ -301,9 +302,15 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    #endif
    
    if (atTime.Get() < mA1FileBeg)
-      throw PlanetaryEphemException("Attempting to read data for an epoch "
-            "earlier than the beginning of the current DE File; exiting.\n");
-
+   {
+	 std::stringstream ss;																// made changes by TUAN NGUYEN
+	  ss << "Attempting to read data for an epoch (" << atTime.Get()					// made changes by TUAN NGUYEN
+		  << ") earlier than the beginning of the current DE File (" << mA1FileBeg		// made changes by TUAN NGUYEN
+		  << "); exiting.\n";															// made changes by TUAN NGUYEN
+	  throw PlanetaryEphemException(ss.str());											// made changes by TUAN NGUYEN
+//      throw PlanetaryEphemException("Attempting to read data for an epoch "			// made changes by TUAN NGUYEN
+//            "earlier than the beginning of the current DE File; exiting.\n");			// made changes by TUAN NGUYEN
+   }
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
    // currently assuming Earth-Centered Equatorial
