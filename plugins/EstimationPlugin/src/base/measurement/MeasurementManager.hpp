@@ -51,7 +51,8 @@ public:
    bool                    ProcessingComplete();
    bool                    Finalize();
 
-   bool                    CalculateMeasurements(bool withEvents = false);
+// bool                    CalculateMeasurements(bool withEvents = false);							// made changes for Bug 8 in ticket GMT-4314
+   bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false);	// made changes for Bug 8 in ticket GMT-4314
    const std::vector<RealArray>&
                            CalculateDerivatives(GmatBase *obj, Integer wrt,
                                                 Integer forMeasurement);
@@ -83,7 +84,7 @@ public:
    IntegerArray&           GetValidMeasurementList();
 
    // Observation reader methods needed for estimation
-   void                    LoadObservations();
+   UnsignedInt             LoadObservations();									// made changes by TUAN NGUYEN
    
 ///// TBD: Do we want something more generic here?
    // Ramp tables reader method needed for simulator							// made changes by TUAN NGUYEN
@@ -93,7 +94,7 @@ public:
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
    ObservationData*        GetObsDataObject(const Integer observationToGet = -1);	// made changes by TUAN NGUYEN
-   void                    AdvanceObservation();
+   bool                    AdvanceObservation();								// made changes by TUAN NGUYEN		for Bug 8 in ticket GMT-4314
    void                    Reset();
 
 protected:
