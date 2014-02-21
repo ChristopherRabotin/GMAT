@@ -48,7 +48,7 @@ GmatODType::GmatODType(const std::string withName) :
    dataPrecision  (6)
 {
    #ifdef DEBUG_ODTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Creating a GMAT_OD obtype\n");
+	  MessageInterface::ShowMessage("GmatODType default constructor (a GMAT_OD obtype) <%s,%p>\n", GetName().c_str(), this);
    #endif
 
    header = "% GMAT OD Measurement Data File\n\n";
@@ -81,7 +81,7 @@ GmatODType::GmatODType(const GmatODType& ot) :
    dataPrecision  (ot.dataPrecision)
 {
    #ifdef DEBUG_ODTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Copying a GMAT_OD obtype\n");
+	  MessageInterface::ShowMessage("GmatODType copy constructor (a GMAT_OD obtype) from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
    #endif
 }
 
@@ -146,10 +146,10 @@ bool GmatODType::Initialize()
 #ifdef DEBUG_ODTYPE_CREATION_INITIALIZATION
    MessageInterface::ShowMessage("GmatODType::Initialize() Executing\n");
 #endif
+   
+   ObType::Initialize();
 
-   bool retval = false;
-
-   return retval;
+   return true;
 }
 
 
@@ -231,6 +231,7 @@ bool GmatODType::Open(bool forRead, bool forWrite, bool append)
          MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
                fullPath.c_str(), mode);
       #endif
+	  
       theStream.open(fullPath.c_str(), mode);
    }
 

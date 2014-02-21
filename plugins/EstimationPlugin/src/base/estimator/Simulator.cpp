@@ -239,8 +239,8 @@ void Simulator::WriteToTextFile(SolverState stateToUse)
    #ifdef DEBUG_SIMULATOR_WRITE
    MessageInterface::ShowMessage
       ("Sim::WriteToTextFile() entered, stateToUse=%d, solverTextFile='%s', "
-       "textFileOpen=%d, initialized=%d\n", stateToUse, solverTextFile.c_str(),
-       textFile.is_open(), initialized);
+       "textFileOpen=%d, isInitialized=%d\n", stateToUse, solverTextFile.c_str(),
+       textFile.is_open(), isInitialized);
    #endif
 
    if (!showProgress)
@@ -1397,7 +1397,7 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   if (measManager.CalculateMeasurements() == false)
+   if (measManager.CalculateMeasurements(true, false) == false)					// made changes by TUAN NGUYEN  for Bug 8 in ticket GMT-4314
    {
       // No measurements were possible
       FindNextSimulationEpoch();
@@ -1475,15 +1475,15 @@ void Simulator::CalculateData()
 void Simulator::SimulateData()
 {
    // Tell the measurement manager to add noise and write the measurements
-   if (measManager.CalculateMeasurements(true) == true)
+   if (measManager.CalculateMeasurements(true, true) == true)
    {
       if (measManager.WriteMeasurements() == false)
-         /*throw EstimatorException("Measurement writing failed")*/;
+         throw EstimatorException("Measurement writing failed");
    }
-
+   
    // Prep for the next measurement simulation
    FindNextSimulationEpoch();
-
+   
    if ((currentEpoch < simulationEnd) && (nextSimulationEpoch < simulationEnd))
       currentState = PROPAGATING;
    else

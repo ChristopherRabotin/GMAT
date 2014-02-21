@@ -135,6 +135,8 @@ void  BatchEstimatorInv::Copy(const GmatBase* orig)
  * This method collects the data needed for estimation.
  */
 //------------------------------------------------------------------------------
+#include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
 void BatchEstimatorInv::Accumulate()
 {
    #ifdef DEBUG_ACCUMULATION
@@ -144,29 +146,51 @@ void BatchEstimatorInv::Accumulate()
    // Measurements are possible!
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
-   const std::vector<ListItem*> *stateMap = esm.GetStateMap();
-
+   
    hTilde.clear();
+
+   // Get state map, measurement models, and measurement data
+   const std::vector<ListItem*> *stateMap = esm.GetStateMap();
+   modelsToAccess = measManager.GetValidMeasurementList();
+   const ObservationData *currentObs =  measManager.GetObsData();
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
-   #endif
-   modelsToAccess = measManager.GetValidMeasurementList();
-   #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
+      MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
    #endif
 
+   // throw an exception when no measurement model is associated with the current observation data
+   if (modelsToAccess.size() == 0)
+   {
+      MessageInterface::ShowMessage("Current observation data: %.12lf   %s  %d  ", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+	  for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
+	     MessageInterface::ShowMessage("%s  ", currentObs->participantIDs[i].c_str());
+	  MessageInterface::ShowMessage("%.12lf\n", currentObs->value[0]);
+
+	  MessageInterface::ShowMessage("List of measurement models used in '%s' estimator:\n", GetName().c_str());
+	  MeasurementModel* mm;
+	  for (UnsignedInt i=0; (mm = measManager.GetMeasurementObject(i)) != NULL; ++i)
+	  {
+		 ObjectArray participants = mm->GetRefObjectArray("SpaceObject");
+		 MessageInterface::ShowMessage("  Measurement model '%s' has %d participants:\n", mm->GetName().c_str(), participants.size());
+		 
+		 for (UnsignedInt j=0; j < participants.size(); ++j)
+		 {
+			if (participants[j]->IsOfType(Gmat::SPACECRAFT))
+			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((Spacecraft*)participants[j])->GetStringParameter("Id").c_str());
+			else if (participants[j]->IsOfType(Gmat::GROUND_STATION))
+			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((GroundstationInterface*)participants[j])->GetStringParameter("Id").c_str());
+			else
+			   throw EstimatorException("Error: participant '" + participants[j]->GetName() + "' is neither spacecraft nor ground station\n");
+		 }
+	  }
+	  throw EstimatorException("Error: No measurement model used in estimator is associated with current observation data:\n");
+   }
    
    MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);
    Real maxLimit = measModel->GetRealParameter("ResidualMax");
 
-   // Get the current observation data
-   const ObservationData *currentObs =  measManager.GetObsData();
-//MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
-
-   int numMeasModels = modelsToAccess.size();
-   if (numMeasModels == 0)
-	   throw EstimatorException("Error: No measurement model was defined in script for running estimation.\n");
 
    int count = measManager.Calculate(modelsToAccess[0], true);
    if (count >= 1)
@@ -293,6 +317,7 @@ void BatchEstimatorInv::Accumulate()
          #endif
       }
 
+//	  MessageInterface::ShowMessage("observation data No.:%d\n", hAccum.size());
       // Accumulate the observed - calculated difference
 //      const ObservationData *currentObs =  measManager.GetObsData();
       Real ocDiff;
@@ -315,10 +340,10 @@ void BatchEstimatorInv::Accumulate()
 		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-		    MessageInterface::ShowMessage("Observation data: %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     M = %.12le  frequency = %.12le\n",
-				currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
+		    MessageInterface::ShowMessage("Observation data: %s  %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     frequency = %.12le\n",
+				currentObs->typeName.c_str(), currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
 				calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
-				ocDiff, currentObs->rangeModulo, currentObs->uplinkFreq);
+				ocDiff, calculatedMeas->uplinkFreq);
          #endif
 //		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
 //                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
@@ -420,12 +445,12 @@ void BatchEstimatorInv::Accumulate()
       MessageInterface::ShowMessage("Advancing to the next measurement\n");
    #endif
 
-   // Advance to MeasMan the next measurement and get its epoch
-   measManager.AdvanceObservation();
+   // Advance to the next measurement and get its epoch
+   bool isEndOfTable = measManager.AdvanceObservation();
    nextMeasurementEpoch = measManager.GetEpoch();
    FindTimeStep();
 
-   if (currentEpoch < nextMeasurementEpoch)
+   if (currentEpoch <= nextMeasurementEpoch)
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;
@@ -453,8 +478,7 @@ void BatchEstimatorInv::Estimate()
    #endif
 
    if (measurementResiduals.size() == 0)
-      throw EstimatorException("Unable to estimate: No measurements were "
-            "feasible");
+      throw EstimatorException("Unable to estimate: No measurement data can be used for estimation or No measurements were feasible");
 
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("Accumulation complete; now solving the "

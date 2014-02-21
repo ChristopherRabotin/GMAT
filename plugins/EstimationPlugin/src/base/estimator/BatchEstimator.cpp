@@ -42,6 +42,7 @@
 
 // Macros for debugging of the state machine
 //#define WALK_STATE_MACHINE
+//#define DEBUG_VERBOSE
 //#define RUN_SINGLE_PASS
 //#define DUMP_FINAL_RESIDUALS
 
@@ -311,13 +312,25 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 {
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
-      estEpochFormat = value;
+      bool retVal = false;
+	  StringArray sa = GetPropertyEnumStrings(id);
+	  for (UnsignedInt i=0; i < sa.size(); ++i)
+	  {
+		 if (value == sa[i])
+		 {
+			estEpochFormat = value;
+			retVal = true;
+			break;
+		 }
+	  }
+
       if (value == "FromParticipants")
       {
          estimationEpoch = 0.0;
          estEpoch = "";
       }
-      return true;
+
+      return retVal;
    }
 
    if (id == ESTIMATION_EPOCH)
@@ -622,6 +635,10 @@ bool BatchEstimator::Initialize()
 //------------------------------------------------------------------------------
 Solver::SolverState BatchEstimator::AdvanceState()
 {
+#ifdef DEBUG_STATE_MACHINE
+   MessageInterface::ShowMessage("BatchEstimator::AdvanceState():  entered: currentState = %d\n", currentState);
+#endif
+
    switch (currentState)
    {
       case INITIALIZING:
@@ -704,6 +721,9 @@ Solver::SolverState BatchEstimator::AdvanceState()
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
    }
 
+#ifdef DEBUG_STATE_MACHINE
+   MessageInterface::ShowMessage("BatchEstimator::AdvanceState():  exit\n");
+#endif
    return currentState;
 }
 
@@ -794,7 +814,10 @@ void BatchEstimator::CompleteInitialization()
 
       // Now load up the observations
       measManager.PrepareForProcessing();
-      measManager.LoadObservations();
+      UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
+	  if (numRec == 0)														// made changes by TUAN NGUYEN
+         throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
+
 ///// Check for more generic approach
 	  measManager.LoadRampTables();											// made changes by TUAN NGUYEN
 

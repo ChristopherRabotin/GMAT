@@ -100,7 +100,7 @@ protected:
 
    /// Name of the data stream
    std::string    streamName;
-   /// Text description of the observation type
+   /// Text description of the observation data type
    std::string    obsType;
 
    /// Class parameter ID enumeration

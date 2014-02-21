@@ -46,7 +46,7 @@ public:
 
 public:
    /// Data format
-   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal", "GMAT_OD", or "GMAT_RampTable"
+   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal", "GMAT_OD", "GMAT_ODDoppler" or "GMAT_RampTable"
 
 };
 

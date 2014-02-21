@@ -146,9 +146,9 @@ bool RampTableType::Initialize()
    MessageInterface::ShowMessage("RampTableType::Initialize() Executing\n");
 #endif
 
-   bool retval = false;
+   ObType::Initialize();
 
-   return retval;
+   return true;
 }
 
 
@@ -230,7 +230,13 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
          MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
                fullPath.c_str(), mode);
       #endif
-      theStream.open(fullPath.c_str(), mode);
+      try
+	  {
+         theStream.open(fullPath.c_str(), mode);
+  	  } catch(...)
+	  {
+		  throw MeasurementException("Error: "+ GetName() +" cannot open '" + fullPath +"' due to this file had been used by another DataFile object\n");
+	  }
    }
 
    retval = theStream.is_open();

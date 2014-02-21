@@ -149,8 +149,9 @@ bool GmatODDopplerType::Initialize()
    MessageInterface::ShowMessage("GmatODDopplerType::Initialize() Executing\n");
 #endif
 
-   bool retval = ObType::Initialize();
-   return retval;
+   ObType::Initialize();
+
+   return true;
 }
 
 
@@ -232,6 +233,7 @@ bool GmatODDopplerType::Open(bool forRead, bool forWrite, bool append)
          MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
                fullPath.c_str(), mode);
       #endif
+	  
       theStream.open(fullPath.c_str(), mode);
    }
 

@@ -25,6 +25,9 @@
 #include "MessageInterface.hpp"
 
 
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_INITIALIZE
+
 //------------------------------------------------------------------------------
 // ObType(const std::string &obType, const std::string &name)
 //------------------------------------------------------------------------------
@@ -42,9 +45,13 @@ ObType::ObType(const std::string &obType, const std::string &name) :
    openForRead       (true),
    openForWrite      (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType default constructor <%s,%p>\n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::OBTYPE);
    objectTypeNames.push_back("ObType");
-
+   objectTypeNames.push_back(obType);			// made changes by TUAN NGUYEN
 //   parameterCount = ObTypeParamCount;
 }
 
@@ -77,6 +84,9 @@ ObType::ObType(const ObType& ot) :
    openForRead       (ot.openForRead),
    openForWrite      (ot.openForWrite)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType cop constructor from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
+#endif
 }
 
 
@@ -93,6 +103,10 @@ ObType::ObType(const ObType& ot) :
 //------------------------------------------------------------------------------
 ObType& ObType::operator=(const ObType& ot)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType operator =\n");
+#endif
+
    if (this != &ot)
    {
       streamName   = ot.streamName;
@@ -120,6 +134,21 @@ void ObType::SetStreamName(std::string name)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetStreamName()
+//------------------------------------------------------------------------------
+/**
+ * Gets the stream name
+ *
+ * @return	name of the stream
+ */
+//------------------------------------------------------------------------------
+std::string ObType::GetStreamName()
+{
+   return streamName;
+}
+
+
 //-----------------------------------------------------------------------------
 // bool Initialize()
 //-----------------------------------------------------------------------------
@@ -131,6 +160,10 @@ void ObType::SetStreamName(std::string name)
 //-----------------------------------------------------------------------------
 bool ObType::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+	MessageInterface::ShowMessage("ObType::Initialize()\n");
+#endif
+
    return false;
 }
 

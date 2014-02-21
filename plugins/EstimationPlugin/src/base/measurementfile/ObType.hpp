@@ -54,6 +54,7 @@ public:
    virtual bool      Finalize();
 
    void              SetStreamName(std::string name);
+   std::string       GetStreamName();
 
    /// Abstract methods used for observation data only:
    /**

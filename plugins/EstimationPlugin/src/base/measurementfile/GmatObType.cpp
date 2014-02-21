@@ -48,7 +48,7 @@ GmatObType::GmatObType(const std::string withName) :
    dataPrecision  (6)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Creating a GMATInternal obtype\n");
+	  MessageInterface::ShowMessage("Creating a GMATInternal obtype  <%s,%p>\n", GetName().c_str(), this);
    #endif
 
    header = "% GMAT Internal Measurement Data File\n\n";
@@ -81,7 +81,7 @@ GmatObType::GmatObType(const GmatObType& ot) :
    dataPrecision  (ot.dataPrecision)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Copying a GMATInternal obtype\n");
+	  MessageInterface::ShowMessage("GmatObType copy constructor (a GMATInternal obtype) from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
    #endif
 }
 
@@ -100,7 +100,7 @@ GmatObType::GmatObType(const GmatObType& ot) :
 GmatObType& GmatObType::operator=(const GmatObType& ot)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Assigning one GMATInternal obtype to another\n");
+      MessageInterface::ShowMessage("GmatObType operator = (assigning one GMATInternal obtype to another)\n");
    #endif
 
    if (this != &ot)
@@ -147,9 +147,9 @@ bool GmatObType::Initialize()
    MessageInterface::ShowMessage("GmatObType::Initialize() Executing\n");
 #endif
 
-   bool retval = false;
+   ObType::Initialize();
 
-   return retval;
+   return true;
 }
 
 
@@ -231,7 +231,8 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
          MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
                fullPath.c_str(), mode);
       #endif
-      theStream.open(fullPath.c_str(), mode);
+
+	  theStream.open(fullPath.c_str(), mode);
    }
 
    retval = theStream.is_open();

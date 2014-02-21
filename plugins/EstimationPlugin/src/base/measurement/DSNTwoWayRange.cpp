@@ -680,7 +680,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  std::string cbName2 = ((SpacePoint*)participants[1])->GetJ2000BodyName();
 	  CelestialBody* cb2 = solarSystem->GetBody(cbName2);
 
-      // 1. Get the range from the down link
+	  // 1. Get the range from the down link
       Rvector3 r1, r2;						// position of downlink leg's participants in central body MJ2000Eq coordinate system 
 	  Rvector3 r1B, r2B;					// position of downlink leg's participants in solar system bary center MJ2000Eq coordinate system
 

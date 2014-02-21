@@ -26,8 +26,10 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
+
 //#define DEBUG_FILE_ACCESS
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_OBSERVATION_READ
 //#define DEBUG_OBSERVATION_DATA
 //#define DEBUG_RAMP_TABLE_READ
@@ -45,9 +47,8 @@ const std::string DataFile::PARAMETER_TEXT[] =
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
-//   Gmat::ENUMERATION_TYPE,			// Gmat::OBJECT_TYPE			// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,			// "Filename"
+   Gmat::STRING_TYPE,			// "Format"			// made changes by TUAN NGUYEN
 };
 
 
@@ -67,6 +68,10 @@ DataFile::DataFile(const std::string name) :
    streamName        ("ObsData.gmd"),
    obsType           ("GMATInternal")
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile default constructor <%s,%p>\n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::DATA_FILE);
    objectTypes.push_back(Gmat::DATASTREAM);
    objectTypeNames.push_back("DataFile");
@@ -103,8 +108,14 @@ DataFile::DataFile(const DataFile& df) :
    streamName        (df.streamName),
    obsType           (df.obsType)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
+#endif
+
    if (df.theDatastream != NULL)
+   {
       theDatastream = (ObType*)df.theDatastream->Clone();
+   }
    else
       theDatastream = NULL;
 }
@@ -123,6 +134,11 @@ DataFile::DataFile(const DataFile& df) :
 //------------------------------------------------------------------------------
 DataFile& DataFile::operator=(const DataFile& df)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile operator = <%s,%p>\n", GetName().c_str(), this);
+#endif
+
+
    if (this != &df)
    {
       GmatBase::operator=(df);
@@ -167,7 +183,7 @@ GmatBase* DataFile::Clone() const
 bool DataFile::Initialize()
 {
 #ifdef DEBUG_INITIALIZATION
-	MessageInterface::ShowMessage("DataFile<%s>::Initialize()\n", GetName().c_str());
+	MessageInterface::ShowMessage("DataFile<%s,%p>::Initialize()   entered\n", GetName().c_str(), this);
 #endif
 
    bool retval = false;
@@ -177,11 +193,16 @@ bool DataFile::Initialize()
       retval = theDatastream->Initialize();
 	  obsType = theDatastream->GetTypeName();			// made changes by TUAN NGUYEN
       #ifdef DEBUG_INITIALIZATION
+	     MessageInterface::ShowMessage("DataFile::Initialize():   theDatastream = '%s'\n", theDatastream->GetStreamName().c_str());
 	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
       #endif
 
    }
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage(" DataFile <%s,%p> script: \n%s\n", GetName().c_str(), this, this->GetGeneratingString().c_str()); 
+   MessageInterface::ShowMessage("DataFile<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
+#endif
    return retval;
 }
 
@@ -317,10 +338,15 @@ std::string DataFile::GetParameterTypeString(const Integer id) const
 std::string DataFile::GetStringParameter(const Integer id) const
 {
    if (id == ObsType)
+   {
+//	   MessageInterface::ShowMessage("DataFile<%s>::GetStringParameter(id = %d  GmatBaseParamCount = %d 'Format') = '%s'\n", GetName().c_str(), id, GmatBaseParamCount, obsType.c_str());
       return obsType;
-
+   }
    if (id == StreamName)
+   {
+//	   MessageInterface::ShowMessage("DataFile<%s>::GetStringParameter(id = %d  GmatBaseParamCount = %d 'Filename') = '%s'\n", GetName().c_str(), id, GmatBaseParamCount, streamName.c_str());
       return streamName;
+   }
 
    return GmatBase::GetStringParameter(id);
 }
@@ -342,8 +368,6 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
    if (id == ObsType)
    {
       obsType = value;
-//	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))			// make changes by TUAN NGUYEN 
-//		  obsType = value.substr(1,value.size()-2);											// make changes by TUAN NGUYEN  fix Bug3, error 1 in ticket GMT-4314
       return true;
    }
 

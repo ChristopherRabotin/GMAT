@@ -576,7 +576,7 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
-         Accumulate();
+		 Accumulate();
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
