@@ -143,9 +143,9 @@ bool GmatApp::OnInit()
       theModerator = Moderator::Instance();
       
       // initialize the moderator
-	  // save current working directory... moderator can change it
-	  // but we need it when reading command line arguments
-	  std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
+      // save current working directory... moderator can change it
+      // but we need it when reading command line arguments
+      std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
       if (theModerator->Initialize(startupFile, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
@@ -164,7 +164,7 @@ bool GmatApp::OnInit()
          // for Windows
          #ifdef __WXMSW__
          // Get MainFrame position and size from the config file
-         wxConfigBase *pConfig = GmatAppData::Instance()->GetPersonalizationConfig();         
+         wxConfigBase *pConfig = gmatAppData->GetPersonalizationConfig();         
          wxString upperLeftStr, windowSizeStr;
          Integer windowX = -99, windowY = -99;
          Integer windowW = -99, windowH = -99;
@@ -229,11 +229,14 @@ bool GmatApp::OnInit()
             size = wxSize(235,900);
          #endif
          
+         // Set icon file from the startup file
+         gmatAppData->SetIconFile();
+         
          std::string wd = GmatFileUtil::GetWorkingDirectory();
          GmatFileUtil::SetWorkingDirectory(cur_dir);
-    	 // save current working directory... moderator may have changed it in
+         // save current working directory... moderator may have changed it in
          // ReadStartupFile
-	     // but we need old one when reading command line arguments
+         // but we need old one when reading command line arguments
          bool pclo = ProcessCommandLineOptions();
          GmatFileUtil::SetWorkingDirectory(wd);
          if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&

@@ -84,11 +84,17 @@ public:
    
    void SetFont(wxFont font);
    wxFont GetFont();
-
+   
    void SetTempScriptName(const wxString &tempName);
    wxString GetTempScriptName();
-
+   
    wxConfigBase* GetPersonalizationConfig();
+   
+   void SetIconFile();
+   wxString GetIconFile();
+   
+   bool SetIcon(wxTopLevelWindow *topWindow, const std::string &calledFrom);
+   
 #endif
     
 private:
@@ -112,6 +118,7 @@ private:
    wxFont        theFont;
    wxString      theTempScriptName;
    wxConfigBase  *thePersonalizationConfig;
+   wxString      theIconFile;
    
    #ifdef __USE_STC_EDITOR__
    wxPageSetupDialogData *thePageSetupDialogData;

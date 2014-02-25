@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include "AboutDialog.hpp"
+#include "GmatAppData.hpp"         // for SetIcon()
 #include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
@@ -197,22 +198,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    pageSizer->Fit(this);
    pageSizer->SetSizeHints(this);
    
-   // Set icon if icon file is in the start up file
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &/*e*/)
-   {
-      //MessageInterface::ShowMessage(e.GetMessage());
-   }
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "AboutDialog");
    
    CenterOnScreen(wxBOTH);
    
