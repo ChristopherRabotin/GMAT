@@ -226,8 +226,10 @@ protected:
    Integer areaID;
 
 
-   void FindShadowState(bool &lit, bool &dark, Real *state);
-   Real ShadowFunction(Real *state);
+   void     FindShadowState(bool &lit, bool &dark, Real *state);
+   Real     ShadowFunction(Real *state);
+   Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
+                                    Real *state, Real *cbSun);
 
 private:
 
