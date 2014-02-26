@@ -53,10 +53,10 @@ then
     mkdir -p "$dest"
 fi
 
-# Copy static application files
+# Copy all application files including bin files
 cp -av ${cur}/../../application/* "$dest"
 
-# Copy bin files
+# Copy bin files from the daily binary dir
 cp -av "$binfiles"/* "$dest"
 
 # Copy support libraries
@@ -79,5 +79,10 @@ cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
 # Remove any Windows hidden files, git files
 find "$dest" -iname thumbs.db -delete
 find "$dest" -iname .gitignore -delete
+
+# Remove optional files
+find "$dest" -iname *.pdb -delete
+find "$dest" -iname *.exp -delete
+find "$dest" -iname *.lib -delete
 
 echo "Finished assembling latest complete version"
