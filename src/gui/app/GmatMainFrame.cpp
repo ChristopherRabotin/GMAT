@@ -114,7 +114,7 @@
 #endif
 
 #include "FileManager.hpp"
-#include "FileUtil.hpp"               // for Compare()
+#include "FileUtil.hpp"               // for Compare(), etc
 #include "GmatOpenGLSupport.hpp"      // for ScreenShotSave
 #include "RealUtilities.hpp"          // for Abs()
 
@@ -501,26 +501,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mRunCompleted = true;
    mAutoExitAfterRun = false;
    
-   // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      if (GmatFileUtil::DoesFileExist(iconfile.c_str()))
-      {
-         #if defined __WXMSW__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-         #elif defined __WXGTK__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-         #elif defined __WXMAC__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-         #endif
-      }
-   }
-   catch (GmatBaseException &e)
-   {
-      MessageInterface::ShowMessage(e.GetFullMessage());
-   }
+   
+   // Set icon if icon file is in the start up file
+   GmatAppData::Instance()->SetIcon(this, "GmatMainFrame");
    
    // If GUI mode is normal (not minimized), show welcome panel
    if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::NORMAL_GUI)

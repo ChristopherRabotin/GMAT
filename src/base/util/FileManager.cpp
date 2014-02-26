@@ -38,7 +38,7 @@
 #endif
 
 // For adding default input path and files
-#define __FM_ADD_DEFAULT_INPUT__
+//#define __FM_ADD_DEFAULT_INPUT__
 
 //#define DEBUG_FILE_MANAGER
 //#define DEBUG_FUNCTION_PATH
@@ -1370,13 +1370,13 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
 
 
 //------------------------------------------------------------------------------
-// std::string ConvertToAbsPath(const std::string &relPath)
+// std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true)
 //------------------------------------------------------------------------------
 /**
  * Converts relative path to absolute path
  */
 //------------------------------------------------------------------------------
-std::string FileManager::ConvertToAbsPath(const std::string &relPath)
+std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appendPathSep)
 {
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
@@ -1443,10 +1443,33 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath)
    absPath = "";
    for (UnsignedInt i = 0; i < pathNames.size(); i++)
    {
-      if (GmatStringUtil::EndsWithPathSeparator(pathNames[i]))
-         absPath = absPath + pathNames[i];
+      if (i < pathNames.size() - 1)
+      {
+         if (GmatStringUtil::EndsWithPathSeparator(pathNames[i]))
+            absPath = absPath + pathNames[i];
+         else
+            absPath = absPath + pathNames[i] + "/";
+      }
       else
-         absPath = absPath + pathNames[i] + "/";
+      {
+         if (GmatStringUtil::EndsWithPathSeparator(pathNames[i]))
+            absPath = absPath + pathNames[i];
+         else
+         {
+            if (appendPathSep)
+               absPath = absPath + pathNames[i] + "/";
+            else
+               absPath = absPath + pathNames[i];
+         }
+      }
+   }
+   
+   // If first path is relative path such as ../ or ./
+   // replace it with working directory (LOJ: 2014.02.24)
+   if (absPath.size() > 1)
+   {
+      if (absPath[0] == '.')
+         absPath = GetWorkingDirectory() + GetPathSeparator() + absPath;
    }
    
    #ifdef DEBUG_FILE_PATH

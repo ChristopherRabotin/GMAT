@@ -71,9 +71,9 @@ public:
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,
       DE421_FILE,							// made change by TUAN NGUYEN
-	  DE424_FILE,							// made change by TUAN NGUYEN
-	  IAUSOFA_FILE,							// made change by TUAN NGUYEN
-	  ICRF_FILE,							// made change by TUAN NGUYEN
+      DE424_FILE,							// made change by TUAN NGUYEN
+      IAUSOFA_FILE,                 // made change by TUAN NGUYEN
+      ICRF_FILE,							// made change by TUAN NGUYEN
       PLANETARY_SPK_FILE,
       JGM2_FILE,
       JGM3_FILE,
@@ -129,7 +129,7 @@ public:
    std::string GetAbsPathname(const FileType type);
    std::string GetAbsPathname(const std::string &typeName);
    
-   std::string ConvertToAbsPath(const std::string &relPath);
+   std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true);
    
    void SetAbsPathname(const FileType type, const std::string &newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
