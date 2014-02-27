@@ -342,6 +342,45 @@ bool TDRSSTwoWayRange::Initialize()
    return retval;
 }
 
+// This function is added by TUAN NGUYEN
+//----------------------------------------------------------------------------------
+// void InitializeMeasurement()
+//----------------------------------------------------------------------------------
+/*
+ * This function is used to complete all setting before using TDRSSTwoWayRange object.
+ * Note that: Initialize() function cannot complete setting for forwardlinkLeg and 
+ *            backlingLeg Because when GMAT runs TDRSSTwoWayRange::Initialize() 
+ *            function, solarsystem is NULL
+*/
+//----------------------------------------------------------------------------------
+void TDRSSTwoWayRange::InitializeMeasurement()
+{
+   TwoWayRange::InitializeMeasurement();
+
+   // Set up base coordinate system for the forwardlink and backlink events
+   forwardlinkLeg.AddCoordinateSystem(j2k);		// Base CS for the event
+   backlinkLeg.AddCoordinateSystem(j2k);		// Base CS for the event
+
+   Integer index = forwardlinkLeg.GetParticipantIndex(participants[1]);
+   forwardlinkLeg.AddCoordinateSystem(F2, index);   // Participant 2 CS for the event
+   index = backlinkLeg.GetParticipantIndex(participants[1]);
+   backlinkLeg.AddCoordinateSystem(F2, index);		// Participant 2 CS for the event
+
+   index = forwardlinkLeg.GetParticipantIndex(participants[2]);
+   forwardlinkLeg.AddCoordinateSystem((CoordinateSystem*)participants[2]->GetRefObject(Gmat::COORDINATE_SYSTEM,""), index); // Participant 3 CS for the event
+   index = backlinkLeg.GetParticipantIndex(participants[2]);
+   backlinkLeg.AddCoordinateSystem((CoordinateSystem*)participants[2]->GetRefObject(Gmat::COORDINATE_SYSTEM,""), index);	// Participant 3 CS for the event
+
+
+   // Set solar system for fowardlinkLeg and backlinkLeg in order to calculate states of paticipants in SSB coordinate system
+   if (solarSystem == NULL)
+	   throw MeasurementException("Error in TwoWayRange::InitializeMeasurement() due to solar system object is NULL.\n");
+
+   forwardlinkLeg.SetSolarSystem(solarSystem);
+   backlinkLeg.SetSolarSystem(solarSystem);
+}
+
+
 //------------------------------------------------------------------------------
 // const std::vector<RealArray>& CalculateMeasurementDerivatives(
 //       GmatBase *obj, Integer id)
