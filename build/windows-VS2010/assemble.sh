@@ -80,9 +80,10 @@ cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
 find "$dest" -iname thumbs.db -delete
 find "$dest" -iname .gitignore -delete
 
-# Remove optional files
+# Remove optional files and debug folder
 find "$dest" -iname *.pdb -delete
 find "$dest" -iname *.exp -delete
 find "$dest" -iname *.lib -delete
+find "$dest" -depth -name debug -exec rm -rf {} \;
 
 echo "Finished assembling latest complete version"
