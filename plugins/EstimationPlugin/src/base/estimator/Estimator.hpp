@@ -171,6 +171,10 @@ protected:
    std::vector<RealArray>  hTilde;
    /// The accumulated measurement data (transformed to the estimation epoch)
    std::vector<RealArray>  hAccum;
+
+   /// Weight														// made changes by TUAN NGUYEN
+   RealArray Weight;												// made changes by TUAN NGUYEN
+
    /// The indices for the MeasurementModels with observations at current epoch
    IntegerArray            modelsToAccess;
 
@@ -182,6 +186,8 @@ protected:
    GmatState               *estimationState;
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
+   /// The estimated state											// made changes by TUAN NGUYEN
+   GmatState               initialEstimationState;					// made changes by TUAN NGUYEN
 
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
@@ -225,6 +231,13 @@ protected:
    /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
    GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
 
+   /// Parameters for data sigma editting
+   Real maxResidualMult;									// made changes by TUAN NGUYEN
+   Real constMult;											// made changes by TUAN NGUYEN
+   Real additiveConst;										// made changes by TUAN NGUYEN
+
+   /// Predicted RMS
+   Real predictedRMS;
 
    /// Parameters associated with the Estimators
    enum
@@ -236,9 +249,12 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
-	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN
-	  START_EPOCH,							// made changes by TUAN NGUYEN
-	  END_EPOCH,							// made changes by TUAN NGUYEN
+	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN  for time span filter
+	  START_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
+	  END_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
+	  MAX_RESIDUAL_MULTIPLIER,				// made changes by TUAN NGUYEN  for data sigma editting
+	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
+	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
       EstimatorParamCount
    };
 

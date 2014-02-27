@@ -27,6 +27,7 @@
 #include "TimeSystemConverter.hpp"
 #include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
+#include "EstimatorException.hpp"							// made changes by TUAN NGUYEN
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -47,9 +48,12 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
-   "EpochFormat",							// made changes by TUAN NGUYEN
-   "StartEpoch",							// made changes by TUAN NGUYEN
-   "EndEpoch",								// made changes by TUAN NGUYEN
+   "EpochFormat",							// made changes by TUAN NGUYEN	for time span filter
+   "StartEpoch",							// made changes by TUAN NGUYEN	for time span filter
+   "EndEpoch",								// made changes by TUAN NGUYEN	for time span filter
+   "MaximumResidualMultiplier",				// made changes by TUAN NGUYEN  for data sigma editting
+   "ConstantMultiplier",					// made changes by TUAN NGUYEN  for data sigma editting
+   "AdditiveConstant",						// made changes by TUAN NGUYEN  for data sigma editting
 };
 
 const Gmat::ParameterType
@@ -62,9 +66,12 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN  for time span filter
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN  for time span filter
+   Gmat::STRING_TYPE,						// made changes by TUAN NGUYEN  for time span filter
+   Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
+   Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
+   Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
 };
 
 
@@ -103,7 +110,10 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    locatingEvent        (false),
    startEpoch           (DateUtil::EARLIEST_VALID_MJD),					// made changes by TUAN NGUYEN
    endEpoch             (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
-   epochFormat          ("TAIModJulian")								// made changes by TUAN NGUYEN
+   epochFormat          ("TAIModJulian"),								// made changes by TUAN NGUYEN
+   maxResidualMult		(10.0),											// made changes by TUAN NGUYEN
+   constMult			(3.0),											// made changes by TUAN NGUYEN
+   additiveConst        (0.0)											// made changes by TUAN NGUYEN
 {
 
    objectTypeNames.push_back("Estimator");
@@ -169,7 +179,10 @@ Estimator::Estimator(const Estimator& est) :
    estimationEnd        (est.estimationEnd),				// made changes by TUAN NGUYEN
    epochFormat          (est.epochFormat),					// made changes by TUAN NGUYEN
    startEpoch           (est.startEpoch),					// made changes by TUAN NGUYEN
-   endEpoch             (est.endEpoch)						// made changes by TUAN NGUYEN
+   endEpoch             (est.endEpoch),						// made changes by TUAN NGUYEN
+   maxResidualMult		(est.maxResidualMult),				// made changes by TUAN NGUYEN
+   constMult			(est.constMult),					// made changes by TUAN NGUYEN
+   additiveConst		(est.additiveConst)					// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -235,6 +248,9 @@ Estimator& Estimator::operator=(const Estimator& est)
 	  epochFormat          = est.epochFormat;				// made changes by TUAN NGUYEN
 	  startEpoch           = est.startEpoch;				// made changes by TUAN NGUYEN
 	  endEpoch             = est.endEpoch;					// made changes by TUAN NGUYEN
+	  maxResidualMult      = est.maxResidualMult;			// made changes by TUAN NGUYEN
+	  constMult            = est.constMult;					// made changes by TUAN NGUYEN
+	  additiveConst        = est.additiveConst;				// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -415,12 +431,18 @@ std::string Estimator::GetParameterTypeString(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Real        Estimator::GetRealParameter(const Integer id) const
+Real Estimator::GetRealParameter(const Integer id) const
 {
    if (id == ABSOLUTETOLERANCE)
       return absoluteTolerance;
    if (id == RELATIVETOLERANCE)
       return relativeTolerance;
+   if (id == MAX_RESIDUAL_MULTIPLIER)
+      return maxResidualMult;
+   if (id == CONSTANT_MULTIPLIER)
+      return constMult;
+   if (id == ADDITIVE_CONSTANT)
+      return additiveConst;
 
    return Solver::GetRealParameter(id);
 }
@@ -443,6 +465,9 @@ Real Estimator::SetRealParameter(const Integer id, const Real value)
    {
       if (value > 0.0)
          absoluteTolerance = value;
+	  else
+	     throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
       return absoluteTolerance;
    }
 
@@ -450,8 +475,38 @@ Real Estimator::SetRealParameter(const Integer id, const Real value)
    {
       if ((value > 0.0) && (value <= 1.0))
          relativeTolerance = value;
-      return relativeTolerance;
+	  else
+	     throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not in range (0,1]\n");
+
+	  return relativeTolerance;
    }
+
+   if (id == MAX_RESIDUAL_MULTIPLIER)
+   {
+	   if (value > 0.0)
+		   maxResidualMult = value;
+	  else
+	     throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
+	   return maxResidualMult;
+   }
+
+   if (id == CONSTANT_MULTIPLIER)
+   {
+	  if (value > 0.0)
+		   constMult = value;
+	  else
+	     throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
+	  return constMult;
+   }
+
+   if (id == ADDITIVE_CONSTANT)
+   {
+      additiveConst = value;
+      return additiveConst;
+   }
+
 
    return Solver::SetRealParameter(id, value);
 }

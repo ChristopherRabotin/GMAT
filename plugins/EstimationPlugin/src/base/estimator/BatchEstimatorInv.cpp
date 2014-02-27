@@ -23,6 +23,8 @@
 #include "BatchEstimatorInv.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
+#include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
 
 
 //#define DEBUG_ACCUMULATION
@@ -135,10 +137,12 @@ void  BatchEstimatorInv::Copy(const GmatBase* orig)
  * This method collects the data needed for estimation.
  */
 //------------------------------------------------------------------------------
-#include "Spacecraft.hpp"
-#include "GroundstationInterface.hpp"
 void BatchEstimatorInv::Accumulate()
 {
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
+   #endif
+
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
    #endif
@@ -160,7 +164,7 @@ void BatchEstimatorInv::Accumulate()
       MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
    #endif
 
-   // throw an exception when no measurement model is associated with the current observation data
+   // Throw an exception when no measurement model is associated with the current observation data
    if (modelsToAccess.size() == 0)
    {
       MessageInterface::ShowMessage("Current observation data: %.12lf   %s  %d  ", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
@@ -196,11 +200,12 @@ void BatchEstimatorInv::Accumulate()
    if (count >= 1)
    {
 	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
+
 	  if (iterationsTaken == 0)
 	  {
 	     for (Integer i=0; i < currentObs->value.size(); ++i)
 	     {
-			// Data filtered based on residual limits:
+			// Data filtered based on measurement model's residual limits:
 		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
 		    {
 //			MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
@@ -217,8 +222,69 @@ void BatchEstimatorInv::Accumulate()
 		       measManager.GetObsDataObject()->inUsed = false;
 			   break;
 			}
+
+			// Data filtered based on sigma editting
+			// . Specify Wii
+            Real weight = 1.0;
+            if (currentObs->noiseCovariance == NULL)
+            {
+               if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+                  weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+               else
+                  weight = 1.0;
+            }
+            else
+               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+			// .Filter based on maximum residual multiplier
+		    if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+		    {
+			   MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+			   for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+			      MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+			   for(int k = 0; k < currentObs->value.size(); ++k)
+			      MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+			   MessageInterface::ShowMessage("\n");
+		       measManager.GetObsDataObject()->inUsed = false;
+			   break;
+		    }
+
 //			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
 	     }
+	  }
+	  else
+	  {
+	     for (Integer i=0; i < currentObs->value.size(); ++i)
+	     {
+			// Data filtered based on sigma editting
+			// . Specify Wii
+            Real weight = 1.0;
+            if (currentObs->noiseCovariance == NULL)
+            {
+               if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+                  weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+               else
+                  weight = 1.0;
+            }
+            else
+               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+
+			// . Filter based on n-sigma			
+		    if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+		    {
+			   MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > kk*sigma + K :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+			   for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+			      MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+			   for(int k = 0; k < currentObs->value.size(); ++k)
+			      MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+			   MessageInterface::ShowMessage("\n");
+
+		       measManager.GetObsDataObject()->inUsed = false;
+			   break;
+		    }
+
+//			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
+	     }
+
 	  }
    
    #ifdef DEBUG_ACCUMULATION
@@ -380,6 +446,7 @@ void BatchEstimatorInv::Accumulate()
                      "is %le\n", k, k, (*(currentObs->noiseCovariance))(k,k));
             #endif
          }
+		 Weight.push_back(weight);
 
          for (UnsignedInt i = 0; i < stateSize; ++i)
          {
@@ -525,6 +592,9 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
+   if (this->iterationsTaken == 0)								// made changes by TUAN NGUYEN
+      initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
+
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -557,6 +627,36 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("   RMS measurement residuals = %.12lf\n",
             newResidualRMS);
    #endif
+
+   // This section is used to calculate predicted RMS for data sigma editting
+   RealArray hRow;
+   hRow.assign(hAccum[0].size(), 0.0);
+   
+   predictedRMS = 0;
+   GmatState currentEstimationState = (*estimationState);
+
+   Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();
+   for (UnsignedInt i = 0; i < stateSize; ++i)
+   {
+      for (UnsignedInt j = 0; j < stateSize; ++j)
+      {
+		  predictedRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i,j)*(currentEstimationState[j] - initialEstimationState[j]);
+      }
+   }
+   
+   for (UnsignedInt j = 0; j < hAccum.size(); ++j)		// j presents for the index of the measurement jth
+   {
+	  Real temp = 0;
+	  for(UnsignedInt i = 0; i < hAccum[j].size(); ++i)
+	  {
+		 temp = hAccum[j][i]*dx[i];
+	  }
+
+	  predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];
+   }
+   predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
+
+   Weight.empty();
 
    currentState = CHECKINGRUN;
 }
