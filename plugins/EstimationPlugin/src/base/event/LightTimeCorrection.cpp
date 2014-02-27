@@ -326,7 +326,7 @@ Real LightTimeCorrection::CalculateRange()
 //   Rvector3 v2;
 
    GmatEpoch t1 = -1.0, t2 = -1.0;
-
+   
    if (participants.size() > 1)
    {
       if (participants[0]->IsOfType(Gmat::SPACEOBJECT))
@@ -355,6 +355,9 @@ Real LightTimeCorrection::CalculateRange()
             ((SpacePoint*)participants[1])->GetMJ2000Position(t2));
 	  
 	  // Specify vector from solar system bary center to particpant position:						// made changes by TUAN NGUYEN
+      if (solarSystem == NULL)
+         throw EventException("Error: no solar system is set to solarSystem variable of "+ GetName() + " object\n");
+
 	  SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");			// made changes by TUAN NGUYEN
 	  std::string cbName1 = ((SpacePoint*)participants[0])->GetJ2000BodyName();						// made changes by TUAN NGUYEN
 	  CelestialBody* cb1 = solarSystem->GetBody(cbName1);											// made changes by TUAN NGUYEN
