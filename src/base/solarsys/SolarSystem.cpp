@@ -3536,7 +3536,7 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
        "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
        format);
    #endif
-
+   
    FILE *defile = fopen(fileName.c_str(), "rb");
    if (defile == NULL)
    {
@@ -3544,9 +3544,36 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       //    (Gmat::WARNING_,
       //     "Error opening the DE file named: %s.\n"
       //     "Please check the path and file name.\n", fileName.c_str());
-      SolarSystemException sse;
-      sse.SetDetails("Error opening the DE file \"%s\"", fileName.c_str());
-      throw sse;
+      
+      // Try open with absolute path (LOJ: 2014.02.27 ref to GMT-4408)
+      if (fileName.size() > 1)
+      {
+         if (fileName[0] == '.')
+         {
+            FileManager *fm = FileManager::Instance();
+            std::string absDeFile;
+            absDeFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + fileName;
+            
+            MessageInterface::ShowMessage
+               ("Error opening the DE file \"%s\", so trying with abs path \"%s\"", fileName.c_str(),
+                absDeFile.c_str());
+            
+            defile = fopen(absDeFile.c_str(), "rb");
+            if (defile == NULL)
+            {
+               SolarSystemException sse;
+               sse.SetDetails("Error opening the DE file \"%s\"", absDeFile.c_str());
+               throw sse;
+            }
+         }
+      }
+      
+      if (defile == NULL)
+      {
+         SolarSystemException sse;
+         sse.SetDetails("Error opening the DE file \"%s\"", fileName.c_str());
+         throw sse;
+      }
    }
    else
    {
