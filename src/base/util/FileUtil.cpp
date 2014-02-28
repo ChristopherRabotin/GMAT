@@ -55,7 +55,7 @@ using namespace GmatStringUtil;
 
 //#define DEBUG_FIRST_10_LINES
 //#define DEBUG_REAL_COLUMNS
-//#define DBGLVL_COMPARE_FILES 3
+//#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
 
 //------------------------------------------------------------------------------
@@ -1231,7 +1231,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    
    if (!in1)
    {
-      textBuffer.push_back("Cannot open first file: " + newfilename1 + "\n");
+      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
       return false;
    }
    
@@ -1246,7 +1246,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    {
       if (!in2)
       {
-         textBuffer.push_back("Cannot open second file: " + newfilename2 + "\n");
+         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
          return false;
       }
       // Check if file2 is an ascii file
@@ -1261,7 +1261,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    {
       if (!in3)
       {
-         textBuffer.push_back("Cannot open third file: " + newfilename3 + "\n");
+         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
          return false;
       }
       // Check if file3 is an ascii file
