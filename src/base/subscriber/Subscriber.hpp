@@ -91,6 +91,7 @@ public:
    
    virtual void         SetProvider(GmatBase *provider);
    virtual void         SetDataLabels(const StringArray& elements);
+   virtual void         SetPropagationDirection(Real propDir);
    virtual void         ClearDataLabels();
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetDataCoordSystem(CoordinateSystem *cs);
@@ -212,6 +213,7 @@ protected:
    Gmat::RunState       runstate;
    Gmat::RunState       prevRunState;
    Integer              currProviderId;
+   Real                 propDirection;
    
    /// The list of names of Wrapper objects
    StringArray          xWrapperObjectNames;

@@ -151,7 +151,9 @@ protected:
    Integer     waitCount;
    Integer     afterFinalEpochCount;
    Integer     toggleStatus;
-   
+   Integer     propIndicator;
+   Real        prevPropDirection;
+   Real        currPropDirection;
    Real        stepSizeInA1Mjd;
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
@@ -223,7 +225,7 @@ protected:
    static StringArray outputFormatList;
    
    // Initialization
-   void         InitializeData();
+   void         InitializeData(bool saveEpochInfo = false);
    void         CreateInterpolator();
    void         CreateEphemerisFile();
    void         CreateSpiceKernelWriter();
@@ -243,6 +245,7 @@ protected:
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
+                                     bool saveEpochInfo = false,
                                      bool writeAfterData = true,
                                      bool canFinalize = false,
                                      bool ignoreBlankComments = true);

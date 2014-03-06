@@ -788,7 +788,7 @@ bool PropagationEnabledCommand::PrepareToPropagate()
           dim+1, streamID, pubdata[0]);
    #endif
 
-   publisher->Publish(this, streamID, pubdata, dim+1);
+   publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage(
@@ -910,7 +910,7 @@ bool PropagationEnabledCommand::Step(Real dt)
              dim+1, streamID, pubdata[0]);
       #endif
 
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
    }
    
    return retval;

@@ -4015,7 +4015,7 @@ void Propagate::PrepareToPropagate()
 //      #ifdef DEBUG_PUBLISH_DATA
 //         MessageInterface::ShowMessage("Unpublished Object Found\n");
 //      #endif
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
 //   }
 //   if (unpublishedObjectExists == true)
 //   {
@@ -4315,7 +4315,7 @@ bool Propagate::Execute()
 //                      pubdata[4], pubdata[5], pubdata[6]);
 //            #endif
 //
-//            publisher->Publish(this, streamID, pubdata, dim+1);
+//            publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
             // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
@@ -4356,7 +4356,7 @@ bool Propagate::Execute()
 
             // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
-            publisher->Publish(this, streamID, pubdata, dim+1);
+            publisher->Publish(this, streamID, pubdata, dim+1, direction);
             CheckForEvents();
          }
          else
@@ -5183,7 +5183,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       }
       // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
       publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
       
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage

@@ -179,6 +179,9 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    waitCount            (0),
    afterFinalEpochCount (0),
    toggleStatus         (0),
+   propIndicator        (0),
+   prevPropDirection    (0.0),
+   currPropDirection    (0.0),
    stepSizeInA1Mjd      (-999.999),
    stepSizeInSecs       (-999.999),
    initialEpochA1Mjd    (-999.999),
@@ -386,6 +389,9 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    waitCount            (ef.waitCount),
    afterFinalEpochCount (ef.afterFinalEpochCount),
    toggleStatus         (ef.toggleStatus),
+   propIndicator        (ef.propIndicator),
+   prevPropDirection    (ef.prevPropDirection),
+   currPropDirection    (ef.currPropDirection),
    stepSizeInA1Mjd      (ef.stepSizeInA1Mjd),
    stepSizeInSecs       (ef.stepSizeInSecs),
    initialEpochA1Mjd    (ef.initialEpochA1Mjd),
@@ -477,6 +483,9 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    waitCount            = ef.waitCount;
    afterFinalEpochCount = ef.afterFinalEpochCount;
    toggleStatus         = ef.toggleStatus;
+   propIndicator        = ef.propIndicator;
+   prevPropDirection    = ef.prevPropDirection;
+   currPropDirection    = ef.currPropDirection;
    stepSizeInA1Mjd      = ef.stepSizeInA1Mjd;
    stepSizeInSecs       = ef.stepSizeInSecs;
    initialEpochA1Mjd    = ef.initialEpochA1Mjd;
@@ -1054,7 +1063,7 @@ bool EphemerisFile::TakeAction(const std::string &action,
       // If toggle off, finish writing ephemeris and restart interpolation
       //LOJ: Write continuous ephemeris if CODE500_EPHEM
       if (fileType != CODE500_EPHEM)
-         RestartInterpolation("", true, true);
+         RestartInterpolation("", false, true, true);
       retval = true;
    }
    else if (action == "ChangeTypeName")
@@ -1645,13 +1654,14 @@ const StringArray& EphemerisFile::GetRefObjectNameArray(const Gmat::ObjectType t
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void InitializeData()
+// void InitializeData(bool saveEpochInfo = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::InitializeData()
+void EphemerisFile::InitializeData(bool saveEpochInfo)
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      ("===== EphemerisFile::InitializeData() '%s' entered\n", GetName().c_str());
+      ("===== EphemerisFile::InitializeData() '%s' entered, saveEpochInfo=%d\n",
+       GetName().c_str(), saveEpochInfo);
    #endif
    
    epochsOnWaiting.clear();
@@ -1662,17 +1672,22 @@ void EphemerisFile::InitializeData()
    initialCount         = 0;
    waitCount            = 0;
    afterFinalEpochCount = 0;
+   
+   if (!saveEpochInfo)
+   {
+      currEpochInDays      = -999.999;
+      currEpochInSecs      = -999.999;
+   }
+   
    nextOutEpochInSecs   = -999.999;
    nextReqEpochInSecs   = -999.999;
-   currEpochInDays      = -999.999;
-   currEpochInSecs      = -999.999;
    prevEpochInSecs      = -999.999;
    prevProcTime         = -999.999;
    lastEpochWrote       = -999.999;
    eventEpochInSecs     = -999.999;
    writingNewSegment    = true;
    continuousSegment    = false;
-   firstTimeMetaData    = true; ///// LOJ: 2013.03.21
+   firstTimeMetaData    = true;
    saveMetaDataStart    = true;
    
    #ifdef DEBUG_EPHEMFILE_RESTART
@@ -2109,7 +2124,7 @@ bool EphemerisFile::CheckInitialAndFinalEpoch()
 {
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
-      ("\nEphemerisFile::CheckInitialAndFinalEpoch() entered, currEpochInDays=%.15f, "
+      ("\nEphemerisFile::CheckInitialAndFinalEpoch() entered, currEpochInDays=%.15f\n   "
        "initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f, finalEpochReached=%d, finalEpochProcessed=%d\n",
        currEpochInDays, initialEpochA1Mjd, finalEpochA1Mjd, finalEpochReached, finalEpochProcessed);
    #endif
@@ -2425,14 +2440,15 @@ void EphemerisFile::HandleWriteOrbit()
  * Resets interpolator to start new segments of data.
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::RestartInterpolation(const std::string &comments, bool writeAfterData,
-                                         bool canFinalize, bool ignoreBlankComments)
+void EphemerisFile::RestartInterpolation(const std::string &comments, bool saveEpochInfo,
+                                         bool writeAfterData, bool canFinalize,
+                                         bool ignoreBlankComments)
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s'\n   "
-       "writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
-       comments.c_str(), writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
+       "saveEpochInfo=%d, writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
+       comments.c_str(), saveEpochInfo, writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
    #endif
    
    // If no first data has written out yet, just return
@@ -2447,7 +2463,7 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      (" EphemerisFile::RestartInterpolation() Calling FinishUpWriting(), canFinalize=%d\n",
+      ("EphemerisFile::RestartInterpolation() Calling FinishUpWriting(), canFinalize=%d\n",
        canFinalize);
    #endif
    
@@ -2482,7 +2498,7 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
    }
    
    // Initialize data
-   InitializeData();
+   InitializeData(saveEpochInfo);
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
@@ -2504,10 +2520,10 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
 {
    #ifdef DEBUG_EPHEMFILE_TIME
    MessageInterface::ShowMessage
-      ("EphemerisFile::IsTimeToWrite() entered, writingNewSegment=%d, prevEpochInSecs = %.15f\n"
-       "   epochInSecs = %.15f, state[0]=%.15f\n", writingNewSegment, prevEpochInSecs,
-       epochInSecs, state[0]);
-   DebugWriteTime("   epochInSecs = ", epochInSecs);
+      ("EphemerisFile::IsTimeToWrite() entered, writingNewSegment=%d, state[0]=%.15f\n",
+       writingNewSegment, state[0]);
+   DebugWriteTime("   prevEpochInSecs = ", prevEpochInSecs);
+   DebugWriteTime("       epochInSecs = ", epochInSecs);
    MessageInterface::ShowMessage
       ("   useFixedStepSize=%d, interpolateInitialState=%d, interpolateFinalState=%d, "
        "finalEpochProcessed=%d\n", useFixedStepSize, interpolateInitialState, interpolateFinalState,
@@ -2537,7 +2553,8 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
          #endif
          
          // If current epoch is greater than previous epoch, add data to interpolator
-         if (epochInSecs > prevEpochInSecs)
+         if ((epochInSecs > prevEpochInSecs) ||
+             (epochInSecs <= prevEpochInSecs) && currPropDirection == -1.0)
          {
             #ifdef DEBUG_EPHEMFILE_TIME
             DebugWriteTime("   ===== Adding to interpolator, epochInSecs = ", epochInSecs);
@@ -2553,7 +2570,7 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
          {
             #ifdef DEBUG_EPHEMFILE_TIME
             MessageInterface::ShowMessage
-               ("   ========== skipping epoch<=prevEpochInSecs epochInSecs=%.15f, prevEpochInSecs=%.15f\n",
+               ("   ========== skipping epoch <= prevEpochInSecs epochInSecs=%.15f, prevEpochInSecs=%.15f\n",
                 epochInSecs, prevEpochInSecs);
             #endif
          }
@@ -2629,17 +2646,19 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
             // If final user defined epoch needs to be handled and received the next
             // output epoch, then add a new next epoch. We don't need to keep adding
             // the new next output epoch when final epoch has already written out. (LOJ: 2012.12.18)
-            if (handleFinalEpoch && epochInSecs >= nextOutEpochInSecs)
+            if (handleFinalEpoch && (((epochInSecs >= nextOutEpochInSecs) && currPropDirection == 1.0) ||
+                                     ((epochInSecs <= nextOutEpochInSecs) && currPropDirection == -1.0)))
             {
-               nextOutEpochInSecs = nextOutEpochInSecs + stepSizeInSecs;
+               nextOutEpochInSecs = nextOutEpochInSecs + (stepSizeInSecs * currPropDirection);
                AddNextEpochToWrite(nextOutEpochInSecs, "   ===== Adding nextOutEpochInSecs to epochsOnWaiting, ");
                
                // Handle step size less than integrator step size
                Real nextOut = nextOutEpochInSecs;
-               while (nextOut <= epochInSecs)
+               while (((nextOut <= epochInSecs) && currPropDirection == 1.0) ||
+                      ((nextOut >= epochInSecs) && currPropDirection == -1.0))
                {
                   // Compute new output time
-                  nextOut = nextOut + stepSizeInSecs;
+                  nextOut = nextOut + (stepSizeInSecs * currPropDirection);
                   AddNextEpochToWrite(nextOut, "   ===== Adding nextOut to epochsOnWaiting, ");
                }
                retval = true;
@@ -2709,7 +2728,7 @@ void EphemerisFile::WriteOrbit(Real reqEpochInSecs, const Real state[6])
       if (GmatMathUtil::Abs(currEpochInSecs - reqEpochInSecs) < 1.0e-6)
       {
          outEpochInSecs = currEpochInSecs;
-         nextOutEpochInSecs = outEpochInSecs + stepSizeInSecs;
+         nextOutEpochInSecs = outEpochInSecs + (stepSizeInSecs * currPropDirection);
          
          #ifdef DEBUG_EPHEMFILE_WRITE
          MessageInterface::ShowMessage
@@ -2840,7 +2859,7 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
    DebugWriteEpochsOnWaiting("   ");
    #endif
    MessageInterface::ShowMessage
-      ("   There are %d data in the buffer, spkWriter=<%p>\n", a1MjdArray.size(),
+      ("   There is(are) %d data point(s) in the buffer, spkWriter=<%p>\n", a1MjdArray.size(),
        spkWriter);
    #endif
    
@@ -3143,7 +3162,7 @@ void EphemerisFile::ProcessFinalDataOnWaiting(bool canFinalize)
             {
                #ifdef DEBUG_EPHEMFILE_FINISH
                MessageInterface::ShowMessage
-                  ("   ===> %.15f > %.15f and not using step size, so writing final data\n",
+                  ("   ===> %.15f > %.15f and not using user defined final epoch, so writing final data\n",
                    currEpochInSecs, lastEpochWrote);
                #endif
                WriteOrbit(currEpochInSecs, currState);
@@ -3180,8 +3199,9 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
    #ifdef DEBUG_EPHEMFILE_ORBIT
    MessageInterface::ShowMessage
       ("EphemerisFile::ProcessEpochsOnWaiting() entered, checkFinalEpoch=%d, "
-       "checkEventEpoch=%d, finalEpochReached=%d\n", checkFinalEpoch,
-       checkEventEpoch, finalEpochReached);
+       "checkEventEpoch=%d, finalEpochReached=%d\n   prevPropDirection=%f, currPropDirection=%f, "
+       "propIndicator=%d\n", checkFinalEpoch, checkEventEpoch, finalEpochReached, prevPropDirection,
+       currPropDirection, propIndicator);
    DebugWriteTime("   currEpochInSecs = ", currEpochInSecs);
    #ifdef DEBUG_EPHEMFILE_ORBIT_MORE
    DebugWriteEpochsOnWaiting("   ");
@@ -3190,6 +3210,16 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
    
    Real estimates[6];
    Real reqEpochInSecs = 0.0;
+   Integer finishDirection = 1; // forward
+   
+   if (propIndicator == 2 || propIndicator == 4)
+      finishDirection = 2; // backward
+   else if (propIndicator == 0 && currPropDirection == -1.0)
+      finishDirection = 2; // backward
+   
+   #ifdef DEBUG_EPHEMFILE_ORBIT
+   MessageInterface::ShowMessage("   finishDirection=%d\n", finishDirection);
+   #endif
    
    RealArray::iterator iter = epochsOnWaiting.begin();
    while (iter != epochsOnWaiting.end())
@@ -3198,33 +3228,38 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
       
       #ifdef DEBUG_EPHEMFILE_ORBIT
       DebugWriteTime("    reqEpochInSecs = ", reqEpochInSecs);
+      DebugWriteTime("   currEpochInSecs = ", currEpochInSecs);
       #endif
       
       // Do not write after the final epoch
       if (checkFinalEpoch)
       {
-         if ( (reqEpochInSecs + 1.0e-6) > currEpochInSecs)
+         if ( (((reqEpochInSecs + 1.0e-6) > currEpochInSecs) && finishDirection == 1) ||
+              (((reqEpochInSecs + 1.0e-6) < currEpochInSecs) && finishDirection == 2) )
          {
             #ifdef DEBUG_EPHEMFILE_ORBIT
             MessageInterface::ShowMessage
-               ("   =====> reqEpochInSecs %.15f > currEpochInSecs %.15f so exiting while "
-                "loop\n", reqEpochInSecs, currEpochInSecs);
+               ("   =====> reqEpochInSecs %.15f %s currEpochInSecs %.15f so exiting while "
+                "loop for %s prop\n", reqEpochInSecs, finishDirection == 1 ? ">" : "<",
+                currEpochInSecs, finishDirection == 1 ? "forward" : "backward");
             #endif
             
             break;
          }
       }
       
-      // We don't want write epoch that matches event epoch which the beginning epoch
+      // We don't want to write epoch that matches event epoch which the beginning epoch
       // of the new segment
       if (checkEventEpoch)
       {
-         if (reqEpochInSecs >= eventEpochInSecs)
+         if ( ((reqEpochInSecs >= eventEpochInSecs) && currPropDirection == 1.0) ||
+              ((reqEpochInSecs <= eventEpochInSecs) && currPropDirection == -1.0) )
          {
             #ifdef DEBUG_EPHEMFILE_ORBIT
             MessageInterface::ShowMessage
-               ("   =====> reqEpochInSecs %.15f >= eventEpochInSecs %.15f so exiting while "
-                "loop\n", reqEpochInSecs, currEpochInSecs);
+               ("   =====> reqEpochInSecs %.15f %s eventEpochInSecs %.15f so exiting while "
+                "loop for %s prop\n", reqEpochInSecs, currPropDirection == 1.0 ? ">=" : "<=",
+                currEpochInSecs, currPropDirection == 1.0 ? "forward" : "backward");
             #endif
             break;
          }
@@ -3237,7 +3272,8 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
       #endif
       
       if (finalEpochA1Mjd != -999.999 && finalEpochReached &&
-          reqEpochInSecs > finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY)
+          ((reqEpochInSecs > finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == 1.0) ||
+          ((reqEpochInSecs < finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == -1.0) )
       {
          #ifdef DEBUG_EPHEMFILE_ORBIT
          MessageInterface::ShowMessage
@@ -3616,9 +3652,9 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
    
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
-      ("BufferOrbitData() leaving, there are %d data\n", a1MjdArray.size());
+      ("BufferOrbitData() leaving, there is(are) %d data point(s)\n", a1MjdArray.size());
    #endif
-}
+} // BufferOrbitData()
 
 
 //------------------------------------------------------------------------------
@@ -4819,8 +4855,8 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
        "EphemerisFile::Distribute() this=<%p>'%s' entered\n", this, GetName().c_str());
    MessageInterface::ShowMessage
       ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRun=%d\n   "
-       "runstate=%d, isManeuvering=%d, firstTimeWriting=%d\n", len, active, writeEphemeris, isEndOfReceive,
-       isEndOfDataBlock, isEndOfRun, runstate, isManeuvering, firstTimeWriting);
+       "runstate=%d, isManeuvering=%d, firstTimeWriting=%d, propDirection=%f\n", len, active, writeEphemeris,
+       isEndOfReceive, isEndOfDataBlock, isEndOfRun, runstate, isManeuvering, firstTimeWriting, propDirection);
    if (len > 0)
    {
       DebugWriteTime("   ", dat[0], true);
@@ -4982,13 +5018,103 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    // For long run epochs to process drifts behind the actual.
    prevEpochInSecs = currEpochInSecs;
    currEpochInSecs = currEpochInDays * GmatTimeConstants::SECS_PER_DAY;
+   prevPropDirection = currPropDirection;
+   currPropDirection = propDirection;
+   
+   propIndicator = 0;
+   
+   if (prevPropDirection == 0.0 && currPropDirection == 1.0)
+      propIndicator = 1; // Initial forward prop
+   else if (prevPropDirection == 0.0 && currPropDirection == -1.0)
+      propIndicator = 2; // Initial backward prop
+   else if (prevPropDirection == 1.0 && currPropDirection == -1.0)
+      propIndicator = 3; // Changed from foward to backward prop
+   else if (prevPropDirection == -1.0 && currPropDirection == 1.0)
+      propIndicator = 4; // Changed from backward to forward prop
+   
+   #if DBGLVL_EPHEMFILE_DATA
+   DebugWriteTime("   currEpochInSecs = ", currEpochInSecs);
+   DebugWriteTime("   prevEpochInSecs = ", prevEpochInSecs);
+   MessageInterface::ShowMessage
+      ("   currPropDirection=%f, prevPropDirection=%f, propIndicator=%d\n",
+       currPropDirection, prevPropDirection, propIndicator);
+   if (propIndicator == 1)
+      MessageInterface::ShowMessage("   ==> It is initial forward propagation\n");
+   else if (propIndicator == 2)
+      MessageInterface::ShowMessage("   ==> It is initial backward propagation\n");
+   else if (propIndicator == 3)
+      MessageInterface::ShowMessage("   ==> It changed to backward propagation\n");
+   else if (propIndicator == 4)
+      MessageInterface::ShowMessage("   ==> It changed to forward propagation\n");
+   #endif
+   
+   
+   // If propagation direction changed, finishup writing current segment
+   if (propIndicator > 2)
+   {
+      if (!firstTimeWriting && !a1MjdArray.empty())
+      {
+         // Restart the interpolation for CCSDS format
+         if ((fileFormat == "CCSDS-OEM" || fileFormat == "CCSDS-AEM"))
+         {
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage
+               ("EphemerisFile::Distribute() prop direction changed, so calling RestartInterpolation()\n");
+            #endif
+            std::string comment = "This block begins after propagation direction change";
+            RestartInterpolation(comment, true, true);
+         }
+         else
+         {
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage
+               ("EphemerisFile::Distribute() prop direction changed, so calling FinishUpWriting()\n");
+            #endif
+            FinishUpWriting();
+         }
+      }
+   }
+   
+   // Check for time going backward (GMT-4066 FIX)
+   if (currEpochInSecs < prevEpochInSecs)
+   {      
+      std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
+      std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
+      
+      //====================================================
+      // Write one time warning and continue
+      static bool firstTimeWarning = true;
+      if (propIndicator >= 3 ||
+          (propDirection == -1.0 && (fileFormat != "CCSDS-OEM" && fileFormat != "CCSDS-AEM")))
+      {
+         if (firstTimeWarning)
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** The user has generated non-monotonic invalid ephemeris file "
+                "\"%s\" starting at %s; previous time is %s.\n", GetName().c_str(),
+                currTimeStr.c_str(), prevTimeStr.c_str());
+               firstTimeWarning = false;
+         }
+      }
+      
+      // If file format is not CCSDS, just return
+      if (fileFormat != "CCSDS-OEM" && fileFormat != "CCSDS-AEM")
+      {
+         #if DBGLVL_EPHEMFILE_DATA
+         MessageInterface::ShowMessage
+            ("EphemerisFile::Distribute() Just returning true, file type is not CCSDS\n");
+         #endif
+         return true;
+      }
+   } // if (currEpochInSecs >= prevEpochInSecs)
+   
    
    // Ignore duplicate data
    if (currEpochInSecs == prevEpochInSecs)
    {
       #ifdef DEBUG_MANEUVER
-         MessageInterface::ShowMessage("Ignoring dupe\n");
-      #endif
+      MessageInterface::ShowMessage("Ignoring dupe\n");
+         #endif
       #if DBGLVL_EPHEMFILE_DATA
       MessageInterface::ShowMessage
          ("EphemerisFile::Distribute() Just returning true, currEpochInSecs (%.15f) "
@@ -4997,63 +5123,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       return true;
    }
    
-   // Check for time going backwards (GMT-4066 FIX)
-   if (currEpochInSecs < prevEpochInSecs)
-   {
-      std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
-      std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
-      
-      // Throw an exception
-      if (!firstTimeWriting && !a1MjdArray.empty())
-      {
-         #ifdef DEBUG_EPHEMFILE_FINISH
-         MessageInterface::ShowMessage
-            ("EphemerisFile::Distribute() currentEpoch < previousEpoch, calling FinishUpWriting()\n");
-         #endif
-         FinishUpWriting();
-      }
-      
-      //==========================================
-      #ifdef THROW_EXCEPTION_ON_BACKWARDS_PROP
-      //==========================================
-      
-      #if DBGLVL_EPHEMFILE_DATA
-      MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() throwing exception, backwards propagation "
-          "is not allowed, currEpochInSecs (%.15f) < prevEpochInSecs (%.15f)\n",
-          currEpochInSecs, prevEpochInSecs);
-      #endif
-      
-      SubscriberException se;
-      se.SetDetails("Cannot continue ephemeris file generation for \"%s\"; "
-                    "Backwards propagation is not allowed.\n   "
-                    "current epoch: %s, previous epoch: %s\n", GetName().c_str(),
-                    currTimeStr.c_str(), prevTimeStr.c_str());
-      throw se;
-      
-      //==========================================
-      #else
-      //==========================================
-      
-      static bool firstTimeWarning = true;
-      
-      // Write first warning and continue
-      if (firstTimeWarning)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The user has generated non-monotonic invalid ephemeris file "
-             "\"%s\" starting at %s; previous time is %s.\n", GetName().c_str(),
-             currTimeStr.c_str(), prevTimeStr.c_str());
-         firstTimeWarning = false;
-      }
-      
-      //==========================================
-      #endif
-      //==========================================
-   }
    
+   //=================================================================
    //Hold this for now to complete GMT-4066(LOJ: 2013.07.19)
-   //
+   //=================================================================
    #if 0
    // Check for large time gap if needed
    if (checkForLargeTimeGap)
@@ -5076,6 +5149,8 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       }
    }
    #endif
+   //=================================================================
+
    
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
@@ -5139,7 +5214,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
             ("*** INTERNAL ERROR *** EphemerisFile type has not set correctly in "
              "EphemerisFile::Distribute()\n");
       }
-   }
+   } //if (runstate == Gmat::RUNNING || runstate == Gmat::SOLVEDPASS)
+   
+   // Set previous prop direction
+   prevPropDirection = currPropDirection;
    
    #if DBGLVL_EPHEMFILE_DATA > 0
    MessageInterface::ShowMessage
@@ -5319,7 +5397,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
       
       //LOJ: Write continuous ephemeris if CODE500_EPHEM
       if (fileType != CODE500_EPHEM)
-         RestartInterpolation(comment, true);
+         RestartInterpolation(comment, false, true);
    }
    
    prevRunState = runstate;
@@ -5415,7 +5493,7 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider)
 
                         //LOJ: Write continuous ephemeris if CODE500_EPHEM
                         if (fileType != CODE500_EPHEM)
-                           RestartInterpolation(comment, true);
+                           RestartInterpolation(comment, false, true);
                      }
                      
                      prevPropName = currPropName;
@@ -5515,7 +5593,7 @@ void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real ep
       
       //LOJ: Write continuous ephemeris if CODE500_EPHEM
       if (fileType != CODE500_EPHEM)
-         RestartInterpolation(comment, true);
+         RestartInterpolation(comment, false, true);
    }
    
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE

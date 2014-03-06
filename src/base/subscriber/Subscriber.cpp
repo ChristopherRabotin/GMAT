@@ -127,7 +127,8 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    isMinimized			    (false),
    runstate              (Gmat::IDLE),
    prevRunState          (Gmat::IDLE),
-   currProviderId        (0)
+   currProviderId        (0),
+   propDirection         (1.0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
@@ -172,6 +173,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    runstate              (copy.runstate),
    prevRunState          (copy.prevRunState),
    currProviderId        (copy.currProviderId),
+   propDirection         (copy.propDirection),
    xWrapperObjectNames   (copy.xWrapperObjectNames),
    yWrapperObjectNames   (copy.yWrapperObjectNames),
    allWrapperObjectNames (copy.allWrapperObjectNames)
@@ -242,6 +244,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    runstate = rhs.runstate;
    prevRunState = rhs.prevRunState;
    currProviderId = rhs.currProviderId;
+   propDirection = rhs. propDirection;
    
    xWrapperObjectNames = rhs.xWrapperObjectNames;
    yWrapperObjectNames = rhs.yWrapperObjectNames;
@@ -737,6 +740,13 @@ void Subscriber::SetDataLabels(const StringArray& elements)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void SetPropagationDirection(Real propDir)
+//------------------------------------------------------------------------------
+void Subscriber::SetPropagationDirection(Real propDir)
+{
+   propDirection = propDir;
+}
 
 //------------------------------------------------------------------------------
 // void ClearDataLabels()
