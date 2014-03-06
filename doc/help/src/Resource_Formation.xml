@@ -177,12 +177,13 @@
     shown in the script examples below or in the GUI example above. The
     primary reasons to use a <guilabel>Formation</guilabel>
     <guilabel>Resource</guilabel> are (1) to simplify the propagation of
-    multiple spacecraft and (2) for performance reasons. GMAT’s propagation
-    subsystem models <guilabel>Formations</guilabel> as a coupled dynamic
-    system. Once spacecraft have been added to a
-    <guilabel>Formation</guilabel>, you can easily propagate all of the
-    spacecraft by simply including the formation in the
-    <guilabel>Propagate</guilabel> command statement like this:</para>
+    multiple spacecraft and (2) for performance reasons. You can only add a
+    spacecraft to a one formation, and you cannot add a formation to a
+    formation. GMAT’s propagation subsystem models
+    <guilabel>Formations</guilabel> as a coupled dynamic system. Once
+    spacecraft have been added to a <guilabel>Formation</guilabel>, you can
+    easily propagate all of the spacecraft by simply including the formation
+    in the <guilabel>Propagate</guilabel> command statement like this:</para>
 
     <programlisting>Propagate aPropagator(aFormation) {aSat1.ElapsedSecs = 12000.0}</programlisting>
 
@@ -203,7 +204,7 @@ Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</computeroutput></pro
     epochs of all <guilabel>Spacecraft</guilabel> in the
     <guilabel>Formation</guilabel> are not equivalent to a tolerance of a few
     microseconds, <guilabel>GMAT</guilabel> will throw an error and execution
-    will stop.</para>
+    will stop. </para>
 
     <refsection>
       <title>Setting Colors On Spacecrafts In Formation Resource</title>
