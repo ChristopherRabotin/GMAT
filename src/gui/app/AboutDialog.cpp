@@ -104,7 +104,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    wxStaticLine *line1 = new wxStaticLine(this);
    wxStaticLine *line2 = new wxStaticLine(this);
    
-   // title, build date   
+   // title, release number, build date   
    wxStaticText *gmatText =
       new wxStaticText(this, -1, "General Mission Analysis Tool");
    wxFont font1 = wxFont();
@@ -119,9 +119,13 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    gmatText->SetOwnFont(font1);
    gmatText->SetOwnForegroundColour(gmatColor);
    
+   // Release number
+   wxString releaseNumber = "Version: 2014a";
+   wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
+   
+   // Build date
    wxString buildDate;
    buildDate.Printf("Build Date: %s %s\n", __DATE__, __TIME__);
-   
    wxStaticText *buildText = new wxStaticText(this, -1, buildDate);
    
    #ifdef __WXMAC__
@@ -130,7 +134,9 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    font1.SetPointSize(8);
    #endif
    
+   // Set font
    font1.SetWeight(wxFONTWEIGHT_LIGHT);
+   releaseText->SetFont(font1);
    buildText->SetFont(font1);
    
    // website and contact email
@@ -148,6 +154,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    
    wxBoxSizer *gmatSizer = new wxBoxSizer(wxVERTICAL);
    gmatSizer->Add(gmatText, 0, wxALIGN_CENTRE|wxALL, 4);
+   gmatSizer->Add(releaseText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT, 4);
    gmatSizer->Add(buildText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT, 4);
    gmatSizer->Add(3, 3);
    gmatSizer->Add(contactSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT, 4);
