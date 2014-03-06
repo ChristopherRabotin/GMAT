@@ -28,6 +28,7 @@
 #include "Parameter.hpp"
 #include "Array.hpp"
 #include "ParameterInfo.hpp"
+#include "SpacePoint.hpp"
 #include "Hardware.hpp"
 #include "GmatGlobal.hpp"         // for GetDataPrecision()
 #include "StringUtil.hpp"         // for GmatStringUtil::
@@ -1916,16 +1917,19 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 
 
 //------------------------------------------------------------------------------
-// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType)
+// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType,
+//                                        bool cbOriginOnly = false)
 //------------------------------------------------------------------------------
 /**
  * Constructs array with CoordinateSystem names with given axes type only.
  *
  * @param axesType  Axes type for the coordinate system
  *                  Use blank "" for retrieving all CoordinateSystem
+ * @param cbOriginOnly Include only those CSs with a Celestial Body origin
  */
 //------------------------------------------------------------------------------
-wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType)
+wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType,
+                              bool cbOriginOnly)
 {
    #ifdef DEBUG_CS_WITH_AXES
    MessageInterface::ShowMessage
@@ -1933,22 +1937,35 @@ wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesTy
    #endif
    
    wxArrayString csList;
+   bool          originOK = true;
+   GmatBase      *cs;
    for (int i=0; i<theNumCoordSys; i++)
    {
-      std::string csName = theCoordSysList[i].c_str();
+      std::string csName     = theCoordSysList[i].c_str();
+      cs                     = theGuiInterpreter->GetConfiguredObject(csName);
+      if (cbOriginOnly)
+      {
+         std::string originName  = cs->GetStringParameter("Origin");
+         SpacePoint* origin      = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
+         originOK                = origin->IsOfType("CelestialBody");
+      }
+      else
+         originOK = true;
+
       if (axesType == "")
       {
-         csList.Add(csName.c_str());
+         if (originOK)
+            csList.Add(csName.c_str());
       }
       else
       {
          // check for axis type
-         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
          if (cs)
          {
             GmatBase *axis = cs->GetOwnedObject(0);
             if (axis && axis->IsOfType(axesType))
-               csList.Add(csName.c_str());
+               if (originOK)
+                  csList.Add(csName.c_str());
          }
       }
    }

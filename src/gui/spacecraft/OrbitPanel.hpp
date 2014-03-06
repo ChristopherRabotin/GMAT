@@ -119,7 +119,7 @@ private:
    void SetLabelsUnits(const std::string &stateType);
 
    void DisplayState();
-   void BuildValidStateTypes();
+   void BuildValidStateTypes(const std::string &forCS = "mOutCoord");
    void BuildValidCoordinateSystemList(const std::string &forStateType);
    void BuildState(const Rvector6 &inputState, bool isInternal = false);
    

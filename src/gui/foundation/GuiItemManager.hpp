@@ -155,7 +155,8 @@ public:
                                  bool forStopCondition = false);
    int GetNumProperty(const wxString &objType);
    
-   wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType);
+   wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType,
+                                          bool cbOriginOnly = false);
    
    
    //-----------------------------------------------------------------
