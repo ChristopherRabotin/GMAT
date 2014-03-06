@@ -101,7 +101,7 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
    mIsEpochModified = false;
    canClose = true;
    dataChanged = false;
-   
+
    Create();
 }
 
@@ -678,7 +678,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 1
    description1 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[0] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, 
                      wxT(""), wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit1"), 
@@ -686,7 +686,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 2
    description2 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[1] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit2"), 
@@ -694,7 +694,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 3
    description3 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[2] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit3"), 
@@ -702,7 +702,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 4
    description4 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[3] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit4"), 
@@ -710,7 +710,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 5    
    description5 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[4] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                                  wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit5"), 
@@ -718,7 +718,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 6
    description6 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[5] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""),
                                 wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit6"), 
@@ -862,7 +862,10 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       #endif
       
       if (event.GetEventObject() == mCoordSysComboBox)
+      {
          mIsCoordSysChanged = true;
+         BuildValidStateTypes(coordSysStr);
+      }
       
       if (event.GetEventObject() == stateTypeComboBox)
       {
@@ -918,7 +921,6 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
             }
          }
 
-
          BuildValidCoordinateSystemList(stateTypeStr);
       }
       
@@ -927,7 +929,9 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
          GetConfiguredObject(mCoordSysComboBox->GetValue().c_str());
       
-      BuildValidStateTypes();
+      // only want to build new state type list if we are changing the CS
+//      BuildValidStateTypes();
+
       
       try
       {
@@ -947,6 +951,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       {
          mCoordSysComboBox->SetValue(mFromCoordSysStr.c_str());
          stateTypeComboBox->SetValue(mFromStateTypeStr.c_str());
+         #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
+         MessageInterface::ShowMessage
+            ("---> ERROR displaying the state ... setting state to %s and coordinate system to %s\n",
+                  mFromStateTypeStr.c_str(),mFromCoordSysStr.c_str());
+         #endif
          mOutCoord = prevCoord;
          BuildValidStateTypes();
          return;
@@ -1444,7 +1453,7 @@ void OrbitPanel::DisplayState()
 
 
 //------------------------------------------------------------------------------
-// void BuildValidStateTypes()
+// void BuildValidStateTypes(const std::string &forCS = "mOutCoord")
 //------------------------------------------------------------------------------
 /**
  * Builds a valid list of state types to be displayed in the combo box, based
@@ -1452,25 +1461,44 @@ void OrbitPanel::DisplayState()
  * are valid when the origin of the coordinate system is a celestial body.
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::BuildValidStateTypes()
+void OrbitPanel::BuildValidStateTypes(const std::string &forCS)
 {
    bool rebuild = false;
    if (mStateTypeNames.empty())
        rebuild = true;
+
+   #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+      std::string      currentStateType = stateTypeComboBox->GetValue().c_str();
+      MessageInterface::ShowMessage
+         ("**** In BuildValidStateTypes (%s) --------->  mFromStateTypeStr=%s, currentStateType=%s, mOutCoord = %s\n",
+               forCS.c_str(), mFromStateTypeStr.c_str(), currentStateType.c_str(), mOutCoord->GetName().c_str());
+   #endif
    
    // get the origin for the output coordinate system
-   std::string originName = mOutCoord->GetStringParameter("Origin");
-   SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
+   std::string originName;
+   CoordinateSystem *theCS = mOutCoord;
+   if (forCS != "mOutCoord")
+      theCS = (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(forCS);
+
+   originName              = theCS->GetStringParameter("Origin");
+   SpacePoint  *origin     = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(
+                              originName);
+   bool        originIsCB  = origin->IsOfType(Gmat::CELESTIAL_BODY);
+   bool        csIsFixed   = theCS->AreAxesOfType("BodyFixedAxes");
    
    #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
       ("   BuildValidStateTypes() origin=%s, addr=%d, mShowFullStateTypeList=%d\n",
        originName.c_str(), origin, mShowFullStateTypeList);
+   MessageInterface::ShowMessage("   originIsCB = %s, csIsFixed = %s\n",
+         (originIsCB? "true" : "false"), (csIsFixed? "true" : "false"));
    #endif
    
-   if (origin->IsOfType(Gmat::CELESTIAL_BODY) && !mShowFullStateTypeList)
-      rebuild = true;
-   else if (!origin->IsOfType(Gmat::CELESTIAL_BODY) && mShowFullStateTypeList)
+   // We need to rebuild every time now that we are also checking for
+   // BodyFixedAxes requirement
+//   if (originIsCB && !mShowFullStateTypeList)
+//      rebuild = true;
+//   else if (!originIsCB && mShowFullStateTypeList)
       rebuild = true;
    
    if (!rebuild)
@@ -1492,16 +1520,25 @@ void OrbitPanel::BuildValidStateTypes()
    // get state type list from the base code (StateConverter)
    const std::string *stateTypeList = StateConversionUtil::GetStateTypeList();
    typeCount = StateConversionUtil::GetTypeCount();
-   for (int i = 0; i<typeCount; i++)
-      mStateTypeNames.push_back(stateTypeList[i]);
+   for (int ii = 0; ii<typeCount; ii++)
+      mStateTypeNames.push_back(stateTypeList[ii]);
    
    // fill state type combobox
-   if (origin->IsOfType(Gmat::CELESTIAL_BODY))
+   if (originIsCB)
    {         
       for (int i = 0; i<typeCount; i++)
-         stateTypeComboBox->Append(wxString(stateTypeList[i].c_str()));
-      
+      {
+         bool needsFixed = StateConversionUtil::RequiresFixedCoordinateSystem(stateTypeList[i]);
+         if (!needsFixed || (needsFixed && csIsFixed))
+            stateTypeComboBox->Append(wxString(stateTypeList[i].c_str()));
+      }
       mShowFullStateTypeList = true;
+
+      #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+      MessageInterface::ShowMessage
+         ("   In CB origin section, Setting state type to %s\n",
+          mFromStateTypeStr.c_str());
+      #endif
       stateTypeComboBox->SetValue(wxT(mFromStateTypeStr.c_str()));
    }
    else
@@ -1512,7 +1549,11 @@ void OrbitPanel::BuildValidStateTypes()
       for (Integer ii = 0; ii < typeCount; ii++)
       {
          if (!(StateConversionUtil::RequiresCelestialBodyOrigin(stateTypeList[ii])))
-            stateTypeComboBox->Append(wxString(stateTypeList[ii].c_str()));
+         {
+            bool needsFixed = StateConversionUtil::RequiresFixedCoordinateSystem(stateTypeList[ii]);
+            if (!needsFixed || (needsFixed && csIsFixed))
+               stateTypeComboBox->Append(wxString(stateTypeList[ii].c_str()));
+         }
       }
       
       mShowFullStateTypeList = false;
@@ -1521,18 +1562,28 @@ void OrbitPanel::BuildValidStateTypes()
            (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]))
       {
          // default to Cartesian
+         #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+         MessageInterface::ShowMessage
+            ("   In NON-CB origin section, Setting state type to Cartesian because Kepl\n",
+             mFromStateTypeStr.c_str());
+         #endif
          stateTypeComboBox->
             SetValue(wxT(mStateTypeNames[StateConversionUtil::CARTESIAN]).c_str());
       }
       else
       {
+         #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+         MessageInterface::ShowMessage
+            ("   In NON-CB origin section, Setting state type to %s\n",
+             mFromStateTypeStr.c_str());
+         #endif
          stateTypeComboBox->SetValue(wxT(mFromStateTypeStr.c_str()));
       }
    }
    
    #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
-      ("   BuildValidStateTypes() Setting state type to %s\n",
+      ("****** BuildValidStateTypes() Setting state type to %s\n",
        mFromStateTypeStr.c_str());
    #endif
 }
@@ -1552,7 +1603,7 @@ void OrbitPanel::BuildValidStateTypes()
 //------------------------------------------------------------------------------
 void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
 {
-   bool reqCBOnly = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
+   bool reqCBOnly      = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
    bool reqFixedCSOnly = StateConversionUtil::RequiresFixedCoordinateSystem(forStateType);
    #ifdef DEBUG_ORBIT_PANEL_REFRESH
       MessageInterface::ShowMessage("Entering BuildValidCoordinateSystemList with stateType = %s\n",
@@ -1587,7 +1638,8 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
    {
       // If current selection is BodyFixed CS, show it; otherwise show the
       // first BodyFixed CS from the list
-      mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
+      mCoordSysComboBox->Append(
+            theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes", reqCBOnly));
       if (mCoordSysComboBox->FindString(currentCS.c_str(), true) == wxNOT_FOUND)
          newCS = mCoordSysComboBox->GetString(0);
       else
@@ -1603,8 +1655,21 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
          tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
          originName = tmpCS->GetStringParameter("Origin");
          origin     = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
-         if ((origin->IsOfType("CelestialBody")) && !(tmpCS->UsesSpacecraft(theSpacecraft->GetName()))) // add it to the list
-            mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
+         if ((origin->IsOfType("CelestialBody")) && !(tmpCS->UsesSpacecraft(theSpacecraft->GetName())))
+         {
+            #ifdef DEBUG_ORBIT_PANEL_REFRESH
+               MessageInterface::ShowMessage("   cs %s is %sof type BodyFixed\n",
+                     coordSystemNames[ii].c_str(), ((tmpCS->AreAxesOfType("BodyFixedAxes"))? "" : "NOT ") );
+            #endif
+            // add it to the list, if appropriate
+            if (!reqFixedCSOnly || (reqFixedCSOnly && tmpCS->AreAxesOfType("BodyFixedAxes")))
+            {
+               #ifdef DEBUG_ORBIT_PANEL_REFRESH
+                  MessageInterface::ShowMessage("   adding %s to combo box\n", coordSystemNames[ii].c_str());
+               #endif
+               mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
+            }
+         }
       }
       mCoordSysComboBox->SetValue(newCS.c_str());
    }
