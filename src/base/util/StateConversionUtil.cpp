@@ -88,8 +88,8 @@ const std::string  StateConversionUtil::STATE_TYPE_TEXT[StateTypeCount] =
    "AlternateEquinoctial", // Alternate Equinoctial by HYKim
    "Delaunay",
    "Planetodetic",
-   "IncomingAsymptote",
    "OutgoingAsymptote",
+   "IncomingAsymptote",
    "BrouwerMeanShort",
    "BrouwerMeanLong",
 };
@@ -121,6 +121,7 @@ const bool         StateConversionUtil::REQUIRES_FIXED_CS[StateTypeCount] =
    false, // "SphericalRADEC"
    false, // "Equinoctial"
    false, // "ModifiedEquinoctial"
+   false, // "AlternateEquinoctial"
    false, // "Delaunay"
    true,  // "Planetodetic"
    false, // "OutgoingAsymptote"

@@ -4576,12 +4576,12 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    if (mBuildErrorCount > 0)
    {
       scriptNames = "";
-      msg1.Printf("Script errors found in the following %d script(s):\n",
-                  mBuildErrorCount);
       
       // Will this fix allocation error in the MessageInterface
       if (mBuildErrorCount <= 50)
       {
+         msg1.Printf("Script errors found in the following %d script(s):\n",
+                     mBuildErrorCount);
          for (int i = 0; i < mBuildErrorCount; i++)
             scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
          
@@ -4589,6 +4589,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       }
       else
       {
+         msg1.Printf("%d script error(s) found. Check GmatLog.txt\n", mBuildErrorCount);
+         MessageInterface::ShowMessage
+            ("Script errors found in the following %d script(s):\n", mBuildErrorCount);
          for (int i = 0; i < mBuildErrorCount; i++)
             MessageInterface::ShowMessage("%s\n", mFailedScriptsList[i].c_str());
       }

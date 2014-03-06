@@ -672,10 +672,11 @@ bool GmatApp::ProcessCommandLineOptions()
                #endif
 
 			   std::string currPath = GmatFileUtil::GetWorkingDirectory();
-			   tempfile = currPath + '\\'+ tempfile;
-               #ifdef DEBUG_CMD_LINE
-               MessageInterface::PutMessage("new file name=<%s>\n", tempfile.c_str());
-               #endif
+			   std::string pathSep  = GmatFileUtil::GetPathSeparator();
+            tempfile = currPath + pathSep + tempfile;
+            #ifdef DEBUG_CMD_LINE
+            MessageInterface::PutMessage("new file name=<%s>\n", tempfile.c_str());
+            #endif
 			   if (GmatFileUtil::DoesFileExist(tempfile))
 			   {
 				  // set current directory to new path

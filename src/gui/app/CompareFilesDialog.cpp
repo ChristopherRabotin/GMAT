@@ -304,6 +304,11 @@ void CompareFilesDialog::Create()
 //------------------------------------------------------------------------------
 void CompareFilesDialog::LoadData()
 {
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::LoadData() entered, mNumFilesToCompare = %d\n",
+       mNumFilesToCompare);
+   #endif
    wxString str;
    str.Printf("%d", mNumFilesToCompare);
    mNumFilesToCompareTextCtrl->SetValue(str);
@@ -334,6 +339,12 @@ void CompareFilesDialog::LoadData()
    mSaveBrowseButton->Disable();
    
    theOkButton->Enable();
+
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::LoadData() leaving, mNumFilesToCompare = %d\n",
+       mNumFilesToCompare);
+   #endif
 }
 
 
@@ -562,6 +573,12 @@ void CompareFilesDialog::OnTextEnterPress(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CompareFilesDialog::UpdateFileInfo(Integer dir, bool isBaseDir)
 {
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::UpdateFileInfo() entered, dir = %d, isBaseDir = %d\n",
+       dir, isBaseDir);
+   #endif
+   
    if (isBaseDir)
    {
       mFileNamesInBaseDir = GetFilenamesContain(mBaseDirectory, mBaseString);
@@ -584,6 +601,13 @@ void CompareFilesDialog::UpdateFileInfo(Integer dir, bool isBaseDir)
    else
       *mNumFilesToCompareTextCtrl << mNumFilesInBaseDir;
    
+   mNumFilesToCompare = mNumFilesInBaseDir;
+   
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::UpdateFileInfo() leaving, mNumFilesInBaseDir = %d, "
+       "mNumFilesToCompare = %d\n", mNumFilesInBaseDir, mNumFilesToCompare);
+   #endif
 }
 
 
@@ -594,6 +618,12 @@ void CompareFilesDialog::UpdateFileInfo(Integer dir, bool isBaseDir)
 wxArrayString CompareFilesDialog::GetFilenamesContain(const wxString &dirname,
                                                       const wxString &str)
 {
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::GetFilenamesContain() entered, dirname = '%s', str = '%s'\n",
+       dirname.c_str(), str.c_str());
+   #endif
+   
    wxDir dir(dirname);
    wxString filename;
    wxString filepath;
@@ -602,10 +632,13 @@ wxArrayString CompareFilesDialog::GetFilenamesContain(const wxString &dirname,
    bool cont = dir.GetFirst(&filename);
    while (cont)
    {
-      if (filename.Contains(".report") || filename.Contains(".txt"))
+      if (filename.Contains(".report") || filename.Contains(".txt") ||
+          filename.Contains(".eph") || filename.Contains(".data") ||
+          filename.Contains(".truth"))
       {
          // if not backup files
-         if (filename.Last() == 't')
+         if (filename.Last() == 't' || filename.Last() == 'h' ||
+             filename.Last() == 'a' || filename.Last() == 'h')
          {
             if (filename.Contains(str))
             {
@@ -618,6 +651,11 @@ wxArrayString CompareFilesDialog::GetFilenamesContain(const wxString &dirname,
       cont = dir.GetNext(&filename);
    }
 
+   #ifdef DEBUG_COMPARE_FILES_DIALOG
+   MessageInterface::ShowMessage
+      ("CompareFilesDialog::GetFilenamesContain() returning %d files\n", fileNames.size());
+   #endif
+   
    return fileNames;
 }
 

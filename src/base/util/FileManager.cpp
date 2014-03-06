@@ -1464,6 +1464,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
       }
    }
    
+   //=================================================================
+   // This is causing some problem in regression test
+   #if 0
    // If first path is relative path such as ../ or ./
    // replace it with working directory (LOJ: 2014.02.24)
    if (absPath.size() > 1)
@@ -1471,6 +1474,8 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
       if (absPath[0] == '.')
          absPath = GetWorkingDirectory() + GetPathSeparator() + absPath;
    }
+   #endif
+   //=================================================================
    
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage

@@ -6378,7 +6378,9 @@ void GmatMainFrame::CompareFiles()
       }
       
       #ifdef DEBUG_FILE_COMPARE
-      MessageInterface::ShowMessage("%s\n", textCtrl->GetValue().c_str());
+      int numLines = textCtrl->GetNumberOfLines();
+      for (int i = 0; i < numLines; i++)
+         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).c_str());
       #endif
       
       if (saveCompareResults)
@@ -6400,7 +6402,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
 {
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d, baseDir='%s', "
+      ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d\n   baseDir='%s', "
        "baseString='%s'\n", compareOption, baseDir.c_str(), baseString.c_str());
    #endif
    
@@ -6431,6 +6433,9 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
                noPrefixName.Replace(baseString, "", false);
                noPrefixNameArray.push_back(noPrefixName.c_str());
                baseFileNameArray.push_back(filepath.c_str());
+               #ifdef DEBUG_FILE_COMPARE
+               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.c_str());
+               #endif
             }
          }
       }
@@ -6438,60 +6443,6 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
       cont = dir.GetNext(&filename);
    }
    
-   #if 0
-   if (compareOption == 1 || compareOption == 2)
-   {
-      while (cont)
-      {
-         if (filename.Contains(".report") || filename.Contains(".txt") ||
-             filename.Contains(".data") || filename.Contains(".script") ||
-             filename.Contains(".eph") || filename.Contains(".truth"))
-         {
-            // if file has prefix
-            if (filename.Left(baseStringLen) == baseString)
-            {
-               filepath = baseDir + "/" + filename;
-               
-               // remove any backup files
-               if (filename.Last() == 't' || filename.Last() == 'a' ||
-                   filename.Last() == 'h')
-               {
-                  wxString noPrefixName = filename;
-                  noPrefixName.Replace(baseString, "", false);
-                  noPrefixNameArray.push_back(noPrefixName.c_str());
-                  baseFileNameArray.push_back(filepath.c_str());
-               }
-            }
-         }
-         
-         cont = dir.GetNext(&filename);
-      }
-   }
-   else if (compareOption == 3)
-   {
-      while (cont)
-      {
-         if (filename.Contains(".report") || filename.Contains(".txt"))
-         {
-            // if file has prefix
-            if (filename.Left(baseStringLen) == baseString)
-            {
-               filepath = baseDir + "/" + filename;
-               
-               if (filename.Last() == 't' || filename.Last() == 'a')
-               {
-                  wxString noPrefixName = filename;
-                  noPrefixName.Replace(baseString, "", false);
-                  noPrefixNameArray.push_back(noPrefixName.c_str());
-                  baseFileNameArray.push_back(filepath.c_str());
-               }
-            }
-         }
-         
-         cont = dir.GetNext(&filename);
-      }
-   }
-   #endif
    
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage

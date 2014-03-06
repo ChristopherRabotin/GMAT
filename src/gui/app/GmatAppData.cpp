@@ -308,10 +308,34 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
       }
       else
       {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s'\n",
-             theIconFile.c_str(), calledFrom.c_str(), topWindow->GetName().c_str());
-         retval = false;
+         if (theIconFile.Len() > 1)
+         {
+            if (theIconFile[0] == '.')
+            {
+               FileManager *fm = FileManager::Instance();
+               wxString workDir = fm->GetWorkingDirectory().c_str();
+               wxString pathSep = fm->GetPathSeparator().c_str();
+               wxString absIconFile = workDir + pathSep + theIconFile;
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s', "
+                   "so trying with abs path \"%s\"\n", theIconFile.c_str(), calledFrom.c_str(),
+                   topWindow->GetName().c_str(), absIconFile.c_str());
+               if (GmatFileUtil::DoesFileExist(absIconFile.c_str()))
+               {
+                  MessageInterface::ShowMessage
+                     ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s'\n",
+                      absIconFile.c_str(), calledFrom.c_str(), topWindow->GetName().c_str());
+                  retval = false;
+               }
+            }
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s'\n",
+                theIconFile.c_str(), calledFrom.c_str(), topWindow->GetName().c_str());
+            retval = false;
+         }
       }
    }
    catch (GmatBaseException &e)
@@ -342,9 +366,11 @@ void GmatAppData::SetIconFile()
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage("GmatAppData::SetIconFile() entered\n");
    #endif
+   
    // Set icon file from the startup file
    FileManager *fm = FileManager::Instance();
    theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+   
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage
       ("GmatAppData::SetIconFile() leaving, theIconFile = '%s'\n", theIconFile.c_str());
