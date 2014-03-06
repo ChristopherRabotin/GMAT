@@ -99,7 +99,7 @@ VO_V100
             IsVector No
             IsCentralBodyFrame Yes
             Name "Inertial"
-            CentralBody Earth
+            CentralBody Mars
         End
         Duration                3600.000
         IsShowing               No
@@ -311,7 +311,7 @@ VO_V100
             IsVector No
             IsCentralBodyFrame Yes
             Name "Inertial"
-            CentralBody Earth
+            CentralBody Mars
         End
         Duration                3600.000
         IsShowing               No
@@ -338,7 +338,7 @@ VO_V100
             IsVector No
             IsCentralBodyFrame Yes
             Name "Inertial"
-            CentralBody Earth
+            CentralBody Mars
         End
         Duration                3600.000
         IsShowing               No

@@ -1,5 +1,5 @@
 stk.v.10.0
-WrittenBy    STK_v10.0.2
+WrittenBy    STK_v10.1.0
 
 BEGIN Satellite
 
@@ -204,6 +204,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "string" Name = "RunDirection"> &quot;Forward&quot; </OBJECT>
                     <OBJECT Class = "int" Name = "SegmentColor"> 65280 </OBJECT>
                     <OBJECT Class = "container" Name = "ShooterControls" />
+                    <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
                     <OBJECT Class = "string" Name = "Type"> &quot;Stop&quot; </OBJECT>
                     <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
                     <OBJECT Class = "string" Name = "UserComment"> &quot;Stops the sequence from running&quot; </OBJECT>
@@ -285,6 +286,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "string" Name = "RunDirection"> &quot;Forward&quot; </OBJECT>
                     <OBJECT Class = "int" Name = "SegmentColor"> 65280 </OBJECT>
                     <OBJECT Class = "container" Name = "ShooterControls" />
+                    <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
                     <OBJECT Class = "string" Name = "Type"> &quot;End&quot; </OBJECT>
                     <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
                     <OBJECT Class = "string" Name = "UserComment"> &quot;End Of Sequence&quot; </OBJECT>
@@ -293,6 +295,7 @@ BEGIN VehiclePath
             </OBJECT>
             <OBJECT Class = "container" Name = "ShooterControls" />
             <OBJECT Class = "string" Name = "StateToPass"> &quot;Final&quot; </OBJECT>
+            <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
             <OBJECT Class = "string" Name = "Type"> &quot;Sequence&quot; </OBJECT>
             <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
             <OBJECT Class = "string" Name = "UserComment"> &quot;Stops Running the Sequence.&quot; </OBJECT>
@@ -437,7 +440,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "link" Name = "CoordinateSystem">
                         <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
                     </OBJECT>
-                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Cartesian&quot; </OBJECT>
+                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Keplerian&quot; </OBJECT>
                     <OBJECT Class = "string" Name = "Description"> &quot;Initializes state data&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "DisplayCoordSystem">
                         <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth Inertial&quot; </OBJECT>
@@ -522,6 +525,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "string" Name = "ShapeType"> &quot;Eccentricity&quot; </OBJECT>
                     <OBJECT Class = "container" Name = "ShooterControls" />
                     <OBJECT Class = "string" Name = "SizeType"> &quot;Semi-major Axis&quot; </OBJECT>
+                    <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
                     <OBJECT Class = "string" Name = "Type"> &quot;InitialState&quot; </OBJECT>
                     <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
                     <OBJECT Class = "string" Name = "UserComment"> &quot;Initializes state data&quot; </OBJECT>
@@ -604,6 +608,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "string" Name = "RunDirection"> &quot;Forward&quot; </OBJECT>
                     <OBJECT Class = "int" Name = "SegmentColor"> 65280 </OBJECT>
                     <OBJECT Class = "container" Name = "ShooterControls" />
+                    <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
                     <OBJECT Class = "string" Name = "Type"> &quot;End&quot; </OBJECT>
                     <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
                     <OBJECT Class = "string" Name = "UserComment"> &quot;End Of Sequence&quot; </OBJECT>
@@ -612,6 +617,7 @@ BEGIN VehiclePath
             </OBJECT>
             <OBJECT Class = "container" Name = "ShooterControls" />
             <OBJECT Class = "string" Name = "StateToPass"> &quot;Final&quot; </OBJECT>
+            <OBJECT Class = "bool" Name = "TreeNodeExpanded"> False </OBJECT>
             <OBJECT Class = "string" Name = "Type"> &quot;Sequence&quot; </OBJECT>
             <OBJECT Class = "bool" Name = "UpdateAnimationTimeAfterRunning"> False </OBJECT>
             <OBJECT Class = "string" Name = "UserComment"> &quot;Sequence of segments&quot; </OBJECT>

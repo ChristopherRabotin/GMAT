@@ -2,7 +2,7 @@
 WorkbookVersion=9.0
 Title=HyperbolicAsymptote
 Description=
-ApplicationVersion=10.0.2
+ApplicationVersion=10.1.0
 Scenario=YES
 ActiveMDIState=FALSE
 [WorkState_v1_2]
@@ -11,7 +11,7 @@ ptn_Child1=Frames
 ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 [WorkState_v1_2.Frames.MainFrame]
-WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAPPPPPPPPPPPPPPPPKAAAAAAAJAAAAAAAKFFAAAAANDDAAAAA
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAPPPPPPPPPPPPPPPPKKBAAAAAHFAAAAAAKPGAAAAALIDAAAAA
 Title=HyperbolicAsymptote - STK 10 - 3D Graphics 1 - Earth
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
@@ -84,5 +84,5 @@ ShowStopTime=True
 ShowToolbar=True
 ShowViewportRuler=True
 Theme=Default
-Title=Timeline View 1
+Title=Timeline 1
 ViewportScaleHeight=33

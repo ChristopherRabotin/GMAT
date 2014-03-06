@@ -3,10 +3,10 @@ WrittenBy    STK_v10.1.0
 
 BEGIN Satellite
 
-Name		Circular_IncPro
+Name		Hyperbolic_IncPro_Mars
 
 BEGIN VehiclePath
-	CentralBody				Earth
+	CentralBody				Mars
 
     BEGIN Interval
 
@@ -329,7 +329,7 @@ BEGIN VehiclePath
     </OBJECT>
     <OBJECT Class = "bool" Name = "GenerateEphemeris"> True </OBJECT>
     <OBJECT Class = "string" Name = "GenPathMode"> &quot;RunMissionControlSequence&quot; </OBJECT>
-    <OBJECT Class = "string" Name = "InstName"> &quot;Circular_IncPro&quot; </OBJECT>
+    <OBJECT Class = "string" Name = "InstName"> &quot;Hyperbolic_IncPro_Mars&quot; </OBJECT>
     <OBJECT Class = "link" Name = "MainSEQUENCE">
         <OBJECT Class = "MCSSegment" Name = "Mission_Control_Sequence">
             <OBJECT Class = "bool" Name = "BeenRun"> True </OBJECT>
@@ -344,16 +344,16 @@ BEGIN VehiclePath
             <OBJECT Class = "AttrCon" Name = "FinalState">
                 <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                     <OBJECT Class = "container" Name = "Cartesian">
-                        <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "CoordSysRep">
-                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                     <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -375,16 +375,16 @@ BEGIN VehiclePath
             <OBJECT Class = "AttrCon" Name = "InitialState">
                 <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                     <OBJECT Class = "container" Name = "Cartesian">
-                        <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                        <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                        <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                        <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                        <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "CoordSysRep">
-                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                     </OBJECT>
                     <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                     <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -438,9 +438,9 @@ BEGIN VehiclePath
                     <OBJECT Class = "string" Name = "Category"> &quot;@Top&quot; </OBJECT>
                     <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
                     <OBJECT Class = "link" Name = "CoordinateSystem">
-                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                        <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                     </OBJECT>
-                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Cartesian&quot; </OBJECT>
+                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Keplerian&quot; </OBJECT>
                     <OBJECT Class = "string" Name = "Description"> &quot;Initializes state data&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "DisplayCoordSystem">
                         <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth Inertial&quot; </OBJECT>
@@ -450,16 +450,16 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "FinalState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
-                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                             <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -485,16 +485,16 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "InitialState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
-                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                             <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -544,16 +544,16 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "FinalState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
-                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                             <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -574,16 +574,16 @@ BEGIN VehiclePath
                     <OBJECT Class = "AttrCon" Name = "InitialState">
                         <OBJECT Class = "Orbit_State" Name = "Orbit_State">
                             <OBJECT Class = "container" Name = "Cartesian">
-                                <OBJECT Class = "double" Name = "X"> -76697867.30920085 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Y"> -111650006.8685209 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Z"> -3867242.957350657 m </OBJECT>
-                                <OBJECT Class = "double" Name = "Vx"> 427.202009925006 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vy"> -349.7092172222175 m*sec^-1 </OBJECT>
-                                <OBJECT Class = "double" Name = "Vz"> 1623.780430308316 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "X"> 5000000.000000005 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Y"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Z"> 0 m </OBJECT>
+                                <OBJECT Class = "double" Name = "Vx"> 0 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vy"> 3584.479638304575 m*sec^-1 </OBJECT>
+                                <OBJECT Class = "double" Name = "Vz"> 3584.479638304574 m*sec^-1 </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cd"> 2.2 &quot;&quot; </OBJECT>
                             <OBJECT Class = "link" Name = "CoordSysRep">
-                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
+                                <OBJECT Class = "string" Name = ""> &quot;CentralBody/Mars J2000&quot; </OBJECT>
                             </OBJECT>
                             <OBJECT Class = "double" Name = "Cr"> 1 &quot;&quot; </OBJECT>
                             <OBJECT Class = "double" Name = "DragArea"> 20 m^2 </OBJECT>
@@ -776,10 +776,10 @@ BEGIN Extensions
                 ShowOrbitMarker      On
                 ShowElsetNum         Off
                 ShowSpecialSwath     On
-                MarkerColor          #00ffff
-                GroundTrackColor     #00ffff
-                SwathColor           #00ffff
-                LabelColor           #00ffff
+                MarkerColor          #ffff00
+                GroundTrackColor     #ffff00
+                SwathColor           #ffff00
+                LabelColor           #ffff00
                 LineStyle            0
                 LineWidth            1.000000
                 MarkerStyle          15
@@ -799,10 +799,10 @@ BEGIN Extensions
                     ShowOrbitMarker      On
                     ShowElsetNum         Off
                     ShowSpecialSwath     On
-                    MarkerColor          #00ffff
-                    GroundTrackColor     #00ffff
-                    SwathColor           #00ffff
-                    LabelColor           #00ffff
+                    MarkerColor          #ffff00
+                    GroundTrackColor     #ffff00
+                    SwathColor           #ffff00
+                    LabelColor           #ffff00
                     LineStyle            0
                     LineWidth            1.000000
                     MarkerStyle          4
@@ -823,10 +823,10 @@ BEGIN Extensions
                     ShowOrbitMarker      On
                     ShowElsetNum         Off
                     ShowSpecialSwath     On
-                    MarkerColor          #00ffff
-                    GroundTrackColor     #00ffff
-                    SwathColor           #00ffff
-                    LabelColor           #00ffff
+                    MarkerColor          #ffff00
+                    GroundTrackColor     #ffff00
+                    SwathColor           #ffff00
+                    LabelColor           #ffff00
                     LineStyle            0
                     LineWidth            1.000000
                     MarkerStyle          4
@@ -844,10 +844,10 @@ BEGIN Extensions
                     ShowOrbitMarker      On
                     ShowElsetNum         Off
                     ShowSpecialSwath     On
-                    MarkerColor          #ff00ff
-                    GroundTrackColor     #ff00ff
-                    SwathColor           #ff00ff
-                    LabelColor           #ff00ff
+                    MarkerColor          #0000ff
+                    GroundTrackColor     #0000ff
+                    SwathColor           #0000ff
+                    LabelColor           #0000ff
                     LineStyle            0
                     LineWidth            1.000000
                     MarkerStyle          4
@@ -868,10 +868,10 @@ BEGIN Extensions
                     ShowOrbitMarker      On
                     ShowElsetNum         Off
                     ShowSpecialSwath     On
-                    MarkerColor          #00ffff
-                    GroundTrackColor     #00ffff
-                    SwathColor           #00ffff
-                    LabelColor           #00ffff
+                    MarkerColor          #ffff00
+                    GroundTrackColor     #ffff00
+                    SwathColor           #ffff00
+                    LabelColor           #ffff00
                     LineStyle            0
                     LineWidth            1.000000
                     MarkerStyle          4
@@ -892,10 +892,10 @@ BEGIN Extensions
                     ShowOrbitMarker      On
                     ShowElsetNum         Off
                     ShowSpecialSwath     On
-                    MarkerColor          #00ffff
-                    GroundTrackColor     #00ffff
-                    SwathColor           #00ffff
-                    LabelColor           #00ffff
+                    MarkerColor          #0000ff
+                    GroundTrackColor     #0000ff
+                    SwathColor           #0000ff
+                    LabelColor           #0000ff
                     LineStyle            0
                     LineWidth            1.000000
                     MarkerStyle          4
@@ -984,7 +984,7 @@ BEGIN Extensions
             END SaaData
             Begin GroundTracks
                 Begin GroundTrack
-                    CentralBody  Earth
+                    CentralBody  Mars
                 End GroundTrack
             End GroundTracks
         BEGIN EllipseSetGxData
@@ -1198,8 +1198,8 @@ BEGIN Extensions
 			DailyFlux    150
 			GeoMagIndex       3.0000000000000000
 			RefAlt       0.0000000000000000
-			ScaleAlt    8500.0000000000000000
-			RefDensity       1.2170000000000001
+			ScaleAlt   11100.0000000000000000
+			RefDensity       0.0200000000000000
 			DensityModel  Exponential
 		END EnvironmentData
 			BEGIN InitList
@@ -1218,6 +1218,10 @@ BEGIN Extensions
     END ObjectCoverage
     
     BEGIN Desc
+        ShortText    0
+
+        LongText    0
+
     END Desc
     
     BEGIN Ellipse
