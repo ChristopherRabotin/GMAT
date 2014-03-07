@@ -5961,7 +5961,7 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
       // range: 0.99 > BrouwerECC >= 0
       if (value < 0 || value >= 0.99)
       {
-         std::string range = "0 >= Real Number < 0.99";
+         std::string range = "0 <= Real Number < 0.99";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
                        label.c_str(), range.c_str());
