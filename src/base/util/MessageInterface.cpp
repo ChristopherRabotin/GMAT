@@ -322,7 +322,7 @@ void MessageInterface::LogMessage(const char *msg, ...)
       short    size;
       va_list  marker;
       char     *msgBuffer = NULL;
-      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to log the message.\n");
       
       // msg is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
@@ -346,11 +346,8 @@ void MessageInterface::LogMessage(const char *msg, ...)
       else
       {
          theMessageReceiver->LogMessage(msgStr);
-//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
-//            "the message.\n";
       }
       
-//      theMessageReceiver->LogMessage(std::string(msgBuffer));
       free(msgBuffer);
    }
 }
