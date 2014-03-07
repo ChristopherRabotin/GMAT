@@ -1844,7 +1844,10 @@ int ViewCanvas::AddAlphaToTexture(const wxImage &image, int objUsingIcon,
    unsigned char red, green, blue;
    int status = 0;
    
-   GlColorType *tex32 = new GlColorType[width * height];
+   // Create new texture image to be used with glTexImage2
+   // Use GlRgbColorType to fix GMT-4337 (LOJ: 2014.03.07)
+   //GlColorType *tex32 = new GlColorType[width * height];
+   GlRgbColorType *tex32 = new GlRgbColorType[width * height];
    
    for (int x = 0; x < width; x++)
    {
