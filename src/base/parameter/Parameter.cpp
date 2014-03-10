@@ -439,6 +439,18 @@ bool Parameter::IsOwnedObjectDependent() const
 }
 
 //------------------------------------------------------------------------------
+// bool IsOptionalField(const std::string &field) const
+//------------------------------------------------------------------------------
+/**
+ * @return true if input field name is optional field, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsOptionalField(const std::string &field) const
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // bool NeedCoordSystem() const
 //------------------------------------------------------------------------------
 /**

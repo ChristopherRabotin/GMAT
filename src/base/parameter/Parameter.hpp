@@ -96,6 +96,7 @@ public:
    bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
    bool  NeedExternalClone() const;
+   virtual bool IsOptionalField(const std::string &field) const;
    virtual const std::string GetExternalCloneName(Integer whichOne = 0);
    virtual void SetExternalClone(GmatBase *clone);
    

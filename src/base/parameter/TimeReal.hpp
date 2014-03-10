@@ -40,6 +40,7 @@ public:
 
    // methods inherited from Parameter
    virtual Real EvaluateReal();
+   virtual bool IsOptionalField(const std::string &field) const;
    
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
