@@ -128,7 +128,6 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
       return *this;
    GmatBase::operator=(coordBase);
 
-   MessageInterface::ShowMessage("***> CoordinateBase::operator=() this=<%p>'%s'\n", this, GetName().c_str());
    origin        = coordBase.origin;
    originName    = coordBase.originName;
    j2000Body     = coordBase.j2000Body;
