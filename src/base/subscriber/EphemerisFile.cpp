@@ -2885,9 +2885,23 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       
       if (canFinalize)
       {
-         // Close ephemeris file (GMT-4049 fix)
          if (isEndOfRun)
+         {
+            // Close ephemeris file (GMT-4049 fix)
             CloseEphemerisFile();
+            
+            // Check for user defined final epoch (GMT-4108 fix)
+            if (finalEpochA1Mjd != -999.999)
+            {
+               if (currEpochInDays < finalEpochA1Mjd)
+               {
+                  MessageInterface::ShowMessage
+                     ("*** WARNING *** Run ended at %f before the user defined final epoch of %f\n",
+                      currEpochInDays, finalEpochA1Mjd);
+               }
+            }
+         }
+         
          isFinalized = true;
       }
    }
