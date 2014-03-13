@@ -30,32 +30,7 @@ typedef std::map<wxString, bool> wxStringBoolMap;
 
 namespace GmatPlot
 {
-   static const int MAX_BODIES = 20;
-   static const int MAX_SCS = 30;
-   static const int UNKNOWN_BODY = -1;
-   static const int UNKNOWN_COLOR = GmatColor::WHITE;
-   static const unsigned int UNINIT_TEXTURE = 999;
-
-   enum BodyId
-   {
-      SUN = 0,  MERCURY,  VENUS,   EARTH,
-      MARS,     JUPITER,  SATURN,  URANUS,
-      NEPTUNE,  PLUTO,    LUNA,    BODY1,
-      BODY2,    BODY3,    BODY4,   BODY5,
-      BODY6,    BODY7,    BODY8,   BODY9,
-   };
-   
-   struct BodyInfo
-   {
-      static wxString WX_BODY_NAME[MAX_BODIES];
-      static std::string BODY_NAME[MAX_BODIES];
-      static unsigned int BODY_COLOR[MAX_BODIES];
-   };
-   
-   std::string& GetBodyName(int bodyId);
-   int GetBodyId(const wxString &bodyName);
-   unsigned int GetBodyColor(const wxString &bodyName);
-   
+   // Event for OpenGlOptionDialog
    enum GlEventType
    {
       MDI_GL_QUIT = 500, //Do not change. Higher number doesn't work!!
