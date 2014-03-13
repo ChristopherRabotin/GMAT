@@ -1661,6 +1661,11 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          EnableUpdate(true);
       }
    }
+   
+   Layout();
+   Refresh();
+   Update();
+   
    #ifdef DEBUG_ADD_SP
    MessageInterface::ShowMessage("OrbitViewPanel::OnAddSpacePoint() leaving\n");
    #endif
