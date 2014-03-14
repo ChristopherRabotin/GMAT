@@ -27,7 +27,7 @@ MAC_SPECIFIC = 1
 
 # Shared library settings
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -bundle -two_levelnamespace -undefined dynamic_lookup \
+SHARED_LIB_FLAGS = -bundle -undefined dynamic_lookup \
                    -L$(GMAT_CODE_LOCATION)/base/lib -l$(BASE_LIBRARY) \
                     $(SAMPLE_LINK_FLAGS)
 
