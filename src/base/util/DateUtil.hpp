@@ -59,8 +59,8 @@ public:
    
    friend Real GMAT_API ModifiedJulianDate(YearNumber year, MonthOfYear month,
                                   DayOfMonth day, Integer hour, Integer minute,
-                                  Real second, Real refEpochJD =
-                                  GmatTimeConstants::JULIAN_DATE_OF_010541);
+                                  Real second, Real refEpochJD);  // =
+                                  // GmatTimeConstants::JULIAN_DATE_OF_010541)
    
    friend void GMAT_API UnpackDate(Real packedDate, Integer& year, Integer& month, 
                           Integer& day);        // input in YYYYMMDD. 
@@ -112,7 +112,7 @@ Real GMAT_API JulianDate(YearNumber year, MonthOfYear month,
                        Real second);
 Real GMAT_API ModifiedJulianDate(YearNumber year, MonthOfYear month,
                                DayOfMonth day, Integer hour, Integer minute,
-                               Real second, Real refEpochJD);
+                               Real second, Real refEpochJD = GmatTimeConstants::JULIAN_DATE_OF_010541);
 void GMAT_API UnpackDate(Real packedDate, Integer& year, Integer& month,
                        Integer& day);        // input in YYYYMMDD.
 void GMAT_API UnpackDateWithDOY(Real packedDate, Integer& year, Integer& day);
