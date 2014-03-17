@@ -5094,20 +5094,34 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    {      
       std::string currTimeStr = ToUtcGregorian(currEpochInSecs);
       std::string prevTimeStr = ToUtcGregorian(prevEpochInSecs);
+      std::string msg = "*** WARNING *** The user has generated non-monotonic "
+         "invalid ephemeris file \"" + GetName() + "\" starting at " + currTimeStr +
+         "; previous time is " + prevTimeStr + ".";
+      
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("   current time (%s> < previous time (%s)\n", currTimeStr.c_str(),
+          prevTimeStr.c_str());
+      #endif
       
       //====================================================
-      // Write one time warning and continue
+      // Throw an exception for CODE-500
+      if (fileType == CODE500_EPHEM)
+      {
+         throw SubscriberException(msg);
+      }
+      
+      //====================================================
+      // Write one time warning and continue for other types
       static bool firstTimeWarning = true;
+      
       if (propIndicator >= 3 ||
           (propDirection == -1.0 && (fileFormat != "CCSDS-OEM" && fileFormat != "CCSDS-AEM")))
-      {
+      {        
          if (firstTimeWarning)
          {
-            MessageInterface::ShowMessage
-               ("*** WARNING *** The user has generated non-monotonic invalid ephemeris file "
-                "\"%s\" starting at %s; previous time is %s.\n", GetName().c_str(),
-                currTimeStr.c_str(), prevTimeStr.c_str());
-               firstTimeWarning = false;
+            MessageInterface::ShowMessage(msg);
+            firstTimeWarning = false;
          }
       }
       
