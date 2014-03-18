@@ -4403,7 +4403,7 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
     Real    theta2=theta*theta;
     Real    theta4=theta2*theta2;
 
-	Real    gm3=bk3/pow(smadp,3.0);
+    Real    gm3=bk3/pow(smadp,3.0);
     Real    gmp3=gm3/(cn2*cn2*cn2);
     Real    gm5=bk5/pow(smadp,5.0);
     Real    gmp5=gm5/pow(cn,10.0);
@@ -4412,19 +4412,20 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
     Real    g4dg2=gmp4/gmp2;
     Real    g5dg2=gmp5/gmp2;
 
-	Real    sinMADP=Sin(meanAnom);
+    Real    sinMADP=Sin(meanAnom);
     Real    cosMADP=Cos(meanAnom);
     Real    sinraandp=Sin(raandp);
     Real    cosraandp=Cos(raandp);
-	
+    
 //-------------------------------------I
 // COMPUTE TRUE ANOMALY(DOUBLE PRIMED) I
 //-------------------------------------I
-
-	Real	tadp		= MeanToTrueAnomaly(meanAnom, eccdp, 0.5E-15);
-	
-	Real	rp		= smadp*(1.0-eccdp*eccdp)/(1.0 + eccdp*Cos(tadp));
-	Real	adr		= smadp/rp;
+    // Need to loosen tolerance to 1e-12 for GMT-4446 fix (LOJ: 2014.03.18)
+    //Real	tadp		= MeanToTrueAnomaly(meanAnom, eccdp, 0.5E-15);
+    Real	tadp		= MeanToTrueAnomaly(meanAnom, eccdp, 1e-12);
+    
+    Real	rp		= smadp*(1.0-eccdp*eccdp)/(1.0 + eccdp*Cos(tadp));
+    Real	adr		= smadp/rp;
     Real    sinta=Sin(tadp);
     Real    costa=Cos(tadp);
     Real    cs2gta=Cos(2.0*aopdp+2.0*tadp);
@@ -6530,17 +6531,24 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       throw UtilityException("Cannot convert from Cartesian to Keplerian - angular momentum is zero.\n");
    }
    Real i = ACos( angMomentum.Get(2)/h );
+   
+   // For GMT-4169 fix (LOJ: 2014.03.18)
+   #if 0
    if (i >= PI - GmatOrbitConstants::KEP_TOL)
    {
       throw UtilityException
          ("Error in conversion to Keplerian state: "
           "GMAT does not currently support orbits with inclination of 180 degrees.\n");
    }
+   #endif
+   
    Real raan         = 0.0;
    Real argPeriapsis = 0.0;
    Real trueAnom     = 0.0;
-
-   if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+   
+   // For GMT-4169 fix (LOJ: 2014.03.18)
+   //if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+   if ( e >= 1E-11 && (i >= 1E-11 && i <= PI-1E-11) )  // CASE 1: Non-circular, Inclined Orbit
    {
       if (n == 0.0)
       {
@@ -6558,7 +6566,9 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       if (pos*vel < 0)
          trueAnom = TWO_PI - trueAnom;
    }
-   if ( e >= 1E-11 && i < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+   // For GMT-4169 fix (LOJ: 2014.03.18)
+   //if ( e >= 1E-11 && i < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+   if ( e >= 1E-11 && (i < 1E-11 || i > PI-1E-11) )  // CASE 2: Non-circular, Equatorial Orbit
    {
       if (e == 0.0)
       {
@@ -6573,7 +6583,9 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       if (pos*vel < 0)
          trueAnom = TWO_PI - trueAnom;
    }
-   if ( e < 1E-11 && i >= 1E-11 )  // CASE 3: Circular, Inclined Orbit
+   // For GMT-4169 fix (LOJ: 2014.03.18)
+   //if ( e < 1E-11 && i >= 1E-11 )  // CASE 3: Circular, Inclined Orbit
+   if ( e < 1E-11 && (i >= 1E-11 && i <= PI-1E-11) )  // CASE 3: Circular, Inclined Orbit
    {
       if (n == 0.0)
       {
@@ -6589,7 +6601,9 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       if (pos.Get(2) < 0)
          trueAnom = TWO_PI - trueAnom;
    }
-   if ( e < 1E-11 && i < 1E-11 )  // CASE 4: Circular, Equatorial Orbit
+   // For GMT-4169 fix (LOJ: 2014.03.18)
+   //if ( e < 1E-11 && i < 1E-11 )  // CASE 4: Circular, Equatorial Orbit
+   if ( e < 1E-11 && (i < 1E-11 || i > PI-1E-11) )  // CASE 4: Circular, Equatorial Orbit
    {
       raan = 0;
       argPeriapsis = 0;
@@ -6789,7 +6803,8 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
             throw UtilityException
                ("ComputeMeanToTrueAnomaly() Stuck in infinite loop in ellitical "
                 "orbit computation using tolerance of " + GmatStringUtil::ToString(tol, 16) +
-                ". Current iteration: " + GmatStringUtil::ToString(*iter) + "\n");
+                //". Current iteration: " + GmatStringUtil::ToString(*iter) + "\n");
+                ". Stopped at iteration: " + GmatStringUtil::ToString(*iter) + "\n");
          }
       } // while (!done)
       
