@@ -37,6 +37,9 @@ private:
    bool             mObjRefChanged;
    bool             mEpochChanged;
    
+   wxString   previousType;
+   wxString   previousOrigin;
+
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;
 
