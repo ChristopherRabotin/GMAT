@@ -6,7 +6,7 @@
     <FreeFlyerVersion>6.8.1.17513</FreeFlyerVersion>
     <RevisionNumber></RevisionNumber>
     <DateCreated>12:30 02/17/2013</DateCreated>
-    <LastModified>13:37 02/26/2014</LastModified>
+    <LastModified>21:51 03/19/2014</LastModified>
     <Title></Title>
     <Subject></Subject>
     <Category></Category>
@@ -540,6 +540,46 @@
         <metadata dim="0" />
       </Array>
     </Object>
+    <Object enabled="true">
+      <Array name="convInertial" isConstant="false" isGlobal="false">
+        <Name>convInertial</Name>
+        <Dimension units="" displayed_units="">10</Dimension>
+        <Capacity units="" displayed_units="">10</Capacity>
+        <Element units="" displayed_units="" dim="(10)">
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+        </Element>
+        <metadata dim="0" />
+      </Array>
+    </Object>
+    <Object enabled="true">
+      <Array name="convFixed" isConstant="false" isGlobal="false">
+        <Name>convFixed</Name>
+        <Dimension units="" displayed_units="">10</Dimension>
+        <Capacity units="" displayed_units="">10</Capacity>
+        <Element units="" displayed_units="" dim="(10)">
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+        </Element>
+        <metadata dim="0" />
+      </Array>
+    </Object>
   </ProjectObjects>
   <ProjectMissionSequence>
     <ProjectExternals />
@@ -591,7 +631,9 @@
       <FreeForm enabled="true">
         <Label>FreeForm</Label>
         <Line>stateFixed = PositionVelocityConvert(1, 4, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
-        <Line>planetodetic = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+        <Line>convFixed = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+        <Line>convInertial = ElementConvert(1, 8, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+        <Line>planetodetic = {convInertial[0], convInertial[1], convInertial[2], convFixed[3], convFixed[4], convFixed[5]};</Line>
       </FreeForm>
       <ReportCommand enabled="true">
         <Report name="Command3" isConstant="false" isGlobal="false">
@@ -850,7 +892,9 @@
   <ProjectScript>
     <Line>Earth.Mu = 398600.4418;</Line>
     <Line>stateFixed = PositionVelocityConvert(1, 4, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
-    <Line>planetodetic = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+    <Line>convFixed = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+    <Line>convInertial = ElementConvert(1, 8, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+    <Line>planetodetic = {convInertial[0], convInertial[1], convInertial[2], convFixed[3], convFixed[4], convFixed[5]};</Line>
     <Line>Report stateFixed[0]&lt;20,16&gt;, stateFixed[1]&lt;20,16&gt;, stateFixed[2]&lt;20,16&gt;, stateFixed[3]&lt;20,16&gt;, stateFixed[4]&lt;20,16&gt;, stateFixed[5]&lt;20,16&gt; to ReportInterface1;</Line>
     <Line>Report planetodetic[0]&lt;20,16&gt;, planetodetic[1]&lt;20,16&gt;, planetodetic[2]&lt;20,16&gt;, planetodetic[3]&lt;20,16&gt;, planetodetic[4]&lt;20,16&gt;, planetodetic[5]&lt;20,16&gt; to ReportInterface1;</Line>
   </ProjectScript>
