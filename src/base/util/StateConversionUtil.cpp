@@ -6147,13 +6147,27 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (labelUpper == "SEMILATUSRECTUM" ||
-            label == "AltEquinoctialP" || label == "AltEquinoctialQ") // value >= 1.e-7
+   else if (labelUpper == "SEMILATUSRECTUM") // value >= 1.e-7
    {
       if (value < 1.E-7)
       {
          std::stringstream rangeMsg;
          rangeMsg << "1.0e-7 <= Real Number";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else if (label == "AltEquinoctialP" || label == "AltEquinoctialQ") // -1 <= x <= 1
+   {
+      // Fix for GMT-4446 (LOJ: 2014.03.20)
+      if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "-1 < Real Number < 1";
+         if (EQUINOCTIAL_TOL != 0.0)
+            rangeMsg << " (tolerance = " << EQUINOCTIAL_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
                        label.c_str(), rangeMsg.str().c_str());
