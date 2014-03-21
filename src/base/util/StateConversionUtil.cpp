@@ -6592,7 +6592,13 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       argPeriapsis = ACos(eccVec.Get(0)/e);
       if (eccVec.Get(1) < 0)
          argPeriapsis = TWO_PI - argPeriapsis;
-
+      
+      // For GMT-4446 fix (LOJ: 2014.03.21)
+      if (i > PI-1E-11)
+         argPeriapsis= argPeriapsis * -1.0;
+      if (argPeriapsis < 0.0)
+         argPeriapsis = argPeriapsis + TWO_PI;
+      
       trueAnom = ACos( (eccVec*pos)/(e*posMag) );
       if (pos*vel < 0)
          trueAnom = TWO_PI - trueAnom;
@@ -6624,8 +6630,14 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       trueAnom = ACos(pos.Get(0)/posMag);
       if (pos.Get(1) < 0)
          trueAnom = TWO_PI - trueAnom;
+      
+      // For GMT-4446 fix (LOJ: 2014.03.21)
+      if (i > PI-1E-11)
+         trueAnom = trueAnom * -1.0;
+      if (trueAnom < 0.0)
+         trueAnom = trueAnom + TWO_PI;
    }
-
+   
    elem[0] = sma;
    elem[1] = e;
    elem[2] = i*DEG_PER_RAD;
