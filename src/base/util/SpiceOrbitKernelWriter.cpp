@@ -522,12 +522,30 @@ void SpiceOrbitKernelWriter::SetBasicMetaData()
 //------------------------------------------------------------------------------
 void SpiceOrbitKernelWriter::FinalizeKernel()
 {
+   #ifdef DEBUG_SPK_WRITING
+      MessageInterface::ShowMessage("In FinalizeKernel .... tmpFileOK = %s\n",
+            (tmpFileOK? "true" : "false"));
+   #endif
    // write all the meta data to the file
    if (tmpFileOK) WriteMetaData();
    basicMetaData.clear();
    addedMetaData.clear();
    // close the SPK file
    spkcls_c(handle);
+   if (failed_c())
+   {
+      ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
+      SpiceInt       numChar  = MAX_SHORT_MESSAGE;
+      SpiceChar      err[MAX_SHORT_MESSAGE];
+      getmsg_c(option, numChar, err);
+      if (eqstr_c(err, "SPICE(NOSEGMENTSFOUND)"))
+      {
+         MessageInterface::ShowMessage(
+               "SPICE cannot close a kernel (%s) with no segments.\n",
+               kernelFileName.c_str());
+      }
+      reset_c();
+   }
    fileOpen = false;
 }
 
