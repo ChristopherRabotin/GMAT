@@ -45,6 +45,7 @@
 //#define DEBUG_VALID_NUMBER
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
+//#define DEBUG_REPLACE
 //#define DEBUG_REPLACE_NAME
 //#define DEBUG_EXTRA_PAREN 1
 //#define DEBUG_REMOVE_EXTRA_PAREN 1
@@ -349,6 +350,13 @@ std::string GmatStringUtil::RemoveTrailingZeros(Real val, const std::string &val
 //------------------------------------------------------------------------------
 //std::string RemoveScientificNotation(const std::string &str)
 //------------------------------------------------------------------------------
+/**
+ * Replaces scientific notations with zeros. If string contains equal sign,
+ * it replaces scientific notations in right hand side of the first equal sign
+ * to zeros.
+ * For example, 1.5e+10 to 1.50010, 1.5E-11 to 1.50011.
+ */
+//------------------------------------------------------------------------------
 std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
 {
    #ifdef DEBUG_SCI_NOTATION
@@ -356,7 +364,7 @@ std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
       ("GmatStringUtil::RemoveScientificNotation() entered, str=<%s>\n", str.c_str());
    #endif
    
-   if (!IsThereScientificNotation(str))
+   if (NumberOfScientificNotation(str) == 0)
    {
       #ifdef DEBUG_SCI_NOTATION
       MessageInterface::ShowMessage
@@ -366,17 +374,55 @@ std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
       return str;
    }
    
+   // We don't want to remove scientific notation in order to keep size
+   // of the string (for GMT-4417 fix) LOJ: 2014.03.24
+   #if 0
    // Remove E+E-e+e- first
    std::string str1 = Replace(str, "E+", "``");
    str1 = Replace(str1, "E-", "``");
    str1 = Replace(str1, "e+", "``");
    str1 = Replace(str1, "e-", "``");
    str1 = RemoveAll(str1, '`');
+   #else
+   std::string prepend1, prepend2;
+   std::string equalSign;
+   std::string str1 = str;
+   std::string::size_type posEqual = str1.find_first_of('=');
+   if (posEqual != str1.npos)
+   {
+      equalSign = "=";
+      prepend1 = str1.substr(0, posEqual);
+      str1 = str1.substr(posEqual + 1);
+      // Find first non blank
+      std::string::size_type firstNonBlank = str1.find_first_not_of(' ');
+      if (firstNonBlank != str1.npos)
+      {
+         prepend2 = str1.substr(0, firstNonBlank);
+         str1 = str1.substr(firstNonBlank);
+      }
+   }
+   
+   #ifdef DEBUG_SCI_NOTATION
+   MessageInterface::ShowMessage
+      ("   prepend1=<%s>, prepend2=<%s>, str1=<%s>\n", prepend1.c_str(), prepend2.c_str(),
+       str1.c_str());
+   #endif
+   
+   // Replace E+E-e+e- with zeros starting from index 1 since
+   // first e or E can be a variable name
+   str1 = Replace(str1, "E+", "00", 1);
+   str1 = Replace(str1, "E-", "00", 1);
+   str1 = Replace(str1, "e+", "00", 1);
+   str1 = Replace(str1, "e-", "00", 1);   
+   #endif
    
    #ifdef DEBUG_SCI_NOTATION
    MessageInterface::ShowMessage("   After removing <E+E-e+e->, str=<%s>\n", str1.c_str());
    #endif
    
+   // Do I need this part?
+   // We don't need to remove E or e if it has no + or - sign (LOJ: 2014.03.24)
+   #if 0
    // Remove E or e without + or - sign, such as 5e7
    std::string::iterator begin = str1.begin();
    std::string::iterator pos = str1.begin();
@@ -386,7 +432,7 @@ std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
    {
       dist = distance(begin, pos);
       currCh = str1[dist];
-      #ifdef DEBUG_SCI_NOTATION
+      #ifdef DEBUG_SCI_NOTATION_MORE
       MessageInterface::ShowMessage("   currCh='%c', dist=%d\n", currCh, dist);
       #endif
       if (dist > 0 && dist < size)
@@ -398,7 +444,7 @@ std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
             Integer numParts = parts.size();
             std::string str3 = parts[numParts-1];
             
-            #ifdef DEBUG_SCI_NOTATION
+            #ifdef DEBUG_SCI_NOTATION_MORE
             MessageInterface::ShowMessage("   str2=<%s>\n", str2.c_str());
             MessageInterface::ShowMessage("   There are %d parts\n", numParts);
             for (int i = 0; i < numParts; i++)
@@ -418,6 +464,17 @@ std::string GmatStringUtil::RemoveScientificNotation(const std::string &str)
       else
          ++pos;
    }
+   #endif
+
+   
+   #ifdef DEBUG_SCI_NOTATION
+   MessageInterface::ShowMessage
+      ("   prepend1=<%s>, equalSign=<%s>, prepend2=<%s>, str1=<%s>\n",
+       prepend1.c_str(), equalSign.c_str(), prepend2.c_str(), str1.c_str());
+   #endif
+   
+   // Prepend any saved strings
+   str1 = prepend1 + equalSign + prepend2 + str1;
    
    #ifdef DEBUG_SCI_NOTATION
    MessageInterface::ShowMessage
@@ -659,36 +716,61 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 
 //------------------------------------------------------------------------------
 // std::string Replace(const std::string &str, const std::string &from,
-//                     const std::string &to)
+//                     const std::string &to, std::string::size_type start)
 //------------------------------------------------------------------------------
 /*
- * Replaces all occurenece of <from> string to <to> string.
+ * Replaces all occurenece of <from> string to <to> string from start index
  *
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::Replace(const std::string &str, const std::string &from,
-                                    const std::string &to)
+                                    const std::string &to, std::string::size_type startIndex)
 {
    #ifdef DEBUG_REPLACE
    MessageInterface::ShowMessage
-      ("GmatStringUtil::Replace()> str=\"%s\", from=\"%s\", to=\"%s\"\n", str.c_str(),
-       from.c_str(), to.c_str());
+      ("GmatStringUtil::Replace()> str=<%s>, from=<%s>, to=<%s>, startIndex=%u\n",
+       str.c_str(), from.c_str(), to.c_str(), startIndex);
    #endif
-
-   std::string str1 = str;
-   std::string::size_type pos = str1.find(from);
-
-   // if string not found, just return same string
-   if (pos == str1.npos)
-      return str1;
-
+   
    // if input string is the same as string to replace, just return <to> string
    if (str == from)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::Replace()> returning <%s>, input and from string "
+          "is the same\n", to.c_str());
+      #endif
       return to;
-
+   }
+   
+   std::string str1 = str;
+   std::string prepend;
+   if (startIndex > 0)
+   {
+      prepend = str.substr(0, startIndex);
+      str1 = str.substr(startIndex);
+   }
+   std::string::size_type pos = str1.find(from);
+   
+   // if string not found, just return input string
+   if (pos == str1.npos)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+      ("GmatStringUtil::Replace()> returning <%s>, the string <%s> not found\n",
+       str.c_str(), from.c_str());
+      #endif
+      return str;
+   }
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("   prepend=<%s>, str1=<%s>\n", prepend.c_str(), str1.c_str());
+   #endif
+   
    bool done = false;
    std::string::size_type start = 0;
-
+   
    while (!done)
    {
       pos = str1.find(from, start);
@@ -711,7 +793,14 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
          break;
       }
    }
-
+   
+   str1 = prepend + str1;
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::Replace()> returning <%s>\n", str1.c_str());
+   #endif
+   
    return str1;
 }
 
@@ -3390,7 +3479,7 @@ bool GmatStringUtil::AreAllNamesValid(const std::string &str, bool blankNameIsOk
       
       #ifdef DEBUG_VALID_NAME
       MessageInterface::ShowMessage
-         ("   parts[%d]=<%s>\n   Checking if it is a real number", i, str2.c_str());
+         ("   parts[%d]=<%s>\n   Checking if it is a real number\n", i, str2.c_str());
       #endif
       
       if (!ToReal(str2, rval))
@@ -3863,17 +3952,18 @@ bool GmatStringUtil::IsThereMathSymbol(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// bool IsThereScientificNotation(const std::string &str)
+// Integer NumberOfScientificNotation(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Checks if input string contains scientific notation.
+ * Checks if input string contains scientific notation and returns number of
+ * occurrance.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
+Integer GmatStringUtil::NumberOfScientificNotation(const std::string &str)
 {
    #ifdef DEBUG_SCI_NOTATION
    MessageInterface::ShowMessage
-      ("GmatStringUtil::IsThereScientificNotation() entered, str=<%s>\n", str.c_str());
+      ("GmatStringUtil::NumberOfScientificNotation() entered, str=<%s>\n", str.c_str());
    #endif
    std::string::size_type sciEIndex = str.find("E");
    std::string::size_type scieIndex = str.find("e");
@@ -3881,7 +3971,7 @@ bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
    {
       #ifdef DEBUG_SCI_NOTATION
       MessageInterface::ShowMessage
-         ("GmatStringUtil::IsThereScientificNotation() returning false, no E or e found\n");
+         ("GmatStringUtil::NumberOfScientificNotation() returning false, no E or e found\n");
       #endif
       return false;
    }
@@ -3893,6 +3983,7 @@ bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
    bool done = false;
    bool sciFound = false;
    Integer currIndex = 1;
+   Integer sciCount = 0;
    char currCh, prevCh, nextCh;
    
    // Separate by math symbols except + or - for e+7 or E-10
@@ -3934,7 +4025,7 @@ bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
                nextCh = str2[currIndex+1];
             if (currCh == 'E' || currCh == 'e')
             {
-               #ifdef DEBUG_SCI_NOTATION
+               #ifdef DEBUG_SCI_NOTATION_MORE
                MessageInterface::ShowMessage
                   ("   currCh='%c', prevCh='%c', nextCh='%c'\n", currCh, prevCh, nextCh);
                #endif
@@ -3947,24 +4038,59 @@ bool GmatStringUtil::IsThereScientificNotation(const std::string &str)
                       (isdigit(str2[size-1]) || !isalpha(str2[size-1])))
                   {
                      sciFound = true;
-                     break;
+                     //done = true;
+                     sciCount++;
+                     ////break;
+                  }
+                  else
+                  {
+                     // Check for sci notation in another way
+                     #ifdef DEBUG_SCI_NOTATION
+                     MessageInterface::ShowMessage("   Check for sci notation in another way\n");
+                     #endif
+                     StringArray subParts = SeparateBy(str2, "+-");
+                     Integer numSubParts = subParts.size();
+                     for (Integer j = 0; j < numSubParts; j++)
+                     {
+                        std::string str3 = subParts[j];
+                        #ifdef DEBUG_SCI_NOTATION_MORE
+                        MessageInterface::ShowMessage("   j=%d, str3=%s\n", j, str3.c_str());
+                        #endif
+                        if (EndsWith(str3, "e") || EndsWith(str3, "E"))
+                        {
+                           #ifdef DEBUG_SCI_NOTATION_MORE
+                           MessageInterface::ShowMessage("   %s ends with e or E\n", str3.c_str());
+                           #endif
+                           if ((j + 1) <= numSubParts)
+                           {
+                              if ((isdigit(str3[0]) || str3[0] == '.') && isdigit(subParts[j+1][0]))
+                              {
+                                 sciFound = true;
+                                 sciCount++;
+                                 //done = true;
+                                 break;
+                              }
+                           }
+                        }
+                     }
                   }
                }
             }
             currIndex++;
-         }
+         } //if (currIndex > 0 && currIndex < size)
          else
          {
             done = true;
          }
-      }
-   }
+      } // while (!done)
+   } // for (Integer i=0; i<numParts; i++)
    
    #ifdef DEBUG_SCI_NOTATION
    MessageInterface::ShowMessage
-      ("GmatStringUtil::IsThereScientificNotation() returning %d\n", sciFound);
+      ("GmatStringUtil::NumberOfScientificNotation() <%s> returning %d, sciCount=%d\n",
+       str.c_str(), sciFound, sciCount);
    #endif
-   return sciFound;
+   return sciCount;
 }
 
 
