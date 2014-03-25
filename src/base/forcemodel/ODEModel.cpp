@@ -79,7 +79,6 @@
 //#define DEBUG_REORIGIN
 //#define DEBUG_ERROR_ESTIMATE
 //#define DEBUG_STM_AMATRIX_DERIVS
-//#define DEBUG_AMATRIX_AND_STM
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
@@ -2788,16 +2787,6 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
       Real aTilde[36];
       for (Integer m = 0; m < 36; ++m)
          aTilde[m] = deriv[i6+m];
-      #ifdef DEBUG_AMATRIX_AND_STM
-         MessageInterface::ShowMessage("IN ODEModel::CompleteDerivative, "
-               "Calculations, i6 = %d and aTilde (initially) is:\n", i6);
-         for (Integer mm = 0; mm < 36; mm++)
-         {
-            MessageInterface::ShowMessage("   %12.16le", aTilde[mm]);
-            if ((mm == 5) || (mm == 11) || (mm == 17) || (mm == 23) || (mm == 29) || (mm == 35))
-               MessageInterface::ShowMessage("\n");
-         }
-      #endif
 
       if (fillSTM)
       {
@@ -2813,10 +2802,6 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
                {
                   deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
                }
-               #ifdef DEBUG_AMATRIX_AND_STM
-                  MessageInterface::ShowMessage("Then IN ODEModel::CompleteDerivative, "
-                        "SET deriv[%d] = %12.16le\n", (i6 + element),deriv[i6+element] );
-               #endif
             }
          }
       }
