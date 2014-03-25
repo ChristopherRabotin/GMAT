@@ -11,7 +11,7 @@ ptn_Child1=Frames
 ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 [WorkState_v1_2.Frames.MainFrame]
-WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAPPPPPPPPPPPPPPPPKKBAAAAAHFAAAAAAKPGAAAAALIDAAAAA
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAAADIPPPPAADIPPPPPPPPPPPPPPPPPPPPLGAAAAAALBAAAAAACFGAAAAAOODAAAAA
 Title=HyperbolicAsymptote - STK 10 - 3D Graphics 1 - Earth
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
@@ -49,7 +49,7 @@ ptn_Child1=ViewFrame-0
 DocPathName=C:\Users\jjparker\Documents\GMAT\GmatDevelopment\prototype\StateConv\test\truth\HyperbolicAsymptote\STK\AgUiAttrBrowser10.AgUiPiAttrBrowser.1
 DocumentString=AgUiAttrBrowser.AgUiPiAttrBrowser.1
 DocTemplateIndex=0
-WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPAAAAAAAAAAAAAAAALNAAAAAAOHCAAAAA
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPAAAAAAAAAAAAAAAAPDBAAAAAKADAAAAA
 IsActiveChildFrame=False
 IsFrameVisible=True
 ProfUISBarID=63000

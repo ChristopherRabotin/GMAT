@@ -440,7 +440,7 @@ BEGIN VehiclePath
                     <OBJECT Class = "link" Name = "CoordinateSystem">
                         <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth J2000&quot; </OBJECT>
                     </OBJECT>
-                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Cartesian&quot; </OBJECT>
+                    <OBJECT Class = "string" Name = "CoordinateType"> &quot;Target Vector Incoming Asymptote&quot; </OBJECT>
                     <OBJECT Class = "string" Name = "Description"> &quot;Initializes state data&quot; </OBJECT>
                     <OBJECT Class = "link" Name = "DisplayCoordSystem">
                         <OBJECT Class = "string" Name = ""> &quot;CentralBody/Earth Inertial&quot; </OBJECT>

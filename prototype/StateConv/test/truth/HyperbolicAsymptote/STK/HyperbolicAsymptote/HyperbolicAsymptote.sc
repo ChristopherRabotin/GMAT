@@ -969,21 +969,6 @@ END MapData
     BEGIN ReportFavorites
         BEGIN Class
             Name  Satellite
-            BEGIN Favorite
-                Type    Report
-                BaseDir Scenario
-                Style   Target Vector Outgoing Asymptote(Mars)
-            END Favorite
-            BEGIN Favorite
-                Type    Report
-                BaseDir Scenario
-                Style   Target Vector Incoming Asymptote(Mars)
-            END Favorite
-            BEGIN Favorite
-                Type    Report
-                BaseDir Scenario
-                Style   Target Vector Incoming Asymptote
-            END Favorite
         END Class
     END ReportFavorites
     
@@ -1500,14 +1485,20 @@ BEGIN SubObjects
 Class Satellite
 
 	Circular_EqPro
+	Circular_EqRetro
 	Circular_IncPro
+	Circular_IncRetro
 	Circular_Polar
 	Elliptic_EqPro
+	Elliptic_EqRetro
 	Elliptic_IncPro
+	Elliptic_IncRetro
 	Elliptic_Polar
 	Hyperbolic_EqPro
+	Hyperbolic_EqRetro
 	Hyperbolic_IncPro
 	Hyperbolic_IncPro_Mars
+	Hyperbolic_IncRetro
 	Hyperbolic_Polar
 
 END Class
@@ -1521,8 +1512,14 @@ BEGIN References
     Instance Satellite/Circular_EqPro
         Satellite/Circular_EqPro
     END Instance
+    Instance Satellite/Circular_EqRetro
+        Satellite/Circular_EqRetro
+    END Instance
     Instance Satellite/Circular_IncPro
         Satellite/Circular_IncPro
+    END Instance
+    Instance Satellite/Circular_IncRetro
+        Satellite/Circular_IncRetro
     END Instance
     Instance Satellite/Circular_Polar
         Satellite/Circular_Polar
@@ -1530,8 +1527,14 @@ BEGIN References
     Instance Satellite/Elliptic_EqPro
         Satellite/Elliptic_EqPro
     END Instance
+    Instance Satellite/Elliptic_EqRetro
+        Satellite/Elliptic_EqRetro
+    END Instance
     Instance Satellite/Elliptic_IncPro
         Satellite/Elliptic_IncPro
+    END Instance
+    Instance Satellite/Elliptic_IncRetro
+        Satellite/Elliptic_IncRetro
     END Instance
     Instance Satellite/Elliptic_Polar
         Satellite/Elliptic_Polar
@@ -1539,11 +1542,17 @@ BEGIN References
     Instance Satellite/Hyperbolic_EqPro
         Satellite/Hyperbolic_EqPro
     END Instance
+    Instance Satellite/Hyperbolic_EqRetro
+        Satellite/Hyperbolic_EqRetro
+    END Instance
     Instance Satellite/Hyperbolic_IncPro
         Satellite/Hyperbolic_IncPro
     END Instance
     Instance Satellite/Hyperbolic_IncPro_Mars
         Satellite/Hyperbolic_IncPro_Mars
+    END Instance
+    Instance Satellite/Hyperbolic_IncRetro
+        Satellite/Hyperbolic_IncRetro
     END Instance
     Instance Satellite/Hyperbolic_Polar
         Satellite/Hyperbolic_Polar

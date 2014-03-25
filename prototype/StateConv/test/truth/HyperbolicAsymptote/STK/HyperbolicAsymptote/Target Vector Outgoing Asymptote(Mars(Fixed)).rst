@@ -86,14 +86,14 @@ BEGIN Element
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-X(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-X(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		X(Mars(J2000))
+	Title		X(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		X(Mars(J2000))
+	Element		X(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -117,14 +117,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Y(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-Y(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Y(Mars(J2000))
+	Title		Y(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Y(Mars(J2000))
+	Element		Y(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -148,14 +148,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Z(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-Z(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Z(Mars(J2000))
+	Title		Z(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Z(Mars(J2000))
+	Element		Z(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -179,14 +179,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vx(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-Vx(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vx(Mars(J2000))
+	Title		Vx(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vx(Mars(J2000))
+	Element		Vx(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -210,14 +210,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vy(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-Vy(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vy(Mars(J2000))
+	Title		Vy(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vy(Mars(J2000))
+	Element		Vy(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -241,14 +241,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Cartesian Elems-Vz(Mars(J2000))
+	Name		Astrogator Values-Cartesian Elems-Vz(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Vz(Mars(J2000))
+	Title		Vz(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Cartesian Elems
-	Element		Vz(Mars(J2000))
+	Element		Vz(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -374,14 +374,14 @@ END Event
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_RA(Mars(J2000))
+	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_RA(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Asymptote_RA(Mars(J2000))
+	Title		Outgoing_Asymptote_RA(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Asymptote_RA(Mars(J2000))
+	Element		Outgoing_Asymptote_RA(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -408,14 +408,14 @@ END Units
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_Dec(Mars(J2000))
+	Name		Astrogator Values-Target Vector-Outgoing_Asymptote_Dec(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Asymptote_Dec(Mars(J2000))
+	Title		Outgoing_Asymptote_Dec(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Asymptote_Dec(Mars(J2000))
+	Element		Outgoing_Asymptote_Dec(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
@@ -442,14 +442,14 @@ END Units
 END Element
 
 BEGIN Element
-	Name		Astrogator Values-Target Vector-Outgoing_Vel_Az_at_Periapsis(Mars(J2000))
+	Name		Astrogator Values-Target Vector-Outgoing_Vel_Az_at_Periapsis(Mars(Fixed))
 	IsIndepVar		No
 	IndepVarName		Time
-	Title		Outgoing_Vel_Az_at_Periapsis(Mars(J2000))
+	Title		Outgoing_Vel_Az_at_Periapsis(Mars(Fixed))
 	NameInTitle		Yes
 	Service		Astrogator
 	Type		Target Vector
-	Element		Outgoing_Vel_Az_at_Periapsis(Mars(J2000))
+	Element		Outgoing_Vel_Az_at_Periapsis(Mars(Fixed))
 	Format		%.16e
 	SumAllowedMask		1559
 	SummaryOnly		No
