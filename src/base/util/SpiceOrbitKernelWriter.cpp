@@ -33,6 +33,7 @@
 #include <sstream>
 
 #include "SpiceOrbitKernelWriter.hpp"
+#include "SpiceInterface.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
 #include "TimeTypes.hpp"
@@ -536,7 +537,8 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
    {
       ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
       SpiceInt       numChar  = MAX_SHORT_MESSAGE;
-      SpiceChar      err[MAX_SHORT_MESSAGE];
+      //SpiceChar      err[MAX_SHORT_MESSAGE];
+      SpiceChar      *err = new SpiceChar[MAX_SHORT_MESSAGE];
       getmsg_c(option, numChar, err);
       if (eqstr_c(err, "SPICE(NOSEGMENTSFOUND)"))
       {
@@ -545,6 +547,7 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
                kernelFileName.c_str());
       }
       reset_c();
+      delete [] err;
    }
    fileOpen = false;
 }
