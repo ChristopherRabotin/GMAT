@@ -153,8 +153,9 @@ protected:
    Rvector6 GetCartStateInParameterCS(Integer item, Real rval);
    Rvector6 GetCartStateInParameterOrigin(Integer item, Real rval);
    void SetRealParameters(Integer item, Real rval);
-   void DebugOutputData(CoordinateSystem *paramOwnerCS);
-      
+   void DebugWriteData(CoordinateSystem *paramOwnerCS);
+   void DebugWriteRefObjInfo();
+   
    Rmatrix66 mSTM;
    Rmatrix33 mSTMSubset;
    
