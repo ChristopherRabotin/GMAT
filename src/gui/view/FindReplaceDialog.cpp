@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "FindReplaceDialog.hpp"
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIND_REPLACE

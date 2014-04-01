@@ -68,7 +68,8 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 EditorPanel::EditorPanel(wxWindow *parent, const wxString &name, bool isActive)
-   : GmatSavePanel(parent, false, name, true, isActive)
+   : GmatSavePanel(parent, false, name, true, isActive),
+    mEditor( NULL )  // Fixed unitialized value error
 {
    #ifdef DEBUG_EDITORPANEL
    MessageInterface::ShowMessage
@@ -101,7 +102,8 @@ EditorPanel::~EditorPanel()
 
    if (mEditor)
    {
-      delete mEditor;
+      // Don't delete wxControls!  Cleaning up the window will clear controls.
+      //delete mEditor;
       mEditor = NULL;
    }
 }
@@ -122,7 +124,7 @@ void EditorPanel::Create()
    //------------------------------------------------------
    // for editor
    //------------------------------------------------------
-   mEditor = new Editor(this, true);
+   mEditor = new ScriptEditor(this, true);
    mEditor->SetFocus();
    
    #ifdef DEBUG_EDITORPANEL_CREATE

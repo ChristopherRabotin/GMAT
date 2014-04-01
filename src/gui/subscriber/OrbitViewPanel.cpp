@@ -79,7 +79,9 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 OrbitViewPanel::OrbitViewPanel(wxWindow *parent,
                                const wxString &subscriberName)
-   : GmatPanel(parent)
+   : GmatPanel(parent),
+    mHasStarOptionChanged( false ),  // Fixed unitialized value error
+    mHasViewUpInfoChanged( false )
 {
    #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage("OrbitViewPanel() entering...\n");
@@ -222,6 +224,10 @@ void OrbitViewPanel::Create()
    wxArrayString empty;
    wxStaticText *emptyStaticText =
       new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );   
+   // We can't add emptyStaticText to two layouts, so I duplicated it
+   // When the window is deleted, it deletes it's children: if the control is added twice, it is deleted twice
+    wxStaticText *emptyStaticText2 =
+       new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );   
    
    
    //-----------------------------------------------------------------
@@ -655,7 +661,8 @@ void OrbitViewPanel::Create()
 
    mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   // Added duplicate emptyStaticText to avoid double free
+   mViewDefSizer->Add(emptyStaticText2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticText *viewDirectionLabel =
       new wxStaticText(this, -1, wxT("View Direction"),

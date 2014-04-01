@@ -1437,6 +1437,10 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
    GmatTree::ItemType childItemType;
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
+   // Do not delete the contents of the list when removed
+   // The child windows need to be released with their ->Destroy() function, not delete
+   theMdiChildren->DeleteContents( false );
+
    while (node)
    {
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
@@ -1472,7 +1476,10 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
          if (deleteChild)
-            delete child;
+         {
+             // The child windows need to be released with their ->Destroy() function, not delete
+             child->Destroy();
+         }
          
          delete node;
          childRemoved = true;
@@ -1645,7 +1652,9 @@ void GmatMainFrame::CloseChild(GmatMdiChildFrame *child)
       // so use OnClose(event) instead
       wxCloseEvent event;
       child->OnClose(event);
-      wxSafeYield();
+      // Don't yield here, the idle loop needs to wait until after the window events are completed
+      // because these events schedule window deltetion
+      // wxSafeYield();
    }
 }
 
@@ -3516,7 +3525,7 @@ void GmatMainFrame::OnPrint(wxCommandEvent &event)
 #if wxUSE_PRINTING_ARCHITECTURE
    #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
 
    if (editor)
    {
@@ -3654,7 +3663,7 @@ void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
 {
    CloseActiveChild();
-   wxSafeYield();
+   //wxSafeYield();
    
    if (theMdiChildren->GetCount() <= 0)
    {
@@ -5414,7 +5423,7 @@ void GmatMainFrame::OnUndo(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnUndo(event);
 #else
@@ -5430,7 +5439,7 @@ void GmatMainFrame::OnRedo(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnRedo(event);
 #else
@@ -5446,7 +5455,7 @@ void GmatMainFrame::OnCut(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnCut(event);
 #else
@@ -5462,7 +5471,7 @@ void GmatMainFrame::OnCopy(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnCopy(event);
 #else
@@ -5488,7 +5497,7 @@ void GmatMainFrame::OnPaste(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnPaste(event);
 #else
@@ -5504,7 +5513,7 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnComment(event);
 #else
@@ -5553,7 +5562,7 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnUncomment(event);
 #else
@@ -5601,7 +5610,7 @@ void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnSelectAll(event);
 #else
@@ -5649,7 +5658,7 @@ void GmatMainFrame::OnFind(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFind(event);
 #endif
@@ -5663,7 +5672,7 @@ void GmatMainFrame::OnFindNext(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFindNext(event);
 #endif
@@ -5677,7 +5686,7 @@ void GmatMainFrame::OnReplace(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFind(event);
 #endif
@@ -5691,7 +5700,7 @@ void GmatMainFrame::OnReplaceNext(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnReplaceNext(event);
 #endif
@@ -5705,7 +5714,7 @@ void GmatMainFrame::OnGoToLine(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnGoToLine(event);
 #endif
@@ -5719,7 +5728,7 @@ void GmatMainFrame::OnLineNumber(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnLineNumber(event);
 #endif
@@ -5733,7 +5742,7 @@ void GmatMainFrame::OnIndentMore(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnIndentMore(event);
 #endif
@@ -5747,7 +5756,7 @@ void GmatMainFrame::OnIndentLess(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnIndentLess(event);
 #endif

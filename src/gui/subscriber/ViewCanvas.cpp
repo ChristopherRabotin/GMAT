@@ -110,6 +110,20 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Constructor with explicit wxGLContext with default GL attributes
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #endif
+   // Fixed unitialized value error     
+   , mTime( NULL ),
+     mIsDrawing( NULL ),
+     mObjectRadius( NULL ),
+     mObjMaxZoomIn( NULL ),
+     mObjLastFrame( NULL ),
+     mDrawOrbitFlag( NULL ),
+     mObjectOrbitColor( NULL ),
+     mObjectGciPos( NULL ),
+     mObjectViewPos( NULL ),
+     mObjectViewVel( NULL ),
+     mObjectQuat( NULL ),
+     mBodyRotAngle( NULL ),
+     mBodyRotAxis( NULL )
 {
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.c_str());

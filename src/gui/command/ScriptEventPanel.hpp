@@ -31,7 +31,7 @@
 #include <wx/laywin.h>
 
 #ifdef __USE_STC_EDITOR__
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #endif
 
 class ScriptEventPanel: public GmatPanel
@@ -46,13 +46,13 @@ public:
    wxTextCtrl *mFileContentsTextCtrl;
    
 #ifdef __USE_STC_EDITOR__
-   Editor* GetEditor() { return mEditor; };
+   ScriptEditor* GetEditor() { return mEditor; };
 #endif
    
 private:
    // member data
 #ifdef __USE_STC_EDITOR__
-   Editor *mEditor;
+   ScriptEditor *mEditor;
 #endif
    
    MissionTreeItemData *theItem;

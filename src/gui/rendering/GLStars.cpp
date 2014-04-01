@@ -39,6 +39,7 @@ GLStars* GLStars::theInstance = NULL;
  */
 //------------------------------------------------------------------------------
 GLStars::GLStars()
+    : DesiredStarCount(42000)   // Fixed uninitialzed value error
 {
    DesiredStarCount = 0;
    NumLines = 0;
