@@ -23,8 +23,7 @@
 #include "BatchEstimatorInv.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
-#include "Spacecraft.hpp"
-#include "GroundstationInterface.hpp"
+#include <sstream>
 
 
 //#define DEBUG_ACCUMULATION
@@ -155,248 +154,136 @@ void BatchEstimatorInv::Accumulate()
 
    // Get state map, measurement models, and measurement data
    const std::vector<ListItem*> *stateMap = esm.GetStateMap();
-   modelsToAccess = measManager.GetValidMeasurementList();
-   const ObservationData *currentObs =  measManager.GetObsData();
+   modelsToAccess = measManager.GetValidMeasurementList();				// Get valid measurement models
+   const ObservationData *currentObs =  measManager.GetObsData();		// Get current observation data
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
       MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
-      MessageInterface::ShowMessage("At epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
+      MessageInterface::ShowMessage("Observation data O: epoch = %.12lf:   O = %.12lf\n", currentObs->epoch, currentObs->value[0]);
    #endif
 
-   // Throw an exception when no measurement model is associated with the current observation data
+//   ValidateModelToAccess();						// verify observation data is matched to a measurement model
+
    if (modelsToAccess.size() == 0)
    {
-      MessageInterface::ShowMessage("Current observation data: %.12lf   %s  %d  ", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-	  for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
-	     MessageInterface::ShowMessage("%s  ", currentObs->participantIDs[i].c_str());
-	  MessageInterface::ShowMessage("%.12lf\n", currentObs->value[0]);
-
-	  MessageInterface::ShowMessage("List of measurement models used in '%s' estimator:\n", GetName().c_str());
-	  MeasurementModel* mm;
-	  for (UnsignedInt i=0; (mm = measManager.GetMeasurementObject(i)) != NULL; ++i)
-	  {
-		 ObjectArray participants = mm->GetRefObjectArray("SpaceObject");
-		 MessageInterface::ShowMessage("  Measurement model '%s' has %d participants:\n", mm->GetName().c_str(), participants.size());
-		 
-		 for (UnsignedInt j=0; j < participants.size(); ++j)
-		 {
-			if (participants[j]->IsOfType(Gmat::SPACECRAFT))
-			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((Spacecraft*)participants[j])->GetStringParameter("Id").c_str());
-			else if (participants[j]->IsOfType(Gmat::GROUND_STATION))
-			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((GroundstationInterface*)participants[j])->GetStringParameter("Id").c_str());
-			else
-			   throw EstimatorException("Error: participant '" + participants[j]->GetName() + "' is neither spacecraft nor ground station\n");
-		 }
-	  }
-	  throw EstimatorException("Error: No measurement model used in estimator is associated with current observation data:\n");
+	  numRemovedRecords["Observation data is unmatched to any measurement model"]++;
    }
-   
-   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);
-   Real maxLimit = measModel->GetRealParameter("ResidualMax");
-
-
-   int count = measManager.Calculate(modelsToAccess[0], true);
-   if (count >= 1)
+   else
    {
-	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
-
-	  if (iterationsTaken == 0)
-	  {
-	     for (Integer i=0; i < currentObs->value.size(); ++i)
-	     {
-			// Data filtered based on measurement model's residual limits:
-		    if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
-		    {
-//			MessageInterface::ShowMessage("abs(O-C) = abs(%.12lf - %.12lf) = %.12lf   > maxLimit = %.12lf\n", currentObs->value[i], calculatedMeas->value[i], abs(currentObs->value[i] - calculatedMeas->value[i]), maxLimit);
-		       measManager.GetObsDataObject()->inUsed = false;
-			   break;
-		    }
-
-			// Data filtered based on time range:
-			Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-			Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-			if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
-			{
-//			MessageInterface::ShowMessage("currentObs->epoch = %.12lf is outside range [%.12lf , %.12lf]\n", currentObs->epoch, epoch1, epoch2);
-		       measManager.GetObsDataObject()->inUsed = false;
-			   break;
-			}
-
-			// Data filtered based on sigma editting
-			// . Specify Wii
-            Real weight = 1.0;
-            if (currentObs->noiseCovariance == NULL)
-            {
-               if ((*(calculatedMeas->covariance))(i,i) != 0.0)
-                  weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
-               else
-                  weight = 1.0;
-            }
-            else
-               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
-			// .Filter based on maximum residual multiplier
-		    if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
-		    {
-			   MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-			   for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-			      MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-			   for(int k = 0; k < currentObs->value.size(); ++k)
-			      MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-			   MessageInterface::ShowMessage("\n");
-		       measManager.GetObsDataObject()->inUsed = false;
-			   break;
-		    }
-
-//			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
-	     }
-	  }
-	  else
-	  {
-	     for (Integer i=0; i < currentObs->value.size(); ++i)
-	     {
-			// Data filtered based on sigma editting
-			// . Specify Wii
-            Real weight = 1.0;
-            if (currentObs->noiseCovariance == NULL)
-            {
-               if ((*(calculatedMeas->covariance))(i,i) != 0.0)
-                  weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
-               else
-                  weight = 1.0;
-            }
-            else
-               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
-
-			// . Filter based on n-sigma			
-		    if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
-		    {
-			   MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > kk*sigma + K :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-			   for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-			      MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-			   for(int k = 0; k < currentObs->value.size(); ++k)
-			      MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-			   MessageInterface::ShowMessage("\n");
-
-		       measManager.GetObsDataObject()->inUsed = false;
-			   break;
-		    }
-
-//			MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
-	     }
-
-	  }
-   
-   #ifdef DEBUG_ACCUMULATION
-      MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
-   #endif
-
-   // Currently assuming uniqueness; modify if more than 1 possible here
-//   if ((modelsToAccess.size() > 0) &&
-//       (measManager.Calculate(modelsToAccess[0], true) >= 1))
-   if (measManager.GetObsDataObject()->inUsed)
-   {
-//      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
-      RealArray hTrow;
-      hTrow.assign(stateSize, 0.0);
-      int rowCount = calculatedMeas->value.size();
-
-	  for (int i = 0; i < rowCount; ++i)
-         hTilde.push_back(hTrow);
-
-	  // Now walk the state vector and get elements of H-tilde for each piece
-      for (UnsignedInt i = 0; i < stateMap->size(); ++i)
+      int count = measManager.Calculate(modelsToAccess[0], true);
+      if (count >= 1)
       {
-         if ((*stateMap)[i]->subelement == 1)
+         // Currently assuming uniqueness; modify if more than 1 possible here
+         // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
+	     calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
+	     DataFilter();
+      
+         #ifdef DEBUG_ACCUMULATION
+         MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
+         #endif
+      
+         if (measManager.GetObsDataObject()->inUsed)
          {
-            #ifdef DEBUG_ACCUMULATION
-               MessageInterface::ShowMessage(
+            RealArray hTrow;
+            hTrow.assign(stateSize, 0.0);
+            int rowCount = calculatedMeas->value.size();
+
+	        for (int i = 0; i < rowCount; ++i)
+               hTilde.push_back(hTrow);
+
+	        // Now walk the state vector and get elements of H-tilde for each piece
+            for (UnsignedInt i = 0; i < stateMap->size(); ++i)
+            {
+               if ((*stateMap)[i]->subelement == 1)
+               {
+                 #ifdef DEBUG_ACCUMULATION
+                 MessageInterface::ShowMessage(
                      "   Calculating ddstate(%d) for %s, subelement %d of %d, "
                      "id = %d\n",
                      i, (*stateMap)[i]->elementName.c_str(),
                      (*stateMap)[i]->subelement, (*stateMap)[i]->length,
                      (*stateMap)[i]->elementID);
-			   MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
-            #endif
-			
-            stateDeriv = measManager.CalculateDerivatives(
+			     MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
+                 #endif
+			     
+                 stateDeriv = measManager.CalculateDerivatives(
                   (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                   modelsToAccess[0]);
 
-            // Fill in the corresponding elements of hTilde
-            for (UnsignedInt j = 0; j < rowCount; ++j)
-               for (Integer k = 0; k < (*stateMap)[i]->length; ++k)
-                  hTilde[j][i+k] = stateDeriv[j][k];
+                 // Fill in the corresponding elements of hTilde
+                 for (UnsignedInt j = 0; j < rowCount; ++j)
+                    for (Integer k = 0; k < (*stateMap)[i]->length; ++k)
+                       hTilde[j][i+k] = stateDeriv[j][k];
 
-            #ifdef DEBUG_ACCUMULATION
-               MessageInterface::ShowMessage("      Result:\n         ");
-               for (UnsignedInt l = 0; l < stateDeriv.size(); ++l)
-               {
-                  for (Integer m = 0; m < (*stateMap)[i]->length; ++m)
-                     MessageInterface::ShowMessage("%.12lf   ",
+                 #ifdef DEBUG_ACCUMULATION
+                 MessageInterface::ShowMessage("      Result:\n         ");
+                 for (UnsignedInt l = 0; l < stateDeriv.size(); ++l)
+                 {
+                    for (Integer m = 0; m < (*stateMap)[i]->length; ++m)
+                       MessageInterface::ShowMessage("%.12lf   ",
                            stateDeriv[l][m]);
-                  MessageInterface::ShowMessage("\n         ");
+                    MessageInterface::ShowMessage("\n         ");
+                 }
+                 MessageInterface::ShowMessage("\n");
+                 #endif
                }
-               MessageInterface::ShowMessage("\n");
+            }
+         
+	  
+	        // Apply the STM
+            #ifdef DEBUG_ACCUMULATION
+            MessageInterface::ShowMessage("Applying the STM\n");
             #endif
-         }
-      }
+            RealArray hRow;
 
-	  // Apply the STM
-      #ifdef DEBUG_ACCUMULATION
-         MessageInterface::ShowMessage("Applying the STM\n");
-      #endif
-      RealArray hRow;
+            // Temporary buffer for non-scalar measurements; hMeas is used to build
+            // the information matrix below.
+            std::vector<RealArray> hMeas;
 
-      // Temporary buffer for non-scalar measurements; hMeas is used to build
-      // the information matrix below.
-      std::vector<RealArray> hMeas;
+            Real entry;
+            for (UnsignedInt i = 0; i < hTilde.size(); ++i)
+            {
+               hRow.assign(stateMap->size(), 0.0);
+               for (UnsignedInt j = 0; j < stateMap->size(); ++j)
+               {
+                  entry = 0.0;
+                  for (UnsignedInt k = 0; k < stateMap->size(); ++k)
+                     entry += hTilde[i][k] * (*stm)(k, j);
+                  hRow[j] = entry;
+               }
 
-      Real entry;
-      for (UnsignedInt i = 0; i < hTilde.size(); ++i)
-      {
-         hRow.assign(stateMap->size(), 0.0);
-         for (UnsignedInt j = 0; j < stateMap->size(); ++j)
-         {
-            entry = 0.0;
-            for (UnsignedInt k = 0; k < stateMap->size(); ++k)
-               entry += hTilde[i][k] * (*stm)(k, j);
-            hRow[j] = entry;
-         }
+               hAccum.push_back(hRow);
+               hMeas.push_back(hRow);
 
-         hAccum.push_back(hRow);
-         hMeas.push_back(hRow);
+               #ifdef DEBUG_ACCUMULATION_RESULTS
+               MessageInterface::ShowMessage("   Htilde  = [");
+               for (UnsignedInt l = 0; l < stateMap->size(); ++l)
+                  MessageInterface::ShowMessage(  " %.12lf ", hTilde[i][l]);
+               MessageInterface::ShowMessage(  "]\n");
 
-         #ifdef DEBUG_ACCUMULATION_RESULTS
-            MessageInterface::ShowMessage("   Htilde  = [");
-            for (UnsignedInt l = 0; l < stateMap->size(); ++l)
-               MessageInterface::ShowMessage(  " %.12lf ", hTilde[i][l]);
-            MessageInterface::ShowMessage(  "]\n");
+               MessageInterface::ShowMessage("   H accum = [");
+               for (UnsignedInt l = 0; l < stateMap->size(); ++l)
+                  MessageInterface::ShowMessage(  " %.12lf ", hRow[l]);
+               MessageInterface::ShowMessage(  "]\n");
 
-            MessageInterface::ShowMessage("   H accum = [");
-            for (UnsignedInt l = 0; l < stateMap->size(); ++l)
-               MessageInterface::ShowMessage(  " %.12lf ", hRow[l]);
-            MessageInterface::ShowMessage(  "]\n");
-
-            MessageInterface::ShowMessage("   H has %d rows\n",
+               MessageInterface::ShowMessage("   H has %d rows\n",
                   hAccum.size());
-         #endif
-      }
+               #endif
+            }
 
-//	  MessageInterface::ShowMessage("observation data No.:%d\n", hAccum.size());
-      // Accumulate the observed - calculated difference
-//      const ObservationData *currentObs =  measManager.GetObsData();
-      Real ocDiff;
-      #ifdef DEBUG_ACCUMULATION
-         MessageInterface::ShowMessage("Accumulating the O-C differences\n");
-         MessageInterface::ShowMessage("   Obs size = %d, calc size = %d\n",
+            Real ocDiff;
+            #ifdef DEBUG_ACCUMULATION
+            MessageInterface::ShowMessage("Accumulating the O-C differences\n");
+            MessageInterface::ShowMessage("   Obs size = %d, calc size = %d\n",
                currentObs->value.size(), calculatedMeas->value.size());
-      #endif
-      for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
-      {
-         ocDiff = currentObs->value[k] - calculatedMeas->value[k];
+            #endif
+            for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
+            {
+			   // Caluclate residual O-C
+               ocDiff = currentObs->value[k] - calculatedMeas->value[k];
 
-         #ifdef DEBUG_O_MINUS_C
+               #ifdef DEBUG_O_MINUS_C
 //		    if ((calculatedMeas->value[k] < 0)||(calculatedMeas->value[k] > currentObs->rangeModulo))
 //				MessageInterface::ShowMessage("!!!!! Error: Get incorrect calculated measurement value:   C =  %.12le\n", calculatedMeas->value[k]);
 //			MessageInterface::ShowMessage("Calculate O-C = %.12le:  O = %.12le    C = %.12le   k = %d  calculatedMeas = <%p>\n\n", ocDiff, currentObs->value[k], calculatedMeas->value[k], k, calculatedMeas);
@@ -410,96 +297,115 @@ void BatchEstimatorInv::Accumulate()
 				currentObs->typeName.c_str(), currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
 				calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
 				ocDiff, calculatedMeas->uplinkFreq);
-         #endif
-//		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
-//                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
-//                                      GmatTimeConstants::JD_JAN_5_1941);
-//		    MessageInterface::ShowMessage("%s    %.12lf   %.12le\n", currentObs->participantIDs[0].c_str(), C_Epoch,	ocDiff);
+               #endif
 
-         measurementEpochs.push_back(currentEpoch);
-         measurementResiduals.push_back(ocDiff);
-         measurementResidualID.push_back(calculatedMeas->uniqueID);
+               measurementEpochs.push_back(currentEpoch);
+		       OData.push_back(currentObs->value[k]);						// made changes by TUAN NGUYEN
+		       CData.push_back(calculatedMeas->value[k]);					// made changes by TUAN NGUYEN
+               measurementResiduals.push_back(ocDiff);
+               measurementResidualID.push_back(calculatedMeas->uniqueID);
 
-         Real weight = 1.0;
-         if (currentObs->noiseCovariance == NULL)
-         {
-            #ifdef DEBUG_WEIGHTS
-               MessageInterface::ShowMessage("Measurement covariance(%d %d) "
+			   // Calculate weight
+               Real weight = 1.0;
+               if (currentObs->noiseCovariance == NULL)
+               {
+                  #ifdef DEBUG_WEIGHTS
+                  MessageInterface::ShowMessage("Measurement covariance(%d %d) "
                      "is %le\n", k, k, (*(calculatedMeas->covariance))(k,k));
-            #endif
+                  #endif
 
-            // todo: Figure out why the covariances can be 0.0!?!
+                  // todo: Figure out why the covariances can be 0.0!?!
 
-            if ((*(calculatedMeas->covariance))(k,k) != 0.0)
-               // Weight is diag(1 / sigma^2), per Montebruck & Gill, eq. 8.33
-               // Covariance diagonal is ~diag(sigma^2)
-               // If no off diagonal terms, inverse in 1/element along diagonal
-               weight = 1.0 / (*(calculatedMeas->covariance))(k,k);
-            else
-               weight = 1.0;
-         }
-         else
-         {
-            weight = 1.0 / (*(currentObs->noiseCovariance))(k,k);
-            #ifdef DEBUG_WEIGHTS
-               MessageInterface::ShowMessage("Noise covariance(%d %d) "
+                  if ((*(calculatedMeas->covariance))(k,k) != 0.0)
+                  // Weight is diag(1 / sigma^2), per Montebruck & Gill, eq. 8.33
+                  // Covariance diagonal is ~diag(sigma^2)
+                  // If no off diagonal terms, inverse in 1/element along diagonal
+                     weight = 1.0 / (*(calculatedMeas->covariance))(k,k);
+                  else
+                     weight = 1.0;
+               }
+               else
+               {
+                   weight = 1.0 / (*(currentObs->noiseCovariance))(k,k);
+                   #ifdef DEBUG_WEIGHTS
+                   MessageInterface::ShowMessage("Noise covariance(%d %d) "
                      "is %le\n", k, k, (*(currentObs->noiseCovariance))(k,k));
-            #endif
-         }
-		 Weight.push_back(weight);
+                   #endif
+               }
+		       Weight.push_back(weight);
 
-         for (UnsignedInt i = 0; i < stateSize; ++i)
-         {
-            for (UnsignedInt j = 0; j < stateSize; ++j)
-               //information(i,j) += hRow[i] * weight * hRow[j];
-               information(i,j) += hMeas[k][i] * weight * hMeas[k][j];
+			   
+		       for (UnsignedInt i = 0; i < stateSize; ++i)
+               {
+                  for (UnsignedInt j = 0; j < stateSize; ++j)
+                     //information(i,j) += hRow[i] * weight * hRow[j];
+                     information(i,j) += hMeas[k][i] * weight * hMeas[k][j];
 
-            //residuals[i] += hRow[i] * weight * ocDiff;
-            residuals[i] += hMeas[k][i] * weight * ocDiff;
-         }
-      }
+                  //residuals[i] += hRow[i] * weight * ocDiff;
+                  residuals[i] += hMeas[k][i] * weight * ocDiff;
+               }
 
-      #ifdef DEBUG_ACCUMULATION_RESULTS
-         MessageInterface::ShowMessage("Observed measurement value:\n");
-         for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
-            MessageInterface::ShowMessage("   %.12lf", currentObs->value[k]);
-         MessageInterface::ShowMessage("\n");
+		       // Write report file:
+		       std::stringstream sLine;
+               Real timeTAI = TimeConverterUtil::Convert(currentEpoch,TimeConverterUtil::A1MJD,TimeConverterUtil::TAIMJD); 
+		       char s[1000];
+		       sprintf(&s[0],"%.12lf   %s   ", timeTAI, currentObs->typeName.c_str());
+		       sLine << s;
+		       for(int n=0; n < currentObs->participantIDs.size(); ++n)
+			      sLine << currentObs->participantIDs[n] << "   ";
 
-         MessageInterface::ShowMessage("Calculated measurement value:\n");
-         for (UnsignedInt k = 0; k < calculatedMeas->value.size(); ++k)
-            MessageInterface::ShowMessage("   %.12lf",calculatedMeas->value[k]);
-         MessageInterface::ShowMessage("\n");
+		       sprintf(&s[0],"%.9lf   %.9lf   %.9lf   %.9le   %.9le\n", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight);
+		       sLine << s;
+		       reportFile << sLine.str();
+		       reportFile.flush();
+	        }
 
-         MessageInterface::ShowMessage("   O - C = ");
-         for (UnsignedInt k = 0; k < calculatedMeas->value.size(); ++k)
-            MessageInterface::ShowMessage("   %.12lf",
-                  currentObs->value[k] - calculatedMeas->value[k]);
-         MessageInterface::ShowMessage("\n");
-
-         MessageInterface::ShowMessage("Derivatives w.r.t. state (H-tilde):\n");
-         for (UnsignedInt k = 0; k < hTilde.size(); ++k)
-         {
-            for (UnsignedInt l = 0; l < hTilde[k].size(); ++l)
-               MessageInterface::ShowMessage("   %.12lf",hTilde[k][l]);
+            #ifdef DEBUG_ACCUMULATION_RESULTS
+            MessageInterface::ShowMessage("Observed measurement value:\n");
+            for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
+               MessageInterface::ShowMessage("   %.12lf", currentObs->value[k]);
             MessageInterface::ShowMessage("\n");
-         }
-         MessageInterface::ShowMessage("   Information Matrix = \n");
-         for (Integer i = 0; i < estimationState->GetSize(); ++i)
-         {
-            MessageInterface::ShowMessage("      [");
-            for (Integer j = 0; j < estimationState->GetSize(); ++j)
+
+            MessageInterface::ShowMessage("Calculated measurement value:\n");
+            for (UnsignedInt k = 0; k < calculatedMeas->value.size(); ++k)
+               MessageInterface::ShowMessage("   %.12lf",calculatedMeas->value[k]);
+            MessageInterface::ShowMessage("\n");
+
+            MessageInterface::ShowMessage("   O - C = ");
+            for (UnsignedInt k = 0; k < calculatedMeas->value.size(); ++k)
+               MessageInterface::ShowMessage("   %.12lf",
+                  currentObs->value[k] - calculatedMeas->value[k]);
+            MessageInterface::ShowMessage("\n");
+
+            MessageInterface::ShowMessage("Derivatives w.r.t. state (H-tilde):\n");
+            for (UnsignedInt k = 0; k < hTilde.size(); ++k)
             {
-               MessageInterface::ShowMessage(" %.12lf ", information(i, j));
+               for (UnsignedInt l = 0; l < hTilde[k].size(); ++l)
+                  MessageInterface::ShowMessage("   %.12lf",hTilde[k][l]);
+               MessageInterface::ShowMessage("\n");
             }
+            MessageInterface::ShowMessage("   Information Matrix = \n");
+            for (Integer i = 0; i < estimationState->GetSize(); ++i)
+            {
+               MessageInterface::ShowMessage("      [");
+               for (Integer j = 0; j < estimationState->GetSize(); ++j)
+               {
+                  MessageInterface::ShowMessage(" %.12lf ", information(i, j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+            MessageInterface::ShowMessage("   Residuals = [");
+            for (Integer i = 0; i < residuals.GetSize(); ++i)
+               MessageInterface::ShowMessage(" %.12lf ", residuals[i]);
             MessageInterface::ShowMessage("]\n");
-         }
-         MessageInterface::ShowMessage("   Residuals = [");
-         for (Integer i = 0; i < residuals.GetSize(); ++i)
-            MessageInterface::ShowMessage(" %.12lf ", residuals[i]);
-         MessageInterface::ShowMessage("]\n");
-      #endif
-   }
-   }
+            #endif
+
+         } // end of if (measManager.GetObsDataObject()->inUsed)
+
+      } // end of if (count >= 1)
+
+   }  // end of if (modelsToAccess.size() == 0)
+
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
       #ifdef SHOW_STATE_TRANSITIONS
@@ -592,7 +498,11 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   if (this->iterationsTaken == 0)								// made changes by TUAN NGUYEN
+   // Close report file
+   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
+       reportFile.close();										// made changes by TUAN NGUYEN
+
+   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
 
    dx.clear();
@@ -657,6 +567,22 @@ void BatchEstimatorInv::Estimate()
    predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
 
    Weight.empty();
+   OData.empty();
+   CData.empty();
 
+   if (iterationsTaken == 0)
+   {
+      for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
+	     MessageInterface::ShowMessage("Number of removed records for %s: %d\n", i->first.c_str(), i->second);
+   }
+   else
+   {
+      std::stringstream ss;
+	  ss << "Outer-Loop Sigma Filter for Iteration " << iterationsTaken;
+	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
+		  MessageInterface::ShowMessage("Number of removed records for %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+
+   }
+   
    currentState = CHECKINGRUN;
 }
