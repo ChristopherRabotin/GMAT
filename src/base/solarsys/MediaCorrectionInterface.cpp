@@ -1,0 +1,264 @@
+//$Id: MediaCorrectionInterface.cpp 67 2010-06-17 21:56:16Z tdnguye2@NDC $
+//------------------------------------------------------------------------------
+//                         MediaCorrectionInterface
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Author: Tuan Dang Nguyen GSFC-NASA
+// Created: 2010/06/17
+//
+/**
+ * Media correction model.
+ */
+//------------------------------------------------------------------------------
+
+
+#include "MediaCorrectionInterface.hpp"
+#include "Moderator.hpp"
+
+
+//------------------------------------------------------------------------------
+// MediaCorrectionInterface(const std::string &typeStr, const std::string &nomme)
+//------------------------------------------------------------------------------
+/**
+ * Standard constructor
+ */
+//------------------------------------------------------------------------------
+MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
+											const std::string &nomme) :
+	GmatBase		 (Gmat::MEDIA_CORRECTION, typeStr, nomme),
+	solarSystem      (NULL),												// made changes by TUAN NGUYEN
+	temperature      (295.1),		// 295.1K
+	pressure         (1013.5),		// 1013.5 kPa
+	humidityFraction (0.55),		// 55%
+	waveLength       (0.0),
+	range            (1.0)
+{
+   objectTypes.push_back(Gmat::MEDIA_CORRECTION);
+//   objectTypeNames.push_back("MediaCorrection");
+
+//   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();		// made changes by TUAN NGUYEN
+   modelName	= typeStr;
+   model 		= 0;
+
+//   temperature = 295.1;		// 295.1K
+//   pressure = 1013.5;		// 938.0 hPa = 93800 Pa = 0.926 atm
+//   humidityFraction = 0.55;	// 55 %
+   
+//   waveLength = 0.0;          // wave length of the signal
+}
+
+//------------------------------------------------------------------------------
+// ~MediaCorrectionInterface()
+//------------------------------------------------------------------------------
+/**
+ * Donstructor
+ */
+//------------------------------------------------------------------------------
+MediaCorrectionInterface::~MediaCorrectionInterface()
+{
+}
+
+//------------------------------------------------------------------------------
+// MediaCorrectionInterface(const MediaCorrectionInterface& mdc)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ */
+//------------------------------------------------------------------------------
+MediaCorrectionInterface::MediaCorrectionInterface(const MediaCorrectionInterface& mdc):
+	GmatBase           (mdc),
+	pressure 		   (mdc.pressure),
+	temperature 	   (mdc.temperature),
+	humidityFraction   (mdc.humidityFraction),
+	waveLength         (mdc.waveLength),
+	range              (mdc.range)
+{
+	model		= mdc.model;
+	modelName   = mdc.modelName;
+	solarSystem = mdc.solarSystem;
+}
+
+
+//-----------------------------------------------------------------------------
+// MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrectionInterface& mc)
+//-----------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param mc The MediaCorrectionInterface that is provides parameters for this one
+ *
+ * @return This MediaCorrectionInterface, configured to match mc
+ */
+//-----------------------------------------------------------------------------
+MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrectionInterface& mc)
+{
+   if (this != &mc)
+   {
+      GmatBase::operator=(mc);
+
+   	  model = mc.model;
+   	  modelName = mc.modelName;
+	  solarSystem = mc.solarSystem;
+
+   	  temperature 		= mc.temperature;
+   	  pressure 			= mc.pressure;
+   	  humidityFraction 	= mc.humidityFraction;
+	  waveLength        = mc.waveLength;
+	  range             = mc.range;
+   }
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Clone
+ */
+//------------------------------------------------------------------------------
+GmatBase* MediaCorrectionInterface::Clone() const
+{
+	return new MediaCorrectionInterface(*this);
+}
+
+//------------------------------------------------------------------------------
+// bool SetModel(Integer mod)
+//------------------------------------------------------------------------------
+/**
+ * Set a correction model
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetModel(Integer mod)
+{
+	model = mod;
+	return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetModelName(std::string modName)
+//------------------------------------------------------------------------------
+/**
+ * Set a correction model name
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetModelName(std::string modName)
+{
+	modelName = modName;
+	return true;
+}
+
+//------------------------------------------------------------------------------
+//  void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer in oreder to access needed physical parameter
+ * value(s).
+ */
+//------------------------------------------------------------------------------
+void MediaCorrectionInterface::SetSolarSystem(SolarSystem *ss)
+{
+   solarSystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetTemperature(Real T)
+//------------------------------------------------------------------------------
+/**
+ * Set temperature
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetTemperature(Real T)
+{
+	temperature = T;
+	return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetPressure(Real P)
+//------------------------------------------------------------------------------
+/**
+ * Set pressure
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetPressure(Real P)
+{
+	pressure = P;
+	return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetHumidityFraction(Real humFr)
+//------------------------------------------------------------------------------
+/**
+ * Set humidity fraction
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetHumidityFraction(Real humFr)
+{
+	humidityFraction = humFr;
+	return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetElevationAngle(Real elevation)
+//------------------------------------------------------------------------------
+/**
+ * Set elevation angle
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetElevationAngle(Real elevation)
+{
+	elevationAngle = elevation;
+	return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetRange(Real r)
+//------------------------------------------------------------------------------
+/**
+ * Set range
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetRange(Real r)
+{
+	range = r;
+	return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetWaveLength(Real lambda)
+//------------------------------------------------------------------------------
+/**
+ * Set wave length
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetWaveLength(Real lambda)
+{
+	waveLength = lambda;
+	return true;
+}
+
+
+//------------------------------------------------------------------------------
+// RealArray Correction()
+//------------------------------------------------------------------------------
+/**
+ * Make a media correction
+ */
+//------------------------------------------------------------------------------
+RealArray MediaCorrectionInterface::Correction()
+{
+	RealArray result;
+
+	return result;
+}
