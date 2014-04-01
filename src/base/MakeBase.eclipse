@@ -471,6 +471,7 @@ OBJECTS = \
     solarsys/ExponentialAtmosphere.o \
     solarsys/JacchiaRobertsAtmosphere.o \
     solarsys/LibrationPoint.o \
+    solarsys/MediaCorrectionInterface.o \
     solarsys/Moon.o \
     solarsys/Msise90Atmosphere.o \
     solarsys/PlanetaryEphemException.o \
