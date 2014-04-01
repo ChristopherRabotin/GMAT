@@ -444,7 +444,7 @@ ObservationData* GmatODDopplerType::ReadObservation()
       theLine >> value;
       currentObs.value.push_back(value);
    }
-
+/*
    Covariance *noise = new Covariance();
    noise->SetDimension(dataSize);
    for (Integer i = 0; i < dataSize; ++i)
@@ -453,7 +453,7 @@ ObservationData* GmatODDopplerType::ReadObservation()
       (*noise)(i,i) = defaultNoiseCovariance;
    }
    currentObs.noiseCovariance = noise;
-
+*/
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
       for (Integer i = 0; i < participantSize; ++i)
