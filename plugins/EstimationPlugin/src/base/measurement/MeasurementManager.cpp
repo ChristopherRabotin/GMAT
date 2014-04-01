@@ -659,39 +659,96 @@ UnsignedInt MeasurementManager::LoadObservations()
       #else
          if (streamList[i]->IsOpen())
          {
-            od = streamList[i]->ReadObservation();
+			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, count, numRec;
+			filter1Num = filter2Num = filter3Num = filter4Num = count = numRec = 0;
 
-            while (od != NULL)
-            {
-			   if (od->value[0] != -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
+
+			Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
+			StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
+			while (true)
+			{
+			   od = streamList[i]->ReadObservation();
+			   ++numRec;
+
+			   // End of file
+			   if (od == NULL)
 			   {
-				  if (od_old.epoch < od->epoch)
-				  {
-                     // observations.push_back(*od);		// made changes by TUAN NGUYEN
-					 obsTable.push_back(*od);				// made changes by TUAN NGUYEN
-
-                     #ifdef DEBUG_LOAD_OBSERVATIONS
-					 MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                     #endif
-
-					 od_old = *od;
-				  }
-				  else
-				  {
-                     #ifdef DEBUG_LOAD_OBSERVATIONS
-				     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                     #endif
-				  }
+				  --numRec;
+                  break;
 			   }
-			   else
+
+			   // Invalid measurement value filter
+			   if (od->value[0] == -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
 			   {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
 				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
+				  ++filter1Num;
+				  continue;
 			   }
 
-			   od = streamList[i]->ReadObservation();
-            }
+			   // duplication or time order filter
+			   if (od_old.epoch >= od->epoch)
+			   {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+				  ++filter2Num;
+				  continue;
+			   }
+
+			   // selected stations filter
+               bool choose = false;
+               if (selectedStations.size() == 0)
+				  choose = true;
+			   else
+			   {
+				  for (int j=0; j < selectedStations.size(); ++j)
+				  {
+				     if (selectedStations[j] == od->participantIDs[0])
+					 {
+					    choose = true;
+						break;
+					 }
+				  }
+               }
+
+               if (choose == false)
+			   {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+				  ++filter3Num;
+				  continue;
+			   }
+
+		       // Data thinning filter
+			   if ((numRec*thinningRatio - count) < 0.0)
+               {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+				  ++filter4Num;
+				  continue;
+			   }
+
+			   obsTable.push_back(*od);
+               #ifdef DEBUG_LOAD_OBSERVATIONS
+	           MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+               #endif
+
+			   ++count;
+               od_old = *od;
+			}
+
+			MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
+            MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
+			MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
+			MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
+			MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
+			MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
+            MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
+
          }
       #endif
 	  }
@@ -712,37 +769,6 @@ UnsignedInt MeasurementManager::LoadObservations()
 
 
    // Sort observation data by epoch due to observations table is required to have an epoch ascending order
-/*
-   if (!obsTable.empty())
-      observations.push_back(obsTable[0]);
-
-   Real ep;
-   for (UnsignedInt i = 1; i < obsTable.size(); ++i)
-   {
-	  // Get observation epoch of ith record on ObsTable:
-	  ep = obsTable[i].epoch;
-		
-      // Doing binary search in order to find observations location of od:
-	  std::vector<ObservationData>::iterator start = observations.begin();
-	  UnsignedInt startIndex = 0;
-	  UnsignedInt endIndex = observations.size()-1; 
-	  UnsignedInt mid;
-      while (startIndex < endIndex)
-	  {
-         mid = (startIndex + endIndex)/2;
-
-        if (ep < observations[mid].epoch)
-			 endIndex = mid;
-		 else
-             startIndex = mid;
-	  }
-	  ObservationData od = obsTable[i];
-	  observations.push_back(obsTable[i]);
-	  observations.insert(start+(startIndex+1), obsTable[i]);
-   }
-*/
-   
-
    bool completed = false;
    while (!completed)
    {
@@ -779,8 +805,9 @@ UnsignedInt MeasurementManager::LoadObservations()
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
+   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
+
 #ifdef DEBUG_LOAD_OBSERVATIONS
-   MessageInterface::ShowMessage("Number of observation records = %d\n", observations.size());
    MessageInterface::ShowMessage(
          "Exit MeasurementManager::LoadObservations() method\n");
 #endif
@@ -846,10 +873,10 @@ void MeasurementManager::LoadRampTables()
 			{
 			   std::vector<RampTableData> ramp_table;
                rtd = rampTableDataStreamList[i]->ReadRampTableData();
-
                while (rtd != NULL)
                {
-			      if (rtd_old.epoch < rtd->epoch)
+				  // Data records containing rampType = 0(snap), 6(invalid/unknown) , and 7(left bank in DSN file) will be removed from ramp table  
+				  if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
 			      {
                      ramp_table.push_back(*rtd);
 
@@ -862,7 +889,7 @@ void MeasurementManager::LoadRampTables()
 			      else
 		          {
                      #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-					    MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+					    MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
                      #endif
 			      }
                   rtd = rampTableDataStreamList[i]->ReadRampTableData();
@@ -1266,7 +1293,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		 if (withEvents)
 		 {  
          #ifdef DEBUG_FLOW
-	        MessageInterface::ShowMessage(" Measurement with events\n");
+	        MessageInterface::ShowMessage(" Simulation: measurement with events\n");
          #endif
 			if (measurements[j].isFeasible)
 	            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);		// made changes by TUAN NGUYEN
@@ -1274,7 +1301,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		 else
 		 {
          #ifdef DEBUG_FLOW
-	        MessageInterface::ShowMessage(" Measurement without events\n");
+	        MessageInterface::ShowMessage(" Simulation: measurement without events\n");
          #endif
 			measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);			// made changes by TUAN NGUYEN
 		 }
@@ -1309,38 +1336,75 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
          // Verify observation data belonging to the measurement model jth
-         if (models[j]->GetStringParameter("Type") != od->typeName)
+		 bool isbelong;
+         if ((models[j]->GetStringParameter("Type") != od->typeName))
+		 {
+//			 MessageInterface::ShowMessage("Hi there 0.0\n");
+	        isbelong = false;
+		 }
+		 else
+		 {
+//			 MessageInterface::ShowMessage("Hi there 0.1:  models[%d]<%s> type<%s>\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
+			isbelong = false;
+		    ObjectArray participants = models[j]->GetParticipants();		// participants in measurement model
+			if (participants.size() == od->participantIDs.size())
+			{
+			   int num = participants.size();
+			   for (int i1 = 0; i1 < num; ++i1)
+			   {
+				  isbelong = false;
+			      for (int i2 = 0; i2 < num; ++i2)
+			      {
+					 if (od->participantIDs[i1] == participants[i2]->GetStringParameter("Id"))
+					 {
+						 isbelong = true;
+						 break;
+					 }
+			      }
+
+				  if (isbelong == false)  
+				  {
+//					  MessageInterface::ShowMessage("Hi there 0.2: od->participantIDs[%d] <%s> is not in model participants list\n", i1, od->participantIDs[i1].c_str());
+					 break;
+				  }
+				  
+			   }
+
+			}
+		 }
+		 
+		 if (isbelong == false)
          {
-		    measurements[j].typeName		= models[j]->GetStringParameter("Type");
-	        measurements[j].epoch			= od->epoch;
-	        measurements[j].epochSystem	= od->epochSystem;
-		    measurements[j].isFeasible		= false;
-	        measurements[j].covariance		= NULL;
-	        measurements[j].eventCount		= 0;
+		    measurements[j].typeName		 = models[j]->GetStringParameter("Type");
+	        measurements[j].epoch			 = od->epoch;
+	        measurements[j].epochSystem	     = od->epochSystem;
+		    measurements[j].isFeasible		 = false;
+	        measurements[j].covariance		 = NULL;
+	        measurements[j].eventCount		 = 0;
 	        measurements[j].feasibilityValue = 0.0;
-	        measurements[j].value.clear();
-
-		    continue;
+	        measurements[j].value.clear();  
          }
-
-
+		 else
+		 {
+		    
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:					// made changes by TUAN NGUYEN
-	     // Note: Only one ramp table is used for a measurement model						// made changes by TUAN NGUYEN
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");					// made changes by TUAN NGUYEN
-	     std::vector<RampTableData>* rt = NULL;												// made changes by TUAN NGUYEN
-	     if (sr.size() > 0)																	// made changes by TUAN NGUYEN
-	        rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
-
-//       measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
-	     measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
+            // Specify ramp table associated with measurement model models[j]:					// made changes by TUAN NGUYEN
+	        // Note: Only one ramp table is used for a measurement model						// made changes by TUAN NGUYEN
+            StringArray sr = models[j]->GetStringArrayParameter("RampTables");					// made changes by TUAN NGUYEN
+	        std::vector<RampTableData>* rt = NULL;												// made changes by TUAN NGUYEN
+	        if (sr.size() > 0)																	// made changes by TUAN NGUYEN
+	           rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
+		    
+//          measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
+	        measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
 	     
-         if (measurements[j].isFeasible)
-         {
+            if (measurements[j].isFeasible)
+            {
             if (!withEvents)
                eventCount += measurements[j].eventCount;
             retval = true;
-         }
+            }
+		 }
       }
    
    }
