@@ -25,6 +25,7 @@
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>
+#include "MeasurementException.hpp"
 
 
 //#define DEBUG_FILE_ACCESS
@@ -43,12 +44,16 @@ const std::string DataFile::PARAMETER_TEXT[] =
 {
    "Filename",
    "Format",
+   "DataThinningRatio",
+   "SelectedStationIDs",
 };
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,			// "Filename"
-   Gmat::STRING_TYPE,			// "Format"			// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,			// "Format"
+   Gmat::REAL_TYPE,				// "DataThinningRatio"
+   Gmat::STRINGARRAY_TYPE,		// "IncludedStations"
 };
 
 
@@ -66,7 +71,8 @@ DataFile::DataFile(const std::string name) :
    GmatBase          (Gmat::DATA_FILE, "DataFile", name),
    theDatastream     (NULL),
    streamName        ("ObsData.gmd"),
-   obsType           ("GMATInternal")
+   obsType           ("GMATInternal"),
+   thinningRatio     (1.0)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -106,7 +112,9 @@ DataFile::~DataFile()
 DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
-   obsType           (df.obsType)
+   obsType           (df.obsType),
+   thinningRatio     (df.thinningRatio),
+   selectedStationIDs(df.selectedStationIDs)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
@@ -145,6 +153,8 @@ DataFile& DataFile::operator=(const DataFile& df)
 
       streamName = df.streamName;
       obsType    = df.obsType;
+	  thinningRatio			= df.thinningRatio;
+	  selectedStationIDs	= df.selectedStationIDs;
 
       if (df.theDatastream)
          theDatastream = (ObType*)df.theDatastream->Clone();
@@ -338,15 +348,10 @@ std::string DataFile::GetParameterTypeString(const Integer id) const
 std::string DataFile::GetStringParameter(const Integer id) const
 {
    if (id == ObsType)
-   {
-//	   MessageInterface::ShowMessage("DataFile<%s>::GetStringParameter(id = %d  GmatBaseParamCount = %d 'Format') = '%s'\n", GetName().c_str(), id, GmatBaseParamCount, obsType.c_str());
       return obsType;
-   }
+
    if (id == StreamName)
-   {
-//	   MessageInterface::ShowMessage("DataFile<%s>::GetStringParameter(id = %d  GmatBaseParamCount = %d 'Filename') = '%s'\n", GetName().c_str(), id, GmatBaseParamCount, streamName.c_str());
       return streamName;
-   }
 
    return GmatBase::GetStringParameter(id);
 }
@@ -377,6 +382,19 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
+   if (id == SelectedStationIDs)
+   {
+      if (value == "")
+         throw MeasurementException("Error: "+GetName()+".SelectedStationIDs cannot accept an empty string\n");
+
+	  if (find(selectedStationIDs.begin(), selectedStationIDs.end(), value) ==
+                  selectedStationIDs.end())
+	  {
+	     selectedStationIDs.push_back(value);
+	  }
+	  return true;
+   }
+
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -399,6 +417,14 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
 std::string DataFile::GetStringParameter(const Integer id,
       const Integer index) const
 {
+   if (id == SelectedStationIDs)
+   {
+	  if ((index >= 0) && ((Integer)selectedStationIDs.size() > index))
+         return selectedStationIDs[index];
+	  else
+         return "";
+   }
+
    return GmatBase::GetStringParameter(id, index);
 }
 
@@ -423,6 +449,16 @@ std::string DataFile::GetStringParameter(const Integer id,
 bool DataFile::SetStringParameter(const Integer id, const std::string &value,
       const Integer index)
 {
+   if (id == SelectedStationIDs)
+   {
+	  if ((index >= 0) && ((Integer)selectedStationIDs.size() > index))
+		 selectedStationIDs[index] = value;
+	  else
+		  selectedStationIDs.push_back(value);
+
+      return true;      
+   }
+
    return GmatBase::SetStringParameter(id, value, index);
 }
 
@@ -509,6 +545,78 @@ bool DataFile::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of properties contained in a StringArray
+ *
+ * @param The ID of the StringArray
+ *
+ * @return The array
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataFile::GetStringArrayParameter(const Integer id) const
+{
+   if (id == SelectedStationIDs)
+      return selectedStationIDs;
+
+   return GmatBase::GetStringArrayParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of properties contained in a StringArray
+ *
+ * @param label Script string used to identify the property
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataFile::GetStringArrayParameter(const std::string & label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+Real DataFile::GetRealParameter(const Integer id) const
+{
+   if (id == DataThinningRatio)
+      return thinningRatio;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+
+Real DataFile::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == DataThinningRatio)
+   {
+      if ((value < 0.0)||(value > 1.0))
+         throw MeasurementException("Error: value of "+ GetName() +".DataThinningRatio parameter is out of range [0, 1]\n");
+
+	  thinningRatio = value;
+	  return thinningRatio;
+   }
+
+   return GmatBase::SetRealParameter(id, value);
+}
+
+
+Real DataFile::GetRealParameter(const std::string& label) const
+{
+	return GetRealParameter(GetParameterID(label));
+}
+
+
+Real DataFile::SetRealParameter(const std::string& label, const Real value)
+{
+	return SetRealParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 // bool SetStream(ObType *thisStream)

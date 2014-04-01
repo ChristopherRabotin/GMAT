@@ -75,6 +75,19 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string& label) const;
+   virtual Real         SetRealParameter(const std::string& label,
+                                         const Real value);
+
+
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
 
@@ -103,11 +116,18 @@ protected:
    /// Text description of the observation data type
    std::string    obsType;
 
+   /// Data thinning ratio
+   Real thinningRatio;						// data thinning ratio specify the ratio between the selected data records and total all records
+   /// List of station IDs
+   StringArray selectedStationIDs;			// list of stationIDs included in data file
+
    /// Class parameter ID enumeration
    enum
    {
        StreamName = GmatBaseParamCount,
        ObsType,
+	   DataThinningRatio,
+	   SelectedStationIDs,
        DataFileParamCount
    };
 
