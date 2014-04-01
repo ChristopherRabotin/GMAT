@@ -472,6 +472,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\LibrationPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Moon.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
@@ -896,6 +897,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />

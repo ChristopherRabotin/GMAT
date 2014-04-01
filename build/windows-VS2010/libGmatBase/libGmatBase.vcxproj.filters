@@ -1332,6 +1332,9 @@
     <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2620,6 +2623,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
       <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
