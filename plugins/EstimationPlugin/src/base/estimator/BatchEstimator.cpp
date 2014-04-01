@@ -773,6 +773,13 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
    #endif
 
+   // Open report file											// made changes by TUAN NGUYEN
+   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
+   {
+      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
+	  reportFile << "Epoch                Meas Type        Parts      Obs Measuement (O)   Cal Measurement (C)  Residual (O-C)   Weight (W)         W*(O-C)^2\n";
+   }
+
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
@@ -1021,7 +1028,7 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
-
+   
    #ifdef WALK_STATE_MACHINE
 	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
    #endif
@@ -1119,7 +1126,9 @@ void BatchEstimator::CheckCompletion()
       esm.MapVectorToObjects();
       esm.MapObjectsToSTM();
       currentEpoch = estimationEpoch;
-      measManager.Reset();
+      measManager.Reset();											// set current observation data to be the first one in observation data table				// made changes by TUAN NGUYEN
+	  if (measManager.GetObsDataObject()->inUsed == false)			// if the first observation data is not in used, then go to the next in-used data record	// made changes by TUAN NGUYEN
+		 measManager.AdvanceObservation();																														// made changes by TUAN NGUYEN
       nextMeasurementEpoch = measManager.GetEpoch();
 
       // Need to reset STM and covariances
