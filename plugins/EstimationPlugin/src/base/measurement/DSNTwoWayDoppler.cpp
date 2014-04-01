@@ -25,6 +25,7 @@
 #include "MeasurementException.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include "GroundstationInterface.hpp"
 #include "Transmitter.hpp"
 #include "Receiver.hpp"
 #include "Transponder.hpp"
@@ -503,8 +504,10 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // coords
       std::string updateAll = "All";
       UpdateRotationMatrix(currentMeasurement.epoch, updateAll);
-      outState = R_o_j2k * rangeVecInertial;
-      currentMeasurement.feasibilityValue = outState[2];
+//    outState = R_o_j2k * rangeVecInertial;
+//    currentMeasurement.feasibilityValue = outState[2];
+	  outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
+	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -528,7 +531,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
                bfLoc.ToString().c_str());
       #endif
 
-      if (currentMeasurement.feasibilityValue > 0.0)
+	  Real minAngle;
+	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+//	  MessageInterface::ShowMessage("min angle = %lf    elevation angle = %lf\n", minAngle, currentMeasurement.feasibilityValue);
+
+      if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
          currentMeasurement.value[0] = 0.0;     // No Doppler shift w/o events
@@ -1231,8 +1241,25 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
 	  if (rampTB != NULL)																											// made changes by TUAN NGUYEN
 	  {
-//		 currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;		// made changes by TUAN NGUYEN
-		 currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE)/ interval;					// made changes by TUAN NGUYEN
+		 Integer errnum;
+		 try
+		 {
+//		    currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;		// made changes by TUAN NGUYEN
+		    currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE, errnum)/ interval;		   // made changes by TUAN NGUYEN
+		 } catch (MeasurementException exp)
+		 {
+			currentMeasurement.value[0] = 0.0;
+	        currentMeasurement.uplinkFreq = frequencyE;
+	        currentMeasurement.uplinkBand = freqBand;
+	        currentMeasurement.dopplerCountInterval = interval;
+			currentMeasurement.isFeasible = false;
+			currentMeasurement.feasibilityValue = 0.0;
+			if ((errnum == 2)||(errnum == 3))
+			   throw exp;
+			else
+               return false;
+		 }
+
          #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 		 Real rampedIntegral = IntegralRampedFrequency(t1TE, interval + dtS-dtE);
             MessageInterface::ShowMessage("    Use ramped DSNTwoWayDoppler calculation:\n");
