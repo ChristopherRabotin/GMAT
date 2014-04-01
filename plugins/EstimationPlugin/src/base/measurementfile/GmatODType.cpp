@@ -452,14 +452,14 @@ ObservationData* GmatODType::ReadObservation()
       currentObs.rangeModulo = rangeModulo;
    }
 
-   Covariance *noise = new Covariance();
-   noise->SetDimension(dataSize);
-   for (Integer i = 0; i < dataSize; ++i)
-   {
-      /// @todo Measurement noise covariance is hard-coded; this must be fixed
-      (*noise)(i,i) = defaultNoiseCovariance;
-   }
-   currentObs.noiseCovariance = noise;
+//   Covariance *noise = new Covariance();
+//   noise->SetDimension(dataSize);
+//   for (Integer i = 0; i < dataSize; ++i)
+//   {
+//      /// @todo Measurement noise covariance is hard-coded; this must be fixed
+//      (*noise)(i,i) = defaultNoiseCovariance;
+//   }
+//   currentObs.noiseCovariance = noise;
 
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
