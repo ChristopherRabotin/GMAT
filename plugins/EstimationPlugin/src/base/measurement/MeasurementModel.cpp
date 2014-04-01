@@ -2314,7 +2314,12 @@ void MeasurementModel::SetCorrection(const std::string& correctionName,
       #ifdef DEBUG_SET_CORRECTION
 	     MessageInterface::ShowMessage("correctionName = '%s' will be added.\n", correctionName.c_str(), correctionType.c_str());
       #endif
-      ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName);
+      ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName, correctionType);
    }
+}
+
+ObjectArray& MeasurementModel::GetParticipants()
+{
+	return participants;
 }
 

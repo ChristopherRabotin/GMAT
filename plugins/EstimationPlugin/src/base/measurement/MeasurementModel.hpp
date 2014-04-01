@@ -161,6 +161,8 @@ public:
    Integer              GetModelTypeID();
    void                 SetModelID(Integer newID);
 
+   virtual ObjectArray&     GetParticipants();																	// made change by TUAN NGUYEN
+
 //   virtual const MeasurementData&
 //                        CalculateMeasurement(bool withEvents = false);										// made changes by TUAN NGUYEN
 ///// TBD: Do we want something more generic here?
