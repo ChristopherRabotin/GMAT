@@ -26,6 +26,7 @@
 
 //#define DEBUG_IONOSPHERE_ELECT_DENSITY
 //#define DEBUG_IONOSPHERE_TEC
+//#define DEBUG_IONOSPHERE_CORRECTION
 
 //------------------------------------------------------------------------------
 // static data
@@ -256,6 +257,9 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    
    // Upper and lower integration limits
    real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
+   if (hbeg < 1.0)
+	   hbeg = 1.0;			// If height is less than 1.0km then set it to 1.0km
+
    real hend = hbeg;
    real hstp = 1.0;
    
@@ -436,17 +440,24 @@ Real Ionosphere::BendingAngle()
 //---------------------------------------------------------------------------
 RealArray Ionosphere::Correction()
 {
+#ifdef DEBUG_IONOSPHERE_CORRECTION
+	MessageInterface::ShowMessage("Ionosphere::Correction() start\n");
+#endif
+
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
    Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL
    Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL		// unit: meter
    Real dphi = 0;                     //BendingAngle()*180/GmatConstants::PI;
                                       // It has not been defined yet
    Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;				// unit: s
-   
-   //MessageInterface::ShowMessage
-   //   ("Ionosphere::Correction: freq = %.12lf MHz,  tec = %.12lfe16,  "
-   //    "drho = %.12lfm, dphi = %f, dtime = %.12lfs\n", freq/1.0e6,
-   //    tec/1.0e16, drho, dphi*3600, dtime);
+
+#ifdef DEBUG_IONOSPHERE_CORRECTION
+   MessageInterface::ShowMessage
+      ("Ionosphere::Correction: freq = %.12lf MHz,  tec = %.12lfe16,  "
+       "drho = %.12lfm, dphi = %f, dtime = %.12lfs\n", freq/1.0e6,
+       tec/1.0e16, drho, dphi*3600, dtime);
+#endif
+
    RealArray ra;
    ra.push_back(drho);
    ra.push_back(dphi);
