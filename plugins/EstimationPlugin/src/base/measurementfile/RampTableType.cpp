@@ -309,8 +309,8 @@ RampTableData* RampTableType::ReadRampTableData()
    currentRecord.dataFormat = "GMAT_RampTable";
 
    // Record format of frequency ramp table: 
-   // Epoch   MeasurementName  MeasurementID   StationID   SpacecraftID    Uplink Band	     Ramp Type	  Ramp Frequency     Ramp Rate
-   // Real    string           Integer         string      string          Integer           Integer      Real               Real
+   // Epoch   StationID   SpacecraftID    Uplink Band	    Ramp Type	  Ramp Frequency     Ramp Rate
+   // Real    string      string          Integer           Integer      Real               Real
    Real value; 
 
    GmatEpoch taiEpoch;
