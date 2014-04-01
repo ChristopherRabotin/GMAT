@@ -28,6 +28,9 @@
 #include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"							// made changes by TUAN NGUYEN
+#include "Spacecraft.hpp"									// made changes by TUAN NGUYEN
+#include "GroundstationInterface.hpp"						// made changes by TUAN NGUYEN
+
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -51,9 +54,9 @@ Estimator::PARAMETER_TEXT[] =
    "EpochFormat",							// made changes by TUAN NGUYEN	for time span filter
    "StartEpoch",							// made changes by TUAN NGUYEN	for time span filter
    "EndEpoch",								// made changes by TUAN NGUYEN	for time span filter
-   "MaximumResidualMultiplier",				// made changes by TUAN NGUYEN  for data sigma editting
-   "ConstantMultiplier",					// made changes by TUAN NGUYEN  for data sigma editting
-   "AdditiveConstant",						// made changes by TUAN NGUYEN  for data sigma editting
+   "OLSEInitialRMSSigma",					// made changes by TUAN NGUYEN  for data sigma editting
+   "OLSEMultiplicativeConstant",			// made changes by TUAN NGUYEN  for data sigma editting
+   "OLSEAdditiveConstant",					// made changes by TUAN NGUYEN  for data sigma editting
 };
 
 const Gmat::ParameterType
@@ -111,7 +114,7 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    startEpoch           (DateUtil::EARLIEST_VALID_MJD),					// made changes by TUAN NGUYEN
    endEpoch             (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
    epochFormat          ("TAIModJulian"),								// made changes by TUAN NGUYEN
-   maxResidualMult		(10.0),											// made changes by TUAN NGUYEN
+   maxResidualMult		(1.0e180),										// made changes by TUAN NGUYEN
    constMult			(3.0),											// made changes by TUAN NGUYEN
    additiveConst        (0.0)											// made changes by TUAN NGUYEN
 {
@@ -287,6 +290,12 @@ bool Estimator::Initialize()
       if (measurementNames.empty())
          throw SolverException("Estimator error - no measurements set.\n");
    }
+   
+   numRemovedRecords["OSLERMSP0 Filter"] = 0;					// made changes by TUAN NGUYEN
+   numRemovedRecords["Outer-Loop Sigma Filter"] = 0;			// made changes by TUAN NGUYEN
+   numRemovedRecords["Timespan Filter"] = 0;					// made changes by TUAN NGUYEN
+   numRemovedRecords["Observation data is unmatched to any measurement model"] = 0; // made changes by TUAN NGUYEN
+   
 
    return retval;
 }
@@ -1582,14 +1591,18 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 //                    Real inputStateElement, Real* outputStateElement)
 //------------------------------------------------------------------------------
 /**
- * Method used to convert result of a state's element in A1mjd to participant's coordinate system
+ * Method used to convert result of a state's element in A1mjd to participant's 
+ * coordinate system
  *
  * @param infor					information about state's element
- * @param epoch					the epoch at which the state is converted it's coordinate system
- * @param inputStateElement		state's element in GMAT internal coordinate system (A1Mjd)
+ * @param epoch					the epoch at which the state is converted it's 
+ *                              coordinate system
+ * @param inputStateElement		state's element in GMAT internal coordinate system
+ *                              (A1Mjd)
  * @param outputStateElemnet	state's element in participant's coordinate system
  *
 */
+//------------------------------------------------------------------------------
 bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
 {
 
@@ -1645,6 +1658,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
  * @param outState		estimation state in participants' coordinate systems
  *
 */
+//-------------------------------------------------------------------------
 void Estimator::GetEstimationState(GmatState& outputState)
 {
 	const std::vector<ListItem*> *map = esm.GetStateMap();
@@ -1658,3 +1672,182 @@ void Estimator::GetEstimationState(GmatState& outputState)
 		outputState[i] = outputStateElement;
 	}
 }
+
+
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// void DataFilter()
+//-------------------------------------------------------------------------
+/**
+* This function is used to filter bad observation data records. It has
+*   1. Measurement model's maximum residual filter
+*   2. Data filter based on time span
+*   3. Sigma editting
+*/
+//-------------------------------------------------------------------------
+void Estimator::DataFilter()
+{
+
+   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
+   Real maxLimit = measModel->GetRealParameter("ResidualMax");									// Get value of MeasurementModel.ResidualMax parameter
+   const ObservationData *currentObs =  measManager.GetObsData();								// Get observation measurement data O
+   const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);		// Get calculated measurement data C
+
+   if (iterationsTaken == 0)
+   {
+      for (Integer i=0; i < currentObs->value.size(); ++i)
+	  {
+         // 1.Data filtered based on measurement model's residual limits:
+		 if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
+		 {
+//			MessageInterface::ShowMessage("Throw away this observation data due to measurement model's residual limit %lf:  %.12lf   %s   %d", maxLimit, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+			std::string filterName = measModel->GetName() + " maximum residual filter";				// made changes by TUAN NGUYEN
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
+
+            break;
+		 }
+
+         // 2.Data filtered based on timespan:
+         Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+         Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+         if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
+         {
+//			MessageInterface::ShowMessage("Throw away this observation data due to time span [%.12lf, %.12lf]:  %.12lf   %s   %d", epoch1, epoch2, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+            numRemovedRecords["Timespan Filter"]++;					// made changes by TUAN NGUYEN
+
+			break;
+         }
+
+         // 3.Data filtered based on sigma editting
+         // 3.1. Specify Weight
+         Real weight = 1.0;
+         if (currentObs->noiseCovariance == NULL)
+         {
+            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+            else
+               weight = 1.0;
+         }
+         else
+               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+         // 3.2. Filter based on maximum residual multiplier
+		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+		 {
+//			MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+            numRemovedRecords["OSLERMSP0 Filter"]++;					// made changes by TUAN NGUYEN
+
+			break;
+		 }
+	  }
+   }
+   else
+   {
+	  for (Integer i=0; i < currentObs->value.size(); ++i)
+	  {
+         // Data filtered based on sigma editting
+         // 1. Specify Weight
+         Real weight = 1.0;
+         if (currentObs->noiseCovariance == NULL)
+         {
+            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+            else
+               weight = 1.0;
+         }
+         else
+            weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+
+         // 2. Filter based on n-sigma			
+		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+		 {
+//            MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > kk*sigma + K :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+            numRemovedRecords["Outer-Loop Sigma Filter"]++;			// made changes by TUAN NGUYEN
+
+			std::stringstream ss;
+			ss << "Outer-Loop Sigma Filter for Iteration " << iterationsTaken;				// made changes by TUAN NGUYEN
+
+			if (numRemovedRecords.find(ss.str()) == numRemovedRecords.end())				// made changes by TUAN NGUYEN
+               numRemovedRecords[ss.str()] = 1;												// made changes by TUAN NGUYEN
+			else																			// made changes by TUAN NGUYEN
+			   numRemovedRecords[ss.str()]++;												// made changes by TUAN NGUYEN
+
+
+			break;
+		 }
+
+//       MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
+	  }
+
+   }
+
+}
+
+
+/*
+// made changes by TUAN NGUYEN
+void Estimator::ValidateModelToAccess()
+{
+   const ObservationData *currentObs =  measManager.GetObsData();
+
+   // Throw an exception when no measurement model is associated with the current observation data
+   if (modelsToAccess.size() == 0)
+   {
+      MessageInterface::ShowMessage("Current observation data: %.12lf   %s  %d  ", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+	  for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
+	     MessageInterface::ShowMessage("%s  ", currentObs->participantIDs[i].c_str());
+	  MessageInterface::ShowMessage("%.12lf\n", currentObs->value[0]);
+
+	  MessageInterface::ShowMessage("List of measurement models used in '%s' estimator:\n", GetName().c_str());
+	  MeasurementModel* mm;
+	  for (UnsignedInt i=0; (mm = measManager.GetMeasurementObject(i)) != NULL; ++i)
+	  {
+		 ObjectArray participants = mm->GetRefObjectArray("SpaceObject");
+		 MessageInterface::ShowMessage("  Measurement model '%s' has %d participants:\n", mm->GetName().c_str(), participants.size());
+		 
+		 for (UnsignedInt j=0; j < participants.size(); ++j)
+		 {
+			if (participants[j]->IsOfType(Gmat::SPACECRAFT))
+			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((Spacecraft*)participants[j])->GetStringParameter("Id").c_str());
+			else if (participants[j]->IsOfType(Gmat::GROUND_STATION))
+			   MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((GroundstationInterface*)participants[j])->GetStringParameter("Id").c_str());
+			else
+			   throw EstimatorException("Error: participant '" + participants[j]->GetName() + "' is neither spacecraft nor ground station\n");
+		 }
+	  }
+	  throw EstimatorException("Error: No measurement model used in estimator is associated with current observation data:\n");
+
+   }
+}
+*/
