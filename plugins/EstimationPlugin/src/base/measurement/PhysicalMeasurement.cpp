@@ -252,17 +252,6 @@ RealArray PhysicalMeasurement::GetObsValue()
 	return obsValue;
 }
 
-// made changes by TUAN NGUYEN
-//void PhysicalMeasurement::SetFlagToReadFromObservationData(bool isFromObservationData)
-//{
-//	isFromObsData = isFromObservationData;
-//}
-
-// made changes by TUAN NGUYEN
-//bool PhysicalMeasurement::GetFlagToReadFromObservationData()
-//{
-//	return isFromObsData;
-//}
 
 // made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetObservationDataRecord(ObservationData* data)
@@ -304,7 +293,8 @@ void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
 }
 
 //----------------------------------------------------------------------
-// void AddCorrection(std::string& modelName)
+// void AddCorrection(const std::string& modelName, 
+//                    const std::string& mediaCorrectionType)
 //----------------------------------------------------------------------
 /**
  * This function is used to add media correction model to the measurement
@@ -313,53 +303,65 @@ void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
  * 						measurement
  */
 //----------------------------------------------------------------------
-void PhysicalMeasurement::AddCorrection(const std::string& modelName)
+void PhysicalMeasurement::AddCorrection(const std::string& modelName, 
+	const std::string& mediaCorrectionType)
 {
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("Adding correction named %s\n",
             modelName.c_str());
    #endif
+   if (mediaCorrectionType == "TroposphereModel")
+   {
+	  if (modelName == "HopfieldSaastamoinen")
+	  {
+	     if (troposphere != NULL)
+	        delete troposphere;
 
-	if (modelName == "HopfieldSaastamoinen")
-	{
-	   if (troposphere != NULL)
-	      delete troposphere;
+	     // Create troposphere correction model
+	     troposphere = new Troposphere(modelName);
 
-	   // Create troposphere correction model
-	   troposphere = new Troposphere(modelName);
-
-       #ifdef DEBUG_MEDIA_CORRECTION
-          MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
-       #endif
-	}
-	else if (modelName == "IRI2007")							// made changes by TUAN NGUYEN
-	{
-      #ifdef DEBUG_MEDIA_CORRECTION
-         MessageInterface::ShowMessage("   Set as ionosphere model\n");
-      #endif
+         #ifdef DEBUG_MEDIA_CORRECTION
+            MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
+         #endif
+	  }
+      else if (modelName == "None")
+	  {
+	  }
+	  else
+	  {
+		  throw new MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
+			+"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
+	  }
+   }
+   else if (mediaCorrectionType == "IonosphereModel")
+   {
+      if (modelName == "IRI2007")							// made changes by TUAN NGUYEN
+	  {
+         #ifdef DEBUG_MEDIA_CORRECTION
+            MessageInterface::ShowMessage("   Set as ionosphere model\n");
+         #endif
 
 ///// TBD: Determine if there is a more generic way to add these
-	  // Create IRI2007 ionosphere correction model
-      #ifdef IONOSPHERE
-		   ionosphere = new Ionosphere(modelName);
-      #else
+	     // Create IRI2007 ionosphere correction model
+         #ifdef IONOSPHERE
+		     ionosphere = new Ionosphere(modelName);
+         #else
 		   MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
 				         "available.\nIt will be be added to GMAT in a future release.\n");
 
 		   throw new GmatBaseException("Ionosphere IRI2007 model currently is not "
 		         "available.\nIt will be be added to GMAT in a future release.\n");
-      #endif
-	}
-	else if (modelName == "None")
-	{
-	}
-	else
-	{
-		MessageInterface::ShowMessage("Error: '%s' is not allowed for media correction name.\n", modelName.c_str());
-		MessageInterface::ShowMessage("Only 2 media correction model names are allowed: HopfieldSaastamoinen and IRI2007\n");
-		throw new MeasurementException("Error: media correction model name is not allowed\n"
-			"Only 2 media correction model names are allowed: HopfieldSaastamoinen and IRI2007\n");
-	}
+         #endif
+	  }
+      else if (modelName == "None")
+	  {
+	  }
+	  else
+	  {
+		  throw new MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
+			+"Currently only 'IRI2007' is allowed for Ionosphere.\n");
+	  }
+   }
 }
 
 
@@ -433,6 +435,18 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
    {
     // Set troposphere's ref objects						// made changes by TUAN NGUYEN
 	troposphere->SetSolarSystem(solarSystem);				// made changes by TUAN NGUYEN
+
+	// Set temperature, pressure, humidity to Troposphere object
+	for (int i=0; i < participants.size(); ++i)
+	{
+	   if (participants[i]->IsOfType(Gmat::GROUND_STATION))
+	   {
+		  troposphere->SetTemperature(((GroundstationInterface*)participants[i])->GetRealParameter("Temperature"));
+		  troposphere->SetPressure(((GroundstationInterface*)participants[i])->GetRealParameter("Pressure"));
+		  troposphere->SetHumidityFraction(((GroundstationInterface*)participants[i])->GetRealParameter("Humidity")/100);
+		  break;
+	   }
+	}
 
    	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
    	troposphere->SetWaveLength(wavelength);
@@ -550,8 +564,8 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
  * This function is used to calculate media corrections.
  *
  * @param freq		The frequency of signal	(unit: MHz)
- * @param r1		Position of ground station
- * @param r2		Position of spacecraft
+ * @param r1		Position of ground station in a FK5 coordinate system 
+ * @param r2		Position of spacecraft in the same coordinate system of r1 
  * @param epoch	    The time at which signal is transmitted from or received at ground station
  */
 //------------------------------------------------------------------------
@@ -993,45 +1007,95 @@ Integer PhysicalMeasurement::FrequencyBand(Real frequency)
  *
  * @param t1         The end time for integration (unit: A1Mjd)
  * @param delta_t    Elapse time (unit: second)
+ * @param err        Error number
  *
  * @return The integration of ramped frequency.
  * Assumptions: ramp table had been sorted by epoch 
  */
 //------------------------------------------------------------------------------
 //#define DEBUG_INTEGRAL_RAMPED_FREQUENCY
-Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
+Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
 {
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
    MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
-
+   err = 0;
    if (delta_t < 0)
+   {
+      err = 1;
       throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+   }
 
    if (rampTB == NULL)
+   {
+      err = 2;
 	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   }
    else if ((*rampTB).size() == 0)
+   {
+      err = 3;
 	  throw MeasurementException("Error: No data in ramp table\n");
+   }
    
 
+   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[0].epoch;
    Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+
+#ifdef RAMP_TABLE_EXPANDABLE
+   Real correct_val = 0;
+   if (t1 < time_min)
+   {
+      // t0 and t1 < time_min
+	   return delta_t*(*rampTB)[0].rampFrequency;
+   }
+   else if (t1 > time_max)
+   {
+	  if (t0 < time_min)
+	  {
+		  // t0 < time_min < time_max < t1
+		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+		  t0 = time_min;
+	  }
+	  else if (t0 > time_max)
+	  {
+		  // t0 and t1 > time_max
+		  return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+	  }
+	  else
+	  {
+		  // time_min <= t0 <= time_max < t1
+		  correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+		  t1 = time_max;
+	  }
+   }
+   else
+   {
+	  if (t0 < time_min)
+	  {
+		  // t0 < time_min <= t1 <= time_max
+		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+		  t0 = time_min;
+	  }
+   }
+#endif
+
    if ((t1 < time_min)||(t1 > time_max))
    {
 	  char s[200];
 	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
 	  std::string st(&s[0]);
-
+	  err = 4;
 	  throw MeasurementException(st);
    }
 
-   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
+   
    if ((t0 < time_min)||(t0 > time_max))
    {
 	  char s[200];
 	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
 	  std::string st(&s[0]);
-
+	  err = 5;
 	  throw MeasurementException(st);
    }
 
@@ -1104,7 +1168,11 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t)
    MessageInterface::ShowMessage("Exit PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
 
+#ifdef RAMP_TABLE_EXPANDABLE
+   return value + correct_val;
+#else
    return value;
+#endif
 
 }
 

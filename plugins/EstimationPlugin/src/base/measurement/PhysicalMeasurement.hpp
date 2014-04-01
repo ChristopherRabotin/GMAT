@@ -60,7 +60,7 @@ public:
    void        SetConstantFrequency(Real newFreq, Integer index=0);						// made changes by TUAN NGUYEN
    Real        GetConstantFrequency(Integer index=0);
 
-   void 			AddCorrection(const std::string& modelName);
+   void 		AddCorrection(const std::string& modelName, const std::string& mediaCorrectionType);
 //   RealArray	TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix33 Ro_j2k);
    RealArray    TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
 
@@ -140,7 +140,7 @@ protected:
 ///// TBD: Determine if there is a more generic way to add these
    Real                       GetFrequencyFromRampTable(Real epoch);			// Get frequency from ramped table for a given epoch (in A1Mjd)		// made changes by TUAN NGUYEN
    Integer                    GetUplinkBandFromRampTable(Real epoch);           // made changes by TUAN NGUYEN
-   virtual Real               IntegralRampedFrequency(Real t1, Real delta_t);   // made changes by TUAN NGUYEN
+   virtual Real               IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);   // made changes by TUAN NGUYEN
 
    /// Enumeration defining the PhysicalMeasurement's scriptable parameters
    enum
