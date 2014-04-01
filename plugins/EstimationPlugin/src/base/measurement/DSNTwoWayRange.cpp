@@ -582,8 +582,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // coords
       std::string updateAll = "All";
       UpdateRotationMatrix(currentMeasurement.epoch, updateAll);
-      outState = R_o_j2k * rangeVecInertial;
-      currentMeasurement.feasibilityValue = outState[2];
+//	  outState = R_o_j2k * rangeVecInertial;
+//    currentMeasurement.feasibilityValue = outState[2];
+	  outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
+	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -610,7 +612,13 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
       #endif
 
-      if (currentMeasurement.feasibilityValue > 0.0)
+	  Real minAngle;
+	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+
+      if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
          currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();
@@ -1138,8 +1146,24 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	     #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 		    MessageInterface::ShowMessage("   Ramped frequency calculation is used\n");
          #endif
+		 Integer errnum;
+		 try
+		 {
+		    realRangeFull = IntegralRampedFrequency(t3R, realTravelTime, errnum);						// unit: range unit
+		 } catch (MeasurementException exp)
+		 {
+            currentMeasurement.value[0] = 0.0;
+	        currentMeasurement.uplinkFreq = frequency;
+	        currentMeasurement.uplinkBand = freqBand;
+	        currentMeasurement.rangeModulo = rangeModulo;
+			currentMeasurement.isFeasible = false;
+			currentMeasurement.feasibilityValue = 0.0;
+			if ((errnum == 2)||(errnum =3))
+			   throw exp;
+			else
+			   return false;
+		 }
 
-		 realRangeFull = IntegralRampedFrequency(t3R, realTravelTime);									// unit: range unit
 		 realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  }
 
@@ -1262,48 +1286,96 @@ Real DSNTwoWayRange::GetFrequencyFactor(Real frequency)
 
 
 //------------------------------------------------------------------------------
-// Real RampedFrequencyIntergration(Real t0, Real t1)
+// Real RampedFrequencyIntergration(Real t0, Real delta_t)
 //------------------------------------------------------------------------------
 /**
  * Calculate the tetegration of ramped frequency in range from time t0 to time t1
  *
  * @param t1         The end time for integration (unit: A1Mjd)
  * @param delta_t    Elapse time (unit: second)
+ * @param err        Error number
  *
  * @return The integration of ramped frequency.
  * Assumptions: ramp table had been sorted by epoch 
  */
 //------------------------------------------------------------------------------
-Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
+Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
 {
-
+   err = 0;
    if (delta_t < 0)
+   {
+	  err = 1;
       throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+   }
 
    if (rampTB == NULL)
+   {
+      err = 2;
 	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   }
    else if ((*rampTB).size() == 0)
+   {
+      err = 3;
 	  throw MeasurementException("Error: No data in ramp table\n");
-   
+   }
 
+   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[0].epoch;
    Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+
+#ifdef RAMP_TABLE_EXPANDABLE
+   Real correct_val = 0;
+   if (t1 < time_min)
+   {
+      // t0 and t1 < time_min
+	   return delta_t*(*rampTB)[0].rampFrequency;
+   }
+   else if (t1 > time_max)
+   {
+	  if (t0 < time_min)
+	  {
+		  // t0 < time_min < time_max < t1
+		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+		  t0 = time_min;
+	  }
+	  else if (t0 > time_max)
+	  {
+		  // t0 and t1 > time_max
+		  return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+	  }
+	  else
+	  {
+		  // time_min <= t0 <= time_max < t1
+		  correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+		  t1 = time_max;
+	  }
+   }
+   else
+   {
+	  if (t0 < time_min)
+	  {
+		  // t0 < time_min <= t1 <= time_max
+		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+		  t0 = time_min;
+	  }
+   }
+#endif
+
    if ((t1 < time_min)||(t1 > time_max))
    {
 	  char s[200];
 	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
 	  std::string st(&s[0]);
-
+	  err = 4;
 	  throw MeasurementException(st);
    }
 
-   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    if ((t0 < time_min)||(t0 > time_max))
    {
 	  char s[200];
 	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
 	  std::string st(&s[0]);
-
+	  err = 5;
 	  throw MeasurementException(st);
    }
 
@@ -1365,8 +1437,11 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t)
 
 //   MessageInterface::ShowMessage("value = %.12lf\n", value);
 
+#ifdef RAP_TABLE_EXPANDABLE
+   return value + correct_val;
+#else
    return value;
-
+#endif
 }
 
 
