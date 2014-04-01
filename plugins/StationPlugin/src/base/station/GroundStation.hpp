@@ -37,6 +37,7 @@
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
 
+#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
 {
@@ -84,6 +85,13 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
+
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -112,6 +120,12 @@ public:
 
    virtual bool            IsValidID(const std::string &id);
 
+
+//   bool                    IsValidElevationAngle();
+//   RealArray               CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+//   RealArray               CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+//   RealArray               CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+
    DEFAULT_TO_NO_CLONES
 
 protected:
@@ -119,9 +133,21 @@ protected:
    std::string          stationId;
 
    // Added hardware of the ground station
-   StringArray	         hardwareNames;       // made changes by Tuan Nguyen
+   StringArray	        hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
 	
+   /// Troposphere and Ionosphere objects
+   MediaCorrectionInterface* troposphereObj;
+   MediaCorrectionInterface* ionosphereObj;
+
+   /// Parameters needed for Troposphere correction
+   Real temperature;						// unit: Kelvin
+   Real pressure;							// unit: hPa
+   Real humidity;							// unit: percentage
+
+   /// Parameters needed for verifying measurement feasibility
+   Real minElevationAngle;					// unit: degree
+
 	
 public:
    /// Published parameters for ground stations
@@ -129,6 +155,10 @@ public:
    {
       STATION_ID = BodyFixedPointParamCount,
       ADD_HARDWARE,								// made changes by Tuan Nguyen
+  	  TEMPERATURE,					// temperature (in K) at ground station. It is used for Troposphere correction
+	  PRESSURE,						// pressure (in hPa) at ground station. It is used for Troposphere correction
+	  HUMIDITY,						// humidity (in %) at ground station. It is used for Troposphere correction
+	  MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying maesurement feasibility 
       GroundStationParamCount,
    };
 

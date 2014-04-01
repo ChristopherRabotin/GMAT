@@ -34,6 +34,7 @@
 
 
 //#define DEBUG_OBJECT_MAPPING
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_INIT
 //#define DEBUG_HARDWARE
 //#define TEST_GROUNDSTATION
@@ -49,6 +50,10 @@ GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount
    {
       "Id",
       "AddHardware",				// made changes by Tuan Nguyen
+      "Temperature",				// K- degree
+	  "Pressure",					// hPa
+	  "Humidity",					// percentage
+	  "MinimumElevationAngle",		// degree
    };
 
 const Gmat::ParameterType
@@ -56,6 +61,10 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
    {
       Gmat::STRING_TYPE,
       Gmat::OBJECTARRAY_TYPE,		// made changes by Tuan Nguyen
+      Gmat::REAL_TYPE,		// Temperature
+	  Gmat::REAL_TYPE,		// Pressure
+	  Gmat::REAL_TYPE,		// Humidity
+	  Gmat::REAL_TYPE,		// MinimumElevationAngle
    };
 
 
@@ -76,8 +85,18 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
 //---------------------------------------------------------------------------
 GroundStation::GroundStation(const std::string &itsName) :
    GroundstationInterface    ("GroundStation", itsName),
-   stationId                 ("StationId")
+   stationId                 ("StationId"),
+   temperature			     (295.1),					// 295.1 K-degree
+   pressure                  (1013.5),					// 1013.5 hPa
+   humidity				     (55.0),					// 55%
+   minElevationAngle         (7.0),						// 7 degree
+   troposphereObj            (NULL),
+   ionosphereObj             (NULL)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation default constructor\n");
+#endif
+
    objectTypeNames.push_back("GroundStation");
    parameterCount = GroundStationParamCount;
 
@@ -111,10 +130,24 @@ GroundStation::~GroundStation()
 //---------------------------------------------------------------------------
 GroundStation::GroundStation(const GroundStation& gs) :
    GroundstationInterface        (gs),
-   stationId             (gs.stationId)
+   stationId             (gs.stationId),
+   temperature           (gs.temperature),
+   pressure              (gs.pressure),
+   humidity              (gs.humidity),
+   minElevationAngle     (gs.minElevationAngle),
+   troposphereObj        (NULL),
+   ionosphereObj         (NULL)
 {
-	hardwareNames 		= gs.hardwareNames;		// made changes by Tuan Nguyen
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation copy constructor start\n");
+#endif
+
+   hardwareNames 		= gs.hardwareNames;		// made changes by Tuan Nguyen
 // hardwareList 		= gs.hardwareList;		// should it be cloned ????
+
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation copy constructor end\n");
+#endif
 }
 
 
@@ -131,13 +164,25 @@ GroundStation::GroundStation(const GroundStation& gs) :
 //---------------------------------------------------------------------------
 GroundStation& GroundStation::operator=(const GroundStation& gs)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation operator =\n");
+#endif
+
    if (&gs != this)
    {
       GroundstationInterface::operator=(gs);
 
       stationId 	  = gs.stationId;
-      hardwareNames = gs.hardwareNames;		// made changes by Tuan Nguyen
+      hardwareNames   = gs.hardwareNames;		// made changes by Tuan Nguyen
 //      hardwareList	= gs.hardwareList;		// should it be cloned ????
+
+	  temperature     = gs.temperature;
+	  pressure        = gs.pressure;
+	  humidity        = gs.humidity;
+
+	  minElevationAngle = gs.minElevationAngle;
+	  troposphereObj = NULL;
+	  ionosphereObj = NULL;
    }
 
    return *this;
@@ -155,6 +200,10 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
 //---------------------------------------------------------------------------
 void GroundStation::Copy(const GmatBase* orig)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation::Copy()\n");
+#endif
+
    operator=(*((GroundStation *)(orig)));
 }
 
@@ -170,6 +219,10 @@ void GroundStation::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 GmatBase* GroundStation::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("GroundStation::Clone()\n");
+#endif
+
    return new GroundStation(*this);
 }
 
@@ -340,18 +393,18 @@ bool GroundStation::SetStringParameter(const Integer id,
 {
    if (id == STATION_ID)
    {
-      if (IsValidID(value))
+//      if (IsValidID(value))
       {
          stationId = value;
          return true;
       }
-      else
-      {
-         AssetException ae;
-         ae.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Id",
-							  "Must begin with a letter; may contain letters, integers, dashes, underscores");
-         throw ae;
-      }
+ //     else
+ //     {
+ //        AssetException ae;
+ //        ae.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Id",
+//							  "Must begin with a letter; may contain letters, integers, dashes, underscores");
+//         throw ae;
+//      }
    }
 
    // made changes by Tuan Nguyen
@@ -564,6 +617,94 @@ const StringArray& GroundStation::GetStringArrayParameter(
       const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets a real parameter based on parameter id.
+ *
+ * @param <id>    id of a real parameter
+ *
+ * @return value of a real parameter.
+ */
+//------------------------------------------------------------------------------
+Real GroundStation::GetRealParameter(const Integer id) const
+{
+   if (id == TEMPERATURE)
+      return temperature;
+   if (id == PRESSURE)
+      return pressure;
+   if (id == HUMIDITY)
+      return humidity;
+
+   if (id == MINIMUM_ELEVATION_ANGLE)
+      return minElevationAngle;
+
+   return GroundstationInterface::GetRealParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value) const
+//------------------------------------------------------------------------------
+/**
+ * This method sets value to a real parameter based on parameter id.
+ *
+ * @param <id>       id of a real parameter
+ * @param <value>    value used to set
+ *
+ * @return value of a real parameter.
+ */
+//------------------------------------------------------------------------------
+Real GroundStation::SetRealParameter(const Integer id,
+                                      const Real value)
+{
+   if (id == TEMPERATURE)
+   {
+	  if ( value < 0.0)
+         throw AssetException("Temperature set to " + GetName() + " does not allow to be a negative number\n");
+	  temperature = value;
+	  return temperature;
+   }
+   if (id == PRESSURE)
+   {
+	  if ( value < 0.0)
+         throw AssetException("Pressure set to " + GetName() + " does not allow to be a negative number\n");
+	  pressure = value;
+	  return pressure;
+   }
+   if (id == HUMIDITY)
+   {
+	  if (( value < 0.0)||( value > 100.0))
+         throw AssetException("Huminity set to " + GetName() + " is not in range [0.0, 100.0]\n");
+	  humidity = value;
+	  return humidity;
+   }
+
+   if (id == MINIMUM_ELEVATION_ANGLE)
+   {
+	  if (( value < -90.0)||( value > 90.0))
+         throw AssetException("Minimum elevation angle set to " + GetName() + " is not in range [-90.0o, 90.0o]\n");
+	  minElevationAngle = value;
+	  return minElevationAngle;
+   }
+   
+   return GroundstationInterface::SetRealParameter(id, value);
+}
+
+
+Real GroundStation::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+Real GroundStation::SetRealParameter(const std::string &label,
+                                      const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
 }
 
 
@@ -949,6 +1090,10 @@ bool GroundStation::Initialize()
    if (VerifyAddHardware() == false)	// verify add hardware
 	  return false;
 
+   #ifdef DEBUG_INIT
+      MessageInterface::ShowMessage("GroundStation::Initializing %s  exit\n", instanceName.c_str());
+   #endif
+
    return true;
 }
 
@@ -1000,16 +1145,101 @@ Real* GroundStation::GetEstimationParameterValue(const Integer item)
  * @return true if input is a valid ID; false otherwise.
  */
 //------------------------------------------------------------------------------
+// Note: stationID can be any string  TUAN NGUYEN. StationID and spacecraftID in 
+//       Stereo-A data are strings containing number.
+//
 bool GroundStation::IsValidID(const std::string &id)
 {
-   // first character must be a letter
-   if (!isalpha(id[0]))  return false;
+//   // first character must be a letter
+//   if (!isalpha(id[0]))  return false;
 
-   // each character must be a letter, an integer, a dash, or an underscore
-   unsigned int sz = id.size();
-   for (unsigned int ii = 0; ii < sz; ii++)
-      if (!isalnum(id[ii]) && id[ii] != '-' && id[ii] != '_') return false;
+//   // each character must be a letter, an integer, a dash, or an underscore
+//   unsigned int sz = id.size();
+//   for (unsigned int ii = 0; ii < sz; ii++)
+//      if (!isalnum(id[ii]) && id[ii] != '-' && id[ii] != '_') return false;
 
    return true;
 }
 
+/*
+bool GroundStation::IsValidElevationAngle()
+{
+	return true;
+}
+
+
+
+RealArray GroundStation::CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+{
+   // Convert state of space point sp into topocentric coordinate system
+   CoordinateSystem* topoCS = CoordinateSystem::CreateLocalCoordinateSystem("topoCS", "Topocentric", 
+	   this,				// origin of this coordinate system is the ground station 
+       NULL, NULL,			// primary and secondary space points do not need to specify for this case  
+	   j2000Body,			// j2000Body is specified by the station's j2000Body
+	   theSolarSystem);		// solar system is specified by the station's solar system
+
+   CoordinateSystem* spacePointCS = CoordinateSystem::CreateLocalCoordinateSystem("sp_j2K", "MJ2000Eq", 
+	   this, NULL, NULL, j2000Body, theSolarSystem);
+
+   Rvector6 inState =  sp->GetMJ2000State(atTime);
+   Rvector6 outState;
+   CoordinateConverter* cv = new CoordinateConverter();
+   cv->Convert(atTime, inState, spacePointCS, outState, topoCS);
+   delete cv;
+   delete topoCS;
+   delete spacePointCS;
+
+   Rvector3 rVec(outState[0],outState[1],outState[2]) ;						// in topo coordinate system
+
+
+   Real lambda = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/frequency ;
+   Real range = rVec.GetMagnitude();	// range in m
+   Real angle = asin(rVec[2]/range);	// elevation angle in radians
+
+   troposphereObj->SetTemperature(temperature);
+   troposphereObj->SetPressure(pressure);
+   troposphereObj->SetHumidityFraction(humidity/100);
+   
+   troposphereObj->SetWaveLength(lambda);
+   troposphereObj->SetElevationAngle(angle);
+   troposphereObj->SetRange(range);
+   RealArray result = troposphereObj->Correction();
+
+   return result;
+}
+
+
+RealArray GroundStation::CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+{
+	RealArray result;
+	return result;
+}
+
+
+void GroundStation::CreateTroposphereObject(const std::string& modelName)
+{
+   if (troposphereObj != NULL)
+	 delete troposphereObj;
+
+   // Create troposphere correction model
+   troposphereObj = new Troposphere(modelName);
+
+   #ifdef DEBUG_MEDIA_CORRECTION
+      MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphereObj);
+   #endif
+}
+
+void GroundStation::CreateIonosphereObject(const std::string& modelName)
+{
+   if (ionosphereObj != NULL)
+	 delete ionosphereObj;
+
+   // Create troposphere correction model
+   ionosphereObj = new Ionosphere(modelName);
+
+   #ifdef DEBUG_MEDIA_CORRECTION
+      MessageInterface::ShowMessage("   Set as ionosphere model:   ionosphere(%p)\n", ionosphereObj);
+   #endif
+}
+
+*/
