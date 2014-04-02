@@ -1133,7 +1133,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
    MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
    MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
-   MessageInterface::ShowMessage("   isSrpModelChanged=%d\n", isSrpModelChanged);
+   MessageInterface::ShowMessage("   isSRPModelChanged=%d\n", isSRPModelChanged);
    #endif
 
    canClose = true;
@@ -1412,6 +1412,12 @@ void PropagationConfigPanel::SaveData()
          catch (BaseException &e)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+            // we need to set canClose, reset the Changed flag, and then return,
+            // so that the Apply button remains highlighted and SaveData
+            // correctly executes on the next OK/Apply.
+            canClose = false;
+            isForceModelChanged = true;
+            return;
          }
 
          //----------------------------------------------------
