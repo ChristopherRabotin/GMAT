@@ -42,6 +42,7 @@ AltEquinP::AltEquinP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -107,6 +108,7 @@ AltEquinQ::AltEquinQ(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -169,6 +171,7 @@ AltEquinState::AltEquinState(const std::string &name, GmatBase *obj)
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

@@ -687,6 +687,7 @@ C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
 }
 
 
