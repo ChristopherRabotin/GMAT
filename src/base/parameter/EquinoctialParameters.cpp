@@ -37,6 +37,7 @@ EquinSma::EquinSma(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -101,6 +102,7 @@ EquinEy::EquinEy(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -162,6 +164,7 @@ EquinEx::EquinEx(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -225,6 +228,7 @@ EquinNy::EquinNy(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
    #endif
@@ -286,6 +290,7 @@ EquinNx::EquinNx(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -348,6 +353,7 @@ EquinMlong::EquinMlong(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -412,6 +418,7 @@ EquinState::EquinState(const std::string &name, GmatBase *obj)
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

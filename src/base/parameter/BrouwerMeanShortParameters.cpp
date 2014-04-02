@@ -33,6 +33,7 @@ BLshortSMAP::BLshortSMAP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
 }
 
 //------------------------------------------------------------------------------
@@ -95,6 +96,7 @@ BLshortECCP::BLshortECCP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
 }
 
 //------------------------------------------------------------------------------
@@ -153,6 +155,7 @@ BLshortINCP::BLshortINCP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
 }
 
@@ -254,6 +257,7 @@ BLshortRAANP::BLshortRAANP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -357,6 +361,7 @@ BLshortAOPP::BLshortAOPP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -460,6 +465,7 @@ BLshortMAP::BLshortMAP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -563,6 +569,7 @@ BLshortState::BLshortState(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

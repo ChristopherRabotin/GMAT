@@ -272,6 +272,7 @@ KepInc::KepInc(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_180;
 }
@@ -387,6 +388,7 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -502,6 +504,7 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
