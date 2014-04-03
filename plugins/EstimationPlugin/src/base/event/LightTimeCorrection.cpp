@@ -384,8 +384,13 @@ Real LightTimeCorrection::CalculateRange()
 
 	  relativityCorrection = 0.0;																	// made changes by TUAN NGUYEN
 	  if (useRelativityCorrection)																	// made changes by TUAN NGUYEN
-	     relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);									// made changes by TUAN NGUYEN
-	  range = precisionRange + relativityCorrection;					// relativity correction was added into the range		// made changes by TUAN NGUYEN
+	     relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);								// made changes by TUAN NGUYEN
+
+	  etminustaiCorrection = 0.0;
+	  if (this->useETMinusTAICorrection)															// made changes by TUAN NGUYEN
+		 etminustaiCorrection = ETminusTAI(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;	// made changes by TUAN NGUYEN
+
+	  range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
 	  
 //	  MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
 
@@ -529,71 +534,34 @@ Real LightTimeCorrection::GetLightTripRange()
 
 
 
-//--------------------------------------------------------------------------------------------
-// Rvector3 ConvertLocalGCToSBB(Real tdbMJD, Rvector3 posGEO, CelestialBody* j2kBody)			// made changes by TUAN NGUYEN
-//--------------------------------------------------------------------------------------------
-/**
- * Convert the local geocentric frame to solar system bary center frame					
- *
- * @param tdbMJD     A1MJD time
- * @param posGEO     position in the local geocentric frame (unit: km)
- * @param j2kBody    the body used as the origin of local geocentric frame
- *
- * return position after converted to solar system bary center frame (unit: km)
-*/
-//-------------------------------------------------------------------------------------------
-Rvector3 LightTimeCorrection::ConvertLocalGEOCToSSB(Real tA1MJD, Rvector3 posGEO, CelestialBody* j2kBody)
-{
-   // Define constants
-   Real Ltilde     = 1.480827e-8;            
-   Real Gamma      = 1;
-   Real c          = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM;			// light speed (unit: km/s)
-   Real j2kBody_mu = j2kBody->GetRealParameter(j2kBody->GetParameterID("Mu"));							// unit:km^3/s^2;        mu = 398600.4415 for Earth
-
-   // Compute the transformation
-   // Note that: function GetMJ2000State, GetMJ2000Position, and GetMJ2000Velocity accepts A1MJD epoch as input. 
-   // It converts to absolute time ET and specify state of celetial body based on ET time    
-   Rvector3 j2kBody_Vel = j2kBody->GetMJ2000Velocity(tA1MJD);							//[earthPos,earthVel] = GetEarthState(tdbMJD);
-
-   Real satRadius       = posGEO.Norm();													// unit: km
-   Real earthPotential  = j2kBody_mu/satRadius;												// unit: km^2/s^2
-   Real posFactor       = 1 - Ltilde - Gamma*earthPotential/c/c;							// unit: no unit
-   Rvector3 posSSB      = posFactor*posGEO - 0.5/c/c*(j2kBody_Vel*posGEO)*j2kBody_Vel;		// unit: km
-
-   return posSSB;
-}
-
-
-
 /// Calculate ET - TAI at a ground station on Earth:										// made changes by TUAN NGUYEN
-Real LightTimeCorrection::CalculateETMinusTAI(Real tA1MJD, GmatBase* participant)
+#include "Barycenter.hpp"
+#include "TimeSystemConverter.hpp"
+Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 {
-   // ET minus TAI calculation.  Eq. 2-23 on p. 2-14 of Moyer
+   // Step 0: convert time from A1 specify TAI
+   Real tTAI = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, tA1MJD);
 
+   // Step 1: calculate initial guessed ET-TAI
+   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
+   Real E = M + 0.01671*sin(M);
+   Real old_ETminusTAI = 32.184 + 1.657e-3*sin(E);
+   Real t_ET_old = tTAI + old_ETminusTAI;
+
+   // Step 2:
    // Specify celestial bodies and special celestial points:
    CelestialBody* sun = solarSystem->GetBody("Sun");
    CelestialBody* earth = solarSystem->GetBody("Earth");
+   CelestialBody* luna  = solarSystem->GetBody("Luna");
    CelestialBody* mars = solarSystem->GetBody("Mars");
    CelestialBody* jupiter= solarSystem->GetBody("Jupiter");
    CelestialBody* saturn = solarSystem->GetBody("Saturn");
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-   SpecialCelestialPoint* emb = solarSystem->GetSpecialPoint("EarthMoonBarycenter");
+   // Create Eath-Moon Barycenter
+   Barycenter* emb = new Barycenter("EarthMoonBarycenter");
+   emb->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+   emb->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
 
-   //Define constants
-   Real c = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM;			// light speed (unit: km/s)
-   Real muEarth   = earth->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 398600.4415 for Earth
-   Real muSun     = sun->GetRealParameter(earth->GetParameterID("Mu"));							// mu = 132712440017.99 for Sun
-   Real muJupiter = jupiter->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 126712767.8578 for Jupiter
-   Real muSaturn  = saturn->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 37940626.061137 for Saturn
-   Real muMars    = mars->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 42828.314258067 for Mars
-
-   //     1 -> Mercury          8 -> Neptune
-   //     2 -> Venus            9 -> Pluto
-   //     3 -> Earth           10 -> Moon
-   //     4 -> Mars            11 -> Sun
-   //     5 -> Jupiter         12 -> Solar system barycenter
-   //     6 -> Saturn          13 -> Earth-Moon barycenter
-   //     7 -> Uranus          14 -> Nutations (longitude and obliquity)
 
    // Specify position and velocity of celestial bodies and special celestial points
    Rvector3 sunPos = sun->GetMJ2000Position(tA1MJD);
@@ -610,16 +578,20 @@ Real LightTimeCorrection::CalculateETMinusTAI(Real tA1MJD, GmatBase* participant
    Rvector3 emPos = emb->GetMJ2000Position(tA1MJD);
    Rvector3 emVel = emb->GetMJ2000Velocity(tA1MJD);
 
-   //[EM_wrt_Sun_Pos, EM_wrt_Sun_Vel] = pleph(tdbMJD+2430000,13,11,1);
-   //[EM_wrt_SSB_Pos, EM_wrt_SSB_Vel] = pleph(tdbMJD+2430000,13,12,1);
-   //[Jup_wrt_Sun_Pos, Jup_wrt_Sun_Vel] = pleph(tdbMJD+2430000,5,11,1);
-   //[Sat_wrt_Sun_Pos, Sat_wrt_Sun_Vel] = pleph(tdbMJD+2430000,6,11,1);
-   //[Sun_wrt_SSB_Pos, Sun_wrt_SSB_Vel] = pleph(tdbMJD+2430000,11,12,1);
-   //[E_wrt_EM_Pos, E_wrt_EM_Vel] = pleph(tdbMJD+2430000,3,13,1);
-   //[E_wrt_SSB_Pos, E_wrt_SSB_Vel] = pleph(tdbMJD+2430000,3,12,1);
-   //[Mars_wrt_Sun_Pos, Mars_wrt_Sun_Vel] = pleph(tdbMJD+2430000,4,11,1);
+   MessageInterface::ShowMessage("Earth-Moon bary center state: %lf  %lf  %lf  %lf  %lf  %lf\n", emPos[0], emPos[1], emPos[2], emVel[0], emVel[1], emVel[2]);
 
+   // Step 3:
    Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);
+
+
+   // Step 4:
+   //Define constants
+   Real c = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM;			// light speed (unit: km/s)
+   Real muEarth   = earth->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 398600.4415 for Earth
+   Real muSun     = sun->GetRealParameter(earth->GetParameterID("Mu"));							// mu = 132712440017.99 for Sun
+   Real muJupiter = jupiter->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 126712767.8578 for Jupiter
+   Real muSaturn  = saturn->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 37940626.061137 for Saturn
+   Real muMars    = mars->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 42828.314258067 for Mars
 
    Rvector3 Sun_wrt_SSB_Vel = sunVel;
    Rvector3 EM_wrt_Sun_Pos = emPos - sunPos;
@@ -632,31 +604,26 @@ Real LightTimeCorrection::CalculateETMinusTAI(Real tA1MJD, GmatBase* participant
    Rvector3 Sat_wrt_Sun_Pos = saturnPos - sunPos;
    Rvector3 Sat_wrt_Sun_Vel = saturnVel - sunVel;
 
-   // Compute the transformation
-   Real delta = 32.184 + (2/c/c) * (EM_wrt_Sun_Vel*EM_wrt_Sun_Pos) + 
-                         (1/c/c) * (EM_wrt_SSB_Vel*E_wrt_EM_Pos) + 
-                         (1/c/c) * (E_wrt_SSB_Vel*Earth2GS) + 
-                (muJupiter  / (c * c * (muSun + muJupiter) )) * (Jup_wrt_Sun_Vel*Jup_wrt_Sun_Pos) + 
-                (muSaturn  / (c * c * (muSun + muSaturn) )) * (Sat_wrt_Sun_Vel*Sat_wrt_Sun_Pos) + 
-                (1/c/c) * (Sun_wrt_SSB_Vel*EM_wrt_Sun_Pos);
+   // ET minus TAI calculation.  Eq. 2-23 on p. 2-14 of Moyer
+   Real ETminusTAI = 32.184 + 2*(EM_wrt_Sun_Vel/c)*(EM_wrt_Sun_Pos/c) + 
+                (EM_wrt_SSB_Vel/c)*(E_wrt_EM_Pos/c) + 
+                (E_wrt_SSB_Vel/c)*(Earth2GS/c) + 
+                (muJupiter  / (muSun + muJupiter)) * (Jup_wrt_Sun_Vel/c)*(Jup_wrt_Sun_Pos/c) + 
+                (muSaturn  / (muSun + muSaturn)) * (Sat_wrt_Sun_Vel/c)*(Sat_wrt_Sun_Pos/c) + 
+                (Sun_wrt_SSB_Vel/c)*(EM_wrt_Sun_Pos/c);
 
    //(muMars  / (c^2 * (muSun + muMars) )) * (Mars_wrt_Sun_Vel'*Mars_wrt_Sun_Pos);  % is this Mars term correct?
+   return ETminusTAI;
+/*
+   // Step 5:
+   Real t_ET = tTAI + ETminusTAI;
+
+   // Step 6:
+   Real delta_t = t_ET - t_ET_old;
+
+   // Step 7:
 
    return delta;
+*/
 }
 
-
-// made changes by TUAN NGUYEN
-#include "MeasurementException.hpp"
-Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
-{
-	if (((SpacePoint*) participant)->GetJ2000BodyName() != "Earth")
-		throw MeasurementException("ET - TAI was not implimented for station on "+ ((SpacePoint*) participant)->GetJ2000BodyName()+"\n");
-
-	Real TAI;
-	Rvector3 posGEO = ((SpacePoint*) participant)->GetMJ2000Position(tA1MJD);
-	SpacePoint* j2kBody = ((SpacePoint*) participant)->GetJ2000Body();
-	Rvector3 posSSB = ConvertLocalGEOCToSSB(tA1MJD, posGEO, (CelestialBody*) j2kBody);
-	Real delta_t = CalculateETMinusTAI(tA1MJD, participant);
-
-}

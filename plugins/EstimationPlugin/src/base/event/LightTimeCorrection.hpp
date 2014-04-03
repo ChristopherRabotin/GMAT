@@ -73,12 +73,9 @@ protected:
 
 private:
    Real relativityCorrection;				// relativity correction (unit: km)				// made changes by TUAN NGUYEN
+   Real etminustaiCorrection;				// ET-TAI correction (unit: km. It was converted from s to km)					// made changes by TUAN NGUYEN
    Real precisionRange;						// precision light time range (unit: km)		// made changes by TUAN NGUYEN
 
-   /// Convert the local geocentric frame to solar system bary center frame					// made changes by TUAN NGUYEN
-   Rvector3 ConvertLocalGEOCToSSB(Real tdbMJD, Rvector3 posGEO, CelestialBody* j2kBody);	// made changes by TUAN NGUYEN
-   /// Calculate ET - TAI at participant's position
-   Real CalculateETMinusTAI(Real tA1MJD, GmatBase* participant);							// made changes by TUAN NGUYEN
 };
 
 #endif /* LightTimeCorrection_hpp */
