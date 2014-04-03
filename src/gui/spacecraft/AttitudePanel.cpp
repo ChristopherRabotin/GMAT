@@ -1012,7 +1012,7 @@ void AttitudePanel::SaveData()
       MessageInterface::ShowMessage("   attStateType = %s\n", attStateType.c_str());
    #endif
 
-   if (!ValidateState("Both"))
+   if (!ValidateState("Both", true))
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, +
          "Please enter valid value(s) before saving the Attitude data\n");
@@ -1123,6 +1123,7 @@ void AttitudePanel::SaveData()
             MessageInterface::ShowMessage("   Setting new sequence: %s\n",
             eulerSequence.c_str());
          #endif
+         // Singularity should have been caught in the ValidateState above
          useAttitude->SetStringParameter("EulerAngleSequence", eulerSequence);
 
 //         // set attitude state and rate as well, to match what the user sees on the screen
