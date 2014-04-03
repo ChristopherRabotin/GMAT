@@ -1012,14 +1012,20 @@ void BatchEstimator::CalculateData()
    if (measManager.CalculateMeasurements() == false)
    {
       // No measurements were possible
-      measManager.AdvanceObservation();
+      bool endOfDataSet = measManager.AdvanceObservation();
+	  if (endOfDataSet)										// made changes by TUAN NGUYEN
+		 currentState = ESTIMATING;							// made changes by TUAN NGUYEN
+	  else													// made changes by TUAN NGUYEN
+	  {														// made changes by TUAN NGUYEN
       nextMeasurementEpoch = measManager.GetEpoch();
       FindTimeStep();
 
-      if (currentEpoch < nextMeasurementEpoch)
+      // if (currentEpoch < nextMeasurementEpoch)			// made changes by TUAN NGUYEN
+	  if (currentEpoch <= nextMeasurementEpoch)
          currentState = PROPAGATING;
       else
          currentState = ESTIMATING;
+	  }														// made changes by TUAN NGUYEN
    }
    else if (measManager.GetEventCount() > 0)
    {
