@@ -109,6 +109,14 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
 };
+
+const Real SolarRadiationPressure::FLUX_LOWER_BOUND          = 1300.0;
+const Real SolarRadiationPressure::FLUX_UPPER_BOUND          = 1450.0;
+const Real SolarRadiationPressure::FLUX_PRESSURE_LOWER_BOUND = 4.33e-6;
+const Real SolarRadiationPressure::FLUX_PRESSURE_UPPER_BOUND = 4.84e-6;
+const Real SolarRadiationPressure::NOMINAL_SUN_LOWER_BOUND   = 135.0e6;
+const Real SolarRadiationPressure::NOMINAL_SUN_UPPER_BOUND   = 165.0e6;
+
            
 //---------------------------------
 // public
@@ -410,12 +418,34 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    }
    if (id == FLUX)
    {
+      if ((value <= FLUX_LOWER_BOUND) || (value >= FLUX_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << FLUX_LOWER_BOUND << " < Real number < " << FLUX_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       flux = value;
       fluxPressure = flux / GmatPhysicalConstants::c;
       return flux;
    }
    if (id == FLUX_PRESSURE)
    {
+      if ((value <= FLUX_PRESSURE_LOWER_BOUND) || (value >= FLUX_PRESSURE_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << FLUX_PRESSURE_LOWER_BOUND << " < Real number < " << FLUX_PRESSURE_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       fluxPressure = value;
       flux = fluxPressure * GmatPhysicalConstants::c;
       return fluxPressure;
@@ -427,6 +457,17 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    }
    if (id == NOMINAL_SUN)
    {
+      if ((value <= NOMINAL_SUN_LOWER_BOUND) || (value >= NOMINAL_SUN_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << NOMINAL_SUN_LOWER_BOUND << " < Real number < " << NOMINAL_SUN_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       nominalSun = value;
       return nominalSun;
    }

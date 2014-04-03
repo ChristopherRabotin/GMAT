@@ -43,6 +43,7 @@ ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    //mDepObjectName = "Earth";
    //SetRefObjectName(Gmat::SPACE_POINT, mDepObjectName);
    #ifdef USE_PREDEFINED_COLORS
@@ -106,6 +107,7 @@ ModEquinF::ModEquinF(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -167,6 +169,7 @@ ModEquinG::ModEquinG(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -230,6 +233,7 @@ ModEquinH::ModEquinH(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
    #endif
@@ -291,6 +295,7 @@ ModEquinK::ModEquinK(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -353,6 +358,7 @@ ModEquinTLONG::ModEquinTLONG(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -417,6 +423,7 @@ ModEquinState::ModEquinState(const std::string &name, GmatBase *obj)
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

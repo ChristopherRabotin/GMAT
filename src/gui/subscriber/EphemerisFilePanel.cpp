@@ -34,6 +34,9 @@ BEGIN_EVENT_TABLE(EphemerisFilePanel, GmatPanel)
    EVT_CHECKBOX(ID_CHECKBOX, EphemerisFilePanel::OnCheck)
 END_EVENT_TABLE()
 
+//#define DEBUG_BUILD_CONTROL
+//#define DEBUG_LOAD_DATA
+//#define DEBUG_SAVE_DATA
 
 //-----------------------------------------
 // public methods
@@ -313,6 +316,10 @@ void EphemerisFilePanel::Create()
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::LoadData()
 {
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage("EphemerisFilePanel::LoadData() entered\n");
+   #endif
+   
    // load data from the core engine
    try
    {
@@ -354,6 +361,10 @@ void EphemerisFilePanel::LoadData()
    // explicitly disable apply button
    // it is turned on in each of the panels
    EnableUpdate(false);
+   
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage("EphemerisFilePanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -366,6 +377,10 @@ void EphemerisFilePanel::LoadData()
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::SaveData()
 {
+   #ifdef DEBUG_SAVE_DATA
+   MessageInterface::ShowMessage("EphemerisFilePanel::SaveData() entered\n");
+   #endif
+   
    canClose = true;
    
    //-----------------------------------------------------------------
@@ -413,6 +428,10 @@ void EphemerisFilePanel::SaveData()
    
    if (canClose)
       mObject->Copy(clonedObj);
+   
+   #ifdef DEBUG_SAVE_DATA
+   MessageInterface::ShowMessage("EphemerisFilePanel::SaveData() leaving\n");
+   #endif
 
 }
 
@@ -432,6 +451,10 @@ void EphemerisFilePanel::SaveData()
 //------------------------------------------------------------------------------
 wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
 {
+   #ifdef DEBUG_BUILD_CONTROL
+   MessageInterface::ShowMessage("EphemerisFilePanel::BuildControl() entered, index=%d\n", index);
+   #endif
+   
    wxControl *control = NULL;
    
    Gmat::ParameterType type = mObject->GetParameterType(index);
@@ -499,7 +522,7 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
             // Create ComboBox showing only CS with MJ2000Eq axis
             if (onlyMj2000EqComboBox == NULL)
                onlyMj2000EqComboBox =
-                  theGuiManager->GetCoordSystemComboBox(this, ID_COMBOBOX, wxSize(180,-1), true); //LOJ: just for testing
+                  theGuiManager->GetCoordSystemComboBox(this, ID_COMBOBOX, wxSize(180,-1), true);
             managedComboBoxMap.insert(std::make_pair("CoordinateSystem", cbControl));
             managedComboBoxMap.insert(std::make_pair("CoordinateSystem", onlyMj2000EqComboBox));
             onlyMj2000EqComboBox->SetName("_MJ2000EqOnly_");
@@ -565,6 +588,12 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
       break;
    }
    
+   #ifdef DEBUG_BUILD_CONTROL
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::BuildControl() returning, <%p>'%s' for index=%d\n",
+       control, control->GetName().c_str(), index);
+   #endif
+   
    return control;
 }
 
@@ -580,30 +609,33 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::LoadControl(const std::string &label)
 {
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::LoadControl() entered, label='%s'\n", label.c_str());
+   #endif
+   
    wxString valueString;
    bool valueBool;
    Integer valueInteger;
-   
-   //Integer index = mObject->GetParameterID(label);
-   //Gmat::ParameterType type = mObject->GetParameterType(index);
    
    if (label == "Spacecraft")
    {
       valueString = wxT(mObject->GetStringParameter(label).c_str());
       spacecraftComboBox->SetValue(valueString);
    }
-//   else if (label == "StateType")
-//   {
-//      valueString = wxT(mObject->GetStringParameter(label).c_str());
-//      stateTypeComboBox->SetValue(valueString);
-//   }
    else if (label == "CoordinateSystem")
    {
       valueString = wxT(mObject->GetStringParameter(label).c_str());
+
+      #ifdef DEBUG_LOAD_DATA
+      MessageInterface::ShowMessage
+         ("   Setting CoordinateSystem CB to '%s'\n", valueString.c_str());
+      #endif
+      
       allCoordSystemComboBox->SetValue(valueString);
-	  // keep 2 comboboxes in sync
+      // keep 2 comboboxes in sync
       if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
-	    onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
+         onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
    }
    else if (label == "WriteEphemeris")
    {
@@ -613,7 +645,6 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    else if (label == "FileFormat")
    {
       fileFormat = (mObject->GetStringParameter(label)).c_str();
-      //valueString = wxT(mObject->GetStringParameter(label).c_str());
       valueString = fileFormat.c_str();
       fileFormatComboBox->SetValue(valueString);
       
@@ -629,12 +660,6 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
       valueString = wxT(mObject->GetStringParameter(label).c_str());
       fileNameTextCtrl->SetValue(valueString);
    }
-   // Set interpolator based on the format, per bug 2219
-//   else if (label == "Interpolator")
-//   {
-//      valueString = wxT(mObject->GetStringParameter(label).c_str());
-//      interpolatorComboBox->SetValue(valueString);
-//   }
    else if (label == "InterpolationOrder")
    {
       valueInteger = mObject->GetIntegerParameter(label.c_str());
@@ -671,6 +696,11 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
       valueString = wxT(mObject->GetStringParameter(label).c_str());
       finalEpochComboBox->SetValue(valueString);
    }
+   
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::LoadControl() leaving, label='%s'\n", label.c_str());
+   #endif
 }
 
 
@@ -685,6 +715,11 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::SaveControl(const std::string &label)
 {
+   #ifdef DEBUG_SAVE_DATA
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::SaveControl() entered, label='%s'\n", label.c_str());
+   #endif
+   
    std::string valueString;
    bool valueBool;
    Integer valueInteger;
@@ -705,7 +740,16 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
 //   }
    else if (label == "CoordinateSystem")
    {
-      valueString = allCoordSystemComboBox->GetValue();
+      // Added check for fileFormat since only coordinate system with MJ2000Eq axis
+      // should be shown for format other than CCSDS-OEM (for GMT-4452 fix - LOJ: 2014.04.01)
+      if (fileFormat == "CCSDS-OEM")
+         valueString = allCoordSystemComboBox->GetValue();
+      else
+         valueString = onlyMj2000EqComboBox->GetValue();
+      #ifdef DEBUG_SAVE_DATA
+      MessageInterface::ShowMessage
+         ("   Setting CoordinateSystem '%s' to object\n", valueString.c_str());
+      #endif
       clonedObj->SetStringParameter(paramId, valueString);
    }
    else if (label == "WriteEphemeris")
@@ -724,18 +768,10 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
       if (CheckFileName(valueString, "Filename"))
          clonedObj->SetStringParameter(paramId, valueString);
    }
-   // Set interpolator based on the format, per bug 2219
-//   else if (label == "Interpolator")
-//   {
-//      valueString = interpolatorComboBox->GetValue();
-//      clonedObj->SetStringParameter(paramId, valueString);
-//   }
    else if (label == "InterpolationOrder")
    {
       valueString = interpolationOrderTextCtrl->GetValue().c_str();
       if (CheckInteger(valueInteger, valueString, "InterpolationOrder",
-                       // Turned off range checking to false so thae base code can check it (LOJ: 2012.12.14)
-                       //"Integer Number > 0.0", false, true, true, false)) 
                        "Integer Number > 0.0", false, false, true, false))
          clonedObj->SetIntegerParameter(paramId, valueInteger);
    }
@@ -776,6 +812,10 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
       clonedObj->SetStringParameter(paramId, valueString);
    }
    
+   #ifdef DEBUG_SAVE_DATA
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::SaveControl() leaving, label='%s'\n", label.c_str());
+   #endif
 }
 
 
@@ -807,12 +847,14 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
             interpolatorComboBox->SetValue("Hermite");
          else if (newFileFormat == "CCSDS-OEM" || newFileFormat == "Code-500")
             interpolatorComboBox->SetValue("Lagrange");
-
+         
+         // Show proper coordinate systems based on the format
          if (newFileFormat == "CCSDS-OEM")
             ShowAllCoordSystems(true);
          else
             ShowAllCoordSystems(false);
          
+         // Show proper fields for Code500 format
          if (newFileFormat == "Code-500")
             ShowCode500Items(true);
          else
@@ -1055,20 +1097,37 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::ShowAllCoordSystems(bool show)
 {
+   #ifdef DEBUG_CS
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::ShowAllCoordSystems() entered, showAll=%d, fileFormat='%s'\n",
+       show, fileFormat.c_str());
+   #endif
+   
    grid1->Show(allCoordSystemStaticText, show);
    grid1->Show(allCoordSystemComboBox, show);
    grid1->Show(onlyMJ2000EqStaticText, !show);
    grid1->Show(onlyMj2000EqComboBox, !show);
+   
+   // Commented out for GMT-4452 fix (LOJ: 2014.04.01)
+   #if 0
    if (allCoordSystemComboBox->GetValue() != onlyMj2000EqComboBox->GetValue())
    {
-	   // if changing to allCoordSystemComboBox or onlyMj does not have value
+	   // if changing to allCoordSystemComboBox or onlyMj2000 does not have value
 	   if (show || (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) == wxNOT_FOUND))
 		   allCoordSystemComboBox->SetValue( onlyMj2000EqComboBox->GetValue() );
 	   else 
 		   onlyMj2000EqComboBox->SetValue( allCoordSystemComboBox->GetValue() );
    }
+   #endif
+   
    grid1->Layout();
    theMiddleSizer->Layout();
+   
+   #ifdef DEBUG_CS
+   MessageInterface::ShowMessage
+      ("EphemerisFilePanel::ShowAllCoordSystems() leaving, showAll=%d, fileFormat='%s'\n",
+       show, fileFormat.c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------

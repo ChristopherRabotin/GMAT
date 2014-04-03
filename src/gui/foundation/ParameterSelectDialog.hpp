@@ -79,7 +79,8 @@ protected:
    bool mSkipDependency;
    bool mForStopCondition;
    bool mAllowWholeObject;
-   bool mLastCSHasFixedOnly;
+//   bool mLastCSHasFixedOnly;
+//   bool mLastCSHasCBOriginOnly;
    
    int  mShowOption;
    int  mShowObjectOption;

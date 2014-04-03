@@ -231,6 +231,13 @@ protected:
    Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
                                     Real *state, Real *cbSun);
 
+   static const Real FLUX_LOWER_BOUND;
+   static const Real FLUX_UPPER_BOUND;
+   static const Real FLUX_PRESSURE_LOWER_BOUND;
+   static const Real FLUX_PRESSURE_UPPER_BOUND;
+   static const Real NOMINAL_SUN_LOWER_BOUND;
+   static const Real NOMINAL_SUN_UPPER_BOUND;
+
 private:
 
    /// Parameter IDs
