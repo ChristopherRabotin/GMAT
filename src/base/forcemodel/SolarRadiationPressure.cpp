@@ -426,7 +426,7 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
                 << " on object \"" << instanceName
                 <<  "\" is not an allowed value.\n"
                 << "The allowed values are: ["
-                << FLUX_LOWER_BOUND << " <= Real number <= " << FLUX_UPPER_BOUND << "]";
+                << FLUX_LOWER_BOUND << " < Real number < " << FLUX_UPPER_BOUND << "]";
          throw ODEModelException(errmsg.str());
       }
       flux = value;
@@ -443,7 +443,7 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
                 << " on object \"" << instanceName
                 <<  "\" is not an allowed value.\n"
                 << "The allowed values are: ["
-                << FLUX_PRESSURE_LOWER_BOUND << " <= Real number <= " << FLUX_PRESSURE_UPPER_BOUND << "]";
+                << FLUX_PRESSURE_LOWER_BOUND << " < Real number < " << FLUX_PRESSURE_UPPER_BOUND << "]";
          throw ODEModelException(errmsg.str());
       }
       fluxPressure = value;
@@ -465,7 +465,7 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
                 << " on object \"" << instanceName
                 <<  "\" is not an allowed value.\n"
                 << "The allowed values are: ["
-                << NOMINAL_SUN_LOWER_BOUND << " <= Real number <= " << NOMINAL_SUN_UPPER_BOUND << "]";
+                << NOMINAL_SUN_LOWER_BOUND << " < Real number < " << NOMINAL_SUN_UPPER_BOUND << "]";
          throw ODEModelException(errmsg.str());
       }
       nominalSun = value;
