@@ -36,6 +36,7 @@
 
 
 //#define DEBUG_ORBITDATA_SET
+//#define DEBUG_ORBITDATA_GET
 //#define DEBUG_ORBITDATA_INIT
 //#define DEBUG_ORBITDATA_CONVERT
 //#define DEBUG_ORBITDATA_RUN
@@ -93,7 +94,6 @@ const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
 // public methods
 //---------------------------------
 
-//LOJ: NEW_PARAMETER: Added paramOwnerType to use in InitializeRefObjects()
 //------------------------------------------------------------------------------
 // OrbitData(const std::string &name = "", const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
 //------------------------------------------------------------------------------
@@ -215,7 +215,8 @@ void OrbitData::SetReal(Integer item, Real rval)
 {
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("\nOrbitData::SetReal() '%s' entered, item=%d, rval=%f\n", mActualParamName.c_str(), item, rval);
+      ("\nOrbitData::SetReal() '%s' entered, item=%d, rval=%f\n",
+       mActualParamName.c_str(), item, rval);
    #endif
    
    if (mSpacePoint == NULL)
@@ -245,7 +246,7 @@ void OrbitData::SetReal(Integer item, Real rval)
    }
    
    #ifdef DEBUG_ORBITDATA_SET
-   DebugOutputData(paramOwnerCS);
+   DebugWriteData(paramOwnerCS);
    #endif
    
    bool convertOriginBeforeSet = false;
@@ -344,13 +345,18 @@ void OrbitData::SetReal(Integer item, Real rval)
       Real currEpoch = mSpacePoint->GetEpoch();
       Rvector6 cartStateNew;
       
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   cartStateInParamCS= \n   %s\n", cartStateInParamCS.ToString().c_str());
+      #endif
+      
       // Convert to internal CS
       mCoordConverter.Convert(A1Mjd(currEpoch), cartStateInParamCS, mParameterCS,
                               cartStateNew, mInternalCS, false);
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   from paramCS to internalCS = \n   %s", cartStateNew.ToString().c_str());
+         ("   from paramCS to internalCS = \n   %s\n", cartStateNew.ToString().c_str());
       #endif
       
       // Need to set whole state in internal CS
@@ -408,65 +414,65 @@ void OrbitData::SetRvector6(const Rvector6 &val)
 //------------------------------------------------------------------------------
 // Rvector6 GetCartState()
 //------------------------------------------------------------------------------
+/**
+ * If Parameter is coordinate system dependent, it returns the spacecraft's last
+ * cartesian state after converting to Parameter coordinate system.  If Parameter
+ * is origin dependent, it returns the last state of spacecraft without conversion.
+ */
+//------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartState()
 {
-   //LOJ: NEW_PARAMETER: Change mSpacecraft to mSpacePoint here
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("--- is mSpacePoint NULL?  %s\n",
-         (mSpacePoint? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("--- is mSpacecraft NULL?  %s\n",
-         (mSpacecraft? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("--- is mSolarSystem NULL?  %s\n",
-         (mSolarSystem? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("OrbitData::GetCartState() for '%s'\n",
-       mSpacePoint->GetName().c_str());
-   MessageInterface::ShowMessage("Is it a Spacecraft?  %s\n",
-         (mSpacePoint->IsOfType("Spacecraft")? "YES!" : "no"));
    MessageInterface::ShowMessage
-      ("In GetCartState, mParamOwnerType = %d, mParamTypeName=%s, mParamOwnerName=%s, mParamDepName=%s\n",
+      ("OrbitData::GetCartState() '%s' entered\n", mActualParamName.c_str());
+   DebugWriteRefObjInfo();
+   MessageInterface::ShowMessage
+      ("   mParamOwnerType = %d, mParamTypeName=%s, mParamOwnerName=%s, mParamDepName=%s\n",
        mParamOwnerType, mParamTypeName.c_str(), mParamOwnerName.c_str(), mParamDepName.c_str());
    #endif
    
    if (mSolarSystem == NULL || mSpacePoint == NULL ||
       (mSpacePoint->IsOfType("Spacecraft") && mSpacecraft == NULL))
       InitializeRefObjects();
+   
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("InitializeRefObjects done ...\n");
-   MessageInterface::ShowMessage("--- is mSpacePoint NULL now?  %s\n",
-         (mSpacePoint? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("--- is mSpacecraft NULL now?  %s\n",
-         (mSpacecraft? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("--- is mSolarSystem NULL now?  %s\n",
-         (mSolarSystem? "NO" : "YES, it's NULL"));
-   MessageInterface::ShowMessage("OrbitData::GetCartState() for '%s'\n",
-       mSpacePoint->GetName().c_str());
-   MessageInterface::ShowMessage("Is it a Spacecraft now?  %s\n",
-         (mSpacePoint->IsOfType("Spacecraft")? "YES!" : "no"));
+   MessageInterface::ShowMessage("   InitializeRefObjects done ...\n");
+   DebugWriteRefObjInfo();
    #endif
    
    mCartEpoch = mSpacePoint->GetEpoch();
    Rvector6 lastCartState = mSpacePoint->GetLastState();
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("----- epoch from spacepoint is %le\n", mCartEpoch);
+      ("   epoch from spacepoint is %le\n", mCartEpoch);
    MessageInterface::ShowMessage
-      ("----- state from spacepoint is %s\n", lastCartState.ToString().c_str());
+      ("   state from spacepoint is %s\n", lastCartState.ToString().c_str());
    #endif
    
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartState() '%s' lastCartState=\n   %s\n",
+      ("   GetCartState() '%s' lastCartState=\n   %s\n",
        mSpacePoint->GetName().c_str(), lastCartState.ToString().c_str());
-   MessageInterface::ShowMessage("   mInternalCS is %s, mParameterCS is %s\n",
-         (mInternalCS? "NOT NULL" : "NULL"),  (mParameterCS? "NOT NULL" : "NULL"));
-   MessageInterface::ShowMessage("   mInternalCS = <%p>, mOutCS = <%p>\n",
-         mInternalCS, mParameterCS);
+   MessageInterface::ShowMessage
+      ("   mInternalCS = <%p><%s>'%s', mParameterCS = <%p><%s>'%s'\n", mInternalCS,
+       mInternalCS ? mInternalCS->GetTypeName().c_str() : "NULL",
+       mInternalCS ? mInternalCS->GetName().c_str() : "NULL", mParameterCS,
+       mParameterCS ? mParameterCS->GetTypeName().c_str() : "NULL",
+       mParameterCS ? mParameterCS->GetName().c_str() : "NULL");
    #endif
    
    // if origin dependent parameter, the relative position/velocity is computed in
    // the parameter calculation, so just return prop state.
    if (mIsParamOriginDep)
+   {
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage
+         ("OrbitDate::GetCartState() '%s' returning lastCartState \n   %s\n   "
+          "since it is origin dep Parameter", mActualParamName.c_str(),
+          lastCartState.ToString().c_str());
+      #endif
       return lastCartState;
+   }
    
    if (mInternalCS == NULL || mParameterCS == NULL)
    {
@@ -478,31 +484,30 @@ Rvector6 OrbitData::GetCartState()
    }
    
    //-----------------------------------------------------------------
-   // convert to output CoordinateSystem
+   // Convert to Parameter CoordinateSystem
    //-----------------------------------------------------------------
    if (mInternalCS->GetName() != mParameterCS->GetName())
    {
       #ifdef DEBUG_ORBITDATA_CONVERT
+      MessageInterface::ShowMessage
+         ("   GetCartState() mParameterCS: %s(%s), Axis addr=<%p>\n",
+          mParameterCS->GetName().c_str(),
+          mParameterCS->GetTypeName().c_str(),
+          mParameterCS->GetRefObject(Gmat::AXIS_SYSTEM, ""));
+      if (mParameterCS->AreAxesOfType("ObjectReferencedAxes"))
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() mParameterCS:%s(%s), Axis addr=%d\n",
-             mParameterCS->GetName().c_str(),
-             mParameterCS->GetTypeName().c_str(),
-             mParameterCS->GetRefObject(Gmat::AXIS_SYSTEM, ""));
-         if (mParameterCS->AreAxesOfType("ObjectReferencedAxes"))
-               MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
-                     "mParameterCS IS of type ObjectReferencedAxes!!!\n");
-         else
-            MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
-                  "mParameterCS IS NOT of type ObjectReferencedAxes!!!\n");
+            ("   GetCartState() <-- mParameterCS IS of type ObjectReferencedAxes!!!\n");
+      else
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\n"
-                  "state = %s\n", mCartEpoch, lastCartState.ToString().c_str());
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() <-- firstTimeEpochWarning = %s\n",
-             (firstTimeEpochWarning? "true" : "false"));
-
+            ("   GetCartState() <-- mParameterCS IS NOT of type ObjectReferencedAxes!!!\n");
+      MessageInterface::ShowMessage
+         ("   GetCartState() <-- Before convert: mCartEpoch=%f\n   "
+          "state = %s\n", mCartEpoch, lastCartState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   GetCartState() <-- firstTimeEpochWarning = %s\n",
+          (firstTimeEpochWarning? "true" : "false"));
       #endif
-
+      
       if ((mParameterCS->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
       {
          GmatBase *objRefOrigin = mParameterCS->GetOrigin();
@@ -534,7 +539,7 @@ Rvector6 OrbitData::GetCartState()
       try
       {
          #ifdef DEBUG_ORBITDATA_CONVERT
-            MessageInterface::ShowMessage("    --> Converting from %s to %s\n\n",
+            MessageInterface::ShowMessage("   --> Converting from %s to %s\n",
                   mInternalCS->GetName().c_str(),
                   mParameterCS->GetName().c_str());
          #endif
@@ -542,8 +547,8 @@ Rvector6 OrbitData::GetCartState()
                                  lastCartState, mParameterCS, true);
          #ifdef DEBUG_ORBITDATA_CONVERT
             MessageInterface::ShowMessage
-               ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
-                "state = %s\n", mCartEpoch, lastCartState.ToString().c_str());
+               ("   GetCartState() --> After convert: mCartEpoch=%f\n"
+                "   state = %s\n", mCartEpoch, lastCartState.ToString().c_str());
          #endif
       }
       catch (BaseException &e)
@@ -558,6 +563,12 @@ Rvector6 OrbitData::GetCartState()
       }
    }
    
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitDate::GetCartState() '%s' returning lastCartState\n   %s\n",
+       mActualParamName.c_str(), lastCartState.ToString().c_str());
+   #endif
+   
    return lastCartState;
 }
 
@@ -567,7 +578,10 @@ Rvector6 OrbitData::GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetKepState()
 {
-   //LOJ: NEW_PARAMETER: Using mSpacecraft here, no change
+   #ifdef DEBUG_ORBITDATA_KEP_STATE
+   MessageInterface::ShowMessage
+      ("OrbitData::GetKepState() '%s' entered\n", mActualParamName.c_str());
+   #endif
    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
@@ -578,7 +592,8 @@ Rvector6 OrbitData::GetKepState()
    
    #ifdef DEBUG_ORBITDATA_KEP_STATE
    MessageInterface::ShowMessage
-      ("OrbitData::GetKepState() kepState=%s", kepState.ToString().c_str());
+      ("OrbitData::GetKepState() '%s' returning kepState=\n   %s\n",
+       mActualParamName.c_str(), kepState.ToString().c_str());
    #endif
    
    return kepState;
@@ -628,7 +643,7 @@ Rvector6 OrbitData::GetDelaState()
 {
    #ifdef DEBUG_DELAUNAY_STATE
    MessageInterface::ShowMessage
-      ("OrbitData::GetDelaState() entered, mActualParamName='%s'\n", mActualParamName.c_str());
+      ("OrbitData::GetDelaState() '%s' entered\n", mActualParamName.c_str());
    #endif
    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
@@ -642,7 +657,8 @@ Rvector6 OrbitData::GetDelaState()
    
    #ifdef DEBUG_DELAUNAY_STATE
    MessageInterface::ShowMessage
-      ("OrbitData::GetDelaState() returning mDelaState='%s'", mDelaState.ToString().c_str());
+      ("OrbitData::GetDelaState() '%s' returning mDelaState=%s\n",
+       mActualParamName.c_str(), mDelaState.ToString().c_str());
    #endif
    
    return delaState;
@@ -689,6 +705,11 @@ Rvector6 OrbitData::GetModKepState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetSphRaDecState()
 {
+   #ifdef DEBUG_ORBITDATA_GET
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphRaDecState() '%s' entered\n", mActualParamName.c_str());
+   #endif
+   
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
@@ -699,8 +720,8 @@ Rvector6 OrbitData::GetSphRaDecState()
    
    #ifdef DEBUG_ORBITDATA_STATE
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphRaDecState() sphRaDecState=\n   %s\n",
-       sphRaDecState.ToString().c_str());
+      ("OrbitData::GetSphRaDecState() '%s' returning, sphRaDecState=\n   %s\n",
+       mActualParamName.c_str(), sphRaDecState.ToString().c_str());
    #endif
    
    return sphRaDecState;
@@ -791,7 +812,7 @@ Rvector6 OrbitData::GetBLshortState()
    Rvector6 state = GetCartState();
 
    #ifdef DEBUG_BROUWER_SHORT
-   MessageInterface::ShowMessage("   CartSate = %s", state.ToString().c_str());
+   MessageInterface::ShowMessage("   CartSate = %s\n", state.ToString().c_str());
    MessageInterface::ShowMessage
       ("   Calling StateConversionUtil::Convert() with mGravConst=%f, "
        "mFlattening=%f, mEqRadius=%f\n", mGravConst, mFlattening, mEqRadius);
@@ -802,7 +823,7 @@ Rvector6 OrbitData::GetBLshortState()
    
    #ifdef DEBUG_BROUWER_SHORT
    MessageInterface::ShowMessage
-      ("OrbitData::GetBLshortState() returning %s", blSshortState.ToString().c_str());
+      ("OrbitData::GetBLshortState() returning %s\n", blSshortState.ToString().c_str());
    #endif
    
    return blShortState;
@@ -828,7 +849,7 @@ Rvector6 OrbitData::GetBLlongState()
    
    #ifdef DEBUG_BROUWER_LONG
    MessageInterface::ShowMessage
-      ("OrbitData::GetBLlongState() returning %s", blLongState.ToString().c_str());
+      ("OrbitData::GetBLlongState() returning %s\n", blLongState.ToString().c_str());
    #endif
    
    return blLongState;
@@ -998,16 +1019,17 @@ Real OrbitData::GetOtherKepReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetSphRaDecReal(Integer item)
 {
-   #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetSphRaDecReal() item=%d\n", item);
+   #ifdef DEBUG_ORBITDATA_GET
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphRaDecReal() '%s' entered, item=%d\n",
+       mActualParamName.c_str(), item);
    #endif
    
-   Rvector6 state = GetSphRaDecState();
+   Rvector6 sphRaDecState = GetSphRaDecState();
    
-   #ifdef DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_GET
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphRaDecReal() item=%d state=%s\n",
-       item, state.ToString().c_str());
+      ("   GetSphRaDecReal() sphRaDecState=\n   %s\n", sphRaDecState.ToString().c_str());
    #endif
    
    switch (item)
@@ -1016,7 +1038,7 @@ Real OrbitData::GetSphRaDecReal(Integer item)
       {
          // if orgin is "Earth" just return default
          if (mOrigin->GetName() == "Earth")
-            return state[RADEC_RMAG-Item2Count];
+            return sphRaDecState[RADEC_RMAG-Item2Count];
          else
             return GetPositionMagnitude(mOrigin);
       }
@@ -1025,7 +1047,15 @@ Real OrbitData::GetSphRaDecReal(Integer item)
    case RADEC_VMAG:
    case RADEC_RAV:
    case RADEC_DECV:
-      return state[item-Item2Count];
+   {
+      #ifdef DEBUG_ORBITDATA_GET
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphRaDecReal() '%s' returning %f\n",
+          mActualParamName.c_str(), sphRaDecState[item-Item2Count]);
+      #endif
+      
+      return sphRaDecState[item-Item2Count];
+   }
    default:
       throw ParameterException
          ("OrbitData::GetSphRaDecReal() Unknown parameter name: " +
@@ -1044,20 +1074,27 @@ Real OrbitData::GetSphRaDecReal(Integer item)
 Real OrbitData::GetSphAzFpaReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetSphAzFpaReal() item=%d\n", item);
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphAzFpaReal() '%s' entered, item=%d\n", mActualParamName.c_str(), item);
    #endif
    
-   Rvector6 state = GetSphAzFpaState();
-
+   Rvector6 sphAzFpaState = GetSphAzFpaState();
+   
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphAzFpaReal() item=%s state=%s\n",
-       item, state.ToString().c_str());
+      ("OrbitData::GetSphAzFpaReal() sphAzFpaState=%s\n",
+       sphAzFpaState.ToString().c_str());
    #endif
    
    if (item >= AZIFPA_RMAG && item <= AZIFPA_FPA)
-      //return mSphAzFpaState[item-Item3Count];
-      return state[item-Item3Count];
+   {
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphAzFpaReal() '%s' returning %f\n",
+          mActualParamName.c_str(), sphAzFpaState[item-Item3Count]);
+      #endif
+      return sphAzFpaState[item-Item3Count];
+   }
    else
    {
       throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown orbit item ID: " +
@@ -2023,16 +2060,12 @@ void OrbitData::InitializeRefObjects()
        mParamTypeName.c_str());
    #endif
    
-   //LOJ: NEW_PARAMETER: Changed mSpacecraft to mSpacePoint and to use FindObject with mParamOwnerName
-   // Changed to pass Gmat::SPACE_POINT since orbit Parameter's owner type is SpacePoint
    mSpacePoint = (SpacePoint*)FindObject(mParamOwnerType, mParamOwnerName);
-   //mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    
    #ifdef DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage("   mSpacePoint=<%p>\n", mSpacePoint);
    #endif
    
-   //if (mSpacecraft == NULL)
    if (mSpacePoint == NULL)
    {
       #ifdef DEBUG_ORBITDATA_INIT
@@ -2048,7 +2081,6 @@ void OrbitData::InitializeRefObjects()
          ("Cannot find Spacepoint: " + GetRefObjectName(Gmat::SPACE_POINT));
    }
    
-   //LOJ: NEW_PARAMETER: Handle special to spacecraft
    if ((mParamOwnerType == Gmat::SPACECRAFT) || (mSpacePoint->IsOfType("Spacecraft")))
    {
       mSpacecraft = (Spacecraft*)mSpacePoint;
@@ -2076,17 +2108,12 @@ void OrbitData::InitializeRefObjects()
    MessageInterface::ShowMessage
       ("OrbitData::InitializeRefObjects()  solar system and coord system are not NULL\n");
    #endif
-
+   
    //-----------------------------------------------------------------
-   // if dependent body name exist and it is a CelestialBody,
+   // If dependent body name exist and it is a CelestialBody,
    // it is origin dependent parameter, set new gravity constant.
    //-----------------------------------------------------------------
-   
-   //LOJ: NEW_PARAMETER: Changed to use mParamDepName
-
-   //std::string originName =
-   //   FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
-   
+      
    std::string originName;
    GmatBase *depObj = NULL;
    mIsParamOriginDep = false;
@@ -2273,7 +2300,7 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
    
    #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
-         ("OrbitData::GetPositionMagnitude() scPos=%s, originPos=%s, relPos=%s\n",
+         ("OrbitData::GetPositionMagnitude()\n    scPos=%s\n   originPos=%s\n   relPos=%s\n",
           scPos.ToString().c_str(), originPos.ToString().c_str(),
           relPos.ToString().c_str());
    #endif
@@ -2283,7 +2310,7 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 
 
 //------------------------------------------------------------------------------
-// Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
+// Rvector6 GetRelativeCartState(SpacePoint *origin)
 //------------------------------------------------------------------------------
 /**
  * Computes spacecraft cartesian state from the given origin.
@@ -2315,6 +2342,13 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 //------------------------------------------------------------------------------
 // Rvector6 GetCartStateInParameterCS(Integer item, Real rval)
 //------------------------------------------------------------------------------
+/**
+ * Returns cartesian state in Parameter coordinate system after input element
+ * is set to state. If input element is not in cartesian state rep, it converts
+ * to Parameter state rep and set the element value and converts it back to
+ * cartesian state.
+ */
+//------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
 {
    #ifdef DEBUG_ORBITDATA_SET
@@ -2323,22 +2357,27 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
        "   Now converting to Parameter CS before setting value\n", 
        mActualParamName.c_str(), item, rval);
    #endif
-   Rvector6 cartState = GetCartState();
-   Rvector6 cartStateInParamCS;
+   
+   Rvector6 cartStateInParamCS = GetCartState();
    Real currEpoch = mSpacePoint->GetEpoch();
+   
+   // Fix for GMT-4438 (LOJ: 2014.03.21)
+   // GetCartState() returns state in Parameter CS, so no conversion is needed
+   #if 0
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
       ("   Setting new value %f to Parameter that has different CS than Parameter Owner CS\n"
-       "   cartState = \n   %s", rval, cartState.ToString().c_str());
+       "   cartState = \n   %s\n", rval, cartState.ToString().c_str());
    #endif
-   
    // Convert to parameterCS
    mCoordConverter.Convert(A1Mjd(currEpoch), cartState, mInternalCS,
                            cartStateInParamCS, mParameterCS, false);
+   #endif
+   
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("   from internalCS to paramCS = \n   %s", cartStateInParamCS.ToString().c_str());
+      ("   cartStateInParamCS = \n   %s\n", cartStateInParamCS.ToString().c_str());
    #endif
    
    if (item >= CART_X && item <= CART_VZ)
@@ -2358,13 +2397,37 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    }
    else if (item >= RADEC_RMAG && item <= RADEC_DECV)
    {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting Spherical RADEC to Cartesian, element index = %d\n", item-Item2Count);
+      #endif
+      
       Rvector6 radecStateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "SphericalRADEC",
                                       mGravConst, mFlattening, mEqRadius);
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Before setting: radecStateInParamCS = \n   %s\n",
+          radecStateInParamCS.ToString().c_str());
+      #endif
+      
       radecStateInParamCS[item-Item2Count] = rval;
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   After  setting: radecStateInParamCS = \n   %s\n",
+          radecStateInParamCS.ToString().c_str());
+      #endif
+      
       cartStateInParamCS =
          StateConversionUtil::Convert(radecStateInParamCS, "SphericalRADEC", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   cartStateInParamCS = %s\n", cartStateInParamCS.ToString().c_str());
+      #endif
    }
    else if (item >= AZIFPA_RMAG && item <= AZIFPA_FPA)
    {
@@ -2426,7 +2489,7 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartStateInParameterCS() '%s' returning\n   %s",
+      ("OrbitData::GetCartStateInParameterCS() '%s' returning\n   %s\n",
        mActualParamName.c_str(), cartStateInParamCS.ToString().c_str());
    #endif
    return cartStateInParamCS;
@@ -2450,7 +2513,7 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
       ("   Setting new value %f to Parameter that has different Origin than "
-       "Parameter Owner CS Origin\n   cartStateInParamOrigin = \n   %s", rval,
+       "Parameter Owner CS Origin\n   cartStateInParamOrigin = \n   %s\n", rval,
        cartStateInParamOrigin.ToString().c_str());
    #endif
    
@@ -2466,7 +2529,7 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
       keplStateInParamOrigin[item-Item1Count] = rval;
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   keplStateInParamOrigin = \n   %s", keplStateInParamOrigin.ToString().c_str());
+         ("   keplStateInParamOrigin = \n   %s\n", keplStateInParamOrigin.ToString().c_str());
       #endif
       cartStateInParamOrigin =
          StateConversionUtil::Convert(keplStateInParamOrigin, "Keplerian", "Cartesian",
@@ -2512,7 +2575,7 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartStateInParameterOrigin() '%s' returning\n   %s",
+      ("OrbitData::GetCartStateInParameterOrigin() '%s' returning\n   %s\n",
        mActualParamName.c_str(), cartStateInParamOrigin.ToString().c_str());
    #endif
    return cartStateInParamOrigin;
@@ -2812,9 +2875,9 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
 
 
 //------------------------------------------------------------------------------
-// void DebugOutputData(CoordinateSystem *paramOwnerCS)
+// void DebugWriteData(CoordinateSystem *paramOwnerCS)
 //------------------------------------------------------------------------------
-void OrbitData::DebugOutputData(CoordinateSystem *paramOwnerCS)
+void OrbitData::DebugWriteData(CoordinateSystem *paramOwnerCS)
 {
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
@@ -2839,9 +2902,30 @@ void OrbitData::DebugOutputData(CoordinateSystem *paramOwnerCS)
    MessageInterface::ShowMessage
       ("   Parameter Settable         = %s\n", mIsParamSettable ? "true" : "false");
    MessageInterface::ShowMessage
-      ("   current cart state         = \n      %s", GetCartState().ToString().c_str());
+      ("   Cart state in Parameter CS = \n   %s\n", GetCartState().ToString().c_str());
    MessageInterface::ShowMessage
       ("   mOrigin = <%p>'%s', mGravConst = %f, mFlattening = %f, mEqRadius = %f\n",
        mOrigin, mOrigin ? mOrigin->GetName().c_str() : "NULL", mGravConst, mFlattening, mEqRadius);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void DebugWriteRefObjInfo()
+//------------------------------------------------------------------------------
+void OrbitData::DebugWriteRefObjInfo()
+{
+   #ifdef DEBUG_ORBITDATA_GET
+   MessageInterface::ShowMessage
+      ("   mSpacePoint=<%p><%s>'%s'\n", mSpacePoint,
+       mSpacePoint ? mSpacePoint->GetTypeName().c_str() : "NULL",
+       mSpacePoint ? mSpacePoint->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("   mSpacecraft=<%p><%s>'%s'\n", mSpacecraft,
+       mSpacecraft ? mSpacecraft->GetTypeName().c_str() : "NULL",
+       mSpacecraft ? mSpacecraft->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("   mSolarSystem=<%p><%s>'%s'\n", mSolarSystem,
+       mSolarSystem ? mSolarSystem->GetTypeName().c_str() : "NULL",
+       mSolarSystem ? mSolarSystem->GetName().c_str() : "NULL");
    #endif
 }

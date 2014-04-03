@@ -361,7 +361,7 @@ bool ScriptReadWriter::Initialize()
 //------------------------------------------------------------------------------
 std::string ScriptReadWriter::CrossPlatformGetLine()
 {
-   char ch;
+   char ch = '\0';
    std::string result;
    
    while (inStream->get(ch) && ch != '\r' && ch != '\n' && ch != '\0' &&

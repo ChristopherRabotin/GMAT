@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                     Editor
+//                                     ScriptEditor
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -15,11 +15,12 @@
 // Created: 2009/01/05
 //
 /**
- * Implements Editor class.
+ * Implements ScriptEditor class.
  */
+// Renamed Editor to CodeEditor to fix name collision with wxWidget's Scintilla lib
 //------------------------------------------------------------------------------
 
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #include "GmatMainFrame.hpp"
 #include "GmatSavePanel.hpp"
 #include "ScriptEventPanel.hpp"
@@ -34,51 +35,51 @@
 //#define DEBUG_EDITOR_FIND
 //#define DEBUG_EDITOR_COMMENT
 
-BEGIN_EVENT_TABLE (Editor, wxStyledTextCtrl)
+BEGIN_EVENT_TABLE (ScriptEditor, wxStyledTextCtrl)
    // common
-   EVT_SIZE (                         Editor::OnSize)
+   EVT_SIZE (                         ScriptEditor::OnSize)
    // edit
-   EVT_MENU (wxID_CLEAR,              Editor::OnClear)
-   EVT_MENU (wxID_CUT,                Editor::OnCut)
-   EVT_MENU (wxID_COPY,               Editor::OnCopy)
-   EVT_MENU (wxID_PASTE,              Editor::OnPaste)
-   EVT_MENU (STC_ID_INDENTMORE,       Editor::OnIndentMore)
-   EVT_MENU (STC_ID_INDENTLESS,       Editor::OnIndentLess)
-   EVT_MENU (wxID_SELECTALL,          Editor::OnSelectAll)
-   EVT_MENU (STC_ID_SELECTLINE,       Editor::OnSelectLine)
-   EVT_MENU (wxID_REDO,               Editor::OnRedo)
-   EVT_MENU (wxID_UNDO,               Editor::OnUndo)
+   EVT_MENU (wxID_CLEAR,              ScriptEditor::OnClear)
+   EVT_MENU (wxID_CUT,                ScriptEditor::OnCut)
+   EVT_MENU (wxID_COPY,               ScriptEditor::OnCopy)
+   EVT_MENU (wxID_PASTE,              ScriptEditor::OnPaste)
+   EVT_MENU (STC_ID_INDENTMORE,       ScriptEditor::OnIndentMore)
+   EVT_MENU (STC_ID_INDENTLESS,       ScriptEditor::OnIndentLess)
+   EVT_MENU (wxID_SELECTALL,          ScriptEditor::OnSelectAll)
+   EVT_MENU (STC_ID_SELECTLINE,       ScriptEditor::OnSelectLine)
+   EVT_MENU (wxID_REDO,               ScriptEditor::OnRedo)
+   EVT_MENU (wxID_UNDO,               ScriptEditor::OnUndo)
    // find, replace, goto
-   EVT_MENU (wxID_FIND,               Editor::OnFind)
-   EVT_MENU (STC_ID_FINDNEXT,         Editor::OnFindNext)
-   EVT_MENU (STC_ID_REPLACENEXT,      Editor::OnReplaceNext)
-   EVT_MENU (STC_ID_REPLACEALL,       Editor::OnReplaceAll)
-   EVT_MENU (STC_ID_BRACEMATCH,       Editor::OnBraceMatch)
-   EVT_MENU (STC_ID_GOTO,             Editor::OnGoToLine)
+   EVT_MENU (wxID_FIND,               ScriptEditor::OnFind)
+   EVT_MENU (STC_ID_FINDNEXT,         ScriptEditor::OnFindNext)
+   EVT_MENU (STC_ID_REPLACENEXT,      ScriptEditor::OnReplaceNext)
+   EVT_MENU (STC_ID_REPLACEALL,       ScriptEditor::OnReplaceAll)
+   EVT_MENU (STC_ID_BRACEMATCH,       ScriptEditor::OnBraceMatch)
+   EVT_MENU (STC_ID_GOTO,             ScriptEditor::OnGoToLine)
    // view
    EVT_MENU_RANGE (STC_ID_HILIGHTFIRST, STC_ID_HILIGHTLAST,
-                                      Editor::OnHilightLang)
-   EVT_MENU (STC_ID_DISPLAYEOL,       Editor::OnDisplayEOL)
-   EVT_MENU (STC_ID_INDENTGUIDE,      Editor::OnIndentGuide)
-   EVT_MENU (STC_ID_LINENUMBER,       Editor::OnLineNumber)
-   EVT_MENU (STC_ID_LONGLINEON,       Editor::OnLongLineOn)
-   EVT_MENU (STC_ID_WHITESPACE,       Editor::OnWhiteSpace)
-   EVT_MENU (STC_ID_FOLDTOGGLE,       Editor::OnFoldToggle)
-   EVT_MENU (STC_ID_OVERTYPE,         Editor::OnSetOverType)
-   EVT_MENU (STC_ID_READONLY,         Editor::OnSetReadOnly)
-   EVT_MENU (STC_ID_WRAPMODEON,       Editor::OnWrapmodeOn)
-   EVT_MENU (STC_ID_CHARSETANSI,      Editor::OnUseCharset)
-   EVT_MENU (STC_ID_CHARSETMAC,       Editor::OnUseCharset)
+                                      ScriptEditor::OnHilightLang)
+   EVT_MENU (STC_ID_DISPLAYEOL,       ScriptEditor::OnDisplayEOL)
+   EVT_MENU (STC_ID_INDENTGUIDE,      ScriptEditor::OnIndentGuide)
+   EVT_MENU (STC_ID_LINENUMBER,       ScriptEditor::OnLineNumber)
+   EVT_MENU (STC_ID_LONGLINEON,       ScriptEditor::OnLongLineOn)
+   EVT_MENU (STC_ID_WHITESPACE,       ScriptEditor::OnWhiteSpace)
+   EVT_MENU (STC_ID_FOLDTOGGLE,       ScriptEditor::OnFoldToggle)
+   EVT_MENU (STC_ID_OVERTYPE,         ScriptEditor::OnSetOverType)
+   EVT_MENU (STC_ID_READONLY,         ScriptEditor::OnSetReadOnly)
+   EVT_MENU (STC_ID_WRAPMODEON,       ScriptEditor::OnWrapmodeOn)
+   EVT_MENU (STC_ID_CHARSETANSI,      ScriptEditor::OnUseCharset)
+   EVT_MENU (STC_ID_CHARSETMAC,       ScriptEditor::OnUseCharset)
    // extra
-   EVT_MENU (STC_ID_CHANGELOWER,      Editor::OnChangeCase)
-   EVT_MENU (STC_ID_CHANGEUPPER,      Editor::OnChangeCase)
-   EVT_MENU (STC_ID_CONVERTCR,        Editor::OnConvertEOL)
-   EVT_MENU (STC_ID_CONVERTCRLF,      Editor::OnConvertEOL)
-   EVT_MENU (STC_ID_CONVERTLF,        Editor::OnConvertEOL)
+   EVT_MENU (STC_ID_CHANGELOWER,      ScriptEditor::OnChangeCase)
+   EVT_MENU (STC_ID_CHANGEUPPER,      ScriptEditor::OnChangeCase)
+   EVT_MENU (STC_ID_CONVERTCR,        ScriptEditor::OnConvertEOL)
+   EVT_MENU (STC_ID_CONVERTCRLF,      ScriptEditor::OnConvertEOL)
+   EVT_MENU (STC_ID_CONVERTLF,        ScriptEditor::OnConvertEOL)
    // stc
-   EVT_STC_MARGINCLICK (wxID_ANY,     Editor::OnMarginClick)
-   EVT_STC_CHANGE      (wxID_ANY,     Editor::OnTextChange)
-   EVT_STC_CHARADDED   (wxID_ANY,     Editor::OnCharAdded)
+   EVT_STC_MARGINCLICK (wxID_ANY,     ScriptEditor::OnMarginClick)
+   EVT_STC_CHANGE      (wxID_ANY,     ScriptEditor::OnTextChange)
+   EVT_STC_CHARADDED   (wxID_ANY,     ScriptEditor::OnCharAdded)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -86,7 +87,7 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
+// ScriptEditor(wxWindow *parent, bool notifyChange, wxWindowID id,
 //        const wxPoint &pos, const wxSize &size, long style)
 //------------------------------------------------------------------------------
 /**
@@ -101,13 +102,13 @@ END_EVENT_TABLE()
  *
  */
 //------------------------------------------------------------------------------
-Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
+ScriptEditor::ScriptEditor(wxWindow *parent, bool notifyChange, wxWindowID id,
                const wxPoint &pos, const wxSize &size, long style)
    : wxStyledTextCtrl(parent, id, pos, size, style)
 {
    #ifdef DEBUG_EDITOR
    MessageInterface::ShowMessage
-      ("Editor::Editor() entered, parent = <%p>'%s', notifyChange = %d\n",
+      ("ScriptEditor::ScriptEditor() entered, parent = <%p>'%s', notifyChange = %d\n",
        parent, parent->GetName().c_str(), notifyChange);
    #endif
    
@@ -243,19 +244,19 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
    InitializePrefs("GMAT");
    
    #ifdef DEBUG_EDITOR
-   MessageInterface::ShowMessage("Editor::Editor() exiting\n");
+   MessageInterface::ShowMessage("ScriptEditor::ScriptEditor() exiting\n");
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// ~Editor()
+// ~ScriptEditor()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  *
  */
-Editor::~Editor()
+ScriptEditor::~ScriptEditor()
 {
    if (mFindReplaceDialog)
       delete mFindReplaceDialog;
@@ -272,7 +273,7 @@ Editor::~Editor()
  * 
  * @param text	Text to search for
  */
-void Editor::SetFindText(const wxString &text)
+void ScriptEditor::SetFindText(const wxString &text)
 {
    mFindText = text;
 }
@@ -286,7 +287,7 @@ void Editor::SetFindText(const wxString &text)
  * 
  * @param text	Text to use for replacement
  */
-void Editor::SetReplaceText(const wxString &text)
+void ScriptEditor::SetReplaceText(const wxString &text)
 {
    mReplaceText = text;
 }
@@ -296,11 +297,11 @@ void Editor::SetReplaceText(const wxString &text)
 // void OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 /**
- * Event handler for when Editor size is changed
+ * Event handler for when ScriptEditor size is changed
  *
  * @param event		holds information about the size change event
  */
-void Editor::OnSize(wxSizeEvent& event)
+void ScriptEditor::OnSize(wxSizeEvent& event)
 {
    int w = 0;
    int maxw = 0;
@@ -332,7 +333,7 @@ void Editor::OnSize(wxSizeEvent& event)
  *
  * @param event		command event originated by the control
  */
-void Editor::OnFont(wxCommandEvent& event)
+void ScriptEditor::OnFont(wxCommandEvent& event)
 {
    //@todo - need implementation
 }
@@ -347,7 +348,7 @@ void Editor::OnFont(wxCommandEvent& event)
  *
  * @param event		command event originated by the control
  */
-void Editor::OnRedo(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnRedo(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanRedo())
       return;
@@ -364,7 +365,7 @@ void Editor::OnRedo(wxCommandEvent &WXUNUSED(event))
  *
  * @param event		command event originated by the control
  */
-void Editor::OnUndo(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnUndo(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanUndo())
       return;
@@ -379,7 +380,7 @@ void Editor::OnUndo(wxCommandEvent &WXUNUSED(event))
  *
  * @param event		command event originated by the control
  */
-void Editor::OnClear(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnClear(wxCommandEvent &WXUNUSED(event))
 {
    if (GetReadOnly())
       return;
@@ -396,7 +397,7 @@ void Editor::OnClear(wxCommandEvent &WXUNUSED(event))
  *
  * @param event		command event originated by the control
  */
-void Editor::OnCut(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnCut(wxCommandEvent &WXUNUSED(event))
 {
    if (GetReadOnly() ||(GetSelectionEnd()-GetSelectionStart() <= 0))
       return;
@@ -413,7 +414,7 @@ void Editor::OnCut(wxCommandEvent &WXUNUSED(event))
  *
  * @param event		command event originated by the control
  */
-void Editor::OnCopy(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnCopy(wxCommandEvent &WXUNUSED(event))
 {
    if (GetSelectionEnd()-GetSelectionStart() <= 0)
       return;
@@ -431,7 +432,7 @@ void Editor::OnCopy(wxCommandEvent &WXUNUSED(event))
  *
  * @param event		command event originated by the control
  */
-void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnPaste(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanPaste())
       return;
@@ -451,7 +452,7 @@ void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
  * @note The find operation is not performed here.  Rather the find dialog is 
  * displayed
  */
-void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnFind(wxCommandEvent &WXUNUSED(event))
 {
    if (mFindReplaceDialog == NULL)
    {
@@ -459,7 +460,7 @@ void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
       
       #ifdef DEBUG_EDITOR_FIND
       MessageInterface::ShowMessage
-         ("Editor::OnFind() FindReplaceDialog <%p> created\n", mFindReplaceDialog);
+         ("ScriptEditor::OnFind() FindReplaceDialog <%p> created\n", mFindReplaceDialog);
       #endif
       
       // show modeless dialog
@@ -489,11 +490,11 @@ void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnFindNext(wxCommandEvent &WXUNUSED(event))
 {
    #ifdef DEBUG_EDITOR_FIND
    MessageInterface::ShowMessage
-      ("Editor::OnFindNext() entered, mFindReplaceDialog=<%p>, mFindText='%s'\n",
+      ("ScriptEditor::OnFindNext() entered, mFindReplaceDialog=<%p>, mFindText='%s'\n",
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
@@ -560,11 +561,11 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
 {
    #ifdef DEBUG_EDITOR_FIND
    MessageInterface::ShowMessage
-      ("Editor::OnFindPrev() entered, mFindReplaceDialog=<%p>, mFindText='%s'\n",
+      ("ScriptEditor::OnFindPrev() entered, mFindReplaceDialog=<%p>, mFindText='%s'\n",
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
@@ -617,7 +618,7 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnReplaceNext(wxCommandEvent &event)
+void ScriptEditor::OnReplaceNext(wxCommandEvent &event)
 {
 	if (mFindText != GetSelectedText())
       OnFindNext(event);
@@ -642,7 +643,7 @@ void Editor::OnReplaceNext(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnReplaceAll(wxCommandEvent &event)
+void ScriptEditor::OnReplaceAll(wxCommandEvent &event)
 {
    GotoPos(0);
    OnFindNext(event);
@@ -663,7 +664,7 @@ void Editor::OnReplaceAll(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnBraceMatch(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnBraceMatch(wxCommandEvent &WXUNUSED(event))
 {
    int min = GetCurrentPos();
    int max = BraceMatch(min);
@@ -688,7 +689,7 @@ void Editor::OnBraceMatch(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
 {
    long lineNumber = wxGetNumberFromUser
       ("", "Line Number", "Go To", mPrevLineNumber, 1, 100000, this);
@@ -711,7 +712,7 @@ void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 {
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
    // fix for when cursor/selection on same line, indent doesn't work
@@ -740,7 +741,7 @@ void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
 {
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
    // fix for when cursor/selection on same line, indent doesn't work
@@ -768,7 +769,7 @@ void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnSelectAll(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnSelectAll(wxCommandEvent &WXUNUSED(event))
 {
    SetSelection(0, GetTextLength());
 }
@@ -783,7 +784,7 @@ void Editor::OnSelectAll(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnSelectLine(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnSelectLine(wxCommandEvent &WXUNUSED(event))
 {
    int lineStart = PositionFromLine(GetCurrentLine());
    int lineEnd = PositionFromLine(GetCurrentLine() + 1);
@@ -801,10 +802,10 @@ void Editor::OnSelectLine(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnComment(wxCommandEvent &event)
+void ScriptEditor::OnComment(wxCommandEvent &event)
 {
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnComment() entered\n");
+   MessageInterface::ShowMessage("ScriptEditor::OnComment() entered\n");
    #endif
    
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
@@ -835,7 +836,7 @@ void Editor::OnComment(wxCommandEvent &event)
    wxString selString = GetSelectedText();
 
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnComment() SelText='%s'\n", selString.c_str());
+   MessageInterface::ShowMessage("ScriptEditor::OnComment() SelText='%s'\n", selString.c_str());
    #endif
 
    wxString newString = "% ";
@@ -867,7 +868,7 @@ void Editor::OnComment(wxCommandEvent &event)
    ReplaceSelection(newString);
 
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnComment() exiting\n");
+   MessageInterface::ShowMessage("ScriptEditor::OnComment() exiting\n");
    #endif
 }
 
@@ -882,10 +883,10 @@ void Editor::OnComment(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnUncomment(wxCommandEvent &event)
+void ScriptEditor::OnUncomment(wxCommandEvent &event)
 {
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnUncomment() entered\n");
+   MessageInterface::ShowMessage("ScriptEditor::OnUncomment() entered\n");
    #endif
    
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
@@ -917,7 +918,7 @@ void Editor::OnUncomment(wxCommandEvent &event)
    wxString selString = GetSelectedText();
 
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnComment() SelText='%s'\n", selString.c_str());
+   MessageInterface::ShowMessage("ScriptEditor::OnComment() SelText='%s'\n", selString.c_str());
    #endif
 
    wxString newString;
@@ -956,7 +957,7 @@ void Editor::OnUncomment(wxCommandEvent &event)
    ReplaceSelection(newString);
    
    #ifdef DEBUG_EDITOR_COMMENT
-   MessageInterface::ShowMessage("Editor::OnUncomment() exiting\n");
+   MessageInterface::ShowMessage("ScriptEditor::OnUncomment() exiting\n");
    #endif
 }
 
@@ -970,7 +971,7 @@ void Editor::OnUncomment(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnHilightLang(wxCommandEvent &event)
+void ScriptEditor::OnHilightLang(wxCommandEvent &event)
 {
    InitializePrefs(GmatEditor::globalLanguagePrefs[event.GetId() -
                                                    STC_ID_HILIGHTFIRST].name);
@@ -987,7 +988,7 @@ void Editor::OnHilightLang(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
 {
    SetViewEOL(!GetViewEOL());
 }
@@ -1003,7 +1004,7 @@ void Editor::OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnIndentGuide(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnIndentGuide(wxCommandEvent &WXUNUSED(event))
 {
    SetIndentationGuides(!GetIndentationGuides());
 }
@@ -1018,7 +1019,7 @@ void Editor::OnIndentGuide(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnLineNumber(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnLineNumber(wxCommandEvent &WXUNUSED(event))
 {
    SetMarginWidth(mLineNumberID,
                   GetMarginWidth(mLineNumberID) == 0 ? mLineNumberMargin : 0);
@@ -1034,7 +1035,7 @@ void Editor::OnLineNumber(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnLongLineOn(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnLongLineOn(wxCommandEvent &WXUNUSED(event))
 {
    SetEdgeMode(GetEdgeMode() == 0? wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
 }
@@ -1049,7 +1050,7 @@ void Editor::OnLongLineOn(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
 {
    SetViewWhiteSpace(GetViewWhiteSpace() == 0?
                       wxSTC_WS_VISIBLEALWAYS: wxSTC_WS_INVISIBLE);
@@ -1065,7 +1066,7 @@ void Editor::OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnFoldToggle(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnFoldToggle(wxCommandEvent &WXUNUSED(event))
 {
    ToggleFold(GetFoldParent(GetCurrentLine()));
 }
@@ -1080,7 +1081,7 @@ void Editor::OnFoldToggle(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnSetOverType(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnSetOverType(wxCommandEvent &WXUNUSED(event))
 {
    SetOvertype(!GetOvertype());
 }
@@ -1095,7 +1096,7 @@ void Editor::OnSetOverType(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
 {
    SetReadOnly(!GetReadOnly());
 }
@@ -1110,7 +1111,7 @@ void Editor::OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
+void ScriptEditor::OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
 {
    SetWrapMode(GetWrapMode() == 0? wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
 }
@@ -1125,7 +1126,7 @@ void Editor::OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
  * @param event		command event originated by the control
  *
  */
-void Editor::OnUseCharset(wxCommandEvent &event)
+void ScriptEditor::OnUseCharset(wxCommandEvent &event)
 {
    int Nr;
    int charset = GetCodePage();
@@ -1146,7 +1147,7 @@ void Editor::OnUseCharset(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnChangeCase(wxCommandEvent &event)
+void ScriptEditor::OnChangeCase(wxCommandEvent &event)
 {
 }
 
@@ -1160,7 +1161,7 @@ void Editor::OnChangeCase(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnConvertEOL(wxCommandEvent &event)
+void ScriptEditor::OnConvertEOL(wxCommandEvent &event)
 {
    int eolMode = GetEOLMode();
    ConvertEOLs(eolMode);
@@ -1169,7 +1170,7 @@ void Editor::OnConvertEOL(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void Editor::OnMarginClick (wxStyledTextEvent &event)
+// void ScriptEditor::OnMarginClick (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Event handler for when the editor's margin is clicked
@@ -1177,7 +1178,7 @@ void Editor::OnConvertEOL(wxCommandEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnMarginClick (wxStyledTextEvent &event)
+void ScriptEditor::OnMarginClick (wxStyledTextEvent &event)
 {
    if (event.GetMargin() == 2)
    {
@@ -1198,7 +1199,7 @@ void Editor::OnMarginClick (wxStyledTextEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnTextChange (wxStyledTextEvent &event)
+void ScriptEditor::OnTextChange (wxStyledTextEvent &event)
 {
    if (mNotifyChange)
    {
@@ -1234,7 +1235,7 @@ void Editor::OnTextChange (wxStyledTextEvent &event)
  * @param event		command event originated by the control
  *
  */
-void Editor::OnCharAdded (wxStyledTextEvent &event)
+void ScriptEditor::OnCharAdded (wxStyledTextEvent &event)
 {
    char chr = (char)event.GetKey();
    int currentLine = GetCurrentLine();
@@ -1267,11 +1268,11 @@ void Editor::OnCharAdded (wxStyledTextEvent &event)
  * @return string detailing the detected preference
  *
  */
-wxString Editor::DeterminePrefs(const wxString &filename)
+wxString ScriptEditor::DeterminePrefs(const wxString &filename)
 {
    #ifdef DEBUG_EDITOR_PREF
    MessageInterface::ShowMessage
-     ("Editor::DeterminePrefs() entered, filename='%s'\n", filename.c_str());
+     ("ScriptEditor::DeterminePrefs() entered, filename='%s'\n", filename.c_str());
    #endif
    
    GmatEditor::LanguageInfoType const* curInfo;
@@ -1292,7 +1293,7 @@ wxString Editor::DeterminePrefs(const wxString &filename)
          {
             #ifdef DEBUG_EDITOR_PREF
             MessageInterface::ShowMessage
-              ("Editor::DeterminePrefs() exiting with '%s'\n", curInfo->name);
+              ("ScriptEditor::DeterminePrefs() exiting with '%s'\n", curInfo->name);
             #endif
             
             return curInfo->name;
@@ -1302,7 +1303,7 @@ wxString Editor::DeterminePrefs(const wxString &filename)
    }
    
    #ifdef DEBUG_EDITOR_PREF
-   MessageInterface::ShowMessage("Editor::DeterminePrefs() exiting with empty string\n");
+   MessageInterface::ShowMessage("ScriptEditor::DeterminePrefs() exiting with empty string\n");
    #endif
    
    return wxEmptyString;
@@ -1319,11 +1320,11 @@ wxString Editor::DeterminePrefs(const wxString &filename)
  * @return true if prefernce name is found in globalLanguagePrefs
  *
  */
-bool Editor::InitializePrefs(const wxString &name)
+bool ScriptEditor::InitializePrefs(const wxString &name)
 {
    #ifdef DEBUG_EDITOR_PREF
    MessageInterface::ShowMessage
-     ("Editor::InitializePrefs() entered, name='%s'\n", name.c_str());
+     ("ScriptEditor::InitializePrefs() entered, name='%s'\n", name.c_str());
    #endif
    
    // initialize styles
@@ -1345,7 +1346,7 @@ bool Editor::InitializePrefs(const wxString &name)
    if (!found)
    {
       #ifdef DEBUG_EDITOR_PREF
-      MessageInterface::ShowMessage("Editor::InitializePrefs() returning false\n");
+      MessageInterface::ShowMessage("ScriptEditor::InitializePrefs() returning false\n");
       #endif
       return false;
    }
@@ -1474,7 +1475,7 @@ bool Editor::InitializePrefs(const wxString &name)
                wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
    
    #ifdef DEBUG_EDITOR_PREF
-   MessageInterface::ShowMessage("Editor::InitializePrefs() returning true\n");
+   MessageInterface::ShowMessage("ScriptEditor::InitializePrefs() returning true\n");
    #endif
    
    return true;
@@ -1491,7 +1492,7 @@ bool Editor::InitializePrefs(const wxString &name)
  * @return string representation of the line
  *
  */
-wxString Editor::GetLine(int lineNumber)
+wxString ScriptEditor::GetLine(int lineNumber)
 {
    return wxStyledTextCtrl::GetLine(lineNumber);
 }
@@ -1506,7 +1507,7 @@ wxString Editor::GetLine(int lineNumber)
  * @return string representation of the editor contents
  *
  */
-wxString Editor::GetText()
+wxString ScriptEditor::GetText()
 {
    return wxStyledTextCtrl::GetText();
 }
@@ -1522,7 +1523,7 @@ wxString Editor::GetText()
  * @return true if file loaded
  *
  */
-bool Editor::LoadFile()
+bool ScriptEditor::LoadFile()
 {
 #if wxUSE_FILEDLG
    // get filname
@@ -1551,11 +1552,11 @@ bool Editor::LoadFile()
  * @return true if file loaded
  *
  */
-bool Editor::LoadFile(const wxString &filename)
+bool ScriptEditor::LoadFile(const wxString &filename)
 {
    #ifdef DEBUG_EDITOR_FILE
    MessageInterface::ShowMessage
-     ("Editor::LoadFile() entered, this=<%p>, filename='%s'\n", this, filename.c_str());
+     ("ScriptEditor::LoadFile() entered, this=<%p>, filename='%s'\n", this, filename.c_str());
    #endif
    
    // load file in edit and clear undo
@@ -1572,7 +1573,7 @@ bool Editor::LoadFile(const wxString &filename)
    InitializePrefs(DeterminePrefs(fname.GetFullName()));
    
    #ifdef DEBUG_EDITOR_FILE
-   MessageInterface::ShowMessage("Editor::LoadFile() exiting with true\n");
+   MessageInterface::ShowMessage("ScriptEditor::LoadFile() exiting with true\n");
    #endif
    
    return true;
@@ -1589,7 +1590,7 @@ bool Editor::LoadFile(const wxString &filename)
  * @return true if file saved
  *
  */
-bool Editor::SaveFile()
+bool ScriptEditor::SaveFile()
 {
 #if wxUSE_FILEDLG
    // return if no change
@@ -1622,7 +1623,7 @@ bool Editor::SaveFile()
  * @return true if file saved
  *
  */
-bool Editor::SaveFile(const wxString &filename)
+bool ScriptEditor::SaveFile(const wxString &filename)
 {
    #ifdef __WXMSW__
    // Convert line endings to wxSTC_EOL_CRLF to make sure endings are correct
@@ -1643,12 +1644,12 @@ bool Editor::SaveFile(const wxString &filename)
  * @return true if editor modified
  *
  */
-bool Editor::IsModified()
+bool ScriptEditor::IsModified()
 {
    bool state = (GetModify() && !GetReadOnly());
    
    #ifdef DEBUG_EDITOR_MODIFIED
-   MessageInterface::ShowMessage("Editor::IsModified() returning %d\n", state);
+   MessageInterface::ShowMessage("ScriptEditor::IsModified() returning %d\n", state);
    #endif
    
    return state;

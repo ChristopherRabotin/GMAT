@@ -26,7 +26,7 @@
 #include "Function.hpp"
 
 #ifdef __USE_STC_EDITOR__
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #endif
 
 class FunctionSetupPanel: public GmatPanel
@@ -41,7 +41,7 @@ public:
    wxTextCtrl *mFileContentsTextCtrl;
    
 #ifdef __USE_STC_EDITOR__
-   Editor* GetEditor() { return mEditor; };
+   ScriptEditor* GetEditor() { return mEditor; };
 #endif
    
 private:
@@ -50,7 +50,7 @@ private:
    wxString mFunctionName;
    
 #ifdef __USE_STC_EDITOR__
-   Editor *mEditor;
+   ScriptEditor *mEditor;
 #endif
    
    bool mEnableLoad;

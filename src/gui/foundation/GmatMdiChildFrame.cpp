@@ -154,7 +154,8 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
    #endif
    
    #ifdef __CREATE_CHILD_MENU_BAR__
-      delete theMenuBar;
+   // Removed delete: The window is responsible for deleting it's own menubar, so this would cause a double free.
+   // delete theMenuBar;
    #else
       // There should be only one MenuBar associated with GmatMainFrame,
       // so we cannot delete it here. Enable or disable edit menu and tools.
@@ -276,19 +277,20 @@ bool GmatMdiChildFrame::IsActiveChild()
 
 
 #ifdef __USE_STC_EDITOR__
+// Renamed Editor to ScriptEditor to fix name collision with wxWidget's Scintilla lib
 //------------------------------------------------------------------------------
-// Editor* GetEditor()
+// ScriptEditor* GetEditor()
 //------------------------------------------------------------------------------
-Editor* GmatMdiChildFrame::GetEditor()
+ScriptEditor* GmatMdiChildFrame::GetEditor()
 {
    return theEditor;
 }
 
 
 //------------------------------------------------------------------------------
-// void SetEditor(Editor *editor)
+// void SetEditor(ScriptEditor *editor)
 //------------------------------------------------------------------------------
-void GmatMdiChildFrame::SetEditor(Editor *editor)
+void GmatMdiChildFrame::SetEditor(ScriptEditor *editor)
 {
    theEditor = editor;
 }
@@ -535,8 +537,11 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
       ("GmatMdiChildFrame::OnClose() calling GetMainFrame::RemoveChild()\n");
    #endif
    
-   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);   
-   wxSafeYield();
+   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);
+   // Removed wxSafeYield() : The window should not be deleted, instead ->Destroy() should be called
+   // which adds the window delete to an idle queue.   Calling safe yield here causes the idle queue to run
+   // too early.   I believe the yield was added here previously to work around a bug that was caused by calling delete on the window.
+   // wxSafeYield();
    // This causes crash on exit with Red X/button on XP and Mac - wcs 2013.03.20
 //   event.Skip();
    

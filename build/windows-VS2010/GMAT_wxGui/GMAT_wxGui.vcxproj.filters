@@ -309,9 +309,6 @@
     <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp">
       <Filter>Source Files\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\view\Editor.cpp">
-      <Filter>Source Files\view</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <Filter>Source Files\view</Filter>
     </ClCompile>
@@ -527,6 +524,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp">
       <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <Filter>Source Files\view</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -773,9 +773,6 @@
     <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp">
       <Filter>Source Files\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\view\Editor.hpp">
-      <Filter>Source Files\view</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <Filter>Source Files\view</Filter>
     </ClInclude>
@@ -994,6 +991,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp">
       <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <Filter>Source Files\view</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

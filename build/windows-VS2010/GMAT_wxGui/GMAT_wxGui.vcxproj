@@ -352,11 +352,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\ViewCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\view\Editor.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -377,6 +372,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp" />
   </ItemGroup>
@@ -562,11 +558,6 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\ViewCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\view\Editor.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -587,6 +578,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp" />
     <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp" />
   </ItemGroup>

@@ -128,6 +128,8 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    runstate              (Gmat::IDLE),
    prevRunState          (Gmat::IDLE),
    currProviderId        (0),
+   mPlotUpperLeft        (2,0.0,0.0),
+   mPlotSize             (2,0.0,0.0),
    propDirection         (1.0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
@@ -142,8 +144,6 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    for (UnsignedInt i = 0; i < SolverIterOptionCount; i++)
       solverIterOptions.push_back(SOLVER_ITER_OPTION_TEXT[i]);
 
-   mPlotUpperLeft = Rvector(2,0.0,0.0);
-   mPlotSize      = Rvector(2,0.0,0.0);
 }
 
 

@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                   Editor
+//                                   ScriptEditor
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -15,11 +15,11 @@
 // Created: 2009/01/05
 //
 /**
- * Declares Editor class.
+ * Declares ScriptEditor class.
  */
 //------------------------------------------------------------------------------
-#ifndef Editor_hpp
-#define Editor_hpp
+#ifndef ScriptEditor_hpp
+#define ScriptEditor_hpp
 
 #include "EditorPreferences.hpp" // for GmatEditor::
 #include "wx/stc/stc.h"          // for wxStyledTextCtrl
@@ -27,20 +27,20 @@
 class GmatPanel;
 class FindReplaceDialog;
 
-class Editor: public wxStyledTextCtrl
+class ScriptEditor: public wxStyledTextCtrl
 {
    friend class EditorProperties;
    friend class EditorPrint;
    
 public:
    // default constructor
-   Editor(wxWindow *parent, bool notifyChange = false,
+   ScriptEditor(wxWindow *parent, bool notifyChange = false,
           wxWindowID id = wxID_ANY, const wxPoint &pos = wxDefaultPosition,
           const wxSize &size = wxDefaultSize,
           long style = wxSUNKEN_BORDER|wxVSCROLL);
    
    // destructor
-   ~Editor();
+   ~ScriptEditor();
    
    // find/replace dialog text
    void SetFindText(const wxString &text);

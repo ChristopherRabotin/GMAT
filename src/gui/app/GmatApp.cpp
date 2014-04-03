@@ -62,6 +62,7 @@ IMPLEMENT_APP(GmatApp)
 // GmatApp()
 //------------------------------------------------------------------------------
 GmatApp::GmatApp()
+: theMainFrame( NULL )   
 {
    GuiMessageReceiver *theMessageReceiver = GuiMessageReceiver::Instance();
    MessageInterface::SetMessageReceiver(theMessageReceiver);

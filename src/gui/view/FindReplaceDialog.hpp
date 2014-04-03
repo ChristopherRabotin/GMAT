@@ -27,7 +27,7 @@
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 
-class Editor;
+class ScriptEditor;
 
 class FindReplaceDialog : public wxDialog
 {
@@ -39,12 +39,12 @@ public:
                      const wxSize& size = wxDefaultSize,
                      long style = wxDEFAULT_DIALOG_STYLE);
 
-   void SetEditor(Editor *editor) { mEditor = editor; };
+   void SetEditor(ScriptEditor *editor) { mEditor = editor; };
    wxString GetFindText() { return mFindText; };
 
 protected:
 
-   Editor *mEditor;
+   ScriptEditor *mEditor;
    wxArrayString mFindArray;
    wxArrayString mReplaceArray;
    wxString   mFindText;

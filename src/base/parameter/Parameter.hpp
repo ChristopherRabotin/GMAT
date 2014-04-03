@@ -101,7 +101,9 @@ public:
    virtual void SetExternalClone(GmatBase *clone);
    
    virtual bool RequiresBodyFixedCS() const;
+   virtual bool RequiresCelestialBodyCSOrigin() const;
    virtual void SetRequiresBodyFixedCS(bool flag);
+   virtual void SetRequiresCelestialBodyCSOrigin(bool flag);
    
    // Methods needed to provide handling for transient forces (e.g. finite burn)
    virtual bool NeedsForces() const;
@@ -219,6 +221,7 @@ protected:
    bool mNeedCoordSystem;
    bool mNeedExternalClone;
    bool mRequiresBodyFixedCS;
+   bool mRequiresCelestialBodyCSOrigin;
    bool mIsCommentFromCreate;
    
    enum

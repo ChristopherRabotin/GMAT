@@ -897,73 +897,77 @@ void AttitudePanel::LoadData()
 //       }
 //       else if (attitudeModel == "CCSDS-AEM")
 //          LoadCCSDSAttitudeData();
+
+      LoadAttitudeAndRateData(theAttitude);
+      attDataLoaded = true;
             
-      if (attStateType == "EulerAngles")
-      {
-         Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
-         for (x = 0; x < 3; ++x)
-         {
-            *eulerAngles[x] = theGuiManager->ToWxString(eaVal[x]);
-            ea[x]           = eaVal[x];
-         }
-         DisplayEulerAngles();
-      }
-      else if (attStateType == "Quaternion")
-      {
-         Rvector qVal = theAttitude->GetRvectorParameter("Quaternion");
-         for (x = 0; x < 4; ++x)
-         {
-            *quaternion[x] = theGuiManager->ToWxString(qVal[x]);
-            q[x]           = qVal[x];
-         }
-         DisplayQuaternion();
-      }
-      else if (attStateType == "MRPs")	// Added by Dunn
-      {
-         Rvector MRPVal = theAttitude->GetRvectorParameter("MRPs");
-         for (x = 0; x < 3; ++x)
-         {
-            *MRPs[x] = theGuiManager->ToWxString(MRPVal[x]);
-            mrp[x]   = MRPVal[x];
-         }
-         DisplayMRPs();
-      }
-      else // "DirectionCosineMatrix
-      {
-         Rmatrix matVal = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
-         for (x = 0; x < 3; ++x)
-            for (y = 0; y < 3; ++y)
-            {
-               *cosineMatrix[x*3+y] = theGuiManager->ToWxString(matVal(x,y));
-               dcmat(x,y)             = matVal(x,y);
-            }
-         DisplayDCM();
-      }
-   
-      if (attRateStateType == "EulerAngleRates") 
-      {
-         Rvector earVal = theAttitude->GetRvectorParameter("EulerAngleRates");
-         for (x = 0; x < 3; ++x)
-         {
-            *eulerAngleRates[x] = theGuiManager->ToWxString(earVal[x]);
-            ear[x]              = earVal[x];
-         }
-         DisplayEulerAngleRates();
-      }
-      else // AngularVelocity
-      {
-         Rvector avVal = theAttitude->GetRvectorParameter("AngularVelocity");
-         for (x = 0; x < 3; ++x)
-         {
-            *angVel[x] = theGuiManager->ToWxString(avVal[x]);
-            av[x]      = avVal[x];
-         }
-         DisplayAngularVelocity();
-      }
+//      if (attStateType == "EulerAngles")
+//      {
+//         Rvector eaVal = theAttitude->GetRvectorParameter("EulerAngles");
+//         for (x = 0; x < 3; ++x)
+//         {
+//            *eulerAngles[x] = theGuiManager->ToWxString(eaVal[x]);
+//            ea[x]           = eaVal[x];
+//         }
+//         DisplayEulerAngles();
+//      }
+//      else if (attStateType == "Quaternion")
+//      {
+//         Rvector qVal = theAttitude->GetRvectorParameter("Quaternion");
+//         for (x = 0; x < 4; ++x)
+//         {
+//            *quaternion[x] = theGuiManager->ToWxString(qVal[x]);
+//            q[x]           = qVal[x];
+//         }
+//         DisplayQuaternion();
+//      }
+//      else if (attStateType == "MRPs")	// Added by Dunn
+//      {
+//         Rvector MRPVal = theAttitude->GetRvectorParameter("MRPs");
+//         for (x = 0; x < 3; ++x)
+//         {
+//            *MRPs[x] = theGuiManager->ToWxString(MRPVal[x]);
+//            mrp[x]   = MRPVal[x];
+//         }
+//         DisplayMRPs();
+//      }
+//      else // "DirectionCosineMatrix
+//      {
+//         Rmatrix matVal = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
+//         for (x = 0; x < 3; ++x)
+//            for (y = 0; y < 3; ++y)
+//            {
+//               *cosineMatrix[x*3+y] = theGuiManager->ToWxString(matVal(x,y));
+//               dcmat(x,y)             = matVal(x,y);
+//            }
+//         DisplayDCM();
+//      }
+//
+//      if (attRateStateType == "EulerAngleRates")
+//      {
+//         Rvector earVal = theAttitude->GetRvectorParameter("EulerAngleRates");
+//         for (x = 0; x < 3; ++x)
+//         {
+//            *eulerAngleRates[x] = theGuiManager->ToWxString(earVal[x]);
+//            ear[x]              = earVal[x];
+//         }
+//         DisplayEulerAngleRates();
+//      }
+//      else // AngularVelocity
+//      {
+//         Rvector avVal = theAttitude->GetRvectorParameter("AngularVelocity");
+//         for (x = 0; x < 3; ++x)
+//         {
+//            *angVel[x] = theGuiManager->ToWxString(avVal[x]);
+//            av[x]      = avVal[x];
+//         }
+//         DisplayAngularVelocity();
+//      }
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      attDataLoaded = false;
    }
    
    dataChanged = false;
@@ -1974,6 +1978,20 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    else
    {
       // Show everything that should be shown, then enable it all
+      if ((modelType == "Spinner") && (!attDataLoaded))
+      {
+         Attitude *tmpSpinner = (Attitude *)theGuiInterpreter->
+               CreateObject("Spinner", "");
+         // populate attitude and rate fields here
+         try
+         {
+            LoadAttitudeAndRateData(tmpSpinner);
+         }
+         catch (BaseException &be)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+         }
+      }
       ShowInitialAttitudeAndRate();
       EnableAll();
    }
@@ -3360,6 +3378,77 @@ void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
       MessageInterface::ShowMessage("AttitudePanel::SaveCCSDSAttitudeData() leaving\n");
    #endif
 
+}
+
+
+//------------------------------------------------------------------------------
+// void LoadAttitudeAndRateData(Attitude* forAtt)
+//------------------------------------------------------------------------------
+void AttitudePanel::LoadAttitudeAndRateData(Attitude* forAtt)
+{
+   unsigned int x, y;
+   if (attStateType == "EulerAngles")
+   {
+      Rvector eaVal = forAtt->GetRvectorParameter("EulerAngles");
+      for (x = 0; x < 3; ++x)
+      {
+         *eulerAngles[x] = theGuiManager->ToWxString(eaVal[x]);
+         ea[x]           = eaVal[x];
+      }
+      DisplayEulerAngles();
+   }
+   else if (attStateType == "Quaternion")
+   {
+      Rvector qVal = forAtt->GetRvectorParameter("Quaternion");
+      for (x = 0; x < 4; ++x)
+      {
+         *quaternion[x] = theGuiManager->ToWxString(qVal[x]);
+         q[x]           = qVal[x];
+      }
+      DisplayQuaternion();
+   }
+   else if (attStateType == "MRPs") // Added by Dunn
+   {
+      Rvector MRPVal = forAtt->GetRvectorParameter("MRPs");
+      for (x = 0; x < 3; ++x)
+      {
+         *MRPs[x] = theGuiManager->ToWxString(MRPVal[x]);
+         mrp[x]   = MRPVal[x];
+      }
+      DisplayMRPs();
+   }
+   else // "DirectionCosineMatrix
+   {
+      Rmatrix matVal = forAtt->GetRmatrixParameter("DirectionCosineMatrix");
+      for (x = 0; x < 3; ++x)
+         for (y = 0; y < 3; ++y)
+         {
+            *cosineMatrix[x*3+y] = theGuiManager->ToWxString(matVal(x,y));
+            dcmat(x,y)             = matVal(x,y);
+         }
+      DisplayDCM();
+   }
+
+   if (attRateStateType == "EulerAngleRates")
+   {
+      Rvector earVal = forAtt->GetRvectorParameter("EulerAngleRates");
+      for (x = 0; x < 3; ++x)
+      {
+         *eulerAngleRates[x] = theGuiManager->ToWxString(earVal[x]);
+         ear[x]              = earVal[x];
+      }
+      DisplayEulerAngleRates();
+   }
+   else // AngularVelocity
+   {
+      Rvector avVal = forAtt->GetRvectorParameter("AngularVelocity");
+      for (x = 0; x < 3; ++x)
+      {
+         *angVel[x] = theGuiManager->ToWxString(avVal[x]);
+         av[x]      = avVal[x];
+      }
+      DisplayAngularVelocity();
+   }
 }
 
 //------------------------------------------------------------------------------

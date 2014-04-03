@@ -23,7 +23,7 @@
 #define EditorPanel_hpp
 
 #include "GmatSavePanel.hpp"
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #include <wx/fontdlg.h>
 
 class EditorPanel: public GmatSavePanel
@@ -35,11 +35,11 @@ public:
    ~EditorPanel();
    
    // method to retrieve the Editor
-   Editor* GetEditor() { return mEditor; };
+   ScriptEditor* GetEditor() { return mEditor; };
    void ClickButton( bool run = false );
    
 private:
-   Editor   *mEditor;
+   ScriptEditor   *mEditor;
    
    // methods inherited from GmatSavePanel
    virtual void Create();

@@ -34,6 +34,7 @@ OutAsymRHA::OutAsymRHA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -134,6 +135,7 @@ OutAsymDHA::OutAsymDHA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -234,6 +236,7 @@ OutAsymBVAZI::OutAsymBVAZI(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -336,6 +339,7 @@ OutAsymState::OutAsymState(const std::string &name, GmatBase *obj)
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

@@ -92,7 +92,8 @@ FunctionSetupPanel::~FunctionSetupPanel()
    #ifdef __USE_STC_EDITOR__
    if (mEditor)
    {
-      delete mEditor;
+	  // Don't delete Editor, it will be deleted as part of the window destroy
+	  // delete mEditor;
       mEditor = NULL;
    }
    #endif
@@ -122,7 +123,7 @@ void FunctionSetupPanel::Create()
    //------------------------------------------------------
    
 #ifdef __USE_STC_EDITOR__
-   mEditor = new Editor(this, true, -1, wxDefaultPosition, wxSize(700,400));
+   mEditor = new ScriptEditor(this, true, -1, wxDefaultPosition, wxSize(700,400));
 #else
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 

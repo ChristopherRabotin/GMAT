@@ -36,6 +36,7 @@ PldRMAG::PldRMAG(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -82,6 +83,7 @@ PldLON::PldLON(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -128,6 +130,7 @@ PldLAT::PldLAT(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -174,6 +177,7 @@ PldVMAG::PldVMAG(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
    #endif
@@ -220,6 +224,7 @@ PldAZI::PldAZI(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -266,6 +271,7 @@ PldHFPA::PldHFPA(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -315,6 +321,7 @@ PldState::PldState(const std::string &name, GmatBase *obj)
    mDepObjectName = "EarthFixed";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    SetRequiresBodyFixedCS(true);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 
