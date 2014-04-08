@@ -154,8 +154,7 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
    #endif
    
    #ifdef __CREATE_CHILD_MENU_BAR__
-   // Removed delete: The window is responsible for deleting it's own menubar, so this would cause a double free.
-   // delete theMenuBar;
+      delete theMenuBar;
    #else
       // There should be only one MenuBar associated with GmatMainFrame,
       // so we cannot delete it here. Enable or disable edit menu and tools.

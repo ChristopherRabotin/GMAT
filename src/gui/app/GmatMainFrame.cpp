@@ -1437,10 +1437,6 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
    GmatTree::ItemType childItemType;
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
-   // Do not delete the contents of the list when removed
-   // The child windows need to be released with their ->Destroy() function, not delete
-   theMdiChildren->DeleteContents( false );
-
    while (node)
    {
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
@@ -1476,10 +1472,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
          if (deleteChild)
-         {
-             // The child windows need to be released with their ->Destroy() function, not delete
-             child->Destroy();
-         }
+            delete child;
          
          delete node;
          childRemoved = true;

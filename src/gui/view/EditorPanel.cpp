@@ -102,8 +102,7 @@ EditorPanel::~EditorPanel()
 
    if (mEditor)
    {
-      // Don't delete wxControls!  Cleaning up the window will clear controls.
-      //delete mEditor;
+      delete mEditor;
       mEditor = NULL;
    }
 }
