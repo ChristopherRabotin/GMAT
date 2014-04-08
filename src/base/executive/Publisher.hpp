@@ -39,7 +39,7 @@ public:
    bool Unsubscribe(Subscriber *s);
    bool UnsubscribeAll();
    
-   bool Publish(GmatBase *provider, Integer id, Real *data, Integer count);
+   bool Publish(GmatBase *provider, Integer id, Real *data, Integer count, Real propDir = 1.0);
    bool Publish(Integer id, char *data, Integer count = 0);
    bool Publish(Integer id, Integer *data, Integer count);
    

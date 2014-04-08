@@ -160,7 +160,8 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mIsSettable = isSettable;
    mIsPlottable = isPlottable;
    mIsReportable = isReportable;
-   mRequiresBodyFixedCS = false;
+   mRequiresBodyFixedCS           = false;
+   mRequiresCelestialBodyCSOrigin = false;
    
    // register parameter names with info
    ParameterInfo::Instance()->
@@ -439,6 +440,18 @@ bool Parameter::IsOwnedObjectDependent() const
 }
 
 //------------------------------------------------------------------------------
+// bool IsOptionalField(const std::string &field) const
+//------------------------------------------------------------------------------
+/**
+ * @return true if input field name is optional field, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsOptionalField(const std::string &field) const
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // bool NeedCoordSystem() const
 //------------------------------------------------------------------------------
 /**
@@ -515,12 +528,29 @@ bool Parameter::RequiresBodyFixedCS() const
 }
 
 //------------------------------------------------------------------------------
+// bool RequiresCelestialBodyCSOrigin() const
+//------------------------------------------------------------------------------
+bool Parameter::RequiresCelestialBodyCSOrigin() const
+{
+   return mRequiresCelestialBodyCSOrigin;
+}
+
+//------------------------------------------------------------------------------
 // void SetRequiresBodyFixedCS(bool flag)
 //------------------------------------------------------------------------------
 void Parameter::SetRequiresBodyFixedCS(bool flag)
 {
    mRequiresBodyFixedCS = flag;
    ParameterInfo::Instance()->SetRequiresBodyFixedCS(typeName, flag);
+}
+
+//------------------------------------------------------------------------------
+// void SetRequiresCelestialBodyCSOrigin(bool flag)
+//------------------------------------------------------------------------------
+void Parameter::SetRequiresCelestialBodyCSOrigin(bool flag)
+{
+   mRequiresCelestialBodyCSOrigin = flag;
+   ParameterInfo::Instance()->SetRequiresCelestialBodyCSOrigin(typeName, flag);
 }
 
 //------------------------------------------------------------------------------

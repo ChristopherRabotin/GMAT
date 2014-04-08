@@ -163,6 +163,8 @@ protected:
    enum
    {
       MAX_DATA = 20000,
+      UNINIT_TEXTURE = 999,
+      UNKNOWN_BODY = -1,
       UNKNOWN_OBJ_ID = -999,
    };
    

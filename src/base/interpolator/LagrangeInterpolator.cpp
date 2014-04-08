@@ -289,6 +289,8 @@ bool LagrangeInterpolator::AddPoint(const Real ind, const Real *data)
        "data[1]=%f, data[2]=%f\n", ind, previousX, data[0], data[1], data[2]);
    #endif
    
+   // To support backward propagation (LOJ: 2014.02.27)
+   #if 0
    if (ind < previousX)
    {
       InterpolatorException ie;
@@ -296,6 +298,7 @@ bool LagrangeInterpolator::AddPoint(const Real ind, const Real *data)
                     "previous data is %f", ind, previousX);
       throw ie;
    }
+   #endif
    
    #ifdef DEBUG_LAGRANGE_ADD
    MessageInterface::ShowMessage

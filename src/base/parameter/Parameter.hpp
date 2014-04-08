@@ -96,11 +96,14 @@ public:
    bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
    bool  NeedExternalClone() const;
+   virtual bool IsOptionalField(const std::string &field) const;
    virtual const std::string GetExternalCloneName(Integer whichOne = 0);
    virtual void SetExternalClone(GmatBase *clone);
    
    virtual bool RequiresBodyFixedCS() const;
+   virtual bool RequiresCelestialBodyCSOrigin() const;
    virtual void SetRequiresBodyFixedCS(bool flag);
+   virtual void SetRequiresCelestialBodyCSOrigin(bool flag);
    
    // Methods needed to provide handling for transient forces (e.g. finite burn)
    virtual bool NeedsForces() const;
@@ -218,6 +221,7 @@ protected:
    bool mNeedCoordSystem;
    bool mNeedExternalClone;
    bool mRequiresBodyFixedCS;
+   bool mRequiresCelestialBodyCSOrigin;
    bool mIsCommentFromCreate;
    
    enum

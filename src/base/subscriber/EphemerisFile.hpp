@@ -151,7 +151,9 @@ protected:
    Integer     waitCount;
    Integer     afterFinalEpochCount;
    Integer     toggleStatus;
-   
+   Integer     propIndicator;
+   Real        prevPropDirection;
+   Real        currPropDirection;
    Real        stepSizeInA1Mjd;
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
@@ -223,7 +225,7 @@ protected:
    static StringArray outputFormatList;
    
    // Initialization
-   void         InitializeData();
+   void         InitializeData(bool saveEpochInfo = false);
    void         CreateInterpolator();
    void         CreateEphemerisFile();
    void         CreateSpiceKernelWriter();
@@ -243,6 +245,7 @@ protected:
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
+                                     bool saveEpochInfo = false,
                                      bool writeAfterData = true,
                                      bool canFinalize = false,
                                      bool ignoreBlankComments = true);
@@ -316,14 +319,20 @@ protected:
    void         RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg);
    void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
    
+   // Event checking
+   bool         IsEventFeasible(bool isManeuverEvent = false);
+   
    // CoordinateSystem conversion
    void         ConvertState(Real epochInDays, const Real inState[6],
                              Real outState[6]);
    
-   // for time formatting
+   // Time formatting
    std::string  ToUtcGregorian(Real epoch, bool inDays = false, Integer format = 2);
    
-   // for debugging
+   // Error message formatting
+   void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg);
+   
+   // Debug output
    void         DebugWriteTime(const std::string &msg, Real epoch, bool inDays = false,
                                Integer format = 2);
    void         DebugWriteOrbit(const std::string &msg, Real epoch, const Real state[6],
@@ -332,7 +341,7 @@ protected:
                                 Rvector6 *state, bool logOnly = false);
    void         DebugWriteEpochsOnWaiting(const std::string &msg = "");
    
-   // for deprecated field
+   // Deprecated field
    void         WriteDeprecatedMessage(Integer id) const;
    
    // methods inherited from Subscriber

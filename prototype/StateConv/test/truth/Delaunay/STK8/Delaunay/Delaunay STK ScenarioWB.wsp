@@ -677,8 +677,8 @@ LargeButtons=False
 ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 [WorkState_v1_2.Frames.MainFrame]
-WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPFCAAAAAABBAAAAAAFCEAAAAAPOCAAAAA
-Title=Delaunay - STK 8 - Object Browser - [2D Graphics 1 - Earth]
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPKJBAAAAAPBAAAAAAKJFAAAAANPCAAAAA
+Title=Delaunay - STK 8 - [2D Graphics 1 - Earth]
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
 ptn_Child2=Document-1
@@ -704,7 +704,7 @@ DocPathName=C:\Users\jjparker\Documents\GMAT\GmatDevelopment\prototype\StateConv
 DocumentString=AgUi2DGfxView.AgUiPi2DGfxView.1
 DocTemplateIndex=0
 WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPCOPPPPPPEABAAAAAEABAAAAAJPCAAAAABACAAAAA
-IsActiveChildFrame=False
+IsActiveChildFrame=True
 IsFrameVisible=True
 ptn_Child1=AGI Custom Node Data
 [WorkState_v1_2.Frames.ChildFrames.Document-2.ViewFrame-0.AGI Custom Node Data]
@@ -717,5 +717,5 @@ DocumentString=AgUiAttrBrowser.AgUiPiAttrBrowser.1
 DocTemplateIndex=0
 DockedViewBarID=256
 DockedViewFloating=0
-IsActiveChildFrame=True
+IsActiveChildFrame=False
 IsFrameVisible=True

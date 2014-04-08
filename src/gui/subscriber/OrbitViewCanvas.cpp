@@ -763,7 +763,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
       mViewPointRefObjName = pViewPointRefObj->GetName();
       mVpRefObjId = GetObjectId(mViewPointRefObjName.c_str());
       
-      if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVpRefObjId == UNKNOWN_BODY)
       {
          mUseViewPointRefVector = true;
          MessageInterface::ShowMessage
@@ -789,7 +789,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
    {
       mVpVecObjId = GetObjectId(pViewPointVectorObj->GetName().c_str());
       
-      if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVpVecObjId == UNKNOWN_BODY)
       {
          mUseViewPointVector = true;
          MessageInterface::ShowMessage
@@ -814,7 +814,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
       mViewObjName = pViewDirectionObj->GetName().c_str();
       mVdirObjId = GetObjectId(mViewObjName.c_str());
       
-      if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVdirObjId == UNKNOWN_BODY)
       {
          mUseViewDirectionVector = true;
          MessageInterface::ShowMessage
@@ -1910,16 +1910,16 @@ void OrbitViewCanvas::DrawObjectOrbit()
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
       
-      int index = objId * MAX_DATA + mLastIndex;
+      int colorIndex = objId * MAX_DATA + mLastIndex;
       
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
-         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s', index=%d\n",
-          obj, objId, objName.c_str(), index);
+         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s', colorIndex=%d, mDrawOrbitFlag[%d]=%d\n",
+          obj, objId, objName.c_str(), colorIndex, colorIndex, mDrawOrbitFlag[colorIndex]);
       #endif
       
       // If not showing orbit just draw object, continue to next one
-      if (!mDrawOrbitFlag[index])
+      if (!mDrawOrbitFlag[colorIndex])
       {
          #if DEBUG_DRAW
          MessageInterface::ShowMessage
@@ -2102,7 +2102,7 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    //-------------------------------------------------------
    // draw object with texture on option
    //-------------------------------------------------------
-   if (mTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[objName] != UNINIT_TEXTURE)
    {
       //glColor4f(1.0, 1.0, 1.0, 1.0);
       glColor3f(1.0, 1.0, 1.0);

@@ -761,11 +761,18 @@ void SpacePoint::SetSpacecraftDefaultColors()
    #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
       ("SpacePoint::SetSpacecraftDefaultColors() <%p>'%s' entered, "
-       "spacecraftInstanceCount = %d\n", this, GetName().c_str(),
-       spacecraftInstanceCount);
+       "spacecraftInstanceCount = %d, MAX_SP_COLOR = %d\n", this, GetName().c_str(),
+       spacecraftInstanceCount, MAX_SP_COLOR);
    #endif
    
-   Integer index = spacecraftInstanceCount-1 % MAX_SP_COLOR;
+   // MAX_SP_COLOR doesn't work with % modulo (LOJ: 2014.03.13)
+   //Integer index = (spacecraftInstanceCount-1) % MAX_SP_COLOR;
+   Integer maxColor = (Integer)MAX_SP_COLOR;
+   Integer index = (spacecraftInstanceCount-1) % maxColor;
+   
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage("   ==> index = %d\n", index);
+   #endif
    UnsignedInt orbColor = DEFAULT_ORBIT_COLOR[index];
    UnsignedInt targColor = DEFAULT_TARGET_COLOR[index];
    SetDefaultColors(orbColor, targColor);

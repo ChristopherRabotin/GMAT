@@ -443,6 +443,10 @@ bool UserInputValidator::CheckVariable(const std::string &varName, ObjectTypeArr
       return false;
    }
    
+   #ifdef DEBUG_CHECK_VARIABLE
+   MessageInterface::ShowMessage("   retval = %d\n", retval);
+   #endif
+   
    if (retval == -1)
    {
       std::string lastMsg = mGuiManager->GetLastErrorMessage().c_str();

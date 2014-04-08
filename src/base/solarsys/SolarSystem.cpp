@@ -1509,9 +1509,39 @@ void SolarSystem::LoadSpiceKernels()
       }
       else
       {
-         std::string errmsg = "Error loading the SPICE Planetary Ephemeris (SPK) Kernel \"";
-         errmsg += theSPKFilename + "\"\n";
-         throw SolarSystemException(errmsg);
+         // Try open with absolute path (LOJ: 2014.02.28 ref to GMT-4408)
+         if (theSPKFilename.size() > 1 && theSPKFilename[0] == '.')
+         {
+            FileManager *fm = FileManager::Instance();
+            std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            
+            MessageInterface::ShowMessage
+               ("Error opening the SPK file \"%s\", so trying with abs path \"%s\"", theSPKFilename.c_str(),
+                absSpkFile.c_str());
+            
+            try
+            {
+               planetarySPK->LoadKernel(absSpkFile);
+               #ifdef DEBUG_SS_SPICE
+               MessageInterface::ShowMessage
+                  ("   kernelReader has loaded file %s\n", absSpkFile.c_str());
+               #endif
+            }
+            catch (UtilityException&)
+            {
+               MessageInterface::ShowMessage("ERROR loading kernel %s\n", absSpkFile.c_str());
+               SolarSystemException sse;
+               sse.SetDetails("Error loading the SPICE Planetary Ephemeris (SPK) Kernel \"%s\" or \"%s\"",
+                              theSPKFilename.c_str(), absSpkFile.c_str());
+               throw sse;
+            }
+         }
+         else
+         {
+            std::string errmsg = "Error loading the SPICE Planetary Ephemeris (SPK) Kernel \"";
+            errmsg += theSPKFilename + "\"\n";
+            throw SolarSystemException(errmsg);
+         }
       }
    }
 
@@ -3536,7 +3566,7 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
        "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
        format);
    #endif
-
+   
    FILE *defile = fopen(fileName.c_str(), "rb");
    if (defile == NULL)
    {
@@ -3544,9 +3574,32 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       //    (Gmat::WARNING_,
       //     "Error opening the DE file named: %s.\n"
       //     "Please check the path and file name.\n", fileName.c_str());
-      SolarSystemException sse;
-      sse.SetDetails("Error opening the DE file \"%s\"", fileName.c_str());
-      throw sse;
+      
+      // Try open with absolute path (LOJ: 2014.02.27 ref to GMT-4408)
+      if (fileName.size() > 1 && fileName[0] == '.')
+      {
+         FileManager *fm = FileManager::Instance();
+         std::string absDeFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + fileName;
+         
+         MessageInterface::ShowMessage
+            ("Error opening the DE file \"%s\", so trying with abs path \"%s\"", fileName.c_str(),
+             absDeFile.c_str());
+         
+         defile = fopen(absDeFile.c_str(), "rb");
+         if (defile == NULL)
+         {
+            SolarSystemException sse;
+            sse.SetDetails("Error opening the DE file \"%s\" or \"%s\"", fileName.c_str(), absDeFile.c_str());
+            throw sse;
+         }
+      }
+      
+      if (defile == NULL)
+      {
+         SolarSystemException sse;
+         sse.SetDetails("Error opening the DE file \"%s\"", fileName.c_str());
+         throw sse;
+      }
    }
    else
    {

@@ -214,7 +214,7 @@ private:
    /// flags for data modification
    bool                dataChanged;
    bool                canClose;
-   
+
    // local values of attitude data
    // NOTE - only currently-displayed representations will be up-to-date;
    // conversions occur on state (or state rate) type changes
@@ -261,6 +261,9 @@ private:
    bool             ccsdsDataLoaded;
    bool             aemFileModified;
 
+   /// has the attitude and attitude rate data been loaded?
+   bool             attDataLoaded;
+
    void Create();
    
    void LoadPrecessingSpinnerData(); //LOJ: Added
@@ -271,6 +274,8 @@ private:
 
    void LoadCCSDSAttitudeData();
    void SaveCCSDSAttitudeData(Attitude *useAttitude);
+
+   void LoadAttitudeAndRateData(Attitude* forAtt);
 
    bool DisplayEulerAngles();
    bool DisplayQuaternion();

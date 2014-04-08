@@ -1493,7 +1493,7 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
    MessageInterface::ShowMessage("DrawCentralBodyTexture() entered\n");
    #endif
    
-   if (mTextureIdMap[mCentralBodyName.c_str()] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[mCentralBodyName.c_str()] != UNINIT_TEXTURE)
    {
       glLoadIdentity();
       glColor3f(1.0, 1.0, 1.0);
@@ -1718,7 +1718,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
       ("   lon2 = %f, lat2 = %f, imagePos = %f\n", lon2, lat2, imagePos);
    #endif
    
-   if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[objName.c_str()] != UNINIT_TEXTURE)
    {
       #if DEBUG_DRAW_IMAGE
       MessageInterface::ShowMessage("   drawing with texture map\n");
@@ -1788,7 +1788,7 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
       ("   lon2 = %f, lat2 = %f, imagePos = %f\n", lon2, lat2, imagePos);
    #endif
    
-   if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[objName.c_str()] != UNINIT_TEXTURE)
    {
       #if DEBUG_DRAW_IMAGE
       MessageInterface::ShowMessage("   drawing with texture map\n");

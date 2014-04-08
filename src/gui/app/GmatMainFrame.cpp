@@ -114,7 +114,7 @@
 #endif
 
 #include "FileManager.hpp"
-#include "FileUtil.hpp"               // for Compare()
+#include "FileUtil.hpp"               // for Compare(), etc
 #include "GmatOpenGLSupport.hpp"      // for ScreenShotSave
 #include "RealUtilities.hpp"          // for Abs()
 
@@ -501,26 +501,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mRunCompleted = true;
    mAutoExitAfterRun = false;
    
-   // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      if (GmatFileUtil::DoesFileExist(iconfile.c_str()))
-      {
-         #if defined __WXMSW__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-         #elif defined __WXGTK__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-         #elif defined __WXMAC__
-            SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-         #endif
-      }
-   }
-   catch (GmatBaseException &e)
-   {
-      MessageInterface::ShowMessage(e.GetFullMessage());
-   }
+   
+   // Set icon if icon file is in the start up file
+   GmatAppData::Instance()->SetIcon(this, "GmatMainFrame");
    
    // If GUI mode is normal (not minimized), show welcome panel
    if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::NORMAL_GUI)
@@ -1661,7 +1645,9 @@ void GmatMainFrame::CloseChild(GmatMdiChildFrame *child)
       // so use OnClose(event) instead
       wxCloseEvent event;
       child->OnClose(event);
-      wxSafeYield();
+      // Don't yield here, the idle loop needs to wait until after the window events are completed
+      // because these events schedule window deltetion
+      // wxSafeYield();
    }
 }
 
@@ -3532,7 +3518,7 @@ void GmatMainFrame::OnPrint(wxCommandEvent &event)
 #if wxUSE_PRINTING_ARCHITECTURE
    #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
 
    if (editor)
    {
@@ -3670,7 +3656,7 @@ void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
 {
    CloseActiveChild();
-   wxSafeYield();
+   //wxSafeYield();
    
    if (theMdiChildren->GetCount() <= 0)
    {
@@ -5430,7 +5416,7 @@ void GmatMainFrame::OnUndo(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnUndo(event);
 #else
@@ -5446,7 +5432,7 @@ void GmatMainFrame::OnRedo(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnRedo(event);
 #else
@@ -5462,7 +5448,7 @@ void GmatMainFrame::OnCut(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnCut(event);
 #else
@@ -5478,7 +5464,7 @@ void GmatMainFrame::OnCopy(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnCopy(event);
 #else
@@ -5504,7 +5490,7 @@ void GmatMainFrame::OnPaste(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnPaste(event);
 #else
@@ -5520,7 +5506,7 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnComment(event);
 #else
@@ -5569,7 +5555,7 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnUncomment(event);
 #else
@@ -5617,7 +5603,7 @@ void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
 {
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
 #ifdef __USE_STC_EDITOR__
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnSelectAll(event);
 #else
@@ -5665,7 +5651,7 @@ void GmatMainFrame::OnFind(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFind(event);
 #endif
@@ -5679,7 +5665,7 @@ void GmatMainFrame::OnFindNext(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFindNext(event);
 #endif
@@ -5693,7 +5679,7 @@ void GmatMainFrame::OnReplace(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnFind(event);
 #endif
@@ -5707,7 +5693,7 @@ void GmatMainFrame::OnReplaceNext(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnReplaceNext(event);
 #endif
@@ -5721,7 +5707,7 @@ void GmatMainFrame::OnGoToLine(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnGoToLine(event);
 #endif
@@ -5735,7 +5721,7 @@ void GmatMainFrame::OnLineNumber(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnLineNumber(event);
 #endif
@@ -5749,7 +5735,7 @@ void GmatMainFrame::OnIndentMore(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnIndentMore(event);
 #endif
@@ -5763,7 +5749,7 @@ void GmatMainFrame::OnIndentLess(wxCommandEvent& event)
 {
 #ifdef __USE_STC_EDITOR__
    GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
-   Editor *editor = child->GetEditor();
+   ScriptEditor *editor = child->GetEditor();
    if (editor)
       editor->OnIndentLess(event);
 #endif
@@ -6394,7 +6380,9 @@ void GmatMainFrame::CompareFiles()
       }
       
       #ifdef DEBUG_FILE_COMPARE
-      MessageInterface::ShowMessage("%s\n", textCtrl->GetValue().c_str());
+      int numLines = textCtrl->GetNumberOfLines();
+      for (int i = 0; i < numLines; i++)
+         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).c_str());
       #endif
       
       if (saveCompareResults)
@@ -6416,7 +6404,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
 {
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d, baseDir='%s', "
+      ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d\n   baseDir='%s', "
        "baseString='%s'\n", compareOption, baseDir.c_str(), baseString.c_str());
    #endif
    
@@ -6447,6 +6435,9 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
                noPrefixName.Replace(baseString, "", false);
                noPrefixNameArray.push_back(noPrefixName.c_str());
                baseFileNameArray.push_back(filepath.c_str());
+               #ifdef DEBUG_FILE_COMPARE
+               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.c_str());
+               #endif
             }
          }
       }
@@ -6454,60 +6445,6 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
       cont = dir.GetNext(&filename);
    }
    
-   #if 0
-   if (compareOption == 1 || compareOption == 2)
-   {
-      while (cont)
-      {
-         if (filename.Contains(".report") || filename.Contains(".txt") ||
-             filename.Contains(".data") || filename.Contains(".script") ||
-             filename.Contains(".eph") || filename.Contains(".truth"))
-         {
-            // if file has prefix
-            if (filename.Left(baseStringLen) == baseString)
-            {
-               filepath = baseDir + "/" + filename;
-               
-               // remove any backup files
-               if (filename.Last() == 't' || filename.Last() == 'a' ||
-                   filename.Last() == 'h')
-               {
-                  wxString noPrefixName = filename;
-                  noPrefixName.Replace(baseString, "", false);
-                  noPrefixNameArray.push_back(noPrefixName.c_str());
-                  baseFileNameArray.push_back(filepath.c_str());
-               }
-            }
-         }
-         
-         cont = dir.GetNext(&filename);
-      }
-   }
-   else if (compareOption == 3)
-   {
-      while (cont)
-      {
-         if (filename.Contains(".report") || filename.Contains(".txt"))
-         {
-            // if file has prefix
-            if (filename.Left(baseStringLen) == baseString)
-            {
-               filepath = baseDir + "/" + filename;
-               
-               if (filename.Last() == 't' || filename.Last() == 'a')
-               {
-                  wxString noPrefixName = filename;
-                  noPrefixName.Replace(baseString, "", false);
-                  noPrefixNameArray.push_back(noPrefixName.c_str());
-                  baseFileNameArray.push_back(filepath.c_str());
-               }
-            }
-         }
-         
-         cont = dir.GetNext(&filename);
-      }
-   }
-   #endif
    
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage

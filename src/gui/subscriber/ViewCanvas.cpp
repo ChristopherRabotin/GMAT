@@ -53,6 +53,7 @@
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
 //#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE_OBJECT 1
 //#define DEBUG_UPDATE_VIEW 1
 //#define DEBUG_DRAW 1
 //#define DEBUG_SOLVER_DATA 1
@@ -109,6 +110,20 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Constructor with explicit wxGLContext with default GL attributes
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #endif
+   // Fixed unitialized value error     
+   , mTime( NULL ),
+     mIsDrawing( NULL ),
+     mObjectRadius( NULL ),
+     mObjMaxZoomIn( NULL ),
+     mObjLastFrame( NULL ),
+     mDrawOrbitFlag( NULL ),
+     mObjectOrbitColor( NULL ),
+     mObjectGciPos( NULL ),
+     mObjectViewPos( NULL ),
+     mObjectViewVel( NULL ),
+     mObjectQuat( NULL ),
+     mBodyRotAngle( NULL ),
+     mBodyRotAxis( NULL )
 {
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.c_str());
@@ -250,7 +265,7 @@ ViewCanvas::~ViewCanvas()
       #ifdef DEBUG_VIEWCANVAS
       MessageInterface::ShowMessage("   texId = %3d, obj = '%s'\n", texId, i->first.c_str());
       #endif
-      if (i->first != "" && texId != GmatPlot::UNINIT_TEXTURE)
+      if (i->first != "" && texId != UNINIT_TEXTURE)
       {
          glDeleteTextures(1, &texId);
       }
@@ -476,11 +491,9 @@ void ViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 
 //------------------------------------------------------------------------------
 // void SetGlObject(const StringArray &objNames,
-//                  const UnsignedIntArray &objOrbitColors,
 //                  const std::vector<SpacePoint*> &objArray)
 //------------------------------------------------------------------------------
 void ViewCanvas::SetGlObject(const StringArray &objNames,
-                             //const UnsignedIntArray &objOrbitColors,
                              const std::vector<SpacePoint*> &objArray)
 {
    #if DEBUG_OBJECT
@@ -493,8 +506,6 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
    wxArrayString tempList;
    int scCount = 0;
    
-   //if (objNames.size() == objOrbitColors.size() &&
-   //    objNames.size() == objArray.size())
    if (objNames.size() == objArray.size())
    {      
       for (UnsignedInt i=0; i<objNames.size(); i++)
@@ -510,7 +521,7 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
          
          #if DEBUG_OBJECT > 1
          MessageInterface::ShowMessage
-            ("   objNames[%d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
+            ("   objNames[%2d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
              mObjectArray[i], mObjectArray[i]->GetName().c_str());
          #endif
       }
@@ -527,7 +538,7 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlObject() '%s' leaving\n", mPlotName.c_str());
+      ("ViewCanvas::SetGlObject() '%s' leaving, mScCount=%d\n", mPlotName.c_str(), mScCount);
    #endif
 }
 
@@ -653,7 +664,7 @@ void ViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
    {
       draw = mDrawOrbitArray[i] ? true : false;      
       MessageInterface::ShowMessage
-         ("ViewCanvas::SetGlDrawOrbitFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
+         ("ViewCanvas::SetGlDrawOrbitFlag() i=%2d, mDrawOrbitArray[%s]=%d\n",
           i, mObjectNames[i].c_str(), draw);
    }
    #endif
@@ -693,7 +704,7 @@ void ViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
-         ("ViewCanvas::SetGlShowObjectFlag() i=%d, mShowObjectMap[%s]=%d\n",
+         ("ViewCanvas::SetGlShowObjectFlag() i=%2d, mShowObjectMap[%s]=%d\n",
           i, mObjectNames[i].c_str(), show);
       #endif
    }
@@ -861,7 +872,6 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                             const RealArray &posX, const RealArray &posY,
                             const RealArray &posZ, const RealArray &velX,
                             const RealArray &velY, const RealArray &velZ,
-                            //const UnsignedIntArray &scColors,
                             const ColorMap &orbitColorMap,
                             const ColorMap &targetColorMap,
                             bool solving, Integer solverOption,
@@ -904,17 +914,23 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
        "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().c_str(),
        time, mNumData, mScCount, solving, solverOption, drawing, inFunction);
    ColorMap::const_iterator iter = orbitColorMap.begin();
+   #endif
+   #if DEBUG_UPDATE > 1
+   for (int i = 0; i < mScCount; i++)
+      MessageInterface::ShowMessage
+         ("   posX:%12.5f, posY:%12.5f, posZ:%12.5f, scColor:%06X\n", posX[i], posY[i],
+          posZ[i], scColors[i]);
+   #endif
+   
+   #if DEBUG_COLOR
    while (iter != orbitColorMap.end())
    {
       MessageInterface::ShowMessage
          ("orbitColorMap[%s] = %06X\n", (iter->first).c_str(), iter->second);
       iter++;
    }
-   for (int i = 0; i < mScCount; i++)
-      MessageInterface::ShowMessage
-         ("   posX:%12.5f, posY:%12.5f, posZ:%12.5f, scColor:%06X\n", posX[i], posY[i],
-          posZ[i], scColors[i]);
    #endif
+   
    
    //-----------------------------------------------------------------
    // If showing current iteration only, handle solver iteration data
@@ -932,8 +948,15 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    if (mNumData < MAX_DATA)
       mNumData++;
    
+   #if 0
    if (mScCount > GmatPlot::MAX_SCS)
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The number of spacecraft to plot is greater than "
+          "maximum of %d, so showing first %d spacrafts\n");
       mScCount = GmatPlot::MAX_SCS;
+   }
+   #endif
    
    //-----------------------------------------------------------------
    // Buffer data for plot
@@ -1012,17 +1035,17 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
    ClearObjectArrays();
    
    if (!CreateObjectArrays())
-      throw SubscriberException("There is not enough memory to allocate\n");
+      throw SubscriberException("There is not enough memory to allocate OrbitView data\n");
    
    for (int i=0; i<mObjectCount; i++)
    {
       // add object names
       mObjectNames.Add(objNames[i]);
-      mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
+      mTextureIdMap[objNames[i]] = UNINIT_TEXTURE;
       
       // initialize show object
       mShowObjectMap[objNames[i]] = true;
-            
+      
       // set real object radius, if it is CelestialBody
       if (mObjectArray[i]->IsOfType(Gmat::CELESTIAL_BODY))
       {
@@ -1036,8 +1059,9 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
       }
       
       #if DEBUG_OBJECT > 1
+      if (i == 0) MessageInterface::ShowMessage("   In AddObjectList()\n");
       MessageInterface::ShowMessage
-         ("   objNames[%d]=%s, objRadius=%f\n", i, objNames[i].c_str(), mObjectRadius[i]);
+         ("   mObjectNames[%2d]=%s, mObjectRadius=%f\n", i, mObjectNames[i].c_str(), mObjectRadius[i]);
       #endif
    }
    
@@ -1280,61 +1304,151 @@ bool ViewCanvas::CreateObjectArrays()
    #endif
    
    if ((mTime = new Real[MAX_DATA]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mTime, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mIsDrawing = new bool[MAX_DATA]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mIsDrawing, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mObjectRadius = new Real[mObjectCount]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectRadius, so returning false\n");
+      #endif
       return false;
+   }
    
    for (int i=0; i<mObjectCount; i++)
       mObjectRadius[i] = 0.0;
    
    if ((mObjMaxZoomIn = new Real[mObjectCount]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjMaxZoomIn, so returning false\n");
+      #endif
       return false;
+   }
    
    for (int i=0; i<mObjectCount; i++)
       mObjMaxZoomIn[i] = 0.0;
    
    if ((mObjLastFrame = new int[mObjectCount]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjLastFrame, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mDrawOrbitFlag = new bool[mObjectCount*MAX_DATA]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mDrawOrbitFlag, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mObjectOrbitColor = new UnsignedInt[mObjectCount*MAX_DATA]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectOrbitColor, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mObjectGciPos = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectGciPos, so returning false\n");
+      #endif
       return false;
+   }
    
    if ((mObjectViewPos = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectViewPos, so returning false\n");
+      #endif
       return false;
-
+   }
+   
    if (mNeedVelocity)
       if ((mObjectViewVel = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+      {
+         #if DEBUG_OBJECT
+         MessageInterface::ShowMessage
+            ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectViewVel, so returning false\n");
+         #endif
          return false;
+      }
    
    if (mNeedAttitude)
    {
       if ((mObjectQuat = new Real[mObjectCount*MAX_DATA*4]) == NULL)
+      {
+         #if DEBUG_OBJECT
+         MessageInterface::ShowMessage
+            ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mObjectQuat, so returning false\n");
+         #endif
          return false;
+      }
       
       if ((mBodyRotAngle = new Real[mObjectCount*MAX_DATA]) == NULL)
+      {
+         #if DEBUG_OBJECT
+         MessageInterface::ShowMessage
+            ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mBodyRotAngle, so returning false\n");
+         #endif
          return false;
+      }
       
       if ((mBodyRotAxis = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+      {
+         #if DEBUG_OBJECT
+         MessageInterface::ShowMessage
+            ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mBodyRotAxis, so returning false\n");
+         #endif
          return false;
+      }
    }
    
    if ((mRotMatViewToInternal = new Real[MAX_DATA*16]) == NULL)
+   {
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mRotMatViewToInternal, so returning false\n");
+      #endif
       return false;
+   }
    
    if (mNeedEcliptic)
    {
       if ((mRotMatViewToEcliptic = new Real[MAX_DATA*16]) == NULL)
+      {
+         #if DEBUG_OBJECT
+         MessageInterface::ShowMessage
+            ("ViewCanvas::CreateObjectArrays() cannot allocate enough memory for mRotMatViewToEcliptic, so returning false\n");
+         #endif
          return false;
+      }
    }
    
    #if DEBUG_OBJECT
@@ -1504,7 +1618,7 @@ bool ViewCanvas::LoadBodyTextures()
 			 mTextureIdMap[mObjectNames[i]]);
       #endif
 		
-      if (mTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
+      if (mTextureIdMap[mObjectNames[i]] == UNINIT_TEXTURE)
       {
          #if DEBUG_TEXTURE > 1
          MessageInterface::ShowMessage
@@ -1537,7 +1651,7 @@ bool ViewCanvas::LoadBodyTextures()
 //------------------------------------------------------------------------------
 GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 {
-   GLuint texId = GmatPlot::UNINIT_TEXTURE;
+   GLuint texId = UNINIT_TEXTURE;
    std::string textureFile;
    
    // If texture file specified then use it
@@ -1620,7 +1734,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
       GLenum error = glGetError();
       MessageInterface::ShowMessage
          ("   texId = %3d, error = %d, GL_INVALID_VALUE = %d, UNINIT_TEXTURE = %d\n",
-          texId, error, GL_INVALID_VALUE, GmatPlot::UNINIT_TEXTURE);
+          texId, error, GL_INVALID_VALUE, UNINIT_TEXTURE);
       #endif
       
       // Save image data if object is spacecraft or ground station
@@ -1638,7 +1752,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
                 "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
          }
-         texId = GmatPlot::UNINIT_TEXTURE;
+         texId = UNINIT_TEXTURE;
       }
    }
    catch (BaseException &e)
@@ -1844,7 +1958,10 @@ int ViewCanvas::AddAlphaToTexture(const wxImage &image, int objUsingIcon,
    unsigned char red, green, blue;
    int status = 0;
    
-   GlColorType *tex32 = new GlColorType[width * height];
+   // Create new texture image to be used with glTexImage2
+   // Use GlRgbColorType to fix GMT-4337 (LOJ: 2014.03.07)
+   //GlColorType *tex32 = new GlColorType[width * height];
+   GlRgbColorType *tex32 = new GlRgbColorType[width * height];
    
    for (int x = 0; x < width; x++)
    {
@@ -2120,9 +2237,10 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
-      ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mScCount=%d, "
-       "mGlInitialized=%d, mModelsAreLoaded=%d\n", time, mScCount,
-       mGlInitialized, mModelsAreLoaded);
+      ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mNumData=%d, mScCount=%d\n"
+       "   mIsSolving=%d, solverOption=%d, mDrawSolverData=%d, mGlInitialized=%d, "
+       "mModelsAreLoaded=%d\n", time, mNumData, mScCount, mIsSolving, solverOption,
+       mDrawSolverData, mGlInitialized, mModelsAreLoaded);
    #endif
    
    // Load spacecraft models
@@ -2138,30 +2256,43 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
       
       #if DEBUG_UPDATE
       MessageInterface::ShowMessage
-         ("ViewCanvas::UpdateSpacecraftData() satId=%d, scName=%s\n", satId,
-          mObjectNames[satId].c_str());
+         ("   ==> sc=%d, mScCount=%d, satId=%d, scName=%s, mDrawOrbitArray[%d]=%d\n",
+          sc, mScCount, satId, mObjectNames[satId].c_str(), satId,
+          satId != UNKNOWN_OBJ_ID ? mDrawOrbitArray[satId] : int(UNKNOWN_OBJ_ID));
       #endif
       
       if (satId != UNKNOWN_OBJ_ID)
       {
-         Spacecraft *spac = (Spacecraft*)mObjectArray[satId];
+         Spacecraft *sat = (Spacecraft*)mObjectArray[satId];
          int colorIndex = satId * MAX_DATA + mLastIndex;
+         #if DEBUG_UPDATE
+         MessageInterface::ShowMessage
+            ("   sat=<%p>'%s', mLastIndex=%d, colorIndex=%d\n", sat, sat->GetName().c_str(),
+             mLastIndex, colorIndex);
+         #endif
          
          if (!mDrawOrbitArray[satId])
          {
             mDrawOrbitFlag[colorIndex] = false;
             #ifdef DEBUG_UPDATE
-            MessageInterface::ShowMessage("===> mDrawOrbitArray[satId] is NULL\n");
+            MessageInterface::ShowMessage("===> mDrawOrbitArray[satId] is false\n");
             #endif
             continue;
          }
          
+         // Now set flags, colors, position, and velocity
          mDrawOrbitFlag[colorIndex] = true;
          
          // If drawing solver's current iteration only, we don't want to draw
          // first 3 points since these points have solver data.
-         if (mDrawSolverData || (solverOption == 1 && mNumData == 2))
+         if (mIsSolving && (mDrawSolverData || (solverOption == 1 && mNumData == 2)))
+         {
+            #ifdef DEBUG_UPDATE
+            MessageInterface::ShowMessage
+               ("===> Drawing solver's current iteration only, so setting mDrawOrbitFlag to false\n");
+            #endif
             mDrawOrbitFlag[colorIndex] = false;
+         }
          
          mObjectOrbitColor[colorIndex] = scColors[sc];
          
@@ -2182,10 +2313,11 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          if (mNumData < sNumDebugOutput)
          {
             MessageInterface::ShowMessage
-               ("   satId=%d, object=%s, colorIndex=%u, color=%06X\n", satId,
-                mObjectNames[satId].c_str(), colorIndex, mObjectOrbitColor[colorIndex]);
+               ("   satId:%d, object=%s, colorIndex=%u, drawOrbit=%d, color=%06X\n",
+                satId, mObjectNames[satId].c_str(), colorIndex, mDrawOrbitFlag[colorIndex],
+                mObjectOrbitColor[colorIndex]);
             MessageInterface::ShowMessage
-               ("   satId:%d posIndex=%d, gcipos = %f, %f, %f\n", satId,
+               ("   satId:%d, posIndex=%d, gcipos = %f, %f, %f\n", satId,
                 posIndex, mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
                 mObjectViewPos[posIndex+2]);
          }
@@ -2213,7 +2345,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          if (mNumData < sNumDebugOutput)
          {
             MessageInterface::ShowMessage
-               ("   satId:%d posIndex=%d, tmppos = %f, %f, %f\n", satId, posIndex,
+               ("   satId:%d, posIndex=%d, tmppos = %f, %f, %f\n", satId, posIndex,
                 mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
                 mObjectViewPos[posIndex+2]);
          }
@@ -2226,7 +2358,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          #endif
          
          if (mNeedAttitude)
-            UpdateSpacecraftAttitude(time, spac, satId);
+            UpdateSpacecraftAttitude(time, sat, satId);
       }
    }
    
@@ -2266,18 +2398,26 @@ void ViewCanvas::UpdateOtherData(const Real &time)
          
          #if DEBUG_UPDATE_OBJECT
          MessageInterface::ShowMessage
-            ("ViewCanvas::UpdateOtherData() objId=%d, obj=%s\n", objId,
-             mObjectNames[objId].c_str());
+            ("ViewCanvas::UpdateOtherData() objId=%d, objName=%s, mDrawOrbitArray[%d]=%d\n",
+             objId, mObjectNames[objId].c_str(), objId,
+             objId != UNKNOWN_OBJ_ID ? mDrawOrbitArray[objId] : int(UNKNOWN_OBJ_ID));
          #endif
          
          // if object id found
          if (objId != UNKNOWN_OBJ_ID)
          {
             int colorIndex = objId * MAX_DATA + mLastIndex;
+            
             if (!mDrawOrbitArray[objId])
                mDrawOrbitFlag[colorIndex] = false;
             else
                mDrawOrbitFlag[colorIndex] = true;
+            
+            #if DEBUG_UPDATE_OBJECT
+            MessageInterface::ShowMessage
+               ("   mLastIndex=%d, colorIndex=%d, drawOrbit=%d\n",
+                mLastIndex, colorIndex, mDrawOrbitFlag[colorIndex]);
+            #endif
             
             //LOJ: 2013.11.25
             // Set orbit or target color

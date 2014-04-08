@@ -2162,7 +2162,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
                str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
                str == "ModEquinoctialH" || str == "DelaunayL" || str == "PlanetodeticVMAG" ||
-               str == "IncomingBVAZI", str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
+               str == "IncomingBVAZI" || str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
          retval =  ELEMENT5_ID;
 
       else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
@@ -7552,6 +7552,9 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    elementLabels.assign(6, "");
    elementUnits.assign(6, "");
    
+   // Clear the multimap before refilling it
+   allElementLabelsMultiMap.clear();
+
    //-----------------------------------
    // Cartesian
    //-----------------------------------

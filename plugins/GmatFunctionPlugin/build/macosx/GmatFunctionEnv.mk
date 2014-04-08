@@ -33,7 +33,7 @@ ifeq ($(LINUX_MAC), 1)
 
 ifeq ($(MAC_SPECIFIC), 1)
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -bundle -two_levelnamespace -undefined dynamic_lookup \
+SHARED_LIB_FLAGS = -bundle -undefined dynamic_lookup \
                    -L$(GMAT_CODE_LOCATION)/base/lib -l$(BASE_LIBRARY) \
                     $(MAC_CPP_FLAGS) -arch i386
                    

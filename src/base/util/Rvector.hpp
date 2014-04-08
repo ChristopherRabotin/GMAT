@@ -87,7 +87,7 @@ public:
                                 Integer width = GmatGlobal::DATA_WIDTH,
                                 bool horizontal = true, Integer spacing = 1,
                                 const std::string &prefix = "",
-                                bool appendEol = true) const;
+                                bool appendEol = false) const;
    
    friend Rvector operator*(Real s, const Rvector &v);
    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);

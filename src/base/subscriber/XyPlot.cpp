@@ -95,7 +95,9 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
 XyPlot::XyPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle) :
-   Subscriber("XYPlot", name)
+   Subscriber("XYPlot", name),
+   mNumCollected(0),  
+   mUpdatePlotFrequency(10)
 {
    // GmatBase data
    objectTypes.push_back(Gmat::XY_PLOT);

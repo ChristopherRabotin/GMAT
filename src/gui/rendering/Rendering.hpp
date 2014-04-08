@@ -26,17 +26,18 @@
 struct GlColorType
 {
    // Reverse for intel storage order
-   #if 1
    Byte blue;
    Byte green;
    Byte red;
    Byte alpha;
-   #else
+};
+
+struct GlRgbColorType
+{
    Byte red;
    Byte green;
    Byte blue;
    Byte alpha;
-   #endif
 };
 
 void SetColor(GlColorType color, Byte red, Byte green, Byte blue);

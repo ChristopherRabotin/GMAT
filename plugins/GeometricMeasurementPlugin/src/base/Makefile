@@ -18,7 +18,7 @@ ifeq ($(LINUX_MAC), 1)
 
 ifeq ($(PLATFORM), mac)
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup \
+SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup \
                    -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
                     $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS)
                    

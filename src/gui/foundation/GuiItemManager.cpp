@@ -28,6 +28,7 @@
 #include "Parameter.hpp"
 #include "Array.hpp"
 #include "ParameterInfo.hpp"
+#include "SpacePoint.hpp"
 #include "Hardware.hpp"
 #include "GmatGlobal.hpp"         // for GetDataPrecision()
 #include "StringUtil.hpp"         // for GmatStringUtil::
@@ -604,22 +605,11 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       ("   type=<%s>, ownerName=<%s>, depObj=<%s>, numberOfDots=%d\n", varName.c_str(),
        type.c_str(), ownerName.c_str(), depObj.c_str(), numberOfDots);
    #endif
-   
-   // Check for the dependency or owned object
-   if (depObj != "" && theGuiInterpreter->GetConfiguredObject(depObj) == NULL)
-   {
-      mLastErrorMsg = "cannot find owned object named \"";
-      mLastErrorMsg = mLastErrorMsg + depObj.c_str() + "\"";
-      #ifdef DEBUG_GUI_ITEM_VALIDATE
-      MessageInterface::ShowMessage
-         ("GuiItemManager::IsValidVariable() returning -1, cannot find owned object\n");
-      #endif
-      return -1;
-   }
-   
+      
    int validStatus = 0;
    bool checkForParameter = false;
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
+   Parameter *param = NULL;
    
    // If name has a system Parameter type and owner object exist, create
    if (obj == NULL)
@@ -642,7 +632,6 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
             ("   Now checking if Parameter can be created, depType=%d, ownedObjType=%d\n",
              depType, ownedObjType);
          #endif
-         //if (theGuiInterpreter->IsParameter(type))
          if (isParameter)
          {
             if (theGuiInterpreter->GetConfiguredObject(ownerName))
@@ -651,7 +640,8 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
                MessageInterface::ShowMessage
                   ("   Creating system Parameter '%s'\n", varName.c_str());
                #endif
-               Parameter *param = theGuiInterpreter->CreateSystemParameter(varName);
+               //Parameter *param = theGuiInterpreter->CreateSystemParameter(varName);
+               param = theGuiInterpreter->CreateSystemParameter(varName);
                if (param == NULL)
                {
                   #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -696,6 +686,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    else
    {
       checkForParameter = true;
+      param = (Parameter*)obj;
       #ifdef DEBUG_GUI_ITEM_VALIDATE
       MessageInterface::ShowMessage
          ("   obj<%p><%p>'%s' found\n", obj, obj->GetTypeName().c_str(),
@@ -715,8 +706,36 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    
    // Now check for valid Parameter
    #ifdef DEBUG_GUI_ITEM_VALIDATE
-   MessageInterface::ShowMessage("   Now checking if it is valid Parameter\n");
+   MessageInterface::ShowMessage
+      ("   Now checking if it is valid Parameter, param=<%p>'%s'\n",
+       param, param ? param->GetName().c_str() : "NULL");
    #endif
+   
+   // Check for the dependency or owned object
+   if (depObj != "" && theGuiInterpreter->GetConfiguredObject(depObj) == NULL)
+   {
+      // Since middle field is dependency or owned object name,
+      // check if middle field is optional
+      if (param->IsOptionalField(depObj))
+      {
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("   '%s' is optional field so ignored\n", depObj.c_str());
+         #endif
+      }
+      else
+      {
+         mLastErrorMsg = "cannot find owned object named \"";
+         mLastErrorMsg = mLastErrorMsg + depObj.c_str() + "\"";
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("GuiItemManager::IsValidVariable() returning -1, cannot find owned object\n");
+         #endif
+         return -1;
+      }
+   }
+   
+   
    validStatus = IsValidParameter(varName, allowedType, allowNonPlottable, allowWholeArray);
    
    #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -1916,16 +1935,19 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 
 
 //------------------------------------------------------------------------------
-// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType)
+// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType,
+//                                        bool cbOriginOnly = false)
 //------------------------------------------------------------------------------
 /**
  * Constructs array with CoordinateSystem names with given axes type only.
  *
  * @param axesType  Axes type for the coordinate system
  *                  Use blank "" for retrieving all CoordinateSystem
+ * @param cbOriginOnly Include only those CSs with a Celestial Body origin
  */
 //------------------------------------------------------------------------------
-wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType)
+wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType,
+                              bool cbOriginOnly)
 {
    #ifdef DEBUG_CS_WITH_AXES
    MessageInterface::ShowMessage
@@ -1933,22 +1955,35 @@ wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesTy
    #endif
    
    wxArrayString csList;
+   bool          originOK = true;
+   GmatBase      *cs;
    for (int i=0; i<theNumCoordSys; i++)
    {
-      std::string csName = theCoordSysList[i].c_str();
+      std::string csName     = theCoordSysList[i].c_str();
+      cs                     = theGuiInterpreter->GetConfiguredObject(csName);
+      if (cbOriginOnly)
+      {
+         std::string originName  = cs->GetStringParameter("Origin");
+         SpacePoint* origin      = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
+         originOK                = origin->IsOfType("CelestialBody");
+      }
+      else
+         originOK = true;
+
       if (axesType == "")
       {
-         csList.Add(csName.c_str());
+         if (originOK)
+            csList.Add(csName.c_str());
       }
       else
       {
          // check for axis type
-         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
          if (cs)
          {
             GmatBase *axis = cs->GetOwnedObject(0);
             if (axis && axis->IsOfType(axesType))
-               csList.Add(csName.c_str());
+               if (originOK)
+                  csList.Add(csName.c_str());
          }
       }
    }

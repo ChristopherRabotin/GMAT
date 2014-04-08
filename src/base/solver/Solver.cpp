@@ -293,29 +293,25 @@ bool Solver::Initialize()
 
    try
    {
-   #ifdef DEBUG_SOLVER_INIT
-      MessageInterface::ShowMessage(
-         "In Solver::Initialize - about to set default values\n");
-   #endif
-      variable.clear();
-      variableInitialValues.clear();
-      variableMinimum.clear();
-      variableMaximum.clear();
-      variableMaximumStep.clear();
-      perturbation.clear();
-      pertDirection.clear();
-      unscaledVariable.clear();
+      #ifdef DEBUG_SOLVER_INIT
+         MessageInterface::ShowMessage(
+            "In Solver::Initialize - about to set default values\n");
+      #endif
 
-      for (Integer i = 0; i < localVariableCount; ++i)
+      // Only populate the vectors if needed
+      if ((Integer)variable.size() != localVariableCount)
       {
-         variable.push_back(0.0);
-         variableInitialValues.push_back(0.0);
-         variableMinimum.push_back(-9.999e300);
-         variableMaximum.push_back(9.999e300);
-         variableMaximumStep.push_back(9.999e300);
-         perturbation.push_back(1.0e-04);
-         pertDirection.push_back(1.0);
-         unscaledVariable.push_back(0.0);
+         for (Integer i = (Integer)variable.size(); i < localVariableCount; ++i)
+         {
+            variable.push_back(0.0);
+            variableInitialValues.push_back(0.0);
+            variableMinimum.push_back(-9.999e300);
+            variableMaximum.push_back(9.999e300);
+            variableMaximumStep.push_back(9.999e300);
+            perturbation.push_back(1.0e-04);
+            pertDirection.push_back(1.0);
+            unscaledVariable.push_back(0.0);
+         }
       }
    }
    catch(const std::exception &)

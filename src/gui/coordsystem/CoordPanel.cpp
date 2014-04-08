@@ -102,6 +102,10 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    
    if (typeStr == "")
       typeStr = "MJ2000Eq";
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() typeStr=%s\n", typeStr.c_str());
+   #endif
 
    if (axis == NULL)
       // create a temp axis to use flags
@@ -111,7 +115,19 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       tmpAxis = axis;
    
    if (tmpAxis == NULL)
+   {
+      #ifdef DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage
+         ("CoordPanel::EnableOptions() EXITING ---------------------- because tmpAxis is NULL!!!!!!\n");
+      #endif
       return;
+   }
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() tmpAxis=<%p>\n", tmpAxis);
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() mEnableAll=%s\n", (mEnableAll? "true" : "false"));
+   #endif
    
    if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
       mShowPrimaryBody = false;
@@ -298,6 +314,10 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    primaryStaticText->SetFocus();
    staticboxsizerAxes->Layout();
    Refresh();
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() EXITING ----------------------\n");
+   #endif
 }
 
 bool CoordPanel::IsAlignmentConstraintTextModified()
@@ -1252,11 +1272,42 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       wxString originName = originComboBox->GetValue().Trim();
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
       coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
-      coordSys->SetOrigin(origin);
       #ifdef DEBUG_COORD_PANEL_SAVE
       MessageInterface::ShowMessage
-         ("CoordPanel::SaveData() axis set on coordSys %s, and origin set to %s <%p>.\n",
-          coordName.c_str(), originName.c_str(), origin);
+         ("CoordPanel::SaveData() About to set origin to %s\n", originName.c_str());
+      #endif
+      try
+      {
+         coordSys->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
+      }
+      catch (BaseException &be)
+      {
+         // Need to popup this error here
+         MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage().c_str());
+         canClose = false;
+         // Since there was an error, copy the clone's data back to the object
+         if (csClone != NULL)
+         {
+            coordSys->Copy(csClone);
+            delete csClone;
+         }
+         return canClose;
+      }
+
+//      coordSys->SetOrigin(origin);
+      #ifdef DEBUG_COORD_PANEL_SAVE
+      if (axis)
+      {
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() axis of type %s set on coordSys %s, and origin set to %s <%p>.\n",
+             axis->GetTypeName().c_str(), coordName.c_str(), originName.c_str(), origin);
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() axis (NULL!) set on coordSys %s, and origin set to %s <%p>.\n",
+             coordName.c_str(), originName.c_str(), origin);
+      }
       #endif
       
       CelestialBody *j2000body =

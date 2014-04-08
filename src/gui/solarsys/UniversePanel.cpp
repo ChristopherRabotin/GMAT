@@ -120,7 +120,7 @@ void UniversePanel::OnScript(wxCommandEvent &event)
       title = "Scripting for ";
       title += mObject->GetName().c_str();
    }
-   ShowScriptDialog ssd(this, -1, title, mObject, true);
+   ShowScriptDialog ssd(this, -1, title, mObject, false);
    ssd.ShowModal();
 }
 

@@ -120,6 +120,20 @@ Real TimeReal::EvaluateReal()
    return mRealValue;
 }
 
+//------------------------------------------------------------------------------
+// bool IsOptionalField(const std::string &field) const
+//------------------------------------------------------------------------------
+/**
+ * @return true if input field name is optional field, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool TimeReal::IsOptionalField(const std::string &field) const
+{
+   if (field == "Epoch")
+      return true;
+   
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const

@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 
 #include "GmatMdiChildFrame.hpp"
-#include "GmatAppData.hpp"
+#include "GmatAppData.hpp"         // for SetIcon(), etc.
 #include "GmatMainFrame.hpp"
 #include "SubscriberException.hpp"
 #include "GuiInterpreter.hpp"
@@ -25,7 +25,7 @@
 #include "GuiItemManager.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatSavePanel.hpp"
-#include "GmatMenuBar.hpp"       // for namespace GmatMenu
+#include "GmatMenuBar.hpp"         // for namespace GmatMenu
 #include <wx/fileconf.h>
 #include <wx/config.h>
 
@@ -136,23 +136,9 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    #endif
    UpdateGuiItem(1, 0);
    
-   // Set icon if icon file is in the start up file
-   FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &e)
-   {
-      MessageInterface::ShowMessage(e.GetFullMessage());
-   }
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "GmatMdiChildFrame");
+   
 }
 
 
@@ -290,19 +276,20 @@ bool GmatMdiChildFrame::IsActiveChild()
 
 
 #ifdef __USE_STC_EDITOR__
+// Renamed Editor to ScriptEditor to fix name collision with wxWidget's Scintilla lib
 //------------------------------------------------------------------------------
-// Editor* GetEditor()
+// ScriptEditor* GetEditor()
 //------------------------------------------------------------------------------
-Editor* GmatMdiChildFrame::GetEditor()
+ScriptEditor* GmatMdiChildFrame::GetEditor()
 {
    return theEditor;
 }
 
 
 //------------------------------------------------------------------------------
-// void SetEditor(Editor *editor)
+// void SetEditor(ScriptEditor *editor)
 //------------------------------------------------------------------------------
-void GmatMdiChildFrame::SetEditor(Editor *editor)
+void GmatMdiChildFrame::SetEditor(ScriptEditor *editor)
 {
    theEditor = editor;
 }
@@ -549,8 +536,11 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
       ("GmatMdiChildFrame::OnClose() calling GetMainFrame::RemoveChild()\n");
    #endif
    
-   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);   
-   wxSafeYield();
+   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, mCanBeDeleted);
+   // Removed wxSafeYield() : The window should not be deleted, instead ->Destroy() should be called
+   // which adds the window delete to an idle queue.   Calling safe yield here causes the idle queue to run
+   // too early.   I believe the yield was added here previously to work around a bug that was caused by calling delete on the window.
+   // wxSafeYield();
    // This causes crash on exit with Red X/button on XP and Mac - wcs 2013.03.20
 //   event.Skip();
    
