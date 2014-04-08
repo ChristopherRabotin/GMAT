@@ -193,15 +193,13 @@ protected:
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
    
-   Gmat::RunState prevRunState;
-   
    CoordinateConverter coordConverter;
    
    FileType    fileType;
    
    /// for maneuver handling
    ObjectArray maneuversHandled;
-      
+   
    /// output data stream
    std::ofstream      dstream;
    
@@ -320,7 +318,7 @@ protected:
    void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
    
    // Event checking
-   bool         IsEventFeasible(bool isManeuverEvent = false);
+   bool         IsEventFeasible(bool checkForNoData = true);
    
    // CoordinateSystem conversion
    void         ConvertState(Real epochInDays, const Real inState[6],

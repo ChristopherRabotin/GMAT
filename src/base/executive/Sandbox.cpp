@@ -761,7 +761,23 @@ bool Sandbox::Initialize()
             moderator->ValidateCommand(current);
             rv = current->Initialize();
          }
-
+         
+         // Find the last Vary command in the SolverBranchCommand to chunk
+         // the ephemeris data. It is done here since this needs to be done
+         // only once. I was going to do this in BranchCommand::Initialize()
+         // but Initialize() is called many times during the run.
+         // (For GMT-4097 fix LOJ: 2014.04.04)
+         if (current->IsOfType("SolverBranchCommand"))
+         {
+            #ifdef DEBUG_SANDBOX_SOLVERBRANCH
+            MessageInterface::ShowMessage
+               ("Sandbox calling TakeAction() for action 'SetLastVaryCommand "
+                "after BranchCommand <%p><%s> is initialized\n",
+                current, current->GetTypeName().c_str());
+            #endif
+            current->TakeAction("SetLastVaryCommand");
+         }
+         
          // Check to see if the command needs a server startup
          if (current->NeedsServerStartup())
             if (moderator->StartMatlabServer() == false)

@@ -82,6 +82,7 @@ public:
    bool                 SetName(const std::string &newName,
                                 const std::string &oldName = "");
    GmatBase*            GetSpacecraft();
+   GmatBase*            GetParameterOwner();
    
    Integer              GetNumRefObjects() const;
    
