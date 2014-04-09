@@ -1289,7 +1289,6 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 	     if (sr.size() > 0)																	// made changes by TUAN NGUYEN
 	        rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
 		 
-//       measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
 		 if (withEvents)
 		 {  
          #ifdef DEBUG_FLOW
@@ -1328,10 +1327,10 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
          return retval;					// no calculation measurement value whenever no observation data is available
 	  }
-#ifdef DEBUG_FLOW
+      #ifdef DEBUG_FLOW
 	  else
 		  MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
-#endif
+      #endif
 
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
@@ -1339,12 +1338,10 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		 bool isbelong;
          if ((models[j]->GetStringParameter("Type") != od->typeName))
 		 {
-//			 MessageInterface::ShowMessage("Hi there 0.0\n");
 	        isbelong = false;
 		 }
 		 else
 		 {
-//			 MessageInterface::ShowMessage("Hi there 0.1:  models[%d]<%s> type<%s>\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
 			isbelong = false;
 		    ObjectArray participants = models[j]->GetParticipants();		// participants in measurement model
 			if (participants.size() == od->participantIDs.size())
@@ -1363,11 +1360,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 			      }
 
 				  if (isbelong == false)  
-				  {
-//					  MessageInterface::ShowMessage("Hi there 0.2: od->participantIDs[%d] <%s> is not in model participants list\n", i1, od->participantIDs[i1].c_str());
-					 break;
-				  }
-				  
+					 break;				  
 			   }
 
 			}
