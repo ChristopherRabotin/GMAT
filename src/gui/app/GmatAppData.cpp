@@ -313,9 +313,11 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
             if (theIconFile[0] == '.')
             {
                FileManager *fm = FileManager::Instance();
-               wxString workDir = fm->GetWorkingDirectory().c_str();
+               // Used bin directory from the FileManager(for GMT-4408 LOJ: 2014.04.09)
+               //wxString absIconDir = fm->GetWorkingDirectory().c_str();
+               wxString absIconDir = fm->GetBinDirectory().c_str();
                wxString pathSep = fm->GetPathSeparator().c_str();
-               wxString absIconFile = workDir + pathSep + theIconFile;
+               wxString absIconFile = absIconDir + pathSep + theIconFile;
                MessageInterface::ShowMessage
                   ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s', "
                    "so trying with abs path \"%s\"\n", theIconFile.c_str(), calledFrom.c_str(),
