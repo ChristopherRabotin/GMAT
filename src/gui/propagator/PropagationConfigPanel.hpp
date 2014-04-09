@@ -45,7 +45,7 @@ class PropagationConfigPanel : public GmatPanel
 public:
 
    PropagationConfigPanel(wxWindow *parent, const wxString &propName);
-   ~PropagationConfigPanel();  
+   virtual ~PropagationConfigPanel();
 
 private:
    
