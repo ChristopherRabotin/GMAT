@@ -27,10 +27,15 @@
 #include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
+#include "Barycenter.hpp"
+#include "TimeSystemConverter.hpp"
 
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_ITERATION
 //#define DEBUG_CALCULATE_RANGE
+
+#define MAX_NUM_ITERATION			5
+
 
 //-----------------------------------------------------------------------------
 // LightTimeCorrection(const std::string &name)
@@ -45,7 +50,8 @@ LightTimeCorrection::LightTimeCorrection(const std::string &name) :
    Event       			("LightTimeCorrection", name),
    fixedParticipant		(0),
    range                (10000.0),
-   oldRange             (0.0)
+   oldRange             (0.0),
+   numIter				(0)
 {
    // Need to convert to km/s here
    lightSpeed = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
@@ -80,7 +86,8 @@ LightTimeCorrection::LightTimeCorrection(const LightTimeCorrection& ltc) :
    lightSpeed  			(ltc.lightSpeed),
    fixedParticipant		(ltc.fixedParticipant),
    range                (ltc.range),
-   oldRange             (0.0)
+   oldRange             (0.0),
+   numIter              (0)
 {
    relativityCorrection = 0.0;						// made changes by TUAN NGUYEN
 }
@@ -109,6 +116,7 @@ LightTimeCorrection& LightTimeCorrection::operator=(
       stepDirection    = ltc.stepDirection;
       range            = ltc.range;
       oldRange         = 0.0;
+	  numIter          = 0;
    }
 
    return *this;
@@ -161,7 +169,7 @@ Real LightTimeCorrection::Evaluate()
 
    Real vals;
 
-   Real tolerance1 = 1.0e-10;
+   Real tolerance1 = 1.0e-12;  // 1.0e-10;
 
    oldRange = range;
    range = CalculateRange();
@@ -181,9 +189,12 @@ Real LightTimeCorrection::Evaluate()
    #endif
 
    // Located if magnitude of the event function is smaller than tolerance
-   if (GmatMathUtil::Abs(vals) < max(tolerance, tolerance1*range))
+   ++numIter;
+   if ((GmatMathUtil::Abs(vals) < max(tolerance, tolerance1*range))||(numIter > MAX_NUM_ITERATION))
    {
       status = LOCATED;
+	  numIter = 0;
+
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("Event located; "
                "status is %d\n", status);
@@ -388,11 +399,11 @@ Real LightTimeCorrection::CalculateRange()
 
 	  etminustaiCorrection = 0.0;
 	  if (this->useETMinusTAICorrection)															// made changes by TUAN NGUYEN
-		 etminustaiCorrection = ETminusTAI(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;	// made changes by TUAN NGUYEN
+		 etminustaiCorrection = ETminusTAICorrection(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;	// made changes by TUAN NGUYEN
 
 	  range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
 	  
-//	  MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
+//	  MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
 
       // Store the rest of the data used in the other measurement calculations
       // for the moving participant.  The fixed participant was stored earlier.
@@ -534,18 +545,29 @@ Real LightTimeCorrection::GetLightTripRange()
 
 
 
+Real LightTimeCorrection::ETminusTAICorrection(Real tA1MJD, GmatBase* participant)
+{
+	Real correction = ETminusTAI(tA1MJD, participant) - EstimatedETminusTAI(tA1MJD);
+
+	return correction;
+}
+
+Real LightTimeCorrection::EstimatedETminusTAI(Real tA1MJD)
+{
+   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
+   Real E = M + 0.01671*sin(M);
+   Real ET_TAI = 32.184 + 1.657e-3*sin(E);
+
+   return ET_TAI;
+}
+
 /// Calculate ET - TAI at a ground station on Earth:										// made changes by TUAN NGUYEN
-#include "Barycenter.hpp"
-#include "TimeSystemConverter.hpp"
 Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 {
-   // Step 0: convert time from A1 specify TAI
    Real tTAI = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, tA1MJD);
 
    // Step 1: calculate initial guessed ET-TAI
-   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
-   Real E = M + 0.01671*sin(M);
-   Real old_ETminusTAI = 32.184 + 1.657e-3*sin(E);
+   Real old_ETminusTAI = EstimatedETminusTAI(tA1MJD);
    Real t_ET_old = tTAI + old_ETminusTAI;
 
    // Step 2:
@@ -561,9 +583,13 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
    Barycenter* emb = new Barycenter("EarthMoonBarycenter");
    emb->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
    emb->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
-
+   emb->SetStringParameter("BodyNames", "Earth", 0);
+   emb->SetStringParameter("BodyNames", "Luna", 1);
+   emb->Initialize();
 
    // Specify position and velocity of celestial bodies and special celestial points
+   Rvector3 ssbPos = ssb->GetMJ2000Position(tA1MJD);
+   Rvector3 ssbVel = ssb->GetMJ2000Velocity(tA1MJD);
    Rvector3 sunPos = sun->GetMJ2000Position(tA1MJD);
    Rvector3 sunVel = sun->GetMJ2000Velocity(tA1MJD);
    Rvector3 earthPos = earth->GetMJ2000Position(tA1MJD);
@@ -578,7 +604,12 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
    Rvector3 emPos = emb->GetMJ2000Position(tA1MJD);
    Rvector3 emVel = emb->GetMJ2000Velocity(tA1MJD);
 
-   MessageInterface::ShowMessage("Earth-Moon bary center state: %lf  %lf  %lf  %lf  %lf  %lf\n", emPos[0], emPos[1], emPos[2], emVel[0], emVel[1], emVel[2]);
+   Rvector3 lunaPos = luna->GetMJ2000Position(tA1MJD);
+   Rvector3 lunaVel = luna->GetMJ2000Velocity(tA1MJD);
+//   MessageInterface::ShowMessage("SSB state: %lf  %lf  %lf  %lf  %lf  %lf\n", ssbPos[0], ssbPos[1], ssbPos[2], ssbVel[0], ssbVel[1], ssbVel[2]);
+//   MessageInterface::ShowMessage("Earth state: %lf  %lf  %lf  %lf  %lf  %lf\n", earthPos[0], earthPos[1], earthPos[2], earthVel[0], earthVel[1], earthVel[2]);
+//   MessageInterface::ShowMessage("Moon state: %lf  %lf  %lf  %lf  %lf  %lf\n", lunaPos[0], lunaPos[1], lunaPos[2], lunaVel[0], lunaVel[1], lunaVel[2]);
+//   MessageInterface::ShowMessage("Earth-Moon bary center state: %lf  %lf  %lf  %lf  %lf  %lf\n", emPos[0], emPos[1], emPos[2], emVel[0], emVel[1], emVel[2]);
 
    // Step 3:
    Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);
@@ -593,11 +624,11 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
    Real muSaturn  = saturn->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 37940626.061137 for Saturn
    Real muMars    = mars->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 42828.314258067 for Mars
 
-   Rvector3 Sun_wrt_SSB_Vel = sunVel;
+   Rvector3 Sun_wrt_SSB_Vel = sunVel - ssbVel;
    Rvector3 EM_wrt_Sun_Pos = emPos - sunPos;
    Rvector3 EM_wrt_Sun_Vel = emVel - sunVel;
-   Rvector3 EM_wrt_SSB_Vel = emVel;
-   Rvector3 E_wrt_SSB_Vel = earthVel;
+   Rvector3 EM_wrt_SSB_Vel = emVel - ssbVel;
+   Rvector3 E_wrt_SSB_Vel = earthVel - ssbVel;
    Rvector3 E_wrt_EM_Pos = earthPos - emPos;
    Rvector3 Jup_wrt_Sun_Pos = jupiterPos - sunPos;
    Rvector3 Jup_wrt_Sun_Vel = jupiterVel - sunVel;
@@ -605,7 +636,7 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
    Rvector3 Sat_wrt_Sun_Vel = saturnVel - sunVel;
 
    // ET minus TAI calculation.  Eq. 2-23 on p. 2-14 of Moyer
-   Real ETminusTAI = 32.184 + 2*(EM_wrt_Sun_Vel/c)*(EM_wrt_Sun_Pos/c) + 
+   Real ET_TAI = 32.184 + 2*(EM_wrt_Sun_Vel/c)*(EM_wrt_Sun_Pos/c) + 
                 (EM_wrt_SSB_Vel/c)*(E_wrt_EM_Pos/c) + 
                 (E_wrt_SSB_Vel/c)*(Earth2GS/c) + 
                 (muJupiter  / (muSun + muJupiter)) * (Jup_wrt_Sun_Vel/c)*(Jup_wrt_Sun_Pos/c) + 
@@ -613,7 +644,8 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
                 (Sun_wrt_SSB_Vel/c)*(EM_wrt_Sun_Pos/c);
 
    //(muMars  / (c^2 * (muSun + muMars) )) * (Mars_wrt_Sun_Vel'*Mars_wrt_Sun_Pos);  % is this Mars term correct?
-   return ETminusTAI;
+   
+   return ET_TAI;
 /*
    // Step 5:
    Real t_ET = tTAI + ETminusTAI;

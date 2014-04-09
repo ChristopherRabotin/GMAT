@@ -65,10 +65,15 @@ protected:
    /// Variable used for iteration
    Real                 oldRange;
 
+   /// Number of Iteration. It is used to count number of iteration in order to exit loop	// made changes by TUAN NGUYEN 
+   UnsignedInt numIter;																		// made changes by TUAN NGUYEN
+
    virtual void CalculateTimestepEstimate();
    virtual Real CalculateRange();
 
    Real RelativityCorrection(Rvector3 r1, Rvector3 r2, Real t1, Real t2);					// made changes by TUAN NGUYEN
+   Real ETminusTAICorrection(Real tA1MJD, GmatBase* participant);
+   Real EstimatedETminusTAI(Real tA1MJD);
    Real ETminusTAI(Real tA1MJD, GmatBase* participant);										// made changes by TUAN NGUYEN
 
 private:
