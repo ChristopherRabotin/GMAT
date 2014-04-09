@@ -115,7 +115,7 @@ protected:
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
-	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
+//	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
       BatchEstimatorParamCount,
    };
 

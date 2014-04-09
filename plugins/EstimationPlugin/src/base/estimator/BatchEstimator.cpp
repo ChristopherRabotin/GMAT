@@ -56,7 +56,7 @@ BatchEstimator::PARAMETER_TEXT[] =
 {
    "EstimationEpochFormat",         // The epoch of the solution
    "EstimationEpoch",				// The epoch of the solution
-   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
+//   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
    // todo Add useApriori here
 };
 
@@ -65,7 +65,7 @@ BatchEstimator::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
-   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
+//   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
 };
 
 
@@ -86,7 +86,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    estEpoch                   (""),
    oldResidualRMS             (0.0),
    newResidualRMS             (1.0e12),
-   useApriori                 (true),
+   useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
    converged                  (false)
 {
@@ -485,8 +485,8 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 // made changes by TUAN NGUYEN
 std::string BatchEstimator::GetOnOffParameter(const Integer id) const
 {
-   if (id == USE_PRIORI_ESTIMATE)
-      return (useApriori ? "On" : "Off");
+//   if (id == USE_PRIORI_ESTIMATE)
+//      return (useApriori ? "On" : "Off");
 
    return Estimator::GetOnOffParameter(id);
 }
@@ -507,21 +507,21 @@ std::string BatchEstimator::GetOnOffParameter(const Integer id) const
 // made changes by TUAN NGUYEN
 bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
 {
-   if (id == USE_PRIORI_ESTIMATE)
-   {
-      if (value == "On")
-	  {
-         useApriori = true;
-		 return true;
-	  }
-      if (value == "Off")
-	  {
-         useApriori = false;
-		 return true;
-	  }
-
-	  return false;
-   }
+//   if (id == USE_PRIORI_ESTIMATE)
+//  {
+//      if (value == "On")
+//	  {
+//        useApriori = true;
+//		 return true;
+//	  }
+//      if (value == "Off")
+//	  {
+//        useApriori = false;
+//		 return true;
+//	  }
+//
+//	  return false;
+//   }
 
    return Estimator::SetOnOffParameter(id, value);
 }
@@ -773,13 +773,15 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
    #endif
 
-   // Open report file											// made changes by TUAN NGUYEN
-   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
-   {
-      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
-	  reportFile << "Epoch                Meas Type        Parts      Obs Measuement (O)   Cal Measurement (C)  Residual (O-C)   Weight (W)         W*(O-C)^2\n";
-   }
+//   // Open report file										// made changes by TUAN NGUYEN
+//   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
+//   {
+//      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
+//	  reportFile << "Epoch                Meas Type        Parts      Obs Measuement (O)   Cal Measurement (C)  Residual (O-C)   Weight (W)         W*(O-C)^2\n";
+//   }
 
+
+   // Show all residuals plots
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
@@ -1112,14 +1114,14 @@ void BatchEstimator::CheckCompletion()
    ++iterationsTaken;
    if ((converged) || (iterationsTaken >= maxIterations))
    {
-      #ifdef DEBUG_VERBOSE
+//      #ifdef DEBUG_VERBOSE
          if (converged)
             MessageInterface::ShowMessage("Estimation has converged\n%s\n\n",
                   convergenceReason.c_str());
          else
             MessageInterface::ShowMessage("Estimation has reached the maximum "
                   "iteration count, but has not converged\n\n");
-      #endif
+//      #endif
       currentState = FINISHED;
    }
    else
@@ -1162,12 +1164,14 @@ void BatchEstimator::CheckCompletion()
 
       esm.MapSTMToObjects();
 
-      for (Integer i = 0; i < information.GetNumRows(); ++i)
-      {
+      for (UnsignedInt i = 0; i < information.GetNumRows(); ++i)
          residuals[i] = 0.0;
-         x0bar[i] -= dx[i];
-      }
+      
+      for (UnsignedInt j = 0; j < stateSize; ++j)
+         x0bar[j] -= dx[j];
+
       if (useApriori)
+	  {
          for (Integer i = 0; i < information.GetNumRows(); ++i)
          {
             for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1175,7 +1179,7 @@ void BatchEstimator::CheckCompletion()
                residuals[i] += information(i,j) * x0bar[j];
             }
          }
-
+      }
       #ifdef DEBUG_VERBOSE
          MessageInterface::ShowMessage("Starting iteration %d\n\n",
                iterationsTaken+1);
@@ -1430,24 +1434,19 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
    bool retval = false;
    std::stringstream why;
 
-   if (GmatMathUtil::Abs(newResidualRMS - oldResidualRMS) <= relativeTolerance)
+   if (GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS) <= relativeTolerance)
    {
-      why << "   RMS Residual differences, "
-          << (GmatMathUtil::Abs(newResidualRMS - oldResidualRMS))
-          << " show a relative change less than the specified tolerance, "
+      why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = "
+          << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
+          << " is less than RealtiveTol, "
           << relativeTolerance << "\n";
       retval = true;
    }
 
-   Real normDx = 0.0;
-   for (UnsignedInt i = 0; i < dx.size(); ++i)
-      normDx += dx[i] * dx[i];
-   normDx = GmatMathUtil::Sqrt(normDx);
-
-   if (normDx <= absoluteTolerance)
+   if (newResidualRMS <= absoluteTolerance)
    {
-      why << "   State change magnitude, " << normDx
-          << " is within the absolute change tolerance, " << absoluteTolerance
+      why << "   WeightedRMS residual, " << newResidualRMS
+          << " is within the AbsoluteTol, " << absoluteTolerance
           << "\n";
       retval = true;
    }
