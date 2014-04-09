@@ -227,7 +227,7 @@ protected:
    /// Noise sigma
    Rvector noiseSigma;
    /// Time constant
-   Real timeConstant;
+//   Real timeConstant;																	// This parameter does not need		// made changes by TUAN NGUYEN
 
    /// Error covariance; the inherited Covariance is used for a priori data
    Covariance measErrorCovariance;
@@ -259,7 +259,7 @@ protected:
        Participants,
        Bias,
        NoiseSigma,
-       TimeConstant,
+//       TimeConstant,
        Frequency,
 	   RangeModuloConstant,									// made changes by TUAN NGUYEN
 	   RelativityCorrection,								// made changes by TUAN NGUYEN

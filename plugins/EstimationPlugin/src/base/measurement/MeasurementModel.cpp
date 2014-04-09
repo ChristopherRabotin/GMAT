@@ -54,7 +54,7 @@ const std::string MeasurementModel::PARAMETER_TEXT[] =
    "Participants",
    "Bias",
    "NoiseSigma",
-   "TimeConstant",
+//   "TimeConstant",
    "Frequency",
 ///// TBD: Do we want something more generic here?
    "RangeModuloConstant",
@@ -72,7 +72,7 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
-   Gmat::REAL_TYPE,
+//   Gmat::REAL_TYPE,		// "TimeConstant"
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
@@ -104,7 +104,7 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    measurement             (NULL),
    theData                 (NULL),
    theDataDerivatives      (NULL),
-   timeConstant            (6000.0),
+//   timeConstant            (6000.0),
    useRelativityCorrection (false),									// made changes by TUAN NGUYEN
    useETminusTAICorrection (false),									// made changes by TUAN NGUYEN
    residualMax			   (1.0e18),								// made changes by TUAN NGUYEN
@@ -151,7 +151,7 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    measurementType         (mm.measurementType),
    theData                 (NULL),
    theDataDerivatives      (NULL),
-   timeConstant            (mm.timeConstant),
+//   timeConstant            (mm.timeConstant),
    useRelativityCorrection (mm.useRelativityCorrection),		// made changes by TUAN NGUYEN
    useETminusTAICorrection (mm.useETminusTAICorrection),		// made changes by TUAN NGUYEN
    residualMax			   (mm.residualMax),					// made changes by TUAN NGUYEN
@@ -207,7 +207,7 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       measurementType         = mm.measurementType;
       theData                 = NULL;
       theDataDerivatives      = NULL;
-      timeConstant            = mm.timeConstant;
+//      timeConstant            = mm.timeConstant;
 	  useRelativityCorrection = mm.useRelativityCorrection;			// made changes by TUAN NGUYEN
 	  useETminusTAICorrection = mm.useETminusTAICorrection;			// made changes by TUAN NGUYEN
 	  residualMax             = mm.residualMax;						// made changes by TUAN NGUYEN
@@ -606,8 +606,8 @@ bool MeasurementModel::IsParameterReadOnly(const std::string & label) const
 //------------------------------------------------------------------------------
 Real MeasurementModel::GetRealParameter(const Integer id) const
 {
-   if (id == TimeConstant)
-      return timeConstant;
+//   if (id == TimeConstant)
+//      return timeConstant;
       
    if (id == Frequency)
       if (measurement != NULL)
@@ -660,12 +660,12 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
 //         noiseSigma = value;
 //      return noiseSigma;
 //   }
-   if (id == TimeConstant)
-   {
-      if (value >= 0)
-         timeConstant = value;
-      return timeConstant;
-   }
+//   if (id == TimeConstant)
+//   {
+//      if (value >= 0)
+//         timeConstant = value;
+//      return timeConstant;
+//   }
 
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
