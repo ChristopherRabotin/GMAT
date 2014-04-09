@@ -621,7 +621,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
-         currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();
+         currentMeasurement.value[0] = 2*rangeVecInertial.GetMagnitude();
          currentMeasurement.eventCount = 2;
 
          SetHardwareDelays(false);
@@ -706,6 +706,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
+
+//		 CelestialBody* sun = solarSystem->GetBody("Sun");
+//		 MessageInterface::ShowMessage(" Sun position at time t2T : %s\n", sun->GetMJ2000Position(t3R).ToString().c_str());
+//		 MessageInterface::ShowMessage(" S/C to Sun position at time t2T : %s\n", (r2B-sun->GetMJ2000Position(t3R)).ToString().c_str());
 
 	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
 		 MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r1 = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r1.Get(0), r1.Get(1), r1.Get(2), t3R);
