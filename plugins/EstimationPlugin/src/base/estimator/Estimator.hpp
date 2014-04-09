@@ -173,7 +173,7 @@ protected:
    std::vector<RealArray>  hAccum;
 
    /// Weight, Observation data, calculated data					// made changes by TUAN NGUYEN
-   std::fstream reportFile;											// made changes by TUAN NGUYEN
+//   std::fstream reportFile;											// made changes by TUAN NGUYEN
    RealArray Weight;												// made changes by TUAN NGUYEN
    RealArray OData;													// made changes by TUAN NGUYEN
    RealArray CData;													// made changes by TUAN NGUYEN
@@ -288,7 +288,7 @@ protected:
    virtual void            SetResultValue(Integer, Real, const std::string&);
 
 //   virtual void            ValidateModelToAccess();					// made changes by TUAN NGUYEN
-   virtual void            DataFilter();							// made changes by TUAN NGUYEN
+   virtual bool            DataFilter();							// made changes by TUAN NGUYEN
 
 ///// TBD: Do simulators need this too?  If so, move to base class
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN

@@ -1686,7 +1686,7 @@ void Estimator::GetEstimationState(GmatState& outputState)
 *   3. Sigma editting
 */
 //-------------------------------------------------------------------------
-void Estimator::DataFilter()
+bool Estimator::DataFilter()
 {
 
    MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
@@ -1694,6 +1694,7 @@ void Estimator::DataFilter()
    const ObservationData *currentObs =  measManager.GetObsData();								// Get observation measurement data O
    const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);		// Get calculated measurement data C
 
+   bool retVal = false;
    if (iterationsTaken == 0)
    {
       for (Integer i=0; i < currentObs->value.size(); ++i)
@@ -1715,6 +1716,7 @@ void Estimator::DataFilter()
 			else																				// made changes by TUAN NGUYEN
 			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
+			retVal = false;
             break;
 		 }
 
@@ -1761,6 +1763,7 @@ void Estimator::DataFilter()
 		    measManager.GetObsDataObject()->inUsed = false;
             numRemovedRecords["OSLERMSP0 Filter"]++;					// made changes by TUAN NGUYEN
 
+			retVal = false;
 			break;
 		 }
 	  }
@@ -1803,7 +1806,7 @@ void Estimator::DataFilter()
 			else																			// made changes by TUAN NGUYEN
 			   numRemovedRecords[ss.str()]++;												// made changes by TUAN NGUYEN
 
-
+			retVal = true;
 			break;
 		 }
 
@@ -1812,6 +1815,7 @@ void Estimator::DataFilter()
 
    }
 
+   return retVal;
 }
 
 
