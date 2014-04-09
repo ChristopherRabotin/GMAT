@@ -164,10 +164,9 @@ void BatchEstimatorInv::Accumulate()
    #endif
 
 //   ValidateModelToAccess();						// verify observation data is matched to a measurement model
-
    if (modelsToAccess.size() == 0)
    {
-	  numRemovedRecords["Observation data is unmatched to any measurement model"]++;
+	  ++numRemovedRecords["Observation data is unmatched to any measurement model"];
    }
    else
    {
@@ -177,13 +176,18 @@ void BatchEstimatorInv::Accumulate()
          // Currently assuming uniqueness; modify if more than 1 possible here
          // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
 	     calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
-	     DataFilter();
+	     bool isReUsed = DataFilter();
       
          #ifdef DEBUG_ACCUMULATION
          MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
          #endif
       
-         if (measManager.GetObsDataObject()->inUsed)
+         if (measManager.GetObsDataObject()->inUsed == false)
+		 {
+			if (isReUsed)
+			   measManager.GetObsDataObject()->inUsed = true;
+		 }
+		 else
          {
             RealArray hTrow;
             hTrow.assign(stateSize, 0.0);
@@ -345,19 +349,20 @@ void BatchEstimatorInv::Accumulate()
                   residuals[i] += hMeas[k][i] * weight * ocDiff;
                }
 
-		       // Write report file:
-		       std::stringstream sLine;
-               Real timeTAI = TimeConverterUtil::Convert(currentEpoch,TimeConverterUtil::A1MJD,TimeConverterUtil::TAIMJD); 
-		       char s[1000];
-		       sprintf(&s[0],"%.12lf   %s   ", timeTAI, currentObs->typeName.c_str());
-		       sLine << s;
-		       for(int n=0; n < currentObs->participantIDs.size(); ++n)
-			      sLine << currentObs->participantIDs[n] << "   ";
 
-		       sprintf(&s[0],"%.9lf   %.9lf   %.9lf   %.9le   %.9le\n", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight);
-		       sLine << s;
-		       reportFile << sLine.str();
-		       reportFile.flush();
+//		       // Write report file:
+//		       std::stringstream sLine;
+//               Real timeTAI = TimeConverterUtil::Convert(currentEpoch,TimeConverterUtil::A1MJD,TimeConverterUtil::TAIMJD); 
+//		       char s[1000];
+//		       sprintf(&s[0],"%.12lf   %s   ", timeTAI, currentObs->typeName.c_str());
+//		       sLine << s;
+//		       for(int n=0; n < currentObs->participantIDs.size(); ++n)
+//			      sLine << currentObs->participantIDs[n] << "   ";
+
+//		       sprintf(&s[0],"%.9lf   %.9lf   %.9lf   %.9le   %.9le\n", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight);
+//		       sLine << s;
+//		       reportFile << sLine.str();
+//		       reportFile.flush();
 	        }
 
             #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -420,6 +425,10 @@ void BatchEstimatorInv::Accumulate()
 
    // Advance to the next measurement and get its epoch
    bool isEndOfTable = measManager.AdvanceObservation();
+   if (isEndOfTable)										// made changes by TUAN NGUYEN
+      currentState = ESTIMATING;							// made changes by TUAN NGUYEN
+   else														// made changes by TUAN NGUYEN
+   {														// made changes by TUAN NGUYEN
    nextMeasurementEpoch = measManager.GetEpoch();
    FindTimeStep();
 
@@ -427,6 +436,7 @@ void BatchEstimatorInv::Accumulate()
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;
+   }														// made changes by TUAN NGUYEN
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Exit BatchEstimatorInv::Accumulate()\n");
@@ -498,9 +508,9 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   // Close report file
-   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
-       reportFile.close();										// made changes by TUAN NGUYEN
+//   // Close report file
+//   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
+//       reportFile.close();										// made changes by TUAN NGUYEN
 
    if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
@@ -518,7 +528,8 @@ void BatchEstimatorInv::Estimate()
 
    delta = 0.0;
    for (UnsignedInt i = 0; i < measurementResiduals.size(); ++i)
-      delta += measurementResiduals[i] * measurementResiduals[i];
+//      delta += measurementResiduals[i] * measurementResiduals[i];
+      delta += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
    oldResidualRMS = newResidualRMS;
    newResidualRMS = GmatMathUtil::Sqrt(delta / measurementResiduals.size());
 
