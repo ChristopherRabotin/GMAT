@@ -541,7 +541,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
-         currentMeasurement.value[0] = 0.0;     // No Doppler shift w/o events
+         currentMeasurement.value[0] = 2*rangeVecInertial.GetMagnitude();     // It is set to range value
          currentMeasurement.eventCount = 4;
 
          retval = true;
