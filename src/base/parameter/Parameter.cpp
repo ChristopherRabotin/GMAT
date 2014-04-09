@@ -1159,7 +1159,8 @@ bool Parameter::RenameRefObject(const Gmat::ObjectType type,
    // Check for allowed object types for name change
    if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
        type != Gmat::BURN && type != Gmat::IMPULSIVE_BURN &&
-       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE)
+       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE &&
+       type != Gmat::ODE_MODEL)
    {
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
