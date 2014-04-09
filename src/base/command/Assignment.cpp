@@ -301,8 +301,8 @@ void Assignment::SetSolarSystem(SolarSystem *ss)
    if (mathTree)
       mathTree->SetSolarSystem(ss);
 }
-
-
+ 
+ 
 //------------------------------------------------------------------------------
 // virtual void SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
@@ -484,6 +484,8 @@ bool Assignment::InterpretAction()
          #endif
          isRhsString = true;
       }
+	  else if (GmatStringUtil::IsEnclosedWith(rhs, "'"))
+		  isRhsString = true;
    }
    else
    {
@@ -497,7 +499,7 @@ bool Assignment::InterpretAction()
    }
    
    // If there is still ; then report error since ; should have been removed
-   if (rhs.find(";") != rhs.npos)
+   if (!isRhsString && (rhs.find(";") != rhs.npos))
       throw CommandException("Is there a missing \"%\" for inline comment?");
    
    #ifdef DEBUG_ASSIGNMENT_IA

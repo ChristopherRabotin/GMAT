@@ -107,7 +107,8 @@ Vary::Vary() :
    multiplicativeScaleFactorName ("1.0"),
    multiplicativeScaleFactor     (NULL),
    variableID                    (-1),
-   solverDataFinalized           (false)
+   solverDataFinalized           (false),
+   isThisLastVaryCommand         (false)
 {
    objectTypeNames.push_back("SolverCommand");
    objectTypeNames.push_back("Vary");
@@ -156,7 +157,8 @@ Vary::Vary(const Vary& t) :
    multiplicativeScaleFactorName (t.multiplicativeScaleFactorName),
    multiplicativeScaleFactor     (NULL),
    variableID                    (-1),
-   solverDataFinalized           (t.solverDataFinalized)
+   solverDataFinalized           (t.solverDataFinalized),
+   isThisLastVaryCommand         (t.isThisLastVaryCommand)
 {
     parameterCount = t.parameterCount;
 }
@@ -1302,6 +1304,82 @@ bool Vary::Execute()
    try
    {
       variable->SetReal(var);
+      
+      // Check if it should notify Publisher so that Subscribers can handle it
+      // such as chunking the ephemeris data
+      if (isThisLastVaryCommand)
+      {
+         #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+         MessageInterface::ShowMessage
+            ("=====> <%p>'%s' is last Vary command = %d\n", this,
+             GetGeneratingString().c_str());
+         #endif
+         
+         GmatBase *refObj = variable->GetRefObject();
+         
+         #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+         MessageInterface::ShowMessage
+            ("   variable refObj = <%p><%s>\n", refObj,
+             refObj ? refObj->GetTypeName().c_str() : "NULL");
+         #endif
+         
+         if (refObj)
+         {
+            bool notifyPublisher = false;
+            bool isParameter = false;
+            std::string satName;
+            Real epoch = 0;
+            
+            if (refObj->IsOfType(Gmat::SPACECRAFT))
+            {
+               #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+               MessageInterface::ShowMessage("   refObj is a Spacecraft\n");
+               #endif
+               notifyPublisher = true;
+               epoch = refObj->GetRealParameter("A1Epoch");
+               satName = refObj->GetName();
+            }
+            else if (refObj->IsOfType("Parameter"))
+            {
+               #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+               MessageInterface::ShowMessage("   refObj is a Parameter\n");
+               #endif
+               
+               GmatBase *paramOwner = ((Parameter*)refObj)->GetOwner();
+               
+               #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+               MessageInterface::ShowMessage
+                  ("   paramOwner=<%p><%s>'%s'\n", paramOwner,
+                   paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+                   paramOwner ? paramOwner->GetName().c_str() : "NULL");
+               #endif
+               
+               // If Parameter owner is Spacecraft, set flag to notify Publisher that
+               // Spacecraft property has changed
+               if (paramOwner && paramOwner->IsOfType(Gmat::SPACECRAFT))
+               {
+                  notifyPublisher = true;
+                  satName = paramOwner->GetName();
+                  epoch = paramOwner->GetRealParameter("A1Epoch");
+                  #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+                  MessageInterface::ShowMessage
+                     ("   Current spacecraft epoch is %f\n", epoch);
+                  #endif
+               }
+            }
+            
+            if (notifyPublisher)
+            {
+               std::string varMsg = variableName + " = " + initialValueName +
+                  " in Vary command";
+               #ifdef DEBUG_VARY_FOR_SUBSCRIBER
+               MessageInterface::ShowMessage("   varMsg = %s\n", varMsg.c_str());
+               #endif
+               publisher->SetSpacecraftPropertyChanged(this, epoch, satName, varMsg);
+            }
+            
+         } // end if (refObj)
+      } // end if (isThisLastVaryCommand)
    }
    catch (ParameterException &pe)
    {
@@ -1428,6 +1506,31 @@ void Vary::SetInitialValue(Solver *theSolver)
    }
 }
 
+//------------------------------------------------------------------------------
+// void SetIsThisLastVaryCommand(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Sets whether this command is the last Vary command in the SolverBranchCommand.
+ * This method is called from the Sandbox during the initialization.
+ */
+//------------------------------------------------------------------------------
+void Vary::SetIsThisLastVaryCommand(bool flag)
+{
+   isThisLastVaryCommand = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool IsThisLastVaryCommand()
+//------------------------------------------------------------------------------
+/**
+ * Sets whether this command is the last Vary command in the SolverBranchCommand.
+ * This method is called from the Sandbox during the initialization.
+ */
+//------------------------------------------------------------------------------
+bool Vary::IsThisLastVaryCommand()
+{
+   return isThisLastVaryCommand;
+}
 
 //------------------------------------------------------------------------------
 // bool IsThereSameWrapperName(const std::string &wrapperName)

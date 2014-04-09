@@ -92,8 +92,7 @@ FunctionSetupPanel::~FunctionSetupPanel()
    #ifdef __USE_STC_EDITOR__
    if (mEditor)
    {
-	  // Don't delete Editor, it will be deleted as part of the window destroy
-	  // delete mEditor;
+      delete mEditor;
       mEditor = NULL;
    }
    #endif
