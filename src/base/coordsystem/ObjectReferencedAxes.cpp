@@ -301,8 +301,14 @@ void ObjectReferencedAxes::SetXAxis(const std::string &toValue)
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
        (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
-      throw CoordinateSystemException(
-            "ObjectReferencedAxes - Invalid value for X-Axis");
+   {
+      CoordinateSystemException cse;
+      cse.SetDetails(errorMessageFormatUnnamed.c_str(),
+                     toValue.c_str(), "XAxis", "R, -R, V, -V, N, -N");
+      throw cse;
+//      throw CoordinateSystemException(
+//            "ObjectReferencedAxes - Invalid value for X-Axis");
+   }
    xAxis = toValue;
 }
 
@@ -323,8 +329,14 @@ void ObjectReferencedAxes::SetYAxis(const std::string &toValue)
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
        (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
-      throw CoordinateSystemException(
-            "ObjectReferencedAxes - Invalid value for Y-Axis");
+   {
+      CoordinateSystemException cse;
+      cse.SetDetails(errorMessageFormatUnnamed.c_str(),
+                     toValue.c_str(), "YAxis", "R, -R, V, -V, N, -N");
+      throw cse;
+//      throw CoordinateSystemException(
+//            "ObjectReferencedAxes - Invalid value for Y-Axis");
+   }
    yAxis = toValue;
 }
 
@@ -345,8 +357,14 @@ void ObjectReferencedAxes::SetZAxis(const std::string &toValue)
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
        (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
-      throw CoordinateSystemException(
-            "ObjectReferencedAxes - Invalid value for Z-Axis");
+   {
+      CoordinateSystemException cse;
+      cse.SetDetails(errorMessageFormatUnnamed.c_str(),
+                     toValue.c_str(), "ZAxis", "R, -R, V, -V, N, -N");
+      throw cse;
+//      throw CoordinateSystemException(
+//            "ObjectReferencedAxes - Invalid value for Z-Axis");
+   }
    zAxis = toValue;
 }
 
@@ -661,17 +679,17 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
    }
    if ((UsesXAxis() != GmatCoordinate::NOT_USED) && (id == X_AXIS))
    {
-      xAxis = value;
+      SetXAxis(value);
       OK = true;
    }
    if ((UsesYAxis() != GmatCoordinate::NOT_USED) && (id == Y_AXIS))
    {
-      yAxis = value;
+      SetYAxis(value);
       OK = true;
    }
    if ((UsesZAxis() != GmatCoordinate::NOT_USED) && (id == Z_AXIS))
    {
-      zAxis = value;
+      SetZAxis(value);
       OK = true;
    }
    if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (id == PRIMARY_OBJECT_NAME))
@@ -864,6 +882,18 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                                    bool forceComputation)
 {
+#ifdef DEBUG_ROT_MATRIX
+   if (visitCount == 0)
+   {
+      std::stringstream ss;
+      ss.precision(30);
+      ss << "xAxis = \"" << xAxis << "\" and yAxis = \"" << yAxis;
+      ss << "\" and zAxis = \"" << zAxis << "\"" << std::endl;
+
+      MessageInterface::ShowMessage("%s\n", ss.str().c_str());
+//      visitCount++;
+   }
+#endif
    if (!primary)
       throw CoordinateSystemException("Primary \"" + primaryName +
          "\" is not yet set in object referenced coordinate system!");
@@ -900,7 +930,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       {
          MessageInterface::ShowMessage(" ------------ rv Primary (%s) to Secondary (%s) = %s\n",
                primary->GetName().c_str(), secondary->GetName().c_str(), rv.ToString().c_str());
-         visitCount++;
+//         visitCount++;
       }
    #endif
 
@@ -913,7 +943,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
               << rv << std::endl;
 
          MessageInterface::ShowMessage("%s\n", ss.str().c_str());
-         visitCount++;
+//         visitCount++;
       }
    #endif
 
@@ -1049,6 +1079,20 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    {
       zUsed = false;
    }
+
+   #ifdef DEBUG_ROT_MATRIX
+      if (visitCount == 0)
+      {
+         std::stringstream ss;
+         ss.precision(30);
+         ss << "xUsed = \"" << (xUsed? "true" : "false") << "\" and yUsed = \"" << (yUsed? "true" : "false");
+         ss << "\" and zUsed = \"" << (zUsed? "true" : "false") << "\"" << std::endl;
+
+         MessageInterface::ShowMessage("%s\n", ss.str().c_str());
+         visitCount++;
+      }
+   #endif
+
    // determine the third axis
    if (xUsed && yUsed && !zUsed)
    {
@@ -1068,7 +1112,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    else
    {
       throw CoordinateSystemException(
-            "Object referenced axes are improperly defined.");
+            "Object referenced axes are improperly defined.\n");
    }
    // Compute the rotation matrix
    rotMatrix(0,0) = xUnit(0);

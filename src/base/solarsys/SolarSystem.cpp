@@ -1513,7 +1513,8 @@ void SolarSystem::LoadSpiceKernels()
          if (theSPKFilename.size() > 1 && theSPKFilename[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            //std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            std::string absSpkFile = fm->GetBinDirectory() + fm->GetPathSeparator() + theSPKFilename;
             
             MessageInterface::ShowMessage
                ("Error opening the SPK file \"%s\", so trying with abs path \"%s\"", theSPKFilename.c_str(),

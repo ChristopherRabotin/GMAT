@@ -1423,7 +1423,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
        type == Gmat::CALCULATED_POINT || type == Gmat::BURN ||
        type == Gmat::IMPULSIVE_BURN || type == Gmat::HARDWARE ||
-       type == Gmat::THRUSTER || type == Gmat::FUEL_TANK)
+       type == Gmat::THRUSTER || type == Gmat::FUEL_TANK ||
+       type == Gmat::ODE_MODEL)
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
