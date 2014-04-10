@@ -691,6 +691,36 @@ bool SolverBranchCommand::TakeAction(const std::string &action,
    
       return true;
    }
+   else if (action == "SetLastVaryCommand")
+   {
+      // Set the vary command for chunking ephemeris data
+      // (Fix for GMT-4097 LOJ: 2014.04.04)
+      std::vector<GmatCommand*>::iterator node;
+      GmatCommand *currentPtr;
+      GmatCommand *lastVary = NULL;
+      
+      for (node = branch.begin(); node != branch.end(); ++node)
+      {
+         currentPtr = *node;
+         while (currentPtr != this)
+         {
+            if (currentPtr->IsOfType("Vary"))
+               lastVary = currentPtr;
+            
+            currentPtr = currentPtr->GetNext();
+            if (currentPtr == NULL)
+               throw CommandException("Branch command \"" + generatingString +
+                                      "\" was not terminated!");
+         }
+      }
+      
+      if (lastVary != NULL)
+      {
+         ((Vary*)lastVary)->SetIsThisLastVaryCommand(true);
+      }
+      
+      return true;
+   }
    
    return BranchCommand::TakeAction(action, actionData);
 }

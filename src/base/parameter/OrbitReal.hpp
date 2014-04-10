@@ -42,6 +42,7 @@ public:
    virtual ~OrbitReal();
    
    // methods inherited from Parameter
+   virtual GmatBase* GetOwner();
    virtual Real EvaluateReal();
    virtual void SetReal(Real val);
    

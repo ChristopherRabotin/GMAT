@@ -75,7 +75,7 @@ Parameter::PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount] =
  * @param <name> Parameter name
  * @param <typeStr>  Parameter type string
  * @param <key>  Parameter key (SYSTEM_PARAM, USER_PARAM, etc)
- * @param <obj>  reference object pointer
+ * @param <owner> owner object pointer
  * @param <desc> Parameter description
  * @param <unit> Parameter unit
  * @param <ownerType> object type who owns this Parameter as property
@@ -90,7 +90,7 @@ Parameter::PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
-                     GmatParam::ParameterKey key, GmatBase *obj,
+                     GmatParam::ParameterKey key, GmatBase *owner,
                      const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
                      bool isTimeParam, bool isSettable, bool isPlottable,
@@ -106,6 +106,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
       objectTypeNames.push_back("UserParameter");
    
    mKey = key;
+   mOwner = owner;
    
    //if ((name != "" && name != " "))
    if (name != "")
@@ -186,6 +187,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 Parameter::Parameter(const Parameter &copy)
    : GmatBase(copy)
 {
+   mOwner = NULL;
    mKey  = copy.mKey;
    mExpr = copy.mExpr;
    mDesc = copy.mDesc;
@@ -210,6 +212,7 @@ Parameter::Parameter(const Parameter &copy)
    mIsOwnedObjDependent = copy.mIsOwnedObjDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
    mNeedExternalClone = copy.mNeedExternalClone;
+   
 }
 
 
@@ -231,6 +234,7 @@ Parameter& Parameter::operator= (const Parameter& right)
 
    GmatBase::operator=(right);
    
+   mOwner = NULL;
    mKey = right.mKey;
    mExpr = right.mExpr;
    mDesc = right.mDesc;
@@ -281,6 +285,18 @@ GmatParam::ParameterKey Parameter::GetKey() const
    return mKey;
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* GetOwner() const
+//------------------------------------------------------------------------------
+/**
+ * @return Parameter owner object pointer
+ */
+//------------------------------------------------------------------------------
+GmatBase* Parameter::GetOwner() const
+{
+   return mOwner;
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ObjectType GetOwnerType() const
@@ -565,6 +581,27 @@ void Parameter::SetRequiresCelestialBodyCSOrigin(bool flag)
 void Parameter::SetKey(const GmatParam::ParameterKey &key)
 {
    mKey = key;
+}
+
+//------------------------------------------------------------------------------
+// void  SetOwner(GmatBase *owner)
+//------------------------------------------------------------------------------
+/**
+ * Sets owner object of this Parameter.
+ *
+ * @param <owner> owner object of Parameter.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetOwner(GmatBase *owner)
+{
+   #ifdef DEBUG_SET_OWNER
+   MessageInterface::ShowMessage
+      ("Parameter::SetOwner() entered, this=<%p><%s>'%s', owner=<%p><%s>'%s'\n",
+       this, GetTypeName().c_str(), GetName().c_str(), owner,
+       owner ? owner->GetTypeName().c_str() : "NULL",
+       owner ? owner->GetName().c_str() : "NULL");
+   #endif
+   mOwner = owner;
 }
 
 //------------------------------------------------------------------------------
@@ -1122,7 +1159,8 @@ bool Parameter::RenameRefObject(const Gmat::ObjectType type,
    // Check for allowed object types for name change
    if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
        type != Gmat::BURN && type != Gmat::IMPULSIVE_BURN &&
-       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE)
+       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE &&
+       type != Gmat::ODE_MODEL)
    {
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage

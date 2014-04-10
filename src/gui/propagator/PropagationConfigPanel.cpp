@@ -3167,6 +3167,9 @@ void PropagationConfigPanel::OnIntegratorComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnPrimaryBodyComboBox(wxCommandEvent &event)
 {
+   if (primaryBody != thePrimaryBodyComboBox->GetStringSelection())
+      EnableUpdate(true);
+
    UpdatePrimaryBodyItems();
 }
 

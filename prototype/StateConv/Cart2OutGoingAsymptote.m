@@ -1,6 +1,6 @@
-function [outGoingAsymptote] = Cart2OutGoingAsymptote(cartState,mu)
+function [HypAsymptote] = Cart2OutgoingAsymptote(cartState,mu)
 
-% outGoingAsymptote = [C3 radPer INC RLA DLA TA];
+% HypAsymptote = [radPer C3 RLA DLA BPA TA];
 
 %  Set mu.  If not provided assume Earth.
 if nargin < 2
@@ -8,28 +8,35 @@ if nargin < 2
 end
 
 %%  Compute variables needed elsewhere
-twopi = 2*pi;
 rv   = cartState(1:3,1);
 rmag = norm(rv);
 vv   = cartState(4:6,1);
 vmag = norm(vv);
 hv   = cross(rv,vv);
 hmag = norm(hv);
-nv   = cross([0 0 1]',hv);  %  vector in direction of RAAN,  zero vector if equatorial orbit
-n    = norm(nv);
 ev   = (vmag*vmag - mu/rmag)*rv/mu - dot(rv,vv)*vv/mu;
 ECC  = norm(ev);
 
 %%  Compute C3 and SMA
 C3     = vmag * vmag - 2 * mu / rmag;
-Energy = vmag * vmag/2 - mu / rmag;
-SMA    = -mu/2/Energy;
 
+if abs(C3) < 1e-7
+        HypAsymptote = [];
+        disp('Error in Cart \2HypAsymptote: Cannot convert from  Cartestion to Asymptote because orbit is parabolic.');   
+    return
+end
+
+SMA    = -mu/C3;
+%% Compute radPer
+
+radPer = SMA*(1 - ECC);
 %%  Compute Asymptote vector
 %  If orbit is hyperbolic, use asymptote
-if C3 > 0
+
+if C3 >= 1e-7
     fac1  = 1/(1 + C3*(hmag*hmag)/(mu*mu));
-    svhat = fac1*(sqrt(C3)/mu*cross(hv,ev) - ev);
+    svhat = fac1*(sqrt(C3)/mu*cross(hv,ev) - ev); % The original expression written by SPH has an error. It is fixed.
+        
 else
     %
     %  The two options below are really hacks, the asymptote doesn't exist.  However,
@@ -40,37 +47,44 @@ else
     %  If orbit is elliptic, use apsides vector
     if ECC > 1e-7
         svhat = -ev/ECC;
-        disp('Warning in Cart2OutGoingAsymptote: Orbit is elliptic so using Apsides vector for asymptote.')
+        disp('Warning in Cart2HypAsymptote: Orbit is elliptic so using Apsides vector for asymptote.')
         %  If orbit is circular, throw an exception
     else
-        outGoingAsymptote = [];
-        disp('Error in Cart2OutGoingAsymptote: Cannot convert from Cartestion to Asymptote because orbit is circular.');   
+        HypAsymptote = [];
+        disp('Error in Cart2HypAsymptote: Cannot convert from Cartestion to Asymptote because orbit is circular.');   
     return
     end
 end
+%%  Compute B-plane angle (BPA)
+uz=[0 0 1].';
+if real(acos(abs(dot(svhat,uz)))) < 1e-11
+    HypAsymptote = [];
+    disp('Error in Cart2HypAsymptote: Cannot convert from  Cartestion to Asymptote because Asymptote vector is aligned with z-direction.')
+end
+Ehat=cross(uz,svhat)/norm(cross(svhat,uz)); % singular when svhat is parallel to uz
+Nhat=cross(svhat,Ehat);
 
+Bvector=cross(hv,svhat);
+cosBvA=dot(Bvector,-Nhat)./hmag;
+sinBvA=dot(Bvector,Ehat)./hmag;
+BvA=atan2(sinBvA,cosBvA);
+
+if BvA < 0 
+    BvA = BvA + 2*pi;
+end
 %%  Compute other elements
-DLA    = asin(svhat(3));
+DLA    = real(asin(svhat(3))); % range is -pi/2, to pi/2
 RLA    = atan2(svhat(2),svhat(1));
-radPer = SMA*(1 - ECC);
-TA     = acos(dot(ev/ECC,rv/rmag));
-INC    = acos(dot(hv/hmag,[0 0 1]'));
 if RLA < 0
     RLA = RLA + 2*pi;
 end
 
-if ECC >= 1
-   maxTA = acos(-1/ECC);
-else
-   maxTA = pi;
+TA=acos(dot(ev,rv)/rmag/ECC);
+
+if dot(vv,rv) < 0
+    TA = 2*pi - TA;
 end
-%  TODO:  determine how to handle ev = [0 0 0];
-AOP    = acos(dot(nv/n,ev/ECC));
-if ( ev(3) < 0 )
-   AOP = twopi - AOP;
-end
-cosAZI = -cos(maxTA + AOP) * sin(INC) / cos(DLA);
-velAzimuth = acos(cosAZI);
 
 %%  Assemble the output
-outGoingAsymptote = [C3 radPer  RLA DLA TA velAzimuth];
+
+HypAsymptote = [radPer C3 rad2deg([RLA DLA BvA TA])];

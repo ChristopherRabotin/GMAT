@@ -200,6 +200,13 @@ GmatBase* RefData::GetSpacecraft()
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetParameterOwner()
+//------------------------------------------------------------------------------
+GmatBase* RefData::GetParameterOwner()
+{
+   return GetRefObject(mParamOwnerType, mParamOwnerName);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const

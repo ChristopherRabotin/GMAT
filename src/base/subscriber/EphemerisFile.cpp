@@ -216,8 +216,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    spkWriteFailed       (true),
    code500WriteFailed   (true),
    writeCommentAfterData (true),
-   checkForLargeTimeGap (false),
-   prevRunState         (Gmat::IDLE)
+   checkForLargeTimeGap (false)
 {
    #ifdef DEBUG_EPHEMFILE
    MessageInterface::ShowMessage
@@ -426,8 +425,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    spkWriteFailed       (ef.spkWriteFailed),
    code500WriteFailed   (ef.code500WriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
-   checkForLargeTimeGap (ef.checkForLargeTimeGap),
-   prevRunState         (ef.prevRunState)
+   checkForLargeTimeGap (ef.checkForLargeTimeGap)
 {
    coordConverter = ef.coordConverter;
 }
@@ -521,7 +519,6 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    code500WriteFailed   = ef.code500WriteFailed;
    writeCommentAfterData = ef.writeCommentAfterData;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
-   prevRunState         = ef.prevRunState;
    coordConverter       = ef.coordConverter;
    
    return *this;
@@ -2459,7 +2456,7 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool saveE
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
-      ("===== EphemerisFile::RestartInterpolation() entered, comments='%s'\n   "
+      ("===== EphemerisFile::RestartInterpolation() entered\n   comments='%s'\n   "
        "saveEpochInfo=%d, writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
        comments.c_str(), saveEpochInfo, writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
    #endif
@@ -4675,20 +4672,20 @@ void EphemerisFile::AddNextEpochToWrite(Real epochInSecs, const std::string &msg
 
 
 //------------------------------------------------------------------------------
-//bool IsEventFeasible(bool isManeuverEvent = false)
+//bool IsEventFeasible(bool checkForNoData = true)
 //------------------------------------------------------------------------------
 /**
  * Checks if events can occur. Events other than maneuver can only occur after
- * valid data is received.
+ * valid data is received, so checkForNoData should be set appropriately.
  */
 //------------------------------------------------------------------------------
-bool EphemerisFile::IsEventFeasible(bool isManeuverEvent)
+bool EphemerisFile::IsEventFeasible(bool checkForNoData)
 {
    #ifdef DEBUG_EPHEMFILE_EVENTS
    MessageInterface::ShowMessage
-      ("EphemerisFile::IsEventFeasible() '%s' entered, isManeuverEvent=%d, active=%d, "
+      ("EphemerisFile::IsEventFeasible() '%s' entered, checkForNoData=%d, active=%d, "
        "firstTimeWriting=%d, currEpochInSecs=%f, a1MjdArray.size()=%d\n", GetName().c_str(),
-       isManeuverEvent, active, firstTimeWriting, currEpochInSecs, a1MjdArray.size());
+       checkForNoData, active, firstTimeWriting, currEpochInSecs, a1MjdArray.size());
    #endif
    
    if (!active)
@@ -4712,7 +4709,7 @@ bool EphemerisFile::IsEventFeasible(bool isManeuverEvent)
    }
    
    // Check if any valid data received if not maneuver event
-   if (!isManeuverEvent)
+   if (checkForNoData)
    {
       if (firstTimeWriting && currEpochInSecs == -999.999 && a1MjdArray.empty())
       {
@@ -4979,17 +4976,19 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       ("======================================================================\n"
        "EphemerisFile::Distribute() this=<%p>'%s' entered\n", this, GetName().c_str());
    MessageInterface::ShowMessage
-      ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, isEndOfRun=%d\n   "
-       "runstate=%d, isManeuvering=%d, firstTimeWriting=%d, propDirection=%f\n", len, active, writeEphemeris,
-       isEndOfReceive, isEndOfDataBlock, isEndOfRun, runstate, isManeuvering, firstTimeWriting, propDirection);
+      ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, "
+       "isEndOfRun=%d\n   runstate=%d, prevRunState=%d, isManeuvering=%d, firstTimeWriting=%d, "
+       "propDirection=%f\n", len, active, writeEphemeris, isEndOfReceive, isEndOfDataBlock,
+       isEndOfRun, runstate, prevRunState, isManeuvering, firstTimeWriting, propDirection);
    if (len > 0)
    {
       DebugWriteTime("   ", dat[0], true);
-      MessageInterface::ShowMessage("   dat[0]=%.15f, dat[1]=%.15f\n", dat[0], dat[1]);
+      //MessageInterface::ShowMessage("   dat[0]=%.15f, dat[1]=%.15f\n", dat[0], dat[1]);
       MessageInterface::ShowMessage("   dat[] = [");
       for (Integer i = 0; i < len; ++i)
       {
-         MessageInterface::ShowMessage("%15le", dat[i]);
+         //MessageInterface::ShowMessage("%.15le", dat[i]);
+         MessageInterface::ShowMessage("%.15f", dat[i]);
          if (i == len-1)
             MessageInterface::ShowMessage("]\n");
          else
@@ -5289,9 +5288,9 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    }
    #endif
    //=================================================================
-
-   bool processData = false;
    
+   bool processData = false;
+      
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
    //------------------------------------------------------------
@@ -5393,7 +5392,7 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
        prevRunState, runstate, maneuversHandled.size());
    #endif
    
-   if (!IsEventFeasible(true))
+   if (!IsEventFeasible(false))
    {
       #if DBGLVL_EPHEMFILE_MANEUVER
       MessageInterface::ShowMessage
@@ -5534,7 +5533,8 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
          RestartInterpolation(comment, false, true);
    }
    
-   prevRunState = runstate;
+   // It is set in the Subscriber. Do we need it here? (LOJ: 2014.04.08)
+   //prevRunState = runstate;
    
    #if DBGLVL_EPHEMFILE_MANEUVER
    MessageInterface::ShowMessage
@@ -5683,12 +5683,32 @@ void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real ep
       ("\n==================================================\n"
        "EphemerisFile::HandleSpacecraftPropertyChange() '%s' entered, originator=<%p>\n   "
        "epoch=%.15f, satName='%s', desc='%s', active=%d\n   firstTimeWriting=%d, "
-       "a1MjdArray.size()=%d, currEpochInDays=%f\n", GetName().c_str(), originator, epoch,
-       satName.c_str(), desc.c_str(), active, firstTimeWriting, a1MjdArray.size(), currEpochInDays);
+       "a1MjdArray.size()=%d, currEpochInDays=%f, runstate=%d\n", GetName().c_str(),
+       originator, epoch, satName.c_str(), desc.c_str(), active, firstTimeWriting,
+       a1MjdArray.size(), currEpochInDays, runstate);
    DebugWriteTime("   event epoch ", epoch, true);
    #endif
    
-   if (!IsEventFeasible())
+   // if (!IsEventFeasible())
+   // {
+   //    #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
+   //    MessageInterface::ShowMessage
+   //       ("EphemerisFile::HandleSpacecraftPropertyChange() '%s' leaving, the spacecraft "
+   //        "property change is not feasible at this time\n", GetName().c_str());
+   //    #endif
+   //    return;
+   // }
+   
+   if (originator == NULL)
+      throw SubscriberException
+         ("Cannot continue with ephemeris file writing, the spacecraft of which "
+          "property changed is NULL");
+   
+   bool checkForEmptyData = true;
+   if (originator->IsOfType("Vary"))
+      checkForEmptyData = false;
+   
+   if (!IsEventFeasible(checkForEmptyData))
    {
       #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
       MessageInterface::ShowMessage
@@ -5698,16 +5718,25 @@ void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real ep
       return;
    }
    
-   if (originator == NULL)
-      throw SubscriberException
-         ("Cannot continue with ephemeris file writing, the spacecraft of which "
-          "property changed is NULL");
-   
    eventEpochInSecs = epoch * GmatTimeConstants::SECS_PER_DAY;
    std::string epochStr = ToUtcGregorian(epoch, true, 2);
    
    if (spacecraftName == satName)
    {
+      if (originator->IsOfType("Vary"))
+      {
+         if (runstate == Gmat::SOLVING)
+         {
+            #if DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
+            MessageInterface::ShowMessage
+               ("EphemerisFile::HandleSpacecraftPropertyChange() '%s' leaving, "
+                "the spacecraft is set from the Vary command and status is SOLVING\n",
+                GetName().c_str());
+            #endif
+            return;
+         }
+      }
+      
       #ifdef DEBUG_EPHEMFILE_RESTART
       MessageInterface::ShowMessage
          ("EphemerisFile::HandleSpacecraftPropertyChange() Calling FinishUpWriting()\n");
@@ -5716,15 +5745,17 @@ void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real ep
       // Write any data in the buffer
       //LOJ: Write continuous ephemeris if CODE500_EPHEM
       if (fileType != CODE500_EPHEM)
+      {
          FinishUpWriting();
-      
-      // Restart interpolation
-      std::string comment = "This block begins after spacecraft setting " +
-         desc + " at " + epochStr;
-      
-      //LOJ: Write continuous ephemeris if CODE500_EPHEM
-      if (fileType != CODE500_EPHEM)
-         RestartInterpolation(comment, false, true);
+         
+         // Restart interpolation
+         std::string comment = "This block begins after spacecraft setting " +
+            desc + " at " + epochStr;
+         
+         //LOJ: Write continuous ephemeris if CODE500_EPHEM
+         if (fileType != CODE500_EPHEM)
+            RestartInterpolation(comment, false, true);
+      }
    }
    
    #ifdef DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE
