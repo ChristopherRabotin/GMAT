@@ -893,8 +893,9 @@ bool EphemerisFile::Initialize()
    // Determine output coordinate system, set to boolean to avoid string comparison
    // We don't need conversion for SPK_ORBIT. SpiceOrbitKernelWriter assumes it is in
    // J2000Eq frame for now
-   if ((fileType == CCSDS_OEM || fileType == CODE500_EPHEM) &&
-       theDataCoordSystem->GetName() != outCoordSystemName)
+//   if ((fileType == CCSDS_OEM || fileType == CODE500_EPHEM) &&
+//       theDataCoordSystem->GetName() != outCoordSystemName)
+   if (theDataCoordSystem->GetName() != outCoordSystemName)
       writeDataInDataCS = false;
    
    // Convert inital and final epoch to A1ModJulian
@@ -2210,7 +2211,13 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData, bool timeToWrite)
       
       if (bufferData)
       {
-         BufferOrbitData(currEpochInDays, currState);
+         Real outState[6];
+         // Convert if necessary
+         if (!writeDataInDataCS)
+            ConvertState(currEpochInDays, currState, outState);
+
+//         BufferOrbitData(currEpochInDays, currState);
+         BufferOrbitData(currEpochInDays, outState);
          
          #ifdef DEBUG_EPHEMFILE_SPICE
          DebugWriteOrbit("In HandleSpkOrbitData:", currEpochInDays, currState, true, true);
