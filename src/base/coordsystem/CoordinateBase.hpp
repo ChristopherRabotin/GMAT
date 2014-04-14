@@ -59,8 +59,14 @@ public:
    virtual void                SetOriginName(const std::string &toName);
    virtual void                SetOrigin(SpacePoint *originPtr);
    virtual bool                RequiresJ2000Body();
+
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    virtual void                SetJ2000BodyName(const std::string &toName);
    virtual void                SetJ2000Body(SpacePoint *j2000Ptr);
+
    virtual SolarSystem*        GetSolarSystem() const;
    virtual std::string         GetOriginName() const;
    virtual SpacePoint*         GetOrigin() const;

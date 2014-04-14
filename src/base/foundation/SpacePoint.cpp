@@ -391,17 +391,53 @@ const std::string SpacePoint::GetJ2000BodyName() const
    else           return j2000BodyName;
 }
 
+//------------------------------------------------------------------------------
+//  SpacePoint* GetJ2000Body() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the j2000 Body pointer.
+ *
+ * @return J2000 Body pointer.
+ *
+ */
+//------------------------------------------------------------------------------
 SpacePoint* SpacePoint::GetJ2000Body() const
 {
    return j2000Body;
 }
 
+//------------------------------------------------------------------------------
+//  bool  SetJ2000BodyName(const std::string &toName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000 Body name.
+ *
+ * @return true if successful; false, otherwise
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
+ */
+//------------------------------------------------------------------------------
 bool SpacePoint::SetJ2000BodyName(const std::string &toName)
 {
    j2000BodyName = toName;
    return true;
 }
 
+//------------------------------------------------------------------------------
+//  void  SetJ2000Body(SpacePoint* toBody)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000 Body.
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
+ */
+//------------------------------------------------------------------------------
 void SpacePoint::SetJ2000Body(SpacePoint* toBody)
 {
    #ifdef DEBUG_J2000_STATE
@@ -1492,6 +1528,10 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
  *
  * @return true if successful; otherwise, false.
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
