@@ -332,6 +332,16 @@ static const bool         REQUIRES_FIXED_CS[StateTypeCount];
 static const std::string  ANOMALY_LONG_TEXT[AnomalyTypeCount];
 static const std::string  ANOMALY_SHORT_TEXT[AnomalyTypeCount];
 
+static       bool         apsidesForIncomingAsymptoteWritten;
+static       bool         apsidesForOutgoingAsymptoteWritten;
+static       bool         brouwerNotConvergingShortWritten;
+static       bool         brouwerNotConvergingLongWritten;
+static       bool         brouwerSmallEccentricityWritten;
+static       bool         criticalInclinationWritten;
+static       bool         possibleInaccuracyShortWritten;
+static       bool         possibleInaccuracyLongWritten;
+static       bool         inaccuracyCriticalAngleWritten;
+
 //------------------------------------------------------------------------------
 // private constructors, destructor, operator=
 //------------------------------------------------------------------------------

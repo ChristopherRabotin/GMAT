@@ -142,6 +142,17 @@ const std::string StateConversionUtil::ANOMALY_SHORT_TEXT[AnomalyTypeCount] =
 };
 
 
+bool StateConversionUtil::apsidesForIncomingAsymptoteWritten  = false;
+bool StateConversionUtil::apsidesForOutgoingAsymptoteWritten  = false;
+bool StateConversionUtil::brouwerNotConvergingShortWritten    = false;
+bool StateConversionUtil::brouwerNotConvergingLongWritten     = false;
+bool StateConversionUtil::brouwerSmallEccentricityWritten     = false;
+bool StateConversionUtil::criticalInclinationWritten          = false;
+bool StateConversionUtil::possibleInaccuracyShortWritten      = false;
+bool StateConversionUtil::possibleInaccuracyLongWritten       = false;
+bool StateConversionUtil::inaccuracyCriticalAngleWritten      = false;
+
+
 
 //------------------------------------------------------------------------------
 // static methods
@@ -2874,8 +2885,13 @@ Rvector6 StateConversionUtil::CartesianToIncomingAsymptote(Real mu, const Rvecto
    }
    else if (c3 < -1E-7)
    {
-      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
-      MessageInterface::ShowMessage(warn);
+      if (!apsidesForIncomingAsymptoteWritten)
+      {
+         std::string warn = "Warning: For IncomingAsymptote, orbit is "
+               "elliptic so using Apsides vector for asymptote.\n";
+         MessageInterface::ShowMessage(warn);
+         apsidesForIncomingAsymptoteWritten = true;
+      }
       
       sVHat = -eccVec/ecc;
       //
@@ -2954,8 +2970,13 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
    
 	if (c3 < 1E-7)
 	{
-		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
-		MessageInterface::ShowMessage(warn);
+	   if (!apsidesForIncomingAsymptoteWritten)
+	   {
+         std::string warn = "Warning: For IncomingAsymptote, orbit is "
+               "elliptic so using Apsides vector for asymptote.\n";
+         MessageInterface::ShowMessage(warn);
+         apsidesForIncomingAsymptoteWritten = true;
+	   }
 	}
    
 	Real sma =  -mu/c3;
@@ -3161,9 +3182,13 @@ Rvector6 StateConversionUtil::CartesianToOutgoingAsymptote(Real mu, const Rvecto
       sVHat = fac1*(Sqrt(c3)/mu*Cross(hVec,eccVec) - eccVec); 
    else if (c3 < -1E-7)
    {
-      
-      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
-      MessageInterface::ShowMessage(warn);
+      if (!apsidesForOutgoingAsymptoteWritten)
+      {
+         std::string warn = "Warning: For OutgoingAsymptote, orbit is "
+               "elliptic so using Apsides vector for asymptote.\n";
+         MessageInterface::ShowMessage(warn);
+         apsidesForOutgoingAsymptoteWritten = true;
+      }
       sVHat = -eccVec/ecc;
       //
       //  The two options below are really hacks, the asymptote doesn't exist.  However,
@@ -3233,8 +3258,13 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
    
 	if (c3 < -1E-7)
 	{
-		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
-		MessageInterface::ShowMessage(warn);
+	   if (!apsidesForOutgoingAsymptoteWritten)
+	   {
+         std::string warn = "Warning: For Outgoing Asymptote, orbit is "
+               "elliptic so using Apsides vector for asymptote.\n";
+         MessageInterface::ShowMessage(warn);
+         apsidesForOutgoingAsymptoteWritten = true;
+	   }
 	}
 
 	Real     sma      =   -mu/c3;
@@ -3450,7 +3480,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyShortWritten)
+       {
+           MessageInterface::ShowMessage(
+                 "Warning: For BrouwerMeanShort, when RadPer < 6378km, there is a "
+                 "possible inaccuracy due to singularity related with "
+                 "inside-of-earth orbit.\n");
+           possibleInaccuracyShortWritten = true;
+       }
 	}
 	kep[5]= kep[5] * RAD_PER_DEG;
 	kep[5]=TrueToMeanAnomaly(kep[5],kep[1]);
@@ -3568,13 +3605,21 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 			aeqmean2= aeqmean + (aeq-aeq2);
 
             #ifdef DEBUG_BrouwerMeanShortToOsculatingElements
-                MessageInterface::ShowMessage("blmean2 : %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", blmean2[0], blmean2[1], blmean2[2], 
+                MessageInterface::ShowMessage("blmean2 : %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n",
+                    blmean2[0], blmean2[1], blmean2[2],
                     blmean2[3], blmean2[4], blmean2[5]);
             #endif
 		}
 		else
 		{
-			MessageInterface::ShowMessage("Warning :  the iterative algorithm converting from Cartesian to BrouwerMeanShort is not converging. So, it has been interrupted. The current relative error is %12.10f .\n",emag_old);
+		   if (!brouwerNotConvergingShortWritten)
+		   {
+            MessageInterface::ShowMessage(
+                  "Warning:  the iterative algorithm converting from Cartesian "
+                  "to BrouwerMeanShort is not converging. So, it has been "
+                  "interrupted. The current relative error is %12.10f .\n",emag_old);
+            brouwerNotConvergingShortWritten = true;
+		   }
 			
 			break;
 		}
@@ -3582,7 +3627,9 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy.\n");
+			MessageInterface::ShowMessage(
+			      "Warning: Maximum iteration number has been reached. "
+			      "There is a possible inaccuracy.\n");
 			break;
 		}
 		ii = ii + 1;
@@ -3690,14 +3737,27 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	}
 	if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+	   if (!possibleInaccuracyShortWritten)
+	   {
+         MessageInterface::ShowMessage(
+              "Warning: For BrouwerMeanShort, when RadPer < 6378km, there is a "
+              "possible inaccuracy due to singularity "
+              "related with inside-of-earth orbit.\n");
+         possibleInaccuracyShortWritten = true;
+	   }
 	}
 	if (eccp < 0.0)
 	{
 		eccp=-1.0*eccp;
 		meanAnom= meanAnom-TWO_PI/2;
 		aopp= aopp+TWO_PI/2;
-		MessageInterface::ShowMessage("Warning : Because eccentricity is smaller than 0.0, the current apoapsis will be taken to be new periapsis.\n");
+		if (!brouwerSmallEccentricityWritten)
+		{
+         MessageInterface::ShowMessage(
+               "Warning: Because eccentricity is smaller than 0.0, "
+               "the current apoapsis will be taken to be new periapsis.\n");
+         brouwerSmallEccentricityWritten = true;
+		}
 	}
 	if (eccp > 0.99)
 	{
@@ -3932,7 +3992,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyLongWritten)
+       {
+           MessageInterface::ShowMessage(
+                 "Warning: For BrouwerMeanLong, when RadPer < 6378km, there is a "
+                 "possible inaccuracy due to singularity "
+                 "related with inside-of-earth orbit.\n");
+           possibleInaccuracyLongWritten = true;
+       }
 	}
 	if (kep[2] > 180.0)
 	{
@@ -3947,7 +4014,15 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 
 	if ((58.80 < kep[2] && kep[2] < 65.78) || (114.22 < kep[2] && kep[2] < 121.2))
 	{
-        MessageInterface::ShowMessage("Warning : When 58.80 DEG < INC < 65.78 DEG, or 114.22 DEG < INC < 121.2DEG, there is a possible inaccuracy due to singularity related with critical angle.");
+	   if (!inaccuracyCriticalAngleWritten)
+	   {
+         MessageInterface::ShowMessage(
+              "Warning: For BrouwserMeanLong, when 58.80 DEG < "
+               "INC < 65.78 DEG, or 114.22 DEG "
+              "< INC < 121.2DEG, there is a possible inaccuracy due to "
+              "singularity related with critical angle.\n");
+         inaccuracyCriticalAngleWritten = true;
+	   }
 	}
 
 	kep[5]= kep[5] * RAD_PER_DEG;
@@ -4071,12 +4146,19 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 		}
 		else
 		{
-			MessageInterface::ShowMessage("Warning : the iterative algorithm converting from Cartesian to BrouwerMeanLong is not converging. So, it has been interrupted. The current relative error is %12.10f . \n",emag_old);
+		   if (!brouwerNotConvergingLongWritten)
+		   {
+            MessageInterface::ShowMessage(
+                  "Warning: the iterative algorithm converting from Cartesian "
+                  "to BrouwerMeanLong is not converging. So, it has been "
+                  "interrupted. The current relative error is %12.10f . \n",emag_old);
+            brouwerNotConvergingLongWritten = true;
+		   }
 			break;
 		}
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy.\n");
+			MessageInterface::ShowMessage("Warning: Maximum iteration number has been reached. There is a possible inaccuracy.\n");
 			break;
 		}
 		ii = ii + 1;
@@ -4193,7 +4275,14 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyLongWritten)
+       {
+          MessageInterface::ShowMessage(
+              "Warning: For BrouwerMeanLong, when RadPer < 6378km, there "
+              "is a possible inaccuracy due to singularity related "
+              "with inside-of-earth orbit.\n");
+          possibleInaccuracyLongWritten = true;
+       }
 	}
     
 	if (blml[2] > 180)
@@ -4342,7 +4431,13 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	Real    dlt1e;
 	if (bisubc >= 0.001)
 	{	// modifications for critical inclination
-		MessageInterface::ShowMessage("Warning : Mean inclination is close to critical inclination 63 or 117 DEG. There is a possible inaccuracy.\n");
+	   if (!criticalInclinationWritten)
+	   {
+         MessageInterface::ShowMessage(
+               "Warning: Mean inclination is close to critical "
+               "inclination 63 or 117 DEG. There is a possible inaccuracy.\n");
+         criticalInclinationWritten = true;
+	   }
 		dlt1e = 0.0;
 		blghp = 0.0;
 		eccdpdl= 0.0;
