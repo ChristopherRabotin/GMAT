@@ -709,9 +709,9 @@ Integer Subscriber::GetProviderId()
 }
 
 //------------------------------------------------------------------------------
-// virtual void SetProvider(GmatBase *provider);
+// virtual void SetProvider(GmatBase *provider, Real epochInMjd = -999.999)
 //------------------------------------------------------------------------------
-void Subscriber::SetProvider(GmatBase *provider)
+void Subscriber::SetProvider(GmatBase *provider, Real epochInMjd)
 {
    currentProvider = provider;
 }
