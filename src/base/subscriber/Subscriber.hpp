@@ -89,7 +89,7 @@ public:
    virtual void         SetProviderId(Integer id);
    virtual Integer      GetProviderId();
    
-   virtual void         SetProvider(GmatBase *provider);
+   virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    virtual void         SetDataLabels(const StringArray& elements);
    virtual void         SetPropagationDirection(Real propDir);
    virtual void         ClearDataLabels();

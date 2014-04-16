@@ -43,7 +43,7 @@ public:
    virtual void         ValidateParameters(bool forInitialization);
    
    // methods inherited from Subscriber
-   virtual void         SetProvider(GmatBase *provider);
+   virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
@@ -348,7 +348,7 @@ protected:
    virtual void HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
                                   const StringArray &satNames,
                                   const std::string &desc);
-   virtual void HandlePropagatorChange(GmatBase *provider);
+   virtual void HandlePropagatorChange(GmatBase *provider, Real epochInMjd);
    virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
                                                const std::string &satName,
                                                const std::string &desc);

@@ -328,7 +328,10 @@ bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer coun
       (*current)->SetDataLabels((*dataList)[id].labels);
       
       // Set provider
-      (*current)->SetProvider(provider);
+      if (count > 0)
+         (*current)->SetProvider(provider, data[0]);
+      else
+         (*current)->SetProvider(provider);
       
       // Set propagation direction
       (*current)->SetPropagationDirection(propDir);
