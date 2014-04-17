@@ -22,6 +22,7 @@
 
 
 #include "DataFile.hpp"
+#include "DateUtil.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>
@@ -46,6 +47,9 @@ const std::string DataFile::PARAMETER_TEXT[] =
    "Format",
    "DataThinningRatio",
    "SelectedStationIDs",
+   "EpochFormat",				// made changes by TUAN NGUYEN  for time span filter
+   "StartEpoch",				// made changes by TUAN NGUYEN  for time span filter
+   "EndEpoch",					// made changes by TUAN NGUYEN  for time span filter
 };
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
@@ -54,6 +58,9 @@ const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,			// "Format"
    Gmat::REAL_TYPE,				// "DataThinningRatio"
    Gmat::STRINGARRAY_TYPE,		// "IncludedStations"
+   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
+   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
+   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
 };
 
 
@@ -72,7 +79,10 @@ DataFile::DataFile(const std::string name) :
    theDatastream     (NULL),
    streamName        ("ObsData.gmd"),
    obsType           ("GMATInternal"),
-   thinningRatio     (1.0)
+   thinningRatio     (1.0),
+   startEpoch        (DateUtil::EARLIEST_VALID_MJD),				// made changes by TUAN NGUYEN
+   endEpoch          (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
+   epochFormat       ("TAIModJulian")								// made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -83,6 +93,11 @@ DataFile::DataFile(const std::string name) :
    objectTypeNames.push_back("DataFile");
 
    parameterCount = DataFileParamCount;
+
+   // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
+   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
+   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
+
 }
 
 
@@ -114,7 +129,12 @@ DataFile::DataFile(const DataFile& df) :
    streamName        (df.streamName),
    obsType           (df.obsType),
    thinningRatio     (df.thinningRatio),
-   selectedStationIDs(df.selectedStationIDs)
+   selectedStationIDs(df.selectedStationIDs),
+   estimationStart   (df.estimationStart),				// made changes by TUAN NGUYEN
+   estimationEnd     (df.estimationEnd),				// made changes by TUAN NGUYEN
+   epochFormat       (df.epochFormat),					// made changes by TUAN NGUYEN
+   startEpoch        (df.startEpoch),					// made changes by TUAN NGUYEN
+   endEpoch          (df.endEpoch)						// made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
@@ -160,6 +180,12 @@ DataFile& DataFile::operator=(const DataFile& df)
          theDatastream = (ObType*)df.theDatastream->Clone();
       else
          theDatastream = NULL;
+
+	  estimationStart      = df.estimationStart;			// made changes by TUAN NGUYEN
+	  estimationEnd        = df.estimationEnd;				// made changes by TUAN NGUYEN
+	  epochFormat          = df.epochFormat;				// made changes by TUAN NGUYEN
+	  startEpoch           = df.startEpoch;					// made changes by TUAN NGUYEN
+	  endEpoch             = df.endEpoch;					// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -353,6 +379,13 @@ std::string DataFile::GetStringParameter(const Integer id) const
    if (id == StreamName)
       return streamName;
 
+   if (id == EpochFormat)
+      return epochFormat;
+   if (id == StartEpoch)
+      return startEpoch;
+   if (id == EndEpoch)
+      return endEpoch;
+
    return GmatBase::GetStringParameter(id);
 }
 
@@ -394,6 +427,27 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
 	  }
 	  return true;
    }
+
+   if (id == EpochFormat)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      epochFormat = value;												// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == StartEpoch)												// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      startEpoch = value;												// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+   if (id == EndEpoch)													// made changes by TUAN NGUYEN
+   {																	// made changes by TUAN NGUYEN
+      endEpoch = value;													// made changes by TUAN NGUYEN
+      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
+      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
+      return true;														// made changes by TUAN NGUYEN
+   }																	// made changes by TUAN NGUYEN
+
 
    return GmatBase::SetStringParameter(id, value);
 }
@@ -587,6 +641,11 @@ Real DataFile::GetRealParameter(const Integer id) const
 {
    if (id == DataThinningRatio)
       return thinningRatio;
+
+   if (id == StartEpoch)
+      return estimationStart;
+   if (id == EndEpoch)
+      return estimationEnd;
 
    return GmatBase::GetRealParameter(id);
 }
@@ -905,3 +964,34 @@ bool DataFile::CloseStream()
 
    return retval;
 }
+
+
+//------------------------------------------------------------------------------
+// Real ConvertToRealEpoch(const std::string &theEpoch,
+//                         const std::string &theFormat)
+//------------------------------------------------------------------------------
+/**
+ * Converts an epoch string is a specified format into
+ *
+ * @param theEpoch The input epoch
+ * @param theFormat The format of the input epoch
+ *
+ * @return The converted epoch
+ */
+//------------------------------------------------------------------------------
+Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
+                                   const std::string &theFormat)
+{
+   Real fromMjd = -999.999;
+   Real retval = -999.999;
+   std::string outStr;
+
+   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+         retval, outStr);
+
+   if (retval == -999.999)
+      throw MeasurementException("Error converting the time string \"" + theEpoch +
+            "\"; please check the format for the input string.");
+   return retval;
+}
+

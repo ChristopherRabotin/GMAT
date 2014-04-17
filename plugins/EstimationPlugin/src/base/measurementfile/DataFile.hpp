@@ -121,6 +121,16 @@ protected:
    /// List of station IDs
    StringArray selectedStationIDs;			// list of stationIDs included in data file
 
+   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
+   std::string         epochFormat;							// made changes by TUAN NGUYEN
+   std::string         startEpoch;							// made changes by TUAN NGUYEN
+   std::string         endEpoch;							// made changes by TUAN NGUYEN
+   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
+   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
+   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
+   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+
+
    /// Class parameter ID enumeration
    enum
    {
@@ -128,6 +138,9 @@ protected:
        ObsType,
 	   DataThinningRatio,
 	   SelectedStationIDs,
+	   EpochFormat,
+	   StartEpoch,
+	   EndEpoch,
        DataFileParamCount
    };
 
@@ -138,6 +151,9 @@ protected:
    /// Types of the DataFile parameters
    static const Gmat::ParameterType
                 PARAMETER_TYPE[DataFileParamCount - GmatBaseParamCount];
+
+private:
+   Real ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
 };
 
 #endif /* DataFile_hpp */
