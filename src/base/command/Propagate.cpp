@@ -3926,7 +3926,7 @@ void Propagate::PrepareToPropagate()
                   state[0], state[1], state[2], state[3], state[4], state[5]);
                MessageInterface::ShowMessage(
                   "Propagator = \n%s\n",
-                  prop[0]->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
+                  propagators[0]->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
             }
             else
                MessageInterface::ShowMessage("Debugging first step: State not set\n");
@@ -4143,7 +4143,7 @@ bool Propagate::Execute()
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
          ("Propagate::Execute() <%s> entered.\n   initialized = %d, inProgress = %d\n",
-          GetGeneratingString().c_str(), initialized, inProgress);
+          GetGeneratingString().c_str(), isInitialized, inProgress);
    #endif
 
    if (isInitialized == false)
