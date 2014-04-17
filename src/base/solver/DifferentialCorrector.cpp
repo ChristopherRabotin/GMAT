@@ -35,6 +35,7 @@
 //#define DEBUG_JACOBIAN
 //#define DEBUG_VARIABLES_CALCS
 //#define DEBUG_TARGETING_MODES
+//#define DEBUG_INITIALIZATION
 
 // Turn on other debug if working on modes
 #ifdef DEBUG_TARGETING_MODES
@@ -878,6 +879,16 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                WriteToTextFile();
                ReportProgress();
                CompleteInitialization();
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("Variable initial values:\n");
+                  for (UnsignedInt i = 0; i < variableInitialValues.size(); ++i)
+                     MessageInterface::ShowMessage("   %.15le  (%.15le)\n",
+                           variableInitialValues[i], variable[i]);
+
+                  MessageInterface::ShowMessage("Goal initial values:\n");
+                  for (Integer i = 0; i < goalCount; ++i)
+                     MessageInterface::ShowMessage("   %.15le\n", goal[i]);
+               #endif
                status = INITIALIZED;
                break;
 
