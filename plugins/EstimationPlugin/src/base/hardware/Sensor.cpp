@@ -335,6 +335,9 @@ bool Sensor::IsParameterReadOnly(const Integer id) const
    if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
       return true;
 
+   if ((id == HARDWARE_DELAY)||(id == SENSOR_ID))
+      return true; 
+
    return Hardware::IsParameterReadOnly(id);
 }
 

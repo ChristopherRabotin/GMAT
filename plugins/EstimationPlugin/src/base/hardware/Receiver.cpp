@@ -314,6 +314,9 @@ bool Receiver::IsParameterReadOnly(const std::string& label) const
 //------------------------------------------------------------------------------
 bool Receiver::IsParameterReadOnly(const Integer id) const
 {
+   if ((id == FREQUENCY_MODEL)||(id == CENTER_FREQUENCY)||(id == BANDWIDTH))
+      return true;
+
    return RFHardware::IsParameterReadOnly(id);
 }
 

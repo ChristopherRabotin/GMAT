@@ -287,6 +287,59 @@ std::string Transponder::GetParameterUnit(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Specifies whether a property is an expected user scripted parameter.
+ *
+ * This method is used when an object is serialized to determine if the
+ * corresponding property should be included in the serialization.  Typical use
+ * is when an object is written to the screen or to a file; objects identified
+ * as "read only" by a return value of true from this method are but places in
+ * the text shown on the screen or in the file.
+ *
+ * Users can script the "read only" parameters, but do so at their own risk.
+ *
+ * @param label The scriptable label of the property
+ *
+ * @return true if the property is read only, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Transponder::IsParameterReadOnly(const std::string& label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Specifies whether a property is an expected user scripted parameter.
+ *
+ * This method is used when an object is serialized to determine if the
+ * corresponding property should be included in the serialization.  Typical use
+ * is when an object is written to the screen or to a file; objects identified
+ * as "read only" by a return value of true from this method are not placed in
+ * the text shown on the screen or in the file.
+ *
+ * Users can script the "read only" parameters, but do so at their own risk.
+ *
+ * @param id The integer ID of the property
+ *
+ * @return true if the property is read only, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Transponder::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == INPUT_FREQUENCY_MODEL)||(id == INPUT_CENTER_FREQUENCY)||(id == INPUT_BANDWIDTH)||(id == OUTPUT_FREQUENCY_MODEL))
+      return true;
+
+   return RFHardware::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**

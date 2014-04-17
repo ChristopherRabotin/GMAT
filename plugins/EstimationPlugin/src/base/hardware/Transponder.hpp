@@ -41,6 +41,9 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    // These are the parameter accessors.  The commented out versions may be
    // needed if derived classes implement them in order to prevent compiler
    // confusion.

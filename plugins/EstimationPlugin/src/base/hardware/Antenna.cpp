@@ -312,6 +312,11 @@ bool Antenna::IsParameterReadOnly(const Integer id) const
 {
    if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
       return true;
+
+   // Inactive fields: Delay, PhaseCenterLocation1,  PhaseCenterLocation2, and PhaseCenterLocation3
+   if ((id == ANTENNA_DELAY)||(id == PHASE_CENTER_LOCATION1)||(id == PHASE_CENTER_LOCATION2)||(id == PHASE_CENTER_LOCATION3))
+      return true;
+
    return Hardware::IsParameterReadOnly(id);
 }
 
