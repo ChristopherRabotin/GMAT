@@ -49,8 +49,13 @@ public:
 
 // Explicitly public so that this class acts like a struct
 public:
-   /// Flag to specify this data record is in used or not		// made changes by TUAN NGUYEN
+   /// Flag to specify this data record is in use or not		// made changes by TUAN NGUYEN
    bool inUsed;													// made changes by TUAN NGUYEN
+
+   /// Flag to specify reason the record not been used. 
+   /// "N": Normal, "U": unmatch, "T": timespan, "M": maximum residual limit, 
+   /// "I": OLSEInitialRMSSigma, "S": outer-loop sigma filter, "F": feasibility, "R": out of ramp table
+   std::string removedReason;		
 
    /// The text name of the data type, if available
    std::string       typeName;
