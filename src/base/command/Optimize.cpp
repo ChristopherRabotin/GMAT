@@ -546,11 +546,13 @@ bool Optimize::Execute()
    #endif
    
    // Attempt to reset if recalled   
+   bool prepareForRun = true;
    if (commandComplete)
    {
       commandComplete  = false;
       commandExecuting = false;
       specialState = Solver::INITIALIZING;
+      prepareForRun = false;
    }  
 
    if (!commandExecuting) 
@@ -561,7 +563,8 @@ bool Optimize::Execute()
       #endif
 
       FreeLoopData();
-      StoreLoopData();
+      if (prepareForRun)
+         StoreLoopData();
 
       retval = SolverBranchCommand::Execute();
 
@@ -1000,19 +1003,19 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             #endif
             currentCmd = branch[0];
             optimizerConverged = false;
+            StoreLoopData();
             while (currentCmd != this)  
             {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
                    (type == "Minimize") || (type == "NonlinearConstraint"))
                {
-                  currentCmd->Execute();
                   if ((type == "Vary") && (optimizerRunOnce))
                      currentCmd->TakeAction("SolverReset");
+                  currentCmd->Execute();
                }
                currentCmd = currentCmd->GetNext();
             }
-            StoreLoopData();
             GetActiveSubscribers();
             SetSubscriberBreakpoint();
             break;
@@ -1232,6 +1235,7 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
             #endif
             currentCmd = branch[0];
             optimizerConverged = false;
+            StoreLoopData();
             while (currentCmd != this)  
             {
                std::string type = currentCmd->GetTypeName();
@@ -1240,7 +1244,6 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
                   currentCmd->Execute();
                currentCmd = currentCmd->GetNext();
             }
-            StoreLoopData();
             GetActiveSubscribers();
             SetSubscriberBreakpoint();
             break;
