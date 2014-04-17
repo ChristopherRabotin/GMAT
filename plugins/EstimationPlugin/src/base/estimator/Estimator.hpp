@@ -173,7 +173,7 @@ protected:
    std::vector<RealArray>  hAccum;
 
    /// Weight, Observation data, calculated data					// made changes by TUAN NGUYEN
-//   std::fstream reportFile;											// made changes by TUAN NGUYEN
+   std::fstream reportFile;											// made changes by TUAN NGUYEN
    RealArray Weight;												// made changes by TUAN NGUYEN
    RealArray OData;													// made changes by TUAN NGUYEN
    RealArray CData;													// made changes by TUAN NGUYEN
@@ -245,6 +245,9 @@ protected:
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;	// made changes by TUAN NGUYEN
 
+   /// Types of reuseable bad record
+   StringArray reuseableTypes;
+
    /// Parameters associated with the Estimators
    enum
    {
@@ -261,6 +264,7 @@ protected:
 	  MAX_RESIDUAL_MULTIPLIER,				// made changes by TUAN NGUYEN  for data sigma editting
 	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
 	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
+	  REUSEABLE_BAD_RECORD_TYPES,
       EstimatorParamCount
    };
 
@@ -293,6 +297,9 @@ protected:
 ///// TBD: Do simulators need this too?  If so, move to base class
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
    virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
+
+private:
+   bool                    IsReuseableType(const std::string& value);
 
 };
 
