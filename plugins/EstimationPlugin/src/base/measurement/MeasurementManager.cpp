@@ -659,9 +659,11 @@ UnsignedInt MeasurementManager::LoadObservations()
       #else
          if (streamList[i]->IsOpen())
          {
-			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, count, numRec;
-			filter1Num = filter2Num = filter3Num = filter4Num = count = numRec = 0;
+			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
+			filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
 
+			Real epoch1 = 0.0;
+            Real epoch2 = 0.0;
 
 			Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
 			StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
@@ -669,6 +671,13 @@ UnsignedInt MeasurementManager::LoadObservations()
 			{
 			   od = streamList[i]->ReadObservation();
 			   ++numRec;
+
+			   if (epoch1 == 0.0)
+			   {
+			      epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+			      epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+			      MessageInterface::ShowMessage("epoch1 = %.12lf    epoch2 = %.12lf\n", epoch1, epoch2);
+			   }
 
 			   // End of file
 			   if (od == NULL)
@@ -687,7 +696,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 				  continue;
 			   }
 
-			   // duplication or time order filter
+			   // Duplication or time order filter
 			   if (od_old.epoch >= od->epoch)
 			   {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
@@ -697,7 +706,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 				  continue;
 			   }
 
-			   // selected stations filter
+			   // Selected stations filter
                bool choose = false;
                if (selectedStations.size() == 0)
 				  choose = true;
@@ -732,9 +741,25 @@ UnsignedInt MeasurementManager::LoadObservations()
 				  continue;
 			   }
 
+			   // Time span filter
+               if ((od->epoch < epoch1)||(od->epoch > epoch2))
+               {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+                  ++filter5Num;
+				  continue;
+               }
+
 			   obsTable.push_back(*od);
                #ifdef DEBUG_LOAD_OBSERVATIONS
-	           MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+	           MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+			   if (od->typeName == "DSNTwoWayDoppler")
+				   MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
+			   else if (od->typeName == "DSNTwoWayRange")
+				   MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
+			   else
+				   MessageInterface::ShowMessage("\n");
                #endif
 
 			   ++count;
@@ -746,6 +771,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 			MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
 			MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
 			MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
+			MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
 			MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
             MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
 
@@ -1854,4 +1880,23 @@ Integer MeasurementManager::FindModelForObservation()
 void  MeasurementManager::Reset()
 {
    currentObs = observations.begin();
+}
+
+
+const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
+{
+	return models;
+}
+
+UnsignedInt MeasurementManager::GetCurrentRecordNumber()
+{
+   UnsignedInt i = 0;
+   for (std::vector<ObservationData>::iterator j = observations.begin(); j != observations.end(); ++j)
+   {
+      if (j == currentObs)
+		 break;
+	  ++i;
+   }
+
+   return i;
 }

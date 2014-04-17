@@ -90,6 +90,9 @@ public:
    // Ramp tables reader method needed for simulator							// made changes by TUAN NGUYEN
    void					   LoadRampTables();									// made changes by TUAN NGUYEN
 
+   const std::vector<MeasurementModel*>& GetAllMeasurementModels();				// made changes by TUAN NGUYEN
+   UnsignedInt             GetCurrentRecordNumber();							// made changes by TUAN NGUYEN
+
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
