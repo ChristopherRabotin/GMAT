@@ -212,26 +212,39 @@ void SolverBranchCommand::StoreLoopData()
       if (obj->GetType() == Gmat::SPACECRAFT)
       {
          Spacecraft *orig = (Spacecraft*)(obj);
-         Spacecraft *sc = new Spacecraft(*orig);
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            ((GmatBase*)sc, "cloned local sc", "SolverBranchCommand::StoreLoopData()",
-             "Spacecraft *sc = new Spacecraft(*orig)");
-         #endif
-         // Handle CoordinateSystems
-         if (orig->GetInternalCoordSystem() == NULL)
-            MessageInterface::ShowMessage(
-               "Internal CS is NULL on spacecraft %s prior to optimizer cloning\n",
-               orig->GetName().c_str());
-         if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-            MessageInterface::ShowMessage(
-               "Coordinate system is NULL on spacecraft %s prior to optimizer cloning\n",
-               orig->GetName().c_str());
-         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
-         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
-            Gmat::COORDINATE_SYSTEM, "");
-         
-         localStore.push_back(sc);
+         Spacecraft *sc = NULL;
+
+         // Only add if not already buffered
+         Integer bufferLoc = -1;
+         for (UnsignedInt i = 0; i < localStore.size(); ++i)
+            if (localStore[i]->GetName() == orig->GetName())
+               bufferLoc = i;
+
+         if (bufferLoc == -1)
+         {
+            sc = (Spacecraft*)orig->Clone();
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Add
+               ((GmatBase*)sc, "cloned local sc", "SolverBranchCommand::StoreLoopData()",
+                "Spacecraft *sc = new Spacecraft(*orig)");
+            #endif
+            // Handle CoordinateSystems
+            if (orig->GetInternalCoordSystem() == NULL)
+               MessageInterface::ShowMessage(
+                  "Internal CS is NULL on spacecraft %s prior to optimizer cloning\n",
+                  orig->GetName().c_str());
+            if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+               MessageInterface::ShowMessage(
+                  "Coordinate system is NULL on spacecraft %s prior to optimizer cloning\n",
+                  orig->GetName().c_str());
+            sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
+            sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
+               Gmat::COORDINATE_SYSTEM, "");
+            localStore.push_back(sc);
+         }
+         else
+            // Call assignment operator
+            (*localStore[bufferLoc]) = (*obj);
       }
       if (obj->GetType() == Gmat::FORMATION)
       {
@@ -397,6 +410,7 @@ void SolverBranchCommand::FreeLoopData()
       #endif
       delete obj;
    }
+   localStore.clear();
 }
 
 
