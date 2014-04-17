@@ -773,14 +773,6 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
    #endif
 
-//   // Open report file										// made changes by TUAN NGUYEN
-//   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
-//   {
-//      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
-//	  reportFile << "Epoch                Meas Type        Parts      Obs Measuement (O)   Cal Measurement (C)  Residual (O-C)   Weight (W)         W*(O-C)^2\n";
-//   }
-
-
    // Show all residuals plots
    if (showAllResiduals)
    {
@@ -902,6 +894,26 @@ void BatchEstimator::CompleteInitialization()
             GmatTimeConstants::SECS_PER_DAY;
       currentState = PROPAGATING;
    }
+
+
+   // Open report file											// made changes by TUAN NGUYEN
+   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
+   {
+      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
+
+	  // Write out maximum residual for each measuement model
+	  std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
+	  for (int i = 0; i < modelsList.size(); ++i)
+		  reportFile << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+
+	  // Write out OLSE Initial RMS: 
+	  reportFile << GetName() <<".OLSEInitialRMSSigma = " << maxResidualMult << "\n";
+
+	  // Write out the header
+	  reportFile << "Iter   RecNum   Epoch                Meas Type      Parts      Status Band   Uplink Frequency         RangeModule              Doppler Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2\n";
+   }
+
+
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("BatchEstimator::CompleteInitialization "
@@ -1227,6 +1239,9 @@ void BatchEstimator::RunComplete()
 
    if (showAllResiduals)
       PlotResiduals();
+
+   // Close report file
+   reportFile.close();										// made changes by TUAN NGUYEN
 }
 
 
@@ -1299,6 +1314,11 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          case CHECKINGRUN:
+            progress << "\n   WeightedRMS residuals: "
+                     << newResidualRMS << "\n";
+            progress << "\n   PredictedRMS residuals: "
+                     << predictedRMS << "\n\n";
+
             progress << "------------------------------"
                      << "------------------------\n"
                      << "Iteration " << iterationsTaken
@@ -1315,11 +1335,13 @@ std::string BatchEstimator::GetProgressString()
 			              << outputEstimationState[i];							// made changes by TUAN NGUYEN
             }
 
-            progress << "\n   RMS residuals: "
-                     << newResidualRMS << "\n";
+//            progress << "\n   WeightedRMS residuals: "
+//                     << newResidualRMS << "\n";
             break;
 
          case FINISHED:
+            progress << "\n   WeightedRMS residuals: "
+                     << newResidualRMS << "\n\n";
             progress << "\n****************************"
                      << "****************************\n"
                      << "*** Estimating Completed in " << iterationsTaken
@@ -1436,7 +1458,8 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
 
    if (GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS) <= relativeTolerance)
    {
-      why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = "
+      why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = (" << newResidualRMS << " - " 
+		  << oldResidualRMS << ")/ " << oldResidualRMS << " = " 
           << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
           << " is less than RealtiveTol, "
           << relativeTolerance << "\n";
@@ -1471,6 +1494,8 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------
 void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 {
+   GmatState outputEstimationState;											// made changes by TUAN NGUYEN
+
    if (!showProgress)
       return;
 
@@ -1499,20 +1524,29 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
             textFile << "   Estimation Epoch (A.1 modified Julian): "
                      << estimationEpoch << "\n\n";
 
+
+         GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
          for (UnsignedInt i = 0; i < map->size(); ++i)
          {
             textFile << "   "
                      << (*map)[i]->objectName << "."
                      << (*map)[i]->elementName << "."
                      << (*map)[i]->subelement << " = "
-                     << (*estimationState)[i] << "\n";
+//                     << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
+                     << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
          }
          break;
 
       case CHECKINGRUN:
          if (textFileMode == "Verbose")
          {
-            textFile << "------------------------------"
+            textFile << "\n   WeightedRMS residuals at this iteration: "
+                     << newResidualRMS << "\n";
+            textFile << "\n   PredictedRMS residuals: "
+                     << predictedRMS << "\n\n";
+
+			textFile << "------------------------------"
                       << "------------------------\n"
                       << "Iteration " << iterationsTaken
                       << "\n\nCurrent estimated state:\n";
@@ -1523,21 +1557,27 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
                textFile << "   Estimation Epoch (A.1 modified Julian): "
                         << estimationEpoch << "\n\n";
 
+
+            GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                textFile << "   "
                         << (*map)[i]->objectName << "."
                         << (*map)[i]->elementName << "."
                         << (*map)[i]->subelement << " = "
-                        << (*estimationState)[i] << "\n";
+//                        << (*estimationState)[i] << "\n";
+                        << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
-            textFile << "\n   RMS residuals at this iteration: "
-                     << newResidualRMS << "\n\n";
+//            textFile << "\n   WeightedRMS residuals at this iteration: "
+//                     << newResidualRMS << "\n\n";
          }
          break;
 
       case FINISHED:
+         textFile << "\n   WeightedRMS residuals: "
+                     << newResidualRMS << "\n\n";
          textFile << "\n****************************"
                   << "****************************\n"
                   << "*** Estimating Completed in " << iterationsTaken
@@ -1555,13 +1595,17 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
             textFile << "   Estimation Epoch (A.1 modified Julian): "
                      << estimationEpoch << "\n\n";
 
+		 
+		 GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
+
          for (UnsignedInt i = 0; i < map->size(); ++i)
          {
             textFile << "   "
                      << (*map)[i]->objectName << "."
                      << (*map)[i]->elementName << "."
                      << (*map)[i]->subelement << " = "
-                     << (*estimationState)[i] << "\n";
+//                     << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
+                     << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
          }
 
          { // Switch statement scoping
