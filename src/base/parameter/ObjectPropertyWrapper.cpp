@@ -378,6 +378,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    if (object == NULL)
       throw ParameterException(
       "Cannot return value of ObjectProperty - object pointer is NULL\n");
+   
    Real itsValue;
    try
    {
@@ -403,9 +404,13 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    }
    catch (BaseException &be)
    {
-      std::stringstream errmsg;
-      errmsg << be.GetFullMessage() << std::endl;
-      throw ParameterException(errmsg.str());
+      //std::stringstream errmsg;
+      //errmsg << be.GetFullMessage(); // << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
    }
    
    return itsValue;
@@ -444,12 +449,17 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
          MessageInterface::ShowMessage(
          "   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
       #endif
-      std::stringstream errmsg;
+         
+      //std::stringstream errmsg;
 //      errmsg << "Cannot set Real value for id \"" << propID;
 //      errmsg << "\" for object \"" << object->GetName();
 //      errmsg << "\" - exception thrown: "<< be.GetFullMessage() << std::endl;
-      errmsg << be.GetFullMessage() << std::endl;
-      throw ParameterException(errmsg.str());
+      //errmsg << be.GetFullMessage() << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing  when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
    }
    
    return true;
@@ -489,9 +499,14 @@ bool ObjectPropertyWrapper::SetRvector(const Rvector &toValue)
       MessageInterface::ShowMessage
          ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
       #endif
-      std::stringstream errmsg;
-      errmsg << be.GetFullMessage() << std::endl;
-      throw ParameterException(errmsg.str());
+      
+      //std::stringstream errmsg;
+      //errmsg << be.GetFullMessage() << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing  when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
    }
    
    return true;

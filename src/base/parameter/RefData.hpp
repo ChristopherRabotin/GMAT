@@ -23,7 +23,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-#include "Parameter.hpp"
+#include "Parameter.hpp" // for namespace GmatParam::
 
 /**
  * Moved out of the RefObjType class so that the Visual Studio exports could be implemented
@@ -79,6 +79,9 @@ public:
    RefData& operator= (const RefData &rd);
    virtual ~RefData();
    
+   void                 SetParameter(Parameter *param);
+   Parameter*           GetParameter();
+   
    bool                 SetName(const std::string &newName,
                                 const std::string &oldName = "");
    GmatBase*            GetSpacecraft();
@@ -105,6 +108,7 @@ public:
 
 protected:
 
+   Parameter   *mParameter;
    std::string mActualParamName;
    std::string mParamOwnerName;
    std::string mParamDepName;

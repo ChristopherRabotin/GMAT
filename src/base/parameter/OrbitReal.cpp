@@ -324,6 +324,9 @@ bool OrbitReal::Initialize()
 {
    RealVar::Initialize();
    
+   //LOJ: 2014.04.16
+   SetParameter(this);
+   
    try
    {
       #if DEBUG_ORBITREAL

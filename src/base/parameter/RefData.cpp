@@ -47,6 +47,7 @@
 RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
                  GmatParam::DepObject depObj, bool isSettable)
 {
+   mParameter = NULL;
    mActualParamName = name;
    GmatStringUtil::ParseParameter(name, mParamTypeName, mParamOwnerName, mParamDepName);
    mParamOwnerType = paramOwnerType;
@@ -73,6 +74,7 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
+   mParameter = NULL; // This will be set during initialization
    mActualParamName = copy.mActualParamName;
    mParamOwnerName = copy.mParamOwnerName;
    mParamDepName = copy.mParamDepName;
@@ -103,6 +105,7 @@ RefData& RefData::operator= (const RefData& right)
    if (this == &right)
       return *this;
    
+   mParameter = right.mParameter;
    mActualParamName = right.mActualParamName;
    mParamOwnerName = right.mParamOwnerName;
    mParamDepName = right.mParamDepName;
@@ -128,6 +131,24 @@ RefData& RefData::operator= (const RefData& right)
 RefData::~RefData()
 {
    mRefObjList.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void SetParameter(Parameter *param)
+//------------------------------------------------------------------------------
+void RefData::SetParameter(Parameter *param)
+{
+   mParameter = param;
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* GetParameter()
+//------------------------------------------------------------------------------
+Parameter* RefData::GetParameter()
+{
+   return mParameter;
 }
 
 

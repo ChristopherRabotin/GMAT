@@ -549,9 +549,9 @@ protected:
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                         std::stringstream &stream);
 
-   Rvector6          GetStateInRepresentation(std::string rep = "", bool useDefaultCartesian = false);
+   Rvector6          GetStateInRepresentation(const std::string &rep = "", bool useDefaultCartesian = false);
    Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID, bool useDefaultCartesian = false);
-   void              SetStateFromRepresentation(std::string rep, Rvector6 &st);
+   void              SetStateFromRepresentation(const std::string &rep, Rvector6 &st, const std::string &label = "");
 
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);

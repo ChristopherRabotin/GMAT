@@ -287,6 +287,72 @@ void OrbitData::SetReal(Integer item, Real rval)
    // Check for different coordinate system for Spacecraft owend Parameter(2013.03.28)
    if (!mIsParamOriginDep && mParameterCS != NULL && paramOwnerCS != NULL)
    {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("mParameter = <%p>'%s'\n", mParameter, mParameter ? mParameter->GetName().c_str() : "NULL");
+      #endif
+      
+      // Do validation on coordinate system (for GMT-4512 fix)
+      if (mParameter)
+      {
+         bool reqBodyFixedCS = mParameter->RequiresBodyFixedCS();
+         bool reqCelesBodyOrigin  = mParameter->RequiresCelestialBodyCSOrigin();
+         #ifdef DEBUG_ORBITDATA_SET
+         MessageInterface::ShowMessage("RequiresBodyFixedCS = %d\n", reqBodyFixedCS);
+         MessageInterface::ShowMessage("RequiresCelestialBodyCSOrigin = %d\n", reqCelesBodyOrigin);
+         #endif
+         if (reqBodyFixedCS)
+         {
+            StringArray typeNames = mParameterCS->GetAxisSystem()->GetTypeNames();
+            #ifdef DEBUG_ORBITDATA_SET
+            MessageInterface::ShowMessage("parameterCSAxis type names are:\n");
+            for (UnsignedInt i = 0; i < typeNames.size(); i++)
+               MessageInterface::ShowMessage("   typeNames[%d] = %s\n", i, typeNames[i].c_str());
+            #endif
+            if ((mParameterCS->GetAxisSystem())->IsOfType("BodyFixedAxes"))
+            {
+               #ifdef DEBUG_ORBITDATA_SET
+               MessageInterface::ShowMessage("Parameter is in BodyFixed CS\n");
+               #endif
+            }
+            else
+            {
+               ParameterException pe;
+               pe.SetDetails("The %s is only defined for coordinate systems with BodyFixed axes",
+                             mParameter->GetParameterClassType().c_str());
+               throw pe;
+            }
+         }
+         if (reqCelesBodyOrigin)
+         {
+            StringArray typeNames = mParameterCS->GetOrigin()->GetTypeNames();
+            #ifdef DEBUG_ORBITDATA_SET
+            MessageInterface::ShowMessage("parameterCSOrigin type names are:\n");
+            for (UnsignedInt i = 0; i < typeNames.size(); i++)
+               MessageInterface::ShowMessage("   typeNames[%d] = %s\n", i, typeNames[i].c_str());
+            MessageInterface::ShowMessage
+               ("   CS origin = <%p><%s>'%s'\n", mParameterCS->GetOrigin(),
+                (mParameterCS->GetOrigin())->GetTypeName().c_str(),
+                (mParameterCS->GetOrigin())->GetName().c_str());
+            #endif
+            if ((mParameterCS->GetOrigin())->IsOfType("CelestialBody"))
+            {
+               #ifdef DEBUG_ORBITDATA_SET
+               MessageInterface::ShowMessage("Parameter is in CS with CelestialBody origin\n");
+               #endif
+            }
+            else
+            {
+               ParameterException pe;
+               pe.SetDetails("The %s is only defined for coordinate systems with "
+                             "BodyFixed axes with CelestialBody origin",
+                             mParameter->GetParameterClassType().c_str());
+               throw pe;
+            }
+         }
+      }
+      
+      
       if (mParameterCS->GetName() != paramOwnerCS->GetName())
       {
          // Now allow setting value to coordinate system dependent Parameter
@@ -300,7 +366,7 @@ void OrbitData::SetReal(Integer item, Real rval)
          {
             // Should not get here, so throw a exception
             ParameterException pe;
-            pe.SetDetails("The Parameter %s is not settable)", mActualParamName.c_str());
+            pe.SetDetails("The Parameter %s is not settable", mActualParamName.c_str());
             throw pe;
          }
          

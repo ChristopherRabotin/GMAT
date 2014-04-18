@@ -83,9 +83,11 @@ public:
    Gmat::ObjectType         GetOwnedObjectType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
+   std::string              GetParameterClassType() const;
    
    void  SetKey(const GmatParam::ParameterKey &key);
    void  SetOwner(GmatBase *owner);
+   void  SetParameterClassType(const std::string &classType);
    
    bool  IsSystemParameter() const;
    bool  IsAngleParameter() const;
@@ -206,6 +208,7 @@ protected:
    std::string   mDepObjectName;
    std::string   mCommentLine2;
    std::string   mInitialValue;
+   std::string   mParameterClassType;
    
    Gmat::ObjectType     mOwnerType;
    Gmat::ObjectType     mOwnedObjectType;

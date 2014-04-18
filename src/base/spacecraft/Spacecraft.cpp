@@ -6241,7 +6241,7 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
  * Code used to obtain a state in a non-Cartesian representation.
  */
 //------------------------------------------------------------------------------
-Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCartesian)
+Rvector6 Spacecraft::GetStateInRepresentation(const std::string &rep, bool useDefaultCartesian)
 {
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Constructing %s state\n", rep.c_str());
@@ -6282,12 +6282,15 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCa
       else
          csState.Set(state.GetState());
    }
-
+   
    // Then convert to the desired representation
+   std::string newRep = rep; // LOJ: I made rep to be const std::string &rep (2014.04.17)
    if (rep == "")
-      rep = stateType;   // do I want displayStateType here?
-
-   if (rep == "Cartesian")
+      //rep = stateType;   // do I want displayStateType here?
+      newRep = stateType;   // do I want displayStateType here?
+   
+   //if (rep == "Cartesian")
+   if (newRep == "Cartesian")
    {
       finalState = csState;
       #ifdef DEBUG_STATE_INTERFACE
@@ -6299,10 +6302,12 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCa
    {
       #ifdef DEBUG_STATE_INTERFACE
          MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): type is %s, so calling StateConversionUtil to convert\n",
-            rep.c_str());
+                                       //rep.c_str());
+            newRep.c_str());
          MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using originMu = %12.10f\n", originMu);
       #endif
-      finalState = StateConversionUtil::Convert(csState, "Cartesian", rep,
+         //finalState = StateConversionUtil::Convert(csState, "Cartesian", rep,
+      finalState = StateConversionUtil::Convert(csState, "Cartesian", newRep,
                    originMu, originFlattening, originEqRadius, anomalyType);
    }
 
@@ -6333,20 +6338,39 @@ Rvector6 Spacecraft::GetStateInRepresentation(Integer rep, bool useDefaultCartes
 
 
 //------------------------------------------------------------------------------
-// void SetStateFromRepresentation(std::string rep, Rvector6 &st)
+// void SetStateFromRepresentation(std::string rep, Rvector6 &st, ...)
 //------------------------------------------------------------------------------
 /**
  * Code used to obtain a state in a non-Cartesian representation.
  */
 //------------------------------------------------------------------------------
-void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
+void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st,
+                                            const std::string &label)
 {
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
-         "Spacecraft::SetStateFromRepresentation: Setting %s state to %s\n",
-         rep.c_str(), st.ToString(16).c_str());
+         "Spacecraft::SetStateFromRepresentation: Setting %s state to %s, label = '%s'\n",
+         rep.c_str(), st.ToString(16).c_str(), label.c_str());
    #endif
-
+      
+   if (internalCoordSystem == NULL)
+      throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
+   if (coordinateSystem == NULL)
+      throw SpaceObjectException(" The spacecraft coordinate system is not set");
+   
+   // Do validation on coordinate system (for GMT-4512 fix)
+   if (rep == "Planetodetic")
+   {
+      #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage
+         ("The rep is Planetodetic, now checking for spacecraft coordiante system\n");
+      #endif
+      // If spacecraft coordinate system is not of BodyFixed axes, throw an error
+      if (!((coordinateSystem->GetAxisSystem())->IsOfType("BodyFixedAxes")))
+         throw SpaceObjectException
+            ("The Planetodetic state type is only defined for coordinate systems with BodyFixed axes");
+   }
+   
    // First convert from the representation to Cartesian
    static Rvector6 csState, finalState;
 
@@ -6367,10 +6391,11 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
          "Spacecraft::SetStateFromRepresentation: state has been converted\n");
    #endif
 
-   if (internalCoordSystem == NULL)
-      throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
-   if (coordinateSystem == NULL)
-      throw SpaceObjectException(" The spacecraft coordinate system is not set");
+   // Moved up so that more validation can be done before doing the state conversion (LOJ: 2014.04.17)
+   // if (internalCoordSystem == NULL)
+   //    throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
+   // if (coordinateSystem == NULL)
+   //    throw SpaceObjectException(" The spacecraft coordinate system is not set");
 
    #ifdef DEBUG_STATE_INTERFACE
    MessageInterface::ShowMessage
@@ -6670,7 +6695,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             #endif
             Rvector6 tempState = GetStateInRepresentation(rep);
             tempState[id] = value;
-            SetStateFromRepresentation(rep, tempState);
+            SetStateFromRepresentation(rep, tempState, label);
          }
          else
          {

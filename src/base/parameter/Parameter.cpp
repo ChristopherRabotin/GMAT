@@ -137,6 +137,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mDepObjectName = "";
    mCommentLine2 = "";
    mInitialValue = "";
+   mParameterClassType = "";
    mIsCommentFromCreate = true;
    mOwnerType = ownerType;
    mOwnedObjectType = ownedObjType;
@@ -196,7 +197,7 @@ Parameter::Parameter(const Parameter &copy)
    mDepObjectName = copy.mDepObjectName;
    mCommentLine2 = copy.mCommentLine2;
    mInitialValue = copy.mInitialValue;
-   mIsCommentFromCreate = copy.mIsCommentFromCreate;
+   mParameterClassType = copy.mParameterClassType;
    mOwnerType = copy.mOwnerType;
    mReturnType = copy.mReturnType;
    mDepObj = copy.mDepObj;
@@ -212,7 +213,9 @@ Parameter::Parameter(const Parameter &copy)
    mIsOwnedObjDependent = copy.mIsOwnedObjDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
    mNeedExternalClone = copy.mNeedExternalClone;
-   
+   mRequiresBodyFixedCS = copy.mRequiresBodyFixedCS;
+   mRequiresCelestialBodyCSOrigin = copy.mRequiresCelestialBodyCSOrigin;
+   mIsCommentFromCreate = copy.mIsCommentFromCreate;
 }
 
 
@@ -242,7 +245,7 @@ Parameter& Parameter::operator= (const Parameter& right)
    mDepObjectName = right.mDepObjectName;
    mCommentLine2 = right.mCommentLine2;
    mInitialValue = right.mInitialValue;
-   mIsCommentFromCreate = right.mIsCommentFromCreate;
+   mParameterClassType = right.mParameterClassType;
    mOwnerType = right.mOwnerType;
    mReturnType = right.mReturnType;
    mDepObj = right.mDepObj;
@@ -258,7 +261,10 @@ Parameter& Parameter::operator= (const Parameter& right)
    mIsOwnedObjDependent = right.mIsOwnedObjDependent;
    mNeedCoordSystem = right.mNeedCoordSystem;
    mNeedExternalClone = right.mNeedExternalClone;
-
+   mRequiresBodyFixedCS = right.mRequiresBodyFixedCS;
+   mRequiresCelestialBodyCSOrigin = right.mRequiresCelestialBodyCSOrigin;
+   mIsCommentFromCreate = right.mIsCommentFromCreate;
+   
    return *this;
 }
 
@@ -336,6 +342,21 @@ GmatParam::CycleType  Parameter::GetCycleType() const
    return mCycleType;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterClassType() const
+//------------------------------------------------------------------------------
+std::string Parameter::GetParameterClassType() const
+{
+   return mParameterClassType;
+}
+
+//------------------------------------------------------------------------------
+// void SetParameterClassType(const std::string &classType)
+//------------------------------------------------------------------------------
+void Parameter::SetParameterClassType(const std::string &classType)
+{
+   mParameterClassType = classType;
+}
 
 //------------------------------------------------------------------------------
 // bool IsSystemParameter() const
