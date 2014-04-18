@@ -45,7 +45,9 @@ public:
    const bool operator==(const CoordinateSystem &coordSys);
    // destructor
    virtual ~CoordinateSystem();
-
+   
+   AxisSystem* GetAxisSystem();
+   
    // virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter (calls through to its AxisSystem)
    virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;

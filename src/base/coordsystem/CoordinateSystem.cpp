@@ -251,6 +251,16 @@ CoordinateSystem::~CoordinateSystem()
    #endif
 }
 
+
+//---------------------------------------------------------------------------
+// AxisSystem* GetAxisSystem()
+//---------------------------------------------------------------------------
+AxisSystem* CoordinateSystem::GetAxisSystem()
+{
+   return axes;
+}
+
+
 //---------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
 //---------------------------------------------------------------------------
