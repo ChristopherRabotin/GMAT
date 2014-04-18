@@ -86,8 +86,9 @@ public:
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
-   bool                 IsOfType(std::string typeDescription) const;
-
+   bool                 IsOfType(const std::string &typeDescription) const;
+   StringArray          GetTypeNames() const;
+   
    virtual bool         IsInitialized();
 
    void                 SetShowPrefaceComment(bool show = true);

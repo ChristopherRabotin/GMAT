@@ -420,7 +420,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType) const
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
       ("   Not the requested type; current types are [");
-   for (ObjectTypeArray::iterator i = objectTypes.begin();
+   for (ObjectTypeArray::const_iterator i = objectTypes.begin();
         i != objectTypes.end(); ++i)
    {
       if (i != objectTypes.begin())
@@ -445,7 +445,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType) const
  * @return true is the class was derived from the type, false if not.
  */
 //---------------------------------------------------------------------------
-bool GmatBase::IsOfType(std::string typeDescription) const
+bool GmatBase::IsOfType(const std::string &typeDescription) const
 {
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
@@ -462,16 +462,16 @@ bool GmatBase::IsOfType(std::string typeDescription) const
       #endif
       return true;
    }
-
+   
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
       ("   Not the requested type; current types are [");
-   for (StringArray::iterator i = objectTypeNames.begin();
+   for (StringArray::const_iterator i = objectTypeNames.begin();
         i != objectTypeNames.end(); ++i)
    {
       if (i != objectTypeNames.begin())
          MessageInterface::ShowMessage(", ");
-      MessageInterface::ShowMessage("%s", i->c_str());
+      MessageInterface::ShowMessage("%s", (*i)->c_str());
    }
    MessageInterface::ShowMessage("]\n");
    #endif
@@ -479,6 +479,13 @@ bool GmatBase::IsOfType(std::string typeDescription) const
    return false;
 }
 
+//------------------------------------------------------------------------------
+// StringArray GetTypeNames() const
+//------------------------------------------------------------------------------
+StringArray GmatBase::GetTypeNames() const
+{
+   return objectTypeNames;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsInitialized()
