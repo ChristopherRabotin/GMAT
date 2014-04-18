@@ -5109,12 +5109,14 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
 
    Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
+   
    Real ecc = eVec.GetMagnitude();
    Real rMag = pos.GetMagnitude();
    Real ta = 0.0;
@@ -5131,7 +5133,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
    #endif
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 1:  Non-circular, Inclined Orbit\n");
@@ -5155,7 +5158,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
       }
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 2: Non-circular, Equatorial Orbit\n");
@@ -5169,7 +5173,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
          ta = TWO_PI - ta;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 3: Circular, Inclined Orbit\n");
@@ -5189,7 +5194,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
          ta = TWO_PI - ta;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 4: Circular, Equatorial Orbit\n");
@@ -5475,13 +5481,14 @@ Real StateConversionUtil::CartesianToINC(Real mu, const Rvector3 &pos,
    }
 
    Real inc = ACos((hVec[2] / hMag), GmatOrbitConstants::KEP_TOL);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
-
+   
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
+   
    #ifdef DEBUG_KEPLERIAN_INC
    MessageInterface::ShowMessage("returning %f\n", inc);
    #endif
@@ -5517,16 +5524,17 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
 
    Real ecc = CartesianToECC(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
    Real raan = 0.0;
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5541,12 +5549,14 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
          raan = TWO_PI - raan;
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       raan = 0.0;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5561,7 +5571,8 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
          raan = TWO_PI - raan;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       raan = 0.0;
    }
@@ -5606,17 +5617,18 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
 
    Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
    Real ecc = eVec.GetMagnitude();
    Real aop = 0.0;
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5631,7 +5643,8 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
          aop = TWO_PI - aop;
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       if (ecc == 0.0)
       {
@@ -5644,12 +5657,14 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
          aop = TWO_PI - aop;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       aop = 0.0;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       aop = 0.0;
    }
