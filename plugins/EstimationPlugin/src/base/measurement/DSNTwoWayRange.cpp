@@ -563,6 +563,13 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
             participants.size());
    #endif
 
+   // Get minimum elevation angle for ground station
+   Real minAngle;
+   if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+   else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+
    if (withEvents == false)
    {
       #ifdef DEBUG_RANGE_CALC
@@ -612,11 +619,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
       #endif
 
-	  Real minAngle;
-	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
-         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
-	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
-         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+//	  Real minAngle;
+//	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+//         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+//	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+//         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
 
       if (currentMeasurement.feasibilityValue > minAngle)
       {
@@ -1124,7 +1131,35 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
 
 
-	  // 18. Calculate real range
+	  //18. Verify uplink leg light path not to be blocked by station's central body
+      UpdateRotationMatrix(t1T, "R_o_j2k");
+	  Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();
+	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+	  if (currentMeasurement.feasibilityValue > minAngle)
+	  {
+         UpdateRotationMatrix(t3R, "R_o_j2k");
+         outState = (R_o_j2k * (r2 - r1)).GetUnitVector();
+	     Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+
+		 if (feasibilityValue > minAngle)
+		 {
+			currentMeasurement.unfeasibleReason = "N";
+		    currentMeasurement.isFeasible = true;
+		 }
+		 else
+		 {
+			currentMeasurement.feasibilityValue = feasibilityValue;
+			currentMeasurement.unfeasibleReason = "ER";
+		    currentMeasurement.isFeasible = false;
+		 }
+	  }
+	  else
+	  {
+		 currentMeasurement.unfeasibleReason = "ET";
+		 currentMeasurement.isFeasible = false;
+	  }
+
+	  // 19. Calculate real range
 	  //	   Real realRange = ((upRange + downRange) /
 	  //            (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M) +
 	  //            receiveDelay + transmitDelay + targetDelay) * freqFactor;
@@ -1156,12 +1191,14 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		    realRangeFull = IntegralRampedFrequency(t3R, realTravelTime, errnum);						// unit: range unit
 		 } catch (MeasurementException exp)
 		 {
-            currentMeasurement.value[0] = 0.0;
+            currentMeasurement.value[0] = 0.0;					// It has no C-value due to the failure of calculation of IntegralRampedFrequency()
 	        currentMeasurement.uplinkFreq = frequency;
 	        currentMeasurement.uplinkBand = freqBand;
 	        currentMeasurement.rangeModulo = rangeModulo;
 			currentMeasurement.isFeasible = false;
-			currentMeasurement.feasibilityValue = 0.0;
+			currentMeasurement.unfeasibleReason = "R";
+//			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 19
+			
 			if ((errnum == 2)||(errnum =3))
 			   throw exp;
 			else
@@ -1197,22 +1234,12 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
 
-	  // 19. Set value for currentMeasurement
+	  // 20. Set value for currentMeasurement
       currentMeasurement.value[0] = realRange;
 	  currentMeasurement.uplinkFreq = frequency;
 	  currentMeasurement.uplinkBand = freqBand;
 	  currentMeasurement.rangeModulo = rangeModulo;
 
-
-	  //20. Verify downlink leg light path not to be blocked by station's central body
-      // Set feasibility off of topocentric horizon, set by the Z value in topo coords
-      UpdateRotationMatrix(t1T, "R_o_j2k");
-      Rvector3 outState = R_o_j2k * (r4B - r3B);
-      currentMeasurement.feasibilityValue = outState[2];
-	  if (currentMeasurement.feasibilityValue > 0)
-		  currentMeasurement.isFeasible = true;
-	  else
-		  currentMeasurement.isFeasible = false;
 
       #ifdef DEBUG_CURRENT_MEASUREMENT
 	     MessageInterface::ShowMessage("   currentMeasurement = <%p>\n", currentMeasurement);
@@ -1320,7 +1347,9 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    else if ((*rampTB).size() == 0)
    {
       err = 3;
-	  throw MeasurementException("Error: No data in ramp table\n");
+	  std::stringstream ss;
+	  ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+	  throw MeasurementException(ss.str());
    }
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
