@@ -38,6 +38,8 @@ MeasurementData::MeasurementData() :
    epochSystem (TimeConverterUtil::A1MJD),
    epoch       (0.0),
    isFeasible  (false),
+   unfeasibleReason ("N"),		// made changes by TUAN NGUYEN
+   feasibilityValue (0.0),		// made changes by TUAN NGUYEN
    covariance  (NULL),
    eventCount  (0),
    uplinkBand  (0),				// made changes by TUAN NGUYEN
@@ -79,6 +81,8 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    participantIDs (md.participantIDs),
    value          (md.value),
    isFeasible     (md.isFeasible),
+   unfeasibleReason (md.unfeasibleReason),  // made changes by TUAN NGUYEN
+   feasibilityValue (md.feasibilityValue),	// made changes by TUAN NGUYEN
    covariance     (md.covariance),
    eventCount     (md.eventCount),
 ///// TBD: Do these go here?
@@ -114,6 +118,8 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       participantIDs  = md.participantIDs;
       value           = md.value;
       isFeasible      = md.isFeasible;
+	  unfeasibleReason = md.unfeasibleReason;   // made changes by TUAN NGUYEN
+	  feasibilityValue = md.feasibilityValue;	// made changes by TUAN NGUYEN
       covariance      = md.covariance;
       eventCount      = md.eventCount;
 	  uplinkBand      = md.uplinkBand;			// made changes by TUAN NGUYEN

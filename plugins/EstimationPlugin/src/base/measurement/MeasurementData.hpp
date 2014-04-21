@@ -68,6 +68,10 @@ public:
    RealArray         value;
    /// Flag indicating if the measurement could be made when it was attempted
    bool              isFeasible;
+   
+   /// Flag to indicate unfeasible reason
+   std::string       unfeasibleReason;				// "N": default value, "E": elevation angle, "R": out of ramped table, "U": unmatched to any measurement model   
+
    /// Value used for root finding
    Real              feasibilityValue;
    /// Measurement error covariance matrix
