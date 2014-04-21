@@ -347,25 +347,6 @@ bool MeasurementModel::Initialize()
                      instanceName.c_str());
             #endif
 
-            #ifdef TEST_FIRE_MEASUREMENT
-               MessageInterface::ShowMessage("Test firing measurement model %s\n",
-                     instanceName.c_str());
-
-               CalculateMeasurement();
-
-               MessageInterface::ShowMessage("   Calculated %s at epoch %.12lf\n",
-                     measurement->GetTypeName().c_str(), theData->epoch);
-               MessageInterface::ShowMessage("   FeasibilityValue = %lf\n",
-                     theData->feasibilityValue);
-               MessageInterface::ShowMessage("   Feasibility:  %s\n",
-                     (theData->isFeasible ? "true" : "false"));
-               MessageInterface::ShowMessage("   Measurement = [");
-               for (RealArray::iterator i = theData->value.begin();
-                     i != theData->value.end(); ++i)
-                  MessageInterface::ShowMessage(" %.12lf ", (*i));
-               MessageInterface::ShowMessage("]\n");
-            #endif
-
          }
       }
    }
@@ -1946,7 +1927,6 @@ void MeasurementModel::SetModelID(Integer newID)
  * @return A reference to the calculated MeasurementData
  */
 //------------------------------------------------------------------------------
-// const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)					// made changes by TUAN NGUYEN
 const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents, 
 			ObservationData* forObservation, std::vector<RampTableData>* rampTB)					// made changes by TUAN NGUYEN
 {
