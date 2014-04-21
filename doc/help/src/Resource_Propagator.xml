@@ -1342,7 +1342,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>Drag.F107</guilabel> &gt; 0</para>
+                      <para><guilabel>Drag.F107</guilabel>&gt;= 0</para>
                     </listitem>
                   </varlistentry>
 
@@ -1400,7 +1400,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>Drag.F107A</guilabel>&gt;0</para>
+                      <para><guilabel>Drag.F107A</guilabel>&gt;=0</para>
                     </listitem>
                   </varlistentry>
 
