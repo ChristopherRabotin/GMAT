@@ -1031,10 +1031,12 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       err = 2;
 	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
-   else if ((*rampTB).size() == 0)
+   else if ((*rampTB).size() < 2)
    {
       err = 3;
-	  throw MeasurementException("Error: No data in ramp table\n");
+	  std::stringstream ss;
+	  ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+	  throw MeasurementException(ss.str());
    }
    
 
