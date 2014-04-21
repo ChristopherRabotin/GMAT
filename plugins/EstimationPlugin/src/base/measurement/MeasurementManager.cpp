@@ -394,25 +394,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 		 if (!observations.empty())																// made changes by TUAN NGUYEN
             od = &(*currentObs);																// made changes by TUAN NGUYEN
 
-		 // measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
-         #ifdef DEBUG_CALCULATE
-		    MessageInterface::ShowMessage("$$$$$$ models[%d]name = '%s'\n", j, models[j]->GetName().c_str());
-			MessageInterface::ShowMessage("$$$$$$ observations.size() = %d\n", observations.size());
-		    if (od == NULL)
-               MessageInterface::ShowMessage("$$$$$$ Observation data is not used in calculation\n");
-			else
-			   MessageInterface::ShowMessage("$$$$$$ currentObs: epoch = %.12lf, participants: %s  %s,  meas value = %.12lf\n", currentObs->epoch, currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), currentObs->value[0]);
-         #endif
-		 
 		 measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);					// made changes by TUAN NGUYEN
-
-		 #ifdef DEBUG_CALCULATE
-			MessageInterface::ShowMessage("$$$$$$ measurements[%d] = <%p>,   .epoch = %.12lf,   .participants: %s  %s,   .value[0] = %.12le\n", 
-				j, &measurements[j], measurements[j].epoch, 
-				measurements[j].participantIDs[0].c_str(), measurements[j].participantIDs[1].c_str(), 
-				measurements[j].value[0]);
-         #endif
-         
          if (measurements[j].isFeasible)
          {
             ++successCount;
@@ -437,26 +419,8 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 		 if (!observations.empty())																// made changes by TUAN NGUYEN
             od = &(*currentObs);																// made changes by TUAN NGUYEN
 
-//         measurements[measurementToCalc] =													// made changes by TUAN NGUYEN
-//			 models[measurementToCalc]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
-         #ifdef DEBUG_CALCULATE
-		    MessageInterface::ShowMessage("****** models[%d]name = '%s'\n", measurementToCalc, models[measurementToCalc]->GetName().c_str());
-			MessageInterface::ShowMessage("****** observations.size() = %d\n", observations.size());
-			if (od == NULL)
-			   MessageInterface::ShowMessage("****** Observation data is not used in calculation\n");
-			else
-			   MessageInterface::ShowMessage("****** currentObs: epoch = %.12lf, participants: %s  %s,  meas value = %.12lf\n", currentObs->epoch, currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), currentObs->value[0]);
-         #endif
-
          measurements[measurementToCalc] =														// made changes by TUAN NGUYEN
 			 models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
-
-         #ifdef DEBUG_CALCULATE
-			MessageInterface::ShowMessage("****** measurements[%d] = <%p>,   .epoch = %.12lf,   .participants: %s  %s,   .value[0] = %.12le\n", 
-				measurementToCalc, &measurements[measurementToCalc], measurements[measurementToCalc].epoch, 
-				measurements[measurementToCalc].participantIDs[0].c_str(), measurements[measurementToCalc].participantIDs[1].c_str(), 
-				measurements[measurementToCalc].value[0]);
-         #endif
          
 		 if (measurements[measurementToCalc].isFeasible)
          {
@@ -1362,6 +1326,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       {
          // Verify observation data belonging to the measurement model jth
 		 bool isbelong;
+		 std::string reason;
          if ((models[j]->GetStringParameter("Type") != od->typeName))
 		 {
 	        isbelong = false;
@@ -1394,6 +1359,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		 
 		 if (isbelong == false)
          {
+//			 MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, models[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
 		    measurements[j].typeName		 = models[j]->GetStringParameter("Type");
 	        measurements[j].epoch			 = od->epoch;
 	        measurements[j].epochSystem	     = od->epochSystem;
@@ -1401,6 +1367,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 	        measurements[j].covariance		 = NULL;
 	        measurements[j].eventCount		 = 0;
 	        measurements[j].feasibilityValue = 0.0;
+			measurements[j].unfeasibleReason = "U";
 	        measurements[j].value.clear();  
          }
 		 else
@@ -1414,14 +1381,13 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 	        if (sr.size() > 0)																	// made changes by TUAN NGUYEN
 	           rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
 		    
-//          measurements[j] = models[j]->CalculateMeasurement(withEvents);						// made changes by TUAN NGUYEN
 	        measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
 	     
             if (measurements[j].isFeasible)
             {
-            if (!withEvents)
-               eventCount += measurements[j].eventCount;
-            retval = true;
+               if (!withEvents)
+                  eventCount += measurements[j].eventCount;
+               retval = true;
             }
 		 }
       }
