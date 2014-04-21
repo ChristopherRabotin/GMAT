@@ -485,6 +485,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
             participants.size());
    #endif
 
+   // Get minimum elevation angle from ground station
+   Real minAngle;
+   if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+   else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+
+
    if (withEvents == false)
    {
       #ifdef DEBUG_DOPPLER_CALC
@@ -531,11 +539,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
                bfLoc.ToString().c_str());
       #endif
 
-	  Real minAngle;
-	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
-         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
-	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
-         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
+//	  Real minAngle;
+//	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
+//         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+//	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
+//         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
 //	  MessageInterface::ShowMessage("min angle = %lf    elevation angle = %lf\n", minAngle, currentMeasurement.feasibilityValue);
 
       if (currentMeasurement.feasibilityValue > minAngle)
@@ -1222,7 +1230,70 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("    Time travel for End path E  : dtE =  %.15le s\n", dtE);
       #endif
 
-      // 15. Calculate Frequency Doppler Shift:
+
+	  // 15. Check feasibility of signals for Start path and End path:
+	  currentMeasurement.isFeasible = true;
+	  // 15.1. Check for Start part
+      UpdateRotationMatrix(t1TS, "R_o_j2k");
+	  Rvector3 outState = (R_o_j2k * (r4S - r3S)).GetUnitVector();
+	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+	  if (currentMeasurement.feasibilityValue > minAngle)
+	  {
+         UpdateRotationMatrix(t3RS, "R_o_j2k");
+         outState = (R_o_j2k * (r2S - r1S)).GetUnitVector();
+	     Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+
+		 if (feasibilityValue > minAngle)
+		 {
+			currentMeasurement.unfeasibleReason = "N";
+		    currentMeasurement.isFeasible = true;
+		 }
+		 else
+		 {
+			currentMeasurement.feasibilityValue = feasibilityValue;
+			currentMeasurement.unfeasibleReason = "EST";
+		    currentMeasurement.isFeasible = false;
+		 }
+	  }
+	  else
+	  {
+		 currentMeasurement.unfeasibleReason = "ESR";
+		 currentMeasurement.isFeasible = false;
+	  }
+
+	  // 15.2. When Start path is feasible, we check for End part
+	  if (currentMeasurement.isFeasible)
+	  {
+         UpdateRotationMatrix(t1TE, "R_o_j2k");
+	     outState = (R_o_j2k * (r4E - r3E)).GetUnitVector();
+	     currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+	     if (currentMeasurement.feasibilityValue > minAngle)
+	     {
+            UpdateRotationMatrix(t3RE, "R_o_j2k");
+            outState = (R_o_j2k * (r2E - r1E)).GetUnitVector();
+	        Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+
+		    if (feasibilityValue > minAngle)
+			{
+			   currentMeasurement.unfeasibleReason = "N";
+		       currentMeasurement.isFeasible = true;
+			}
+		    else
+		    {
+			   currentMeasurement.feasibilityValue = feasibilityValue;
+			   currentMeasurement.unfeasibleReason = "EET";
+		       currentMeasurement.isFeasible = false;
+		    }
+	     }
+	     else
+		 {
+			currentMeasurement.unfeasibleReason = "EER";
+		    currentMeasurement.isFeasible = false;
+		 }
+	  }
+	  
+
+      // 16. Calculate Frequency Doppler Shift:
       dtdt = dtE - dtS;
 
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
@@ -1239,6 +1310,10 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("         dtdt = dtE - dtS : %.15lf s\n", dtdt);
       #endif
 
+	  currentMeasurement.uplinkFreq = frequencyE;				// uplink frequency for E path										// made changes by TUAN NGUYEN
+	  currentMeasurement.uplinkBand = freqBand;																						// made changes by TUAN NGUYEN
+	  currentMeasurement.dopplerCountInterval = interval;																			// made changes by TUAN NGUYEN
+
 	  if (rampTB != NULL)																											// made changes by TUAN NGUYEN
 	  {
 		 Integer errnum;
@@ -1248,12 +1323,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		    currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE, errnum)/ interval;		   // made changes by TUAN NGUYEN
 		 } catch (MeasurementException exp)
 		 {
-			currentMeasurement.value[0] = 0.0;
+			currentMeasurement.value[0] = 0.0;						// It has no C-value due to the failure of calculation of IntegralRampedFrequency()
 	        currentMeasurement.uplinkFreq = frequencyE;
 	        currentMeasurement.uplinkBand = freqBand;
 	        currentMeasurement.dopplerCountInterval = interval;
 			currentMeasurement.isFeasible = false;
-			currentMeasurement.feasibilityValue = 0.0;
+			currentMeasurement.unfeasibleReason = "R";
+//			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 15
+			
 			if ((errnum == 2)||(errnum == 3))
 			   throw exp;
 			else
@@ -1275,13 +1352,6 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 
 	     currentMeasurement.value[0] = -turnaround*frequency*(interval - dtdt)/interval;											// made changes by TUAN NGUYEN
 	  }
-
-	  currentMeasurement.uplinkFreq = frequencyE;				// uplink frequency for E path										// made changes by TUAN NGUYEN
-	  currentMeasurement.uplinkBand = freqBand;																						// made changes by TUAN NGUYEN
-	  currentMeasurement.dopplerCountInterval = interval;																			// made changes by TUAN NGUYEN
-      
-	  // Note that: It needs to check return signal not be blocked by Earth. If it is blocked, isFeasible has to set to false.
-	  currentMeasurement.isFeasible = true;
 
 
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
