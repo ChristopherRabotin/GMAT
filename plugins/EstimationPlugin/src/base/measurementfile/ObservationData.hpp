@@ -55,7 +55,7 @@ public:
    /// Flag to specify reason the record not been used. 
    /// "N": Normal, "U": unmatch, "T": timespan, "M": maximum residual limit, 
    /// "I": OLSEInitialRMSSigma, "S": outer-loop sigma filter, "F": feasibility, "R": out of ramp table
-   std::string removedReason;		
+   std::string       removedReason;
 
    /// The text name of the data type, if available
    std::string       typeName;
