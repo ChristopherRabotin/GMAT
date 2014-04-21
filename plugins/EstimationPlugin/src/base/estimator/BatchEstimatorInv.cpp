@@ -174,6 +174,7 @@ void BatchEstimatorInv::Accumulate()
       sLine << currentObs->typeName << "   ";
    for(int n=0; n < currentObs->participantIDs.size(); ++n)
       sLine << currentObs->participantIDs[n] << "   ";
+   sLine << "       ";
 
 
 //   ValidateModelToAccess();						// verify observation data is matched to a measurement model
@@ -181,34 +182,48 @@ void BatchEstimatorInv::Accumulate()
    {
 	  ++numRemovedRecords["Observation data is unmatched to any measurement model"];
 
-	  sLine << "U       ";
+	  measManager.GetObsDataObject()->removedReason = "U";
+	  measManager.GetObsDataObject()->inUsed = false;
+
+	  sLine << measManager.GetObsDataObject()->removedReason << "     ";
 	  if (currentObs->typeName == "DSNTwoWayRange")
 	     sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	  else if (currentObs->typeName == "DSNTwoWayDoppler")
 		 sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
       sLine << s;
-      sprintf(&s[0],"%18.6lf   ", currentObs->value[0]);
-	  sLine << s << "\n";
+      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                                  N/A", currentObs->value[0]);
+	  sLine << s;
+
+	  // fill out N/A for partial derivative
+      for (int i = 0; i < stateMap->size(); ++i)
+		 sLine << "                      N/A";
+	  sLine << "\n";
    }
    else
    {
       int count = measManager.Calculate(modelsToAccess[0], true);
+	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
 	  if (count == 0)
 	  {
-	     sLine << "F       ";
+		 measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
+		 sLine << measManager.GetObsDataObject()->removedReason << "     ";
 	     if (currentObs->typeName == "DSNTwoWayRange")
 		    sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	     else if (currentObs->typeName == "DSNTwoWayDoppler")
 		    sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
          sLine << s;
-         sprintf(&s[0],"%18.6lf   ", currentObs->value[0]);
-	     sLine << s << "\n";
+		 sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
+		 sLine << s;
+
+		 // fill out N/A for partial derivative
+		 for (int i = 0; i < stateMap->size(); ++i)
+			 sLine << "                      N/A";
+	     sLine << "\n";
 	  }
 	  else // (count >= 1)
       {
          // Currently assuming uniqueness; modify if more than 1 possible here
          // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
-	     calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
 	     bool isReUsed = DataFilter();
       
          #ifdef DEBUG_ACCUMULATION
@@ -236,8 +251,13 @@ void BatchEstimatorInv::Accumulate()
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-			sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le", calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight);
-		    sLine << s <<"\n";
+			sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %18.12lf", calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, calculatedMeas->feasibilityValue);
+			sLine << s;
+
+			// fill out N/A for partial derivative
+		    for (int i = 0; i < stateMap->size(); ++i)
+			   sLine << "                      N/A";
+		    sLine << "\n";
 		 }
 		 else
          {
@@ -413,8 +433,16 @@ void BatchEstimatorInv::Accumulate()
                sprintf(&s[0],"%18.6lf   ", currentObs->value[k]);
 			   sLine << s;
 
-			   sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le", calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight);
-		       sLine << s <<"\n";
+			   sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %18.12lf", calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, calculatedMeas->feasibilityValue);
+			   sLine << s;
+
+               // fill out N/A for partial derivative
+			   for (int p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
+			   {
+				  sprintf(&s[0],"   %18.15le", hAccum[hAccum.size()-1][p]);
+                  sLine << s;
+			   }
+		       sLine << "\n";
 	        }
 
             #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -563,13 +591,12 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-//   // Close report file
-//   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
-//       reportFile.close();										// made changes by TUAN NGUYEN
    
    if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
+   GmatState initState = (*estimationState);
 
+   // Calculalte state change dx 
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -581,35 +608,13 @@ void BatchEstimatorInv::Estimate()
       (*estimationState)[i] += delta;
    }
 
-   
-   char s[1000];
-
+   // Calculate weighted root mean square residuals  
    delta = 0.0;
    for (int i = 0; i < measurementResiduals.size(); ++i)
-   {
-//      delta += measurementResiduals[i] * measurementResiduals[i];
       delta += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
 
-      std::stringstream sLine;
-	  Real timeTAI = TimeConverterUtil::Convert(this->measurementEpochs[i],TimeConverterUtil::A1MJD,TimeConverterUtil::TAIMJD);
-	  sprintf(&s[0],"%.12lf   ", timeTAI);
-	  sLine << s;
-
-	  sprintf(&s[0],"%.9lf   %.9lf   %.9lf   %.9le   %.9le\n", OData[i], CData[i], measurementResiduals[i], Weight[i], measurementResiduals[i] * measurementResiduals[i]*Weight[i]);
-	  sLine << s;
-//      reportFile << sLine.str();
-//      reportFile.flush();
-   }
    oldResidualRMS = newResidualRMS;
    newResidualRMS = GmatMathUtil::Sqrt(delta / measurementResiduals.size());
-//   MessageInterface::ShowMessage("   Weighted RMS measurement residuals = %.12lf    delta = %lf   numrec = %d\n", newResidualRMS, delta, measurementResiduals.size());
-
-   // Write report file:
-   std::stringstream sLine;
-   sprintf(&s[0],"   WeightedRMS residuals = %.12lf       delta = %lf     number of reccords = %d\n\n", newResidualRMS, delta, measurementResiduals.size());
-   sLine << s;
-   reportFile << sLine.str();
-   reportFile.flush();
 
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");
@@ -624,9 +629,6 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("]\n");
    #endif
 
-   // This section is used to calculate predicted RMS for data sigma editting
-   RealArray hRow;
-   hRow.assign(hAccum[0].size(), 0.0);
    
    // Calculate predicted RMS for Outer-Loop sigma editting
    predictedRMS = 0;
@@ -646,13 +648,59 @@ void BatchEstimatorInv::Estimate()
 	  Real temp = 0;
 	  for(UnsignedInt i = 0; i < hAccum[j].size(); ++i)
 	  {
-		 temp = hAccum[j][i]*dx[i];
+		 temp += hAccum[j][i]*dx[i];
 	  }
 
 	  predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];
    }
    predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
 
+
+   // Write report file:
+   char s[1000];
+   std::stringstream sLine;
+   sprintf(&s[0],"   WeightedRMS residuals = %.12lf       Sum [W*(O-C)^2] = %lf     number of reccords = %d\n", newResidualRMS, delta, measurementResiduals.size());
+   sLine << s;
+   sprintf(&s[0],"   Predicted RMS residuals = %.12lf\n", predictedRMS);
+   sLine << s;
+   
+   sLine << "   Initial state (solve-for vector) in EarthMJ2000: x" << iterationsTaken << " = (";
+   for (int i= 0; i < initState.GetSize(); ++i)
+   {
+	  sprintf(&s[0],"%18.9lf   ", initState[i]);
+      sLine << s;
+   }
+   sLine << ")\n";
+
+   sLine << "   Estimated state (solve-for vector) in EarthMJ2000: x" << iterationsTaken+1 << " = (";
+   for (int i= 0; i < (*estimationState).GetSize(); ++i)
+   {
+	  sprintf(&s[0],"%18.9lf   ", (*estimationState)[i]);
+      sLine << s;
+   }
+   sLine << ")\n";
+
+   sLine << "   State (solve-for vector) change: dx = x" << iterationsTaken+1 << " - x" << iterationsTaken << " = (";
+   for (int i= 0; i < dx.size(); ++i)
+   {
+	  sprintf(&s[0],"%18.9lf   ", dx[i]);
+      sLine << s;
+   }
+   sLine << ")\n\n";
+
+   sLine << "----------------------------------------------------------------------\n";
+//   sLine << "Iteration " << iterationsTaken+1 << "\n"; 
+//   sLine << "Initial state (solve-for vector) x = (" ;
+   
+//   GmatState currentEstimationState = (*estimationState);
+//   for (int i= 0; i < currentEstimationState.GetSize(); ++i)
+//   {
+//	  sprintf(&s[0],"%18.9lf   ", currentEstimationState[i]);
+//      sLine << s;
+//   }
+//   sLine << ")\n";
+   reportFile << sLine.str();
+   reportFile.flush();
 
    // Clear O, C, and W lists
    Weight.clear();

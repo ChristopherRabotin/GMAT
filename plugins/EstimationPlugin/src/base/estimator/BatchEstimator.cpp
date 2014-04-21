@@ -905,12 +905,28 @@ void BatchEstimator::CompleteInitialization()
 	  std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
 	  for (int i = 0; i < modelsList.size(); ++i)
 		  reportFile << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+	  reportFile << "\n";
 
 	  // Write out OLSE Initial RMS: 
-	  reportFile << GetName() <<".OLSEInitialRMSSigma = " << maxResidualMult << "\n";
+	  reportFile << GetName() <<".OLSEInitialRMSSigma = " << maxResidualMult << "\n\n";
+
+	  // Notation:
+	  reportFile << "Notaions used in report file: \n";
+	  reportFile << "  N: Normal\n";
+	  reportFile << "  U: Unmatched to any measurement model\n";
+	  reportFile << "  R: Out of ramped table\n";
+	  reportFile << "  ET: measurement unfeasible due to the block of transmitted signal\n";
+	  reportFile << "  ER: measurement unfeasible due to the block of received signal\n";
+	  reportFile << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
+	  reportFile << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
+	  reportFile << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
+	  reportFile << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
+	  reportFile << "  M: Edited by measurement maximum residual\n";
+	  reportFile << "  I: Edited by Initial RMS Sigma filter\n";
+	  reportFile << "  S: Edited by Outer-Loop Sigma Editing\n\n";
 
 	  // Write out the header
-	  reportFile << "Iter   RecNum   Epoch                Meas Type      Parts      Status Band   Uplink Frequency         RangeModule              Doppler Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2\n";
+	  reportFile << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2                Elevation-Angle   Partial-Derivative Vector\n";
    }
 
 
