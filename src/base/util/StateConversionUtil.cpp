@@ -2807,8 +2807,7 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
 } // PlanetodeticToCartesian()
 
 
-
-// modified by YK
+// modified by YK (2014.04.09)
 //------------------------------------------------------------------------------
 // Rvector6 CartesianToIncomingAsymptote(Real mu, const Rvector6& cartesian)
 //------------------------------------------------------------------------------
@@ -2859,7 +2858,14 @@ Rvector6 StateConversionUtil::CartesianToIncomingAsymptote(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
+   	if (vMag < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << " The Incoming Asymptote elements are";
+      errmsg << " undefined for zero-velocity orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
    if (ecc <= 1E-7)
 	{
 		std::stringstream errmsg("");
@@ -2885,13 +2891,8 @@ Rvector6 StateConversionUtil::CartesianToIncomingAsymptote(Real mu, const Rvecto
    }
    else if (c3 < -1E-7)
    {
-      if (!apsidesForIncomingAsymptoteWritten)
-      {
-         std::string warn = "Warning: For IncomingAsymptote, orbit is "
-               "elliptic so using Apsides vector for asymptote.\n";
-         MessageInterface::ShowMessage(warn);
-         apsidesForIncomingAsymptoteWritten = true;
-      }
+      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+      MessageInterface::ShowMessage(warn);
       
       sVHat = -eccVec/ecc;
       //
@@ -2970,13 +2971,8 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
    
 	if (c3 < 1E-7)
 	{
-	   if (!apsidesForIncomingAsymptoteWritten)
-	   {
-         std::string warn = "Warning: For IncomingAsymptote, orbit is "
-               "elliptic so using Apsides vector for asymptote.\n";
-         MessageInterface::ShowMessage(warn);
-         apsidesForIncomingAsymptoteWritten = true;
-	   }
+		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+		MessageInterface::ShowMessage(warn);
 	}
    
 	Real sma =  -mu/c3;
@@ -2994,7 +2990,6 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
 	if (ecc < 1E-7)
 	{
       std::stringstream errmsg("");
@@ -3015,7 +3010,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 	Rvector3 uz(0.0,0.0,1.0);
 	Rvector3 ux(1.0,0.0,0.0);
    
-	if (ACos(Abs(sVHat*uz)) < 1E-11) // 1e-7, 1e-11, criteria??
+	if (ACos(Abs(sVHat*uz)) < 1E-7) // 1e-7, 1e-11, criteria??
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
@@ -3030,7 +3025,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
 	Real	    ami	=	TWO_PI/4 - bva; // angular azimuth at infinity 
 	Rvector3  hVHat	=	Sin(ami)*eaVhat + Cos(ami)*noVhat;
-   Rvector3  nodeVec =   Cross(uz, hVHat);
+    Rvector3  nodeVec =   Cross(uz, hVHat);
 	Real      nMag    =   nodeVec.GetMagnitude();
 	Rvector3  eccVHat;
    
@@ -3065,7 +3060,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
-	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	if ( ecc >= 1E-11 && inc < 1E-7 )  // CASE 2: Non-circular, Equatorial Orbit
 	{
 		raan = 0;
 		argPeriapsis = ACos(eccVHat.Get(0));
@@ -3074,12 +3069,12 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 
 	}
    
-	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-7 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
 	{
-		raan = ACos(eccVHat(1));
-		argPeriapsis = 0;
+		raan = 0 ;
+		argPeriapsis = -ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
-			raan = TWO_PI - raan;
+			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
 	Real kepl[6];
@@ -3094,28 +3089,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
    
 	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
 	AnomalyType type = GetAnomalyType("TA");
-	Integer errorCode = ComputeKeplToCart(mu, kepl, pos, vel, type);
-	if (errorCode > 0)
-	{
-		if (errorCode == 2)
-      {
-			std::stringstream errmsg("");
-         errmsg.precision(16);
-         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
-         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
-         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
-         throw UtilityException(errmsg.str());
-      }
-      else
-      {
-         //  Hope we never hit this.  This is a last resort, something went wrong.
-         throw UtilityException
-            ("Unable to convert Keplerian elements to Cartesian state.\n");
-		}
-	}
-   
-	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
-   
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
 	return cart;
 }
 
@@ -3158,7 +3132,14 @@ Rvector6 StateConversionUtil::CartesianToOutgoingAsymptote(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
+    if (vMag < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << " The Outgoing Asymptote elements are";
+      errmsg << " undefined for zero-velocity orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
    if (ecc <= 1E-7)
 	{
 		std::stringstream errmsg("");
@@ -3182,13 +3163,9 @@ Rvector6 StateConversionUtil::CartesianToOutgoingAsymptote(Real mu, const Rvecto
       sVHat = fac1*(Sqrt(c3)/mu*Cross(hVec,eccVec) - eccVec); 
    else if (c3 < -1E-7)
    {
-      if (!apsidesForOutgoingAsymptoteWritten)
-      {
-         std::string warn = "Warning: For OutgoingAsymptote, orbit is "
-               "elliptic so using Apsides vector for asymptote.\n";
-         MessageInterface::ShowMessage(warn);
-         apsidesForOutgoingAsymptoteWritten = true;
-      }
+      
+      std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+      MessageInterface::ShowMessage(warn);
       sVHat = -eccVec/ecc;
       //
       //  The two options below are really hacks, the asymptote doesn't exist.  However,
@@ -3258,13 +3235,8 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
    
 	if (c3 < -1E-7)
 	{
-	   if (!apsidesForOutgoingAsymptoteWritten)
-	   {
-         std::string warn = "Warning: For Outgoing Asymptote, orbit is "
-               "elliptic so using Apsides vector for asymptote.\n";
-         MessageInterface::ShowMessage(warn);
-         apsidesForOutgoingAsymptoteWritten = true;
-	   }
+		std::string warn = "Warning: Orbit is elliptic so using Apsides vector for asymptote.\n";
+		MessageInterface::ShowMessage(warn);
 	}
 
 	Real     sma      =   -mu/c3;
@@ -3351,19 +3323,19 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 		if (eccVHat.Get(2) < 0)
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
-	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	if ( ecc >= 1E-11 && inc < 1E-7 )  // CASE 2: Non-circular, Equatorial Orbit
 	{
 		raan = 0;
 		argPeriapsis = ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
-	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-7 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
 	{
-		raan = ACos(eccVHat(1));
-		argPeriapsis = 0;
+		raan = 0 ;
+		argPeriapsis = -ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
-			raan = TWO_PI - raan;
+			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
 	Real kepl[6];
@@ -3379,31 +3351,9 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
 	
 	AnomalyType type = GetAnomalyType("TA");
-	Integer errorCode	=	ComputeKeplToCart(mu, kepl, pos, vel, type);
-	if (errorCode > 0)
-	{
-		if (errorCode == 2)
-      {
-			std::stringstream errmsg("");
-         errmsg.precision(16);
-         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
-         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
-         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
-         throw UtilityException(errmsg.str());
-      }
-      else
-      {
-         //  Hope we never hit this.  This is a last resort, something went wrong.
-         throw UtilityException
-            ("Unable to convert Keplerian elements to Cartesian state.\n");
-		}
-	}
-   
-	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
 	return cart;
 }
-
-
 
 
 // Mod made by YKK 2014.03.29
