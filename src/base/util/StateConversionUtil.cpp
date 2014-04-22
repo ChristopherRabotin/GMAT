@@ -2017,7 +2017,8 @@ Rvector6 StateConversionUtil::ModKeplerianToKeplerian(const Rvector6& modKepleri
 
    if (radApo < radPer && radApo > 0.0)
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: If RadApo < RadPer then RadApo must be negative.  "
-                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
+                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.  "
+                             "If setting the hyperbolic asymptote, set RadPer last.");
 
    if (radPer <= 0.0)
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
@@ -2109,7 +2110,7 @@ Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, 
    {
       throw UtilityException
          ("Error in conversion to Equinoctial elements: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+          "Equinoctial state does not currently support orbits with inclination of 180 degrees.\n");
    }
 
    Integer j = 1;  // always 1, unless inclination is exactly 180 degrees
@@ -2553,28 +2554,33 @@ Rvector6 StateConversionUtil::KeplerianToDelaunay(const Rvector6& keplerian, con
       }
    }
    
-   if ( ecc > 1.0 )
+   // Check for hyperbolic orbit
+   if ( ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)
    {
-      #ifdef DEBUG_CONVERT_ERRORS
-      MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", ecc);
-      #endif
-      
-      Real possible = PI - ACos(1.0/ecc);
-      
-      while ( ta > PI )ta -= TWO_PI;
-      while ( ta < PI)ta += TWO_PI;
-      
-      if ( Abs(ta ) >= possible )
-      {
-         possible *= DEG_PER_RAD;
-         std::stringstream errmsg;
-           errmsg.precision(12);
-           errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
-           errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
-           errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
-           errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
-           throw UtilityException(errmsg.str());
-      }
+      std::string errmsg =
+            "Cannot convert from Keplerian to Delaunay - the orbit is hyperbolic.\n";
+      throw UtilityException(errmsg);
+
+//      #ifdef DEBUG_CONVERT_ERRORS
+//      MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", ecc);
+//      #endif
+//
+//      Real possible = PI - ACos(1.0/ecc);
+//
+//      while ( ta > PI )ta -= TWO_PI;
+//      while ( ta < -PI)ta += TWO_PI;  // was +PI
+//
+//      if ( Abs(ta ) >= possible )
+//      {
+//         possible *= DEG_PER_RAD;
+//         std::stringstream errmsg;
+//           errmsg.precision(12);
+//           errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
+//           errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
+//           errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
+//           errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
+//           throw UtilityException(errmsg.str());
+//      }
    }
    
    Real L_dela= Sqrt(mu * sma);
