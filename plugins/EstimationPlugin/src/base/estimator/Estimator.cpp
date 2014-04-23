@@ -58,6 +58,7 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEMultiplicativeConstant",			// made changes by TUAN NGUYEN  for data sigma editting
    "OLSEAdditiveConstant",					// made changes by TUAN NGUYEN  for data sigma editting
    "ReuseableBadRecordTypes",
+   "ReportFileName",
 };
 
 const Gmat::ParameterType
@@ -77,6 +78,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::STRINGARRAY_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -118,7 +120,8 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    epochFormat          ("TAIModJulian"),								// made changes by TUAN NGUYEN
    maxResidualMult		(1.0e180),										// made changes by TUAN NGUYEN
    constMult			(3.0),											// made changes by TUAN NGUYEN
-   additiveConst        (0.0)											// made changes by TUAN NGUYEN
+   additiveConst        (0.0),											// made changes by TUAN NGUYEN
+   reportFilename       ("")											// made changes by TUAN NGUYEN
 {
 
    objectTypeNames.push_back("Estimator");
@@ -188,7 +191,8 @@ Estimator::Estimator(const Estimator& est) :
    maxResidualMult		(est.maxResidualMult),				// made changes by TUAN NGUYEN
    constMult			(est.constMult),					// made changes by TUAN NGUYEN
    additiveConst		(est.additiveConst),				// made changes by TUAN NGUYEN
-   reuseableTypes       (est.reuseableTypes)
+   reuseableTypes       (est.reuseableTypes),				// made changes by TUAN NGUYEN
+   reportFilename       (est.reportFilename)				// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -257,7 +261,8 @@ Estimator& Estimator::operator=(const Estimator& est)
 	  maxResidualMult      = est.maxResidualMult;			// made changes by TUAN NGUYEN
 	  constMult            = est.constMult;					// made changes by TUAN NGUYEN
 	  additiveConst        = est.additiveConst;				// made changes by TUAN NGUYEN
-	  reuseableTypes       = est.reuseableTypes;
+	  reuseableTypes       = est.reuseableTypes;			// made changes by TUAN NGUYEN
+	  reportFilename       = est.reportFilename;
    }
 
    return *this;
@@ -295,12 +300,6 @@ bool Estimator::Initialize()
          throw SolverException("Estimator error - no measurements set.\n");
    }
    
-   numRemovedRecords["OLSEInitialRMSSigma Filter"] = 0;			// made changes by TUAN NGUYEN
-   numRemovedRecords["Outer-Loop Sigma Filter"] = 0;			// made changes by TUAN NGUYEN
-   numRemovedRecords["Timespan Filter"] = 0;					// made changes by TUAN NGUYEN
-   numRemovedRecords["Observation data is unmatched to any measurement model"] = 0; // made changes by TUAN NGUYEN
-   
-
    return retval;
 }
 
@@ -547,6 +546,9 @@ std::string Estimator::GetStringParameter(const Integer id) const
    if (id == END_EPOCH)									// made changes by TUAN NGUYEN
       return endEpoch;									// made changes by TUAN NGUYEN
 
+   if (id == REPORT_FILE_NAME)
+      return reportFilename;
+
    return Solver::GetStringParameter(id);
 }
 
@@ -626,6 +628,12 @@ bool Estimator::SetStringParameter(const Integer id,
       estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
       return true;														// made changes by TUAN NGUYEN
    }																	// made changes by TUAN NGUYEN
+
+   if (id == REPORT_FILE_NAME)
+   {
+	   reportFilename = value;
+	   return true;
+   }
 
    return Solver::SetStringParameter(id, value);
 }
@@ -1736,7 +1744,7 @@ bool Estimator::DataFilter()
 
 		    measManager.GetObsDataObject()->inUsed = false;
 			measManager.GetObsDataObject()->removedReason = "M";	// "M": represent for maximum residual limit
-			std::string filterName = measModel->GetName() + " maximum residual filter";			// made changes by TUAN NGUYEN
+			std::string filterName = measModel->GetName() + " maximum residual";				// made changes by TUAN NGUYEN
 		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
                numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
 			else																				// made changes by TUAN NGUYEN
@@ -1760,7 +1768,11 @@ bool Estimator::DataFilter()
 
 		    measManager.GetObsDataObject()->inUsed = false;
 			measManager.GetObsDataObject()->removedReason = "T";	// "T": represent for time span
-            numRemovedRecords["Timespan Filter"]++;					// made changes by TUAN NGUYEN
+			std::string filterName = "Timespan";
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
 			retVal = IsReuseableType("Timespan");
 			break;
@@ -1790,7 +1802,11 @@ bool Estimator::DataFilter()
 
 		    measManager.GetObsDataObject()->inUsed = false;
 			measManager.GetObsDataObject()->removedReason = "I";				// "I": represent for OLSEInitialRMSSigma
-            numRemovedRecords["OLSEInitialRMSSigma Filter"]++;					// made changes by TUAN NGUYEN
+			std::string filterName = "OLSEInitialRMSSigma";
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
 			retVal = IsReuseableType("OLSEInitialRMSSigma");
 			break;
@@ -1829,10 +1845,10 @@ bool Estimator::DataFilter()
 
 		    measManager.GetObsDataObject()->inUsed = false;
 			measManager.GetObsDataObject()->removedReason = "S";							// "S": represent for outer-loop sigma filter
-            numRemovedRecords["Outer-Loop Sigma Filter"]++;									// made changes by TUAN NGUYEN
+            numRemovedRecords["OLSE"]++;													// made changes by TUAN NGUYEN
 
 			std::stringstream ss;
-			ss << "Outer-Loop Sigma Filter for Iteration " << iterationsTaken;				// made changes by TUAN NGUYEN
+			ss << "OLSE for Iteration " << iterationsTaken;									// made changes by TUAN NGUYEN
 
 			if (numRemovedRecords.find(ss.str()) == numRemovedRecords.end())				// made changes by TUAN NGUYEN
                numRemovedRecords[ss.str()] = 1;												// made changes by TUAN NGUYEN

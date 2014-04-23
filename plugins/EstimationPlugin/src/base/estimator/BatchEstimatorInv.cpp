@@ -176,11 +176,15 @@ void BatchEstimatorInv::Accumulate()
       sLine << currentObs->participantIDs[n] << "   ";
    sLine << "       ";
 
-
 //   ValidateModelToAccess();						// verify observation data is matched to a measurement model
    if (modelsToAccess.size() == 0)
    {
-	  ++numRemovedRecords["Observation data is unmatched to any measurement model"];
+	  // Count number of records removed by measurement model unmatched 
+      std::string filterName = "Measurement model unmatched";
+      if (numRemovedRecords.find(filterName) == numRemovedRecords.end())
+         numRemovedRecords[filterName] = 1;
+	  else
+		 numRemovedRecords[filterName]++;
 
 	  measManager.GetObsDataObject()->removedReason = "U";
 	  measManager.GetObsDataObject()->inUsed = false;
@@ -191,7 +195,7 @@ void BatchEstimatorInv::Accumulate()
 	  else if (currentObs->typeName == "DSNTwoWayDoppler")
 		 sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
       sLine << s;
-      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                                  N/A", currentObs->value[0]);
+      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                  N/A                      N/A", currentObs->value[0]);
 	  sLine << s;
 
 	  // fill out N/A for partial derivative
@@ -212,7 +216,7 @@ void BatchEstimatorInv::Accumulate()
 	     else if (currentObs->typeName == "DSNTwoWayDoppler")
 		    sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
          sLine << s;
-		 sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
+		 sprintf(&s[0],"%18.6lf                  N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
 		 sLine << s;
 
 		 // fill out N/A for partial derivative
@@ -251,7 +255,7 @@ void BatchEstimatorInv::Accumulate()
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-			sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %18.12lf", calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, calculatedMeas->feasibilityValue);
+			sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %.12le   %18.12lf", calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			sLine << s;
 
 			// fill out N/A for partial derivative
@@ -433,7 +437,7 @@ void BatchEstimatorInv::Accumulate()
                sprintf(&s[0],"%18.6lf   ", currentObs->value[k]);
 			   sLine << s;
 
-			   sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %18.12lf", calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, calculatedMeas->feasibilityValue);
+			   sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %.12le   %18.12lf", calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			   sLine << s;
 
                // fill out N/A for partial derivative
@@ -491,8 +495,12 @@ void BatchEstimatorInv::Accumulate()
 
    }  // end of if (modelsToAccess.size() == 0)
 
-   reportFile << sLine.str();
-   reportFile.flush();
+
+   if (reportFile.is_open())
+   {
+      reportFile << sLine.str();
+      reportFile.flush();
+   }
 
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
@@ -512,13 +520,13 @@ void BatchEstimatorInv::Accumulate()
       currentState = ESTIMATING;							// made changes by TUAN NGUYEN
    else														// made changes by TUAN NGUYEN
    {														// made changes by TUAN NGUYEN
-   nextMeasurementEpoch = measManager.GetEpoch();
-   FindTimeStep();
+      nextMeasurementEpoch = measManager.GetEpoch();
+      FindTimeStep();
 
-   if (currentEpoch <= nextMeasurementEpoch)
-      currentState = PROPAGATING;
-   else
-      currentState = ESTIMATING;
+      if (currentEpoch <= nextMeasurementEpoch)
+         currentState = PROPAGATING;
+      else
+         currentState = ESTIMATING;
    }														// made changes by TUAN NGUYEN
 
    #ifdef DEBUG_ACCUMULATION
@@ -650,7 +658,6 @@ void BatchEstimatorInv::Estimate()
 	  {
 		 temp += hAccum[j][i]*dx[i];
 	  }
-
 	  predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];
    }
    predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
@@ -683,24 +690,18 @@ void BatchEstimatorInv::Estimate()
    sLine << "   State (solve-for vector) change: dx = x" << iterationsTaken+1 << " - x" << iterationsTaken << " = (";
    for (int i= 0; i < dx.size(); ++i)
    {
-	  sprintf(&s[0],"%18.9lf   ", dx[i]);
+	  sprintf(&s[0],"%.15lf   ", dx[i]);
       sLine << s;
    }
    sLine << ")\n\n";
 
    sLine << "----------------------------------------------------------------------\n";
-//   sLine << "Iteration " << iterationsTaken+1 << "\n"; 
-//   sLine << "Initial state (solve-for vector) x = (" ;
-   
-//   GmatState currentEstimationState = (*estimationState);
-//   for (int i= 0; i < currentEstimationState.GetSize(); ++i)
-//   {
-//	  sprintf(&s[0],"%18.9lf   ", currentEstimationState[i]);
-//      sLine << s;
-//   }
-//   sLine << ")\n";
-   reportFile << sLine.str();
-   reportFile.flush();
+
+   if (reportFile.is_open())
+   {
+      reportFile << sLine.str();
+      reportFile.flush();
+   }
 
    // Clear O, C, and W lists
    Weight.clear();
@@ -710,16 +711,19 @@ void BatchEstimatorInv::Estimate()
    // Display number of removed records for each type of filters
    if (iterationsTaken == 0)
    {
-	  MessageInterface::ShowMessage("Number of removed records for:\n");
-      for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
-	     MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
+	  if (!numRemovedRecords.empty())
+	  {
+	     MessageInterface::ShowMessage("Number of records removed by:\n");
+         for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
+	        MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
+	  }
    }
    else
    {
       std::stringstream ss;
-	  ss << "Outer-Loop Sigma Filter for Iteration " << iterationsTaken;
+	  ss << "OLSE for Iteration " << iterationsTaken;
 	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
-		  MessageInterface::ShowMessage("Number of removed records for %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+		  MessageInterface::ShowMessage("Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
 
    }
    

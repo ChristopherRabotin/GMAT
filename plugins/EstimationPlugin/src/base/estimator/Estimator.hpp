@@ -248,6 +248,9 @@ protected:
    /// Types of reuseable bad record
    StringArray reuseableTypes;
 
+   /// Report file
+   std::string reportFilename;
+
    /// Parameters associated with the Estimators
    enum
    {
@@ -265,6 +268,7 @@ protected:
 	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
 	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
 	  REUSEABLE_BAD_RECORD_TYPES,
+	  REPORT_FILE_NAME,
       EstimatorParamCount
    };
 

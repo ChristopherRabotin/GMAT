@@ -29,6 +29,7 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 #include <sstream>
 #include "SpaceObject.hpp"    // To access epoch data
 
@@ -899,34 +900,51 @@ void BatchEstimator::CompleteInitialization()
    // Open report file											// made changes by TUAN NGUYEN
    if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
    {
-      reportFile.open("report.txt", std::ios_base::out);		// made changes by TUAN NGUYEN
 
-	  // Write out maximum residual for each measuement model
-	  std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
-	  for (int i = 0; i < modelsList.size(); ++i)
-		  reportFile << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
-	  reportFile << "\n";
+      if (reportFilename != "")
+      {
+         std::string fullPath = "";
 
-	  // Write out OLSE Initial RMS: 
-	  reportFile << GetName() <<".OLSEInitialRMSSigma = " << maxResidualMult << "\n\n";
+         // If no path designation slash character is found, add the default path
+         if ((reportFilename.find('/') == std::string::npos) &&
+             (reportFilename.find('\\') == std::string::npos))
+         {
+            FileManager *fm = FileManager::Instance();
+            fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);
+         }
+         fullPath += reportFilename;
 
-	  // Notation:
-	  reportFile << "Notaions used in report file: \n";
-	  reportFile << "  N: Normal\n";
-	  reportFile << "  U: Unmatched to any measurement model\n";
-	  reportFile << "  R: Out of ramped table\n";
-	  reportFile << "  ET: measurement unfeasible due to the block of transmitted signal\n";
-	  reportFile << "  ER: measurement unfeasible due to the block of received signal\n";
-	  reportFile << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
-	  reportFile << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
-	  reportFile << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
-	  reportFile << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
-	  reportFile << "  M: Edited by measurement maximum residual\n";
-	  reportFile << "  I: Edited by Initial RMS Sigma filter\n";
-	  reportFile << "  S: Edited by Outer-Loop Sigma Editing\n\n";
+         reportFile.open(fullPath, std::ios_base::out);		// made changes by TUAN NGUYEN
 
-	  // Write out the header
-	  reportFile << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2                Elevation-Angle   Partial-Derivative Vector\n";
+	     // Write out maximum residual for each measuement model
+	     std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
+	     for (int i = 0; i < modelsList.size(); ++i)
+		    reportFile << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+	     reportFile << "\n";
+
+	     // Write out OLSE Initial RMS: 
+	     reportFile << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
+	     reportFile << GetName() <<".OLSEMultiplicativeConstant = " << constMult << "\n";
+	     reportFile << GetName() <<".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
+
+	     // Notation:
+	     reportFile << "Notaions used in report file: \n";
+	     reportFile << "  N: Normal\n";
+	     reportFile << "  U: Unmatched to any measurement model\n";
+	     reportFile << "  R: Out of ramped table\n";
+	     reportFile << "  ET: measurement unfeasible due to the block of transmitted signal\n";
+	     reportFile << "  ER: measurement unfeasible due to the block of received signal\n";
+	     reportFile << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
+	     reportFile << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
+	     reportFile << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
+	     reportFile << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
+	     reportFile << "  M: Edited by measurement maximum residual\n";
+	     reportFile << "  I: Edited by Initial RMS Sigma filter\n";
+	     reportFile << "  S: Edited by Outer-Loop Sigma Editing\n\n";
+
+	     // Write out the header
+	     reportFile << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
+	  }
    }
 
 
@@ -1039,6 +1057,7 @@ void BatchEstimator::CalculateData()
    esm.MapObjectsToSTM();
 
    // Tell the measurement manager to calculate the simulation data
+//   measManager.CalculateMeasurements();
    if (measManager.CalculateMeasurements() == false)
    {
       // No measurements were possible
@@ -1057,7 +1076,8 @@ void BatchEstimator::CalculateData()
          currentState = ESTIMATING;
 	  }														// made changes by TUAN NGUYEN
    }
-   else if (measManager.GetEventCount() > 0)
+   else 
+   if (measManager.GetEventCount() > 0)
    {
       currentState = LOCATING;
       locatingEvent = true;
@@ -1164,7 +1184,9 @@ void BatchEstimator::CheckCompletion()
       currentEpoch = estimationEpoch;
       measManager.Reset();											// set current observation data to be the first one in observation data table				// made changes by TUAN NGUYEN
 	  if (measManager.GetObsDataObject()->inUsed == false)			// if the first observation data is not in used, then go to the next in-used data record	// made changes by TUAN NGUYEN
-		 measManager.AdvanceObservation();																														// made changes by TUAN NGUYEN
+	  {
+		 measManager.AdvanceObservation();							// made changes by TUAN NGUYEN
+	  }
       nextMeasurementEpoch = measManager.GetEpoch();
 
       // Need to reset STM and covariances
@@ -1477,7 +1499,7 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
       why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = (" << newResidualRMS << " - " 
 		  << oldResidualRMS << ")/ " << oldResidualRMS << " = " 
           << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
-          << " is less than RealtiveTol, "
+          << " is less than RelativeTol, "
           << relativeTolerance << "\n";
       retval = true;
    }
