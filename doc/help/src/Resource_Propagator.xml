@@ -2186,7 +2186,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>1300 &lt;<guilabel>SRP.Flux</guilabel> &lt;
+                      <para>1200 &lt;<guilabel>SRP.Flux</guilabel> &lt;
                       1450</para>
                     </listitem>
                   </varlistentry>
