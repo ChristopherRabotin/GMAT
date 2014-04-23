@@ -640,7 +640,6 @@ UnsignedInt MeasurementManager::LoadObservations()
 			   {
 			      epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
 			      epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-			      MessageInterface::ShowMessage("epoch1 = %.12lf    epoch2 = %.12lf\n", epoch1, epoch2);
 			   }
 
 			   // End of file
