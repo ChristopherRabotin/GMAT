@@ -32,6 +32,7 @@
 #include "StringUtil.hpp"
 
 //#define DEBUG_EQUINOCTIAL
+//#define DEBUG_MODEQUINOCTIAL
 //#define DEBUG_STATE_CONVERSION
 //#define DEBUG_STATE_CONVERSION_SQRT
 //#define DEBUG_KEPLERIAN
@@ -3377,7 +3378,9 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian)
 { 
-	Real	 mu_Earth= 398600.4418;
+	//Real	 mu_Earth = 398600.4418;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -3648,8 +3651,9 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6& blms)
 { 
-	Real	 mu_Earth= 398600.4415;
-	
+	//Real	 mu_Earth = 398600.4415;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -3660,7 +3664,8 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 		throw UtilityException(errmsg.str());
 	}
 	
-	Real	 re		 = 6378.1363; // Earth radius
+	//Real	 re		 = 6378.1363; // Earth radius
+	Real	 re		 = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
 	Real	 j2		 = 1.082626925638815E-03;
 	Real	 ae		 = 1.0;
 	Real     smap    = blms[0] / re; 
@@ -3904,9 +3909,9 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToCartesian(Real mu, const Rvector
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian)
 { 
-	
-	
-	Real	 mu_Earth= 398600.4415;
+	//Real	 mu_Earth = 398600.4415;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -4172,9 +4177,10 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
  */
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml)
-{ 
-	
-	Real	 mu_Earth= 398600.4418;
+{
+	//Real	 mu_Earth = 398600.4418;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -4187,7 +4193,8 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 
 	Integer pseudostate = 0;
 	
-	Real	 re		 = 6378.1363; // Earth radius
+	//Real	 re		 = 6378.1363; // Earth radius
+	Real	 re		 = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
 	Real	 j2		 = 1.082626925638815E-03;
 	Real	 j3     = -0.2532307818191774E-5;
 	Real	 j4     = -0.1620429990000000E-5;
