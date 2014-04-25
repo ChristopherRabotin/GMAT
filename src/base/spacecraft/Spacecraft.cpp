@@ -2135,12 +2135,15 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             return ii + CART_X;
          }
 
+      // Is this code block necessary? (LOJ)
+      // Element ID is already handled in above block using MULT_REP_STRINGS
+      // Added SemilatusRectum (LOJ:2014.04.25)
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "RMAG" || str == "Delaunayl" || str == "PlanetodeticRMAG" ||
-          str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
+          str == "RMAG" || str == "SemilatusRectum" || str == "Delaunayl" ||
+          str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
          retval =  ELEMENT1_ID;
-
+      
       else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
                str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
                str == "Delaunayg" || str == "PlanetodeticLON" || str == "C3Energy" ||

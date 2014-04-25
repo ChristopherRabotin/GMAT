@@ -216,7 +216,7 @@ protected:
    enum {MOD_EQ_P = EquinCount, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, ModEquinCount};
    
    // AlternateEquinoctial items
-   enum {ALT_EQ_SMA = ModEquinCount, ALT_EQ_H, ALT_EQ_K, ALT_EQ_Q, ALT_EQ_P, ALT_EQ_MLONG, AltEquinCount};
+   enum {ALT_EQ_SMA = ModEquinCount, ALT_EQ_H, ALT_EQ_K, ALT_EQ_P, ALT_EQ_Q, ALT_EQ_MLONG, AltEquinCount};
    
    // Modified by M.H.
    // Delaunay items

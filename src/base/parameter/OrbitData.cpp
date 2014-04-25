@@ -396,6 +396,11 @@ void OrbitData::SetReal(Integer item, Real rval)
       Rvector6 cartStateInParamOrigin = GetCartStateInParameterOrigin(item, rval);
       Rvector6 cartStateNew = cartStateInParamOrigin + mOrigin->GetMJ2000State(mCartEpoch);
       
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Setting %s to Spacecraft\n", cartStateNew.ToString().c_str());
+      #endif
+      
       // Need to set whole state in internal CS
       mSpacecraft->SetState(cartStateNew);
       
@@ -1367,11 +1372,14 @@ Real OrbitData::GetAltEquinReal(Integer item)
    case ALT_EQ_SMA:
    case ALT_EQ_H:
    case ALT_EQ_K:
-   case ALT_EQ_Q:
    case ALT_EQ_P:
+   case ALT_EQ_Q:
    case ALT_EQ_MLONG:
    {
       Rvector6 altequiState = GetAltEquinState();
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage("   altequiState = %s\n", altequiState.ToString().c_str());
+      #endif
       return altequiState[item - ModEquinCount];
    }
    
@@ -2215,14 +2223,19 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
    // get origin state
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
    
+   // Relative state
+   Rvector6 relState = scState - originState;
+   
    #ifdef DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
-          origin->GetName().c_str(), originState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("OrbitData::GetRelativeCartState() origin = %s\n   satState = %s\n   orgState = %s\n"
+       "   relState = %s\n", origin->GetName().c_str(), scState.ToString().c_str(),
+       originState.ToString().c_str(), relState.ToString().c_str());
    #endif
-      
+   
    // return relative state
-   return scState - originState;
+   //return scState - originState;
+   return relState;
 }
 
 
@@ -2271,7 +2284,7 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    if (item >= CART_X && item <= CART_VZ)
    {
       // Now set new value to state
-      cartStateInParamCS(item) = rval;
+      cartStateInParamCS(item - OrbitStmCount) = rval;
    }
    else if (item >= KEP_SMA && item <= KEP_TA)
    {
@@ -2282,7 +2295,7 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
       stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "Keplerian",
                                       mGravConst, mFlattening, mEqRadius);
-      stateInParamCS[item-CartCount] = rval;
+      stateInParamCS[item - CartCount] = rval;
       cartStateInParamCS =
          StateConversionUtil::Convert(stateInParamCS, "Keplerian", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
@@ -2307,7 +2320,7 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
          ("   Before setting: stateInParamCS = \n   %s\n", stateInParamCS.ToString().c_str());
       #endif
       
-      stateInParamCS[item-KepCount] = rval;
+      stateInParamCS[item - KepCount] = rval;
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
@@ -2592,6 +2605,10 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
       // ModifiedEquinoctial state elements:
       // SemilatusRectum, ModEquinoctialF, ModEquinoctialG, ModEquinoctialH, ModEquinoctialK, TLONG
       stateInParamOrigin[0] = rval;
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   modEqStateInParamOrigin = \n   %s\n", stateInParamOrigin.ToString().c_str());
+      #endif
       cartStateInParamOrigin =
          StateConversionUtil::Convert(stateInParamOrigin, "ModifiedEquinoctial", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
@@ -2751,10 +2768,19 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    case EQ_MLONG:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MLONG"), rval);
       break;
-
+      
    // ModifiedEquinoctial;Modified by M.H.
    case MOD_EQ_P:
+   case SEMILATUS_RECTUM:
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   mSpacecraft->GetParameterID(SemilatusRectum) = %d\n",
+          mSpacecraft->GetParameterID("SemilatusRectum"));
+      #endif
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemilatusRectum"), rval);
+      //@note Change to following since Spacecraft code using parameter ID calls
+      // SetRealParameter using label anyway
+      //mSpacecraft->SetRealParameter("SemilatusRectum", rval);
       break;
    case MOD_EQ_F:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialF"), rval);
