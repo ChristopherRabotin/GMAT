@@ -7474,15 +7474,33 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    }
 
    // Check for EquinoctialH and EquinoctialK relative to each other, if necessary
-   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialH") && (state[1] != UNSET_ELEMENT_VALUE))
+   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialH") && (state[2] != UNSET_ELEMENT_VALUE))
    {
-      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialK", state[1]);
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialK", state[2]);
    }
-   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialK") && (state[0] != UNSET_ELEMENT_VALUE))
+   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialK") && (state[1] != UNSET_ELEMENT_VALUE))
    {
       validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialH", state[1]);
    }
-
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayH") && (state[4] != UNSET_ELEMENT_VALUE))
+   {
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayG", state[4]);
+   }
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayG"))
+   {
+      if (state[5] != UNSET_ELEMENT_VALUE)
+      {
+         validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayH", state[5]);
+      }
+      if (state[3] != UNSET_ELEMENT_VALUE)
+      {
+         validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayL", state[3]);
+      }
+   }
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayL") && (state[4] != UNSET_ELEMENT_VALUE))
+   {
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayG", state[4]);
+   }
    // Otherwise, check the value
    else
    {

@@ -2716,10 +2716,10 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
    Real f = flattening;
    
    Real rMag = planetodetic[0];
-   Real lon = planetodetic[1];
+   Real lon  = planetodetic[1];
    Real latd = planetodetic[2];
    Real vMag = planetodetic[3];
-   Real azi = planetodetic[4];
+   Real azi  = planetodetic[4];
    Real hfpa = planetodetic[5];
 
 // Check input value
@@ -2762,14 +2762,14 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
 	   }
    }
    
-   lon = lon * RAD_PER_DEG;
+   lon  = lon * RAD_PER_DEG;
    latd = latd * RAD_PER_DEG;
 
    Real vfpa = 90 - hfpa;
    
 // convert plantodetic latitude to planetocentric latitude
-   Real e2 = 2*f - f*f;
-   Real tol = 1;
+   Real e2   = 2*f - f*f;
+   Real tol  = 1;
    Real latg = latd;
    
    while(tol >= 1e-13)
@@ -5774,10 +5774,13 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
    #ifdef DEBUG_SC_CONVERT_VALIDATE
       MessageInterface::ShowMessage(
          "SCU::ValidateValue() entered with label = %s, value = %le\n   "
-         "errorMsgFmt = %s, dataPrecision = %d, compareTo = %s, compareValue = %le\n",
-         label.c_str(), value, errorMsgFmt.c_str(), dataPrecision, compareTo.c_str(), compareValue);
+         "dataPrecision = %d, compareTo = %s, compareValue = %le\n",
+         label.c_str(), value, dataPrecision, compareTo.c_str(), compareValue);
    #endif
       
+   // NOTE - the labels for Delaunay will be checked without conversion to
+   // all upper case, as element names are identical except for the last
+   // character being lower or upper case, e.g. Delaunayl vs. DelaunayL
    std::string labelUpper   = GmatStringUtil::ToUpper(label);
    std::string compareUpper = GmatStringUtil::ToUpper(compareTo);
    #ifdef DEBUG_SC_CONVERT_VALIDATE
@@ -5964,20 +5967,6 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (label == "PlanetodeticLON") // -180 <= value <= 180
-   {
-      if ((value < -180.0 - ANGLE_TOL) || (value > 180.0 + ANGLE_TOL))
-      {
-         std::stringstream rangeMsg;
-         rangeMsg << "-180.0 <= Real Number <= 180.0";
-         if (ANGLE_TOL != 0.0)
-            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
-         UtilityException ue;
-         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       label.c_str(), rangeMsg.str().c_str());
-         throw ue;
-      }
-   }
    else if (labelUpper == "EQUINOCTIALK" || label == "ModEqunoctialK")
    {
       if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
@@ -6082,7 +6071,7 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (label == "DelaunayL" || label == "DelaunayG") // value >= 0
+   else if (label == "DelaunayL") // value >= 0
    {
       if (value < 0)
       {
@@ -6092,6 +6081,61 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
                        label.c_str(), rangeMsg.str().c_str());
          throw ue;
+      }
+      if (compareTo == "DelaunayG")
+      {
+         if ((compareValue / value) > 1)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayL", "(DelaunayG / DelaunayL) <= 1");
+            throw ue;
+         }
+      }
+   }
+   else if (label == "DelaunayG")
+   {
+      if (value < 0)
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "0 <= Real Number";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+      if (compareTo == "DelaunayH")
+      {
+         if (GmatMathUtil::Abs(value) < GmatMathUtil::Abs(compareValue))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayG", "| DelaunayH | <= | DelaunayG | ");
+            throw ue;
+         }
+      }
+      if (compareTo == "DelaunayL")
+      {
+         if ((value / compareValue) > 1)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayG", "(DelaunayG / DelaunayL) <= 1");
+            throw ue;
+         }
+      }
+   }
+   else if (label == "DelaunayH")
+   {
+      if (compareTo == "DelaunayG")
+      {
+         if (GmatMathUtil::Abs(value) > GmatMathUtil::Abs(compareValue))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayH", "| DelaunayH | <= | DelaunayG | ");
+            throw ue;
+         }
       }
    }
    else
