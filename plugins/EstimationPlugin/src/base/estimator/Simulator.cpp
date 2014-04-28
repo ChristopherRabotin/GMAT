@@ -51,6 +51,7 @@ Simulator::PARAMETER_TEXT[SimulatorParamCount -SolverParamCount] =
    "FinalEpochFormat",
    "FinalEpoch",
    "MeasurementTimeStep",
+   "AddNoise",
 };
 
 const Gmat::ParameterType
@@ -63,6 +64,7 @@ Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
    Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::ON_OFF_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -91,7 +93,8 @@ Simulator::Simulator(const std::string& name) :
    finalEpochFormat    ("TAIModJulian"),
    simulationStep      (60.0),
    locatingEvent       (false),
-   timeStep            (60.0)
+   timeStep            (60.0),
+   addNoise            (false)
 {
    objectTypeNames.push_back("Simulator");
    std::stringstream ss("");
@@ -129,7 +132,8 @@ Simulator::Simulator(const Simulator& sim) :
    locatingEvent       (false),
    timeStep            (sim.timeStep),
    measManager         (sim.measManager),
-   measList            (sim.measList)
+   measList            (sim.measList),
+   addNoise            (sim.addNoise)
 {
    propagator = NULL;
    if (sim.propagator) propagator = ((PropSetup*) (sim.propagator)->Clone());
@@ -175,6 +179,7 @@ Simulator& Simulator::operator =(const Simulator& sim)
       locatingEvent       = false;
       measManager         = sim.measManager;
       measList            = sim.measList;
+	  addNoise            = sim.addNoise;
    }
 
    return *this;
@@ -720,6 +725,38 @@ const StringArray& Simulator::GetStringArrayParameter(const Integer id) const
       return measList; // temporary
    }
    return Solver::GetStringArrayParameter(id);
+}
+
+
+// made changes by TUAN NGUYEN
+std::string Simulator::GetOnOffParameter(const Integer id) const
+{
+	if (id == ADD_NOISE)
+	   return (addNoise ? "On" : "Off");
+
+	return Solver::GetOnOffParameter(id);
+}
+
+// made changes by TUAN NGUYEN
+bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   if (id == ADD_NOISE)
+   {
+      if (value == "On")
+	  {
+         addNoise = true;
+		 return true;
+	  }
+      if (value == "Off")
+	  {
+         addNoise = false;
+		 return true;
+	  }
+
+	  return false;
+   }
+
+   return Solver::SetOnOffParameter(id, value);
 }
 
 
@@ -1477,6 +1514,11 @@ void Simulator::SimulateData()
    // Tell the measurement manager to add noise and write the measurements
    if (measManager.CalculateMeasurements(true, true) == true)
    {
+	  // Add noise to measurements								// made changes by TUAN NGUYEN
+	  if (addNoise)
+	     measManager.AddNoiseToCalculatedMeasurements();		// made changes by TUAN NGUYEN
+
+	  // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
          throw EstimatorException("Measurement writing failed");
    }

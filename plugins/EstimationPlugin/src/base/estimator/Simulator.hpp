@@ -77,6 +77,11 @@ public:
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
+                                         const std::string &value);						// made changes by TUAN NGUYEN
+
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
@@ -128,6 +133,7 @@ protected:
       FINAL_EPOCH_FORMAT,
       FINAL_EPOCH,
       MEASUREMENT_TIME_STEP,
+	  ADD_NOISE,
       SimulatorParamCount
    };
    /// Script strings associated with the parameters
@@ -172,6 +178,9 @@ protected:
    ObjectArray         activeEvents;
    /// Flag indicating is an Event is currently being located
    bool                locatingEvent;
+
+   /// Flag to indicate option to add noise to calculated measurement
+   bool                addNoise;
 
    /**
     *  The time step that gets returned for the next propagation
