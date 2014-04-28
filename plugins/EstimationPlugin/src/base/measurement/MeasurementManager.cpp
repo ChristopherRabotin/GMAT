@@ -26,6 +26,8 @@
 
 #include "DataFileAdapter.hpp"
 
+#include "RandomNumber.hpp"									// made changes by TUAN NGUYEN
+
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILE_WRITE
@@ -1865,3 +1867,30 @@ UnsignedInt MeasurementManager::GetCurrentRecordNumber()
 
    return i;
 }
+
+
+bool MeasurementManager::AddNoiseToCalculatedMeasurements()
+{
+   // Get RandomNumber object handler:
+   RandomNumber* rn = RandomNumber::Instance();
+
+
+   for (UnsignedInt i = 0; i < measurements.size(); ++i)
+   {
+	  if (!measurements[i].isFeasible)
+	     continue;
+
+      for(UnsignedInt k = 0; k < measurements[i].value.size(); ++k)
+	  {
+         // Generate noise for measurements[i].value[k]:
+	     Real noisesigma = sqrt((*(measurements[i].covariance))(k,k));
+		 Real mean_value = measurements[i].value[k];
+		 Real real_value = rn->Gaussian(mean_value, noisesigma);
+
+		 measurements[i].value[k] = real_value;
+	  }
+   }
+
+   return true;
+}
+

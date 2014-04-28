@@ -92,6 +92,8 @@ public:
 
    const std::vector<MeasurementModel*>& GetAllMeasurementModels();				// made changes by TUAN NGUYEN
    UnsignedInt             GetCurrentRecordNumber();							// made changes by TUAN NGUYEN
+   
+   bool                    AddNoiseToCalculatedMeasurements();					// made changes by TUAN NGUYEN
 
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
