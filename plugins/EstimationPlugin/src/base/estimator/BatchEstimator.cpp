@@ -1162,14 +1162,13 @@ void BatchEstimator::CheckCompletion()
    ++iterationsTaken;
    if ((converged) || (iterationsTaken >= maxIterations))
    {
-//      #ifdef DEBUG_VERBOSE
-         if (converged)
-            MessageInterface::ShowMessage("Estimation has converged\n%s\n\n",
+      if (converged)
+         MessageInterface::ShowMessage("Estimation has converged\n%s\n\n",
                   convergenceReason.c_str());
-         else
-            MessageInterface::ShowMessage("Estimation has reached the maximum "
+      else
+         MessageInterface::ShowMessage("Estimation has reached the maximum "
                   "iteration count, but has not converged\n\n");
-//      #endif
+
       currentState = FINISHED;
    }
    else
@@ -1373,8 +1372,6 @@ std::string BatchEstimator::GetProgressString()
 			              << outputEstimationState[i];							// made changes by TUAN NGUYEN
             }
 
-//            progress << "\n   WeightedRMS residuals: "
-//                     << newResidualRMS << "\n";
             break;
 
          case FINISHED:
@@ -1608,14 +1605,15 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
                         << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
-//            textFile << "\n   WeightedRMS residuals at this iteration: "
-//                     << newResidualRMS << "\n\n";
          }
          break;
 
       case FINISHED:
-         textFile << "\n   WeightedRMS residuals: "
-                     << newResidualRMS << "\n\n";
+         textFile << "\n   WeightedRMS residuals at this iteration: "
+                  << newResidualRMS << "\n";
+         textFile << "\n   PredictedRMS residuals: "
+                  << predictedRMS << "\n\n";
+
          textFile << "\n****************************"
                   << "****************************\n"
                   << "*** Estimating Completed in " << iterationsTaken
@@ -1659,9 +1657,9 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 
          if (textFileMode == "Verbose")
          {
-            textFile << "\n   RMS residuals at previous iteration: "
+            textFile << "\n   WeightedRMS residuals at previous iteration: "
                      << oldResidualRMS;
-            textFile << "\n   RMS residuals at this iteration:     "
+            textFile << "\n   WeightedRMS residuals at this iteration:     "
                      << newResidualRMS << "\n\n";
          }
 
