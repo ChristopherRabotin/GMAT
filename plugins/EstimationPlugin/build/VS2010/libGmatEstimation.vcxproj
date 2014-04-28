@@ -204,6 +204,7 @@
     <ClInclude Include="..\..\src\base\measurement\OpticalAngles.hpp" />
     <ClInclude Include="..\..\src\base\measurement\OpticalAzEl.hpp" />
     <ClInclude Include="..\..\src\base\measurement\PhysicalMeasurement.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\RandomNumber.hpp" />
     <ClInclude Include="..\..\src\base\measurement\SnTwoWayRange.hpp" />
     <ClInclude Include="..\..\src\base\measurement\TDRSSTwoWayRange.hpp" />
     <ClInclude Include="..\..\src\base\measurement\TrackingData.hpp" />
@@ -282,6 +283,7 @@
     <ClCompile Include="..\..\src\base\measurement\OpticalAngles.cpp" />
     <ClCompile Include="..\..\src\base\measurement\OpticalAzEl.cpp" />
     <ClCompile Include="..\..\src\base\measurement\PhysicalMeasurement.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\RandomNumber.cpp" />
     <ClCompile Include="..\..\src\base\measurement\SnTwoWayRange.cpp" />
     <ClCompile Include="..\..\src\base\measurement\TDRSSTwoWayRange.cpp" />
     <ClCompile Include="..\..\src\base\measurement\TrackingData.cpp" />
