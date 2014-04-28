@@ -606,7 +606,7 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): FINISHED state\n");
          #endif
-         Finalize();
+//         Finalize();					// made changes by TUAN NGUYEN
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): FINISHED state\n");
          #endif
@@ -617,8 +617,15 @@ bool RunEstimator::Execute()
                " encountered in the RunEstimator command");
    }
 
-   state = theEstimator->AdvanceState();
-
+   if (state != Solver::FINISHED)					// made changes by TUAN NGUYEN
+      state = theEstimator->AdvanceState();
+   else												// made changes by TUAN NGUYEN
+   {												// made changes by TUAN NGUYEN
+	   // It has to run all work in AdvanceState() before Finalize()
+	   state = theEstimator->AdvanceState();		// made changes by TUAN NGUYEN
+   	   Finalize();									// made changes by TUAN NGUYEN
+   }												// made changes by TUAN NGUYEN
+   
    #ifdef DEBUG_STATE
       MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
    #endif
