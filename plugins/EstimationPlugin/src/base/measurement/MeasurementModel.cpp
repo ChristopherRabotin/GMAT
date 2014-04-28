@@ -857,14 +857,18 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
       #endif
       if ((index >=0) && (index < noiseSigma.GetSize()))
       {
-         if (value >= 0)
+         if (value > 0.0)
             noiseSigma[index] = value;
+		 else
+			throw MeasurementException("Error: "+GetName()+".NoiseSigma has invalid value. Valid value is a positive number\n"); 
          return noiseSigma[index];
       }
       else if (index == -1)
       {
-         if (value >= 0)
+         if (value > 0.0)
             noiseSigma[0] = value;
+		 else
+			throw MeasurementException("Error: "+GetName()+".NoiseSigma has invalid value. Valid value is a positive number\n"); 
          return noiseSigma[0];
       }
    }

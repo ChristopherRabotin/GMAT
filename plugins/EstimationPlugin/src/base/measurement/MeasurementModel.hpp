@@ -246,7 +246,7 @@ protected:
    bool useETminusTAICorrection;														// made changes by TUAN NGUYEN
 
    /// Residual maximum
-   Real residualMax;
+   Real residualMax;																	// made changes by TUAN NGUYEN
 
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
