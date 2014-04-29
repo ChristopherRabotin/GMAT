@@ -2135,12 +2135,15 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             return ii + CART_X;
          }
 
+      // Is this code block necessary? (LOJ)
+      // Element ID is already handled in above block using MULT_REP_STRINGS
+      // Added SemilatusRectum (LOJ:2014.04.25)
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "RMAG" || str == "Delaunayl" || str == "PlanetodeticRMAG" ||
-          str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
+          str == "RMAG" || str == "SemilatusRectum" || str == "Delaunayl" ||
+          str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
          retval =  ELEMENT1_ID;
-
+      
       else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
                str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
                str == "Delaunayg" || str == "PlanetodeticLON" || str == "C3Energy" ||
@@ -2161,7 +2164,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
       else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
                str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
-               str == "ModEquinoctialH" || str == "DelaunayL" || str == "PlanetodeticVMAG" ||
+               str == "ModEquinoctialH" || str == "DelaunayG" || str == "PlanetodeticVMAG" ||
                str == "IncomingBVAZI" || str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
          retval =  ELEMENT5_ID;
 
@@ -7441,10 +7444,16 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
 bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel,
                                          Real andValue, bool checkCoupled)
 {
+   #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+   MessageInterface::ShowMessage(
+         "In SC::ValidateOrbitStateValue, about to validate %s with value %le for rep = %s, checkCoupled = %s\n",
+         withLabel.c_str(), andValue, forRep.c_str(), (checkCoupled? "true" : "false"));
+   #endif
+
    if (!checkCoupled)
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-      MessageInterface::ShowMessage("In SC::SetElement, about to validate (no coupled element check) %s with value %le\n", withLabel.c_str(), andValue);
+      MessageInterface::ShowMessage("In SC::ValidateOrbitStateValue, about to validate (no coupled element check) %s with value %le\n", withLabel.c_str(), andValue);
       #endif
       return StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
    }
@@ -7455,7 +7464,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    if ((forRep == "ModifiedKeplerian") && (withLabel == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-      MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le when RadPer already set\n", withLabel.c_str(), andValue);
+      MessageInterface::ShowMessage("In SC::ValidateOrbitStateValue, about to validate %s with value %le when RadPer already set\n", withLabel.c_str(), andValue);
       #endif
       validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "RadPer", state[0]);
    }
@@ -7471,20 +7480,48 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
    }
 
    // Check for EquinoctialH and EquinoctialK relative to each other, if necessary
-   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialH") && (state[1] != UNSET_ELEMENT_VALUE))
+   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialH") && (state[2] != UNSET_ELEMENT_VALUE))
    {
-      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialK", state[1]);
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialK", state[2]);
    }
-   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialK") && (state[0] != UNSET_ELEMENT_VALUE))
+   else if ((forRep == "Equinoctial") && (withLabel == "EquinoctialK") && (state[1] != UNSET_ELEMENT_VALUE))
    {
       validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "EquinoctialH", state[1]);
    }
-
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayH") && (state[4] != UNSET_ELEMENT_VALUE))
+   {
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayG", state[4]);
+   }
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayG"))
+   {
+      try
+      {
+         if (state[5] != UNSET_ELEMENT_VALUE)
+         {
+            validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayH", state[5]);
+         }
+         if (state[3] != UNSET_ELEMENT_VALUE)
+         {
+            validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayL", state[3]);
+         }
+         // if neither of those throw an exception, check the DelaunayG value by itself
+         validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
+      }
+      catch (BaseException &be)
+      {
+         // ValidateValue really doesn't return false when it fails; it just throws an exception
+         throw;
+      }
+   }
+   else if ((forRep == "Delaunay") && (withLabel == "DelaunayL") && (state[4] != UNSET_ELEMENT_VALUE))
+   {
+      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "DelaunayG", state[4]);
+   }
    // Otherwise, check the value
    else
    {
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-      MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le\n", withLabel.c_str(), andValue);
+      MessageInterface::ShowMessage("In SC::ValidateOrbitStateValue, about to validate %s with value %le\n", withLabel.c_str(), andValue);
       #endif
       validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
    }

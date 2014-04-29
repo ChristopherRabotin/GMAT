@@ -110,7 +110,7 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
    Gmat::REAL_TYPE,
 };
 
-const Real SolarRadiationPressure::FLUX_LOWER_BOUND          = 1300.0;
+const Real SolarRadiationPressure::FLUX_LOWER_BOUND          = 1200.0;
 const Real SolarRadiationPressure::FLUX_UPPER_BOUND          = 1450.0;
 const Real SolarRadiationPressure::FLUX_PRESSURE_LOWER_BOUND = 4.33e-6;
 const Real SolarRadiationPressure::FLUX_PRESSURE_UPPER_BOUND = 4.84e-6;
