@@ -50,16 +50,9 @@ GMAT MMSRef.AttitudeDisplayStateType = 'Quaternion';
 GMAT MMSRef.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT MMSRef.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 
-
-
-
-
-
-
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
-
 
 %--------------------------------------------------------------------------
 %------------------------------ Propagators -------------------------------
@@ -212,8 +205,6 @@ GMAT OGL_EarthMJ2K.RelativeZOrder = 1790;
 GMAT OGL_EarthMJ2K.Add = {MMSRef, Earth, Luna};
 GMAT OGL_EarthMJ2K.CoordinateSystem = EarthMJ2000Eq;
 GMAT OGL_EarthMJ2K.DrawObject = [ true true true ];
-GMAT OGL_EarthMJ2K.OrbitColor = [ 255 32768 12632256 ];
-GMAT OGL_EarthMJ2K.TargetColor = [ 8421440 0 0 ];
 GMAT OGL_EarthMJ2K.DataCollectFrequency = 1;
 GMAT OGL_EarthMJ2K.UpdatePlotFrequency = 50;
 GMAT OGL_EarthMJ2K.NumPointsToRedraw = 0;
@@ -243,8 +234,6 @@ GMAT OGL_MoonMJ2K.RelativeZOrder = 1801;
 GMAT OGL_MoonMJ2K.Add = {MMSRef, Earth, Luna};
 GMAT OGL_MoonMJ2K.CoordinateSystem = MoonMJ2000Eq;
 GMAT OGL_MoonMJ2K.DrawObject = [ true true true ];
-GMAT OGL_MoonMJ2K.OrbitColor = [ 255 32768 12632256 ];
-GMAT OGL_MoonMJ2K.TargetColor = [ 8421440 0 0 ];
 GMAT OGL_MoonMJ2K.DataCollectFrequency = 1;
 GMAT OGL_MoonMJ2K.UpdatePlotFrequency = 50;
 GMAT OGL_MoonMJ2K.NumPointsToRedraw = 0;
@@ -274,8 +263,6 @@ GMAT OGL_EarthMoonRot.RelativeZOrder = 1795;
 GMAT OGL_EarthMoonRot.Add = {MMSRef, Earth, Luna, Sun};
 GMAT OGL_EarthMoonRot.CoordinateSystem = EarthMoonRot;
 GMAT OGL_EarthMoonRot.DrawObject = [ true true true true ];
-GMAT OGL_EarthMoonRot.OrbitColor = [ 255 32768 12632256 4227327 ];
-GMAT OGL_EarthMoonRot.TargetColor = [ 8421440 0 0 0 ];
 GMAT OGL_EarthMoonRot.DataCollectFrequency = 1;
 GMAT OGL_EarthMoonRot.UpdatePlotFrequency = 50;
 GMAT OGL_EarthMoonRot.NumPointsToRedraw = 0;

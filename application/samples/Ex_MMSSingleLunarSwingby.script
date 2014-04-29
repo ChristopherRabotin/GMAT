@@ -78,9 +78,6 @@ GMAT MoonProp_ForceModel.RelativisticCorrection = Off;
 GMAT MoonProp_ForceModel.ErrorControl = RSSStep;
 
 
-
-
-
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -220,8 +217,6 @@ GMAT EarthInertialView.RelativeZOrder = 681;
 GMAT EarthInertialView.Add = {MMSRef, Earth, Luna};
 GMAT EarthInertialView.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthInertialView.DrawObject = [ true true true ];
-GMAT EarthInertialView.OrbitColor = [ 255 32768 12632256 ];
-GMAT EarthInertialView.TargetColor = [ 8421440 0 0 ];
 GMAT EarthInertialView.DataCollectFrequency = 1;
 GMAT EarthInertialView.UpdatePlotFrequency = 50;
 GMAT EarthInertialView.NumPointsToRedraw = 0;
@@ -251,8 +246,6 @@ GMAT MoonInertialView.RelativeZOrder = 679;
 GMAT MoonInertialView.Add = {MMSRef, Earth, Luna};
 GMAT MoonInertialView.CoordinateSystem = MoonMJ2000Eq;
 GMAT MoonInertialView.DrawObject = [ true true true ];
-GMAT MoonInertialView.OrbitColor = [ 255 32768 12632256 ];
-GMAT MoonInertialView.TargetColor = [ 8421440 0 0 ];
 GMAT MoonInertialView.DataCollectFrequency = 1;
 GMAT MoonInertialView.UpdatePlotFrequency = 50;
 GMAT MoonInertialView.NumPointsToRedraw = 0;
