@@ -1440,12 +1440,14 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          std::string::size_type pos;
 
          #if DEBUG_RENAME
-         MessageInterface::ShowMessage("   Now going through all Parameters in the map\n");
+         MessageInterface::ShowMessage("   Now going through all Parameters "
+               "in the map\n");
          #endif
          for (unsigned int i=0; i<params.size(); i++)
          {
             #if DEBUG_RENAME
-            MessageInterface::ShowMessage("   params[%2d]=%s\n", i, params[i].c_str());
+            MessageInterface::ShowMessage("   params[%2d]=%s\n", i,
+                  params[i].c_str());
             #endif
 
             param = GetParameter(params[i]);
@@ -1458,7 +1460,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                if (pos != oldParamName.npos)
                {
                   newParamName = oldParamName;
-                  newParamName = GmatStringUtil::ReplaceName(oldParamName, oldFmName, newFmName);
+                  newParamName = GmatStringUtil::ReplaceName(oldParamName,
+                        oldFmName, newFmName);
 
                   #if DEBUG_RENAME
                   MessageInterface::ShowMessage
@@ -1475,6 +1478,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                      param->SetName(newParamName, oldParamName);
                      renamed = true;
                   }
+
+                  if (newParamName != oldParamName)
+                     param->RenameRefObject(Gmat::ODE_MODEL, oldFmName, newFmName);
                }
             }
             // If variable, need to change expression
