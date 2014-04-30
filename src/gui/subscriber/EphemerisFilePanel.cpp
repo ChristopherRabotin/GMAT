@@ -844,9 +844,15 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       {
          fileFormat = newFileFormat;
          if (newFileFormat == "SPK")
+         {
             interpolatorComboBox->SetValue("Hermite");
+            allStepSizeComboBox->Enable(false);
+         }
          else if (newFileFormat == "CCSDS-OEM" || newFileFormat == "Code-500")
+         {
             interpolatorComboBox->SetValue("Lagrange");
+            allStepSizeComboBox->Enable(true);
+         }
          
          // Show proper coordinate systems based on the format
          if (newFileFormat == "CCSDS-OEM")
