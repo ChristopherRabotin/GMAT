@@ -2615,6 +2615,23 @@ Rvector6 StateConversionUtil::DelaunayToKeplerian(const Rvector6& delaunay, cons
    Real H_dela= delaunay[5];
    Real ll_dela= delaunay[0]*RAD_PER_DEG;
    
+   if (GmatMathUtil::Abs(H_dela) > GmatMathUtil::Abs(G_dela))
+   {
+      std::string errmsg = "The magnitude of DelaunayH must be less than or ";
+      errmsg += "equal to the magnitude of DelaunayG.  If setting the Delaunay ";
+      errmsg += "state, set DelaunayG before DelaunayH to avoid this ";
+      errmsg += "issue.\n";
+      throw UtilityException(errmsg);
+   }
+   if ((G_dela / L_dela) > 1.0)
+   {
+      std::string errmsg = "It is required that (DelaunayG / DelaunayL) <= 1.  ";
+      errmsg += "If setting the Delaunay state, ";
+      errmsg += "set DelaunayL before DelaunayG to avoid this ";
+      errmsg += "issue.\n";
+      throw UtilityException(errmsg);
+   }
+
    Real sma= L_dela*L_dela / mu;
    Real ecc= Sqrt ( 1 - (G_dela/L_dela)*(G_dela/L_dela) );
    Real inc= ACos(H_dela / G_dela) * DEG_PER_RAD;
