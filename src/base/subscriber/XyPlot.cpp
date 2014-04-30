@@ -575,7 +575,7 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
    if (type != Gmat::PARAMETER && type != Gmat::SPACECRAFT &&
        type != Gmat::COORDINATE_SYSTEM && type != Gmat::BURN &&
        type != Gmat::IMPULSIVE_BURN && type != Gmat::CALCULATED_POINT &&
-       type != Gmat::HARDWARE)
+       type != Gmat::HARDWARE && type != Gmat::ODE_MODEL)
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage

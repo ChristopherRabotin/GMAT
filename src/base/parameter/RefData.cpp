@@ -491,7 +491,8 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
        type != Gmat::THRUSTER         && type != Gmat::FUEL_TANK         &&
        type != Gmat::BARYCENTER       && type != Gmat::LIBRATION_POINT   &&
        type != Gmat::BODY_FIXED_POINT && type != Gmat::GROUND_STATION    &&
-       type != Gmat::CELESTIAL_BODY   && type != Gmat::SPACE_POINT)
+       type != Gmat::CELESTIAL_BODY   && type != Gmat::SPACE_POINT       &&
+       type != Gmat::ODE_MODEL)
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
