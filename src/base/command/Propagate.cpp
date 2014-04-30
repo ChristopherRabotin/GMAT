@@ -4480,8 +4480,8 @@ bool Propagate::Execute()
                {
                   if (fm[0] != NULL)
                      fm[i]->SetTime(fm[0]->GetTime());
-//                  else
-//                     fm[i]->SetTime(p[0]->GetTime());
+                  else
+                     fm[i]->SetTime(p[0]->GetTime());
                }
       }
 
