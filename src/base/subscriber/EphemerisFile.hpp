@@ -195,6 +195,9 @@ protected:
    
    CoordinateConverter coordConverter;
    
+   /// number of SPK segments that have been written
+   Integer     numSPKSegmentsWritten;
+
    FileType    fileType;
    
    /// for maneuver handling

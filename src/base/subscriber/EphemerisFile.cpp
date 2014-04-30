@@ -216,7 +216,8 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    spkWriteFailed       (true),
    code500WriteFailed   (true),
    writeCommentAfterData (true),
-   checkForLargeTimeGap (false)
+   checkForLargeTimeGap (false),
+   numSPKSegmentsWritten (0)
 {
    #ifdef DEBUG_EPHEMFILE
    MessageInterface::ShowMessage
@@ -310,7 +311,7 @@ EphemerisFile::~EphemerisFile()
    }
    
    #ifdef __USE_SPICE__
-   #ifdef DEBUG_EPHEMFILE
+   #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
       ("   spkWriter=<%p>, spkWriteFailed=%d\n", spkWriter, spkWriteFailed);
    #endif
@@ -324,6 +325,8 @@ EphemerisFile::~EphemerisFile()
          (spkWriter, "SPK writer", "EphemerisFile::~EphemerisFile()()",
           "deleting local SPK writer");
       #endif
+      if (numSPKSegmentsWritten == 0)
+         spkWriter->WriteDataToClose();
       delete spkWriter;
    }
    #endif
@@ -425,7 +428,8 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    spkWriteFailed       (ef.spkWriteFailed),
    code500WriteFailed   (ef.code500WriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
-   checkForLargeTimeGap (ef.checkForLargeTimeGap)
+   checkForLargeTimeGap (ef.checkForLargeTimeGap),
+   numSPKSegmentsWritten (ef.numSPKSegmentsWritten)
 {
    coordConverter = ef.coordConverter;
 }
@@ -520,6 +524,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    writeCommentAfterData = ef.writeCommentAfterData;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
    coordConverter       = ef.coordConverter;
+   numSPKSegmentsWritten = ef.numSPKSegmentsWritten;
    
    return *this;
 }
@@ -2023,7 +2028,7 @@ void EphemerisFile::CloseEphemerisFile()
 {
    // Close SPK file
    #ifdef __USE_SPICE__
-   #ifdef DEBUG_EPHEMFILE
+   #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
       ("EphemerisFile::CloseEphemerisFile() spkWriter=<%p>, spkWriteFailed=%d\n",
        spkWriter, spkWriteFailed);
@@ -4331,6 +4336,7 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
       {
          spkWriter->WriteSegment(*start, *end, stateArray, a1MjdArray);
          ClearOrbitData();
+         numSPKSegmentsWritten++;
       }
       catch (BaseException &e)
       {
@@ -4463,7 +4469,11 @@ void EphemerisFile::FinalizeSpkFile()
       {
          WriteSpkOrbitDataSegment();
       }
-      
+
+      // SPICE will not close a file that has no segments, so if we
+      // haven't written any segments, write a bogus one now
+      if (numSPKSegmentsWritten == 0)
+         spkWriter->WriteDataToClose();
       spkWriter->FinalizeKernel();
    }
    catch (BaseException &e)

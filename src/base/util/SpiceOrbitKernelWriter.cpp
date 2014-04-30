@@ -42,6 +42,7 @@
 #include "RealUtilities.hpp"
 
 //#define DEBUG_SPK_WRITING
+//#define DEBUG_SPK_INIT
 
 //---------------------------------
 // static data
@@ -89,9 +90,11 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    tmpTxtFile      (NULL),
    fm              (NULL)
 {
-   #ifdef DEBUG_SPK_WRITING
-      MessageInterface::ShowMessage("Entering constructor for SPKOrbitWriter with fileName = %s, objectName = %s\n",
-            fileName.c_str(), objName.c_str());
+   #ifdef DEBUG_SPK_INIT
+      MessageInterface::ShowMessage(
+            "Entering constructor for SPKOrbitWriter with fileName = %s, objectName = %s, "
+            "centerName = %s\n",
+            fileName.c_str(), objName.c_str(), centerName.c_str());
    #endif
    if (GmatMathUtil::IsEven(deg)) // degree must be odd for Data Type 13
    {
@@ -111,7 +114,7 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    // Create the temporary text file to hold the meta data
    tmpTxtFileName = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
    tmpTxtFileName += TMP_TXT_FILE_NAME + objectName + ".txt";
-   #ifdef DEBUG_SPK_WRITING
+   #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage("temporary SPICE file name is: %s\n", tmpTxtFileName.c_str());
    #endif
    tmpTxtFile = fopen(tmpTxtFileName.c_str(), "w");
@@ -148,7 +151,7 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    SpiceInt        maxChar = MAX_CHAR_COMMENT;
    std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
    ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
-   #ifdef DEBUG_SPK_WRITING
+   #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage("... attempting to open SPK file with  fileName = %s\n",
             fileName.c_str());
    #endif
@@ -526,6 +529,8 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
    #ifdef DEBUG_SPK_WRITING
       MessageInterface::ShowMessage("In FinalizeKernel .... tmpFileOK = %s\n",
             (tmpFileOK? "true" : "false"));
+      MessageInterface::ShowMessage("In FinalizeKernel .... kernelFileName = %s\n",
+            kernelFileName.c_str());
    #endif
    // write all the meta data to the file
    if (tmpFileOK) WriteMetaData();
@@ -540,6 +545,8 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
       //SpiceChar      err[MAX_SHORT_MESSAGE];
       SpiceChar      *err = new SpiceChar[MAX_SHORT_MESSAGE];
       getmsg_c(option, numChar, err);
+      // This should no longer occur as the method WriteDataToClose is called to
+      // write 'bogus' data to a segment, if no segment has been written before.
       if (eqstr_c(err, "SPICE(NOSEGMENTSFOUND)"))
       {
          MessageInterface::ShowMessage(
@@ -552,6 +559,44 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
    fileOpen = false;
 }
 
+void SpiceOrbitKernelWriter::WriteDataToClose()
+{
+   #ifdef DEBUG_SPK_WRITING
+      MessageInterface::ShowMessage("In WriteDataToClose ....\n");
+   #endif
+   A1Mjd *start = new A1Mjd(21545.00);
+   A1Mjd *end   = new A1Mjd(21546.00);
+   EpochArray  epochs;
+   StateArray  states;
+   for (unsigned int ii = 0; ii < 10; ii++)
+   {
+      Real      epochVal = start->Get() + 0.1 * ii;
+      A1Mjd     *epochii = new A1Mjd(epochVal);
+      Rvector6  *stateii = new Rvector6(7000.00 + ii, 500.00 + ii, 1000.00 + ii,
+                                   0.10000 + ii, 0.2000 + ii, 0.30000 + ii);
+      epochs.push_back(epochii);
+      states.push_back(stateii);
+   }
+   end->Set(epochs.at(9)->Get());
+   WriteSegment(*start, *end, states, epochs);
+   delete start;
+   delete end;
+   for (unsigned int ii = 0; ii < 10; ii++)
+   {
+      delete epochs[ii];
+      delete states[ii];
+   }
+   std::string warnmsg = "No segments were written to kernel ";
+   warnmsg += kernelFileName;
+   warnmsg += " in a previous run.  Because SPICE cannot close a kernel ";
+   warnmsg += "with no segments, GMAT has written a segment ";
+   warnmsg += "containing invalid data to the file.\n";
+   MessageInterface::ShowMessage(warnmsg.c_str());
+
+   #ifdef DEBUG_SPK_WRITING
+      MessageInterface::ShowMessage("EXITing WriteDataToClose ....\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 //  WriteMetaData()
@@ -614,6 +659,7 @@ void SpiceOrbitKernelWriter::WriteMetaData()
    remove(tmpTxtFileName.c_str());
    delete [] tmpTxt;
 }
+
 
 //---------------------------------
 // private methods
