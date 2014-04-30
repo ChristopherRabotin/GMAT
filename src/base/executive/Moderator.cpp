@@ -7856,8 +7856,10 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
-
+   
    // IncomingAsymptote parameters by YK
+   // Added HyperbolicRadPer (LOJ: 2014.04.28)
+   CreateParameter("HyperbolicRadPer", "DefaultSC.Earth.HyperbolicRadPer");
    CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
    CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
    CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");

@@ -46,6 +46,9 @@
 // Do we want to write anomaly type?
 //#define __WRITE_ANOMALY_TYPE__
 
+// Uncomment the macro to use old element map(single map) 
+//#define __USE_OLD_ELEMENT_MAP__
+
 
 //#define DEBUG_SPACECRAFT
 //#define DEBUG_SPACECRAFT_SET
@@ -261,6 +264,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "PlanetodeticAZI",
    "PlanetodeticHFPA",
    // Hyperbolic Asymptotes by YK
+   "HyperbolicRadPer",
    "C3Energy",
    "IncomingRHA",
    "IncomingDHA",
@@ -355,7 +359,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
-      
+   
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -414,20 +418,24 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    //=======================================================
    #ifndef __USE_OLD_ELEMENT_MAP__
    //=======================================================
-
+   
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
       ("==> Spacecraft constructor using state element labels mulimap\n");
    #endif
    
+   //=======================================================
    #else
+   //=======================================================
    
    // initialize possible input state types to be any type
    for (unsigned int ii = 0; ii < representations.size(); ii++)
       possibleInputTypes.push_back(representations.at(ii));
    
+   //=======================================================
    #endif
-
+   //=======================================================
+   
    parameterCount = SpacecraftParamCount;
 
    // Create a default unnamed attitude
@@ -2129,18 +2137,21 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
          {
             #ifdef DEBUG_GET_REAL
             MessageInterface::ShowMessage(
-            "In SC::GetParameterID, multiple reps found!! - str = %s and id = %d\n ",
+            "In SC::GetParameterID, multiple reps found!! - str = %s and id = %d\n",
             str.c_str(), (ii + CART_X));
             #endif
             return ii + CART_X;
          }
 
+      
+      #if 0
+      //========================================================================
       // Is this code block necessary? (LOJ)
       // Element ID is already handled in above block using MULT_REP_STRINGS
       // Added SemilatusRectum (LOJ:2014.04.25)
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "RMAG" || str == "SemilatusRectum" || str == "Delaunayl" ||
+          str == "HyperbolicRadPer" || str == "RMAG" || str == "SemilatusRectum" || str == "Delaunayl" ||
           str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
          retval =  ELEMENT1_ID;
       
@@ -2175,18 +2186,23 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       
       #ifdef DEBUG_GET_REAL
       MessageInterface::ShowMessage(
-      "In SC::GetParameterID, after checking for elements, id = %d\n ",
+      "In SC::GetParameterID, after checking for elements, id = %d\n",
       retval);
       #endif
+      
       if (retval != -1) return retval;
-
+      
+      #endif
+      //========================================================================
+      
+      
       for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
       {
          if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
          {
             #ifdef DEBUG_GET_REAL
             MessageInterface::ShowMessage(
-            "In SC::GetParameterID, getting id %d for str = %s\n ",
+            "In SC::GetParameterID, getting id %d for str = %s\n",
             i, str.c_str());
             #endif
             return i;
@@ -2883,11 +2899,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       throw SpaceObjectException
          ("ERROR - setting of anomaly of type other than True Anomaly not "
           "currently allowed.");
-
+   
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
-
+   
    if (label == "A1Epoch")
    {
       state.SetEpoch(value);
@@ -6157,7 +6173,7 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
    // mod by YK
    if (displayStateType == "IncomingAsymptote")
    {
-      stateElementLabel[0] = "RadPer";
+      stateElementLabel[0] = "HyperbolicRadPer";
       stateElementLabel[1] = "C3Energy";
       stateElementLabel[2] = "IncomingRHA";
       stateElementLabel[3] = "IncomingDHA";
@@ -6176,7 +6192,7 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
    
    if (displayStateType == "OutgoingAsymptote")
    {
-      stateElementLabel[0] = "RadPer";
+      stateElementLabel[0] = "HyperbolicRadPer";
       stateElementLabel[1] = "C3Energy";
       stateElementLabel[2] = "OutgoingRHA";
       stateElementLabel[3] = "OutgoingDHA";
@@ -6575,24 +6591,26 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             #endif
             // leave it as OutgoingAsymptote
          }
-         else if ( (stateType == "IncomingAsymptote") && (rep == "ModifiedKeplerian") &&
-                   (label == "RadPer") )
-         {
-            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-               MessageInterface::ShowMessage
-                  (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-            #endif
-            // leave it as IncomingAsymptote
-         }
-         else if ( (stateType == "OutgoingAsymptote") && (rep == "ModifiedKeplerian") &&
-                   (label == "RadPer") )
-         {
-            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-               MessageInterface::ShowMessage
-                  (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
-            #endif
-            // leave it as OutgoingAsymptote
-         }
+         // RadPer is no longer shared with IncomingAsymptote or OutgoingAsymtote
+         // so commented out (LOJ: 2014.04.28)
+         // else if ( (stateType == "IncomingAsymptote") && (rep == "ModifiedKeplerian") &&
+         //           (label == "RadPer") )
+         // {
+         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+         //       MessageInterface::ShowMessage
+         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
+         //    #endif
+         //    // leave it as IncomingAsymptote
+         // }
+         // else if ( (stateType == "OutgoingAsymptote") && (rep == "ModifiedKeplerian") &&
+         //           (label == "RadPer") )
+         // {
+         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+         //       MessageInterface::ShowMessage
+         //          (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
+         //    #endif
+         //    // leave it as OutgoingAsymptote
+         // }
          else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
                    (label == "C3Energy") )
          {
@@ -6630,8 +6648,15 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
       
       // Has the state type has been fully determined or not?  Only worry about this before the CS has been applied
       if (!csSet)
+      {
+         #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+         MessageInterface::ShowMessage
+            ("   CS is not set so calling SetPossibleInputTypes(%s, %s)\n",
+             label.c_str(), stateType.c_str());
+         #endif
          SetPossibleInputTypes(label, stateType);
-
+      }
+      
       // Get the true anomaly if needed
       if ((stateType == "Keplerian") || (stateType == "ModifiedKeplerian"))
       {
@@ -6644,14 +6669,15 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
 
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
    if (id >= 0)
+   {
       MessageInterface::ShowMessage
          ("In SC::SetElement, after LookUpLabel, id+ELEMENT1_ID = %d, its "
           "string = \"%s\",  and rep = \"%s\"\n", id+ELEMENT1_ID,
           (GetParameterText(id+ELEMENT1_ID)).c_str(), rep.c_str());
       MessageInterface::ShowMessage
          ("In SC::SetElement, after LookUpLabel, its label = \"%s\" and its value = %12.10f\n",
-               label.c_str(), value);
-
+          label.c_str(), value);
+   }
    #endif
 
    // parabolic and hyperbolic orbits not yet supported
@@ -6681,7 +6707,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    if ((id == 5) && (StateConversionUtil::IsValidAnomalyType(label)))
 //      trueAnomaly.SetType(label);
       anomalyType = label;  // is this right?
-
+      
    if (id >= 0)
    {
       // Only validate coupled elements in Assignment mode (i.e. before initialization).
@@ -6712,7 +6738,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
          Rvector6 vec6(state.GetState());
          MessageInterface::ShowMessage
-            ("   CS was %sset, state is now\n   %s ", (csSet ? "" : "NOT "),
+            ("   CS was %sset, state is now\n   %s\n", (csSet ? "" : "NOT "),
              vec6.ToString().c_str());
          MessageInterface::ShowMessage
             ("In SC::SetElement, '%s', returning TRUE\n", GetName().c_str());
@@ -6720,7 +6746,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          return true;
       }
    }
-
+   
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
    MessageInterface::ShowMessage("In SC::SetElement, returning FALSE\n");
    #endif
@@ -6773,11 +6799,13 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       rep = stateType;
       return ELEMENT6_ID;
    }
-
+   
+   //@todo Can we use multimap to find out the element id? (LOJ: 2014.04.28)
    // Modified by M.H. and YK
-   if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG" ||
-       label == "SemilatusRectum" || label == "Delaunayl" || label == "PlanetodeticRMAG" ||
-       label == "BrouwerShortSMA"  || label == "BrouwerLongSMA")
+   if (label == "X" || label == "SMA" || label == "RadPer" || label == "HyperbolicRadPer" ||
+       label == "RMAG" || label == "SemilatusRectum" || label == "Delaunayl" ||
+       label == "PlanetodeticRMAG" || label == "BrouwerShortSMA"  ||
+       label == "BrouwerLongSMA")
       retval = ELEMENT1_ID;
    
    else if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA" ||
@@ -6812,7 +6840,7 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       retval = ELEMENT6_ID;
 
    rep = elementLabelMap[label];
-
+   
    #ifdef DEBUG_LOOK_UP_LABEL
       MessageInterface::ShowMessage("Spacecraft::LookUpLabel(%s..) gives rep %s with retval = %d\n",
          label.c_str(), rep.c_str(), retval);
@@ -6895,10 +6923,11 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
       elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
       
-      elementLabelMap["C3Energy"]      = "IncomingAsymptote";
-      elementLabelMap["IncomingRHA"]   = "IncomingAsymptote";
-      elementLabelMap["IncomingDHA"]   = "IncomingAsymptote";
-      elementLabelMap["IncomingBVAZI"] = "IncomingAsymptote";
+      elementLabelMap["HyperbolicRadPer"] = "IncomingAsymptote";
+      elementLabelMap["C3Energy"]         = "IncomingAsymptote";
+      elementLabelMap["IncomingRHA"]      = "IncomingAsymptote";
+      elementLabelMap["IncomingDHA"]      = "IncomingAsymptote";
+      elementLabelMap["IncomingBVAZI"]    = "IncomingAsymptote";
       
       elementLabelMap["OutgoingRHA"]   = "OutgoingAsymptote";
       elementLabelMap["OutgoingDHA"]   = "OutgoingAsymptote";
@@ -7217,7 +7246,9 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    if (numRepCount == 1)
    {
       #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage("Unique state type found for label '%s'\n", label.c_str());
+      MessageInterface::ShowMessage
+         ("Unique state type found for label '%s', uniqueStateTypeFound = %d\n", label.c_str(),
+          uniqueStateTypeFound);
       #endif
       
       if (!uniqueStateTypeFound)
@@ -7277,11 +7308,12 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    // mod. by YK. "RadPer" is removed becuase hyperbolic asymptotes uses "RadPer".
    // EquinoctialH, EquinoctialK, and MLONG are no longer unique, those are state elements of
    // Equinoctial and AlternateEquinoctial, so removed (LOJ: 2014.01.29)
+   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
    if ((label == "X")                || (label == "Y")                || (label == "Z")                ||
        (label == "VX")               || (label == "VY")               || (label == "VZ")               ||
        (label == "ECC")              || (label == "RadApo")           || (label == "AZI")              ||
        (label == "FPA")              || (label == "RAV")              || (label == "DECV")             ||
-       (label == "EquinoctialP")     ||
+       (label == "EquinoctialP")     || (label == "RadPer")           ||
        (label == "EquinoctialQ")     || (label == "SemilatusRectum")  || (label == "ModEquinoctialF")  ||
        (label == "ModEquinoctialG")  || (label == "ModEquinoctialH")  || (label == "ModEquinoctialK")  ||
        (label == "TLONG")            || (label == "AltEquinoctialP")  || (label == "AltEquinoctialQ")  ||
@@ -7357,10 +7389,27 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    }
    // 4) It could be ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
-   else if ((label == "RadPer"))
+   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
+   // else if ((label == "RadPer"))
+   // {
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   // }
+   // 4) HyperbolicRadPer could be IncomingAsymptote, or OutgoingAsymptote
+   else if ((label == "HyperbolicRadPer"))
    {
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
@@ -7637,8 +7686,6 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    stateElementLabelsMap["Cartesian"] = elementLabels;
    stateElementUnitsMap["Cartesian"] = elementUnits;
    
-   //m.insert(pair<string, int>("a", 1));
-   
    // Build all labels to state type map
    allElementLabelsMultiMap.insert(std::make_pair("X",  "Cartesian"));
    allElementLabelsMultiMap.insert(std::make_pair("Y",  "Cartesian"));
@@ -7899,7 +7946,7 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    //-----------------------------------
    // IncomingAsymptote
    //-----------------------------------
-   elementLabels[0] = "RadPer";
+   elementLabels[0] = "HyperbolicRadPer";
    elementLabels[1] = "C3Energy";
    elementLabels[2] = "IncomingRHA";
    elementLabels[3] = "IncomingDHA";
@@ -7916,17 +7963,17 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    stateElementLabelsMap["IncomingAsymptote"] = elementLabels;
    stateElementUnitsMap["IncomingAsymptote"] = elementUnits;
    
-   allElementLabelsMultiMap.insert(std::make_pair("RadPer",        "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",      "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("IncomingRHA",   "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("IncomingDHA",   "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("IncomingBVAZI", "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("TA",            "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("HyperbolicRadPer", "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",         "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("IncomingRHA",      "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("IncomingDHA",      "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("IncomingBVAZI",    "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("TA",               "IncomingAsymptote"));
    
    //-----------------------------------
    // OutgoingAsymptote
    //-----------------------------------
-   elementLabels[0] = "RadPer";
+   elementLabels[0] = "HyperbolicRadPer";
    elementLabels[1] = "C3Energy";
    elementLabels[2] = "OutgoingRHA";
    elementLabels[3] = "OutgoingDHA";
@@ -7943,12 +7990,12 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    stateElementLabelsMap["OutgoingAsymptote"] = elementLabels;
    stateElementUnitsMap["OutgoingAsymptote"] = elementUnits;
    
-   allElementLabelsMultiMap.insert(std::make_pair("RadPer",        "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",      "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("OutgoingRHA",   "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("OutgoingDHA",   "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("OutgoingBVAZI", "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("TA",            "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("HyperbolicRadPer", "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",         "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("OutgoingRHA",      "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("OutgoingDHA",      "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("OutgoingBVAZI",    "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("TA",               "OutgoingAsymptote"));
    
    //-----------------------------------
    // BrouwerMeanShort

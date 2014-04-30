@@ -16,7 +16,7 @@
 //
 /**
  * Declares Incoming Asymptote related parameter classes.
- * IncAsym_RadPer, IncAsym_C3, IncAsym_RHA, IncAsym_DHA, IncAsym_BVAZI, IncAsym_TA, IncAsym_State
+ * HyperbolicRadPer, IncAsymC3, IncAsymRHA, IncAsymDHA, IncAsymBVAZI, IncAsymTA, IncAsymState
  */
 //------------------------------------------------------------------------------
 
@@ -24,6 +24,25 @@
 #include "OrbitReal.hpp"
 #include "OrbitRvec6.hpp"
 
+
+class GMAT_API HyperbolicRadPer : public OrbitReal
+{
+public:
+
+   HyperbolicRadPer(const std::string &name = "", GmatBase *obj = NULL);
+   HyperbolicRadPer(const HyperbolicRadPer &copy);
+   HyperbolicRadPer& operator=(const HyperbolicRadPer &right);
+   virtual ~HyperbolicRadPer();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+	   
+protected:
+
+};
 
 class GMAT_API IncAsymRHA : public OrbitReal
 {

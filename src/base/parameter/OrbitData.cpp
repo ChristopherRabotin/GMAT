@@ -539,7 +539,7 @@ Rvector6 OrbitData::GetCartState()
       #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitDate::GetCartState() '%s' returning lastCartState \n   %s\n   "
-          "since it is origin dep Parameter", mActualParamName.c_str(),
+          "since it is origin dep Parameter\n", mActualParamName.c_str(),
           lastCartState.ToString().c_str());
       #endif
       return lastCartState;
@@ -1030,15 +1030,20 @@ Real OrbitData::GetKepReal(Integer item)
 Real OrbitData::GetModKepReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetModKepReal() item=%d\n", item);
+   MessageInterface::ShowMessage("OrbitData::GetModKepReal() entered, item=%d\n", item);
    #endif
-      
+   
    Rvector6 state = GetCartState();
    
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("   state to pass to CalculateKeplerianData() is\n   %s\n", state.ToString().c_str());
+   #endif
    
    switch (item)
    {
@@ -1490,15 +1495,19 @@ Real OrbitData::GetPlanetodeticReal(Integer item)
 Real OrbitData::GetIncAsymReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetIncAsymReal() item=%d\n", item);
+   MessageInterface::ShowMessage("OrbitData::GetIncAsymReal() entered, item=%d\n", item);
    #endif
-   
+    
    Rvector6 state = GetCartState();
-
+   
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   state = %s\n", state.ToString().c_str());
+   #endif
    
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);   
@@ -1508,17 +1517,24 @@ Real OrbitData::GetIncAsymReal(Integer item)
       throw ParameterException
          ("*** Error *** Cannot convert from Cartesian to IncomingAsymptote because position vector is a zero vector.");
    
+   Rvector6 incAsymState =
+      StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   incAsymState = %s\n", incAsymState.ToString().c_str());
+   #endif
+   
    switch (item)
    {
    case INCASYM_RADPER:
    case INCASYM_C3:
+   case INCASYM_TA:
    case INCASYM_RHA:
    case INCASYM_DHA:
    case INCASYM_BVAZI:   
-   case INCASYM_TA:
    {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[item - PlanetoCount];
+      return incAsymState[item - PlanetoCount];
    }
    
    default:
@@ -1542,7 +1558,7 @@ Real OrbitData::GetOutAsymReal(Integer item)
    #endif
    
    Rvector6 state = GetCartState();
-
+   
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
@@ -1556,17 +1572,24 @@ Real OrbitData::GetOutAsymReal(Integer item)
       throw ParameterException
          ("*** Error *** Cannot convert from Cartesian to OutgoingAsymptote because position vector is a zero vector.");
    
+   Rvector6 outAsymState =
+      StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   outAsymState = %s\n", outAsymState.ToString().c_str());
+   #endif
+
    switch (item)
    {
    case OUTASYM_RADPER:
    case OUTASYM_C3:
+   case OUTASYM_TA:
    case OUTASYM_RHA:
    case OUTASYM_DHA:
    case OUTASYM_BVAZI:
-   case OUTASYM_TA:
    {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[item - InAsymCount];
+      return outAsymState[item - InAsymCount];
    }
    
    default:
@@ -2479,6 +2502,11 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    else
    {
       // Unimplemented state types should get here, so throw a exception
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("OrbitData::GetCartStateInParameterCS() throwing exception\n"
+          "Setting the Parameter %s has not been implemented\n", mActualParamName.c_str());
+      #endif
       ParameterException pe;
       pe.SetDetails("Setting the Parameter %s has not been implemented)", mActualParamName.c_str());
       throw pe;
@@ -2555,6 +2583,22 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
          stateInParamOrigin[1] = rval;
       cartStateInParamOrigin =
          StateConversionUtil::Convert(stateInParamOrigin, "ModifiedKeplerian", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case INCASYM_RADPER:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for items: INCASYM_RADPER\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // IncomingAsymptote elements: HyperbolicRadPer, C3Energy, IncRHA, IncDHA, IncBVAZI, TA
+      stateInParamOrigin[0] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       break;
    }
@@ -2848,7 +2892,7 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
       
    // Incoming Asymptote State
    case INCASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
       break;
    case INCASYM_C3:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
@@ -2865,7 +2909,7 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    
    // Outgoing Asymptote State
    case OUTASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
       break;
     case OUTASYM_C3:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
