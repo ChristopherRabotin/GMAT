@@ -113,6 +113,7 @@ Report::Report(const Report &rep) :
    rfName         (rep.rfName),
    reporter       (NULL),
    reportID       (-1),
+   numParams      (0),
    needsHeaders   (rep.needsHeaders),
    hasExecuted    (rep.hasExecuted)
 {
