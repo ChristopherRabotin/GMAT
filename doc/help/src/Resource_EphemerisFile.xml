@@ -207,9 +207,9 @@
           <row>
             <entry><guilabel>FileFormat</guilabel></entry>
 
-            <entry><para>Allows the user to generate ephemeris file in two
-            available file formats: CCSDS-OEM or SPK. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            <entry><para>Allows the user to generate ephemeris file in three
+            available file formats: CCSDS-OEM, SPK or Code-500. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -864,9 +864,14 @@
             <entry><para>The ephemeris file is generated at the step size that
             is specified for <guilabel>StepSize</guilabel> field. The user can
             generate ephemeris file at default Integration step size (using
-            raw integrator steps) or by defining a fixed step size provided by
-            user. This field cannot be modified in the Mission
-            Sequence.</para> <variablelist>
+            raw integrator steps) or by defining a fixed step size. For
+            <literal>CCSDS-OEM</literal> file format, you can generate
+            ephemeris at either Integrator steps or fixed step size. For
+            <literal>SPK</literal> file format, GMAT lets you generate
+            ephemeris at only raw integrator step sizes. For
+            <literal>Code-500</literal> ephemeris file type, you can generate
+            ephemeris at only fixed step sizes. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -895,9 +900,10 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>IntegratorSteps</literal>
-                    </para>
+                    <para><literal>IntegratorSteps </literal> for
+                    <literal>CCSDS-OEM</literal> and <literal>SPK</literal>
+                    file formats and <literal>60</literal> seconds for
+                    <literal>Code-500</literal> file format</para>
                   </listitem>
                 </varlistentry>
 
