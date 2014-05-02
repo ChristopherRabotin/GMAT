@@ -511,10 +511,10 @@ EndOptimize </code></programlisting>
       this example, since the force model in use in not perfectly two body
       Keplerian, the optimal TA value obtained is close to but not exactly 0.
       Note that the use of the <guilabel>VF13ad</guilabel> solver object in
-      this example assumes that you have installed this optional
-      plug-in.</para>
+      this example assumes that you have installed this optional plug-in.
+      Finally, report the convergence status to a file.</para>
 
-      <programlisting><code>Create Spacecraft aSat
+      <programlisting>Create Spacecraft aSat
 Create Propagator aPropagator
 Create ImpulsiveBurn aBurn
 Create VF13ad VF13ad1
@@ -523,6 +523,7 @@ Create OrbitView EarthView
 EarthView.Add = {Earth, aSat}
 EarthView.ViewScaleFactor = 5
 Create Variable ApogeeRadius DVCost
+Create ReportFile aReport
 
 BeginMissionSequence
 Optimize VF13ad1
@@ -534,7 +535,8 @@ Optimize VF13ad1
   NonlinearConstraint VF13ad1(ApogeeRadius=42164)
   GMAT DVCost = aBurn.Element1
   Minimize VF13ad1(DVCost)
-EndOptimize</code>      </programlisting>
+EndOptimize 
+Report aReport VF13ad1.SolverStatus VF13ad1.SolverState     </programlisting>
     </informalexample>
   </refsection>
 </refentry>
