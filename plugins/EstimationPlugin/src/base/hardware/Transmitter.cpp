@@ -554,7 +554,7 @@ Real Transmitter::GetDelay(Integer whichOne)
 	if (whichOne == 0)
 		return RFHardware::GetDelay();
 	else
-		throw new GmatBaseException("Delay index is out of bound\n");
+		throw GmatBaseException("Delay index is out of bound\n");
 }
 
 
@@ -575,7 +575,7 @@ bool Transmitter::SetDelay(Real delay, Integer whichOne)
 	   	 hardwareDelay1 = delay;
 	   	 return true;
 	  default:
-	   	 throw new GmatBaseException("Delay index is out of bound\n");
+	   	 throw GmatBaseException("Delay index is out of bound\n");
    }
 }
 
