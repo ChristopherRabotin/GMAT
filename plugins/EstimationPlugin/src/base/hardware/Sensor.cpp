@@ -455,7 +455,7 @@ Real Sensor::GetRealParameter(const Integer id, const Integer index) const
             if(index == 1)
                return hardwareDelay2;
             else
-               throw new GmatBaseException("Index is out of bound\n");
+               throw GmatBaseException("Index is out of bound\n");
          }
       default:
          break;
@@ -513,7 +513,7 @@ Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer 
             return hardwareDelay2;
          }
          else
-            throw new GmatBaseException("Index is out of bound\n");
+            throw GmatBaseException("Index is out of bound\n");
 
       default:
          break;
