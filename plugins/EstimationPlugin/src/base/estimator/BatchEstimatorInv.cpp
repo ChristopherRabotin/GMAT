@@ -496,11 +496,14 @@ void BatchEstimatorInv::Accumulate()
    }  // end of if (modelsToAccess.size() == 0)
 
 
-   if (reportFile.is_open())
-   {
-      reportFile << sLine.str();
-      reportFile.flush();
-   }
+   linesBuff = sLine.str();
+   WriteToTextFile(currentState);
+
+   //if (reportFile.is_open())
+   //{
+   //   reportFile << sLine.str();
+   //   reportFile.flush();
+   //}
 
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
@@ -666,12 +669,42 @@ void BatchEstimatorInv::Estimate()
    // Write report file:
    char s[1000];
    std::stringstream sLine;
-   sprintf(&s[0],"   WeightedRMS residuals = %.12lf       Sum [W*(O-C)^2] = %lf     number of reccords = %d\n", newResidualRMS, delta, measurementResiduals.size());
+   sLine << "\n";
+
+   // Display number of removed records for each type of filters
+   if (iterationsTaken == 0)
+   {
+	  if (!numRemovedRecords.empty())
+	  {
+	     MessageInterface::ShowMessage("Number of records removed by:\n");
+		 sLine << "   Number of records removed by:\n";
+         for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
+		 {
+	        MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
+			sprintf(&s[0],"      .%s: %d\n", i->first.c_str(), i->second);
+			sLine << s;
+		 }
+	  }
+   }
+   else
+   {
+      std::stringstream ss;
+	  ss << "OLSE for Iteration " << iterationsTaken;
+	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
+	  {
+		  MessageInterface::ShowMessage("Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+		  sprintf(&s[0], "   Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+		  sLine << s;
+	  }
+   }
+
+   sprintf(&s[0],"   Number of reccords used for estimation = %d\n", measurementResiduals.size());
+//   sprintf(&s[0],"   WeightedRMS residuals = %.12lf       Sum [W*(O-C)^2] = %lf     number of reccords = %d\n", newResidualRMS, delta, measurementResiduals.size());
    sLine << s;
-   sprintf(&s[0],"   Predicted RMS residuals = %.12lf\n", predictedRMS);
-   sLine << s;
+//   sprintf(&s[0],"   Predicted RMS residuals = %.12lf\n", predictedRMS);
+//   sLine << s;
    
-   sLine << "   Initial state (solve-for vector) in EarthMJ2000: x" << iterationsTaken << " = (";
+   sLine << "   Initial state (solve-for vector) in EarthMJ2000:   x" << iterationsTaken << " = (";
    for (int i= 0; i < initState.GetSize(); ++i)
    {
 	  sprintf(&s[0],"%18.9lf   ", initState[i]);
@@ -693,39 +726,22 @@ void BatchEstimatorInv::Estimate()
 	  sprintf(&s[0],"%.15lf   ", dx[i]);
       sLine << s;
    }
-   sLine << ")\n\n";
+   sLine << ")\n";
 
-   sLine << "----------------------------------------------------------------------\n";
+   linesBuff = sLine.str();
+   WriteToTextFile(currentState);
 
-   if (reportFile.is_open())
-   {
-      reportFile << sLine.str();
-      reportFile.flush();
-   }
+   //if (reportFile.is_open())
+   //{
+   //   reportFile << sLine.str();
+   //   reportFile.flush();
+   //}
 
    // Clear O, C, and W lists
    Weight.clear();
    OData.clear();
    CData.clear();
 
-   // Display number of removed records for each type of filters
-   if (iterationsTaken == 0)
-   {
-	  if (!numRemovedRecords.empty())
-	  {
-	     MessageInterface::ShowMessage("Number of records removed by:\n");
-         for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
-	        MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
-	  }
-   }
-   else
-   {
-      std::stringstream ss;
-	  ss << "OLSE for Iteration " << iterationsTaken;
-	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
-		  MessageInterface::ShowMessage("Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
-
-   }
    
    currentState = CHECKINGRUN;
 }
