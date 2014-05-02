@@ -1032,8 +1032,7 @@ std::string MeasurementModel::GetStringParameter(const Integer id) const
 bool MeasurementModel::SetStringParameter(const Integer id,
       const std::string & value)
 {
-//   if (id == ObservationData)				// made changes by TUAN NGUYEN
-   if (id == ObsData)						// made changes by TUAN NGUYEN
+   if (id == ObsData)
    {
       // Only add the obs data if it is not in the list already
       if (find(observationStreamName.begin(), observationStreamName.end(),
@@ -1043,23 +1042,23 @@ bool MeasurementModel::SetStringParameter(const Integer id,
          return true;
       }
    }
-   if (id == RampTables)												// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      // Only add the ramp table if it is not in the list already		// made changes by TUAN NGUYEN
-      if (find(rampTableStreamName.begin(), rampTableStreamName.end(),	// made changes by TUAN NGUYEN
-            value) == rampTableStreamName.end())						// made changes by TUAN NGUYEN
-      {																	// made changes by TUAN NGUYEN
-		 if (rampTableStreamName.size() == 0)							// made changes by TUAN NGUYEN
-         {																// made changes by TUAN NGUYEN
-			rampTableStreamName.push_back(value);						// made changes by TUAN NGUYEN
-			return true;												// made changes by TUAN NGUYEN
-		 }																// made changes by TUAN NGUYEN
-		 else															// made changes by TUAN NGUYEN
+   if (id == RampTables)
+   {
+      // Only add the ramp table if it is not in the list already
+      if (find(rampTableStreamName.begin(), rampTableStreamName.end(),
+            value) == rampTableStreamName.end())
+      {
+		 if (rampTableStreamName.size() == 0)
+         {
+			rampTableStreamName.push_back(value);
+			return true;
+		 }
+		 else
 			 throw MeasurementException(
 			 "Error: This GmatEstimation version allows "+GetName()+
-			 ".RampTables having only one ramp table!!!\n");			// made changes by TUAN NGUYEN
-      }																	// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
+			 ".RampTables having only one ramp table!!!\n");
+      }
+   }
    if (id == MeasurementType)
    {
       measurementType = value;
