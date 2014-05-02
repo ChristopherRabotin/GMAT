@@ -329,7 +329,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 	  }
 	  else
 	  {
-		  throw new MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
+		  throw MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
 			+"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
 	  }
    }
@@ -349,7 +349,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 		   MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
 				         "available.\nIt will be be added to GMAT in a future release.\n");
 
-		   throw new GmatBaseException("Ionosphere IRI2007 model currently is not "
+		   throw GmatBaseException("Ionosphere IRI2007 model currently is not "
 		         "available.\nIt will be be added to GMAT in a future release.\n");
          #endif
 	  }
@@ -358,7 +358,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 	  }
 	  else
 	  {
-		  throw new MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
+		  throw MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
 			+"Currently only 'IRI2007' is allowed for Ionosphere.\n");
 	  }
    }
@@ -1019,6 +1019,7 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
    MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
+
    err = 0;
    if (delta_t < 0)
    {
@@ -1102,9 +1103,9 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    }
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-   MessageInterface::ShowMessage(" Start epoch t1T = %.12lf A1Mjd\n", t0);
-   MessageInterface::ShowMessage(" End epoch t3R   = %.12lf A1Mjd\n", t1);
-   MessageInterface::ShowMessage(" elapse time   = %.12lf s\n", delta_t);
+   MessageInterface::ShowMessage(" Start epoch t1 = %.15lf A1Mjd\n", t0);
+   MessageInterface::ShowMessage(" End epoch t3   = %.15lf A1Mjd\n", t1);
+   MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
 #endif
    // search for end interval:
    UnsignedInt end_interval = 0;
@@ -1117,9 +1118,12 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 	  }
    }
 
+   Real basedFreq = (*rampTB)[end_interval].rampFrequency; 
+
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
    MessageInterface::ShowMessage("\n End interval: i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n", end_interval, (*rampTB)[end_interval].epoch, (*rampTB)[end_interval].rampFrequency, (*rampTB)[end_interval].rampRate);
    MessageInterface::ShowMessage("               i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n\n", end_interval+1, (*rampTB)[end_interval+1].epoch, (*rampTB)[end_interval+1].rampFrequency, (*rampTB)[end_interval+1].rampRate);
+   MessageInterface::ShowMessage(" Based frequency = %.15le\n", basedFreq);
 #endif
 
    // search for end interval:
@@ -1150,7 +1154,7 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 	  f1 = f0 + f_dot*interval_len;
 
 	  // Take integral for the current interval
-	  value1 = (f0 + f1) * interval_len / 2;
+	  value1 = ((f0 + f1)/2 - basedFreq) * interval_len;
 	  value  = value + value1;
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
@@ -1164,9 +1168,11 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 
 	  i--;
    }
+   Real rel_val = value;
+   value = value + basedFreq*delta_t;
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-   MessageInterface::ShowMessage("value = %.12lf\n", value);
+   MessageInterface::ShowMessage(" value = %.15lf     relative value = %.15lf    based value = %.15lf\n", value, rel_val, basedFreq*delta_t);
    MessageInterface::ShowMessage("Exit PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
 
