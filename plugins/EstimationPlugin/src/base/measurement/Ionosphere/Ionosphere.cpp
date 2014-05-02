@@ -286,10 +286,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 	   &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
 
    if (error != 0)
-   {
-      MessageInterface::ShowMessage("Ionosphere data files not found\n");
-      throw new MeasurementException("Ionosphere data files not found\n");
-   }
+      throw MeasurementException("Ionosphere data files not found\n");
 
    real density = outf[20+1];
    if (density < 0)
@@ -344,8 +341,7 @@ float Ionosphere::ElectronDensity1(Rvector3 pos2, Rvector3 pos1)
    
    if (error != 0)
    {
-      MessageInterface::ShowMessage("Ionosphere data files not found\n");
-      throw new GmatBaseException("Ionosphere data files not found\n");
+      throw GmatBaseException("Ionosphere data files not found\n");
    }
    
    MessageInterface::ShowMessage("density = %.12lf\n", tec/((hend-hbeg)*1000));
