@@ -750,7 +750,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	      return true;
 	   }
 
-	   for(std::vector<Hardware*>::iterator hw = this->participantHardware[0].begin();
+	   for(std::vector<Hardware*>::iterator hw = participantHardware[0].begin();
 	   		hw != this->participantHardware[0].end(); ++hw)
 	   {
 	   	if ((*hw) != NULL)
@@ -764,7 +764,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	   		MessageInterface::ShowMessage(" sensor = NULL\n");
 	   }
 
-	   for(std::vector<Hardware*>::iterator hw = this->participantHardware[1].begin();
+	   for(std::vector<Hardware*>::iterator hw = participantHardware[1].begin();
 	   		hw != this->participantHardware[1].end(); ++hw)
 	   {
 	   	if ((*hw) != NULL)
@@ -777,39 +777,21 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	   }
 
 	   if (objList1.size() != 1)
-	   {
-	   	MessageInterface::ShowMessage("The first participant does not have only 1 transmitter to send signal.\n");
-	      throw new MeasurementException("The first participant does not have only 1 transmitter to send signal.\n");
-	   }
+	      throw MeasurementException("The first participant does not have only 1 transmitter to send signal.\n");
 	   if (objList2.size() != 1)
-	   {
-	   	MessageInterface::ShowMessage("The first participant does not have only 1 receiver to receive signal.\n");
-	      throw new MeasurementException("The first participant does not have only 1 receiver to receive signal.\n");
-	   }
+	      throw MeasurementException("The first participant does not have only 1 receiver to receive signal.\n");
 	   if (objList3.size() != 1)
-	   {
-	   	MessageInterface::ShowMessage("The second participant does not have only 1 transponder to transpond signal.\n");
-  			throw new MeasurementException("The second participant does not have only 1 transponder to transpond signal.\n");
-	   }
+  		  throw MeasurementException("The second participant does not have only 1 transponder to transpond signal.\n");
 
 	   Transmitter* 	gsTransmitter 	= (Transmitter*)objList1[0];
 	   Receiver* 		gsReceiver 		= (Receiver*)objList2[0];
 	   Transponder* 	scTransponder 	= (Transponder*)objList3[0];
 	   if (gsTransmitter == NULL)
-	   {
-	   	MessageInterface::ShowMessage("Transmitter is NULL object.\n");
-	   	throw new GmatBaseException("Transmitter is NULL object.\n");
-	   }
+	   	  throw MeasurementException("Transmitter is NULL object.\n");
 	   if (gsReceiver == NULL)
-	   {
-	   	MessageInterface::ShowMessage("Receiver is NULL object.\n");
-	   	throw new GmatBaseException("Receiver is NULL object.\n");
-	   }
+	   	  throw MeasurementException("Receiver is NULL object.\n");
 	   if (scTransponder == NULL)
-	   {
-	   	MessageInterface::ShowMessage("Transponder is NULL object.\n");
-	   	throw new GmatBaseException("Transponder is NULL object.\n");
-	   }
+	   	  throw MeasurementException("Transponder is NULL object.\n");
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 			MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
@@ -858,8 +840,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	   {
 	   	 currentMeasurement.isFeasible = false;
 	   	 currentMeasurement.value[0] = 0;
-	   	 MessageInterface::ShowMessage("The transponder is unfeasible to receive uplink signal.\n");
-	   	 throw new GmatBaseException("The transponder is unfeasible to receive uplink signal.\n");
+	   	 throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
 	   }
 
 	   // 12. Get frequency of transponder output signal
@@ -886,7 +867,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	   {
 	   	 currentMeasurement.isFeasible = false;
 	   	 currentMeasurement.value[0] = 0;
-	   	 throw new MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
+	   	 throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
 	   }
 
 	   // 16. Calculate media correction for downlink leg:
