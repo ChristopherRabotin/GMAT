@@ -6944,6 +6944,154 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
     </refsection>
 
     <refsection>
+      <title>Solver</title>
+
+      <para><guilabel>Solver</guilabel> parameters allow you to query a
+      <guilabel>Solver</guilabel> for its convergence state to determine if
+      the <guilabel>Solver</guilabel> converged. There are both string and
+      numeric parameters which are described in further detail in the table
+      below the following usage example using solver parameters before and
+      after a <guilabel>Target</guilabel> sequence.</para>
+
+      <para><programlisting><code>Create Spacecraft aSat
+Create Propagator aPropagator
+
+Create ImpulsiveBurn aBurn
+Create DifferentialCorrector aDC
+Create OrbitView EarthView
+EarthView.Add = {Earth,aSat}
+EarthView.ViewScaleFactor = 5
+
+Create ReportFile aReport
+
+BeginMissionSequence
+Report aReport aDC.SolverStatus aDC.SolverState
+Target aDC
+   Vary aDC(aBurn.Element1 = 1.0, {Upper = 3})
+   Maneuver aBurn(aSat)
+   Propagate aPropagator(aSat,{aSat.Apoapsis})
+   Achieve aDC(aSat.RMAG = 42164)
+EndTarget
+Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting></para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="4">
+          <colspec colnum="1" colwidth="1.5in"/>
+
+          <colspec colnum="2" colwidth="0.75in"/>
+
+          <colspec colnum="3" colwidth="0.75in"/>
+
+          <colspec colnum="4"/>
+
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+
+              <entry>Settable</entry>
+
+              <entry>Plottable</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>SolverStatus</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>N</entry>
+
+              <entry><para>The <guilabel>SolverStatus</guilabel> parameter
+              contains the state of a <guilabel>Solver</guilabel>. If the
+              <guilabel>Solver</guilabel> has not exectuted,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Initialized</guilabel>. If the
+              <guilabel>Solver</guilabel> has executed and converged,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Converged</guilabel>. If the
+              <guilabel>Solver</guilabel> is iterating,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Running</guilabel>. If the <guilabel>Solver</guilabel>
+              has executed and reached the maximum number of iterations before
+              convergence, <guilabel>SolverStatus</guilabel> is
+              <guilabel>ExceededIterations</guilabel>. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>SolverState</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The <guilabel>SolverState</guilabel> parameter
+              contains the state of a <guilabel>Solver</guilabel>. If the
+              solver has not executed, <guilabel>SolverState</guilabel> is 0.
+              If the <guilabel>Solver</guilabel> has executed and converged,
+              <guilabel>SolverState</guilabel> is <guilabel>1</guilabel>. If
+              the <guilabel>Solver</guilabel> is iterating, <guilabel>
+              SolverState</guilabel> is 0. If the <guilabel>Solver</guilabel>
+              has executed and reached the maximum number of iterations before
+              convergence, <guilabel>SolverState</guilabel> is
+              -1.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Integer</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
       <title>Array, String, Variable</title>
 
       <para><guilabel>Array</guilabel>, <guilabel>String</guilabel>, and
