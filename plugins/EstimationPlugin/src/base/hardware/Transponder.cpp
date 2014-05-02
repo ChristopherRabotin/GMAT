@@ -682,7 +682,7 @@ bool Transponder::IsTransmitted(Integer whichOne)
 	case 2:
 		return isTransmitted2;
 	default:
-		throw new GmatBaseException("Index is out of bound\n");
+		throw GmatBaseException("Index is out of bound\n");
 	}
 }
 
