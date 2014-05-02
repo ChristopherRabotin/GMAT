@@ -158,6 +158,7 @@ protected:
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
    Real        finalEpochA1Mjd;
+   Real        blockBeginA1Mjd;
    Real        nextOutEpochInSecs;
    Real        nextReqEpochInSecs;
    Real        currEpochInDays;

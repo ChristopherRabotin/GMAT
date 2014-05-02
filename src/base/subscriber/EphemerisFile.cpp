@@ -187,6 +187,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    stepSizeInSecs       (-999.999),
    initialEpochA1Mjd    (-999.999),
    finalEpochA1Mjd      (-999.999),
+   blockBeginA1Mjd      (-999.999),
    nextOutEpochInSecs   (-999.999),
    nextReqEpochInSecs   (-999.999),
    currEpochInDays      (-999.999),
@@ -399,6 +400,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    stepSizeInSecs       (ef.stepSizeInSecs),
    initialEpochA1Mjd    (ef.initialEpochA1Mjd),
    finalEpochA1Mjd      (ef.finalEpochA1Mjd),
+   blockBeginA1Mjd      (ef.blockBeginA1Mjd),
    nextOutEpochInSecs   (ef.nextOutEpochInSecs),
    nextReqEpochInSecs   (ef.nextReqEpochInSecs),
    currEpochInDays      (ef.currEpochInDays),
@@ -493,6 +495,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    stepSizeInSecs       = ef.stepSizeInSecs;
    initialEpochA1Mjd    = ef.initialEpochA1Mjd;
    finalEpochA1Mjd      = ef.finalEpochA1Mjd;
+   blockBeginA1Mjd      = ef.blockBeginA1Mjd;
    nextOutEpochInSecs   = ef.nextOutEpochInSecs;
    nextReqEpochInSecs   = ef.nextReqEpochInSecs;
    currEpochInDays      = ef.currEpochInDays;
@@ -1683,6 +1686,7 @@ void EphemerisFile::InitializeData(bool saveEpochInfo)
       currEpochInSecs      = -999.999;
    }
    
+   blockBeginA1Mjd      = -999.999;
    nextOutEpochInSecs   = -999.999;
    nextReqEpochInSecs   = -999.999;
    prevEpochInSecs      = -999.999;
@@ -4852,6 +4856,14 @@ void EphemerisFile::FormatErrorMessage(std::string &ephemMsg, std::string &errMs
       "ephemeris";
    std::string ephemFileStr = " to EphemerisFile: \"" + fileName + "\"";
    
+   Real timeSpanInSecs = (currEpochInDays - blockBeginA1Mjd) * GmatTimeConstants::SECS_PER_DAY;
+
+   #ifdef DEBUG_TIME_SPAN
+   DebugWriteTime("=> blockBeginA1Mjd = ", blockBeginA1Mjd, true, 2);
+   DebugWriteTime("=> currEpochInDays = ", currEpochInDays, true, 2);
+   MessageInterface::ShowMessage("=> timeSpanInSecs  = %f\n", timeSpanInSecs);
+   #endif
+   
    // Format error message
    if (initialEpochA1Mjd != -999.999 && (currEpochInDays < initialEpochA1Mjd))
    {
@@ -4860,6 +4872,16 @@ void EphemerisFile::FormatErrorMessage(std::string &ephemMsg, std::string &errMs
       std::string detailedMsg = ". The block ended at " + currentEpochStr + "(" +
          GmatStringUtil::ToString(currEpochInDays) + ") before the user defined initial epoch of " +
          initialEpochStr + "(" + GmatStringUtil::ToString(initialEpochA1Mjd) + ").";
+      ephemMsg = commonMsg + detailedMsg;
+      errMsg = commonMsg + ephemFileStr + detailedMsg;
+   }
+   else if (timeSpanInSecs < stepSizeInSecs)
+   {
+      std::string blockBeginEpochStr = ToUtcGregorian(blockBeginA1Mjd, true, 2);
+      std::string currentEpochStr = ToUtcGregorian(currEpochInDays, true, 2);
+      std::string detailedMsg = ".  The data time span (" + blockBeginEpochStr + " - " +
+         currentEpochStr + ") is less than the step size of " +
+         GmatStringUtil::ToString(stepSizeInSecs, 2, true) + " seconds.";
       ephemMsg = commonMsg + detailedMsg;
       errMsg = commonMsg + ephemFileStr + detailedMsg;
    }
@@ -5068,8 +5090,6 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
       // End of run, blank out the last comment if needed
       #ifdef DEBUG_EPHEMFILE_FINISH
       MessageInterface::ShowMessage("=====> End of run\n");
-      #endif
-      #ifdef DEBUG_EPHEMFILE_FINISH
       std::string lastEpochWroteStr = ToUtcGregorian(lastEpochWrote);
       std::string currEpochStr = ToUtcGregorian(currEpochInSecs);
       std::string prevEpochStr = ToUtcGregorian(prevEpochInSecs);
@@ -5183,11 +5203,16 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    currState[4] = dat[idVy];
    currState[5] = dat[idVz];
    
+   // To compute block time span for use in the error message (LOJ: 2014.04.30)
+   // Save block begin time
+   if (blockBeginA1Mjd == -999.999)
+      blockBeginA1Mjd = currEpochInDays;
+   
    #ifdef DEBUG_MANEUVER
-      MessageInterface::ShowMessage("   Distribute dat[0]=%.15f, dat[1]=%.15f, "
-            "dat[4]=%.15f\n", dat[0], dat[1], dat[4]);
+   MessageInterface::ShowMessage
+      ("   Distribute dat[0]=%.15f, dat[1]=%.15f, dat[4]=%.15f\n", dat[0], dat[1], dat[4]);
    #endif
-
+   
    // Internally all epochs are in seconds to avoid epoch drifting.
    // For long run epochs to process drifts behind the actual.
    prevEpochInSecs = currEpochInSecs;

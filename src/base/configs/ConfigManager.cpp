@@ -1292,6 +1292,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    #endif
    
    bool renamed = false;
+   changedItemType.clear();
+   oldRelatedName.clear();
+   newRelatedName.clear();
    
    //--------------------------------------------------
    // change mapping name
@@ -1431,6 +1434,14 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
 
                renamed = obj->RenameRefObject(Gmat::ODE_MODEL, oldFmName,
                                newFmName);
+
+               if (newFmName != oldFmName)
+               {
+                  changedItemType.push_back(Gmat::ODE_MODEL);
+                  oldRelatedName.push_back(oldFmName);
+                  newRelatedName.push_back(newFmName);
+               }
+
             }
          }
 
@@ -1480,7 +1491,13 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                   }
 
                   if (newParamName != oldParamName)
-                     param->RenameRefObject(Gmat::ODE_MODEL, oldFmName, newFmName);
+                  {
+                     param->RenameRefObject(Gmat::ODE_MODEL, oldFmName,
+                           newFmName);
+                     changedItemType.push_back(Gmat::PARAMETER);
+                     oldRelatedName.push_back(oldParamName);
+                     newRelatedName.push_back(newParamName);
+                  }
                }
             }
             // If variable, need to change expression
@@ -1547,7 +1564,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             if (pos != oldParamName.npos)
             {
                newParamName = oldParamName;
-               newParamName = GmatStringUtil::ReplaceName(oldParamName, oldName, newName);
+               newParamName = GmatStringUtil::ReplaceName(oldParamName, oldName,
+                     newName);
                
                #if DEBUG_RENAME
                MessageInterface::ShowMessage
@@ -2535,3 +2553,42 @@ ObjectMap* ConfigManager::GetObjectMap()
    return &mapping;
 }
 
+//------------------------------------------------------------------------------
+// bool RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+//       StringArray& oldName, StringArray& newName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves name changes that were made as a side effect of other name changes
+ *
+ * The force model parameters use this code to report force model name and
+ * Parameter name changes when a Propagator changes name, resulting in a name
+ * change on an associated force model.
+ *
+ * This method clears the input arrays and then fills them with the name change
+ * data.
+ *
+ * @param itemType An array filled with a list of changed types
+ * @param oldName  An array of old object names
+ * @param newName  An array of new object names
+ *
+ * @return true if there are name changes to be processed, false if not
+ */
+//------------------------------------------------------------------------------
+bool ConfigManager::RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+StringArray& oldName, StringArray& newName)
+{
+   itemType.clear();
+   oldName.clear();
+   newName.clear();
+
+   bool retval = false;
+   if (oldRelatedName.size() > 0)
+   {
+      itemType = changedItemType;
+      oldName  = oldRelatedName;
+      newName  = newRelatedName;
+      retval   = true;
+   }
+
+   return retval;
+}
