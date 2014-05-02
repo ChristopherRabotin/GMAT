@@ -58,7 +58,7 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEMultiplicativeConstant",			// made changes by TUAN NGUYEN  for data sigma editting
    "OLSEAdditiveConstant",					// made changes by TUAN NGUYEN  for data sigma editting
    "ReuseableBadRecordTypes",
-   "ReportFileName",
+   //"ReportFileName",
 };
 
 const Gmat::ParameterType
@@ -78,7 +78,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::STRINGARRAY_TYPE,
-   Gmat::STRING_TYPE,
+   //Gmat::STRING_TYPE,
 };
 
 
@@ -120,8 +120,8 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    epochFormat          ("TAIModJulian"),								// made changes by TUAN NGUYEN
    maxResidualMult		(1.0e180),										// made changes by TUAN NGUYEN
    constMult			(3.0),											// made changes by TUAN NGUYEN
-   additiveConst        (0.0),											// made changes by TUAN NGUYEN
-   reportFilename       ("")											// made changes by TUAN NGUYEN
+   additiveConst        (0.0)											// made changes by TUAN NGUYEN
+   //reportFilename       ("")											// made changes by TUAN NGUYEN
 {
 
    objectTypeNames.push_back("Estimator");
@@ -191,8 +191,8 @@ Estimator::Estimator(const Estimator& est) :
    maxResidualMult		(est.maxResidualMult),				// made changes by TUAN NGUYEN
    constMult			(est.constMult),					// made changes by TUAN NGUYEN
    additiveConst		(est.additiveConst),				// made changes by TUAN NGUYEN
-   reuseableTypes       (est.reuseableTypes),				// made changes by TUAN NGUYEN
-   reportFilename       (est.reportFilename)				// made changes by TUAN NGUYEN
+   reuseableTypes       (est.reuseableTypes)				// made changes by TUAN NGUYEN
+   //reportFilename       (est.reportFilename)				// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -262,7 +262,7 @@ Estimator& Estimator::operator=(const Estimator& est)
 	  constMult            = est.constMult;					// made changes by TUAN NGUYEN
 	  additiveConst        = est.additiveConst;				// made changes by TUAN NGUYEN
 	  reuseableTypes       = est.reuseableTypes;			// made changes by TUAN NGUYEN
-	  reportFilename       = est.reportFilename;
+	  //reportFilename       = est.reportFilename;
    }
 
    return *this;
@@ -546,8 +546,8 @@ std::string Estimator::GetStringParameter(const Integer id) const
    if (id == END_EPOCH)									// made changes by TUAN NGUYEN
       return endEpoch;									// made changes by TUAN NGUYEN
 
-   if (id == REPORT_FILE_NAME)
-      return reportFilename;
+   //if (id == REPORT_FILE_NAME)
+   //   return reportFilename;
 
    return Solver::GetStringParameter(id);
 }
@@ -629,11 +629,11 @@ bool Estimator::SetStringParameter(const Integer id,
       return true;														// made changes by TUAN NGUYEN
    }																	// made changes by TUAN NGUYEN
 
-   if (id == REPORT_FILE_NAME)
-   {
-	   reportFilename = value;
-	   return true;
-   }
+   //if (id == REPORT_FILE_NAME)
+   //{
+	  // reportFilename = value;
+	  // return true;
+   //}
 
    return Solver::SetStringParameter(id, value);
 }
@@ -1663,7 +1663,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 		 else if (infor->elementName == "Velocity")
 			index = infor->subelement+2;
 		 else
-            throw GmatBaseException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
+            throw EstimatorException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
 
          inState.SetElement(index, inputStateElement);
          Rvector6 outState;
@@ -1671,7 +1671,6 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
          cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
 
          (*outputStateElement) = outState[index]; 
-//		 (*outputStateElement) = inState[index]; 
          delete cv;
 	  }
    }
@@ -1719,6 +1718,8 @@ void Estimator::GetEstimationState(GmatState& outputState)
 *   3. Sigma editting
 */
 //-------------------------------------------------------------------------
+// This function was moved to BatchEstimator
+/*
 bool Estimator::DataFilter()
 {
 
@@ -1831,7 +1832,8 @@ bool Estimator::DataFilter()
             weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
 
          // 2. Filter based on n-sigma			
-		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+//		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*newResidualRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
 		 {
 //            MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| = %lf > kk*sigma + K = %lf:  %.12lf   %s   %d", 
 //				sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]), 
@@ -1866,8 +1868,9 @@ bool Estimator::DataFilter()
 
    return retVal;
 }
-
-
+*/
+// This function was moved to BatchEstimator
+/*
 bool Estimator::IsReuseableType(const std::string& value)
 {
    bool isReuseable = false;
@@ -1882,7 +1885,7 @@ bool Estimator::IsReuseableType(const std::string& value)
 
    return isReuseable;
 }
-
+*/
 
 /*
 // made changes by TUAN NGUYEN

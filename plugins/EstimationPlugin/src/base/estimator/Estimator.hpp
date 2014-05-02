@@ -173,7 +173,7 @@ protected:
    std::vector<RealArray>  hAccum;
 
    /// Weight, Observation data, calculated data					// made changes by TUAN NGUYEN
-   std::fstream reportFile;											// made changes by TUAN NGUYEN
+   //std::fstream reportFile;											// made changes by TUAN NGUYEN
    RealArray Weight;												// made changes by TUAN NGUYEN
    RealArray OData;													// made changes by TUAN NGUYEN
    RealArray CData;													// made changes by TUAN NGUYEN
@@ -239,8 +239,8 @@ protected:
    Real constMult;											// made changes by TUAN NGUYEN
    Real additiveConst;										// made changes by TUAN NGUYEN
 
-   /// Predicted RMS
-   Real predictedRMS;
+   ///// Predicted RMS
+   //Real predictedRMS;			// It was moved to BatchEstimator
 
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;	// made changes by TUAN NGUYEN
@@ -248,8 +248,10 @@ protected:
    /// Types of reuseable bad record
    StringArray reuseableTypes;
 
-   /// Report file
-   std::string reportFilename;
+   ///// Report file
+   //std::string reportFilename;
+   /// A string as a line/lines buffer to store a line/lines for writing to report file
+   std::string linesBuff;
 
    /// Parameters associated with the Estimators
    enum
@@ -268,7 +270,7 @@ protected:
 	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
 	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
 	  REUSEABLE_BAD_RECORD_TYPES,
-	  REPORT_FILE_NAME,
+	  //REPORT_FILE_NAME,
       EstimatorParamCount
    };
 
@@ -296,14 +298,14 @@ protected:
    virtual void            SetResultValue(Integer, Real, const std::string&);
 
 //   virtual void            ValidateModelToAccess();					// made changes by TUAN NGUYEN
-   virtual bool            DataFilter();							// made changes by TUAN NGUYEN
+//   virtual bool            DataFilter();								// It was moved to BatchEstimator
 
 ///// TBD: Do simulators need this too?  If so, move to base class
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
    virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
 
-private:
-   bool                    IsReuseableType(const std::string& value);
+//private:
+//   bool                    IsReuseableType(const std::string& value);	// It was moved to BatchEstimator
 
 };
 
