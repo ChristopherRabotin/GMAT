@@ -7006,7 +7006,7 @@ Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting></para>
 
               <entry><para>The <guilabel>SolverStatus</guilabel> parameter
               contains the state of a <guilabel>Solver</guilabel>. If the
-              <guilabel>Solver</guilabel> has not exectuted,
+              <guilabel>Solver</guilabel> has not executed,
               <guilabel>SolverStatus</guilabel> is
               <guilabel>Initialized</guilabel>. If the
               <guilabel>Solver</guilabel> has executed and converged,
@@ -7017,7 +7017,11 @@ Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting></para>
               <guilabel>Running</guilabel>. If the <guilabel>Solver</guilabel>
               has executed and reached the maximum number of iterations before
               convergence, <guilabel>SolverStatus</guilabel> is
-              <guilabel>ExceededIterations</guilabel>. </para><variablelist>
+              <guilabel>ExceededIterations</guilabel>. If the
+              <guilabel>Solver</guilabel> has executed and failed to converge,
+              but did not exceed the maximum iterations,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>DidNotConverge</guilabel>.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7060,7 +7064,10 @@ Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting></para>
               SolverState</guilabel> is 0. If the <guilabel>Solver</guilabel>
               has executed and reached the maximum number of iterations before
               convergence, <guilabel>SolverState</guilabel> is
-              -1.</para><variablelist>
+              <guilabel>-1</guilabel>. If the <guilabel>Solver</guilabel> has
+              executed and failed to converge, but did not exceed the maximum
+              iterations, <guilabel>SolverState</guilabel> is
+              <guilabel>-2</guilabel>.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
