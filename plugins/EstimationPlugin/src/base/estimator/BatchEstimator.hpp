@@ -97,6 +97,11 @@ protected:
    Real                    oldResidualRMS;
    /// RMS residual value froooom the current pass through the data
    Real                    newResidualRMS;
+   /// Predicted RMS
+   Real predictedRMS;
+   /// Flag to indicate weightedRMS or predictedRMS
+   bool chooseRMSP;
+
    /// Flag set when an a priori estimate is available
    bool                    useApriori;
    /// The most recently computed state vector changes
@@ -107,6 +112,8 @@ protected:
    bool                    advanceToEstimationEpoch;
    /// Flag indicating convergence
    bool                    converged;
+   // String to show reason of convergence
+   std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
    ObjectArray             outerLoopBuffer;
 
@@ -147,6 +154,12 @@ protected:
 
    // progress string for reporting
    virtual std::string    GetProgressString();
+
+   virtual bool            DataFilter();							// made changes by TUAN NGUYEN
+
+private:
+   bool                    IsReuseableType(const std::string& value);
+
 };
 
 #endif /* BatchEstimator_hpp */

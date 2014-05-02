@@ -29,7 +29,7 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
-#include "FileManager.hpp"
+//#include "FileManager.hpp"
 #include <sstream>
 #include "SpaceObject.hpp"    // To access epoch data
 
@@ -89,7 +89,8 @@ BatchEstimator::BatchEstimator(const std::string &type,
    newResidualRMS             (1.0e12),
    useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
-   converged                  (false)
+   converged                  (false),
+   chooseRMSP                 (true)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -128,7 +129,8 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    newResidualRMS             (1.0e12),
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
-   converged                  (false)
+   converged                  (false),
+   chooseRMSP                 (est.chooseRMSP)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -163,6 +165,7 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
 
       advanceToEstimationEpoch = false;
       converged                = false;
+	  chooseRMSP               = est.chooseRMSP;
 
       // Clear the loop buffer
       for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -884,6 +887,66 @@ void BatchEstimator::CompleteInitialization()
    converged   = false;
    isInitialized = true;
 
+   // Open report file											// made changes by TUAN NGUYEN
+   //if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
+   //{
+
+   //   if (reportFilename != "")
+   //   {
+   //      std::string fullPath = "";
+
+   //      // If no path designation slash character is found, add the default path
+   //      if ((reportFilename.find('/') == std::string::npos) &&
+   //          (reportFilename.find('\\') == std::string::npos))
+   //      {
+   //         FileManager *fm = FileManager::Instance();
+   //         fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);
+   //      }
+   //      fullPath += reportFilename;
+
+   //      reportFile.open(fullPath, std::ios_base::out);		// made changes by TUAN NGUYEN
+	  //}
+   //}
+
+
+   std::stringstream sLine;
+   // Write out maximum residual for each measuement model
+   std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
+   sLine << "\nData Editing criteria:\n";
+   for (int i = 0; i < modelsList.size(); ++i)
+      sLine << "   " << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+
+   // Write out OLSE Initial RMS: 
+   sLine << "   " << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
+   sLine << "   " << GetName() <<".OLSEMultiplicativeConstant = " << constMult << "\n";
+   sLine << "   " << GetName() <<".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
+
+   // Write out all notations used in table:
+   sLine << "Notaions used in report file: \n";
+   sLine << "  N: Normal\n";
+   sLine << "  U: Unmatched to any measurement model\n";
+   sLine << "  R: Out of ramped table\n";
+   sLine << "  ET: measurement unfeasible due to the block of transmitted signal\n";
+   sLine << "  ER: measurement unfeasible due to the block of received signal\n";
+   sLine << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
+   sLine << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
+   sLine << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
+   sLine << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
+   sLine << "  M: Edited by measurement maximum residual\n";
+   sLine << "  I: Edited by Initial RMS Sigma filter\n";
+   sLine << "  S: Edited by Outer-Loop Sigma Editing\n\n";
+
+   // Write out the header
+   sLine << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
+   
+   linesBuff = sLine.str();
+
+   //if (reportFile.is_open())
+   //{
+	  // reportFile << sLine.str();
+	  // reportFile.flush();
+   //}
+
    WriteToTextFile();
    ReportProgress();
 
@@ -894,57 +957,6 @@ void BatchEstimator::CompleteInitialization()
       timeStep = (nextMeasurementEpoch - currentEpoch) *
             GmatTimeConstants::SECS_PER_DAY;
       currentState = PROPAGATING;
-   }
-
-
-   // Open report file											// made changes by TUAN NGUYEN
-   if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
-   {
-
-      if (reportFilename != "")
-      {
-         std::string fullPath = "";
-
-         // If no path designation slash character is found, add the default path
-         if ((reportFilename.find('/') == std::string::npos) &&
-             (reportFilename.find('\\') == std::string::npos))
-         {
-            FileManager *fm = FileManager::Instance();
-            fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);
-         }
-         fullPath += reportFilename;
-
-         reportFile.open(fullPath, std::ios_base::out);		// made changes by TUAN NGUYEN
-
-	     // Write out maximum residual for each measuement model
-	     std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
-	     for (int i = 0; i < modelsList.size(); ++i)
-		    reportFile << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
-	     reportFile << "\n";
-
-	     // Write out OLSE Initial RMS: 
-	     reportFile << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
-	     reportFile << GetName() <<".OLSEMultiplicativeConstant = " << constMult << "\n";
-	     reportFile << GetName() <<".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
-
-	     // Notation:
-	     reportFile << "Notaions used in report file: \n";
-	     reportFile << "  N: Normal\n";
-	     reportFile << "  U: Unmatched to any measurement model\n";
-	     reportFile << "  R: Out of ramped table\n";
-	     reportFile << "  ET: measurement unfeasible due to the block of transmitted signal\n";
-	     reportFile << "  ER: measurement unfeasible due to the block of received signal\n";
-	     reportFile << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
-	     reportFile << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
-	     reportFile << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
-	     reportFile << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
-	     reportFile << "  M: Edited by measurement maximum residual\n";
-	     reportFile << "  I: Edited by Initial RMS Sigma filter\n";
-	     reportFile << "  S: Edited by Outer-Loop Sigma Editing\n\n";
-
-	     // Write out the header
-	     reportFile << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
-	  }
    }
 
 
@@ -1154,7 +1166,7 @@ void BatchEstimator::CheckCompletion()
             iterationsTaken+1);
    #endif
 
-   std::string convergenceReason = "";
+   convergenceReason = "";
    converged = TestForConvergence(convergenceReason);
 
    #ifdef RUN_SINGLE_PASS
@@ -1164,13 +1176,14 @@ void BatchEstimator::CheckCompletion()
    ++iterationsTaken;
    if ((converged) || (iterationsTaken >= maxIterations))
    {
+#ifdef DEBUG_VERBOSE
       if (converged)
          MessageInterface::ShowMessage("Estimation has converged\n%s\n\n",
                   convergenceReason.c_str());
       else
          MessageInterface::ShowMessage("Estimation has reached the maximum "
                   "iteration count, but has not converged\n\n");
-
+#endif
       currentState = FINISHED;
    }
    else
@@ -1279,8 +1292,8 @@ void BatchEstimator::RunComplete()
    if (showAllResiduals)
       PlotResiduals();
 
-   // Close report file
-   reportFile.close();										// made changes by TUAN NGUYEN
+   //// Close report file
+   //reportFile.close();										// made changes by TUAN NGUYEN
 }
 
 
@@ -1328,7 +1341,7 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   Estimation Epoch (A.1 modified Julian): "
                            << estimationEpoch << "\n\n";
 
-			   GetEstimationState(outputEstimationState);
+			   GetEstimationState(outputEstimationState);						// made changes by TUAN NGUYEN
                
 			   for (UnsignedInt i = 0; i < map->size(); ++i)
                {
@@ -1353,9 +1366,9 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          case CHECKINGRUN:
-            progress << "\n   WeightedRMS residuals: "
-                     << newResidualRMS << "\n";
-            progress << "\n   PredictedRMS residuals: "
+            progress << "\n   WeightedRMS residuals for this iteration: "
+                     << newResidualRMS;
+            progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n\n";
 
             progress << "------------------------------"
@@ -1377,8 +1390,11 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          case FINISHED:
-            progress << "\n   WeightedRMS residuals: "
-                     << newResidualRMS << "\n\n";
+            progress << "\n   WeightedRMS residuals for this iteration: "
+                     << newResidualRMS;
+            progress << "\n   PredictedRMS residuals for next iteration: "
+                     << predictedRMS << "\n\n";
+
             progress << "\n****************************"
                      << "****************************\n"
                      << "*** Estimating Completed in " << iterationsTaken
@@ -1386,8 +1402,9 @@ std::string BatchEstimator::GetProgressString()
                      << "\n****************************"
                      << "****************************\n\n"
                      << "Estimation "
-                     << (converged ? "converged!" : "did not converge")
-                     << "\n\nFinal Estimated State:\n\n";
+                     << (converged ? "converged!" : "did not converge") << "\n"
+					 << convergenceReason << "\n"
+                     << "\nFinal Estimated State:\n\n";
 
             if (estEpochFormat != "FromParticipants")
                progress << "   Estimation Epoch (" << estEpochFormat
@@ -1422,9 +1439,9 @@ std::string BatchEstimator::GetProgressString()
 
             if (textFileMode == "Verbose")
             {
-               progress << "\n   RMS residuals at previous iteration: "
+               progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   RMS residuals at this iteration:     "
+               progress << "\n   WeightedRMS residuals for this iteration:     "
                         << newResidualRMS << "\n\n";
             }
 
@@ -1500,6 +1517,8 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
           << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
           << " is less than RelativeTol, "
           << relativeTolerance << "\n";
+
+	  reason = why.str();
       retval = true;
    }
 
@@ -1508,11 +1527,15 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
       why << "   WeightedRMS residual, " << newResidualRMS
           << " is within the AbsoluteTol, " << absoluteTolerance
           << "\n";
+
+	  reason = why.str();
       retval = true;
    }
 
-   if (retval)
-      reason = why.str();
+   if ((iterationsTaken + 1) >= maxIterations)
+   {
+	   reason =  "Estimation has reached the maximum iteration count\n";
+   }
 
    return retval;
 }
@@ -1573,14 +1596,37 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 //                     << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
                      << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
          }
-         break;
 
+		 if (textFileMode == "Debug")
+		 {
+			 //Write out all information for Debug mode here
+			 textFile << linesBuff;
+			 textFile.flush();
+		 }
+
+         break;
+	  case ACCUMULATING:
+		 if (textFileMode == "Debug")
+		 {
+			// Write detail about observation data and estimation calculation for that record here
+			textFile << linesBuff;
+			textFile.flush();
+		 }
+		 break;
+	  case ESTIMATING:
+		 if (textFileMode == "Debug")
+		 {
+			 // Write detail summary about estimation of current iteration here
+			 textFile << linesBuff;
+			 textFile.flush();
+		 }
+		 break;
       case CHECKINGRUN:
-         if (textFileMode == "Verbose")
+         if ((textFileMode == "Verbose")||(textFileMode == "Debug"))
          {
-            textFile << "\n   WeightedRMS residuals at this iteration: "
-                     << newResidualRMS << "\n";
-            textFile << "\n   PredictedRMS residuals: "
+            textFile << "\n   WeightedRMS residuals for this iteration: "
+                     << newResidualRMS;
+            textFile << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n\n";
 
 			textFile << "------------------------------"
@@ -1611,10 +1657,13 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          break;
 
       case FINISHED:
-         textFile << "\n   WeightedRMS residuals at this iteration: "
-                  << newResidualRMS << "\n";
-         textFile << "\n   PredictedRMS residuals: "
-                  << predictedRMS << "\n\n";
+         if ((textFileMode == "Verbose")||(textFileMode == "Debug"))
+         {
+            textFile << "\n   WeightedRMS residuals for this iteration: "
+                     << newResidualRMS;
+            textFile << "\n   PredictedRMS residuals for next iteration: "
+                     << predictedRMS << "\n\n";
+		 }
 
          textFile << "\n****************************"
                   << "****************************\n"
@@ -1623,7 +1672,8 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
                   << "\n****************************"
                   << "****************************\n\n"
                   << "Estimation "
-                  << (converged ? "converged!" : "did not converge")
+                  << (converged ? "converged!" : "did not converge") << "\n"
+				  << convergenceReason << "\n"
                   << "\n\nFinal Estimated State:\n\n";
 
          if (estEpochFormat != "FromParticipants")
@@ -1657,11 +1707,11 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
             }
          }
 
-         if (textFileMode == "Verbose")
+         if ((textFileMode == "Verbose")||(textFileMode == "Debug"))
          {
-            textFile << "\n   WeightedRMS residuals at previous iteration: "
+            textFile << "\n   WeightedRMS residuals for previous iteration: "
                      << oldResidualRMS;
-            textFile << "\n   WeightedRMS residuals at this iteration:     "
+            textFile << "\n   WeightedRMS residuals for this iteration:     "
                      << newResidualRMS << "\n\n";
          }
 
@@ -1675,3 +1725,171 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          break;
    }
 }
+
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// void DataFilter()
+//-------------------------------------------------------------------------
+/**
+* This function is used to filter bad observation data records. It has
+*   1. Measurement model's maximum residual filter
+*   2. Data filter based on time span
+*   3. Sigma editting
+*/
+//-------------------------------------------------------------------------
+bool BatchEstimator::DataFilter()
+{
+
+   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
+   Real maxLimit = measModel->GetRealParameter("ResidualMax");									// Get value of MeasurementModel.ResidualMax parameter
+   const ObservationData *currentObs =  measManager.GetObsData();								// Get observation measurement data O
+   const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);		// Get calculated measurement data C
+
+   bool retVal = false;
+   if (iterationsTaken == 0)
+   {
+      for (Integer i=0; i < currentObs->value.size(); ++i)
+	  {
+         // 1.Data filtered based on measurement model's residual limits:
+		 if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
+		 {
+//			MessageInterface::ShowMessage("Throw away this observation data due to measurement model's residual limit %lf:  %.12lf   %s   %d", maxLimit, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+			measManager.GetObsDataObject()->removedReason = "M";	// "M": represent for maximum residual limit
+			std::string filterName = measModel->GetName() + " maximum residual";				// made changes by TUAN NGUYEN
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
+
+			retVal = IsReuseableType("ResidualMax");
+            break;
+		 }
+
+         // 2.Data filtered based on timespan:
+         Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+         Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+         if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
+         {
+//			MessageInterface::ShowMessage("Throw away this observation data due to time span [%.12lf, %.12lf]:  %.12lf   %s   %d", epoch1, epoch2, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+			measManager.GetObsDataObject()->removedReason = "T";	// "T": represent for time span
+			std::string filterName = "Timespan";
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
+
+			retVal = IsReuseableType("Timespan");
+			break;
+         }
+
+         // 3.Data filtered based on sigma editting
+         // 3.1. Specify Weight
+         Real weight = 1.0;
+         if (currentObs->noiseCovariance == NULL)
+         {
+            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+            else
+               weight = 1.0;
+         }
+         else
+               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+         // 3.2. Filter based on maximum residual multiplier
+		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+		 {
+//			MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
+//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
+//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
+//			for(int k = 0; k < currentObs->value.size(); ++k)
+//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
+//			MessageInterface::ShowMessage("\n");
+
+		    measManager.GetObsDataObject()->inUsed = false;
+			measManager.GetObsDataObject()->removedReason = "I";				// "I": represent for OLSEInitialRMSSigma
+			std::string filterName = "OLSEInitialRMSSigma";
+		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			else																				// made changes by TUAN NGUYEN
+			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
+
+			retVal = IsReuseableType("OLSEInitialRMSSigma");
+			break;
+		 }
+	  }
+   }
+   else
+   {
+	  for (Integer i=0; i < currentObs->value.size(); ++i)
+	  {
+         // Data filtered based on sigma editting
+         // 1. Specify Weight
+         Real weight = 1.0;
+         if (currentObs->noiseCovariance == NULL)
+         {
+            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
+               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
+            else
+               weight = 1.0;
+         }
+         else
+            weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+
+         // 2. Filter based on n-sigma
+		 Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
+		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+		 {
+		    measManager.GetObsDataObject()->inUsed = false;
+			measManager.GetObsDataObject()->removedReason = "S";							// "S": represent for outer-loop sigma filter
+            numRemovedRecords["OLSE"]++;													// made changes by TUAN NGUYEN
+
+			std::stringstream ss;
+			ss << "OLSE for Iteration " << iterationsTaken;									// made changes by TUAN NGUYEN
+
+			if (numRemovedRecords.find(ss.str()) == numRemovedRecords.end())				// made changes by TUAN NGUYEN
+               numRemovedRecords[ss.str()] = 1;												// made changes by TUAN NGUYEN
+			else																			// made changes by TUAN NGUYEN
+			   numRemovedRecords[ss.str()]++;												// made changes by TUAN NGUYEN
+
+			retVal = IsReuseableType("OLSE");
+			break;
+		 }
+
+//       MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
+	  }
+
+   }
+
+   return retVal;
+}
+
+
+bool BatchEstimator::IsReuseableType(const std::string& value)
+{
+   bool isReuseable = false;
+   for (int i = 0; i < reuseableTypes.size(); ++i)
+   {
+      if (reuseableTypes[i] == value)
+      {
+         isReuseable = true;
+		 break;
+	  }
+   }
+
+   return isReuseable;
+}
+
