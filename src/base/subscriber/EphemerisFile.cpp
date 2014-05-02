@@ -2592,7 +2592,7 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
          
          // If current epoch is greater than previous epoch, add data to interpolator
          if ((epochInSecs > prevEpochInSecs) ||
-             (epochInSecs <= prevEpochInSecs) && currPropDirection == -1.0)
+             ((epochInSecs <= prevEpochInSecs) && currPropDirection == -1.0))
          {
             #ifdef DEBUG_EPHEMFILE_TIME
             DebugWriteTime("   ===== Adding to interpolator, epochInSecs = ", epochInSecs);
@@ -3024,8 +3024,8 @@ void EphemerisFile::FinishUpWritingCCSDS(bool canFinalize)
          // Throw an exception         
          #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage
-            ("EphemerisFile::FinishUpWritingCCSDS() throwing exception, a1MjdArray.size()=%d\n",
-             a1MjdArray.size());
+            ("EphemerisFile::FinishUpWritingCCSDS() throwing exception, a1MjdArray.size()=%d\n"
+             "   errMsg = %s\n", a1MjdArray.size(), errMsg.c_str());
          #endif
          
          throw SubscriberException(errMsg);
@@ -3346,9 +3346,9 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
                      "reqEpochInSecs = ", reqEpochInSecs);
       #endif
       
-      if (finalEpochA1Mjd != -999.999 && finalEpochReached &&
-          ((reqEpochInSecs > finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == 1.0) ||
-          ((reqEpochInSecs < finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == -1.0) )
+      if ((finalEpochA1Mjd != -999.999) && finalEpochReached &&
+          (((reqEpochInSecs > finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == 1.0) ||
+           ((reqEpochInSecs < finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY) && currPropDirection == -1.0)) )
       {
          #ifdef DEBUG_EPHEMFILE_ORBIT
          MessageInterface::ShowMessage
@@ -5108,7 +5108,22 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
          #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage("EphemerisFile::Distribute() Calling FinishUpWriting()\n");
          #endif
-         FinishUpWriting();
+
+         try
+         {
+            FinishUpWriting();
+         }
+         catch (BaseException &be)
+         {
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage
+               ("EphemerisFile::Distribute() returning true after writing error "
+                "message\n   FinishUpWriting() threw an exception\n  message = %s\n",
+                be.GetFullMessage().c_str());
+            #endif
+            MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+            return true;
+         }
       }
       
       #if DBGLVL_EPHEMFILE_DATA > 0
