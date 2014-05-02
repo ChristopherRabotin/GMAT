@@ -31,6 +31,7 @@
 #include "Spacecraft.hpp"							// made changes by TUAN NGUYEN
 
 
+//#define DEBUG_CONSTRUCTOR
 //#define DEBUG_MEASUREMENT_INITIALIZATION
 //#define DEBUG_CALC_RANGE
 //#define DEBUG_HARDWARE
@@ -128,6 +129,10 @@ CoreMeasurement::CoreMeasurement(const CoreMeasurement& core) :
    solarSystem        (core.solarSystem),
    satEpochID         (core.satEpochID)
 {
+#ifdef DEBUG_CONSTRUCTOR
+	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> Copy constructor. Copy from <'%s',%p>\n", GetName().c_str(), this, core.GetName().c_str(), &core);
+#endif
+
    std::vector<Hardware*> hv;
    participantHardware.assign(core.participantHardware.size(), hv);
 
@@ -157,6 +162,9 @@ CoreMeasurement::CoreMeasurement(const CoreMeasurement& core) :
 //-----------------------------------------------------------------------------
 CoreMeasurement& CoreMeasurement::operator=(const CoreMeasurement& core)
 {
+#ifdef DEBUG_CONSTRUCTOR
+	MessageInterface::ShowMessage("CoreMeasurement operator =\n");
+#endif
    if (this != &core)
    {
       GmatBase::operator=(core);
@@ -221,7 +229,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
 {
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage(
-            "CoreMeasurement::SetRefObject(%p, %d, %s == %s)\n", obj, type,
+            "CoreMeasurement<'%s',%p>::SetRefObject(%p, %d, %s == %s)\n", GetName().c_str(), this, obj, type,
             obj->GetName().c_str(), name.c_str());
    #endif
 
@@ -243,7 +251,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
 			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
 			{
 				participantHardware[0].push_back((Hardware*)(*i));
-//				MessageInterface::ShowMessage("CoreMeasurement::SetRefObject():  set hardware to participantHardware[0][%d] = '%s'\n", index, participantHardware[0][index]->GetName().c_str());
+//				MessageInterface::ShowMessage("CoreMeasurement<'%s',%p>::SetRefObject():  set hardware to participantHardware[0][%d] = '%s'\n", GetName().c_str(), this, index, participantHardware[0][index]->GetName().c_str());
 				++index;
 			}
 
@@ -261,7 +269,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
 			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
 			{
 				participantHardware[index1].push_back((Hardware*)(*i));
-//				MessageInterface::ShowMessage("CoreMeasurement::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", index1, index2, participantHardware[index1][index2]->GetName().c_str());
+//				MessageInterface::ShowMessage("CoreMeasurement<'%s',%p>::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", GetName().c_str(), this, index1, index2, participantHardware[index1][index2]->GetName().c_str());
 				++index2;
 			}
 
@@ -383,7 +391,7 @@ void CoreMeasurement::SetSolarSystem(SolarSystem *ss)
 bool CoreMeasurement::Initialize()
 {
    #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("CoreMeasurement::Initializing %s\n",
+	MessageInterface::ShowMessage("CoreMeasurement<'%s',%p>::Initializing %s\n", GetName().c_str(), this,
             instanceName.c_str());
    #endif
 
