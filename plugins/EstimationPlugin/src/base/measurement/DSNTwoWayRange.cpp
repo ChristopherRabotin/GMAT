@@ -889,39 +889,21 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       }
 
       if (objList1.size() != 1)
-      {
-		 MessageInterface::ShowMessage("The first participant does not have only 1 transmitter to send signal.\n");
 		 throw MeasurementException("The first participant does not have only 1 transmitter to send signal.\n");
-      }
       if (objList2.size() != 1)
-      {
-		 MessageInterface::ShowMessage("The first participant does not have only 1 receiver to receive signal.\n");
 		 throw MeasurementException("The first participant does not have only 1 receiver to receive signal.\n");
-      }
       if (objList3.size() != 1)
-      {
-		 MessageInterface::ShowMessage("The second participant does not have only 1 transponder to transpond signal.\n");
 		 throw MeasurementException("The second participant does not have only 1 transponder to transpond signal.\n");
-      }
 
 	  Transmitter* 	gsTransmitter 	= (Transmitter*)objList1[0];
 	  Receiver* 		gsReceiver 		= (Receiver*)objList2[0];
 	  Transponder* 	scTransponder 	= (Transponder*)objList3[0];
 	  if (gsTransmitter == NULL)
-	  {
-	   	 MessageInterface::ShowMessage("Transmitter is NULL object.\n");
 	   	 throw GmatBaseException("Transmitter is NULL object.\n");
-	  }
 	  if (gsReceiver == NULL)
-	  {
-	   	 MessageInterface::ShowMessage("Receiver is NULL object.\n");
 	   	 throw GmatBaseException("Receiver is NULL object.\n");
-	  }
 	  if (scTransponder == NULL)
-	  {
-	   	 MessageInterface::ShowMessage("Transponder is NULL object.\n");
 	   	 throw GmatBaseException("Transponder is NULL object.\n");
-	  }
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
@@ -1428,6 +1410,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    Real value1;
    Real interval_len;
 
+   Real basedFreqFactor = GetFrequencyFactor((*rampTB)[end_interval+1].rampFrequency);
    Real value = 0.0;
    Real dt = delta_t;
    Integer i = end_interval;
@@ -1452,7 +1435,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
 	  f1 = f0 + f_dot*interval_len;
 
 	  // Take integral for the current interval
-	  value1 = (GetFrequencyFactor(f0) + GetFrequencyFactor(f1)) * interval_len / 2;
+	  value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
 	  value  = value + value1;
 
 //	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
@@ -1467,6 +1450,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
 
 	  i--;
    }
+   value = value + basedFreqFactor*delta_t;
 
 //   MessageInterface::ShowMessage("value = %.12lf\n", value);
 
