@@ -574,7 +574,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
                p2Loc.ToString().c_str());
          MessageInterface::ShowMessage("   Range Vector:  %s\n",
                rangeVecInertial.ToString().c_str());
-         MessageInterface::ShowMessage("   R(Groundstation) dot RangeVec =  %lf\n",
+         MessageInterface::ShowMessage("   Elevation angle =  %lf degree\n",
                currentMeasurement.feasibilityValue);
          MessageInterface::ShowMessage("   Feasibility:  %s\n",
                (currentMeasurement.isFeasible ? "true" : "false"));
@@ -1019,7 +1019,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 freqBand = GetUplinkBandFromRampTable(t1TS);
 		 freqBandE = GetUplinkBandFromRampTable(t1TE);
 		 if (freqBand != freqBandE)
-		    throw MeasurementException("Error: Frequency bands for S path (%d) and E path (%d) are not the same. In DSNTwoWayDoppler calculation, it assumes that frequency band for S path and E path signals have to be the same !!!\n");  
+		    throw MeasurementException("Error: Frequency bands for S path and E path are not the same. In DSNTwoWayDoppler calculation, it assumes that frequency band for S path and E path signals have to be the same !!!\n");  
 
 		 turnaround = GetTurnAroundRatio(freqBand);				// Get value of turn around ratio associated with frequency band
 
@@ -1302,8 +1302,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 			                           "    t1E                   : %.12lf s\n"
 									   "    t3S                   : %.12lf s\n"
 									   "    t3E                   : %.12lf s\n"
-                                       "    Turnaround ratio      : %.12lf\n"
-									   "    M2R                   : %.12lf\n"
+                                       "    Turnaround ratio      : %.15lf\n"
+									   "    M2R                   : %.15lf\n"
 		                               "    Time interval         : %.12lf s\n", t1TS, t1TE, t3RS, t3RE, turnaround, M2R, interval);
 		 MessageInterface::ShowMessage("    Travel time for S path: %.15lf s\n", dtS);
 		 MessageInterface::ShowMessage("    Travel time for E path: %.15lf s\n", dtE);
@@ -1338,7 +1338,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 }
 
          #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
-		 Real rampedIntegral = IntegralRampedFrequency(t1TE, interval + dtS-dtE);
+		 Real rampedIntegral = IntegralRampedFrequency(t1TE, interval + dtS-dtE, errnum);
             MessageInterface::ShowMessage("    Use ramped DSNTwoWayDoppler calculation:\n");
 			MessageInterface::ShowMessage("    ramped integral = %.12lf\n", rampedIntegral);
          #endif
@@ -1359,7 +1359,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 if (obsData != NULL)
 		 {
 		    MessageInterface::ShowMessage("    Observated Doppler O = %.12le Hz\n", obsData->value[0]);
-			MessageInterface::ShowMessage("    O-C = %.12lf Hz\n", currentMeasurement.value[0] - obsData->value[0]);
+			MessageInterface::ShowMessage("    O-C = %.12lf Hz\n", obsData->value[0] - currentMeasurement.value[0]);
 		 }
       #endif
 
