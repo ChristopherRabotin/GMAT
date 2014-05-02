@@ -255,23 +255,26 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new PldHFPA(withName);
    if (ofType == "Planetodetic")
       return new PldState(withName);
-
+   
    // IncomingAsymptote parameters; Modified by YK
-   if (ofType == "IncomingBVAZI")
-      return new IncAsymBVAZI(withName);
+   // Added HyperbolicRadPer (LOJ: 2014.04.28)
+   if (ofType == "HyperbolicRadPer")
+      return new HyperbolicRadPer(withName);
    if (ofType == "IncomingRHA")
       return new IncAsymRHA(withName);
    if (ofType == "IncomingDHA")
       return new IncAsymDHA(withName);
+   if (ofType == "IncomingBVAZI")
+      return new IncAsymBVAZI(withName);
    
    // OutgoingAsymptote parameters; Modified by YK
-   if (ofType == "OutgoingBVAZI")
-      return new OutAsymBVAZI(withName);
    if (ofType == "OutgoingRHA")
       return new OutAsymRHA(withName);
    if (ofType == "OutgoingDHA")
       return new OutAsymDHA(withName);
-
+   if (ofType == "OutgoingBVAZI")
+      return new OutAsymBVAZI(withName);
+   
    // Brouwer Mean Short parameters; Modified by YK
    // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
    if (ofType == "BrouwerShortSMA")
@@ -619,6 +622,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Planetodetic");
 
       // IncomingAsymptote parameters ; Modified by YK
+      creatables.push_back("HyperbolicRadPer");
       creatables.push_back("IncomingRHA");
       creatables.push_back("IncomingDHA");
       creatables.push_back("IncomingBVAZI");

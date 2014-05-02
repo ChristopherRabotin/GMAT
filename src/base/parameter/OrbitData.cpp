@@ -287,6 +287,72 @@ void OrbitData::SetReal(Integer item, Real rval)
    // Check for different coordinate system for Spacecraft owend Parameter(2013.03.28)
    if (!mIsParamOriginDep && mParameterCS != NULL && paramOwnerCS != NULL)
    {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("mParameter = <%p>'%s'\n", mParameter, mParameter ? mParameter->GetName().c_str() : "NULL");
+      #endif
+      
+      // Do validation on coordinate system (for GMT-4512 fix)
+      if (mParameter)
+      {
+         bool reqBodyFixedCS = mParameter->RequiresBodyFixedCS();
+         bool reqCelesBodyOrigin  = mParameter->RequiresCelestialBodyCSOrigin();
+         #ifdef DEBUG_ORBITDATA_SET
+         MessageInterface::ShowMessage("RequiresBodyFixedCS = %d\n", reqBodyFixedCS);
+         MessageInterface::ShowMessage("RequiresCelestialBodyCSOrigin = %d\n", reqCelesBodyOrigin);
+         #endif
+         if (reqBodyFixedCS)
+         {
+            StringArray typeNames = mParameterCS->GetAxisSystem()->GetTypeNames();
+            #ifdef DEBUG_ORBITDATA_SET
+            MessageInterface::ShowMessage("parameterCSAxis type names are:\n");
+            for (UnsignedInt i = 0; i < typeNames.size(); i++)
+               MessageInterface::ShowMessage("   typeNames[%d] = %s\n", i, typeNames[i].c_str());
+            #endif
+            if ((mParameterCS->GetAxisSystem())->IsOfType("BodyFixedAxes"))
+            {
+               #ifdef DEBUG_ORBITDATA_SET
+               MessageInterface::ShowMessage("Parameter is in BodyFixed CS\n");
+               #endif
+            }
+            else
+            {
+               ParameterException pe;
+               pe.SetDetails("The %s is only defined for coordinate systems with BodyFixed axes",
+                             mParameter->GetParameterClassType().c_str());
+               throw pe;
+            }
+         }
+         if (reqCelesBodyOrigin)
+         {
+            StringArray typeNames = mParameterCS->GetOrigin()->GetTypeNames();
+            #ifdef DEBUG_ORBITDATA_SET
+            MessageInterface::ShowMessage("parameterCSOrigin type names are:\n");
+            for (UnsignedInt i = 0; i < typeNames.size(); i++)
+               MessageInterface::ShowMessage("   typeNames[%d] = %s\n", i, typeNames[i].c_str());
+            MessageInterface::ShowMessage
+               ("   CS origin = <%p><%s>'%s'\n", mParameterCS->GetOrigin(),
+                (mParameterCS->GetOrigin())->GetTypeName().c_str(),
+                (mParameterCS->GetOrigin())->GetName().c_str());
+            #endif
+            if ((mParameterCS->GetOrigin())->IsOfType("CelestialBody"))
+            {
+               #ifdef DEBUG_ORBITDATA_SET
+               MessageInterface::ShowMessage("Parameter is in CS with CelestialBody origin\n");
+               #endif
+            }
+            else
+            {
+               ParameterException pe;
+               pe.SetDetails("The %s is only defined for coordinate systems with "
+                             "BodyFixed axes with CelestialBody origin",
+                             mParameter->GetParameterClassType().c_str());
+               throw pe;
+            }
+         }
+      }
+      
+      
       if (mParameterCS->GetName() != paramOwnerCS->GetName())
       {
          // Now allow setting value to coordinate system dependent Parameter
@@ -300,7 +366,7 @@ void OrbitData::SetReal(Integer item, Real rval)
          {
             // Should not get here, so throw a exception
             ParameterException pe;
-            pe.SetDetails("The Parameter %s is not settable)", mActualParamName.c_str());
+            pe.SetDetails("The Parameter %s is not settable", mActualParamName.c_str());
             throw pe;
          }
          
@@ -329,6 +395,11 @@ void OrbitData::SetReal(Integer item, Real rval)
    {
       Rvector6 cartStateInParamOrigin = GetCartStateInParameterOrigin(item, rval);
       Rvector6 cartStateNew = cartStateInParamOrigin + mOrigin->GetMJ2000State(mCartEpoch);
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Setting %s to Spacecraft\n", cartStateNew.ToString().c_str());
+      #endif
       
       // Need to set whole state in internal CS
       mSpacecraft->SetState(cartStateNew);
@@ -468,7 +539,7 @@ Rvector6 OrbitData::GetCartState()
       #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitDate::GetCartState() '%s' returning lastCartState \n   %s\n   "
-          "since it is origin dep Parameter", mActualParamName.c_str(),
+          "since it is origin dep Parameter\n", mActualParamName.c_str(),
           lastCartState.ToString().c_str());
       #endif
       return lastCartState;
@@ -871,7 +942,7 @@ Real OrbitData::GetCartReal(Integer item)
    
    Rvector6 state = GetCartState();
    if (item >= CART_X && item <= CART_VZ)
-      return state[item];
+      return state[item - OrbitStmCount];
    else
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(item));
@@ -959,15 +1030,20 @@ Real OrbitData::GetKepReal(Integer item)
 Real OrbitData::GetModKepReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetModKepReal() item=%d\n", item);
+   MessageInterface::ShowMessage("OrbitData::GetModKepReal() entered, item=%d\n", item);
    #endif
-      
+   
    Rvector6 state = GetCartState();
    
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("   state to pass to CalculateKeplerianData() is\n   %s\n", state.ToString().c_str());
+   #endif
    
    switch (item)
    {
@@ -1038,7 +1114,7 @@ Real OrbitData::GetSphRaDecReal(Integer item)
       {
          // if orgin is "Earth" just return default
          if (mOrigin->GetName() == "Earth")
-            return sphRaDecState[RADEC_RMAG-Item2Count];
+            return sphRaDecState[RADEC_RMAG-KepCount];
          else
             return GetPositionMagnitude(mOrigin);
       }
@@ -1051,10 +1127,10 @@ Real OrbitData::GetSphRaDecReal(Integer item)
       #ifdef DEBUG_ORBITDATA_GET
       MessageInterface::ShowMessage
          ("OrbitData::GetSphRaDecReal() '%s' returning %f\n",
-          mActualParamName.c_str(), sphRaDecState[item-Item2Count]);
+          mActualParamName.c_str(), sphRaDecState[item-KepCount]);
       #endif
       
-      return sphRaDecState[item-Item2Count];
+      return sphRaDecState[item-KepCount];
    }
    default:
       throw ParameterException
@@ -1091,9 +1167,9 @@ Real OrbitData::GetSphAzFpaReal(Integer item)
       #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitData::GetSphAzFpaReal() '%s' returning %f\n",
-          mActualParamName.c_str(), sphAzFpaState[item-Item3Count]);
+          mActualParamName.c_str(), sphAzFpaState[item-RaDecCount]);
       #endif
-      return sphAzFpaState[item-Item3Count];
+      return sphAzFpaState[item-RaDecCount];
    }
    else
    {
@@ -1201,29 +1277,13 @@ Real OrbitData::GetEquinReal(Integer item)
    case EQ_SMA:
       return StateConversionUtil::CartesianToSMA(mGravConst, pos, vel);
    case EQ_H:
-      {
-         Rvector6 equiState = GetEquinState();
-         return equiState[1];
-      }
    case EQ_K:
-      {
-         Rvector6 equiState = GetEquinState();
-         return equiState[2];
-      }
    case EQ_P:
-      {
-         Rvector6 equiState = GetEquinState();
-         return equiState[3];
-      }
    case EQ_Q:
-      {
-         Rvector6 equiState = GetEquinState();
-         return equiState[4];
-      }
    case EQ_MLONG:
       {
          Rvector6 equiState = GetEquinState();
-         return equiState[5];
+         return equiState[item - AziFpaCount];
       }
       
    default:
@@ -1260,39 +1320,20 @@ Real OrbitData::GetModEquinReal(Integer item)
    
    if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
       throw ParameterException
-         ("*** Error *** Cannot convert from Cartesian to ModifiedEquinoctial because position vector is a zero vector.");
+         ("*** Error *** Cannot convert from Cartesian to ModifiedEquinoctial "
+          "because position is a zero " + mActualParamName);
    
    switch (item)
    {
    case MOD_EQ_P:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[0];
-      }
    case MOD_EQ_F:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[1];
-      }
    case MOD_EQ_G:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[2];
-      }
    case MOD_EQ_H:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[3];
-      }
    case MOD_EQ_K:
-      {
-         Rvector6 modequiState = GetModEquinState();
-         return modequiState[4];
-      }
    case MOD_EQ_TLONG:
       {
          Rvector6 modequiState = GetModEquinState();
-         return modequiState[5];
+         return modequiState[item - EquinCount];
       }
       
    default:
@@ -1333,19 +1374,18 @@ Real OrbitData::GetAltEquinReal(Integer item)
    
    switch (item)
    {
+   case ALT_EQ_SMA:
+   case ALT_EQ_H:
+   case ALT_EQ_K:
    case ALT_EQ_P:
-   {
-      Rvector6 altequiState = GetAltEquinState();
-      // I think the index should be 3 (LOJ: 2014.01.29)
-      //return altequiState[1];
-      return altequiState[3];
-   }
    case ALT_EQ_Q:
+   case ALT_EQ_MLONG:
    {
       Rvector6 altequiState = GetAltEquinState();
-      // I think the index should be 4 (LOJ: 2014.01.29)
-      //return altequiState[2];
-      return altequiState[4];
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage("   altequiState = %s\n", altequiState.ToString().c_str());
+      #endif
+      return altequiState[item - ModEquinCount];
    }
    
    default:
@@ -1387,34 +1427,14 @@ Real OrbitData::GetDelaReal(Integer item)
    switch (item)
    {
    case DEL_DELA_SL:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[0];
-      }
    case DEL_DELA_SG:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[1];
-      }
    case DEL_DELA_SH:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[2];
-      }
    case DEL_DELA_L:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[3];
-      }
    case DEL_DELA_G:
-      {
-         Rvector6 delaState = GetDelaState();
-         return delaState[4];
-      }
    case DEL_DELA_H:
       {
          Rvector6 delaState = GetDelaState();
-         return delaState[5];
+         return delaState[item - AltEquinCount];
       }
       
    default:
@@ -1448,34 +1468,14 @@ Real OrbitData::GetPlanetodeticReal(Integer item)
    switch (item)
    {
    case PLD_RMAG:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[0];
-      }
    case PLD_LON:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[1];
-      }
    case PLD_LAT:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[2];
-      }
    case PLD_VMAG:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[3];
-      }
    case PLD_AZI:
-      {
-         Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[4];
-      }
    case PLD_HFPA:
       {
          Rvector6 PlanetodeticState = GetPlanetodeticState();
-         return PlanetodeticState[5];
+         return PlanetodeticState[item - DelaCount];
       }
       
    default:
@@ -1495,15 +1495,19 @@ Real OrbitData::GetPlanetodeticReal(Integer item)
 Real OrbitData::GetIncAsymReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetIncAsymReal() item=%d\n", item);
+   MessageInterface::ShowMessage("OrbitData::GetIncAsymReal() entered, item=%d\n", item);
    #endif
-   
+    
    Rvector6 state = GetCartState();
-
+   
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   state = %s\n", state.ToString().c_str());
+   #endif
    
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);   
@@ -1513,42 +1517,24 @@ Real OrbitData::GetIncAsymReal(Integer item)
       throw ParameterException
          ("*** Error *** Cannot convert from Cartesian to IncomingAsymptote because position vector is a zero vector.");
    
+   Rvector6 incAsymState =
+      StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   incAsymState = %s\n", incAsymState.ToString().c_str());
+   #endif
+   
    switch (item)
    {
    case INCASYM_RADPER:
-   {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[0];
-   }
-   
    case INCASYM_C3:
-   {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[1];
-   }
-   
-   case INCASYM_RHA:
-   {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[2];
-   }
-   
-   case INCASYM_DHA:
-   {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[3];
-   }
-   
-   case INCASYM_BVAZI:
-   {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[4];
-   }
-   
    case INCASYM_TA:
+   case INCASYM_RHA:
+   case INCASYM_DHA:
+   case INCASYM_BVAZI:   
    {
-      Rvector6 IncAsymState = GetIncAsymState();
-      return IncAsymState[5];
+      return incAsymState[item - PlanetoCount];
    }
    
    default:
@@ -1572,7 +1558,7 @@ Real OrbitData::GetOutAsymReal(Integer item)
    #endif
    
    Rvector6 state = GetCartState();
-
+   
    if (mIsParamOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
@@ -1586,42 +1572,24 @@ Real OrbitData::GetOutAsymReal(Integer item)
       throw ParameterException
          ("*** Error *** Cannot convert from Cartesian to OutgoingAsymptote because position vector is a zero vector.");
    
+   Rvector6 outAsymState =
+      StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+                                   mGravConst, mFlattening, mEqRadius);
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("   outAsymState = %s\n", outAsymState.ToString().c_str());
+   #endif
+
    switch (item)
    {
    case OUTASYM_RADPER:
-   {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[0];
-   }
-   
    case OUTASYM_C3:
-   {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[1];
-   }
-   
+   case OUTASYM_TA:
    case OUTASYM_RHA:
-   {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[2];
-   }
-   
    case OUTASYM_DHA:
-   {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[3];
-   }
-   
    case OUTASYM_BVAZI:
    {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[4];
-   }
-   
-   case OUTASYM_TA:
-   {
-      Rvector6 OutAsymState = GetOutAsymState();
-      return OutAsymState[5];
+      return outAsymState[item - InAsymCount];
    }
    
    default:
@@ -1663,39 +1631,14 @@ Real OrbitData::GetBLshortReal(Integer item)
    switch (item)
    {
    case BLS_SMA:
-   {
-      Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[0];
-   }
-   
    case BLS_ECC:
-   {
-      Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[1];
-   }
-   
    case BLS_INC:
-   {
-      Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[2];
-   }
-   
    case BLS_RAAN:
-   {
-      Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[3];
-   }
-   
    case BLS_AOP:
-   {
-      Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[4];
-   }
-   
    case BLS_MA:
    {
       Rvector6 BLshortState = GetBLshortState();
-      return BLshortState[5];
+      return BLshortState[item - OutAsymCount];
    }
    
    default:
@@ -1736,39 +1679,14 @@ Real OrbitData::GetBLlongReal(Integer item)
    switch (item)
    {
    case BLL_SMA:
-   {
-      Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[0];
-   }
-   
    case BLL_ECC:
-   {
-      Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[1];
-   }
-   
    case BLL_INC:
-   {
-      Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[2];
-   }
-   
    case BLL_RAAN:
-   {
-      Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[3];
-   }
-   
    case BLL_AOP:
-   {
-      Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[4];
-   }
-   
    case BLL_MA:
    {
       Rvector6 BLlongState = GetBLlongState();
-      return BLlongState[5];
+      return BLlongState[item - BrouwerShortCount];
    }
    
    default:
@@ -2328,14 +2246,19 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
    // get origin state
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
    
+   // Relative state
+   Rvector6 relState = scState - originState;
+   
    #ifdef DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
-          origin->GetName().c_str(), originState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("OrbitData::GetRelativeCartState() origin = %s\n   satState = %s\n   orgState = %s\n"
+       "   relState = %s\n", origin->GetName().c_str(), scState.ToString().c_str(),
+       originState.ToString().c_str(), relState.ToString().c_str());
    #endif
-      
+   
    // return relative state
-   return scState - originState;
+   //return scState - originState;
+   return relState;
 }
 
 
@@ -2359,6 +2282,7 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    #endif
    
    Rvector6 cartStateInParamCS = GetCartState();
+   Rvector6 stateInParamCS;
    Real currEpoch = mSpacePoint->GetEpoch();
    
    // Fix for GMT-4438 (LOJ: 2014.03.21)
@@ -2383,45 +2307,51 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    if (item >= CART_X && item <= CART_VZ)
    {
       // Now set new value to state
-      cartStateInParamCS(item) = rval;
+      cartStateInParamCS(item - OrbitStmCount) = rval;
    }
    else if (item >= KEP_SMA && item <= KEP_TA)
    {
-      Rvector6 keplStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to Keplerian for items: KEP_SMA .. KEP_TA\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "Keplerian",
                                       mGravConst, mFlattening, mEqRadius);
-      keplStateInParamCS[item-Item1Count] = rval;
+      stateInParamCS[item - CartCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(keplStateInParamCS, "Keplerian", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "Keplerian", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else if (item >= RADEC_RMAG && item <= RADEC_DECV)
    {
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   Converting Spherical RADEC to Cartesian, element index = %d\n", item-Item2Count);
+         ("   Converting to SphericalRADEC for items: RADEC_RMAG .. RADEC_DECV\n");
+      #endif
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting Spherical RADEC to Cartesian, element index = %d\n", item-KepCount);
       #endif
       
-      Rvector6 radecStateInParamCS =
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "SphericalRADEC",
                                       mGravConst, mFlattening, mEqRadius);
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   Before setting: radecStateInParamCS = \n   %s\n",
-          radecStateInParamCS.ToString().c_str());
+         ("   Before setting: stateInParamCS = \n   %s\n", stateInParamCS.ToString().c_str());
       #endif
       
-      radecStateInParamCS[item-Item2Count] = rval;
+      stateInParamCS[item - KepCount] = rval;
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   After  setting: radecStateInParamCS = \n   %s\n",
-          radecStateInParamCS.ToString().c_str());
+         ("   After  setting: stateInParamCS = \n   %s\n", stateInParamCS.ToString().c_str());
       #endif
       
       cartStateInParamCS =
-         StateConversionUtil::Convert(radecStateInParamCS, "SphericalRADEC", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "SphericalRADEC", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       
       #ifdef DEBUG_ORBITDATA_SET
@@ -2431,57 +2361,152 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    }
    else if (item >= AZIFPA_RMAG && item <= AZIFPA_FPA)
    {
-      Rvector6 azfpaStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to SphericalAZFPA for items: AZIFPA_RMAG .. AZIFPA_FPA\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "SphericalAZFPA",
                                       mGravConst, mFlattening, mEqRadius);
-      azfpaStateInParamCS[item-Item3Count] = rval;
+      stateInParamCS[item-RaDecCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(azfpaStateInParamCS, "SphericalAZFPA", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "SphericalAZFPA", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else if (item >= EQ_SMA && item <= EQ_MLONG)
    {
-      Rvector6 equinStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to Equinoctial for items: EQ_SMA .. EQ_MLONG\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "Equinoctial",
                                       mGravConst, mFlattening, mEqRadius);
-      equinStateInParamCS[item-Item6Count] = rval;
+      stateInParamCS[item - AziFpaCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(equinStateInParamCS, "Equinoctial", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "Equinoctial", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else if (item >= MOD_EQ_P && item <= MOD_EQ_TLONG)
    {
-      Rvector6 modequinStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting ModifiedEquinoctial to for items: MOD_EQ_P .. MOD_EQ_TLONG\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "ModifiedEquinoctial",
                                       mGravConst, mFlattening, mEqRadius);
-      modequinStateInParamCS[item-Item8Count] = rval;
+      stateInParamCS[item - EquinCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(modequinStateInParamCS, "ModifiedEquinoctial", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "ModifiedEquinoctial", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+   }
+   else if (item >= ALT_EQ_SMA && item <= ALT_EQ_MLONG)
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to AlternateEquinoctial for items: ALT_EQ_SMA .. ALT_EQ_MLONG\n");
+      #endif
+      stateInParamCS =
+         StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "AlternateEquinoctial",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamCS[item - ModEquinCount] = rval;
+      cartStateInParamCS =
+         StateConversionUtil::Convert(stateInParamCS, "AlternateEquinoctial", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else if (item >= DEL_DELA_SL && item <= DEL_DELA_H)
    {
-      Rvector6 delaunayStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to Delaunay for items:  DEL_DELA_SL .. DEL_DELA_H\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "Delaunay",
                                       mGravConst, mFlattening, mEqRadius);
-      delaunayStateInParamCS[item-Item9Count] = rval;
+      stateInParamCS[item - AltEquinCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(delaunayStateInParamCS, "Delaunay", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "Delaunay", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else if (item >= PLD_RMAG && item <= PLD_HFPA)
    {
-      Rvector6 planetoStateInParamCS =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to Planetodetic for items: PLD_RMAG .. PLD_HFPA\n");
+      #endif
+      stateInParamCS =
          StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "Planetodetic",
                                       mGravConst, mFlattening, mEqRadius);
-      planetoStateInParamCS[item-Item10Count] = rval;
+      stateInParamCS[item - DelaCount] = rval;
       cartStateInParamCS =
-         StateConversionUtil::Convert(planetoStateInParamCS, "Planetodetic", "Cartesian",
+         StateConversionUtil::Convert(stateInParamCS, "Planetodetic", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+   }
+   else if (item >= INCASYM_RADPER && item <= INCASYM_TA )
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for items: INCASYM_RADPER .. INCASYM_TA\n");
+      #endif
+      stateInParamCS =
+         StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "IncomingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamCS[item - PlanetoCount] = rval;
+      cartStateInParamCS =
+         StateConversionUtil::Convert(stateInParamCS, "IncomingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+   }
+   else if (item >= OUTASYM_RADPER && item <= OUTASYM_TA )
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to OutgoingAsymptote for items: OUTASYM_RADPER .. OUTASYM_TA\n");
+      #endif
+      stateInParamCS =
+         StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "OutgoingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamCS[item - InAsymCount] = rval;
+      cartStateInParamCS =
+         StateConversionUtil::Convert(stateInParamCS, "OutgoingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+   }
+   else if (item >= BLS_SMA && item <= BLS_MA )
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to BrouwerMeanShort for items: BLS_SMA .. BLS_MA\n");
+      #endif
+      stateInParamCS =
+         StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "BrouwerMeanShort",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamCS[item - OutAsymCount] = rval;
+      cartStateInParamCS =
+         StateConversionUtil::Convert(stateInParamCS, "BrouwerMeanShort", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+   }
+   else if (item >= BLL_SMA && item <= BLL_MA )
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to BrouwerMeanLong for items: BLL_SMA .. BLL_MA\n");
+      #endif
+      stateInParamCS =
+         StateConversionUtil::Convert(cartStateInParamCS, "Cartesian", "BrouwerMeanLong",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamCS[item - BrouwerShortCount] = rval;
+      cartStateInParamCS =
+         StateConversionUtil::Convert(stateInParamCS, "BrouwerMeanLong", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
    }
    else
    {
       // Unimplemented state types should get here, so throw a exception
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("OrbitData::GetCartStateInParameterCS() throwing exception\n"
+          "Setting the Parameter %s has not been implemented\n", mActualParamName.c_str());
+      #endif
       ParameterException pe;
       pe.SetDetails("Setting the Parameter %s has not been implemented)", mActualParamName.c_str());
       throw pe;
@@ -2504,11 +2529,12 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
       ("OrbitData::GetCartStateInParameterOrigin() '%s' entered, item=%d, rval=%f\n"
-       "   Now converting to Parameter CS before setting value\n", 
+       "   Now converting to Parameter Origin before setting value\n", 
        mActualParamName.c_str(), item, rval);
    #endif
    
    Rvector6 cartStateInParamOrigin = GetRelativeCartState(mOrigin);
+   Rvector6 stateInParamOrigin;
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
@@ -2523,52 +2549,126 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
    case KEP_ECC:
    case KEP_TA:
    {
-      Rvector6 keplStateInParamOrigin =
-         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "Keplerian",
-                                      mGravConst, mFlattening, mEqRadius);
-      keplStateInParamOrigin[item-Item1Count] = rval;
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   keplStateInParamOrigin = \n   %s\n", keplStateInParamOrigin.ToString().c_str());
+         ("   Converting to Keplerian for items: KEP_SMA, KEP_ECC, KEP_TA\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "Keplerian",
+                                      mGravConst, mFlattening, mEqRadius);
+      stateInParamOrigin[item - CartCount] = rval;
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   keplStateInParamOrigin = \n   %s\n", stateInParamOrigin.ToString().c_str());
       #endif
       cartStateInParamOrigin =
-         StateConversionUtil::Convert(keplStateInParamOrigin, "Keplerian", "Cartesian",
+         StateConversionUtil::Convert(stateInParamOrigin, "Keplerian", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);      
       break;
    }
    case MODKEP_RADPER:
    case MODKEP_RADAPO:
    {
-      Rvector6 keplStateInParamOrigin =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to ModifiedKeplerian for items: MODKEP_RADPER, MODKEP_RADAPO\n");
+      #endif
+      stateInParamOrigin =
          StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "ModifiedKeplerian",
                                       mGravConst, mFlattening, mEqRadius);
       // ModKeplerian elements: RadPer, RadApo, INC, RAAN, AOP, TA
       if (item == MODKEP_RADPER)
-         keplStateInParamOrigin[0] = rval;
+         stateInParamOrigin[0] = rval;
       else
-         keplStateInParamOrigin[1] = rval;
+         stateInParamOrigin[1] = rval;
       cartStateInParamOrigin =
-         StateConversionUtil::Convert(keplStateInParamOrigin, "ModifiedKeplerian", "Cartesian",
+         StateConversionUtil::Convert(stateInParamOrigin, "ModifiedKeplerian", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case INCASYM_RADPER:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for items: INCASYM_RADPER\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // IncomingAsymptote elements: HyperbolicRadPer, C3Energy, IncRHA, IncDHA, IncBVAZI, TA
+      stateInParamOrigin[0] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       break;
    }
    case RADEC_RMAG:
    {
-      Rvector6 radecStateInParamOrigin =
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to SphericalRADEC for item: RADEC_RMAG\n");
+      #endif
+      stateInParamOrigin =
          StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "SphericalRADEC",
                                       mGravConst, mFlattening, mEqRadius);
       // SphericalRADEC elements: RMAG, RA, DEC, VMAG, RAV, DECV
-      radecStateInParamOrigin[0] = rval;
+      stateInParamOrigin[0] = rval;
       cartStateInParamOrigin =
-         StateConversionUtil::Convert(radecStateInParamOrigin, "SphericalRADEC", "Cartesian",
+         StateConversionUtil::Convert(stateInParamOrigin, "SphericalRADEC", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case C3_ENERGY:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for item: C3_ENERGY\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // IncomingAsymptote state elements:
+      // RadPer, C3Energy, IncomingRHA, IncomingDHA, IncomingBVAZI, TA 
+      // OutgoingAsymptote state elements:
+      // RadPer, C3Energy, OutgoingRHA, OutgoingDHA, OutgoingBVAZI, TA 
+      stateInParamOrigin[1] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case SEMILATUS_RECTUM:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to ModifiedEquinoctial for item: SEMILATUS_RECTUM\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "ModifiedEquinoctial",
+                                      mGravConst, mFlattening, mEqRadius);
+      // ModifiedEquinoctial state elements:
+      // SemilatusRectum, ModEquinoctialF, ModEquinoctialG, ModEquinoctialH, ModEquinoctialK, TLONG
+      stateInParamOrigin[0] = rval;
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   modEqStateInParamOrigin = \n   %s\n", stateInParamOrigin.ToString().c_str());
+      #endif
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "ModifiedEquinoctial", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       break;
    }
    default:
    {
       // Unimplemented state types should get here, so throw a exception
+      
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("OrbitData::GetCartStateInParameterOrigin() throwing exception\n"
+          "Setting the Parameter %s has not been implemented\n", mActualParamName.c_str());
+      #endif
       ParameterException pe;
-      pe.SetDetails("Setting the Parameter %s has not been implemented)", mActualParamName.c_str());
+      pe.SetDetails("Setting the Parameter %s has not been implemented", mActualParamName.c_str());
       throw pe;
    }
    }
@@ -2712,11 +2812,19 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    case EQ_MLONG:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MLONG"), rval);
       break;
-
+      
    // ModifiedEquinoctial;Modified by M.H.
    case MOD_EQ_P:
-      //mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemiLatusRectum"), rval);
+   case SEMILATUS_RECTUM:
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   mSpacecraft->GetParameterID(SemilatusRectum) = %d\n",
+          mSpacecraft->GetParameterID("SemilatusRectum"));
+      #endif
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemilatusRectum"), rval);
+      //@note Change to following since Spacecraft code using parameter ID calls
+      // SetRealParameter using label anyway
+      //mSpacecraft->SetRealParameter("SemilatusRectum", rval);
       break;
    case MOD_EQ_F:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialF"), rval);
@@ -2784,7 +2892,7 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
       
    // Incoming Asymptote State
    case INCASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
       break;
    case INCASYM_C3:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
@@ -2801,7 +2909,7 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    
    // Outgoing Asymptote State
    case OUTASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
       break;
     case OUTASYM_C3:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
@@ -2821,42 +2929,42 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
       
    // Brouwer-Lyddane Mean-short
    case BLS_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMAP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortSMA"), rval);
       break;
    case BLS_ECC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECCP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortECC"), rval);
       break;
    case BLS_INC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INCP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortINC"), rval);
       break;
    case BLS_RAAN:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAANP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortRAAN"), rval);
       break;
    case BLS_AOP:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOPP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortAOP"), rval);
       break;
    case BLS_MA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MAP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortMA"), rval);
       break;
 
    // Brouwer-Lyddane Mean-long
    case BLL_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMADP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongSMA"), rval);
       break;
    case BLL_ECC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECCDP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongECC"), rval);
       break;
    case BLL_INC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INCDP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongINC"), rval);
       break;
    case BLL_RAAN:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAANDP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongRAAN"), rval);
       break;
    case BLL_AOP:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOPDP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongAOP"), rval);
       break;
    case BLL_MA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MADP"), rval);
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongMA"), rval);
       break;
 
    default:

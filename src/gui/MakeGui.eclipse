@@ -69,7 +69,7 @@ endif
 
 ifeq ($(USE_STC_EDITOR),1)
 STC_EDITOR_OBJECTS = \
-    view/Editor.o \
+    view/ScriptEditor.o \
     view/EditorPanel.o \
     view/EditorPreferences.o \
     view/EditorPrintout.o \

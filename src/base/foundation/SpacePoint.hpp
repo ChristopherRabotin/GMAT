@@ -65,6 +65,11 @@ public:
    virtual bool       RequiresJ2000Body();
    const std::string  GetJ2000BodyName() const;
    SpacePoint*        GetJ2000Body() const;
+
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    bool               SetJ2000BodyName(const std::string &toName);
    void               SetJ2000Body(SpacePoint* toBody);
 

@@ -251,6 +251,16 @@ CoordinateSystem::~CoordinateSystem()
    #endif
 }
 
+
+//---------------------------------------------------------------------------
+// AxisSystem* GetAxisSystem()
+//---------------------------------------------------------------------------
+AxisSystem* CoordinateSystem::GetAxisSystem()
+{
+   return axes;
+}
+
+
 //---------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
 //---------------------------------------------------------------------------
@@ -2103,6 +2113,11 @@ Gmat::ObjectType CoordinateSystem::GetPropertyObjectType(const Integer id) const
  * @param  initializeIt Initialize the Coordinate System before returning it?
  *
  * @return new CoordinateSystem pointer if successful, NULL otherwise
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(

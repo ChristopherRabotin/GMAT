@@ -78,6 +78,8 @@ public:
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
    void        FinalizeKernel();
+   // Write bogus data to the file, in order to close it
+   void    WriteDataToClose();
 
 protected:
    /// the name of the spacecraft or body for which the SPK is created

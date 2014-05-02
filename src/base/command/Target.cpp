@@ -623,12 +623,15 @@ bool Target::Execute()
             targeterConverged);
    #endif
       
+
+   bool prepareForRun = true;
    // Attempt to reset if recalled   
    if (commandComplete)
    {
       commandComplete = false;
       commandExecuting = false;
       specialState = Solver::INITIALIZING;
+      prepareForRun = false;
    }  
 
    if (!commandExecuting) 
@@ -639,8 +642,8 @@ bool Target::Execute()
       #endif
 
       FreeLoopData();
-      StoreLoopData();
-
+      if (prepareForRun)
+         StoreLoopData();
 
       retval = SolverBranchCommand::Execute();
 
@@ -697,6 +700,7 @@ bool Target::Execute()
                         currentCmd->Execute();
                      currentCmd = currentCmd->GetNext();
                   }
+
                   StoreLoopData();
                   specialState = Solver::NOMINAL;
                   break;
@@ -758,6 +762,7 @@ bool Target::Execute()
                   // Finalize initialization of the targeter data
                   currentCmd = branch[0];
                   targeterConverged = false;
+                  StoreLoopData();
                   while (currentCmd != this)  
                   {
                      std::string type = currentCmd->GetTypeName();
@@ -770,7 +775,6 @@ bool Target::Execute()
                      }
                      currentCmd = currentCmd->GetNext();
                   }
-                  StoreLoopData();
                   GetActiveSubscribers();
                   SetSubscriberBreakpoint();
                   break;

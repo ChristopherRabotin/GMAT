@@ -146,6 +146,69 @@ FileManager::~FileManager()
    }
 }
 
+//------------------------------------------------------------------------------
+// std::string GetBinDirectory()
+//------------------------------------------------------------------------------
+std::string FileManager::GetBinDirectory()
+{
+   if (mAbsBinDir == "")
+      SetBinDirectory();
+   
+   return mAbsBinDir;
+}
+
+//------------------------------------------------------------------------------
+// bool SetBinDirectory(const std::string &binDir = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets bin directory where GMAT.exe reside. It sets only once when GMAT.exe
+ * found in the directory. If input binDir is blank, it will try with
+ * GmatFileUtil::GetApplicationPath().
+ */
+//------------------------------------------------------------------------------
+bool FileManager::SetBinDirectory(const std::string &binDir)
+{
+   #ifdef DEBUG_BIN_DIR
+   MessageInterface::ShowMessage
+      ("FileManager::SetBinDirectory() entered, binDir = '%s', mAbsBinDir = '%s'\n",
+       binDir.c_str(), mAbsBinDir.c_str());
+   #endif
+   
+   if (mAbsBinDir == "")
+   {
+      std::string appFullPath = binDir;
+      if (binDir == "")
+         appFullPath = GmatFileUtil::GetApplicationPath();
+
+      #ifdef DEBUG_BIN_DIR
+      MessageInterface::ShowMessage("   appFullPath = '%s'\n", appFullPath.c_str());
+      #endif
+      
+      // Set absolute bin directory if it is not relative path and GMAT.exe found
+      if (appFullPath[0] != '.')
+      {
+         std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
+         std::string newPath = appPath + "GMAT.exe";
+         if (GmatFileUtil::DoesFileExist(newPath))
+         {
+            mAbsBinDir = appPath;
+            
+            #ifdef DEBUG_BIN_DIR
+            MessageInterface::ShowMessage
+               ("FileManager::SetBinDirectory() returning true, mAbsBinDir = '%s'\n",
+                mAbsBinDir.c_str());
+            #endif
+            return true;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_BIN_DIR
+   MessageInterface::ShowMessage
+      ("FileManager::SetBinDirectory() returning false, mAbsBinDir = '%s'\n", mAbsBinDir.c_str());
+   #endif
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // std::string GetPathSeparator()
@@ -314,6 +377,9 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    RefreshFiles();
 
+   // Set bin directory
+   SetBinDirectory();
+   
    // get current path and application path
    std::string currPath = GmatFileUtil::GetWorkingDirectory();
    std::string appFullPath = GmatFileUtil::GetApplicationPath();

@@ -32,6 +32,7 @@
 #include "StringUtil.hpp"
 
 //#define DEBUG_EQUINOCTIAL
+//#define DEBUG_MODEQUINOCTIAL
 //#define DEBUG_STATE_CONVERSION
 //#define DEBUG_STATE_CONVERSION_SQRT
 //#define DEBUG_KEPLERIAN
@@ -140,6 +141,17 @@ const std::string StateConversionUtil::ANOMALY_SHORT_TEXT[AnomalyTypeCount] =
 {
    "TA", "MA", "EA", "HA",
 };
+
+
+bool StateConversionUtil::apsidesForIncomingAsymptoteWritten  = false;
+bool StateConversionUtil::apsidesForOutgoingAsymptoteWritten  = false;
+bool StateConversionUtil::brouwerNotConvergingShortWritten    = false;
+bool StateConversionUtil::brouwerNotConvergingLongWritten     = false;
+bool StateConversionUtil::brouwerSmallEccentricityWritten     = false;
+bool StateConversionUtil::criticalInclinationWritten          = false;
+bool StateConversionUtil::possibleInaccuracyShortWritten      = false;
+bool StateConversionUtil::possibleInaccuracyLongWritten       = false;
+bool StateConversionUtil::inaccuracyCriticalAngleWritten      = false;
 
 
 
@@ -2006,7 +2018,8 @@ Rvector6 StateConversionUtil::ModKeplerianToKeplerian(const Rvector6& modKepleri
 
    if (radApo < radPer && radApo > 0.0)
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: If RadApo < RadPer then RadApo must be negative.  "
-                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
+                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.  "
+                             "If setting the hyperbolic asymptote, set RadPer last.");
 
    if (radPer <= 0.0)
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
@@ -2098,7 +2111,7 @@ Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, 
    {
       throw UtilityException
          ("Error in conversion to Equinoctial elements: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+          "Equinoctial state does not currently support orbits with inclination of 180 degrees.\n");
    }
 
    Integer j = 1;  // always 1, unless inclination is exactly 180 degrees
@@ -2542,28 +2555,33 @@ Rvector6 StateConversionUtil::KeplerianToDelaunay(const Rvector6& keplerian, con
       }
    }
    
-   if ( ecc > 1.0 )
+   // Check for hyperbolic orbit
+   if ( ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)
    {
-      #ifdef DEBUG_CONVERT_ERRORS
-      MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", ecc);
-      #endif
-      
-      Real possible = PI - ACos(1.0/ecc);
-      
-      while ( ta > PI )ta -= TWO_PI;
-      while ( ta < PI)ta += TWO_PI;
-      
-      if ( Abs(ta ) >= possible )
-      {
-         possible *= DEG_PER_RAD;
-         std::stringstream errmsg;
-           errmsg.precision(12);
-           errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
-           errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
-           errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
-           errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
-           throw UtilityException(errmsg.str());
-      }
+      std::string errmsg =
+            "Cannot convert from Keplerian to Delaunay - the orbit is hyperbolic.\n";
+      throw UtilityException(errmsg);
+
+//      #ifdef DEBUG_CONVERT_ERRORS
+//      MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", ecc);
+//      #endif
+//
+//      Real possible = PI - ACos(1.0/ecc);
+//
+//      while ( ta > PI )ta -= TWO_PI;
+//      while ( ta < -PI)ta += TWO_PI;  // was +PI
+//
+//      if ( Abs(ta ) >= possible )
+//      {
+//         possible *= DEG_PER_RAD;
+//         std::stringstream errmsg;
+//           errmsg.precision(12);
+//           errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
+//           errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
+//           errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
+//           errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
+//           throw UtilityException(errmsg.str());
+//      }
    }
    
    Real L_dela= Sqrt(mu * sma);
@@ -2597,6 +2615,23 @@ Rvector6 StateConversionUtil::DelaunayToKeplerian(const Rvector6& delaunay, cons
    Real H_dela= delaunay[5];
    Real ll_dela= delaunay[0]*RAD_PER_DEG;
    
+   if (GmatMathUtil::Abs(H_dela) > GmatMathUtil::Abs(G_dela))
+   {
+      std::string errmsg = "The magnitude of DelaunayH must be less than or ";
+      errmsg += "equal to the magnitude of DelaunayG.  If setting the Delaunay ";
+      errmsg += "state, set DelaunayG before DelaunayH to avoid this ";
+      errmsg += "issue.\n";
+      throw UtilityException(errmsg);
+   }
+   if ((G_dela / L_dela) > 1.0)
+   {
+      std::string errmsg = "It is required that (DelaunayG / DelaunayL) <= 1.  ";
+      errmsg += "If setting the Delaunay state, ";
+      errmsg += "set DelaunayL before DelaunayG to avoid this ";
+      errmsg += "issue.\n";
+      throw UtilityException(errmsg);
+   }
+
    Real sma= L_dela*L_dela / mu;
    Real ecc= Sqrt ( 1 - (G_dela/L_dela)*(G_dela/L_dela) );
    Real inc= ACos(H_dela / G_dela) * DEG_PER_RAD;
@@ -2698,10 +2733,10 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
    Real f = flattening;
    
    Real rMag = planetodetic[0];
-   Real lon = planetodetic[1];
+   Real lon  = planetodetic[1];
    Real latd = planetodetic[2];
    Real vMag = planetodetic[3];
-   Real azi = planetodetic[4];
+   Real azi  = planetodetic[4];
    Real hfpa = planetodetic[5];
 
 // Check input value
@@ -2744,14 +2779,14 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
 	   }
    }
    
-   lon = lon * RAD_PER_DEG;
+   lon  = lon * RAD_PER_DEG;
    latd = latd * RAD_PER_DEG;
 
    Real vfpa = 90 - hfpa;
    
 // convert plantodetic latitude to planetocentric latitude
-   Real e2 = 2*f - f*f;
-   Real tol = 1;
+   Real e2   = 2*f - f*f;
+   Real tol  = 1;
    Real latg = latd;
    
    while(tol >= 1e-13)
@@ -2796,8 +2831,7 @@ Rvector6 StateConversionUtil::PlanetodeticToCartesian(const Rvector6& planetodet
 } // PlanetodeticToCartesian()
 
 
-
-// modified by YK
+// modified by YK (2014.04.09)
 //------------------------------------------------------------------------------
 // Rvector6 CartesianToIncomingAsymptote(Real mu, const Rvector6& cartesian)
 //------------------------------------------------------------------------------
@@ -2848,7 +2882,14 @@ Rvector6 StateConversionUtil::CartesianToIncomingAsymptote(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
+   	if (vMag < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << " The Incoming Asymptote elements are";
+      errmsg << " undefined for zero-velocity orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
    if (ecc <= 1E-7)
 	{
 		std::stringstream errmsg("");
@@ -2973,7 +3014,6 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
 	if (ecc < 1E-7)
 	{
       std::stringstream errmsg("");
@@ -2994,7 +3034,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 	Rvector3 uz(0.0,0.0,1.0);
 	Rvector3 ux(1.0,0.0,0.0);
    
-	if (ACos(Abs(sVHat*uz)) < 1E-11) // 1e-7, 1e-11, criteria??
+	if (ACos(Abs(sVHat*uz)) < 1E-7) // 1e-7, 1e-11, criteria??
 	{
 		std::stringstream errmsg("");
 		errmsg.precision(21);
@@ -3009,7 +3049,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 	Rvector3  noVhat	=	Cross(sVHat,eaVhat); 
 	Real	    ami	=	TWO_PI/4 - bva; // angular azimuth at infinity 
 	Rvector3  hVHat	=	Sin(ami)*eaVhat + Cos(ami)*noVhat;
-   Rvector3  nodeVec =   Cross(uz, hVHat);
+    Rvector3  nodeVec =   Cross(uz, hVHat);
 	Real      nMag    =   nodeVec.GetMagnitude();
 	Rvector3  eccVHat;
    
@@ -3044,7 +3084,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
-	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	if ( ecc >= 1E-11 && inc < 1E-7 )  // CASE 2: Non-circular, Equatorial Orbit
 	{
 		raan = 0;
 		argPeriapsis = ACos(eccVHat.Get(0));
@@ -3053,12 +3093,12 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
 
 	}
    
-	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-7 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
 	{
-		raan = ACos(eccVHat(1));
-		argPeriapsis = 0;
+		raan = 0 ;
+		argPeriapsis = -ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
-			raan = TWO_PI - raan;
+			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
 	Real kepl[6];
@@ -3073,28 +3113,7 @@ Rvector6 StateConversionUtil::IncomingAsymptoteToCartesian(Real mu, const Rvecto
    
 	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
 	AnomalyType type = GetAnomalyType("TA");
-	Integer errorCode = ComputeKeplToCart(mu, kepl, pos, vel, type);
-	if (errorCode > 0)
-	{
-		if (errorCode == 2)
-      {
-			std::stringstream errmsg("");
-         errmsg.precision(16);
-         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
-         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
-         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
-         throw UtilityException(errmsg.str());
-      }
-      else
-      {
-         //  Hope we never hit this.  This is a last resort, something went wrong.
-         throw UtilityException
-            ("Unable to convert Keplerian elements to Cartesian state.\n");
-		}
-	}
-   
-	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
-   
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
 	return cart;
 }
 
@@ -3137,7 +3156,14 @@ Rvector6 StateConversionUtil::CartesianToOutgoingAsymptote(Real mu, const Rvecto
       errmsg << " undefined for a parabolic orbit." << std::endl;
       throw UtilityException(errmsg.str());
 	}
-   
+    if (vMag < 1E-7)
+	{
+      std::stringstream errmsg("");
+      errmsg.precision(17); // what is it precision(16) ?
+      errmsg << " The Outgoing Asymptote elements are";
+      errmsg << " undefined for zero-velocity orbit." << std::endl;
+      throw UtilityException(errmsg.str());
+	}
    if (ecc <= 1E-7)
 	{
 		std::stringstream errmsg("");
@@ -3321,19 +3347,19 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 		if (eccVHat.Get(2) < 0)
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
-	if ( ecc >= 1E-11 && inc < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+	if ( ecc >= 1E-11 && inc < 1E-7 )  // CASE 2: Non-circular, Equatorial Orbit
 	{
 		raan = 0;
 		argPeriapsis = ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
 			argPeriapsis = TWO_PI - argPeriapsis;
 	}
-	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-11 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
+	if ( ecc > 1E-11 && inc >= TWO_PI/2 - 1E-7 )  // CASE 3: Non-circular, Equatorial Retrograde Orbit
 	{
-		raan = ACos(eccVHat(1));
-		argPeriapsis = 0;
+		raan = 0 ;
+		argPeriapsis = -ACos(eccVHat.Get(0));
 		if (eccVHat.Get(1) < 0)
-			raan = TWO_PI - raan;
+			argPeriapsis = TWO_PI - argPeriapsis;
 	}
    
 	Real kepl[6];
@@ -3349,31 +3375,9 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 	// if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
 	
 	AnomalyType type = GetAnomalyType("TA");
-	Integer errorCode	=	ComputeKeplToCart(mu, kepl, pos, vel, type);
-	if (errorCode > 0)
-	{
-		if (errorCode == 2)
-      {
-			std::stringstream errmsg("");
-         errmsg.precision(16);
-         errmsg << "A nearly parabolic orbit (ECC = " << kepl[1] << ") was encountered";
-         errmsg << " while converting from the Keplerian elements to the Cartesian state.";
-         errmsg << " The Keplerian elements are undefined for a parabolic orbit." << std::endl;
-         throw UtilityException(errmsg.str());
-      }
-      else
-      {
-         //  Hope we never hit this.  This is a last resort, something went wrong.
-         throw UtilityException
-            ("Unable to convert Keplerian elements to Cartesian state.\n");
-		}
-	}
-   
-	Rvector6 cart(pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
+	Rvector6 cart=KeplerianToCartesian(mu, kepl, type);
 	return cart;
 }
-
-
 
 
 // Mod made by YKK 2014.03.29
@@ -3391,7 +3395,9 @@ Rvector6 StateConversionUtil::OutgoingAsymptoteToCartesian(Real mu, const Rvecto
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector6& cartesian)
 { 
-	Real	 mu_Earth= 398600.4418;
+	//Real	 mu_Earth = 398600.4418;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -3450,7 +3456,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyShortWritten)
+       {
+           MessageInterface::ShowMessage(
+                 "Warning: For BrouwerMeanShort, when RadPer < 6378km, there is a "
+                 "possible inaccuracy due to singularity related with "
+                 "inside-of-earth orbit.\n");
+           possibleInaccuracyShortWritten = true;
+       }
 	}
 	kep[5]= kep[5] * RAD_PER_DEG;
 	kep[5]=TrueToMeanAnomaly(kep[5],kep[1]);
@@ -3568,13 +3581,21 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 			aeqmean2= aeqmean + (aeq-aeq2);
 
             #ifdef DEBUG_BrouwerMeanShortToOsculatingElements
-                MessageInterface::ShowMessage("blmean2 : %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n", blmean2[0], blmean2[1], blmean2[2], 
+                MessageInterface::ShowMessage("blmean2 : %12.10f, %12.10f, %12.10f, %12.10f, %12.10f, %12.10f\n",
+                    blmean2[0], blmean2[1], blmean2[2],
                     blmean2[3], blmean2[4], blmean2[5]);
             #endif
 		}
 		else
 		{
-			MessageInterface::ShowMessage("Warning :  the iterative algorithm converting from Cartesian to BrouwerMeanShort is not converging. So, it has been interrupted. The current relative error is %12.10f .\n",emag_old);
+		   if (!brouwerNotConvergingShortWritten)
+		   {
+            MessageInterface::ShowMessage(
+                  "Warning:  the iterative algorithm converting from Cartesian "
+                  "to BrouwerMeanShort is not converging. So, it has been "
+                  "interrupted. The current relative error is %12.10f .\n",emag_old);
+            brouwerNotConvergingShortWritten = true;
+		   }
 			
 			break;
 		}
@@ -3582,7 +3603,9 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy.\n");
+			MessageInterface::ShowMessage(
+			      "Warning: Maximum iteration number has been reached. "
+			      "There is a possible inaccuracy.\n");
 			break;
 		}
 		ii = ii + 1;
@@ -3645,8 +3668,9 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanShort(Real mu, const Rvector
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, const Rvector6& blms)
 { 
-	Real	 mu_Earth= 398600.4415;
-	
+	//Real	 mu_Earth = 398600.4415;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -3657,7 +3681,8 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 		throw UtilityException(errmsg.str());
 	}
 	
-	Real	 re		 = 6378.1363; // Earth radius
+	//Real	 re		 = 6378.1363; // Earth radius
+	Real	 re		 = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
 	Real	 j2		 = 1.082626925638815E-03;
 	Real	 ae		 = 1.0;
 	Real     smap    = blms[0] / re; 
@@ -3690,14 +3715,27 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToOsculatingElements(Real mu, cons
 	}
 	if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+	   if (!possibleInaccuracyShortWritten)
+	   {
+         MessageInterface::ShowMessage(
+              "Warning: For BrouwerMeanShort, when RadPer < 6378km, there is a "
+              "possible inaccuracy due to singularity "
+              "related with inside-of-earth orbit.\n");
+         possibleInaccuracyShortWritten = true;
+	   }
 	}
 	if (eccp < 0.0)
 	{
 		eccp=-1.0*eccp;
 		meanAnom= meanAnom-TWO_PI/2;
 		aopp= aopp+TWO_PI/2;
-		MessageInterface::ShowMessage("Warning : Because eccentricity is smaller than 0.0, the current apoapsis will be taken to be new periapsis.\n");
+		if (!brouwerSmallEccentricityWritten)
+		{
+         MessageInterface::ShowMessage(
+               "Warning: Because eccentricity is smaller than 0.0, "
+               "the current apoapsis will be taken to be new periapsis.\n");
+         brouwerSmallEccentricityWritten = true;
+		}
 	}
 	if (eccp > 0.99)
 	{
@@ -3888,9 +3926,9 @@ Rvector6 StateConversionUtil::BrouwerMeanShortToCartesian(Real mu, const Rvector
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6& cartesian)
 { 
-	
-	
-	Real	 mu_Earth= 398600.4415;
+	//Real	 mu_Earth = 398600.4415;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -3932,7 +3970,14 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyLongWritten)
+       {
+           MessageInterface::ShowMessage(
+                 "Warning: For BrouwerMeanLong, when RadPer < 6378km, there is a "
+                 "possible inaccuracy due to singularity "
+                 "related with inside-of-earth orbit.\n");
+           possibleInaccuracyLongWritten = true;
+       }
 	}
 	if (kep[2] > 180.0)
 	{
@@ -3947,7 +3992,15 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 
 	if ((58.80 < kep[2] && kep[2] < 65.78) || (114.22 < kep[2] && kep[2] < 121.2))
 	{
-        MessageInterface::ShowMessage("Warning : When 58.80 DEG < INC < 65.78 DEG, or 114.22 DEG < INC < 121.2DEG, there is a possible inaccuracy due to singularity related with critical angle.");
+	   if (!inaccuracyCriticalAngleWritten)
+	   {
+         MessageInterface::ShowMessage(
+              "Warning: For BrouwserMeanLong, when 58.80 DEG < "
+               "INC < 65.78 DEG, or 114.22 DEG "
+              "< INC < 121.2DEG, there is a possible inaccuracy due to "
+              "singularity related with critical angle.\n");
+         inaccuracyCriticalAngleWritten = true;
+	   }
 	}
 
 	kep[5]= kep[5] * RAD_PER_DEG;
@@ -4071,12 +4124,19 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
 		}
 		else
 		{
-			MessageInterface::ShowMessage("Warning : the iterative algorithm converting from Cartesian to BrouwerMeanLong is not converging. So, it has been interrupted. The current relative error is %12.10f . \n",emag_old);
+		   if (!brouwerNotConvergingLongWritten)
+		   {
+            MessageInterface::ShowMessage(
+                  "Warning: the iterative algorithm converting from Cartesian "
+                  "to BrouwerMeanLong is not converging. So, it has been "
+                  "interrupted. The current relative error is %12.10f . \n",emag_old);
+            brouwerNotConvergingLongWritten = true;
+		   }
 			break;
 		}
 		if (ii > maxiter)
 		{		
-			MessageInterface::ShowMessage("Warning : Maximum iteration number has been reached. There is a possible inaccuracy.\n");
+			MessageInterface::ShowMessage("Warning: Maximum iteration number has been reached. There is a possible inaccuracy.\n");
 			break;
 		}
 		ii = ii + 1;
@@ -4134,9 +4194,10 @@ Rvector6 StateConversionUtil::CartesianToBrouwerMeanLong(Real mu, const Rvector6
  */
 //---------------------------------------------------------------------------
 Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const Rvector6 &blml)
-{ 
-	
-	Real	 mu_Earth= 398600.4418;
+{
+	//Real	 mu_Earth = 398600.4418;
+	Real	 mu_Earth = GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+   
 	if (Abs(mu - mu_Earth) > 1.0)
 	{
 		std::stringstream errmsg("");
@@ -4149,7 +4210,8 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 
 	Integer pseudostate = 0;
 	
-	Real	 re		 = 6378.1363; // Earth radius
+	//Real	 re		 = 6378.1363; // Earth radius
+	Real	 re		 = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
 	Real	 j2		 = 1.082626925638815E-03;
 	Real	 j3     = -0.2532307818191774E-5;
 	Real	 j4     = -0.1620429990000000E-5;
@@ -4193,7 +4255,14 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	}
     if (radper < 6378.0)
 	{
-        MessageInterface::ShowMessage("Warning : When RadPer < 6378km, there is a possible inaccuracy due to singularity related with inside-of-earth orbit.");
+       if (!possibleInaccuracyLongWritten)
+       {
+          MessageInterface::ShowMessage(
+              "Warning: For BrouwerMeanLong, when RadPer < 6378km, there "
+              "is a possible inaccuracy due to singularity related "
+              "with inside-of-earth orbit.\n");
+          possibleInaccuracyLongWritten = true;
+       }
 	}
     
 	if (blml[2] > 180)
@@ -4342,7 +4411,13 @@ Rvector6 StateConversionUtil::BrouwerMeanLongToOsculatingElements(Real mu, const
 	Real    dlt1e;
 	if (bisubc >= 0.001)
 	{	// modifications for critical inclination
-		MessageInterface::ShowMessage("Warning : Mean inclination is close to critical inclination 63 or 117 DEG. There is a possible inaccuracy.\n");
+	   if (!criticalInclinationWritten)
+	   {
+         MessageInterface::ShowMessage(
+               "Warning: Mean inclination is close to critical "
+               "inclination 63 or 117 DEG. There is a possible inaccuracy.\n");
+         criticalInclinationWritten = true;
+	   }
 		dlt1e = 0.0;
 		blghp = 0.0;
 		eccdpdl= 0.0;
@@ -5014,12 +5089,14 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
 
    Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
+   
    Real ecc = eVec.GetMagnitude();
    Real rMag = pos.GetMagnitude();
    Real ta = 0.0;
@@ -5036,7 +5113,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
    #endif
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 1:  Non-circular, Inclined Orbit\n");
@@ -5060,7 +5138,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
       }
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 2: Non-circular, Equatorial Orbit\n");
@@ -5074,7 +5153,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
          ta = TWO_PI - ta;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 3: Circular, Inclined Orbit\n");
@@ -5094,7 +5174,8 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
          ta = TWO_PI - ta;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 4: Circular, Equatorial Orbit\n");
@@ -5380,13 +5461,14 @@ Real StateConversionUtil::CartesianToINC(Real mu, const Rvector3 &pos,
    }
 
    Real inc = ACos((hVec[2] / hMag), GmatOrbitConstants::KEP_TOL);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
-
+   
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
+   
    #ifdef DEBUG_KEPLERIAN_INC
    MessageInterface::ShowMessage("returning %f\n", inc);
    #endif
@@ -5422,16 +5504,17 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
 
    Real ecc = CartesianToECC(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
    Real raan = 0.0;
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5446,12 +5529,14 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
          raan = TWO_PI - raan;
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       raan = 0.0;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5466,7 +5551,8 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
          raan = TWO_PI - raan;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       raan = 0.0;
    }
@@ -5511,17 +5597,18 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
 
    Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
    Real inc = CartesianToINC(mu, pos, vel, true);
-   if (inc >= PI - GmatOrbitConstants::KEP_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion to Keplerian state: "
-          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
-   }
+   // if (inc >= PI - GmatOrbitConstants::KEP_TOL)
+   // {
+   //    throw UtilityException
+   //       ("Error in conversion to Keplerian state: "
+   //        "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   // }
    Real ecc = eVec.GetMagnitude();
    Real aop = 0.0;
 
    // Case 1:  Non-circular, Inclined Orbit
-   if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
       Real nMag = nVec.GetMagnitude();
@@ -5536,7 +5623,8 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
          aop = TWO_PI - aop;
    }
    // Case 2: Non-circular, Equatorial Orbit
-   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc >= GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc >= GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       if (ecc == 0.0)
       {
@@ -5549,12 +5637,14 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
          aop = TWO_PI - aop;
    }
    // Case 3: Circular, Inclined Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc >= GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc >= GmatOrbitConstants::KEP_TOL) && (inc <= PI - GmatOrbitConstants::KEP_TOL)))
    {
       aop = 0.0;
    }
    // Case 4: Circular, Equatorial Orbit
-   else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   //else if ((ecc < GmatOrbitConstants::KEP_TOL) && (inc < GmatOrbitConstants::KEP_TOL))
+   else if ((ecc < GmatOrbitConstants::KEP_TOL) && ((inc < GmatOrbitConstants::KEP_TOL) || (inc > PI - GmatOrbitConstants::KEP_TOL)))
    {
       aop = 0.0;
    }
@@ -5701,10 +5791,13 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
    #ifdef DEBUG_SC_CONVERT_VALIDATE
       MessageInterface::ShowMessage(
          "SCU::ValidateValue() entered with label = %s, value = %le\n   "
-         "errorMsgFmt = %s, dataPrecision = %d, compareTo = %s, compareValue = %le\n",
-         label.c_str(), value, errorMsgFmt.c_str(), dataPrecision, compareTo.c_str(), compareValue);
+         "dataPrecision = %d, compareTo = %s, compareValue = %le\n",
+         label.c_str(), value, dataPrecision, compareTo.c_str(), compareValue);
    #endif
       
+   // NOTE - the labels for Delaunay will be checked without conversion to
+   // all upper case, as element names are identical except for the last
+   // character being lower or upper case, e.g. Delaunayl vs. DelaunayL
    std::string labelUpper   = GmatStringUtil::ToUpper(label);
    std::string compareUpper = GmatStringUtil::ToUpper(compareTo);
    #ifdef DEBUG_SC_CONVERT_VALIDATE
@@ -5891,20 +5984,6 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (label == "PlanetodeticLON") // -180 <= value <= 180
-   {
-      if ((value < -180.0 - ANGLE_TOL) || (value > 180.0 + ANGLE_TOL))
-      {
-         std::stringstream rangeMsg;
-         rangeMsg << "-180.0 <= Real Number <= 180.0";
-         if (ANGLE_TOL != 0.0)
-            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
-         UtilityException ue;
-         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       label.c_str(), rangeMsg.str().c_str());
-         throw ue;
-      }
-   }
    else if (labelUpper == "EQUINOCTIALK" || label == "ModEqunoctialK")
    {
       if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
@@ -6009,7 +6088,7 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
-   else if (label == "DelaunayL" || label == "DelaunayG") // value >= 0
+   else if (label == "DelaunayL") // value >= 0
    {
       if (value < 0)
       {
@@ -6019,6 +6098,61 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
                        label.c_str(), rangeMsg.str().c_str());
          throw ue;
+      }
+      if (compareTo == "DelaunayG")
+      {
+         if ((compareValue / value) > 1)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayL", "(DelaunayG / DelaunayL) <= 1");
+            throw ue;
+         }
+      }
+   }
+   else if (label == "DelaunayG")
+   {
+      if (value < 0)
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "0 <= Real Number";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       label.c_str(), rangeMsg.str().c_str());
+         throw ue;
+      }
+      if (compareTo == "DelaunayH")
+      {
+         if (GmatMathUtil::Abs(value) < GmatMathUtil::Abs(compareValue))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayG", "| DelaunayH | <= | DelaunayG | ");
+            throw ue;
+         }
+      }
+      if (compareTo == "DelaunayL")
+      {
+         if ((value / compareValue) > 1)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayG", "(DelaunayG / DelaunayL) <= 1");
+            throw ue;
+         }
+      }
+   }
+   else if (label == "DelaunayH")
+   {
+      if (compareTo == "DelaunayG")
+      {
+         if (GmatMathUtil::Abs(value) > GmatMathUtil::Abs(compareValue))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "DelaunayH", "| DelaunayH | <= | DelaunayG | ");
+            throw ue;
+         }
       }
    }
    else

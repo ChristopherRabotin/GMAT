@@ -67,7 +67,7 @@ class GMAT_API Parameter : public GmatBase
 public:
 
    Parameter(const std::string &name, const std::string &typeStr,
-             GmatParam::ParameterKey key, GmatBase *obj,
+             GmatParam::ParameterKey key, GmatBase *owner,
              const std::string &desc, const std::string &unit,
              GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
              bool isTimeParam, bool isSettable, bool isPlottable,
@@ -78,13 +78,17 @@ public:
    virtual ~Parameter();
    
    GmatParam::ParameterKey  GetKey() const;
+   GmatBase*                GetOwner() const;
    Gmat::ObjectType         GetOwnerType() const;
    Gmat::ObjectType         GetOwnedObjectType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
+   std::string              GetParameterClassType() const;
    
    void  SetKey(const GmatParam::ParameterKey &key);
-
+   void  SetOwner(GmatBase *owner);
+   void  SetParameterClassType(const std::string &classType);
+   
    bool  IsSystemParameter() const;
    bool  IsAngleParameter() const;
    bool  IsTimeParameter() const;
@@ -195,6 +199,8 @@ protected:
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
    
    GmatParam::ParameterKey  mKey;
+   GmatBase *mOwner;
+   
    std::string   mDesc;
    std::string   mUnit;
    std::string   mExpr;
@@ -202,6 +208,7 @@ protected:
    std::string   mDepObjectName;
    std::string   mCommentLine2;
    std::string   mInitialValue;
+   std::string   mParameterClassType;
    
    Gmat::ObjectType     mOwnerType;
    Gmat::ObjectType     mOwnedObjectType;
@@ -209,7 +216,7 @@ protected:
    GmatParam::DepObject mDepObj;
    GmatParam::CycleType mCycleType;
    UnsignedInt          mColor;
-   
+
    bool mIsAngleParam;
    bool mIsTimeParam;
    bool mIsPlottable;

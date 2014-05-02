@@ -24,8 +24,11 @@ GMAT LEOsat.DragArea = 15;
 GMAT LEOsat.SRPArea = 1;
 GMAT LEOsat.NAIFId = -123456789;
 GMAT LEOsat.NAIFIdReferenceFrame = -123456789;
+GMAT LEOsat.OrbitColor = Red;
+GMAT LEOsat.TargetColor = Teal;
 GMAT LEOsat.Id = 'SatId';
 GMAT LEOsat.Attitude = CoordinateSystemFixed;
+GMAT LEOsat.SPADSRPScaleFactor = 1;
 GMAT LEOsat.ModelFile = '../data/vehicle/models/aura.3ds';
 GMAT LEOsat.ModelOffsetX = 0;
 GMAT LEOsat.ModelOffsetY = 0;
@@ -36,7 +39,9 @@ GMAT LEOsat.ModelRotationZ = 0;
 GMAT LEOsat.ModelScale = 3;
 GMAT LEOsat.AttitudeDisplayStateType = 'Quaternion';
 GMAT LEOsat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT LEOsat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT LEOsat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT LEOsat.EulerAngleSequence = '321';
+
 
 %----------------------------------------
 %---------- ForceModels
@@ -54,11 +59,8 @@ GMAT LEOprop_ForceModel.GravityField.Earth.Order = 4;
 GMAT LEOprop_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT LEOprop_ForceModel.GravityField.Earth.EarthTideModel = 'None';
 GMAT LEOprop_ForceModel.SRP.Flux = 1367;
+GMAT LEOprop_ForceModel.SRP.SRPModel = Spherical;
 GMAT LEOprop_ForceModel.SRP.Nominal_Sun = 149597870.691;
-GMAT LEOprop_ForceModel.Drag.AtmosphereModel = JacchiaRoberts;
-GMAT LEOprop_ForceModel.Drag.F107 = 150;
-GMAT LEOprop_ForceModel.Drag.F107A = 150;
-GMAT LEOprop_ForceModel.Drag.MagneticIndex = 3;
 GMAT LEOprop_ForceModel.Drag.AtmosphereModel = JacchiaRoberts;
 GMAT LEOprop_ForceModel.Drag.F107 = 150;
 GMAT LEOprop_ForceModel.Drag.F107A = 150;
@@ -114,6 +116,7 @@ GMAT DC.ReportStyle = Normal;
 GMAT DC.ReportFile = 'DifferentialCorrectorDC1.data';
 GMAT DC.MaximumIterations = 25;
 GMAT DC.DerivativeMethod = ForwardDifference;
+GMAT DC.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
@@ -121,18 +124,18 @@ GMAT DC.DerivativeMethod = ForwardDifference;
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0.3739130434782609 0.00546448087431694 ];
-GMAT DefaultOrbitView.Size = [ 0.5945652173913043 0.476775956284153 ];
+GMAT DefaultOrbitView.UpperLeft = [ 0 0 ];
+GMAT DefaultOrbitView.Size = [ 0 0 ];
 GMAT DefaultOrbitView.RelativeZOrder = 725;
+GMAT DefaultOrbitView.Maximized = false;
 GMAT DefaultOrbitView.Add = {LEOsat, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultOrbitView.DrawObject = [ true true ];
-GMAT DefaultOrbitView.OrbitColor = [ 255 32768 ];
-GMAT DefaultOrbitView.TargetColor = [ 8421440 0 ];
 GMAT DefaultOrbitView.DataCollectFrequency = 1;
 GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
 GMAT DefaultOrbitView.NumPointsToRedraw = 0;
 GMAT DefaultOrbitView.ShowPlot = true;
+GMAT DefaultOrbitView.ShowLabels = true;
 GMAT DefaultOrbitView.ViewPointReference = Earth;
 GMAT DefaultOrbitView.ViewPointVector = [ 30000 0 0 ];
 GMAT DefaultOrbitView.ViewDirection = Earth;
@@ -152,9 +155,10 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.SolverIterations = Current;
-GMAT XYPlot1.UpperLeft = [ 0.3771739130434783 0.4931693989071038 ];
-GMAT XYPlot1.Size = [ 0.5945652173913043 0.4795081967213115 ];
+GMAT XYPlot1.UpperLeft = [ 0 0 ];
+GMAT XYPlot1.Size = [ 0 0 ];
 GMAT XYPlot1.RelativeZOrder = 723;
+GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = LEOsat.A1ModJulian;
 GMAT XYPlot1.YVariables = {LEOsat.Earth.Altitude};
 GMAT XYPlot1.ShowGrid = true;
@@ -172,11 +176,11 @@ While 'While ElapsedDays < 10' LEOsat.ElapsedDays < 10.0
    If 'If Alt < Threshold' LEOsat.Earth.Altitude < 342
       Propagate 'Prop To Periapsis' LEOprop(LEOsat) {LEOsat.Periapsis};
       Target 'Raise Orbit' DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
-         Vary 'Vary TCM1.V' DC(TCM1.Element1 = 0.002, {Perturbation = 0.0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.05});
+         Vary 'Vary TCM1.V' DC(TCM1.Element1 = 0.002, {Perturbation = 0.0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.05, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
          Maneuver 'Apply TCM1' TCM1(LEOsat);
          Propagate 'Prop to Apoapsis' LEOprop(LEOsat) {LEOsat.Earth.Apoapsis};
          Achieve 'Achieve RMAG' DC(LEOsat.Earth.RMAG = 6737, {Tolerance = 0.1});
-         Vary 'Vary TCM2.V' DC(TCM2.Element1 = 1e-005, {Perturbation = 0.00005, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.05});
+         Vary 'Vary TCM2.V' DC(TCM2.Element1 = 1e-005, {Perturbation = 0.00005, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.05, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
          Maneuver 'Apply TCM2' TCM2(LEOsat);
          Achieve 'Achieve ECC' DC(LEOsat.Earth.ECC = 0.00005, {Tolerance = 0.0001});
       EndTarget;  % For targeter DC

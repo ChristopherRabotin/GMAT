@@ -16,12 +16,113 @@
 //
 /**
  * Declares Incoming Asymptote related parameter classes.
- * IncAsym_RHA, IncAsym_DHA, IncAsym_BVAZI, IncAsym_State
+ * IncAsymRHA, IncAsymDHA, IncAsymBVAZI, IncAsymState
  */
 //------------------------------------------------------------------------------
 
 #include "IncomingAsymptoteParameters.hpp"
 #include "ColorTypes.hpp"
+
+
+//==============================================================================
+//                              HyperbolicRadPer
+//==============================================================================
+HyperbolicRadPer::HyperbolicRadPer(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HyperbolicRadPer", obj, "Hyperbolic radius at periapsis", "Km",
+               GmatParam::ORIGIN, INCASYM_RADPER, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
+}
+
+
+//------------------------------------------------------------------------------
+// HyperbolicRadPer(const HyperbolicRadPer &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+HyperbolicRadPer::HyperbolicRadPer(const HyperbolicRadPer &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const HyperbolicRadPer& operator=(const HyperbolicRadPer &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+HyperbolicRadPer& HyperbolicRadPer::operator=(const HyperbolicRadPer &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~HyperbolicRadPer()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+HyperbolicRadPer::~HyperbolicRadPer()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool HyperbolicRadPer::Evaluate()
+{
+   mRealValue = OrbitData::GetIncAsymReal(INCASYM_RADPER);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* HyperbolicRadPer::Clone(void) const
+{
+   return new HyperbolicRadPer(*this);
+}
+
 
 
 //==============================================================================

@@ -287,6 +287,10 @@ bool CoordinateBase::RequiresJ2000Body()
  *
  * @param <toName> the J2000 Body name
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetJ2000BodyName(const std::string &toName)
@@ -302,6 +306,10 @@ void CoordinateBase::SetJ2000BodyName(const std::string &toName)
  *
  * @param <j2000Ptr> pointer to the j2000Body
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)

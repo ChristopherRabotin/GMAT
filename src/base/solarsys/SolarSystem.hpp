@@ -330,6 +330,10 @@ private:
    
    /// method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    void           SetJ2000Body();
    void           CloneBodiesInUse(const SolarSystem &ss,
                                    bool cloneSpecialPoints = true);

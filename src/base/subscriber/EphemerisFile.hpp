@@ -43,7 +43,7 @@ public:
    virtual void         ValidateParameters(bool forInitialization);
    
    // methods inherited from Subscriber
-   virtual void         SetProvider(GmatBase *provider);
+   virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
@@ -158,6 +158,7 @@ protected:
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
    Real        finalEpochA1Mjd;
+   Real        blockBeginA1Mjd;
    Real        nextOutEpochInSecs;
    Real        nextReqEpochInSecs;
    Real        currEpochInDays;
@@ -193,15 +194,16 @@ protected:
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
    
-   Gmat::RunState prevRunState;
-   
    CoordinateConverter coordConverter;
    
+   /// number of SPK segments that have been written
+   Integer     numSPKSegmentsWritten;
+
    FileType    fileType;
    
    /// for maneuver handling
    ObjectArray maneuversHandled;
-      
+   
    /// output data stream
    std::ofstream      dstream;
    
@@ -320,7 +322,7 @@ protected:
    void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
    
    // Event checking
-   bool         IsEventFeasible(bool isManeuverEvent = false);
+   bool         IsEventFeasible(bool checkForNoData = true);
    
    // CoordinateSystem conversion
    void         ConvertState(Real epochInDays, const Real inState[6],
@@ -350,7 +352,7 @@ protected:
    virtual void HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
                                   const StringArray &satNames,
                                   const std::string &desc);
-   virtual void HandlePropagatorChange(GmatBase *provider);
+   virtual void HandlePropagatorChange(GmatBase *provider, Real epochInMjd);
    virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
                                                const std::string &satName,
                                                const std::string &desc);

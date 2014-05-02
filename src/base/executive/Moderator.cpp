@@ -1708,12 +1708,22 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #endif
    bool renamed = theConfigManager->RenameItem(type, oldName, newName);
    
+   std::vector<Gmat::ObjectType> relatedItemType;
+   StringArray relatedOldName;
+   StringArray relatedNewName;
+   bool hasRelatedChange = theConfigManager->RelatedNameChange(relatedItemType,
+         relatedOldName, relatedNewName);
+
    //--------------------------------------------------
    // rename object name used in mission sequence
    //--------------------------------------------------
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameObject() ===> Change Command ref object names\n");
+   MessageInterface::ShowMessage
+      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
+       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
+       relatedNewName.c_str());
    #endif
    
    int sandboxIndex = 0; //handles one sandbox for now
@@ -1731,6 +1741,10 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
       #endif
       
       renamed = cmd->RenameRefObject(type, oldName, newName);
+      if (hasRelatedChange)
+         for (UnsignedInt i = 0; i < relatedItemType.size(); ++i)
+            cmd->RenameRefObject(relatedItemType[i], relatedOldName[i],
+                  relatedNewName[i]);
       if (!renamed)
          MessageInterface::ShowMessage
             ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
@@ -1749,6 +1763,11 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
          if (typeName.find("End") == typeName.npos)
          {
             renamed = child->RenameRefObject(type, oldName, newName);
+            if (hasRelatedChange)
+               for (UnsignedInt i = 0; i < relatedItemType.size(); ++i)
+                  child->RenameRefObject(relatedItemType[i], relatedOldName[i],
+                        relatedNewName[i]);
+
             if (!renamed)
                MessageInterface::ShowMessage
                   ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
@@ -7856,8 +7875,10 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
-
+   
    // IncomingAsymptote parameters by YK
+   // Added HyperbolicRadPer (LOJ: 2014.04.28)
+   CreateParameter("HyperbolicRadPer", "DefaultSC.Earth.HyperbolicRadPer");
    CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
    CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
    CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");

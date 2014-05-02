@@ -1513,7 +1513,8 @@ void SolarSystem::LoadSpiceKernels()
          if (theSPKFilename.size() > 1 && theSPKFilename[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            //std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            std::string absSpkFile = fm->GetBinDirectory() + fm->GetPathSeparator() + theSPKFilename;
             
             MessageInterface::ShowMessage
                ("Error opening the SPK file \"%s\", so trying with abs path \"%s\"", theSPKFilename.c_str(),
@@ -3259,6 +3260,11 @@ CelestialBody* SolarSystem::FindBody(std::string withName)
 /*
  * Sets the J2000Body used for Earth to be use for all bodies in the solar
  * system.
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 void SolarSystem::SetJ2000Body()

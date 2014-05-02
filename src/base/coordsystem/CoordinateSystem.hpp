@@ -45,7 +45,9 @@ public:
    const bool operator==(const CoordinateSystem &coordSys);
    // destructor
    virtual ~CoordinateSystem();
-
+   
+   AxisSystem* GetAxisSystem();
+   
    // virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter (calls through to its AxisSystem)
    virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
@@ -169,6 +171,10 @@ public:
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
    
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    static CoordinateSystem* CreateLocalCoordinateSystem(
                             const std::string &csName, const std::string &axesType,
                             SpacePoint *origin, SpacePoint *primary,

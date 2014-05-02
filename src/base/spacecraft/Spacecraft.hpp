@@ -357,13 +357,16 @@ protected:
       PLD_VMAG,
       PLD_AZI,
       PLD_HFPA,
-      // Hyperbolic Asymptotes mod by YK 
+      // Hyperbolic Asymptotes mod by YK
+      // @note RadPer and TA are shared by Mod_Kep and Kep.
+      // Added HyperbolicRadPer (LOJ: 2014.04.28)
+      HYP_RAD_PER,
       HYP_ASYM_C3,
-      HYP_ASYM_Incoming_RLA,  // radPer and TA are shared by Mod_Kep and Kep.
-      HYP_ASYM_Incoming_DLA,
+      HYP_ASYM_Incoming_RHA,
+      HYP_ASYM_Incoming_DHA,
       HYP_ASYM_Incoming_BVAZI,
-      HYP_ASYM_Outgoing_RLA,  // radPer and TA are shared by Mod_Kep and Kep.
-      HYP_ASYM_Outgoing_DLA,
+      HYP_ASYM_Outgoing_RHA,
+      HYP_ASYM_Outgoing_DHA,
       HYP_ASYM_Outgoing_BVAZI,
       // Brouwer-Lyddane Mean elements (short term only) mod by YK 
       BROLYD_SHORT_SMA,
@@ -549,9 +552,9 @@ protected:
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                         std::stringstream &stream);
 
-   Rvector6          GetStateInRepresentation(std::string rep = "", bool useDefaultCartesian = false);
+   Rvector6          GetStateInRepresentation(const std::string &rep = "", bool useDefaultCartesian = false);
    Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID, bool useDefaultCartesian = false);
-   void              SetStateFromRepresentation(std::string rep, Rvector6 &st);
+   void              SetStateFromRepresentation(const std::string &rep, Rvector6 &st, const std::string &label = "");
 
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);

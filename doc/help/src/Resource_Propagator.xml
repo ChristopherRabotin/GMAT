@@ -1342,7 +1342,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>Drag.F107</guilabel> &gt; 0</para>
+                      <para><guilabel>Drag.F107</guilabel>&gt;= 0</para>
                     </listitem>
                   </varlistentry>
 
@@ -1400,7 +1400,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para><guilabel>Drag.F107A</guilabel>&gt;0</para>
+                      <para><guilabel>Drag.F107A</guilabel>&gt;=0</para>
                     </listitem>
                   </varlistentry>
 
@@ -2115,8 +2115,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
               <entry><guilabel>SRP</guilabel></entry>
 
               <entry><para>Sets SRP force on or off. See the Remarks section
-              for a detailed explanation of SRP
-              configuration.</para><variablelist>
+              for a detailed explanation of SRP configuration. The SRP model
+              used is set in the SRP.Model field.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -2186,7 +2186,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Allowed Values</term>
 
                     <listitem>
-                      <para>1300 &lt;<guilabel>SRP.Flux</guilabel> &lt;
+                      <para>1200 &lt;<guilabel>SRP.Flux</guilabel> &lt;
                       1450</para>
                     </listitem>
                   </varlistentry>
@@ -2279,6 +2279,60 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
 
                     <listitem>
                       <para>script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>SRP.Model </guilabel></entry>
+
+              <entry><para>The model for SRP acceleration.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>Spherical,SPADFile</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para>Spherical</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -2745,41 +2799,62 @@ GMAT aForceModel.Drag.MagneticIndex = 4
 
       <para><emphasis>Configuring an SRP Model</emphasis></para>
 
-      <para>GMAT uses a dual cone model to model central body shadowing of the
-      spacecraft and models solar radiation pressure using a spherical
-      spacecraft model. You can define the solar flux using two approaches
-      which are currently only supported in the script interface. One approach
-      is to define the flux value using the <guilabel>SRP.Flux</guilabel>
-      field and the value of an astronomical unit (in km) using the
+      <para>GMAT supports a spherical SRP model, and an SRP file for high
+      fidelity SRP modelling. Both models use a dual cone model for central
+      body shadowing of the spacecraft. See the <xref
+      linkend="SpacecraftBallisticMass" xrefstyle="select:title"/>
+      documentation for configuring a SPAD file for a spacecraft . The script
+      snippet below shows how to configure two
+      <guilabel>ForceModels</guilabel>, one that use
+      <guilabel>Spherical</guilabel> and on that uses a
+      <guilabel>SPADFile</guilabel>.</para>
+
+      <programlisting>% A spherical SRP model
+Create ForceModel aForceModel_1
+aForceModel_1.PrimaryBodies = {Earth}
+aForceModel_1.SRP = On
+aForceModel_1.SRP.Model = Spherical
+
+% A SPAD SRP model
+Create ForceModel aForceModel_2
+aForceModel_2.PrimaryBodies = {Earth}
+aForceModel_2.SRP = On
+aForceModel_2.SRP.Model = SPADFile
+</programlisting>
+
+      <para>You can define the solar flux using two approaches which are
+      currently only supported in the script interface. One approach is to
+      define the flux value using the <guilabel>SRP.Flux</guilabel> field and
+      the value of an astronomical unit (in km) using the
       <guilabel>Nominal_Sun</guilabel> field as shown in the following
       example.</para>
 
       <programlisting>Create ForceModel aForceModel
-GMAT aForceModel.PrimaryBodies = {Earth}
-GMAT aForceModel.SRP = On
-GMAT aForceModel.SRP.Flux = 1367
-GMAT aForceModel.SRP.Nominal_Sun = 149597870.691</programlisting>
+aForceModel.PrimaryBodies = {Earth}
+aForceModel.SRP = On
+aForceModel.SRP.Flux = 1367
+aForceModel.SRP.Nominal_Sun = 149597870.691</programlisting>
 
       <para>An alternative approach is to define the flux pressure at 1
       astronomical unit using the <guilabel>Flux_Pressure</guilabel> field as
       shown below..</para>
 
       <programlisting>Create ForceModel aForceModel
-GMAT aForceModel.PrimaryBodies = {Earth}
-GMAT aForceModel.SRP = On
-GMAT aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006
-GMAT aForceModel.SRP.Nominal_Sun = 149597870.691</programlisting>
+aForceModel.PrimaryBodies = {Earth}
+aForceModel.SRP = On
+aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006
+aForceModel.SRP.Nominal_Sun = 149597870.691</programlisting>
 
       <para>If you mix flux settings, as shown in the example below, GMAT will
       use the last approach in the script. Here, GMAT will use the
       <guilabel>Flux_Pressure</guilabel> setting.</para>
 
       <programlisting>Create ForceModel aForceModel
-GMAT aForceModel.PrimaryBodies = {Earth}
-GMAT aForceModel.SRP = On
-GMAT aForceModel.SRP.Flux = 1370
-GMAT aForceModel.SRP.Nominal_Sun = 149597870
-GMAT aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006</programlisting>
+aForceModel.PrimaryBodies = {Earth}
+aForceModel.SRP = On
+aForceModel.SRP.Flux = 1370
+aForceModel.SRP.Nominal_Sun = 149597870
+aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006</programlisting>
 
       <caution>
         <para>Caution: GMAT’s default option for configuring solar flux for an
@@ -2856,6 +2931,7 @@ aForceModel.Drag.F107 = 150
 aForceModel.Drag.F107A = 150
 aForceModel.Drag.MagneticIndex = 3
 aForceModel.SRP.Flux = 1359.388569998901
+aForceModel.SRP.SRPModel = Spherical;
 aForceModel.SRP.Nominal_Sun = 149597870.691
 
 Create Propagator aProp
@@ -2864,6 +2940,27 @@ aProp.FM = aForceModel
 BeginMissionSequence
 
 Propagate aProp(aSat){aSat.ElapsedDays = .2}</code></programlisting>
+      </informalexample>
+
+      <informalexample>
+        <para>A <guilabel>ForceModel</guilabel> that uses a SPAD SRP
+        File.</para>
+
+        <programlisting><code>Create Spacecraft aSpacecraft;
+aSpacecraft.DryMass   = 2000
+aSpacecraft.SPADSRPFile = '..\data\vehicle\spad\SphericalModel.spo'
+aSpacecraft.SPADSRPScaleFactor = 1;
+
+Create ForceModel aFM;
+aFM.SRP = On;
+aFM.SRP.SRPModel = SPADFile
+
+Create Propagator aProp;
+aProp.FM = aFM;
+
+BeginMissionSequence
+
+Propagate aProp(aSpacecraft) {aSpacecraft.ElapsedDays = 0.2}</code></programlisting>
       </informalexample>
 
       <informalexample>

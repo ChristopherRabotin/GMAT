@@ -98,6 +98,9 @@ public:
    static FileManager* Instance();
    ~FileManager();
    
+   std::string GetBinDirectory();
+   bool        SetBinDirectory(const std::string &newBin = "");
+   
    std::string GetPathSeparator();
    std::string GetWorkingDirectory();
    bool DoesDirectoryExist(const std::string &dirPath);
@@ -164,6 +167,7 @@ private:
          { mPath = path; mFile = file; }
    };
    
+   std::string mAbsBinDir;
    std::string mPathSeparator;
    std::string mStartupFileDir;
    std::string mStartupFileName;

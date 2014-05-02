@@ -79,7 +79,9 @@ ConfigManager* ConfigManager::Instance()
  */
 //------------------------------------------------------------------------------
 ConfigManager::ConfigManager() :
-   configChanged(false)
+   configChanged        (false),
+   defaultSolarSystem   (NULL),
+   solarSystemInUse     (NULL)
 {
 }
 
@@ -1290,6 +1292,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    #endif
    
    bool renamed = false;
+   changedItemType.clear();
+   oldRelatedName.clear();
+   newRelatedName.clear();
    
    //--------------------------------------------------
    // change mapping name
@@ -1342,8 +1347,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    GmatBase *obj = NULL;
    StringArray itemList = GetListOfItemsHas(type, oldName);
    #if DEBUG_RENAME
-   MessageInterface::ShowMessage
-      ("   =====> There are %d items has '%s'\n", itemList.size(), oldName.c_str());
+      MessageInterface::ShowMessage("   =====> There are %d items has '%s'\n",
+            itemList.size(), oldName.c_str());
    #endif
    for (UnsignedInt i=0; i<itemList.size(); i++)
    {
@@ -1364,6 +1369,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    //----------------------------------------------------
    if (type == Gmat::PROP_SETUP)
    {
+      bool newFMName = false;
       // Change _ForceMode name if _ForceModel is configured
       std::string oldFmName = oldName + "_ForceModel";
       std::string newFmName = newName + "_ForceModel";
@@ -1383,6 +1389,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             // Update the prop setup with the new name
             propSetup->SetStringParameter("FM", newFmName);
             propSetup->RenameRefObject(mapObj->GetType(), oldFmName, newFmName);
+            newFMName = true;
             
             #if DEBUG_RENAME
             MessageInterface::ShowMessage
@@ -1395,6 +1402,111 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       MessageInterface::ShowMessage("   Calling PropSetup::RenameRefObject()\n");
       #endif
       mapObj->RenameRefObject(type, oldName, newName);
+
+      if (newFMName)
+      {
+         // Call to reset references to the force model by name
+         #if DEBUG_RENAME
+            MessageInterface::ShowMessage("      *** Force model name changed "
+                  "from %s to %s; making call to handle that piece\n",
+                  oldFmName.c_str(), newFmName.c_str());
+         #endif
+         //----------------------------------------------------
+         // Rename ref. objects using FM
+         //----------------------------------------------------
+         GmatBase *obj = NULL;
+         StringArray itemList = GetListOfItemsHas(Gmat::ODE_MODEL, oldFmName);
+         #if DEBUG_RENAME
+            MessageInterface::ShowMessage("      =====> %d items have '%s'\n",
+                  itemList.size(), oldFmName.c_str());
+         #endif
+         for (UnsignedInt i=0; i<itemList.size(); i++)
+         {
+            obj = GetItem(itemList[i]);
+            if (obj)
+            {
+               #if DEBUG_RENAME
+               MessageInterface::ShowMessage
+                  ("      calling  %s->RenameRefObject(%d, %s, %s)\n",
+                   obj->GetName().c_str(), Gmat::ODE_MODEL, oldFmName.c_str(),
+                   newFmName.c_str());
+               #endif
+
+               renamed = obj->RenameRefObject(Gmat::ODE_MODEL, oldFmName,
+                               newFmName);
+
+               if (newFmName != oldFmName)
+               {
+                  changedItemType.push_back(Gmat::ODE_MODEL);
+                  oldRelatedName.push_back(oldFmName);
+                  newRelatedName.push_back(newFmName);
+               }
+
+            }
+         }
+
+         StringArray params = GetListOfItems(Gmat::PARAMETER);
+         std::string oldParamName, newParamName;
+         Parameter *param;
+         std::string::size_type pos;
+
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage("   Now going through all Parameters "
+               "in the map\n");
+         #endif
+         for (unsigned int i=0; i<params.size(); i++)
+         {
+            #if DEBUG_RENAME
+            MessageInterface::ShowMessage("   params[%2d]=%s\n", i,
+                  params[i].c_str());
+            #endif
+
+            param = GetParameter(params[i]);
+            // if system parameter, change its name
+            if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+            {
+               oldParamName = param->GetName();
+               pos = oldParamName.find(oldFmName);
+               // Rename actual parameter name
+               if (pos != oldParamName.npos)
+               {
+                  newParamName = oldParamName;
+                  newParamName = GmatStringUtil::ReplaceName(oldParamName,
+                        oldFmName, newFmName);
+
+                  #if DEBUG_RENAME
+                  MessageInterface::ShowMessage
+                     ("   oldParamName=%s, newParamName=%s\n",
+                      oldParamName.c_str(), newParamName.c_str());
+                  #endif
+
+                  // Change parameter mapping name
+                  if (mapping.find(oldParamName) != mapping.end())
+                  {
+                     mapping.erase(oldParamName);
+                     mapping[newParamName] = (GmatBase*)param;
+                     // Give a Parameter new name
+                     param->SetName(newParamName, oldParamName);
+                     renamed = true;
+                  }
+
+                  if (newParamName != oldParamName)
+                  {
+                     param->RenameRefObject(Gmat::ODE_MODEL, oldFmName,
+                           newFmName);
+                     changedItemType.push_back(Gmat::PARAMETER);
+                     oldRelatedName.push_back(oldParamName);
+                     newRelatedName.push_back(newParamName);
+                  }
+               }
+            }
+            // If variable, need to change expression
+            else if (param->GetTypeName() == "Variable")
+            {
+               param->RenameRefObject(Gmat::PARAMETER, oldFmName, newFmName);
+            }
+         }
+      }
    }
    
    //----------------------------------------------------
@@ -1418,12 +1530,13 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    //----------------------------------------------------
    // Rename system parameters and expression of variables
    //----------------------------------------------------
-   // Since new hardware Parameters were added, chcek for the Hardware also.
+   // Since new hardware Parameters were added, check for the Hardware also.
    
    if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
        type == Gmat::CALCULATED_POINT || type == Gmat::BURN ||
        type == Gmat::IMPULSIVE_BURN || type == Gmat::HARDWARE ||
-       type == Gmat::THRUSTER || type == Gmat::FUEL_TANK)
+       type == Gmat::THRUSTER || type == Gmat::FUEL_TANK ||
+       type == Gmat::ODE_MODEL)
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
@@ -1451,7 +1564,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             if (pos != oldParamName.npos)
             {
                newParamName = oldParamName;
-               newParamName = GmatStringUtil::ReplaceName(oldParamName, oldName, newName);
+               newParamName = GmatStringUtil::ReplaceName(oldParamName, oldName,
+                     newName);
                
                #if DEBUG_RENAME
                MessageInterface::ShowMessage
@@ -2439,3 +2553,42 @@ ObjectMap* ConfigManager::GetObjectMap()
    return &mapping;
 }
 
+//------------------------------------------------------------------------------
+// bool RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+//       StringArray& oldName, StringArray& newName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves name changes that were made as a side effect of other name changes
+ *
+ * The force model parameters use this code to report force model name and
+ * Parameter name changes when a Propagator changes name, resulting in a name
+ * change on an associated force model.
+ *
+ * This method clears the input arrays and then fills them with the name change
+ * data.
+ *
+ * @param itemType An array filled with a list of changed types
+ * @param oldName  An array of old object names
+ * @param newName  An array of new object names
+ *
+ * @return true if there are name changes to be processed, false if not
+ */
+//------------------------------------------------------------------------------
+bool ConfigManager::RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+StringArray& oldName, StringArray& newName)
+{
+   itemType.clear();
+   oldName.clear();
+   newName.clear();
+
+   bool retval = false;
+   if (oldRelatedName.size() > 0)
+   {
+      itemType = changedItemType;
+      oldName  = oldRelatedName;
+      newName  = newRelatedName;
+      retval   = true;
+   }
+
+   return retval;
+}

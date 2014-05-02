@@ -2835,9 +2835,24 @@ bool OrbitPanel::CheckDelaunay(Rvector6 &outState)
    {
       if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
+         #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+            MessageInterface::ShowMessage("OrbitPanel::CheckDelaunay() : label = %s, outState[%d] = %12.10f\n",
+                  labels[ii].c_str(), ii, outState[ii]);
+         #endif
          try
          {
-            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+            if (ii == 4) // Do additional check for L and G
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[3], outState[3]);
+            }
+            else if (ii == 5)  // Do additional check for H and G
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[4], outState[4]);
+            }
+            else
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+            }
          }
          catch (BaseException &ue)
          {
