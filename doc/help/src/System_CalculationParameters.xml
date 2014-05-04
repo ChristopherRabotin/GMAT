@@ -59,8 +59,7 @@
     <literal><replaceable>Spacecraft</replaceable>.Mars.Altitude</literal>.
     Any built-in central body or user-defined <guilabel>Asteroid</guilabel>,
     <guilabel>Comet</guilabel>, <guilabel>Moon</guilabel>, or
-    <guilabel>Planet</guilabel> is valid as a dependency. If the dependency is
-    omitted, <literal>Earth</literal> is assumed.</para>
+    <guilabel>Planet</guilabel> is valid as a dependency.</para>
 
     <para>Likewise, coordinate-system-dependent parameters have a value that
     is dependent on the chosen coordinate system. The <guilabel>DEC</guilabel>
@@ -69,8 +68,25 @@
     <guilabel>CoordinateSystem</guilabel> resource, such as
     <literal><replaceable>Spacecraft</replaceable>.EarthFixed.DEC</literal>.
     Any default or user-defined <guilabel>CoordinateSystem</guilabel> resource
-    is valid as a dependency. If the dependency is omitted,
-    <literal>EarthMJ2000Eq</literal> is assumed.</para>
+    is valid as a dependency.</para>
+
+    <para>If a dependency is used when retrieving the value of the parameter,
+    as in the following line, the value of <guilabel>Altitude</guilabel> is
+    calculated at Mars before setting it to the variable <literal>x</literal>.
+    If the dependency is omitted, <guilabel>Earth</guilabel> and
+    <guilabel>EarthMJ2000Eq</guilabel> are assumed unless noted
+    otherwise.</para>
+
+    <programlisting>x = DefaultSC.Mars.Altitude</programlisting>
+
+    <para>If a dependency is used when setting the value of a parameter, the
+    value of the parameter is first converted based on the value of the
+    dependency, then the value is set. For example, in the following line, the
+    value of <guilabel>SMA</guilabel> is first calculated at Mars, then it is
+    set to the value <literal>10000</literal> in that context. If the
+    dependency is omitted when setting the value, the default is assumed to be
+    the central body or coordinate system of the parent resource (in this
+    case, <guilabel>DefaultSC</guilabel>).<programlisting>DefaultSC.Mars.SMA = 10000</programlisting></para>
 
     <para>Attached-hardware parameters have no dependencies, but are
     themselves dependent on being attached to a
