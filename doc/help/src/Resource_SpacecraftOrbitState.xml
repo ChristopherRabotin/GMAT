@@ -93,7 +93,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>AOP</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -149,7 +149,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>AZI</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -188,9 +188,234 @@
           </row>
 
           <row>
+            <entry><para><guilabel>BrouwerLongAOP</guilabel></para><para><guilabel>BrouwerShortAOP</guilabel></para></entry>
+
+            <entry><para>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean argument of periapsis.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>Brouwer*AOP</guilabel> &lt;
+                    ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><para><guilabel>BrouwerLongECC</guilabel></para><para><guilabel>BrouwerShortECC</guilabel></para></entry>
+
+            <entry><para>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean eccentricity.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0 ≤ <guilabel>Brouwer*ECC</guilabel> ≤ 0.99</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><para><guilabel>BrouwerLongINC</guilabel></para><para><guilabel>BrouwerShortINC</guilabel></para></entry>
+
+            <entry><para>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean inclination.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>BrouwerLongINC</guilabel>:</para>
+
+                    <para><guilabel>BrouwerShortINC</guilabel>: 0 ≤
+                    <guilabel>BrouwerShortINC</guilabel> ≤ 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><para><guilabel>BrouwerLongSMA</guilabel></para><para><guilabel>BrouwerShortSMA</guilabel></para></entry>
+
+            <entry><para>Long-term averaged (short-term averaged) mean
+            semi-major axis.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>Brouwer*SMA</guilabel> &gt;
+                    6378/(1-<guilabel>Brouwer*ECC</guilabel>)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>DEC</guilabel></entry>
 
-            <entry><para> The declination of the orbital position expressed in
+            <entry><para>The declination of the orbital position expressed in
             the coordinate system chosen in the
             <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
                 <varlistentry>
@@ -205,7 +430,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-90 &lt;= Real &lt;= 90</para>
+                    <para>-90 ≤ <guilabel>DEC</guilabel> ≤ 90</para>
                   </listitem>
                 </varlistentry>
 
@@ -229,7 +454,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -261,7 +486,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-90 &lt;= Real &lt;= 90</para>
+                    <para>-90 ≤ <guilabel>DECV</guilabel> ≤ 90</para>
                   </listitem>
                 </varlistentry>
 
@@ -285,7 +510,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -503,7 +728,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-Inf &lt;= Real &lt;= Inf</para>
+                    <para>-∞ &lt; <guilabel>EquinoctialP</guilabel> &lt;
+                    ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -562,7 +788,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-Inf &lt;= Real &lt;= Inf</para>
+                    <para>-∞ &lt; <guilabel>EquinoctialQ</guilabel> &lt;
+                    ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -618,7 +845,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>0&lt;= Real &lt;= 180</para>
+                    <para>0 ≤ <guilabel>FPA</guilabel> ≤ 180</para>
                   </listitem>
                 </varlistentry>
 
@@ -674,7 +901,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>0&lt;= Real &lt;= 180</para>
+                    <para>0 ≤ <guilabel>INC</guilabel> ≤ 180</para>
                   </listitem>
                 </varlistentry>
 
@@ -698,7 +925,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -731,7 +958,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-360 &lt;= Real &lt;=360</para>
+                    <para>-360 ≤ <guilabel>MLONG</guilabel> ≤ 360</para>
                   </listitem>
                 </varlistentry>
 
@@ -843,8 +1070,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Input: -∞ &lt; Real &lt; ∞, Output -180&lt;= Real
-                    &lt;= 180</para>
+                    <para>-∞ &lt; <guilabel>RA</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -868,7 +1094,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -900,7 +1126,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>RAAN</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -924,7 +1150,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -959,8 +1185,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>abs(<guilabel>RadApo</guilabel>) &gt;= 1
-                    meter.</para>
+                    <para>abs(<guilabel>RadApo</guilabel>) ≥ 1 meter.</para>
                   </listitem>
                 </varlistentry>
 
@@ -1019,8 +1244,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>abs(<guilabel>RadPer</guilabel>) &gt;= 1
-                    meter.</para>
+                    <para>abs(<guilabel>RadPer</guilabel>) ≥ 1 meter.</para>
                   </listitem>
                 </varlistentry>
 
@@ -1076,8 +1300,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Input: -∞ &lt; Real &lt; ∞, Output -180&lt;=
-                    <guilabel>RA</guilabel> &lt;= 180</para>
+                    <para>-∞ &lt; <guilabel>RAV</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1101,7 +1324,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>deg.</para>
+                    <para>deg</para>
                   </listitem>
                 </varlistentry>
 
@@ -1133,7 +1356,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>RMAG &gt;= 1e-10</para>
+                    <para><guilabel>RMAG</guilabel> ≥ 1e-10</para>
                   </listitem>
                 </varlistentry>
 
@@ -1200,7 +1423,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set,get</para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -1248,7 +1471,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>TA</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1304,7 +1527,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Real &gt;= 1e-10</para>
+                    <para><guilabel>VMAG</guilabel> ≥ 1e-10</para>
                   </listitem>
                 </varlistentry>
 
@@ -1361,7 +1584,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>VX</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1418,7 +1641,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>VY</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1475,7 +1698,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>VZ</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1532,7 +1755,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>X</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1589,7 +1812,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>Y</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -1646,7 +1869,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; Real &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>Z</guilabel> &lt; ∞</para>
                   </listitem>
                 </varlistentry>
 
@@ -2164,27 +2387,32 @@
               <entry><guilabel>INC = 0</guilabel></entry>
 
               <entry><para><guilabel>RAAN</guilabel> is undefined. If
-              <guilabel>INC</guilabel> &lt; 1e-11, GMAT sets <guilabel>RAAN
-              </guilabel>to 0 degrees in conversion from
+              <guilabel>INC</guilabel> &lt; 6e-10, GMAT sets
+              <guilabel>RAAN</guilabel> to 0 in the conversion from
               <guilabel>Cartesian</guilabel> to
-              <guilabel>Keplerian/ModKeplerian</guilabel>. Then, if
-              <guilabel>ECC</guilabel> is also &lt; 1e-11,
+              <guilabel>Keplerian</guilabel>/<guilabel>ModKeplerian</guilabel>.
+              Then, if <guilabel>ECC</guilabel> &lt; 1e-11,
               <guilabel>AOP</guilabel> is set to 0 and GMAT includes all
               angular displacement between the x-axis and the spacecraft in
-              the true anomaly. If <guilabel>ECC </guilabel>&gt; 1e-11,
-              then<guilabel> AOP</guilabel> is computed as the angle between
-              the eccentricity vector and the x-axis </para></entry>
+              the true anomaly. If <guilabel>ECC</guilabel> ≥ 1e-11, then
+              <guilabel>AOP</guilabel> is computed as the angle between the
+              eccentricity vector and the x-axis.</para></entry>
             </row>
 
             <row>
               <entry><guilabel>INC = 180</guilabel></entry>
 
               <entry><para><guilabel>RAAN</guilabel> is undefined. If
-              <guilabel>INC</guilabel> &gt; 180 - 1.0e-11,
-              <guilabel>Keplerian</guilabel>, <guilabel>Modified
-              Keplerian</guilabel>, and <guilabel>Equinoctial</guilabel>
-              elements are not supported. For transformations performed near
-              these limits, loss of precision may occur. </para></entry>
+              <guilabel>INC</guilabel> &gt; (180 - 6e-10), GMAT sets
+              <guilabel>RAAN</guilabel> to 0 in the conversion from
+              <guilabel>Cartesian</guilabel> to
+              <guilabel>Keplerian</guilabel>/<guilabel>ModKeplerian</guilabel>.
+              Then, if <guilabel>ECC</guilabel> &lt; 1e-11,
+              <guilabel>AOP</guilabel> is set to 0 and GMAT includes all
+              angular displacement between the x-axis and the spacecraft in
+              the true anomaly. If <guilabel>ECC</guilabel> ≥ 1e-11, then
+              <guilabel>AOP</guilabel> is computed as the angle between the
+              eccentricity vector and the x-axis.</para></entry>
             </row>
 
             <row>
