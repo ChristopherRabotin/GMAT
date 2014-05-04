@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <part condition="ug" version="5.0" xml:id="RefGuide"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -114,6 +114,7 @@
       <title>System</title>
       <xi:include href="System_CalculationParameters.xml" />
       <xi:include href="System_CommandLineUsage.xml" />
+      <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
       <xi:include href="System_ScriptLanguage.xml" />
       <xi:include href="System_StartupFile.xml" />
