@@ -63,7 +63,9 @@
             <entry><guilabel>BodyNames</guilabel></entry>
 
             <entry><para>The list of <guilabel>CelestialBody</guilabel>
-            resources included in the Barycenter. </para><variablelist>
+            resources included in the Barycenter. Providing empty brackets
+            sets the bodies to the default list described
+            below.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
