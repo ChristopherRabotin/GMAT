@@ -2837,6 +2837,158 @@ VZ =  0.99953       </code>      </programlisting>
       in the mission sequence (after the
       <guilabel>BeginMissionSequence</guilabel> command).</para>
     </refsection>
+
+    <refsection>
+      <title>Shared State Components</title>
+
+      <para>Some state components, such as <guilabel>SMA</guilabel>, are
+      shared among multiple state representations. In the mission sequence,
+      GMAT does not require you to specify the state representation that you
+      are setting; rather, you may specify a combination of elements from
+      different representations.</para>
+
+      <para>For these shared components, GMAT defines a default representation
+      for each, and uses that representation when setting or retrieving the
+      value for the shared component. This is normally transparent, though it
+      can have side effects if the default representation has singularities or
+      numerical precision losses caused by the value being set or retrieved.
+      The following table lists each shared state component and its default
+      representation.</para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="3">
+          <colspec colnum="1" colwidth="0.5*"/>
+
+          <thead>
+            <row>
+              <entry>Field</entry>
+
+              <entry>Shared Between</entry>
+
+              <entry>Default Representation</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>AOP</entry>
+
+              <entry>Keplerian, ModifiedKeplerian</entry>
+
+              <entry>Keplerian</entry>
+            </row>
+
+            <row>
+              <entry>C3Energy</entry>
+
+              <entry>IncomingAsymptote, OutgoingAsymptote</entry>
+
+              <entry>IncomingAsymptote</entry>
+            </row>
+
+            <row>
+              <entry>DEC</entry>
+
+              <entry>SphericalAZFPA, SphericalRADEC</entry>
+
+              <entry>SphericalAZFPA</entry>
+            </row>
+
+            <row>
+              <entry>EquinoctialH</entry>
+
+              <entry>AlternateEquinoctial, Equinoctial</entry>
+
+              <entry>Equinoctial</entry>
+            </row>
+
+            <row>
+              <entry>EquinoctialK</entry>
+
+              <entry>AlternateEquinoctial, Equinoctial</entry>
+
+              <entry>Equinoctial</entry>
+            </row>
+
+            <row>
+              <entry>HyperbolicRadPer</entry>
+
+              <entry>IncomingAsymptote, OutgoingAsymptote</entry>
+
+              <entry>IncomingAsymptote</entry>
+            </row>
+
+            <row>
+              <entry>INC</entry>
+
+              <entry>Keplerian, ModifiedKeplerian</entry>
+
+              <entry>Keplerian</entry>
+            </row>
+
+            <row>
+              <entry>RA</entry>
+
+              <entry>SphericalAZFPA, SphericalRADEC</entry>
+
+              <entry>SphericalAZFPA</entry>
+            </row>
+
+            <row>
+              <entry>RAAN</entry>
+
+              <entry>Keplerian, ModifiedKeplerian</entry>
+
+              <entry>Keplerian</entry>
+            </row>
+
+            <row>
+              <entry>RMAG</entry>
+
+              <entry>SphericalAZFPA, SphericalRADEC</entry>
+
+              <entry>SphericalAZFPA</entry>
+            </row>
+
+            <row>
+              <entry>SMA</entry>
+
+              <entry>AlternateEquinoctial, Equinoctial, Keplerian</entry>
+
+              <entry>Keplerian</entry>
+            </row>
+
+            <row>
+              <entry>TA</entry>
+
+              <entry>IncomingAsymptote, OutgoingAsymptote, Keplerian,
+              ModifiedKeplerian</entry>
+
+              <entry>Keplerian</entry>
+            </row>
+
+            <row>
+              <entry>VMAG</entry>
+
+              <entry>SphericalAZFPA, SphericalRADEC</entry>
+
+              <entry>SphericalAZFPA</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>As an example, consider the following mission sequence. Because
+      GMAT executes each command sequentially, it uses the assigned state
+      representation to calculation each component. For shared components, it
+      uses the default representation for reach.</para>
+
+      <programlisting>BeginMissionSequence
+aSpacecraft.SMA = 20000      % conversion goes through Keplerian
+aSpacecraft.C3Energy = 3     % conversion goes through IncomingAsymptote
+aSpacecraft.OutgoingDHA = 90 % conversion goes through OutgoingAsymptote
+aSpacecraft.TA = 45          % conversion goes through Keplerian</programlisting>
+    </refsection>
   </refsection>
 
   <refsection>
