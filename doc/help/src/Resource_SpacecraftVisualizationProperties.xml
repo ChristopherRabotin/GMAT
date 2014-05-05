@@ -35,7 +35,7 @@
     GMAT lets you set orbit colors via the spacecraft visualization properties
     as well. You can set colors to spacecraft orbital trajectories and any
     perturbing trajectories that are drawn during iterative processes. See
-    <xref linkend="Setting_Colors"/> documentation for discussion and examples
+    <xref linkend="Color"/> documentation for discussion and examples
     on how to set orbital colors using <guilabel>Spacecraft</guilabel>
     object's <guilabel>OrbitColor</guilabel> and
     <guilabel>TargetColor</guilabel> fields. Also see the <xref
@@ -45,7 +45,7 @@
     interface.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="OrbitView"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="OrbitView"/>, <xref linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="SpacecraftVisProp_Fields">
@@ -535,7 +535,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -599,7 +601,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 

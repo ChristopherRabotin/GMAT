@@ -38,7 +38,7 @@
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="LibrationPoint"/>, <xref linkend="CoordinateSystem"/>, <xref
     linkend="CelestialBody"/>, <xref linkend="SolarSystem"/>, <xref
-    linkend="Setting_Colors"/></para>
+    linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="Barycenter_Resource_Fields">
@@ -144,7 +144,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -207,7 +209,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -338,23 +342,23 @@
         </imageobject>
       </mediaobject>
     </screenshot>
-	
-	    <refsection>
+
+    <refsection>
       <title>Setting Colors On Barycenter Orbits</title>
 
-      <para>GMAT allows you to assign colors to barycenter orbits that
-      are drawn using the <guilabel>OrbitView</guilabel> graphics resource. GMAT also allows you to assign colors to perturbing barycenter
-      orbital trajectories which are drawn during iterative processes
-      such as differential correction or optimization. The
-      <guilabel>Barycenter</guilabel> object's
-      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
-      fields are used to assign colors to both orbital and perturbing
-      trajectories. See the <xref linkend="Barycenter_Resource_Fields"
-      xrefstyle="select:title"/> section to learn more about these two fields.
-      Also see <xref linkend="Setting_Colors"/> documentation for discussion
-      and examples on how to set colors on a barycenter orbit.</para>
+      <para>GMAT allows you to assign colors to barycenter orbits that are
+      drawn using the <guilabel>OrbitView</guilabel> graphics resource. GMAT
+      also allows you to assign colors to perturbing barycenter orbital
+      trajectories which are drawn during iterative processes such as
+      differential correction or optimization. The
+      <guilabel>Barycenter</guilabel> object's <guilabel>OrbitColor</guilabel>
+      and <guilabel>TargetColor</guilabel> fields are used to assign colors to
+      both orbital and perturbing trajectories. See the <xref
+      linkend="Barycenter_Resource_Fields" xrefstyle="select:title"/> section
+      to learn more about these two fields. Also see <xref linkend="Color"/>
+      documentation for discussion and examples on how to set colors on a
+      barycenter orbit.</para>
     </refsection>
-	
   </refsection>
 
   <refsection>

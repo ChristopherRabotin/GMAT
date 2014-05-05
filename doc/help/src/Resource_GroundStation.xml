@@ -35,7 +35,7 @@
     Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CoordinateSystem"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="CoordinateSystem"/>, <xref linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="GroundStation_Resource_Fields">
@@ -613,7 +613,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -734,7 +736,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -866,12 +870,14 @@
       <title>Setting Colors On a Ground Station Facility</title>
 
       <para>GMAT allows you to set colors on a ground station facility that
-      you create. The <guilabel>GroundStations</guilabel> are drawn on the <guilabel>GroundTrackPlot</guilabel> 2D graphics display. The <guilabel>GroundStation</guilabel> object's
+      you create. The <guilabel>GroundStations</guilabel> are drawn on the
+      <guilabel>GroundTrackPlot</guilabel> 2D graphics display. The
+      <guilabel>GroundStation</guilabel> object's
       <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
       fields are used to set colors on a ground station facility. See the
       <xref linkend="GroundStation_Resource_Fields" xrefstyle="select:title"/>
       section to read more about these two fields. Also See <xref
-      linkend="Setting_Colors"/> documentation for discussion and examples on
+      linkend="Color"/> documentation for discussion and examples on
       how to set colors on a ground station facility.</para>
     </refsection>
   </refsection>

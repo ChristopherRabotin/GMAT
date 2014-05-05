@@ -124,7 +124,7 @@ or
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Propagator"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="Formation"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="Formation"/>, <xref linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="Propagate_Options">
@@ -582,7 +582,9 @@ or
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -1116,7 +1118,7 @@ Propagate Backprop numProp(numSat){numSat.Periapsis}</code></programlisting>
       <xref linkend="Propagate_Options" xrefstyle="select:title"/> section for
       <guilabel>OrbitColor</guilabel> option that lets you set colors on the
       <guilabel>Propagate</guilabel> command. Also see <xref
-      linkend="Setting_Colors"/> documentation for discussion and examples on
+      linkend="Color"/> documentation for discussion and examples on
       how to set unique colors on orbital trajectory segments through GMAT's
       <guilabel>Propagate</guilabel> command.</para>
     </refsection>

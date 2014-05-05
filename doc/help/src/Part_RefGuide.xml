@@ -113,11 +113,11 @@
     <reference xml:id="System">
       <title>System</title>
       <xi:include href="System_CalculationParameters.xml" />
+      <xi:include href="System_Color.xml" />
       <xi:include href="System_CommandLineUsage.xml" />
       <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
       <xi:include href="System_ScriptLanguage.xml" />
       <xi:include href="System_StartupFile.xml" />
-	  <xi:include href="System_SettingColors.xml" />
     </reference>
 </part>

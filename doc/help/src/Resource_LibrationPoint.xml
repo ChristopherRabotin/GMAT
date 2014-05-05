@@ -38,7 +38,7 @@
     be modified in the Mission Sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Barycenter"/>, <xref linkend="Setting_Colors"/></para>
+    linkend="Barycenter"/>, <xref linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="LibrationPoint_Resource_Fields">
@@ -84,7 +84,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -321,7 +323,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any color available from the Orbit Color Picker in GUI. Valid predefined color name or RGB triplet value between 0 and 255.</para>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
                   </listitem>
                 </varlistentry>
 
@@ -440,7 +444,7 @@
       fields are used to assign colors to both orbital and perturbing
       trajectories. See the <xref linkend="LibrationPoint_Resource_Fields"
       xrefstyle="select:title"/> section to learn more about these two fields.
-      Also see <xref linkend="Setting_Colors"/> documentation for discussion
+      Also see <xref linkend="Color"/> documentation for discussion
       and examples on how to set colors on a libration point orbit.</para>
     </refsection>
   </refsection>
