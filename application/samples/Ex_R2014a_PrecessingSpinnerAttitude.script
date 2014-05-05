@@ -1,0 +1,26 @@
+Create Spacecraft aSat; 
+GMAT aSat.Attitude = PrecessingSpinner;
+GMAT aSat.NutationReferenceVectorX = 0;
+GMAT aSat.NutationReferenceVectorY = 0;
+GMAT aSat.NutationReferenceVectorZ = 1;
+GMAT aSat.BodySpinAxisX = 0;
+GMAT aSat.BodySpinAxisY = 0;
+GMAT aSat.BodySpinAxisZ = 1;
+GMAT aSat.InitialPrecessionAngle = 0;
+GMAT aSat.PrecessionRate = 1;
+GMAT aSat.NutationAngle = 30;
+GMAT aSat.InitialSpinAngle = 0;
+GMAT aSat.SpinRate = 2;
+
+Create OrbitView OrbitView1;
+OrbitView1.Add = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector = [ 30000 0 0 ]
+
+Create Propagator aProp
+aProp.MaxStep = 10
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 12000.0}
+

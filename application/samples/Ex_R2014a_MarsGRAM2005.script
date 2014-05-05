@@ -1,0 +1,138 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2013-09-18 17:05:02
+
+% Match STK shape values, since STK hard-codes them with Mars-GRAM
+GMAT Mars.EquatorialRadius = 3396.19;
+GMAT Mars.Flattening = 0.00588600755552546;
+GMAT Mars.Mu = 4.28283719012840e+4;
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft MarsSC;
+GMAT MarsSC.DateFormat = UTCGregorian;
+GMAT MarsSC.Epoch = '01 Jun 2004 12:00:00.000';
+GMAT MarsSC.CoordinateSystem = MarsMJ2000Eq;
+GMAT MarsSC.DisplayStateType = Cartesian;
+GMAT MarsSC.X = 3547;
+GMAT MarsSC.Y = 0;
+GMAT MarsSC.Z = 0;
+GMAT MarsSC.VX = 0;
+GMAT MarsSC.VY = 2.457083402459184;
+GMAT MarsSC.VZ = 2.457083402459184;
+GMAT MarsSC.DryMass = 350;
+GMAT MarsSC.Cd = 2.2;
+GMAT MarsSC.Cr = 1.2;
+GMAT MarsSC.DragArea = 20;
+GMAT MarsSC.SRPArea = 20;
+GMAT MarsSC.NAIFId = -123456789;
+GMAT MarsSC.NAIFIdReferenceFrame = -123456789;
+GMAT MarsSC.Id = 'SatId';
+GMAT MarsSC.Attitude = CoordinateSystemFixed;
+GMAT MarsSC.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT MarsSC.ModelOffsetX = 0;
+GMAT MarsSC.ModelOffsetY = 0;
+GMAT MarsSC.ModelOffsetZ = 0;
+GMAT MarsSC.ModelRotationX = 0;
+GMAT MarsSC.ModelRotationY = 0;
+GMAT MarsSC.ModelRotationZ = 0;
+GMAT MarsSC.ModelScale = 3;
+GMAT MarsSC.AttitudeDisplayStateType = 'Quaternion';
+GMAT MarsSC.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT MarsSC.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT MarsSC.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel MarsDrag;
+GMAT MarsDrag.CentralBody = Mars;
+GMAT MarsDrag.PrimaryBodies = {Mars};
+GMAT MarsDrag.SRP = Off;
+GMAT MarsDrag.RelativisticCorrection = Off;
+GMAT MarsDrag.ErrorControl = RSSStep;
+GMAT MarsDrag.GravityField.Mars.Degree = 0;
+GMAT MarsDrag.GravityField.Mars.Order = 0;
+GMAT MarsDrag.GravityField.Mars.PotentialFile = 'Mars50c.cof';
+GMAT MarsDrag.Drag.AtmosphereModel = MarsGRAM2005;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator RKV89;
+GMAT RKV89.FM = MarsDrag;
+GMAT RKV89.Type = RungeKutta89;
+GMAT RKV89.InitialStepSize = 60;
+GMAT RKV89.Accuracy = 1e-013;
+GMAT RKV89.MinStep = 0;
+GMAT RKV89.MaxStep = 2700;
+GMAT RKV89.MaxStepAttempts = 50;
+GMAT RKV89.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem MarsMJ2000Eq;
+GMAT MarsMJ2000Eq.Origin = Mars;
+
+GMAT MarsMJ2000Eq.Axes = MJ2000Eq;
+
+Create CoordinateSystem MarsFixed;
+GMAT MarsFixed.Origin = Mars;
+GMAT MarsFixed.Axes = BodyFixed;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile Mars_Report;
+GMAT Mars_Report.SolverIterations = Current;
+GMAT Mars_Report.UpperLeft = [ 0 0 ];
+GMAT Mars_Report.Size = [ 0 0 ];
+GMAT Mars_Report.RelativeZOrder = 0;
+GMAT Mars_Report.Maximized = false;
+GMAT Mars_Report.Filename = 'GMAT_MarsLow_Mars_0_MarsGRAM2005_0_Defaults.report';
+GMAT Mars_Report.Precision = 17;
+GMAT Mars_Report.WriteHeaders = false;
+GMAT Mars_Report.LeftJustify = On;
+GMAT Mars_Report.ZeroFill = Off;
+GMAT Mars_Report.ColumnWidth = 25;
+GMAT Mars_Report.WriteReport = true;
+
+Create ReportFile Debug_FixedPositionDensity;
+GMAT Debug_FixedPositionDensity.SolverIterations = Current;
+GMAT Debug_FixedPositionDensity.UpperLeft = [ 0.1096491228070175 0.1388888888888889 ];
+GMAT Debug_FixedPositionDensity.Size = [ 0.5986842105263158 0.7986111111111112 ];
+GMAT Debug_FixedPositionDensity.RelativeZOrder = 17;
+GMAT Debug_FixedPositionDensity.Maximized = false;
+GMAT Debug_FixedPositionDensity.Filename = 'GMAT_Debug_FixedStateDensity_MarsLow_Mars_0_MarsGRAM2005_0_Defaults.txt';
+GMAT Debug_FixedPositionDensity.Precision = 17;
+GMAT Debug_FixedPositionDensity.WriteHeaders = true;
+GMAT Debug_FixedPositionDensity.LeftJustify = On;
+GMAT Debug_FixedPositionDensity.ZeroFill = Off;
+GMAT Debug_FixedPositionDensity.ColumnWidth = 25;
+GMAT Debug_FixedPositionDensity.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable OutputStepSize;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence;
+
+% Output Report file data for each propagation set in the FOR loop
+Propagate RKV89(MarsSC) {MarsSC.ElapsedSecs = 300};
