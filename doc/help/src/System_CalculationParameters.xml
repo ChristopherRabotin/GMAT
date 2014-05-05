@@ -2963,7 +2963,8 @@
 
               <entry>N</entry>
 
-              <entry><para>State transition matrix.</para><variablelist>
+              <entry><para>State transition matrix with respect to the
+              origin-independent MJ2000Eq axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -2976,7 +2977,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -2997,8 +2998,9 @@
 
               <entry>N</entry>
 
-              <entry><para>Upper-left quadrant of the state transition
-              matrix.</para><variablelist>
+              <entry><para>Upper-left quadrant of the state transition matrix,
+              with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3011,7 +3013,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3033,7 +3035,8 @@
               <entry>N</entry>
 
               <entry><para>Upper-right quadrant of the state transition
-              matrix.</para><variablelist>
+              matrix, with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3046,7 +3049,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3067,8 +3070,9 @@
 
               <entry>N</entry>
 
-              <entry><para>Lower-left quadrant of the state transition
-              matrix.</para><variablelist>
+              <entry><para>Lower-left quadrant of the state transition matrix,
+              with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3081,7 +3085,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3103,7 +3107,8 @@
               <entry>N</entry>
 
               <entry><para>Lower-right quadrant of the state transition
-              matrix.</para><variablelist>
+              matrix, with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3116,7 +3121,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
