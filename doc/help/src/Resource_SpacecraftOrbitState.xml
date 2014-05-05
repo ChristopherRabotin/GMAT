@@ -5265,6 +5265,13 @@ aSpacecraft.SMA = 20000      % conversion goes through Keplerian
 aSpacecraft.C3Energy = 3     % conversion goes through IncomingAsymptote
 aSpacecraft.OutgoingDHA = 90 % conversion goes through OutgoingAsymptote
 aSpacecraft.TA = 45          % conversion goes through Keplerian</programlisting>
+
+      <warning>
+        <para>When setting state parameters (especially in Keplerian-based
+        representations) using non-default dependencies, be careful of the
+        loss of precision caused by large translations in the intermediate
+        orbit.</para>
+      </warning>
     </refsection>
   </refsection>
 
