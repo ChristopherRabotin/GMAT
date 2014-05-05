@@ -86,7 +86,9 @@
     set to the value <literal>10000</literal> in that context. If the
     dependency is omitted when setting the value, the default is assumed to be
     the central body or coordinate system of the parent resource (in this
-    case, <guilabel>DefaultSC</guilabel>).<programlisting>DefaultSC.Mars.SMA = 10000</programlisting></para>
+    case, <guilabel>DefaultSC</guilabel>).</para>
+
+    <para><programlisting>DefaultSC.Mars.SMA = 10000</programlisting></para>
 
     <para>Attached-hardware parameters have no dependencies, but are
     themselves dependent on being attached to a

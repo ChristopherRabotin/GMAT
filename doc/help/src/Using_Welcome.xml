@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="WelcomeToGmat"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -201,7 +201,7 @@
     script engine and over 4000 test cases for the GUI interface.</para>
 
     <para>While the system is routinely built on Mac and Linux, we consider
-    the software to be in alpha form on those plaforms. For release R2013b, we
+    the software to be in alpha form on those plaforms. For release R2014a, we
     have only addressed issues on Mac and Linux that also occur on the Windows
     7 platform. Part of our planning effort for the next release will be to
     assess the future of GMAT on Mac and Linux.</para>
@@ -214,9 +214,9 @@
     Flight Center performs project management activities and is involved in
     most phases of the development process including requirements, algorithms,
     design, and testing. The Ground Software Systems Branch performs design,
-    implementation, and integration testing. Commecial particpants contribute
-    to design, implementation, testing and documentation. Commercial
-    participants for R2013b include:</para>
+    implementation, and integration testing. External particpants contribute
+    to design, implementation, testing and documentation. External
+    participants for R2014a include:</para>
 
     <itemizedlist>
       <listitem>
@@ -226,6 +226,22 @@
 
       <listitem>
         <para>a.i. solutions (testing)</para>
+      </listitem>
+      
+      <listitem>
+        <para>Korean Aerospace Research Institute</para>
+      </listitem>
+      
+      <listitem>
+        <para>Chonbuk National University, South Korea</para>
+      </listitem>
+      
+      <listitem>
+        <para>Korea Advanced Institute of Science and Technology</para>
+      </listitem>
+      
+      <listitem>
+        <para>Yonsei University, South Korea</para>
       </listitem>
     </itemizedlist>
 
