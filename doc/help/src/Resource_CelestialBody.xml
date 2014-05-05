@@ -526,7 +526,8 @@
           <row>
             <entry><guilabel>OrbitSpiceKernelName</guilabel></entry>
 
-            <entry><para> List of SPK kernels. </para> <variablelist>
+            <entry><para> List of SPK kernels. Providing emtpy brackets
+            unloads previously loaded kernels.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1368,9 +1369,8 @@ Vesta.RotationRate        = 1617.332776</code></programlisting>
         fields are used to assign colors to both orbital and perturbing
         trajectories. See the <xref linkend="CelestialBody_Resource_Fields"
         xrefstyle="select:title"/> section for description of these two
-        fields. Also see <xref linkend="Color"/> documentation for
-        discussion and examples on how to set colors on a celestial
-        body.</para>
+        fields. Also see <xref linkend="Color"/> documentation for discussion
+        and examples on how to set colors on a celestial body.</para>
       </refsection>
     </refsection>
   </refsection>

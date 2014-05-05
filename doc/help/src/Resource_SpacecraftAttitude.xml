@@ -604,7 +604,9 @@
 
             <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel>
             attitude. SPK atttitude kernels have extension ".BC". This field
-            cannot be set in the Mission Sequence.</para> <variablelist>
+            cannot be set in the Mission Sequence. An empty list unloads all
+            kernels of this type on the
+            <guilabel>Spacecraft</guilabel>.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2028,7 +2030,9 @@
 
             <entry><para>SPK Kernels for <guilabel>Spacecraft</guilabel> body
             frame. SPK Frame kernels have extension ".TF". This field cannot
-            be set in the Mission Sequence.</para> <variablelist>
+            be set in the Mission Sequence. An empty list unloads all kernels
+            of this type on the <guilabel>Spacecraft</guilabel>.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -3005,7 +3009,10 @@
 
             <entry><para>SPK Kernels for spacecraft clock. SPK clock kernels
             have extension ".TSC". This field cannot be set in the Mission
-            Sequence.</para> <variablelist>
+            Sequence. An empty list unloads all kernels of this type on the
+            <guilabel>Spacecraft</guilabel>. An empty list unloads all kernels
+            of this type on the <guilabel>Spacecraft</guilabel>.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
