@@ -208,29 +208,6 @@
   </section>
 
   <section>
-    <title>Development Status and Usage</title>
-
-    <para>R2013a is a major maintenance release with completely updated
-    documentation and greatly improved quality. GMAT is no longer Beta
-    software. Historically, solutions from GMAT have been verified in other
-    operational systems. However, with release R2013a, the GMAT team will
-    perform final operational certifications testing of the system be
-    completed in the summer of 2013. After completion of operational
-    certification, GMAT will be used for operational support of flight
-    projects.</para>
-
-    <para>GMAT has been used to optimize maneuvers for flight projects such as
-    NASA’s LCROSS and ARTEMIS missions, and the Lunar Reconnaissance Orbiter
-    (LRO). ARTEMIS and LRO flew trajectories optimized in GMAT and verified in
-    the operational ground system. GMAT has been used extensively for launch
-    window verification for OSIRIS-REx. The MMS project has used GMAT for
-    formation maneuver planning and Monte Carlo analysis. GMAT has been used
-    on numerous concept studies from Earth-Sun libration point missions, LEO
-    missions, lunar missions, and interplanetary missions to Venus, Mars,
-    Jupiter, and near-Earth and Trojan asteroids.</para>
-  </section>
-
-  <section>
     <title>Contributors</title>
 
     <para>The Navigation and Mission Design Branch at NASA’s Goddard Space
