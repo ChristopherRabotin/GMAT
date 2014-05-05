@@ -308,10 +308,6 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
           <listitem>
             <para>percent character (“<literal>%</literal>”) (hex: 25)</para>
           </listitem>
-
-          <listitem>
-            <para>semicolon (“<literal>;</literal>”) (hex: 3B)</para>
-          </listitem>
         </itemizedlist>
 
         <para>Quotes are generally optional, but are mandatory in

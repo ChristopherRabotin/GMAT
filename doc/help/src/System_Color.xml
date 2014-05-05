@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Setting_Colors"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Color" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -8,11 +7,19 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>SettingColors</primary>
+    <primary>Color</primary>
+  </indexterm>
+
+  <indexterm>
+    <primary>OrbitColor</primary>
+  </indexterm>
+
+  <indexterm>
+    <primary>TargetColor</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>SettingColors</refentrytitle>
+    <refentrytitle>Color</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -20,10 +27,9 @@
   </refmeta>
 
   <refnamediv>
-    <refname>Setting Colors</refname>
+    <refname>Color</refname>
 
-    <refpurpose>How to set colors on GMAT’s Resources and
-    Commands</refpurpose>
+    <refpurpose>Color support in GMAT resources and commands</refpurpose>
   </refnamediv>
 
   <refsection xml:id="SettingColors_Description">
@@ -560,22 +566,23 @@
     </informaltable>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="SpacecraftVisualizationProperties"/>, <xref linkend="CelestialBody"/>, <xref
-    linkend="LibrationPoint"/>, <xref linkend="Barycenter"/>, <xref
-    linkend="GroundStation"/>, <xref linkend="Propagate"/></para>
+    linkend="SpacecraftVisualizationProperties"/>, <xref
+    linkend="CelestialBody"/>, <xref linkend="LibrationPoint"/>, <xref
+    linkend="Barycenter"/>, <xref linkend="GroundStation"/>, <xref
+    linkend="Propagate"/></para>
   </refsection>
 
   <refsection xml:id="SettingColor_GUI">
     <title>GUI</title>
 
     <para>Setting colors on <guilabel>Spacecraft</guilabel>,
-    <guilabel>GroundStation</guilabel>,
-    <guilabel>CelestialBody</guilabel>, <guilabel>LibrationPoint</guilabel>
-    and <guilabel>Barycenter</guilabel> resources’
-    <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
-    fields via GMAT’s GUI mode is very easy. Since the procedure for setting
-    colors on these five resources is the same, hence only one GUI example is
-    given below using the <guilabel>Spacecraft</guilabel> resource:</para>
+    <guilabel>GroundStation</guilabel>, <guilabel>CelestialBody</guilabel>,
+    <guilabel>LibrationPoint</guilabel> and <guilabel>Barycenter</guilabel>
+    resources’ <guilabel>OrbitColor</guilabel> and
+    <guilabel>TargetColor</guilabel> fields via GMAT’s GUI mode is very easy.
+    Since the procedure for setting colors on these five resources is the
+    same, hence only one GUI example is given below using the
+    <guilabel>Spacecraft</guilabel> resource:</para>
 
     <para>After opening the <guilabel>Spacecraft</guilabel> resource, click on
     Visualization tab.</para>

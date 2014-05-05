@@ -55,7 +55,7 @@
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
     linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/>, <xref
-    linkend="Setting_Colors"/></para>
+    linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="Fields_Section">
