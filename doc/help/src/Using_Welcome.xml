@@ -17,8 +17,8 @@
   flight regimes ranging from low Earth orbit to lunar, libration point , and
   deep space missions. GMAT is developed by a team of NASA, private industry,
   public, and private contributors and is used for real-world engineering
-  studies, as a tool for education and public engagement, and starting in
-  Sept. 2013 to fly operational spacecraft.</para>
+  studies, as a tool for education and public engagement, and as of  R2013b released in Nov. 
+  2013, to fly operational spacecraft.</para>
 
   <section>
     <title>Features Overview</title>
@@ -197,7 +197,7 @@
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
-    perform nightly regression tests running almost 11,000 test cases for the
+    perform nightly regression tests running almost 12,000 test cases for the
     script engine and over 4000 test cases for the GUI interface.</para>
 
     <para>While the system is routinely built on Mac and Linux, we consider
