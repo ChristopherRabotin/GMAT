@@ -394,15 +394,17 @@ void OrbitData::SetReal(Integer item, Real rval)
    if (convertOriginBeforeSet)
    {
       Rvector6 cartStateInParamOrigin = GetCartStateInParameterOrigin(item, rval);
-      Rvector6 cartStateNew = cartStateInParamOrigin + mOrigin->GetMJ2000State(mCartEpoch);
+      Rvector6 cartStateInternal = cartStateInParamOrigin + mOrigin->GetMJ2000State(mCartEpoch);
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
-         ("   Setting %s to Spacecraft\n", cartStateNew.ToString().c_str());
+         ("   cartStateInParamOrigin = \n   %s\n", cartStateInParamOrigin.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   cartStateInternal = \n   %s\n", cartStateInternal.ToString().c_str());
       #endif
       
       // Need to set whole state in internal CS
-      mSpacecraft->SetState(cartStateNew);
+      mSpacecraft->SetState(cartStateInternal);
       
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage
@@ -1573,7 +1575,7 @@ Real OrbitData::GetOutAsymReal(Integer item)
          ("*** Error *** Cannot convert from Cartesian to OutgoingAsymptote because position vector is a zero vector.");
    
    Rvector6 outAsymState =
-      StateConversionUtil::Convert(state, "Cartesian", "IncomingAsymptote",
+      StateConversionUtil::Convert(state, "Cartesian", "OutgoingAsymptote",
                                    mGravConst, mFlattening, mEqRadius);
    
    #ifdef DEBUG_ORBITDATA_RUN
@@ -1589,6 +1591,9 @@ Real OrbitData::GetOutAsymReal(Integer item)
    case OUTASYM_DHA:
    case OUTASYM_BVAZI:
    {
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage("   element index = %d\n", item-InAsymCount);
+      #endif
       return outAsymState[item - InAsymCount];
    }
    
@@ -2240,6 +2245,13 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 {
+   #if 1
+   CoordinateSystem *inertialCS =
+      CoordinateSystem::CreateLocalCoordinateSystem("", "MJ2000Eq", origin, NULL, NULL,
+                                                    mInternalCS->GetOrigin(),
+                                                    mSolarSystem);
+   #endif
+   
    // get spacecraft state
    Rvector6 scState = GetCartState();
    
@@ -2302,6 +2314,8 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
       ("   cartStateInParamCS = \n   %s\n", cartStateInParamCS.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   paramCsOriginState = \n   %s\n", mOrigin->GetMJ2000State(mCartEpoch).ToString().c_str());
    #endif
    
    if (item >= CART_X && item <= CART_VZ)
@@ -2656,6 +2670,15 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
       cartStateInParamOrigin =
          StateConversionUtil::Convert(stateInParamOrigin, "ModifiedEquinoctial", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
+
+      // Try converting back to ModifiedEquinoctial
+      Rvector modEquinState =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "ModifiedEquinoctial",
+                                                          mGravConst, mFlattening, mEqRadius);
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage("   modEquinState = \n   %s\n", modEquinState.ToString().c_str());
+      #endif
+      
       break;
    }
    default:
