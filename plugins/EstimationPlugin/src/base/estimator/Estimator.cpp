@@ -121,7 +121,6 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    maxResidualMult		(1.0e180),										// made changes by TUAN NGUYEN
    constMult			(3.0),											// made changes by TUAN NGUYEN
    additiveConst        (0.0)											// made changes by TUAN NGUYEN
-   //reportFilename       ("")											// made changes by TUAN NGUYEN
 {
 
    objectTypeNames.push_back("Estimator");
@@ -130,6 +129,13 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
    estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
    estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
+
+   // Setting all bad records to be reuseable
+   reuseableTypes.push_back("OLSE");
+   reuseableTypes.push_back("OLSEInitialRMSSigma");
+   reuseableTypes.push_back("ResidualMax");
+   reuseableTypes.push_back("Timespan");
+   isReuseableTypesDefaultVal = true;
 
    esm.SetMeasurementManager(&measManager);
 }
@@ -192,7 +198,6 @@ Estimator::Estimator(const Estimator& est) :
    constMult			(est.constMult),					// made changes by TUAN NGUYEN
    additiveConst		(est.additiveConst),				// made changes by TUAN NGUYEN
    reuseableTypes       (est.reuseableTypes)				// made changes by TUAN NGUYEN
-   //reportFilename       (est.reportFilename)				// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -262,7 +267,6 @@ Estimator& Estimator::operator=(const Estimator& est)
 	  constMult            = est.constMult;					// made changes by TUAN NGUYEN
 	  additiveConst        = est.additiveConst;				// made changes by TUAN NGUYEN
 	  reuseableTypes       = est.reuseableTypes;			// made changes by TUAN NGUYEN
-	  //reportFilename       = est.reportFilename;
    }
 
    return *this;
@@ -721,11 +725,23 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == REUSEABLE_BAD_RECORD_TYPES)
    {
-	  if (index < reuseableTypes.size())
-		 reuseableTypes[index] = value;
-	  else
-		 reuseableTypes.push_back(value);
+      if ((value != "OLSE")&&(value != "OLSEInitialRMSSigma")&&
+		  (value != "ResidualMax"))
+		  return false;
 
+	  if (isReuseableTypesDefaultVal)
+	  {
+		 isReuseableTypesDefaultVal = false;
+		 reuseableTypes.clear();
+		 reuseableTypes.push_back(value);
+	  }
+	  else
+	  {
+	     if (index < reuseableTypes.size())
+		    reuseableTypes[index] = value;
+	     else
+		    reuseableTypes.push_back(value);
+	  }
 	  return true;
    }
 

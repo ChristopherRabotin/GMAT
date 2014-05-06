@@ -247,6 +247,8 @@ protected:
 
    /// Types of reuseable bad record
    StringArray reuseableTypes;
+   /// Flag to indicate resuseableTypes using default value
+   bool        isReuseableTypesDefaultVal;
 
    ///// Report file
    //std::string reportFilename;
