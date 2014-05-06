@@ -236,11 +236,8 @@ void BatchEstimatorInv::Accumulate()
       
          if (measManager.GetObsDataObject()->inUsed == false)
 		 {
-			if (isReUsed)
-			   measManager.GetObsDataObject()->inUsed = true;
-
 			// Write report for this observation data for case data record is removed
-	        sLine << currentObs->removedReason << "       ";
+	        sLine << currentObs->removedReason << "      ";
 	        if (currentObs->typeName == "DSNTwoWayRange")
 			   sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	        else if (currentObs->typeName == "DSNTwoWayDoppler")
@@ -262,6 +259,12 @@ void BatchEstimatorInv::Accumulate()
 		    for (int i = 0; i < stateMap->size(); ++i)
 			   sLine << "                      N/A";
 		    sLine << "\n";
+
+			if (isReUsed)
+			{
+			   measManager.GetObsDataObject()->inUsed = true;
+			   measManager.GetObsDataObject()->removedReason = "N";
+			}
 		 }
 		 else
          {
@@ -427,7 +430,7 @@ void BatchEstimatorInv::Accumulate()
 
 
 			   // Write report for this observation data for case data record is removed
-	           sLine << currentObs->removedReason << "       ";
+	           sLine << currentObs->removedReason << "      ";
 	           if (currentObs->typeName == "DSNTwoWayRange")
 			      sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	           else if (currentObs->typeName == "DSNTwoWayDoppler")
