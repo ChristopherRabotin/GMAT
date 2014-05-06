@@ -619,12 +619,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
       #endif
 
-//	  Real minAngle;
-//	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
-//         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
-//	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
-//         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
-
       if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
@@ -639,8 +633,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       {
          currentMeasurement.isFeasible = false;
          currentMeasurement.value[0] = 0.0;
-         currentMeasurement.eventCount = 0;
-		 
+         currentMeasurement.eventCount = 0;	 
       }
 
       #ifdef DEBUG_RANGE_CALC
@@ -656,7 +649,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
                p2Loc.ToString().c_str());
          MessageInterface::ShowMessage("   Range Vector:  %s\n",
                rangeVecInertial.ToString().c_str());
-         MessageInterface::ShowMessage("   R(Groundstation) dot RangeVec =  %lf\n",
+         MessageInterface::ShowMessage("   Elevation angle =  %lf degree\n",
                currentMeasurement.feasibilityValue);
          MessageInterface::ShowMessage("   Feasibility:  %s\n",
                (currentMeasurement.isFeasible ? "true" : "false"));
@@ -703,6 +696,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       r2 = downlinkLeg.GetPosition(participants[1]);										// position of spacecraft at transmit time t2T in central body MJ2000Eq coordinate system
 	  t3R = downlinkLeg.GetEventData((GmatBase*) participants[0]).epoch;					// reception time at station for downlink leg
 	  t2T = downlinkLeg.GetEventData((GmatBase*) participants[1]).epoch;                    // transmit time at spacecraft for downlink leg
+
+      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+	  MessageInterface::ShowMessage("Debug downlinkLeg <'%s',%p>: r1 = (%lf  %lf  %lf)\ n", downlinkLeg.GetName().c_str(), &downlinkLeg, r1[0], r1[1], r1[2]);
+	  MessageInterface::ShowMessage("                             r2 = (%lf  %lf  %lf)\ n", r2[0], r2[1], r2[2]);
+      #endif
 
 	  Rvector3 ssb2cb_t3R = cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R);		// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t3R
       Rvector3 ssb2cb_t2T = cb2->GetMJ2000Position(t2T) - ssb->GetMJ2000Position(t2T);		// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t2T
@@ -1179,7 +1177,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	        currentMeasurement.rangeModulo = rangeModulo;
 			currentMeasurement.isFeasible = false;
 			currentMeasurement.unfeasibleReason = "R";
-//			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 19
+//			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 18
 			
 			if ((errnum == 2)||(errnum =3))
 			   throw exp;
