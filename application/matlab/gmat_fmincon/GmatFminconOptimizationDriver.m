@@ -40,6 +40,7 @@
 % --- Declare global variables 
 global NonLinearEqCon JacNonLinearEqCon NonLinearIneqCon JacNonLinearIneqCon
 OpenGMAT
+GMAToptions = optimset(GMAToptions,'Algorithm','active-set');
 [X, fVal, exitFlag] = fmincon(@EvaluateGMATObjective, X0, [], [], [], [], Lower, Upper, ...
 @EvaluateGMATConstraints, GMAToptions) 
 % Apply the converged variables 
