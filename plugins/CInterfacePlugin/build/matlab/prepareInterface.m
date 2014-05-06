@@ -1,3 +1,10 @@
+% $Id$
+% GMAT: General Mission Analysis Tool.
+% 
+%  Copyright (c) 2002-2011 United States Government as represented by the
+%  Administrator of The National Aeronautics and Space Administration.
+%  All Other Rights Reserved.
+%
 disp('This script builds the GMAT interface prototypes by calling ');
 disp('loadlibrary. The prototype file is placed in');
 disp('trunk/application/matlab/libCInterface.');
