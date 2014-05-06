@@ -86,7 +86,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    estEpochFormat             ("FromParticipants"),
    estEpoch                   (""),
    oldResidualRMS             (0.0),
-   newResidualRMS             (1.0e12),
+   newResidualRMS             (0.0),
    useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
    converged                  (false),
@@ -126,7 +126,7 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    estEpochFormat             (est.estEpochFormat),
    estEpoch                   (est.estEpoch),
    oldResidualRMS             (0.0),
-   newResidualRMS             (1.0e12),
+   newResidualRMS             (0.0),
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
    converged                  (false),
@@ -160,7 +160,7 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       estEpochFormat = est.estEpochFormat;
       estEpoch       = est.estEpoch;
       oldResidualRMS = 0.0;
-      newResidualRMS = 1.0e12;
+      newResidualRMS = 0.0;
       useApriori     = est.useApriori;
 
       advanceToEstimationEpoch = false;
@@ -1069,29 +1069,25 @@ void BatchEstimator::CalculateData()
    esm.MapObjectsToSTM();
 
    // Tell the measurement manager to calculate the simulation data
-   measManager.CalculateMeasurements();
+//   measManager.CalculateMeasurements();
 
-   //if (measManager.CalculateMeasurements() == false)
-   //{
-   //   // No measurements were possible
-   //   bool endOfDataSet = measManager.AdvanceObservation();
-	  //if (endOfDataSet)										// made changes by TUAN NGUYEN
-		 //currentState = ESTIMATING;							// made changes by TUAN NGUYEN
-	  //else													// made changes by TUAN NGUYEN
-	  //{														// made changes by TUAN NGUYEN
-   //   nextMeasurementEpoch = measManager.GetEpoch();
-   //   FindTimeStep();
-
-   //   // if (currentEpoch < nextMeasurementEpoch)			// made changes by TUAN NGUYEN
-	  //if (currentEpoch <= nextMeasurementEpoch)
-   //      currentState = PROPAGATING;
-   //   else
-   //      currentState = ESTIMATING;
-	  //}														// made changes by TUAN NGUYEN
-   //}
-   //else 
-
-   if (measManager.GetEventCount() > 0)
+   if (measManager.CalculateMeasurements() == false)
+   {
+      // No measurements were possible
+      bool endOfDataSet = measManager.AdvanceObservation();
+      if (endOfDataSet)										// made changes by TUAN NGUYEN
+         currentState = ESTIMATING;							// made changes by TUAN NGUYEN
+	  else													// made changes by TUAN NGUYEN
+	  {														// made changes by TUAN NGUYEN
+         nextMeasurementEpoch = measManager.GetEpoch();
+         FindTimeStep();
+	     if (currentEpoch <= nextMeasurementEpoch)
+            currentState = PROPAGATING;
+         else
+            currentState = ESTIMATING;
+	  }														// made changes by TUAN NGUYEN
+   }
+   else if (measManager.GetEventCount() > 0)
    {
       currentState = LOCATING;
       locatingEvent = true;
