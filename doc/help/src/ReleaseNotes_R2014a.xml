@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="ReleaseNotesR2013b"
+<section version="5.0" xml:id="ReleaseNotesR2014a"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -68,7 +68,7 @@
       </informalfigure>
 
       <para>Additionally, colors can now be specified either by name
-      (<literal>'Blue'</literal>) or by hex RGB value (<literal>[0 0
+      (<literal>'Blue'</literal>) or by RGB value (<literal>[0 0
       255]</literal>).</para>
 
       <para>This release also adds participant labels in the graphics as well.
@@ -92,11 +92,13 @@ aView.EnableConstellations = off
 aView.ShowLabels = on
 
 BeginMissionSequence
-
-Propagate aProp(aSat) {aSat.ElapsedSecs = 900}                     % plots in blue
+% plots in blue
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900}                     
 aSat.OrbitColor = 'Green'
-Propagate aProp(aSat) {aSat.ElapsedSecs = 900}                     % plots in green
-Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}   % plots in red</code></programlisting>
+% plots in green
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900}             
+ % plots in red        
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}  </code></programlisting>
 
       <para>This example results in the following image:</para>
 
@@ -157,7 +159,7 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}   % plots in re
           </listitem>
         </itemizedlist></para>
 
-      <para>The new representations are available as new options in the
+      <para>The new representations are available as options in the
       <guilabel>Spacecraft</guilabel> "<guilabel>State Type</guilabel>" list,
       and as options to the
       <guilabel>Spacecraft</guilabel>.<guilabel>DisplayStateType</guilabel>
@@ -177,90 +179,197 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}   % plots in re
       <para>See the <link linkend="SpacecraftOrbitState">Spacecraft Orbit
       State</link> reference for more information.</para>
     </section>
+
+    <section>
+      <title>New Attitude Models</title>
+
+      <para>GMAT now supports three new kinematic attitude models, developed
+      with support by the Korean Aerospace Research Institute (KARI). The new
+      representations are:<itemizedlist spacing="compact">
+          <listitem>
+            <para>Precessing spinner</para>
+          </listitem>
+
+          <listitem>
+            <para>Nadir pointing</para>
+          </listitem>
+
+          <listitem>
+            <para>CCSDS Attitude Ephemeris Message (AEM)</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>The new representations are available as options in the
+      <guilabel>Spacecraft</guilabel> "<guilabel>Attitude</guilabel>" list,
+      and as options to the
+      <guilabel>Spacecraft</guilabel>.<guilabel>DisplayStateType</guilabel>
+      field.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2014a/AttitudeTypes.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+
+      <para>See the <link linkend="SpacecraftAttitude">Spacecraft
+      Attitude</link> reference for more information.</para>
+    </section>
+
+    <section>
+      <title>Dynamics and Model Improvements</title>
+
+      <para>GMAT now supports several new dynamics models and a new numerical
+      integrator.<itemizedlist spacing="compact">
+          <listitem>
+            <para>Prince Dormand 853 integrator. See the <link
+            linkend="Propagator">Propagator</link> reference for more
+            information.</para>
+          </listitem>
+
+          <listitem>
+            <para>Mars-GRAM density model. See the <link
+            linkend="Propagator">Propagator</link> reference for more
+            information.</para>
+          </listitem>
+
+          <listitem>
+            <para>High-fidelity, attitude dependent SRP dynamics model. See
+            the <link linkend="Propagator">Propagator</link> reference, and
+            the <link linkend="SpacecraftBallisticMass">Spacecraft Ballistic
+            and Mass Properties</link> reference for more information.</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Targeting and Optimization Improvements</title>
+
+      <para><itemizedlist spacing="compact">
+          <listitem>
+            <para>There are new boundary value solver options on
+            <guilabel>DifferentialCorrector</guilabel>
+            (<guilabel>Broyden</guilabel>, and
+            <guilabel>ModifiedBroyden</guilabel>). Brodyen’s method and
+            modified Broyden's method usually take more iterations but fewer
+            function evaluations than <guilabel>NewtonRaphson</guilabel> and
+            so are often faster. See the <link
+            linkend="DifferentialCorrector">Differential Corrector</link>
+            reference for more information.</para>
+          </listitem>
+
+          <listitem>
+            <para>There are new parameters that check for convergence of
+            solvers. See the <link linkend="CalculationParameters">Calculation
+            Parameters</link> reference for more information.</para>
+          </listitem>
+        </itemizedlist> Below is a script example that illustrates the new
+      algorithm and parameter options.<programlisting><code>Create Spacecraft aSat
+Create Propagator aPropagator
+
+Create ImpulsiveBurn aBurn
+Create DifferentialCorrector aDC
+%  This algorithm is often faster, as is ModifiedBroyden
+aDC.Algorithm = Broyden  
+
+Create OrbitView EarthView
+EarthView.Add = {Earth,aSat}
+EarthView.ViewScaleFactor = 5
+
+Create ReportFile aReport 
+
+BeginMissionSequence
+
+%  Report targeter status here
+Report aReport aDC.SolverStatus aDC.SolverState
+Target aDC
+    Vary aDC(aBurn.Element1 = 1.0, {Upper = 3, MaxStep = 0.4})
+    Maneuver aBurn(aSat)
+    Propagate aPropagator(aSat,{aSat.Apoapsis})
+    Achieve aDC(aSat.RMAG = 42164)
+EndTarget
+%  Report targeter status here
+Report aReport aDC.SolverStatus aDC.SolverState
+</code></programlisting></para>
+    </section>
   </section>
 
   <section>
     <title>Improvements</title>
 
     <section>
-      <title>Force Model Parameters</title>
+      <title>Dependencies in Assignment Command</title>
 
-      <para>You can now access <guilabel>ForceModel</guilabel>-dependent
-      parameters, such as <guilabel>Spacecraft</guilabel> acceleration and
-      atmospheric density. The new parameters are:<itemizedlist
-          spacing="compact">
-          <listitem>
-            <para><literal><replaceable>Spacecraft</replaceable>.<replaceable>ForceModel</replaceable>.Acceleration</literal></para>
-          </listitem>
+      <para>You can now define settable parameters by using a dependency on
+      the LHS of an assignment command:</para>
 
-          <listitem>
-            <para><literal><replaceable>Spacecraft</replaceable>.<replaceable>ForceModel</replaceable>.AccelerationX</literal></para>
-          </listitem>
-
-          <listitem>
-            <para><literal><replaceable>Spacecraft</replaceable>.<replaceable>ForceModel</replaceable>.AccelerationY</literal></para>
-          </listitem>
-
-          <listitem>
-            <para><literal><replaceable>Spacecraft</replaceable>.<replaceable>ForceModel</replaceable>.AccelerationZ</literal></para>
-          </listitem>
-
-          <listitem>
-            <para><literal><replaceable>Spacecraft</replaceable>.<replaceable>ForceModel</replaceable>.AtmosDensity</literal></para>
-          </listitem>
-        </itemizedlist></para>
-    </section>
-
-    <section>
-      <title>Space Point Parameters</title>
-
-      <para>All Resources that have coordinates in space now have Cartesian
-      position and velocity parameters, so you can access ephemeris
-      information. This includes all built-in solar system bodies and other
-      Resources such as
-      <guilabel>CelestialBody</guilabel>,<guilabel>Planet</guilabel>,
-      <guilabel>Moon</guilabel>, <guilabel>Asteroid</guilabel>,
-      <guilabel>Comet</guilabel>, <guilabel>Barycenter</guilabel>,
-      <guilabel>LibrationPoint</guilabel>, and
-      <guilabel>GroundStation</guilabel> :</para>
-
-      <itemizedlist spacing="compact">
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.X</literal></para>
-        </listitem>
-
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.Y</literal></para>
-        </listitem>
-
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.Z</literal></para>
-        </listitem>
-
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VX</literal></para>
-        </listitem>
-
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VY</literal></para>
-        </listitem>
-
-        <listitem>
-          <para><literal><replaceable>CelestialBody</replaceable>.<replaceable>CoordinateSystem</replaceable>.VZ</literal></para>
-        </listitem>
-      </itemizedlist>
-
-      <para>Note that to use these parameters, you must first set the epoch of
-      the Resource to the desired epoch at which you want the data. See the
-      following example:</para>
-
-      <programlisting><code>Create ReportFile rf
+      <programlisting><code>Create Spacecraft aSat
 
 BeginMissionSequence
 
-Luna.Epoch.A1ModJulian = 21545
-Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
-       Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></programlisting>
+aSat.EarthFixed.X = 7000
+aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
+    </section>
+
+    <section>
+      <title>Other Improvements</title>
+
+      <itemizedlist spacing="compact">
+        <listitem>
+          <para>You can now set true retrograde orbits when using the
+          Keplerian representation.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can now use the quaternion Rvector parameter on the right
+          hand side of an assignment command.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can now use a <guilabel>Spacecraft</guilabel> body fixed
+          coordinate system as the coordinate system for an
+          <guilabel>OrbitView</guilabel>.</para>
+        </listitem>
+
+        <listitem>
+          <para>The number of <guilabel>Spacecraft</guilabel> that that can be
+          displayed in <guilabel>OrbitView </guilabel>is no longer limited to
+          30.</para>
+        </listitem>
+
+        <listitem>
+          <para>The documentation for <guilabel>OrbitView</guilabel> has been
+          significantly expanded. See the <link linkend="OrbitView">Orbit
+          View</link> reference for details.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can now save an XY plot graphics window to an image
+          file.</para>
+        </listitem>
+
+        <listitem>
+          <para>The supported set of keyboard shortcuts has been greatly
+          expanded. See the <link linkend="KeyboardShortcuts">Keyboard
+          Shortcuts</link> reference for more information.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can now use many more common ASCII characters in GMAT
+          strings.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can now generate orbit state command summary reports using
+          coordinate systems that have any point type as the origin of the
+          selected coordinate system. Previously the origin had to be a
+          <guilabel>Celestial Body</guilabel>.</para>
+        </listitem>
+      </itemizedlist>
     </section>
   </section>
 
@@ -269,37 +378,26 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
 
     <itemizedlist>
       <listitem>
-        <para><literal><replaceable><replaceable>EphemerisFile</replaceable></replaceable>.InitialEpoch</literal>
-        now cannot be later than
-        <literal><replaceable>EphemerisFile</replaceable>.FinalEpoch</literal>.
-        See the <link linkend="EphemerisFile">EphemerisFile</link> reference
-        for details.</para>
-      </listitem>
-
-      <listitem>
-        <para>When
-        <literal><replaceable>EphemerisFile</replaceable>.FileFormat</literal>
-        is set to <literal>'SPK'</literal>,
-        <literal><replaceable>EphemerisFile</replaceable>.CoordinateSystem</literal>
-        must have <literal>MJ2000Eq</literal> as the axis system. Other axis
-        systems are no longer allowed with this ephemeris format. See the
-        <link linkend="EphemerisFile">EphemerisFile</link> reference for
+        <para>Color settings for <guilabel>Resources</guilabel> displayed in
+        graphics are now configured on the <guilabel>Resource</guilabel> and
+        via the <guilabel>Propagate</guilabel> command.
+        <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+        fields on graphics resources are no longer used.. See the <link
+        linkend="SpacecraftVisualizationProperties">Spacecraft
+        Visualization</link> reference, and <link
+        linkend="Propagate">Propagate</link> command reference for
         details.</para>
       </listitem>
 
       <listitem>
-        <para>The deprecated fields
-        <literal><replaceable>Thruster</replaceable>.Element{1–3}</literal>
-        have been removed. Use
-        <literal><replaceable>Thruster</replaceable>.ThrustDirection{1–3}</literal>
-        instead. See the <link linkend="Thruster">Thruster</link> reference
-        for details.</para>
+        <para>GMAT now looks in the working directory for scripts run via the
+        command line. See the <link linkend="CommandLine">Command line</link>
+        reference for details.</para>
       </listitem>
 
       <listitem>
-        <para>Tab characters in strings are now treated literally, instead of
-        being changed to spaces. See <link
-        xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3336">GMT-3336</link>
+        <para>AtmosDensity is now reported in units of kg/km^3. See the <link
+        linkend="CalculationParameters">Calculation Parameter</link> reference
         for details.</para>
       </listitem>
     </itemizedlist>
@@ -308,21 +406,21 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
   <section>
     <title>Known &amp; Fixed Issues</title>
 
-    <para>Over 50 bugs were closed in this release. See the <link
-    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11911">"Critical
-    Issues Fixed in R2013b" report</link> for a list of critical bugs and
-    resolutions in R2013b. See the <link
-    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11912">"Minor
-    Issues Fixed for R2013b" report</link> for minor issues addressed in
-    R2013b.</para>
+    <para>Over 123 bugs were closed in this release. See the <link
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12406">"Critical
+    Issues Fixed in R2014a" report</link> for a list of critical bugs and
+    resolutions in R2014a. See the <link
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12408">"Minor
+    Issues Fixed for R2014a" report</link> for minor issues addressed in
+    R2014a.</para>
 
     <section>
       <title>Known Issues</title>
 
       <para>All known issues that affect this version of GMAT can be seen in
       the <link
-      xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=11913">"Known
-      Issues in R2013b" report</link> in JIRA.</para>
+      xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12407">"Known
+      Issues in R2014a" report</link> in JIRA.</para>
 
       <para>There are several known issues in this release that we consider to
       be significant:<informaltable frame="topbot">
@@ -372,14 +470,6 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
 
               <row>
                 <entry><link
-                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-4097">GMT-4097</link></entry>
-
-                <entry>Ephemeris File is Not Chunking File At Some
-                Discontinuty Types</entry>
-              </row>
-
-              <row>
-                <entry><link
                 xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3350">GMT-3350</link></entry>
 
                 <entry>Single-quote requirements are not consistent across
@@ -420,10 +510,25 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
 
               <row>
                 <entry><link
-                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3745">GMT-3745</link></entry>
+                xlink:href="http://bugs.gmatcentral.org/browse/GMT-4520">GMT-4520</link></entry>
 
-                <entry>SPICE ephemeris stress tests are not writing out
-                ephemeris for the entire mission sequence</entry>
+                <entry>Unrelated script line in Optimize changes results
+                (causes crash)</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://bugs.gmatcentral.org/browse/GMT-4408">GMT-4408</link></entry>
+
+                <entry>Failed to load icon file and to open DE file</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://bugs.gmatcentral.org/browse/GMT-4398">GMT-4520</link></entry>
+
+                <entry>Coordinate System Fixed attitudes are held constant in
+                SPAD SRP model during a propagation step</entry>
               </row>
             </tbody>
           </tgroup>
