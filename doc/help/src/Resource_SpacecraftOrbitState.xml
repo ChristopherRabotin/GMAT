@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="SpacecraftOrbitState"
+<refentry version="5.0" xml:id="SpacecraftOrbitState" xml:lang="en_US"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -75,118 +75,6 @@
         </thead>
 
         <tbody>
-          <row>
-            <entry><guilabel>AOP</guilabel></entry>
-
-            <entry><para> The orbital argument of periapsis expressed in the
-            coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>-∞ &lt; <guilabel>AOP</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>314.1905515359921</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>deg.</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>AZI</guilabel></entry>
-
-            <entry><para> The orbital velocity azimuth expressed in the
-            coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>-∞ &lt; <guilabel>AZI</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>82.37742168155043</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>deg.</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
           <row>
             <entry><guilabel>AltEquinoctialP</guilabel></entry>
 
@@ -290,6 +178,118 @@
 
                   <listitem>
                     <para>(None)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AOP</guilabel></entry>
+
+            <entry><para> The orbital argument of periapsis expressed in the
+            coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>AOP</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>314.1905515359921</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AZI</guilabel></entry>
+
+            <entry><para> The orbital velocity azimuth expressed in the
+            coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>AZI</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>82.37742168155043</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg.</para>
                   </listitem>
                 </varlistentry>
 
@@ -646,62 +646,6 @@
           </row>
 
           <row>
-            <entry><guilabel>C3Energy</guilabel></entry>
-
-            <entry><para>C3 energy. <guilabel>C3Energy</guilabel> =
-            -mu/<guilabel>SMA</guilabel>.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>C3Energy</guilabel> ≤ -1e-7 or
-                    <guilabel>C3Energy</guilabel> ≥ 1e-7</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>-55.42322475310041</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km<superscript>2</superscript>/s<superscript>2</superscript></para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
             <entry><para>The coordinate system with respect to which the
@@ -879,175 +823,6 @@
           </row>
 
           <row>
-            <entry><guilabel>DelaunayG</guilabel></entry>
-
-            <entry><para>Delaunay "G" element, the magnitude of the orbital
-            angular momentum, expressed in the coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>0 ≤ <guilabel>DelaunayG</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>53525.52895581695</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km<superscript>2</superscript>/s</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DelaunayH</guilabel></entry>
-
-            <entry><para>Delaunay "H" element, the z-component of the orbital
-            angular momentum vector, expressed in the coordinate system chosen
-            in the <guilabel>CoordinateSystem</guilabel> field.</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>-∞ &lt; <guilabel>Delaunayl</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>52184.99999999999</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km<superscript>2</superscript>/s</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>DelaunayL</guilabel></entry>
-
-            <entry><para>Delaunay "L" element, related to the two-body orbital
-            energy, expressed in the coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>0 ≤ <guilabel>DelaunayL</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>53541.66590560955</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km<superscript>2</superscript>/s</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>Delaunayg</guilabel></entry>
 
             <entry><para>Delaunay "g" element, identical to
@@ -1091,6 +866,62 @@
 
                   <listitem>
                     <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DelaunayG</guilabel></entry>
+
+            <entry><para>Delaunay "G" element, the magnitude of the orbital
+            angular momentum, expressed in the coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0 ≤ <guilabel>DelaunayG</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>53525.52895581695</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km<superscript>2</superscript>/s</para>
                   </listitem>
                 </varlistentry>
 
@@ -1162,6 +993,63 @@
           </row>
 
           <row>
+            <entry><guilabel>DelaunayH</guilabel></entry>
+
+            <entry><para>Delaunay "H" element, the z-component of the orbital
+            angular momentum vector, expressed in the coordinate system chosen
+            in the <guilabel>CoordinateSystem</guilabel> field.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>Delaunayl</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>52184.99999999999</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km<superscript>2</superscript>/s</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Delaunayl</guilabel></entry>
 
             <entry><para>Delaunay "ℓ" element, identical to the mean anomaly,
@@ -1204,6 +1092,62 @@
 
                   <listitem>
                     <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DelaunayL</guilabel></entry>
+
+            <entry><para>Delaunay "L" element, related to the two-body orbital
+            energy, expressed in the coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0 ≤ <guilabel>DelaunayL</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>53541.66590560955</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km<superscript>2</superscript>/s</para>
                   </listitem>
                 </varlistentry>
 
@@ -1645,21 +1589,16 @@
           </row>
 
           <row>
-            <entry><guilabel>HyperbolicRadPer</guilabel></entry>
+            <entry><guilabel>Id</guilabel></entry>
 
-            <entry><para>The orbital radius of periapsis. The radius of
-            periapsis is the minimum distance (osculating) between the
-            spacecraft and celestial body at the origin of coordinate system.
-            <guilabel>HyperbolicRadPer</guilabel> differs from
-            <guilabel>RadPer</guilabel> only in that it is associated with the
-            <guilabel>IncomingAsymptote</guilabel> and
-            <guilabel>OutgoingAsymptote</guilabel> state representations.
+            <entry><para> The spacecraft Id used in tracking data files. This
+            field is only used for EstimationPlugin protype functionality.
             </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Real</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1667,8 +1606,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>abs(<guilabel>HyperbolicRadPer</guilabel>) ≥ 1
-                    meter.</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -1676,7 +1614,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set, get</para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -1684,7 +1622,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>7015.378524789846</para>
+                    <para>SatId</para>
                   </listitem>
                 </varlistentry>
 
@@ -1692,7 +1630,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>km</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1700,7 +1638,7 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>GUI, script</para>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -1757,62 +1695,6 @@
 
                   <listitem>
                     <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Id</guilabel></entry>
-
-            <entry><para> The spacecraft Id used in tracking data files. This
-            field is only used for EstimationPlugin protype functionality.
-            </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>SatId</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -1880,6 +1762,70 @@
           </row>
 
           <row>
+            <entry><para><guilabel>IncomingC3Energy</guilabel></para><para><guilabel>OutgoingC3Energy</guilabel></para></entry>
+
+            <entry><para>C3 energy. <guilabel>C3Energy</guilabel> =
+            -mu/<guilabel>SMA</guilabel>.
+            <guilabel>IncomingC3Energy</guilabel>/<guilabel>OutgoingC3Energy</guilabel>
+            differ only in that they are associated with the
+            <guilabel>IncomingAsymptote</guilabel> and
+            <guilabel>OutgoingAsymptote</guilabel> state representations,
+            respectively.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>IncomingC3Energy</guilabel> ≤ -1e-7 or
+                    <guilabel>IncomingC3Energy</guilabel> ≥ 1e-7</para>
+
+                    <para><guilabel>OutgoingC3Energy</guilabel> ≤ -1e-7 or
+                    <guilabel>OutgoingC3Energy</guilabel> ≥ 1e-7</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km<superscript>2</superscript>/s<superscript>2</superscript></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><para><guilabel>IncomingDHA</guilabel></para><para><guilabel>OutgoingDHA</guilabel></para></entry>
 
             <entry><para><guilabel>IncomingDHA</guilabel>/<guilabel>OutgoingDHA</guilabel>
@@ -1926,6 +1872,71 @@
 
                   <listitem>
                     <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><para><guilabel>IncomingRadPer</guilabel></para><para><guilabel>OutgoingRadPer</guilabel></para></entry>
+
+            <entry><para>The orbital radius of periapsis. The radius of
+            periapsis is the minimum distance (osculating) between the
+            spacecraft and celestial body at the origin of coordinate system.
+            <guilabel>IncomingRadPer</guilabel>/<guilabel>OutgoingRadPer</guilabel>
+            differ from <guilabel>RadPer</guilabel> only in that they are
+            associated with the <guilabel>IncomingAsymptote</guilabel> and
+            <guilabel>OutgoingAsymptote</guilabel> state representations,
+            respectively.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>abs(<guilabel>IncomingRadPer</guilabel>) ≥ 1
+                    meter.</para>
+
+                    <para>abs(<guilabel>OutgoingRadPer</guilabel>) ≥ 1
+                    meter.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Conversion from default Cartesian state</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km</para>
                   </listitem>
                 </varlistentry>
 
@@ -2872,118 +2883,6 @@
           </row>
 
           <row>
-            <entry><guilabel>RAV</guilabel></entry>
-
-            <entry><para> The right ascension of orbital velocity expressed in
-            the coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>-∞ &lt; <guilabel>RAV</guilabel> &lt; ∞</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set,get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>90</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>deg</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>RMAG</guilabel></entry>
-
-            <entry><para> The magnitude of the orbital position vector
-            expressed in the coordinate system chosen in the
-            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para><guilabel>RMAG</guilabel> ≥ 1e-10</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>7218.032973047435</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>km</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>RadApo</guilabel></entry>
 
             <entry><para>The orbital radius of apoapsis expressed in the
@@ -3102,10 +3001,10 @@
           </row>
 
           <row>
-            <entry><guilabel>SMA</guilabel></entry>
+            <entry><guilabel>RAV</guilabel></entry>
 
-            <entry><para> The orbital semi-major axis expressed in the
-            coordinate system chosen in the
+            <entry><para> The right ascension of orbital velocity expressed in
+            the coordinate system chosen in the
             <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -3119,10 +3018,63 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>SMA</guilabel> &lt; -0.001 m or
-                    <guilabel>SMA</guilabel> &gt; 0.001 meter. If
-                    <guilabel>SMA</guilabel> &lt; 0, then
-                    <guilabel>ECC</guilabel> must be &gt; 1</para>
+                    <para>-∞ &lt; <guilabel>RAV</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set,get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>90</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>RMAG</guilabel></entry>
+
+            <entry><para> The magnitude of the orbital position vector
+            expressed in the coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>RMAG</guilabel> ≥ 1e-10</para>
                   </listitem>
                 </varlistentry>
 
@@ -3138,7 +3090,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>7191.938817629013</para>
+                    <para>7218.032973047435</para>
                   </listitem>
                 </varlistentry>
 
@@ -3195,6 +3147,65 @@
 
                   <listitem>
                     <para>7187.60430675539</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SMA</guilabel></entry>
+
+            <entry><para> The orbital semi-major axis expressed in the
+            coordinate system chosen in the
+            <guilabel>CoordinateSystem</guilabel> field. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>SMA</guilabel> &lt; -0.001 m or
+                    <guilabel>SMA</guilabel> &gt; 0.001 meter. If
+                    <guilabel>SMA</guilabel> &lt; 0, then
+                    <guilabel>ECC</guilabel> must be &gt; 1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>7191.938817629013</para>
                   </listitem>
                 </varlistentry>
 
@@ -4885,23 +4896,29 @@
 
           <tbody>
             <row>
-              <entry><guilabel>HyperbolicRadPer</guilabel></entry>
+              <entry><para><guilabel>IncomingRadPer</guilabel></para><para><guilabel>OutgoingRadPer</guilabel></para></entry>
 
               <entry><para>The orbital radius of periapsis. The radius of
               periapsis is the minimum distance (osculating) between the
               spacecraft and celestial body at the origin of coordinate
-              system. <guilabel>HyperbolicRadPer</guilabel> differs from
-              <guilabel>RadPer</guilabel> only in that it is associated with
-              the <guilabel>IncomingAsymptote</guilabel> and
-              <guilabel>OutgoingAsymptote</guilabel> state representations.
-              </para></entry>
+              system.
+              <guilabel>IncomingRadPer</guilabel>/<guilabel>OutgoingRadPer</guilabel>
+              differ from <guilabel>RadPer</guilabel> only in that they are
+              associated with the <guilabel>IncomingAsymptote</guilabel> and
+              <guilabel>OutgoingAsymptote</guilabel> state representations,
+              respectively. </para></entry>
             </row>
 
             <row>
-              <entry><guilabel>C3Energy</guilabel></entry>
+              <entry><para><guilabel>IncomingC3Energy</guilabel></para><para><guilabel>OutgoingC3Energy</guilabel></para></entry>
 
               <entry><para> C3 energy. <guilabel>C3Energy</guilabel> =
-              -mu/<guilabel>SMA</guilabel>.</para></entry>
+              -mu/<guilabel>SMA</guilabel>.
+              <guilabel>IncomingC3Energy</guilabel>/<guilabel>OutgoingC3Energy</guilabel>
+              differ only in that they are associated with the
+              <guilabel>IncomingAsymptote</guilabel> and
+              <guilabel>OutgoingAsymptote</guilabel> state representations,
+              respectively.</para></entry>
             </row>
 
             <row>
@@ -4962,13 +4979,15 @@
 
           <tbody>
             <row>
-              <entry><guilabel>C3Energy = 0</guilabel></entry>
+              <entry><guilabel>IncomingC3Energy/OutgoingC3Energy =
+              0</guilabel></entry>
 
-              <entry><para>If <guilabel>C3Energy</guilabel> = 0 the spacecraft
-              has a parabolic orbit. Hyperbolic asymptote states do not
-              support parabolic orbits. It must be avoided that -1E-7 ≤
-              <guilabel>C3Energy</guilabel> ≤ 1E-7 by choosing a proper set of
-              elements. </para></entry>
+              <entry><para>If
+              <guilabel>IncomingC3Energy</guilabel>/<guilabel>OutgoingC3Energy</guilabel>
+              = 0 the spacecraft has a parabolic orbit. Hyperbolic asymptote
+              states do not support parabolic orbits. It must be avoided that
+              -1E-7 ≤ <guilabel>IncomingC3Energy/OutgoingC3Energy</guilabel> ≤
+              1E-7 by choosing a proper set of elements. </para></entry>
             </row>
 
             <row>
@@ -5156,14 +5175,6 @@ VZ =  0.99953       </code>      </programlisting>
             </row>
 
             <row>
-              <entry>C3Energy</entry>
-
-              <entry>IncomingAsymptote, OutgoingAsymptote</entry>
-
-              <entry>IncomingAsymptote</entry>
-            </row>
-
-            <row>
               <entry>DEC</entry>
 
               <entry>SphericalAZFPA, SphericalRADEC</entry>
@@ -5185,14 +5196,6 @@ VZ =  0.99953       </code>      </programlisting>
               <entry>AlternateEquinoctial, Equinoctial</entry>
 
               <entry>Equinoctial</entry>
-            </row>
-
-            <row>
-              <entry>HyperbolicRadPer</entry>
-
-              <entry>IncomingAsymptote, OutgoingAsymptote</entry>
-
-              <entry>IncomingAsymptote</entry>
             </row>
 
             <row>
@@ -5262,7 +5265,7 @@ VZ =  0.99953       </code>      </programlisting>
 
       <programlisting>BeginMissionSequence
 aSpacecraft.SMA = 20000      % conversion goes through Keplerian
-aSpacecraft.C3Energy = 3     % conversion goes through IncomingAsymptote
+aSpacecraft.RA = 30          % conversion goes through SphericalAZFPA
 aSpacecraft.OutgoingDHA = 90 % conversion goes through OutgoingAsymptote
 aSpacecraft.TA = 45          % conversion goes through Keplerian</programlisting>
 
