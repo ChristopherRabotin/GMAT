@@ -7878,7 +7878,9 @@ void Moderator::CreateDefaultParameters()
    
    // IncomingAsymptote parameters by YK
    // Added HyperbolicRadPer (LOJ: 2014.04.28)
-   CreateParameter("HyperbolicRadPer", "DefaultSC.Earth.HyperbolicRadPer");
+   // Changed HyperbolicRadPer to IncomingRadPer and added IncomingC3Energy (LOJ: 2014.05.08)
+   CreateParameter("IncomingRadPer", "DefaultSC.Earth.IncomingRadPer");
+   CreateParameter("IncomingC3Energy", "DefaultSC.Earth.IncomingC3Energy");
    CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
    CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
    CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");
@@ -7887,6 +7889,9 @@ void Moderator::CreateDefaultParameters()
    #endif
    
    // OutgoingAsymptote parameters by YK
+   // Added OutgoingRadPer and OutgoingC3Energy (LOJ: 2014.05.08)
+   CreateParameter("OutgoingRadPer", "DefaultSC.Earth.OutgoingRadPer");
+   CreateParameter("OutgoingC3Energy", "DefaultSC.Earth.OutgoingC3Energy");
    CreateParameter("OutgoingRHA", "DefaultSC.EarthMJ2000Eq.OutgoingRHA");
    CreateParameter("OutgoingDHA", "DefaultSC.EarthMJ2000Eq.OutgoingDHA");
    CreateParameter("OutgoingBVAZI", "DefaultSC.EarthMJ2000Eq.OutgoingBVAZI");

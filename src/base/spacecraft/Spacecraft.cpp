@@ -263,12 +263,15 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "PlanetodeticVMAG",
    "PlanetodeticAZI",
    "PlanetodeticHFPA",
-   // Hyperbolic Asymptotes by YK
-   "HyperbolicRadPer",
-   "C3Energy",
+   // Hyperbolic Incoming Asymptotes by YK
+   "IncomingRadPer",
+   "IncomingC3Energy",
    "IncomingRHA",
    "IncomingDHA",
    "IncomingBVAZI",
+   // Hyperbolic Outgoing Asymptotes
+   "OutgoingRadPer",
+   "OutgoingC3Energy",
    "OutgoingRHA",
    "OutgoingDHA",
    "OutgoingBVAZI",
@@ -2151,14 +2154,15 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       // Added SemilatusRectum (LOJ:2014.04.25)
       Integer retval = -1;
       if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "HyperbolicRadPer" || str == "RMAG" || str == "SemilatusRectum" || str == "Delaunayl" ||
+          str == "IncomingRadPer" || str == "OutgoingRadPer" || str == "RMAG" ||
+          str == "SemilatusRectum" || str == "Delaunayl" ||
           str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
          retval =  ELEMENT1_ID;
       
       else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
                str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
-               str == "Delaunayg" || str == "PlanetodeticLON" || str == "C3Energy" ||
-               str == "BrouwerShortECC" || str == "BrouwerLongECC")
+               str == "Delaunayg" || str == "PlanetodeticLON" || str == "IncomingC3Energy" ||
+               str == "OutgoingC3Energy" || str == "BrouwerShortECC" || str == "BrouwerLongECC")
          retval =  ELEMENT2_ID;
 
       else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
@@ -6173,8 +6177,8 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
    // mod by YK
    if (displayStateType == "IncomingAsymptote")
    {
-      stateElementLabel[0] = "HyperbolicRadPer";
-      stateElementLabel[1] = "C3Energy";
+      stateElementLabel[0] = "IncomingRadPer";
+      stateElementLabel[1] = "IncomingC3Energy";
       stateElementLabel[2] = "IncomingRHA";
       stateElementLabel[3] = "IncomingDHA";
       stateElementLabel[4] = "IncomingBVAZI";
@@ -6192,8 +6196,8 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
    
    if (displayStateType == "OutgoingAsymptote")
    {
-      stateElementLabel[0] = "HyperbolicRadPer";
-      stateElementLabel[1] = "C3Energy";
+      stateElementLabel[0] = "OutgoingRadPer";
+      stateElementLabel[1] = "OutgoingC3Energy";
       stateElementLabel[2] = "OutgoingRHA";
       stateElementLabel[3] = "OutgoingDHA";
       stateElementLabel[4] = "OutgoingBVAZI";
@@ -6611,15 +6615,16 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          //    #endif
          //    // leave it as OutgoingAsymptote
          // }
-         else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
-                   (label == "C3Energy") )
-         {
-            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-               MessageInterface::ShowMessage
-                  (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-            #endif
-            // leave it as IncomingAsymptote
-         }
+         // C3Energy is no longer shared with IncomingAsymptote or OutgoingAsymtote
+         // else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
+         //           (label == "C3Energy") )
+         // {
+         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+         //       MessageInterface::ShowMessage
+         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
+         //    #endif
+         //    // leave it as IncomingAsymptote
+         // }
          else
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
@@ -6802,16 +6807,16 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
    
    //@todo Can we use multimap to find out the element id? (LOJ: 2014.04.28)
    // Modified by M.H. and YK
-   if (label == "X" || label == "SMA" || label == "RadPer" || label == "HyperbolicRadPer" ||
-       label == "RMAG" || label == "SemilatusRectum" || label == "Delaunayl" ||
-       label == "PlanetodeticRMAG" || label == "BrouwerShortSMA"  ||
+   if (label == "X" || label == "SMA" || label == "RadPer" || label == "IncomingRadPer" ||
+       label == "OutgoingRadPer" || label == "RMAG" || label == "SemilatusRectum" ||
+       label == "Delaunayl" || label == "PlanetodeticRMAG" || label == "BrouwerShortSMA"  ||
        label == "BrouwerLongSMA")
       retval = ELEMENT1_ID;
    
    else if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA" ||
             label == "PEY" || label == "EquinoctialH" || label == "ModEquinoctialF" ||
-            label == "Delaunayg" || label == "PlanetodeticLON" || label == "C3Energy" ||
-            label == "BrouwerShortECC" || label == "BrouwerLongECC" )
+            label == "Delaunayg" || label == "PlanetodeticLON" || label == "IncomingC3Energy" ||
+            label == "OutgoingC3Energy" || label == "BrouwerShortECC" || label == "BrouwerLongECC" )
       retval = ELEMENT2_ID;
 
    else if (label == "Z" || label == "INC" || label == "DEC" || label == "PEX" ||
@@ -6923,15 +6928,17 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
       elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
       
-      elementLabelMap["HyperbolicRadPer"] = "IncomingAsymptote";
-      elementLabelMap["C3Energy"]         = "IncomingAsymptote";
+      elementLabelMap["IncomingRadPer"]   = "IncomingAsymptote";
+      elementLabelMap["IncomingC3Energy"] = "IncomingAsymptote";
       elementLabelMap["IncomingRHA"]      = "IncomingAsymptote";
       elementLabelMap["IncomingDHA"]      = "IncomingAsymptote";
       elementLabelMap["IncomingBVAZI"]    = "IncomingAsymptote";
       
-      elementLabelMap["OutgoingRHA"]   = "OutgoingAsymptote";
-      elementLabelMap["OutgoingDHA"]   = "OutgoingAsymptote";
-      elementLabelMap["OutgoingBVAZI"] = "OutgoingAsymptote";
+      elementLabelMap["OutgoingRadPer"]   = "OutgoingAsymptote";
+      elementLabelMap["OutgoingC3Energy"] = "OutgoingAsymptote";
+      elementLabelMap["OutgoingRHA"]      = "OutgoingAsymptote";
+      elementLabelMap["OutgoingDHA"]      = "OutgoingAsymptote";
+      elementLabelMap["OutgoingBVAZI"]    = "OutgoingAsymptote";
       
       elementLabelMap["BrouwerShortSMA"]  = "BrouwerMeanShort";
       elementLabelMap["BrouwerShortECC"]  = "BrouwerMeanShort";
@@ -7405,21 +7412,22 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    // }
    // 4) HyperbolicRadPer could be IncomingAsymptote, or OutgoingAsymptote
-   else if ((label == "HyperbolicRadPer"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
+   // HyperbolicRadPer is no longer used. (LOJ: 2014.05.08)
+   // else if ((label == "HyperbolicRadPer"))
+   // {
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   // }
    // 5) It could be Keplerian, ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
    else if ((label == "TA"))
    {
@@ -7435,21 +7443,22 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
    }
    // 6) It could be IncomingAsymptote or OutgoingAsymptote (mod by YK)
-   else if ((label == "C3Energy"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
+   // C3Energy is no longer shared with IncomingAsymptote and OutgoingAsymptote
+   // else if ((label == "C3Energy"))
+   // {
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
+   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
+   // }
    // 7) It could be Equinoctial or AlternateEquinoctial
    else if ((label == "EquinoctialH") || (label == "EquinoctialK") || (label == "MLONG"))
    {
@@ -7946,8 +7955,8 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    //-----------------------------------
    // IncomingAsymptote
    //-----------------------------------
-   elementLabels[0] = "HyperbolicRadPer";
-   elementLabels[1] = "C3Energy";
+   elementLabels[0] = "IncomingRadPer";
+   elementLabels[1] = "IncomingC3Energy";
    elementLabels[2] = "IncomingRHA";
    elementLabels[3] = "IncomingDHA";
    elementLabels[4] = "IncomingBVAZI";
@@ -7963,8 +7972,8 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    stateElementLabelsMap["IncomingAsymptote"] = elementLabels;
    stateElementUnitsMap["IncomingAsymptote"] = elementUnits;
    
-   allElementLabelsMultiMap.insert(std::make_pair("HyperbolicRadPer", "IncomingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",         "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("IncomingRadPer",   "IncomingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("IncomingC3Energy", "IncomingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("IncomingRHA",      "IncomingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("IncomingDHA",      "IncomingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("IncomingBVAZI",    "IncomingAsymptote"));
@@ -7973,8 +7982,8 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    //-----------------------------------
    // OutgoingAsymptote
    //-----------------------------------
-   elementLabels[0] = "HyperbolicRadPer";
-   elementLabels[1] = "C3Energy";
+   elementLabels[0] = "OutgoingRadPer";
+   elementLabels[1] = "OutgoingC3Energy";
    elementLabels[2] = "OutgoingRHA";
    elementLabels[3] = "OutgoingDHA";
    elementLabels[4] = "OutgoingBVAZI";
@@ -7990,8 +7999,8 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    stateElementLabelsMap["OutgoingAsymptote"] = elementLabels;
    stateElementUnitsMap["OutgoingAsymptote"] = elementUnits;
    
-   allElementLabelsMultiMap.insert(std::make_pair("HyperbolicRadPer", "OutgoingAsymptote"));
-   allElementLabelsMultiMap.insert(std::make_pair("C3Energy",         "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("OutgoingRadPer",   "OutgoingAsymptote"));
+   allElementLabelsMultiMap.insert(std::make_pair("OutgoingC3Energy", "OutgoingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("OutgoingRHA",      "OutgoingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("OutgoingDHA",      "OutgoingAsymptote"));
    allElementLabelsMultiMap.insert(std::make_pair("OutgoingBVAZI",    "OutgoingAsymptote"));

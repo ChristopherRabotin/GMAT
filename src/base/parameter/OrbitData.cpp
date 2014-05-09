@@ -270,15 +270,6 @@ void OrbitData::SetReal(Integer item, Real rval)
             pe.SetDetails("The Parameter %s is not settable)", mActualParamName.c_str());
             throw pe;
          }
-         #if 0
-         ParameterException pe;
-         pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
-                       "requires values to be in the '%s' origin (setting "
-                       "values in different origin will be implemented in "
-                       "future builds)",  mActualParamName.c_str(),
-                       mSpacecraft->GetName().c_str(), paramOwnerCS->GetOriginName().c_str());
-         throw pe;
-         #endif
       }
    }
    
@@ -369,17 +360,6 @@ void OrbitData::SetReal(Integer item, Real rval)
             pe.SetDetails("The Parameter %s is not settable", mActualParamName.c_str());
             throw pe;
          }
-         
-         // Old code should be removed
-         #if 0
-         ParameterException pe;
-         pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
-                       "requires values to be in the '%s' coordinate system (setting "
-                       "values in different coordinate systems will be implemented in "
-                       "future builds)",  mActualParamName.c_str(),
-                       mSpacecraft->GetName().c_str(), paramOwnerCS->GetName().c_str());
-         throw pe;
-         #endif
       }
    }
    
@@ -1530,11 +1510,11 @@ Real OrbitData::GetIncAsymReal(Integer item)
    switch (item)
    {
    case INCASYM_RADPER:
-   case INCASYM_C3:
-   case INCASYM_TA:
+   case INCASYM_C3_ENERGY:
    case INCASYM_RHA:
    case INCASYM_DHA:
    case INCASYM_BVAZI:   
+   case INCASYM_TA:
    {
       return incAsymState[item - PlanetoCount];
    }
@@ -1585,11 +1565,11 @@ Real OrbitData::GetOutAsymReal(Integer item)
    switch (item)
    {
    case OUTASYM_RADPER:
-   case OUTASYM_C3:
-   case OUTASYM_TA:
+   case OUTASYM_C3_ENERGY:
    case OUTASYM_RHA:
    case OUTASYM_DHA:
    case OUTASYM_BVAZI:
+   case OUTASYM_TA:
    {
       #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage("   element index = %d\n", item-InAsymCount);
@@ -2245,12 +2225,10 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 {
-   #if 1
    CoordinateSystem *inertialCS =
       CoordinateSystem::CreateLocalCoordinateSystem("", "MJ2000Eq", origin, NULL, NULL,
                                                     mInternalCS->GetOrigin(),
                                                     mSolarSystem);
-   #endif
    
    // get spacecraft state
    Rvector6 scState = GetCartState();
@@ -2293,23 +2271,10 @@ Rvector6 OrbitData::GetCartStateInParameterCS(Integer item, Real rval)
        mActualParamName.c_str(), item, rval);
    #endif
    
+   // GetCartState() returns state in Parameter CS, so no conversion is needed
    Rvector6 cartStateInParamCS = GetCartState();
    Rvector6 stateInParamCS;
    Real currEpoch = mSpacePoint->GetEpoch();
-   
-   // Fix for GMT-4438 (LOJ: 2014.03.21)
-   // GetCartState() returns state in Parameter CS, so no conversion is needed
-   #if 0
-   #ifdef DEBUG_ORBITDATA_SET
-   MessageInterface::ShowMessage
-      ("   Setting new value %f to Parameter that has different CS than Parameter Owner CS\n"
-       "   cartState = \n   %s\n", rval, cartState.ToString().c_str());
-   #endif
-   // Convert to parameterCS
-   mCoordConverter.Convert(A1Mjd(currEpoch), cartState, mInternalCS,
-                           cartStateInParamCS, mParameterCS, false);
-   #endif
-   
    
    #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
@@ -2609,10 +2574,62 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
       stateInParamOrigin =
          StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
                                       mGravConst, mFlattening, mEqRadius);
-      // IncomingAsymptote elements: HyperbolicRadPer, C3Energy, IncRHA, IncDHA, IncBVAZI, TA
+      // IncomingAsymptote elements:
+      // IncomingRadPer, IncomingC3Energy, IncRHA, IncDHA, IncBVAZI, TA
       stateInParamOrigin[0] = rval;
       cartStateInParamOrigin =
          StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case OUTASYM_RADPER:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for items: OUTASYM_RADPER\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "OutgoingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // OutgoingAsymptote elements:
+      // OutgoingRadPer, OutgoingC3Energy, IncRHA, IncDHA, IncBVAZI, TA
+      stateInParamOrigin[0] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "OutgoingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case INCASYM_C3_ENERGY:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to IncomingAsymptote for item: INCASYM_C3_ENERGY\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // IncomingAsymptote state elements:
+      // IncomingRadPer, IncomingC3Energy, IncomingRHA, IncomingDHA, IncomingBVAZI, TA 
+      stateInParamOrigin[1] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
+                                      mGravConst, mFlattening, mEqRadius);
+      break;
+   }
+   case OUTASYM_C3_ENERGY:
+   {
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("   Converting to OutgoingAsymptote for item: OUTASYM_C3_ENERGY\n");
+      #endif
+      stateInParamOrigin =
+         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "OutgoingAsymptote",
+                                      mGravConst, mFlattening, mEqRadius);
+      // OutgoingAsymptote state elements:
+      // OutgoingRadPer, OutgoingC3Energy, OutgoingRHA, OutgoingDHA, OutgoingBVAZI, TA 
+      stateInParamOrigin[1] = rval;
+      cartStateInParamOrigin =
+         StateConversionUtil::Convert(stateInParamOrigin, "OutgoingAsymptote", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       break;
    }
@@ -2629,25 +2646,6 @@ Rvector6 OrbitData::GetCartStateInParameterOrigin(Integer item, Real rval)
       stateInParamOrigin[0] = rval;
       cartStateInParamOrigin =
          StateConversionUtil::Convert(stateInParamOrigin, "SphericalRADEC", "Cartesian",
-                                      mGravConst, mFlattening, mEqRadius);
-      break;
-   }
-   case C3_ENERGY:
-   {
-      #ifdef DEBUG_ORBITDATA_SET
-      MessageInterface::ShowMessage
-         ("   Converting to IncomingAsymptote for item: C3_ENERGY\n");
-      #endif
-      stateInParamOrigin =
-         StateConversionUtil::Convert(cartStateInParamOrigin, "Cartesian", "IncomingAsymptote",
-                                      mGravConst, mFlattening, mEqRadius);
-      // IncomingAsymptote state elements:
-      // RadPer, C3Energy, IncomingRHA, IncomingDHA, IncomingBVAZI, TA 
-      // OutgoingAsymptote state elements:
-      // RadPer, C3Energy, OutgoingRHA, OutgoingDHA, OutgoingBVAZI, TA 
-      stateInParamOrigin[1] = rval;
-      cartStateInParamOrigin =
-         StateConversionUtil::Convert(stateInParamOrigin, "IncomingAsymptote", "Cartesian",
                                       mGravConst, mFlattening, mEqRadius);
       break;
    }
@@ -2721,119 +2719,119 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
    {
    // Cartesian
    case CART_X:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("X"), rval);
+      mSpacecraft->SetRealParameter("X", rval);
       break;
    case CART_Y:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Y"), rval);
+      mSpacecraft->SetRealParameter("Y", rval);
       break;
    case CART_Z:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Z"), rval);
+      mSpacecraft->SetRealParameter("Z", rval);
       break;
    case CART_VX:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VX"), rval);
+      mSpacecraft->SetRealParameter("VX", rval);
       break;
    case CART_VY:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VY"), rval);
+      mSpacecraft->SetRealParameter("VY", rval);
       break;
    case CART_VZ:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VZ"), rval);
+      mSpacecraft->SetRealParameter("VZ", rval);
       break;
       
    // Keplerian
    case KEP_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMA"), rval);
+      mSpacecraft->SetRealParameter("SMA", rval);
       break;
    case KEP_ECC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECC"), rval);
+      mSpacecraft->SetRealParameter("ECC", rval);
       break;
    case KEP_INC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INC"), rval);
+      mSpacecraft->SetRealParameter("INC", rval);
       break;
    case KEP_RAAN:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAAN"), rval);
+      mSpacecraft->SetRealParameter("RAAN", rval);
       break;
    case KEP_AOP:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOP"), rval);
+      mSpacecraft->SetRealParameter("AOP", rval);
       break;
    case KEP_TA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TA"), rval);
+      mSpacecraft->SetRealParameter("TA", rval);
       break;
    case KEP_MA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MA"), rval);
+      mSpacecraft->SetRealParameter("MA", rval);
       break;
    case KEP_EA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EA"), rval);
+      mSpacecraft->SetRealParameter("EA", rval);
       break;
    case KEP_HA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HA"), rval);
+      mSpacecraft->SetRealParameter("HA", rval);
       break;
 
    // ModifiedKeplerian
    case MODKEP_RADAPO:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadApo"), rval);
+      mSpacecraft->SetRealParameter("RadApo", rval);
       break;
    case MODKEP_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
+      mSpacecraft->SetRealParameter("RadPer", rval);
       break;
 
    // Spherical RADEC
    case RADEC_RMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RMAG"), rval);
+      mSpacecraft->SetRealParameter("RMAG", rval);
       break;
    case RADEC_RA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RA"), rval);
+      mSpacecraft->SetRealParameter("RA", rval);
       break;
    case RADEC_DEC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DEC"), rval);
+      mSpacecraft->SetRealParameter("DEC", rval);
       break;
    case RADEC_VMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VMAG"), rval);
+      mSpacecraft->SetRealParameter("VMAG", rval);
       break;
    case RADEC_RAV:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAV"), rval);
+      mSpacecraft->SetRealParameter("RAV", rval);
       break;
    case RADEC_DECV:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DECV"), rval);
+      mSpacecraft->SetRealParameter("DECV", rval);
       break;
    
    // Spherical AZFPA
    case AZIFPA_RMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RMAG"), rval);
+      mSpacecraft->SetRealParameter("RMAG", rval);
       break;
    case AZIFPA_RA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RA"), rval);
+      mSpacecraft->SetRealParameter("RA", rval);
       break;
    case AZIFPA_DEC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DEC"), rval);
+      mSpacecraft->SetRealParameter("DEC", rval);
       break;
    case AZIFPA_VMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VMAG"), rval);
+      mSpacecraft->SetRealParameter("VMAG", rval);
       break;
    case AZIFPA_AZI:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AZI"), rval);
+      mSpacecraft->SetRealParameter("AZI", rval);
       break;
    case AZIFPA_FPA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("FPA"), rval);
+      mSpacecraft->SetRealParameter("FPA", rval);
       break;
 
    // Equinoctial
    case EQ_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMA"), rval);
+      mSpacecraft->SetRealParameter("SMA", rval);
       break;
    case EQ_H:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialH"), rval);
+      mSpacecraft->SetRealParameter("EquinoctialH", rval);
       break;
    case EQ_K:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialK"), rval);
+      mSpacecraft->SetRealParameter("EquinoctialK", rval);
       break;
    case EQ_P:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialP"), rval);
+      mSpacecraft->SetRealParameter("EquinoctialP", rval);
       break;
    case EQ_Q:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialQ"), rval);
+      mSpacecraft->SetRealParameter("EquinoctialQ", rval);
       break;
    case EQ_MLONG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MLONG"), rval);
+      mSpacecraft->SetRealParameter("MLONG", rval);
       break;
       
    // ModifiedEquinoctial;Modified by M.H.
@@ -2844,152 +2842,152 @@ void OrbitData::SetRealParameters(Integer item, Real rval)
          ("   mSpacecraft->GetParameterID(SemilatusRectum) = %d\n",
           mSpacecraft->GetParameterID("SemilatusRectum"));
       #endif
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SemilatusRectum"), rval);
+      mSpacecraft->SetRealParameter("SemilatusRectum", rval);
       //@note Change to following since Spacecraft code using parameter ID calls
       // SetRealParameter using label anyway
       //mSpacecraft->SetRealParameter("SemilatusRectum", rval);
       break;
    case MOD_EQ_F:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialF"), rval);
+      mSpacecraft->SetRealParameter("ModEquinoctialF", rval);
       break;
    case MOD_EQ_G:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialG"), rval);
+      mSpacecraft->SetRealParameter("ModEquinoctialG", rval);
       break;
    case MOD_EQ_H:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialH"), rval);
+      mSpacecraft->SetRealParameter("ModEquinoctialH", rval);
       break;
    case MOD_EQ_K:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ModEquinoctialK"), rval);
+      mSpacecraft->SetRealParameter("ModEquinoctialK", rval);
       break;
    case MOD_EQ_TLONG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TLONG"), rval);
+      mSpacecraft->SetRealParameter("TLONG", rval);
       break;
       
    // Alternate Equinoctial by HYKim
    case ALT_EQ_P:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AltEquinoctialP"), rval);
+      mSpacecraft->SetRealParameter("AltEquinoctialP", rval);
       break;
    case ALT_EQ_Q:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AltEquinoctialQ"), rval);
+      mSpacecraft->SetRealParameter("AltEquinoctialQ", rval);
       break;
       
    // Delaunay;Modified by M.H.
    case DEL_DELA_SL:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayl"), rval);
+      mSpacecraft->SetRealParameter("Delaunayl", rval);
       break;
    case DEL_DELA_SG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayg"), rval);
+      mSpacecraft->SetRealParameter("Delaunayg", rval);
       break;
    case DEL_DELA_SH:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Delaunayh"), rval);
+      mSpacecraft->SetRealParameter("Delaunayh", rval);
       break;
    case DEL_DELA_L:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayL"), rval);
+      mSpacecraft->SetRealParameter("DelaunayL", rval);
       break;
    case DEL_DELA_G:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayG"), rval);
+      mSpacecraft->SetRealParameter("DelaunayG", rval);
       break;
    case DEL_DELA_H:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DelaunayH"), rval);
+      mSpacecraft->SetRealParameter("DelaunayH", rval);
       break;
 
    // Planetodetic;Modified by M.H.
    case PLD_RMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticRMAG"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticRMAG", rval);
       break;
    case PLD_LON:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticLON"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticLON", rval);
       break;
    case PLD_LAT:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticLAT"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticLAT", rval);
       break;
    case PLD_VMAG:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticVMAG"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticVMAG", rval);
       break;
    case PLD_AZI:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticAZI"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticAZI", rval);
       break;
    case PLD_HFPA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("PlanetodeticHFPA"), rval);
+      mSpacecraft->SetRealParameter("PlanetodeticHFPA", rval);
       break;
       
    // Incoming Asymptote State
    case INCASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
+      mSpacecraft->SetRealParameter("IncomingRadPer", rval);
       break;
-   case INCASYM_C3:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
+   case INCASYM_C3_ENERGY:
+      mSpacecraft->SetRealParameter("IncomingC3Energy", rval);
       break;
    case INCASYM_RHA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingRHA"), rval);
+      mSpacecraft->SetRealParameter("IncomingRHA", rval);
       break;
    case INCASYM_DHA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingDHA"), rval);
+      mSpacecraft->SetRealParameter("IncomingDHA", rval);
       break;
    case INCASYM_BVAZI:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("IncomingBVAZI"), rval);
+      mSpacecraft->SetRealParameter("IncomingBVAZI", rval);
       break;
    
    // Outgoing Asymptote State
    case OUTASYM_RADPER:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HyperbolicRadPer"), rval);
+      mSpacecraft->SetRealParameter("OutgoingRadPer", rval);
       break;
-    case OUTASYM_C3:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("C3Energy"), rval);
+   case OUTASYM_C3_ENERGY:
+      mSpacecraft->SetRealParameter("OutgoingC3Energy", rval);
       break;
-  case OUTASYM_RHA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingRHA"), rval);
+   case OUTASYM_RHA:
+      mSpacecraft->SetRealParameter("OutgoingRHA", rval);
       break;
    case OUTASYM_DHA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingDHA"), rval);
+      mSpacecraft->SetRealParameter("OutgoingDHA", rval);
       break;
    case OUTASYM_BVAZI:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("OutgoingBVAZI"), rval);
+      mSpacecraft->SetRealParameter("OutgoingBVAZI", rval);
       break;
    case OUTASYM_TA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TA"), rval);
+      mSpacecraft->SetRealParameter("TA", rval);
       break;
       
    // Brouwer-Lyddane Mean-short
    case BLS_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortSMA"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortSMA", rval);
       break;
    case BLS_ECC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortECC"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortECC", rval);
       break;
    case BLS_INC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortINC"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortINC", rval);
       break;
    case BLS_RAAN:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortRAAN"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortRAAN", rval);
       break;
    case BLS_AOP:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortAOP"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortAOP", rval);
       break;
    case BLS_MA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerShortMA"), rval);
+      mSpacecraft->SetRealParameter("BrouwerShortMA", rval);
       break;
 
    // Brouwer-Lyddane Mean-long
    case BLL_SMA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongSMA"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongSMA", rval);
       break;
    case BLL_ECC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongECC"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongECC", rval);
       break;
    case BLL_INC:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongINC"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongINC", rval);
       break;
    case BLL_RAAN:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongRAAN"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongRAAN", rval);
       break;
    case BLL_AOP:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongAOP"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongAOP", rval);
       break;
    case BLL_MA:
-      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("BrouwerLongMA"), rval);
+      mSpacecraft->SetRealParameter("BrouwerLongMA", rval);
       break;
-
+      
    default:
       #ifdef DEBUG_ORBITDATA_SET
       MessageInterface::ShowMessage

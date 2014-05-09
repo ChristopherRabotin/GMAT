@@ -681,8 +681,8 @@ GmatBase* OrbitPeriod::Clone(void) const
 //------------------------------------------------------------------------------
 C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN,
-               //C3_ENERGY, false, true, true, Gmat::SPACECRAFT)
-               C3_ENERGY, true, true, true, Gmat::SPACECRAFT) // Made settable (LOJ: 2013.12.23)
+               C3_ENERGY, false, true, true, Gmat::SPACECRAFT) // Changed back to read-only (LOJ: 2014.05.07)
+     //C3_ENERGY, true, true, true, Gmat::SPACECRAFT) // Made settable (LOJ: 2013.12.23)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
