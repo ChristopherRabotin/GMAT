@@ -228,11 +228,11 @@ protected:
 
    // Modified by YK
    // Incoming Asymptote State
-   enum {INCASYM_RADPER = PlanetoCount, INCASYM_C3, INCASYM_RHA, INCASYM_DHA, INCASYM_BVAZI, INCASYM_TA, InAsymCount};
+   enum {INCASYM_RADPER = PlanetoCount, INCASYM_C3_ENERGY, INCASYM_RHA, INCASYM_DHA, INCASYM_BVAZI, INCASYM_TA, InAsymCount};
    
    // Modified by YK
    // Outgoing Asymptote State
-   enum {OUTASYM_RADPER = InAsymCount, OUTASYM_C3, OUTASYM_RHA, OUTASYM_DHA, OUTASYM_BVAZI, OUTASYM_TA, OutAsymCount};
+   enum {OUTASYM_RADPER = InAsymCount, OUTASYM_C3_ENERGY, OUTASYM_RHA, OUTASYM_DHA, OUTASYM_BVAZI, OUTASYM_TA, OutAsymCount};
    
    // Modified by YK
    // Brouwer-Lyddane Mean-short 

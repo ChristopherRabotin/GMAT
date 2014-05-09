@@ -16,7 +16,7 @@
 //
 /**
  * Declares Outgoing Asymptote related parameter classes.
- * OutAsym_RHA, OutAsym_DHA, OutAsym_BVAZI, OutAsym_State
+ * OutAsymRadPer, OutAsymC3Energy, OutAsym_RHA, OutAsym_DHA, OutAsym_BVAZI, OutAsym_State
  */
 //------------------------------------------------------------------------------
 
@@ -24,12 +24,203 @@
 #include "ColorTypes.hpp"
 
 
+//==============================================================================
+//                              OutAsymRadPer
+//==============================================================================
+OutAsymRadPer::OutAsymRadPer(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "OutgoingRadPer", obj, "Hyperbolic Outgoing Asymptote Radius at Periapsis", "Km",
+               GmatParam::ORIGIN, OUTASYM_RADPER, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
+}
+
+//------------------------------------------------------------------------------
+// OutAsymRadPer(const OutAsymRadPer &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+OutAsymRadPer::OutAsymRadPer(const OutAsymRadPer &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const OutAsymRadPer& operator=(const OutAsymRadPer &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+OutAsymRadPer& OutAsymRadPer::operator=(const OutAsymRadPer &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~OutAsymRadPer()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+OutAsymRadPer::~OutAsymRadPer()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OutAsymRadPer::Evaluate()
+{
+   mRealValue = OrbitData::GetOutAsymReal(OUTASYM_RADPER);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* OutAsymRadPer::Clone(void) const
+{
+   return new OutAsymRadPer(*this);
+}
+
+
+
+//==============================================================================
+//                              OutAsymC3Energy
+//==============================================================================
+OutAsymC3Energy::OutAsymC3Energy(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "OutgoingC3Energy", obj, "Hyperbolic Outgoing Asymptote C3Energy Energy", "Km^2/s^2",
+               GmatParam::ORIGIN, OUTASYM_C3_ENERGY, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
+}
+
+//------------------------------------------------------------------------------
+// OutAsymC3Energy(const OutAsymC3Energy &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+OutAsymC3Energy::OutAsymC3Energy(const OutAsymC3Energy &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const OutAsymC3Energy& operator=(const OutAsymC3Energy &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+OutAsymC3Energy& OutAsymC3Energy::operator=(const OutAsymC3Energy &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~OutAsymC3Energy()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+OutAsymC3Energy::~OutAsymC3Energy()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OutAsymC3Energy::Evaluate()
+{
+   mRealValue = OrbitData::GetOutAsymReal(OUTASYM_C3_ENERGY);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* OutAsymC3Energy::Clone(void) const
+{
+   return new OutAsymC3Energy(*this);
+}
+
+
 
 //==============================================================================
 //                              OutAsymRHA
 //==============================================================================
 OutAsymRHA::OutAsymRHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "OutgoingRHA", obj, "RA of Outgoing Asymptote", "Deg",
+   : OrbitReal(name, "OutgoingRHA", obj, "RA of Hyperbolic Outgoing Asymptote", "Deg",
                GmatParam::COORD_SYS, OUTASYM_RHA, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -38,7 +229,6 @@ OutAsymRHA::OutAsymRHA(const std::string &name, GmatBase *obj)
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
-
 
 //------------------------------------------------------------------------------
 // OutAsymRHA(const OutAsymRHA &copy)
@@ -53,7 +243,6 @@ OutAsymRHA::OutAsymRHA(const OutAsymRHA &copy)
    : OrbitReal(copy)
 {
 }
-
 
 //------------------------------------------------------------------------------
 // const OutAsymRHA& operator=(const OutAsymRHA &right)
@@ -72,7 +261,6 @@ OutAsymRHA& OutAsymRHA::operator=(const OutAsymRHA &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~OutAsymRHA()
 //------------------------------------------------------------------------------
@@ -83,7 +271,6 @@ OutAsymRHA& OutAsymRHA::operator=(const OutAsymRHA &right)
 OutAsymRHA::~OutAsymRHA()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -108,7 +295,6 @@ bool OutAsymRHA::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -126,11 +312,12 @@ GmatBase* OutAsymRHA::Clone(void) const
 }
 
 
+
 //==============================================================================
 //                              OutAsymDHA
 //==============================================================================
 OutAsymDHA::OutAsymDHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "OutgoingDHA", obj, "DEC of Outgoing Asymptote", "Deg",
+   : OrbitReal(name, "OutgoingDHA", obj, "DEC of Hyperbolic Outgoing Asymptote", "Deg",
                GmatParam::COORD_SYS, OUTASYM_DHA, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -139,7 +326,6 @@ OutAsymDHA::OutAsymDHA(const std::string &name, GmatBase *obj)
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
-
 
 //------------------------------------------------------------------------------
 // OutAsymDHA(const OutAsymDHA &copy)
@@ -154,7 +340,6 @@ OutAsymDHA::OutAsymDHA(const OutAsymDHA &copy)
    : OrbitReal(copy)
 {
 }
-
 
 //------------------------------------------------------------------------------
 // const OutAsymDHA& operator=(const OutAsymDHA &right)
@@ -173,7 +358,6 @@ OutAsymDHA& OutAsymDHA::operator=(const OutAsymDHA &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~OutAsymDHA()
 //------------------------------------------------------------------------------
@@ -184,7 +368,6 @@ OutAsymDHA& OutAsymDHA::operator=(const OutAsymDHA &right)
 OutAsymDHA::~OutAsymDHA()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -209,7 +392,6 @@ bool OutAsymDHA::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -227,11 +409,12 @@ GmatBase* OutAsymDHA::Clone(void) const
 }
 
 
+
 //==============================================================================
 //                              OutAsymBVAZI
 //==============================================================================
 OutAsymBVAZI::OutAsymBVAZI(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "OutgoingBVAZI", obj, "B-vector AZI at Infinity of Outgoing Asymptote", "Deg",
+   : OrbitReal(name, "OutgoingBVAZI", obj, "B-vector AZI at Infinity of Hyperbolic Outgoing Asymptote", "Deg",
                GmatParam::COORD_SYS, OUTASYM_BVAZI, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -240,7 +423,6 @@ OutAsymBVAZI::OutAsymBVAZI(const std::string &name, GmatBase *obj)
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
-
 
 //------------------------------------------------------------------------------
 // OutAsymBVAZI(const OutAsymBVAZI &copy)
@@ -255,7 +437,6 @@ OutAsymBVAZI::OutAsymBVAZI(const OutAsymBVAZI &copy)
    : OrbitReal(copy)
 {
 }
-
 
 //------------------------------------------------------------------------------
 // const OutAsymBVAZI& operator=(const OutAsymBVAZI &right)
@@ -274,7 +455,6 @@ OutAsymBVAZI& OutAsymBVAZI::operator=(const OutAsymBVAZI &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~OutAsymBVAZI()
 //------------------------------------------------------------------------------
@@ -285,7 +465,6 @@ OutAsymBVAZI& OutAsymBVAZI::operator=(const OutAsymBVAZI &right)
 OutAsymBVAZI::~OutAsymBVAZI()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -310,7 +489,6 @@ bool OutAsymBVAZI::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -329,11 +507,14 @@ GmatBase* OutAsymBVAZI::Clone(void) const
 
 
 
+//==============================================================================
+//                              OutAsymState
+//==============================================================================
 //------------------------------------------------------------------------------
 // OutAsymState::OutAsymState(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 OutAsymState::OutAsymState(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "OutgoingAsymptote", obj, "Outgoing Asymptote State Vector",
+   : OrbitRvec6(name, "OutgoingAsymptote", obj, "Hyperbolic Outgoing Asymptote State Vector",
                 "", GmatParam::COORD_SYS)
 {
    // Parameter member data

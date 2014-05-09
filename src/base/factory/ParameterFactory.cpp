@@ -258,8 +258,13 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    
    // IncomingAsymptote parameters; Modified by YK
    // Added HyperbolicRadPer (LOJ: 2014.04.28)
-   if (ofType == "HyperbolicRadPer")
-      return new HyperbolicRadPer(withName);
+   //if (ofType == "HyperbolicRadPer")
+   //   return new HyperbolicRadPer(withName);
+   // Added IncomingRadPer and IncomingC3Energy (LOJ: 2014.05.07)
+   if (ofType == "IncomingRadPer")
+      return new IncAsymRadPer(withName);
+   if (ofType == "IncomingC3Energy")
+      return new IncAsymC3Energy(withName);
    if (ofType == "IncomingRHA")
       return new IncAsymRHA(withName);
    if (ofType == "IncomingDHA")
@@ -268,6 +273,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new IncAsymBVAZI(withName);
    
    // OutgoingAsymptote parameters; Modified by YK
+   // Added OutgoingRadPer and OutgoingC3Energy (LOJ: 2014.05.07)
+   if (ofType == "OutgoingRadPer")
+      return new OutAsymRadPer(withName);
+   if (ofType == "OutgoingC3Energy")
+      return new OutAsymC3Energy(withName);
    if (ofType == "OutgoingRHA")
       return new OutAsymRHA(withName);
    if (ofType == "OutgoingDHA")
@@ -622,13 +632,17 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Planetodetic");
 
       // IncomingAsymptote parameters ; Modified by YK
-      creatables.push_back("HyperbolicRadPer");
+      //creatables.push_back("HyperbolicRadPer");
+      creatables.push_back("IncomingRadPer");
+      creatables.push_back("IncomingC3Energy");
       creatables.push_back("IncomingRHA");
       creatables.push_back("IncomingDHA");
       creatables.push_back("IncomingBVAZI");
       creatables.push_back("IncomingAsymptote");
       
       // OutgoingAsymptote parameters ; Modified by YK
+      creatables.push_back("OutgoingRadPer");
+      creatables.push_back("OutgoingC3Energy");
       creatables.push_back("OutgoingRHA");
       creatables.push_back("OutgoingDHA");
       creatables.push_back("OutgoingBVAZI");

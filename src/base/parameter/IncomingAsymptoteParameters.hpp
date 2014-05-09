@@ -16,7 +16,7 @@
 //
 /**
  * Declares Incoming Asymptote related parameter classes.
- * HyperbolicRadPer, IncAsymC3, IncAsymRHA, IncAsymDHA, IncAsymBVAZI, IncAsymTA, IncAsymState
+ * IncAsymRadPer, IncAsymC3Energy, IncAsymRHA, IncAsymDHA, IncAsymBVAZI, IncAsymState
  */
 //------------------------------------------------------------------------------
 
@@ -25,14 +25,17 @@
 #include "OrbitRvec6.hpp"
 
 
-class GMAT_API HyperbolicRadPer : public OrbitReal
+//==============================================================================
+//                               IncAsymRadPer
+//==============================================================================
+class GMAT_API IncAsymRadPer : public OrbitReal
 {
 public:
 
-   HyperbolicRadPer(const std::string &name = "", GmatBase *obj = NULL);
-   HyperbolicRadPer(const HyperbolicRadPer &copy);
-   HyperbolicRadPer& operator=(const HyperbolicRadPer &right);
-   virtual ~HyperbolicRadPer();
+   IncAsymRadPer(const std::string &name = "", GmatBase *obj = NULL);
+   IncAsymRadPer(const IncAsymRadPer &copy);
+   IncAsymRadPer& operator=(const IncAsymRadPer &right);
+   virtual ~IncAsymRadPer();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -44,6 +47,33 @@ protected:
 
 };
 
+
+//==============================================================================
+//                               IncAsymC3Energy
+//==============================================================================
+class GMAT_API IncAsymC3Energy : public OrbitReal
+{
+public:
+
+   IncAsymC3Energy(const std::string &name = "", GmatBase *obj = NULL);
+   IncAsymC3Energy(const IncAsymC3Energy &copy);
+   IncAsymC3Energy& operator=(const IncAsymC3Energy &right);
+   virtual ~IncAsymC3Energy();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+	   
+protected:
+
+};
+
+
+//==============================================================================
+//                               IncAsymRHA
+//==============================================================================
 class GMAT_API IncAsymRHA : public OrbitReal
 {
 public:
@@ -63,6 +93,10 @@ protected:
 
 };
 
+
+//==============================================================================
+//                               IncAsymDHA
+//==============================================================================
 class GMAT_API IncAsymDHA : public OrbitReal
 {
 public:
@@ -77,10 +111,15 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-	   
+   
 protected:
 
 };
+
+
+//==============================================================================
+//                               IncAsymBVAZI
+//==============================================================================
 class GMAT_API IncAsymBVAZI : public OrbitReal
 {
 public:
@@ -100,6 +139,10 @@ protected:
 
 };
 
+
+//==============================================================================
+//                               
+//==============================================================================
 class GMAT_API IncAsymState : public OrbitRvec6
 {
 public:
