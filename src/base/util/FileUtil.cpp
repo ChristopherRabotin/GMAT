@@ -57,6 +57,46 @@ using namespace GmatStringUtil;
 //#define DEBUG_REAL_COLUMNS
 //#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
+//#define DEBUG_ABSOLUTE_PATH
+
+
+//------------------------------------------------------------------------------
+// std::string GetGmatPath()
+//------------------------------------------------------------------------------
+/**
+ * Accessor method to find the location of the GMAT application
+ *
+ * This method is currently only coded for Windows, to address path issues found
+ * in GMAT R2014a (see GMT-2688 and email reporting issues around May 9 2014)
+ *
+ * @return The path to the GMAT application on Windows machines; an empty 
+ * string for the others
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetGmatPath()
+{
+   std::string retval = "";
+
+#ifdef _MSC_VER  // if Microsoft Visual C++
+   char buffer[GmatFile::MAX_PATH_LEN];
+   GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
+
+   #ifdef DEBUG_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("EXE path: %s\n", buffer);
+   #endif
+
+   std::string currDir = buffer;
+   Integer end = currDir.find_last_of("\\");
+   if (end != std::string::npos)
+      retval = currDir.substr(0, end+1);
+   
+   #ifdef DEBUG_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("EXE dir: %s\n", retval.c_str());
+   #endif
+#endif
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // std::string GetPathSeparator()
@@ -101,7 +141,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
    
 #ifdef _MSC_VER  // if Microsoft Visual C++
    char buffer[GmatFile::MAX_PATH_LEN];
-   
+
    //if (_getcwd(buffer, sizeof(buffer) / sizeof(TCHAR)))
    if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, buffer) > 0)
       currDir = buffer;

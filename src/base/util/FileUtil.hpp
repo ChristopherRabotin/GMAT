@@ -47,6 +47,8 @@ namespace GmatFileUtil
    bool GMAT_API DoesFileExist(const std::string &filename);
    bool GMAT_API GetLine(std::istream *inStream, std::string &line);
    bool GMAT_API IsAppInstalled(const std::string &appName, std::string &appLoc);
+
+   std::string GetGmatPath();
    
    WrapperTypeArray GMAT_API 
       GetFunctionOutputTypes(std::istream *is, const StringArray &inputs,
@@ -98,7 +100,7 @@ namespace GmatFileUtil
    bool GMAT_API GetRealColumns(const std::string &line, RealArray &cols);
    
    static StringArray textBuffer;
-   
+
 }
 
 #endif // FileUtil_hpp

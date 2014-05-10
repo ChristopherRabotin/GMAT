@@ -207,5 +207,6 @@ private:
    
    FileManager();
    
+   void SetPathsAbsolute();
 };
 #endif // FileManager_hpp

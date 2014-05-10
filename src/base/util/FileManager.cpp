@@ -50,6 +50,7 @@
 //#define DEBUG_PLUGIN_DETECTION
 //#define DEBUG_FILE_RENAME
 //#define DEBUG_MAPPING
+//#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
 
 //---------------------------------
 // static data
@@ -633,6 +634,8 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
    MessageInterface::SetLogEnable(true);
    mInStream.close();
+
+   SetPathsAbsolute();
    
    #ifdef DEBUG_MAPPING
    ShowMaps("In ReadStartupFile()");
@@ -2411,3 +2414,61 @@ FileManager::FileManager()
 }
 
 
+//------------------------------------------------------------------------------
+// void SetPathsAbsolute()
+//------------------------------------------------------------------------------
+/*
+ * Sets the paths read from the startup file to absolute paths
+ *
+ * This method is separate from ReadStartupFile so taht if it is broken, it can 
+ * just be commented out.
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetPathsAbsolute()
+{
+   std::string mGmatBinDir = GmatFileUtil::GetGmatPath();
+
+   #ifdef DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("Real bin folder = %s\nPaths:\n", 
+         mGmatBinDir.c_str());
+      for (std::map<std::string, std::string>::iterator path = mPathMap.begin(); 
+         path != mPathMap.end(); ++path)
+         MessageInterface::ShowMessage("   %s\n", path->second.c_str());
+      MessageInterface::ShowMessage("Files:\n");
+      for (std::map<std::string, FileInfo*>::iterator file = mFileMap.begin(); 
+         file != mFileMap.end(); ++file)
+         MessageInterface::ShowMessage("   %s  %s\n", file->second->mPath.c_str(),
+               file->second->mFile.c_str());
+   #endif
+
+   for (std::map<std::string, std::string>::iterator path = mPathMap.begin(); 
+      path != mPathMap.end(); ++path)
+   {
+      #ifdef DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+         MessageInterface::ShowMessage("Checking %s:  ", path->second.c_str());
+      #endif
+      const char* setting = path->second.c_str();
+      if (setting[0] == '.')
+      {
+         path->second = mGmatBinDir + path->second;
+         #ifdef DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+               MessageInterface::ShowMessage("reset to %s", path->second.c_str());
+         #endif
+      }
+      #ifdef DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+         MessageInterface::ShowMessage("\n");
+      #endif
+   }
+   
+   #ifdef DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("Paths:\n");
+      for (std::map<std::string, std::string>::iterator path = mPathMap.begin(); 
+         path != mPathMap.end(); ++path)
+         MessageInterface::ShowMessage("   %s\n", path->second.c_str());
+      MessageInterface::ShowMessage("Files:\n");
+      for (std::map<std::string, FileInfo*>::iterator file = mFileMap.begin(); 
+         file != mFileMap.end(); ++file)
+         MessageInterface::ShowMessage("   %s  %s\n", file->second->mPath.c_str(),
+               file->second->mFile.c_str());
+   #endif
+}
