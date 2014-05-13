@@ -635,7 +635,11 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    MessageInterface::SetLogEnable(true);
    mInStream.close();
 
-   SetPathsAbsolute();
+   /// @todo This code replaces relative paths with absolute.  It was implemented to 
+   /// address an issue in R2014a, but the side effects were to severe for 
+   /// the release.  It is commented out so that post release, we can asses how
+   /// to proceed addressing path issues in GMAT.
+   // SetPathsAbsolute();
    
    #ifdef DEBUG_MAPPING
    ShowMaps("In ReadStartupFile()");
