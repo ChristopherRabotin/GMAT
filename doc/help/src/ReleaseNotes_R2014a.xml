@@ -390,12 +390,6 @@ aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
       </listitem>
 
       <listitem>
-        <para>GMAT now looks in the working directory for scripts run via the
-        command line. See the <link linkend="CommandLine">Command line</link>
-        reference for details.</para>
-      </listitem>
-
-      <listitem>
         <para>AtmosDensity is now reported in units of kg/km^3. See the <link
         linkend="CalculationParameters">Calculation Parameter</link> reference
         for details.</para>
