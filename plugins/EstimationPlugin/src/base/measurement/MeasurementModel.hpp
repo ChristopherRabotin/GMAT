@@ -167,8 +167,9 @@ public:
 //                        CalculateMeasurement(bool withEvents = false);										// made changes by TUAN NGUYEN
 ///// TBD: Do we want something more generic here?
    virtual const MeasurementData&
-                        CalculateMeasurement(bool withEvents = false, 
-						     ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL);		// made changes by TUAN NGUYEN
+                        CalculateMeasurement(bool withEvents = false,
+						     ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL, 
+							 bool withNoise = false);																// made changes by TUAN NGUYEN
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);

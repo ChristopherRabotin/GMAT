@@ -104,7 +104,6 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    measurement             (NULL),
    theData                 (NULL),
    theDataDerivatives      (NULL),
-//   timeConstant            (6000.0),
    useRelativityCorrection (false),									// made changes by TUAN NGUYEN
    useETminusTAICorrection (false),									// made changes by TUAN NGUYEN
    residualMax			   (1.0e18),								// made changes by TUAN NGUYEN
@@ -1914,7 +1913,9 @@ void MeasurementModel::SetModelID(Integer newID)
 
 
 //------------------------------------------------------------------------------
-// const MeasurementData& CalculateMeasurement(bool withEvents)
+// const MeasurementData& CalculateMeasurement(bool withEvents,
+//       ObservationData* forObservation, std::vector<RampTableData>* rampTB, 
+//       bool withNoise)
 //------------------------------------------------------------------------------
 /**
  * Calculates the measurement
@@ -1924,17 +1925,20 @@ void MeasurementModel::SetModelID(Integer newID)
  * state, the MeasurementData container is cleared and its isFeasible flag is
  * set to false.
  *
- * @param withEvents Flag indicating is events - if present - should be included
- *                   in the calculations
+ * @param withEvents		Flag indicating is events - if present - should be included
+ *							in the calculations
+ * @param forObservation	Pointer to an observation data object
+ * @param rampTB			Pointer to a ramped frequency table data object
+ * @param withNoise			Flag indicating noise is added to calculated measurement 
  *
  * @return A reference to the calculated MeasurementData
  */
 //------------------------------------------------------------------------------
 const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents, 
-			ObservationData* forObservation, std::vector<RampTableData>* rampTB)					// made changes by TUAN NGUYEN
+			ObservationData* forObservation, std::vector<RampTableData>* rampTB, bool withNoise)	// made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_MEASUREMENT_CALCULATION
-      MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p)\n", this, (withEvents?"true":"false"), forObservation, rampTB);
+      MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p, withNoise = %s)\n", this, (withEvents?"true":"false"), forObservation, rampTB,(withNoise?"true":"false"));
    #endif
 
    // Handle the physical model settings for physical model classes only
@@ -1969,8 +1973,13 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
 
    
    // Specifying the value of calculated measurement C:
+   if (withNoise)
+	  measurement->SetNoise(&noiseSigma);														// made changes by TUAN NGUYEN
    measurement->CalculateMeasurement(withEvents);
+   if (withNoise)
+      measurement->SetNoise(NULL);																	// made changes by TUAN NGUYEN
    
+
    // Add in the Biases if the measurement was feasible
    if (theData->isFeasible)
    {
