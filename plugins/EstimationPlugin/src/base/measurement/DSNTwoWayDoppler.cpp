@@ -31,6 +31,7 @@
 #include "Transponder.hpp"
 #include <sstream>
 
+#include "RandomNumber.hpp"
 
 //#define DEBUG_DOPPLER_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
@@ -539,14 +540,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
                bfLoc.ToString().c_str());
       #endif
 
-//	  Real minAngle;
-//	  if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)
-//         minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
-//	  else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)
-//         minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
-//	  MessageInterface::ShowMessage("min angle = %lf    elevation angle = %lf\n", minAngle, currentMeasurement.feasibilityValue);
-
-      if (currentMeasurement.feasibilityValue > minAngle)
+//      if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
          currentMeasurement.value[0] = 2*rangeVecInertial.GetMagnitude();     // It is set to range value
@@ -554,12 +548,12 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
          retval = true;
       }
-      else
-      {
-         currentMeasurement.isFeasible = false;
-         currentMeasurement.value[0] = 0.0;
-         currentMeasurement.eventCount = 0;
-      }
+//      else
+//      {
+//         currentMeasurement.isFeasible = false;
+//         currentMeasurement.value[0] = 0.0;
+//         currentMeasurement.eventCount = 0;
+//      }
 
       #ifdef DEBUG_DOPPLER_CALC
          MessageInterface::ShowMessage("Calculating Range at epoch %.12lf\n",
@@ -1374,6 +1368,16 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
                participants[1]->GetParameterID("CartesianX");
          CalculateMeasurementDerivatives(participants[1], id);
       #endif
+
+	  // Add noise to calculated measurement
+	  if (noiseSigma != NULL)
+	  {
+		  RandomNumber* rn = RandomNumber::Instance();
+		  Real val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
+		  while (val <= 0.0)
+			 val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
+		  currentMeasurement.value[0] = val;
+	  }
 
       retval = true;
    }
