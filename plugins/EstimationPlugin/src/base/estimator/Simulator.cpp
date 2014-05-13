@@ -1512,12 +1512,8 @@ void Simulator::CalculateData()
 void Simulator::SimulateData()
 {
    // Tell the measurement manager to add noise and write the measurements
-   if (measManager.CalculateMeasurements(true, true) == true)
+   if (measManager.CalculateMeasurements(true, true, addNoise) == true)
    {
-	  // Add noise to measurements								// made changes by TUAN NGUYEN
-	  if (addNoise)
-	     measManager.AddNoiseToCalculatedMeasurements();		// made changes by TUAN NGUYEN
-
 	  // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
          throw EstimatorException("Measurement writing failed");
