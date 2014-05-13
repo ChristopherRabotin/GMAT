@@ -34,6 +34,7 @@
 #include "TimeSystemConverter.hpp"
 
 #include "SpacePoint.hpp"
+#include "RandomNumber.hpp"
 
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
@@ -917,6 +918,15 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          CalculateMeasurementDerivatives(participants[1], id);
       #endif
 
+	  // 20. Add noise to current measurement if it is needed
+	  if (noiseSigma != NULL)
+	  {
+		 RandomNumber* rn = RandomNumber::Instance();
+		 Real val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
+		 while (val <= 0.0)
+            val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
+		 currentMeasurement.value[0] = val;
+	  }
       retval = true;
    }
 
