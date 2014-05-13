@@ -33,6 +33,8 @@
 #include "Troposphere.hpp"
 #include <sstream>
 
+#include "RandomNumber.hpp"
+
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
@@ -619,7 +621,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
       #endif
 
-      if (currentMeasurement.feasibilityValue > minAngle)
+//      if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
          currentMeasurement.value[0] = 2*rangeVecInertial.GetMagnitude();
@@ -629,12 +631,12 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
          retval = true;
       }
-      else
-      {
-         currentMeasurement.isFeasible = false;
-         currentMeasurement.value[0] = 0.0;
-         currentMeasurement.eventCount = 0;	 
-      }
+//      else
+//      {
+//         currentMeasurement.isFeasible = false;
+//         currentMeasurement.value[0] = 0.0;
+//         currentMeasurement.eventCount = 0;	 
+//      }
 
       #ifdef DEBUG_RANGE_CALC
          MessageInterface::ShowMessage("Calculating Range at epoch %.12lf\n",
@@ -1157,6 +1159,17 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          #endif
 
 		 realRangeFull = realTravelTime*freqConversionFactor;											// unit: range unit
+		 // Add noise to calculated measurement
+		 if (noiseSigma != NULL)
+		 {
+		    RandomNumber* rn = RandomNumber::Instance();
+			Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+			while (val <= 0.0)
+			   val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+			realRangeFull = val;
+		 }
+
+		 // Get range
 	     realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  }
 	  else
@@ -1185,6 +1198,17 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 			   return false;
 		 }
 
+		 // Add noise to calculated measurement
+		 if (noiseSigma != NULL)
+		 {
+		    RandomNumber* rn = RandomNumber::Instance();
+			Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+			while (val <= 0.0)
+			   val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+			realRangeFull = val;
+		 }
+
+		 // Get range
 		 realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  }
 
@@ -1408,7 +1432,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    Real value1;
    Real interval_len;
 
-   Real basedFreqFactor = GetFrequencyFactor((*rampTB)[end_interval+1].rampFrequency);
+   Real basedFreqFactor = GetFrequencyFactor((*rampTB)[end_interval].rampFrequency);
    Real value = 0.0;
    Real dt = delta_t;
    Integer i = end_interval;
