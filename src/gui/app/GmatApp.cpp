@@ -146,7 +146,7 @@ bool GmatApp::OnInit()
       // initialize the moderator
       // save current working directory... moderator can change it
       // but we need it when reading command line arguments
-      std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
+//      std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
       if (theModerator->Initialize(startupFile, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
@@ -233,18 +233,19 @@ bool GmatApp::OnInit()
          // Set icon file from the startup file
          gmatAppData->SetIconFile();
          
-         std::string wd = GmatFileUtil::GetWorkingDirectory();
-         GmatFileUtil::SetWorkingDirectory(cur_dir);
+//         std::string wd = GmatFileUtil::GetWorkingDirectory();
+//         GmatFileUtil::SetWorkingDirectory(cur_dir);
          // save current working directory... moderator may have changed it in
          // ReadStartupFile
          // but we need old one when reading command line arguments
          bool pclo = ProcessCommandLineOptions();
-         GmatFileUtil::SetWorkingDirectory(wd);
-         if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&
-             (GmatFileUtil::DoesFileExist(cur_dir+'/'+scriptToRun)))
-            scriptToRun = cur_dir+'/'+scriptToRun;
+//         GmatFileUtil::SetWorkingDirectory(wd);
+//         if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&
+//             (GmatFileUtil::DoesFileExist(cur_dir+'/'+scriptToRun)))
+//            scriptToRun = cur_dir+'/'+scriptToRun;
          
-         if (!pclo)
+//         if (!pclo)
+         if (!ProcessCommandLineOptions())
             return false;
          
          if (!showMainFrame)
@@ -656,7 +657,7 @@ bool GmatApp::ProcessCommandLineOptions()
             // appear after script name such as, 'BplaneTarget.script' -- run
             // So removed #ifdef __WIN32__
             //#ifdef __WIN32__
-			if (GmatFileUtil::DoesFileExist(tempfile))
+            if (GmatFileUtil::DoesFileExist(tempfile))
             {
                // Set this as script to run
                scriptToRun = tempfile;
@@ -666,30 +667,30 @@ bool GmatApp::ProcessCommandLineOptions()
                MessageInterface::PutMessage("scriptToRun=<%s>\n", scriptToRun.c_str());
                #endif
             }
-			else
-			{
-               #ifdef DEBUG_CMD_LINE
-               MessageInterface::PutMessage("File not found, checking working directory=<%s>\n", tempfile.c_str());
-               #endif
-
-			   std::string currPath = GmatFileUtil::GetWorkingDirectory();
-			   std::string pathSep  = GmatFileUtil::GetPathSeparator();
-            tempfile = currPath + pathSep + tempfile;
-            #ifdef DEBUG_CMD_LINE
-            MessageInterface::PutMessage("new file name=<%s>\n", tempfile.c_str());
-            #endif
-			   if (GmatFileUtil::DoesFileExist(tempfile))
-			   {
-				  // set current directory to new path
-				  GmatFileUtil::SetWorkingDirectory(tempfile);
-				  // Set this as script to run
-				  scriptToRun = tempfile;
-				  buildScript = true;
-				  isArgValid = true;
-			   }
-			}
+//			else
+//			{
+//               #ifdef debug_cmd_line
+//               messageinterface::putmessage("file not found, checking working directory=<%s>\n", tempfile.c_str());
+//               #endif
+//
+//			   std::string currpath = gmatfileutil::getworkingdirectory();
+//			   std::string pathsep  = gmatfileutil::getpathseparator();
+//            tempfile = currpath + pathsep + tempfile;
+//            #ifdef debug_cmd_line
+//            messageinterface::putmessage("new file name=<%s>\n", tempfile.c_str());
+//            #endif
+//			   if (gmatfileutil::doesfileexist(tempfile))
+//			   {
+//				  // set current directory to new path
+//				  gmatfileutil::setworkingdirectory(tempfile);
+//				  // set this as script to run
+//				  scripttorun = tempfile;
+//				  buildscript = true;
+//				  isargvalid = true;
+//			   }
+//			}
             //#endif
-            //@todo Implement this for Mac and Linux?
+            //@todo implement this for mac and linux?
             
             if (!isArgValid)
             {
