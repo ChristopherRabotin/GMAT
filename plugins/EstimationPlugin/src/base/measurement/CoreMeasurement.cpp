@@ -75,7 +75,8 @@ CoreMeasurement::CoreMeasurement(const std::string &type,
    Fo                 (NULL),
    j2k                (NULL),
    solarSystem        (NULL),
-   satEpochID         (-1)
+   satEpochID         (-1),
+   noiseSigma         (NULL)
 {
    objectTypes.push_back(Gmat::CORE_MEASUREMENT);
    objectTypeNames.push_back("CoreMeasurement");
@@ -127,7 +128,8 @@ CoreMeasurement::CoreMeasurement(const CoreMeasurement& core) :
    Fo                 (NULL),
    j2k                (NULL),
    solarSystem        (core.solarSystem),
-   satEpochID         (core.satEpochID)
+   satEpochID         (core.satEpochID),
+   noiseSigma         (NULL)
 {
 #ifdef DEBUG_CONSTRUCTOR
 	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> Copy constructor. Copy from <'%s',%p>\n", GetName().c_str(), this, core.GetName().c_str(), &core);
@@ -183,6 +185,7 @@ CoreMeasurement& CoreMeasurement::operator=(const CoreMeasurement& core)
       j2k                = NULL;
       solarSystem        = core.solarSystem;
       satEpochID         = core.satEpochID;
+	  noiseSigma         = NULL;
 
       // Clear the old hardware out
       for (UnsignedInt i = 0; i < participantHardware.size(); ++i)
@@ -1261,4 +1264,10 @@ Real CoreMeasurement::GetDelay(UnsignedInt forParticipant, Integer whichOne)
 Integer CoreMeasurement::GetMeasurementParameterCount() const
 {
    return CoreMeasurementParamCount;
+}
+
+
+void CoreMeasurement::SetNoise(Rvector* ns)
+{
+	noiseSigma = ns;
 }

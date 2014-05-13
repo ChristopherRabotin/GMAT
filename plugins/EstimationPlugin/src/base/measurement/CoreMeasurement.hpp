@@ -82,6 +82,8 @@ public:
 
    virtual Integer            GetMeasurementParameterCount() const;
 
+   void                       SetNoise(Rvector* ns);
+
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -190,6 +192,8 @@ protected:
    static const Rvector3      yUnit;             // [0,1,0]T
    static const Rvector3      zUnit;             // [0,0,1]T
 
+   /// Measuement noise sigma
+   Rvector*                   noiseSigma;									// made changes by TUAN NGUYEN
 
    // Methods
    Integer                    GetParmIdFromEstID(Integer id, GmatBase *obj);
