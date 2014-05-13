@@ -403,7 +403,9 @@ Real LightTimeCorrection::CalculateRange()
 
 	  range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
 	  
-//	  MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
+	  #ifdef DEBUG_CALCULATE_RANGE
+	     MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
+      #endif
 
       // Store the rest of the data used in the other measurement calculations
       // for the moving participant.  The fixed participant was stored earlier.
