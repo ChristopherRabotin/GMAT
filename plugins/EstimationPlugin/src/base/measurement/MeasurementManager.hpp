@@ -52,7 +52,7 @@ public:
    bool                    Finalize();
 
 // bool                    CalculateMeasurements(bool withEvents = false);							// made changes for Bug 8 in ticket GMT-4314
-   bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false);	// made changes for Bug 8 in ticket GMT-4314
+   bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false, bool addNoise = false);	// made changes for Bug 8 in ticket GMT-4314
    const std::vector<RealArray>&
                            CalculateDerivatives(GmatBase *obj, Integer wrt,
                                                 Integer forMeasurement);
@@ -93,8 +93,6 @@ public:
    const std::vector<MeasurementModel*>& GetAllMeasurementModels();				// made changes by TUAN NGUYEN
    UnsignedInt             GetCurrentRecordNumber();							// made changes by TUAN NGUYEN
    
-   bool                    AddNoiseToCalculatedMeasurements();					// made changes by TUAN NGUYEN
-
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);

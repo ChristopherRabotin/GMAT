@@ -26,8 +26,6 @@
 
 #include "DataFileAdapter.hpp"
 
-#include "RandomNumber.hpp"									// made changes by TUAN NGUYEN
-
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILE_WRITE
@@ -1236,7 +1234,7 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// bool CalculateMeasurements(bool forSimulation, bool withEvents)	
+// bool CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)	
 //																					This method was modified by TUAN NGUYEN
 //------------------------------------------------------------------------------
 /**
@@ -1245,12 +1243,13 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
  * @param  forSimulation	true for simulation calculation and false for 
  *                          estimation calculation. Default value is false
  * @param  withEvents       flag to indicate calculation with ro without events
+ * @param  addNoise			flag to indicate noise added to measurement
  *
  * @return True if at least one measurement is feasible and calculated; false
  *         otherwise
  */
 //------------------------------------------------------------------------------
-bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEvents)
+bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)
 {
    #ifdef DEBUG_FLOW
       MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(%s,%s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"));
@@ -1286,7 +1285,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 	        MessageInterface::ShowMessage(" Simulation: measurement with events\n");
          #endif
 			if (measurements[j].isFeasible)
-	            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);		// made changes by TUAN NGUYEN
+	            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);		// made changes by TUAN NGUYEN
 		 }
 		 else
 		 {
@@ -1867,30 +1866,3 @@ UnsignedInt MeasurementManager::GetCurrentRecordNumber()
 
    return i;
 }
-
-
-bool MeasurementManager::AddNoiseToCalculatedMeasurements()
-{
-   // Get RandomNumber object handler:
-   RandomNumber* rn = RandomNumber::Instance();
-
-
-   for (UnsignedInt i = 0; i < measurements.size(); ++i)
-   {
-	  if (!measurements[i].isFeasible)
-	     continue;
-
-      for(UnsignedInt k = 0; k < measurements[i].value.size(); ++k)
-	  {
-         // Generate noise for measurements[i].value[k]:
-	     Real noisesigma = sqrt((*(measurements[i].covariance))(k,k));
-		 Real mean_value = measurements[i].value[k];
-		 Real real_value = rn->Gaussian(mean_value, noisesigma);
-
-		 measurements[i].value[k] = real_value;
-	  }
-   }
-
-   return true;
-}
-
