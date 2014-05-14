@@ -190,7 +190,7 @@ Real LightTimeCorrection::Evaluate()
 
    // Located if magnitude of the event function is smaller than tolerance
    ++numIter;
-   if ((GmatMathUtil::Abs(vals) < max(tolerance, tolerance1*range))||(numIter > MAX_NUM_ITERATION))
+   if ((GmatMathUtil::Abs(vals) < GmatMathUtil::Max(tolerance, tolerance1*range))||(numIter > MAX_NUM_ITERATION))
    {
       status = LOCATED;
 	  numIter = 0;
