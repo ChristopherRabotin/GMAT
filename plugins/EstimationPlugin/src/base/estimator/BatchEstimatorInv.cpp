@@ -31,9 +31,7 @@
 //#define WALK_STATE_MACHINE
 //#define DEBUG_VERBOSE
 //#define DEBUG_WEIGHTS
-//#define DEBUG_O_MINUS_C
-
-//------------------------------------------------------------------------------
+//#define DEBUG_O_MINUS_C//------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -142,9 +140,7 @@ void BatchEstimatorInv::Accumulate()
       MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
    #endif
 
-   #ifdef DEBUG_ACCUMULATION
-      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
-   #endif
+   #ifdef DEBUG_ACCUMULATION      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");   #endif
 
    // Measurements are possible!
    const MeasurementData *calculatedMeas;
@@ -585,28 +581,73 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   Rmatrix cov = information.Inverse();
-   
-   #ifdef DEBUG_VERBOSE
-      MessageInterface::ShowMessage(" residuals: [\n");
-      for (UnsignedInt i = 0; i < stateSize; ++i)
-         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
-      MessageInterface::ShowMessage("]\n");
+   Rmatrix cov(information.GetNumRows(), information.GetNumColumns());
+   if (inversionType == "Schur")
+   {
+      Real *sum1;
+      Integer arraysize;
 
-      MessageInterface::ShowMessage("   covarian matrix:\n");
-      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
-      {
-         MessageInterface::ShowMessage("      [");
-         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)
+      Integer iSize = information.GetNumColumns();
+      if (iSize != information.GetNumRows())
+         throw SolverException("Schur inversion requires a square information "
+                        "matrix");
+
+      arraysize = iSize * (iSize + 1) / 2;
+      sum1 = new Real[arraysize];
+      // Fill sum1 with the upper triangle
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+            sum1[i * information.GetNumColumns() + j] = information(i,j);
+
+      if (SchurInvert(sum1, arraysize) != 0)
+         throw SolverException("Schur inversion failed");
+
+      // Now fill in cov
+      // Fill sum1 with the upper triangle
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
          {
-            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));
+            cov(i,j) = sum1[i * information.GetNumColumns() + j];
+            if (i != j)
+               cov(j,i) = cov(i,j);
          }
-         MessageInterface::ShowMessage("]\n");
-      }
-   #endif
+      delete [] sum1;
+   }
+/*   else if (inversionType == "Cholesky")
+   {
+      Real *sum1;
+	  Integer arraysize;
 
-   
-   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
+	  Integer iSize = information.GetNumColumns();
+	  if (iSize != information.GetNumRows())
+		  throw SolverException("Cholesky inversion requires a symmetric positive definite "
+		                        "information matrix");
+
+	  arraysize = iSize * (iSize + 1) / 2;
+	  sum1 = new Real[arraysize];
+	  // Fill sum1 with the upper triangle
+	  for (Integer i = 0; i < information.GetNumRows(); ++i)
+		  for (Integer j = i; j < information.GetNumColumns(); ++j)
+			  sum1[i * information.GetNumColumns() + j] = information(i,j);
+
+      if (CholInvert(sum1, arraysize, iSize) != 0)
+		  throw SolverException("Cholesky inversion failed");
+
+	  // Now fill in cov
+	  	  // Fill sum1 with the upper triangle
+	  for (Integer i = 0; i < information.GetNumRows(); ++i)
+		  for (Integer j = i; j < information.GetNumColumns(); ++j)
+		  {
+			  cov(i,j) = sum1[i * information.GetNumColumns() + j];
+			  if (i != j)
+				 cov(j,i) = cov(i,j);
+		  }
+	  delete [] sum1;
+   }
+*/
+   else
+      cov = information.Inverse();
+      #ifdef DEBUG_VERBOSE      MessageInterface::ShowMessage(" residuals: [\n");      for (UnsignedInt i = 0; i < stateSize; ++i)         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));      MessageInterface::ShowMessage("]\n");      MessageInterface::ShowMessage("   covarian matrix:\n");      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)      {         MessageInterface::ShowMessage("      [");         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)         {            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));         }         MessageInterface::ShowMessage("]\n");      }   #endif      if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
    GmatState initState = (*estimationState);
 
