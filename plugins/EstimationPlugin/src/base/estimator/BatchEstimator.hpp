@@ -116,6 +116,8 @@ protected:
    std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
    ObjectArray             outerLoopBuffer;
+   /// Inversion algorithm used 
+   std::string             inversionType;
 
    /// Parameter IDs for the BatchEstimators
    enum
@@ -123,6 +125,7 @@ protected:
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
 //	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
+      INVERSION_ALGORITHM,
       BatchEstimatorParamCount,
    };
 
@@ -155,7 +158,10 @@ protected:
    // progress string for reporting
    virtual std::string    GetProgressString();
 
-   virtual bool            DataFilter();							// made changes by TUAN NGUYEN
+   Integer SchurInvert(Real *SUM1, Integer array_size);
+//   Integer CholInvert(Real *SUM1, Integer array_size);
+
+   virtual bool            DataFilter();                    // made changes by TUAN NGUYEN
 
 //private:
 //   bool                    IsReuseableType(const std::string& value);
