@@ -60,47 +60,50 @@ ifeq ($(PLATFORM), mac)
 all: 
 	cd CInterfacePlugin; make all;
 	cd EphemPropagatorPlugin; make all;
+	cd StationPlugin; make all;
 	cd EstimationPlugin; make all;
 	cd GeometricMeasurementPlugin; make all;
 	cd EventLocatorPlugin; make all;
 	cd ExtraPropagatorsPlugin; make all;
 	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
-	cd MatlabInterfacePlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
-	cd StationPlugin; make all;
 	cd DataInterfacePlugin; make all;
+
+#	cd MatlabInterfacePlugin; make all;
 
 rebuild: 
 	cd CInterfacePlugin; make rebuild;
 	cd EphemPropagatorPlugin; make rebuild;
+	cd StationPlugin; make rebuild;
 	cd EstimationPlugin; make rebuild;
 	cd GeometricMeasurementPlugin; make rebuild;
 	cd EventLocatorPlugin; make rebuild;
 	cd ExtraPropagatorsPlugin; make rebuild;
 	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
-	cd MatlabInterfacePlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
-	cd StationPlugin; make rebuild;
 	cd DataInterfacePlugin; make rebuild;
+
+#	cd MatlabInterfacePlugin; make rebuild;
 
 clean:
 	cd CInterfacePlugin; make clean;
 	cd EphemPropagatorPlugin; make clean;
+	cd StationPlugin; make clean;
 	cd EstimationPlugin; make clean;
 	cd GeometricMeasurementPlugin; make clean;
 	cd EventLocatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd ProductionPropagatorPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
-	cd MatlabInterfacePlugin; make clean;
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
-	cd StationPlugin; make clean;
 	cd DataInterfacePlugin; make clean;
+
+#	cd MatlabInterfacePlugin; make clean;
 
 endif
 
