@@ -92,7 +92,8 @@ BatchEstimator::BatchEstimator(const std::string &type,
    useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
    converged                  (false),
-   chooseRMSP                 (true)
+   chooseRMSP                 (true),
+   inversionType              ("")
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -132,7 +133,8 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
    converged                  (false),
-   chooseRMSP                 (est.chooseRMSP)
+   chooseRMSP                 (est.chooseRMSP),
+   inversionType              (est.inversionType)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -173,6 +175,8 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
          delete outerLoopBuffer[i];
       outerLoopBuffer.clear();
+
+      inversionType = est.inversionType;
    }
 
    return *this;
@@ -499,7 +503,8 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const Integer id) const//------------------------------------------------------------------------------
+// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
 /**
  * This method gets "On" or "Off" value
  *
@@ -508,8 +513,19 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
  * @return "On" or "Off" value
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYENstd::string BatchEstimator::GetOnOffParameter(const Integer id) const{//   if (id == USE_PRIORI_ESTIMATE)//      return (useApriori ? "On" : "Off");   return Estimator::GetOnOffParameter(id);}//------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const Integer id) const//------------------------------------------------------------------------------
+// made changes by TUAN NGUYEN
+std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+{
+//   if (id == USE_PRIORI_ESTIMATE)
+//      return (useApriori ? "On" : "Off");
+
+   return Estimator::GetOnOffParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool BatchEstimator::SetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
 /**
  * This method gets "On" or "Off" value
  *
@@ -519,7 +535,27 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
  * @return true value when it successfully sets the value, false otherwise. 
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYENbool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value){//   if (id == USE_PRIORI_ESTIMATE)//  {//      if (value == "On")//	  {//        useApriori = true;//		 return true;//	  }//      if (value == "Off")//	  {//        useApriori = false;//		 return true;//	  }////	  return false;//   }   return Estimator::SetOnOffParameter(id, value);}
+// made changes by TUAN NGUYEN
+bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+{
+//   if (id == USE_PRIORI_ESTIMATE)
+//  {
+//      if (value == "On")
+//	  {
+//        useApriori = true;
+//		 return true;
+//	  }
+//      if (value == "Off")
+//	  {
+//        useApriori = false;
+//		 return true;
+//	  }
+//
+//	  return false;
+//   }
+
+   return Estimator::SetOnOffParameter(id, value);
+}
 
 
 //------------------------------------------------------------------------------
@@ -881,7 +917,18 @@ void BatchEstimator::CompleteInitialization()
    //if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
    //{
 
-   //   if (reportFilename != "")   //   {   //      std::string fullPath = "";   //      // If no path designation slash character is found, add the default path   //      if ((reportFilename.find('/') == std::string::npos) &&   //          (reportFilename.find('\\') == std::string::npos))   //      {   //         FileManager *fm = FileManager::Instance();   //         fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);   //      }   //      fullPath += reportFilename;
+   //   if (reportFilename != "")
+   //   {
+   //      std::string fullPath = "";
+
+   //      // If no path designation slash character is found, add the default path
+   //      if ((reportFilename.find('/') == std::string::npos) &&
+   //          (reportFilename.find('\\') == std::string::npos))
+   //      {
+   //         FileManager *fm = FileManager::Instance();
+   //         fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);
+   //      }
+   //      fullPath += reportFilename;
    //      reportFile.open(fullPath, std::ios_base::out);		// made changes by TUAN NGUYEN
 	  //}
    //}
@@ -1001,12 +1048,19 @@ void BatchEstimator::FindTimeStep()
    {
       // Estimate and check for convergence after processing measurements
       currentState = ESTIMATING;
-   #ifdef WALK_STATE_MACHINE      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");   #endif   }
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
+   #endif
+
+   }
    else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
-   #ifdef WALK_STATE_MACHINE      MessageInterface::ShowMessage("Next state will be CALCULATING\n");   #endif   }
+   #ifdef WALK_STATE_MACHINE
+      MessageInterface::ShowMessage("Next state will be CALCULATING\n");
+   #endif
+   }
    else
    {
       // Calculate the time step in seconds and stay in the PROPAGATING state;
@@ -1033,7 +1087,8 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");   #endif
+	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
+   #endif
 
    // Update the STM
    esm.MapObjectsToSTM();
@@ -1064,7 +1119,12 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
-      #ifdef WALK_STATE_MACHINE	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");   #endif}
+   
+   #ifdef WALK_STATE_MACHINE
+	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
+   #endif
+
+}
 
 
 //------------------------------------------------------------------------------
@@ -1175,7 +1235,8 @@ void BatchEstimator::CheckCompletion()
             for (UnsignedInt j = 0; j <  stateSize; ++j)
                information(i,j) = 0.0;
       }
-	  measurementResiduals.clear();      measurementEpochs.clear();
+	  measurementResiduals.clear();
+      measurementEpochs.clear();
       measurementResidualID.clear();
 
       for (UnsignedInt i = 0; i <  stateSize; ++i)
@@ -1251,7 +1312,8 @@ void BatchEstimator::RunComplete()
    if (showAllResiduals)
       PlotResiduals();
 
-   //// Close report file   //reportFile.close();										// made changes by TUAN NGUYEN
+   //// Close report file
+   //reportFile.close();										// made changes by TUAN NGUYEN
 }
 
 
@@ -1865,8 +1927,20 @@ bool BatchEstimator::IsReuseableType(const std::string& value)
  * @return 0 on success, anything else indicates a problem
  */
 //------------------------------------------------------------------------------
-Integer SchurInvert(Real *sum1, Integer array_size)
+/*Integer SchurInvert(Real *sum1, Integer array_size)
 {
+   MessageInterface::ShowMessage("Performing Schur inversion\n   ");
+   MessageInterface::ShowMessage("array_size = %d\n", array_size);
+
+   MessageInterface::ShowMessage("Packed array:   [");
+   for (UnsignedInt i = 0; i < array_size; ++i)
+   {
+      if (i > 0)
+         MessageInterface::ShowMessage(", ");
+      MessageInterface::ShowMessage("%.15le", sum1[i]);
+   }
+   MessageInterface::ShowMessage("]\n");
+
    Integer retval = -1;
 
    // Check to see if the upper left element is invertible
@@ -1964,6 +2038,166 @@ Integer SchurInvert(Real *sum1, Integer array_size)
       delete [] delta;
       retval = 0;
    }
+   else
+   {
+      if (array_size == 0)
+         throw SolverException("Schur inversion cannot proceed; the size of "
+               "the array being inverted is zero");
+
+      if (sum1[0] == 0.0)
+         throw SolverException("Schur inversion cannot proceed; the upper "
+               "left element of the array being inverted is zero");
+   }
 
    return retval;
+}
+*/
+
+
+Integer SchurInvert(Real *SUM1, Integer array_size)
+//int SchurInvert(double *SUM1, int array_size)
+{
+   double *DELTA = new double[array_size];
+
+   int NDIM , NLIM, I, I1, IJ, J, J1, JL, JN, L, L1, Lplus1;
+//   int MN[20], NDIM = 4, NLIM = 4, I, I1, IJ, J, J1, JL, JN, L, L1, Lplus1;
+   int N, NdimMinus1, NN, NOW, Nminus1, IMESG, ramp_debug = 8, IAA;
+   int iloop, jloop, iindex;
+
+   NDIM = NLIM = (int)((std::sqrt(1 + 8 * array_size) - 1) / 2);
+
+   //....Beginning
+   //..........IF RETURN FLAG *900 THEN {
+   //.............IMESG = 40
+   IJ = 0;
+
+   //
+   //.....INITIALLY INVERT 1 X 1 MATRIX
+   //
+   //.....CHECK IF OBSERVATION IS '0' , IF SO CALL COVUP
+   //
+two:
+     NOW = IJ + 1;
+
+     if (NOW > NLIM) {
+         if(IJ != 0) {
+            delete [] DELTA;
+            return 1;
+         }
+     }
+
+   // CHECK IF NON-ZERO VALUE, INVERTIBLE
+   if (SUM1[0] == 0.)
+   {
+      if (IJ == NLIM)
+      {
+         delete [] DELTA;
+         return 1;
+      }
+      else
+      {
+         goto two;
+      }
+   }
+   SUM1[0] = 1.0/ SUM1[0];
+   if (NLIM == 1)
+   {
+      delete [] DELTA;
+      return 0;
+   }
+   NdimMinus1 = NDIM - 1;
+
+
+   // RECURSIVELY INVERT N X N MATRIX KNOWING THE INVERSE OF
+   // (N-1) X (N-1) MATRIX UNTIL NLIM X NLIM MATRIX IS FOUND
+   for (N = 2; N <=NLIM; ++N)
+   {
+five:
+      Nminus1 = N-1;
+
+      L1 = 0;
+
+      // COMPUTE DELTA WORKING ARRAYS
+      for (L = 1; L <= Nminus1; ++L)
+      {
+         J1 = 0;
+         DELTA[L-1] = 0.0;
+
+         for (J = 1; J <= L; ++J)
+         {
+            JL = J1 + L-1;
+            JN = J1 + N-1;
+            DELTA[L-1] = DELTA[L-1] + (SUM1[JL] * SUM1[JN]);
+            J1 +=  NDIM - J;
+         }
+
+         if (L != Nminus1)
+         {
+            Lplus1 = L + 1;
+
+            for (J = Lplus1; J <= Nminus1; ++J) // Are FOR limits correct??
+            {
+               JN = J1 + N-1;
+               JL = L1 + J-1;
+               DELTA[L-1] += (SUM1[JL] * SUM1[JN]);
+               J1 += NDIM - J;
+            }
+            L1 += NDIM - L;
+         }
+      }
+      J1 = N;
+      NN = NdimMinus1 + N;
+
+      // COMPUTE W
+      for (J = 1; J <= Nminus1; ++J)
+      {
+         SUM1[NN-1] -= (DELTA[J-1] * SUM1[J1-1]);
+
+         J1 += NDIM - J;
+      }
+
+      // CHECK IF OBSERVATION IS '0' , IF SO CALL COVUP
+      NOW = N + IJ;
+      if (NOW > NLIM)
+      {
+         if (IJ != 0)
+         {
+            delete [] DELTA;
+            return 0;
+         }
+      }
+
+      if (SUM1[NN-1] == 0.)
+      {
+         goto five;
+      }
+
+      SUM1[NN-1] = 1.0 / SUM1[NN-1];
+      J1 = N;
+
+      // COMPUTE Y
+      for (J=1; J <= Nminus1; ++J)
+      {
+         SUM1[J1-1] = -DELTA[J-1] * SUM1[NN-1];
+         J1 += NDIM - J;
+      }
+      I1 = N;
+
+      // COMPUTE X
+      for (I=1; I <= Nminus1; ++I)
+      {
+         J1 = I;
+         for (J=1; J <= I; ++J)
+         {
+            SUM1[J1-1] -= (SUM1[I1-1] * DELTA[J-1]);
+            J1 += NDIM - J;
+         }
+         I1 += NDIM - I;
+      }
+      NdimMinus1 += NDIM - N;
+   }
+
+   delete [] DELTA;
+   return 0;
+
 }
