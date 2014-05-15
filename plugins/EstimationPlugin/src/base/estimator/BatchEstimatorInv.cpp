@@ -560,6 +560,19 @@ void BatchEstimatorInv::Estimate()
    if (measurementResiduals.size() == 0)
       throw EstimatorException("Unable to estimate: No measurement data can be used for estimation or No measurements were feasible");
 
+   // Apriori state (initial state for 0th iteration) and initial state for current iteration: 
+   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
+      initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
+   GmatState initState = (*estimationState);
+
+   // Calculate old and current weighted residuals' root mean square
+   oldResidualRMS = newResidualRMS;
+   newResidualRMS = 0.0;
+   for (int i = 0; i < measurementResiduals.size(); ++i)
+      newResidualRMS += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
+   newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
+
+   // Solve normal equation
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("Accumulation complete; now solving the "
             "normal equations!\n");
@@ -605,11 +618,6 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   
-   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
-      initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
-   GmatState initState = (*estimationState);
-
    // Calculalte state change dx 
    dx.clear();
    Real delta;
@@ -621,15 +629,6 @@ void BatchEstimatorInv::Estimate()
       dx.push_back(delta);
       (*estimationState)[i] += delta;
    }
-
-   // Calculate weighted root mean square residuals  
-   delta = 0.0;
-   for (int i = 0; i < measurementResiduals.size(); ++i)
-      delta += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
-
-   oldResidualRMS = newResidualRMS;
-   newResidualRMS = GmatMathUtil::Sqrt(delta / measurementResiduals.size());
-
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -642,9 +641,8 @@ void BatchEstimatorInv::Estimate()
          MessageInterface::ShowMessage("  %.12lf  ", (*estimationState)[i]);
       MessageInterface::ShowMessage("]\n");
    #endif
-
    
-   // Calculate predicted RMS for Outer-Loop sigma editting
+   // Calculate predicted RMS
    predictedRMS = 0;
    if (useApriori)
    {
@@ -702,10 +700,7 @@ void BatchEstimatorInv::Estimate()
    }
 
    sprintf(&s[0],"   Number of reccords used for estimation = %d\n", measurementResiduals.size());
-//   sprintf(&s[0],"   WeightedRMS residuals = %.12lf       Sum [W*(O-C)^2] = %lf     number of reccords = %d\n", newResidualRMS, delta, measurementResiduals.size());
    sLine << s;
-//   sprintf(&s[0],"   Predicted RMS residuals = %.12lf\n", predictedRMS);
-//   sLine << s;
    
    sLine << "   Initial state (solve-for vector) in EarthMJ2000:   x" << iterationsTaken << " = (";
    for (int i= 0; i < initState.GetSize(); ++i)
@@ -734,11 +729,6 @@ void BatchEstimatorInv::Estimate()
    linesBuff = sLine.str();
    WriteToTextFile(currentState);
 
-   //if (reportFile.is_open())
-   //{
-   //   reportFile << sLine.str();
-   //   reportFile.flush();
-   //}
 
    // Clear O, C, and W lists
    Weight.clear();
