@@ -625,6 +625,7 @@ UnsignedInt MeasurementManager::LoadObservations()
          {
 			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
 			filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
+			Real acc = 1.0;
 
 			Real epoch1 = 0.0;
             Real epoch2 = 0.0;
@@ -648,6 +649,30 @@ UnsignedInt MeasurementManager::LoadObservations()
 				  --numRec;
                   break;
 			   }
+
+		       // Data thinning filter
+			   acc = acc + thinningRatio;
+			   if (acc < 1.0)
+               {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+//				  MessageInterface::ShowMessage("acc = %lf\n", acc);
+				  ++filter4Num;
+				  continue;
+			   }
+			   else
+			      acc = acc -1.0;
+
+			   // Time span filter
+               if ((od->epoch < epoch1)||(od->epoch > epoch2))
+               {
+                  #ifdef DEBUG_LOAD_OBSERVATIONS
+		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  #endif
+                  ++filter5Num;
+				  continue;
+               }
 
 			   // Invalid measurement value filter
 			   if (od->value[0] == -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
@@ -693,26 +718,6 @@ UnsignedInt MeasurementManager::LoadObservations()
 				  ++filter3Num;
 				  continue;
 			   }
-
-		       // Data thinning filter
-			   if ((numRec*thinningRatio - count) < 0.0)
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-				  ++filter4Num;
-				  continue;
-			   }
-
-			   // Time span filter
-               if ((od->epoch < epoch1)||(od->epoch > epoch2))
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-                  ++filter5Num;
-				  continue;
-               }
 
 			   obsTable.push_back(*od);
                #ifdef DEBUG_LOAD_OBSERVATIONS
