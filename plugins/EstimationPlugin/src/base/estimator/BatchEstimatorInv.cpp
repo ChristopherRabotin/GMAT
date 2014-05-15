@@ -32,8 +32,9 @@
 //#define DEBUG_VERBOSE
 //#define DEBUG_WEIGHTS
 //#define DEBUG_O_MINUS_C
+//#define DEBUG_SCHUR
 
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -142,7 +143,9 @@ void BatchEstimatorInv::Accumulate()
       MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
    #endif
 
-   #ifdef DEBUG_ACCUMULATION      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");   #endif
+   #ifdef DEBUG_ACCUMULATION
+      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
+   #endif
 
    // Measurements are possible!
    const MeasurementData *calculatedMeas;
@@ -597,31 +600,51 @@ void BatchEstimatorInv::Estimate()
       arraysize = iSize * (iSize + 1) / 2;
       sum1 = new Real[arraysize];
 
-      MessageInterface::ShowMessage("Schur inversion array size = %d\n", arraysize);
-
       // Fill sum1 with the upper triangle
       Integer index = 0;
       for (Integer i = 0; i < information.GetNumRows(); ++i)
          for (Integer j = i; j < information.GetNumColumns(); ++j)
          {
-            MessageInterface::ShowMessage("   Setting element %d to %.16le\n",
-                  index, information(i,j));
             sum1[index] = information(i,j);
             ++index;
          }
 
-      MessageInterface::ShowMessage("Calling Schur with array size = %d\n",
-            arraysize);
+      #ifdef DEBUG_SCHUR
+         MessageInterface::ShowMessage("Calling Schur with array size = %d\n"
+               "   Input vector:  [", arraysize);
+         for (Integer i = 0; i < arraysize; ++i)
+         {
+            if (i > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", sum1[i]);
+         }
+         MessageInterface::ShowMessage("]\n");
+      #endif
+      
       Integer schurRet = SchurInvert(sum1, arraysize);
+
+      #ifdef DEBUG_SCHUR
+         MessageInterface::ShowMessage("   Output vector: [", arraysize);
+         for (Integer i = 0; i < arraysize; ++i)
+         {
+            if (i > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", sum1[i]);
+         }
+         MessageInterface::ShowMessage("]\n");
+      #endif
+
       if (schurRet != 0)
          throw SolverException("Schur inversion failed");
 
       // Now fill in cov
       // Fill sum1 with the upper triangle
+      index = 0;
       for (Integer i = 0; i < information.GetNumRows(); ++i)
          for (Integer j = i; j < information.GetNumColumns(); ++j)
          {
-            cov(i,j) = sum1[i * information.GetNumColumns() + j];
+            cov(i,j) = sum1[index];
+            ++index;
             if (i != j)
                cov(j,i) = cov(i,j);
          }
@@ -665,8 +688,28 @@ void BatchEstimatorInv::Estimate()
       cov = information.Inverse();
       MessageInterface::ShowMessage("Internal inverted; ");
    }
-   MessageInterface::ShowMessage("con[0][0] = %.18le\n", cov(0,0));   
-   #ifdef DEBUG_VERBOSE      MessageInterface::ShowMessage(" residuals: [\n");      for (UnsignedInt i = 0; i < stateSize; ++i)         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));      MessageInterface::ShowMessage("]\n");      MessageInterface::ShowMessage("   covarian matrix:\n");      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)      {         MessageInterface::ShowMessage("      [");         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)         {            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));         }         MessageInterface::ShowMessage("]\n");      }   #endif      if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("con[0][0] = %.18le\n", cov(0,0));
+   
+   #ifdef DEBUG_VERBOSE
+      MessageInterface::ShowMessage(" residuals: [\n");
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+         MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
+      MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   covarian matrix:\n");
+      for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
+      {
+         MessageInterface::ShowMessage("      [");
+         for (UnsignedInt j = 0; j < cov.GetNumColumns(); ++j)
+         {
+            MessageInterface::ShowMessage(" %.12lf ", cov(i,j));
+         }
+         MessageInterface::ShowMessage("]\n");
+      }
+   #endif
+
+   
+   if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
    GmatState initState = (*estimationState);
 
