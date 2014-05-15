@@ -192,6 +192,7 @@ CPP_OBJECTS = \
     measurement/USNTwoWayRange.o \
     measurement/OpticalAngles.o \
     measurement/OpticalAzEl.o \
+    measurement/RandomNumber.o \
     measurement/Troposphere/Troposphere.o \
     $(IONOSPHERE_CPP_OBJECTS) \
     $(DATAFILE_OBJECTS) \
