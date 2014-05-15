@@ -57,8 +57,6 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEInitialRMSSigma",					// made changes by TUAN NGUYEN  for data sigma editting
    "OLSEMultiplicativeConstant",			// made changes by TUAN NGUYEN  for data sigma editting
    "OLSEAdditiveConstant",					// made changes by TUAN NGUYEN  for data sigma editting
-   "ReuseableBadRecordTypes",
-   //"ReportFileName",
 };
 
 const Gmat::ParameterType
@@ -77,8 +75,6 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
    Gmat::REAL_TYPE,							// made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::STRINGARRAY_TYPE,
-   //Gmat::STRING_TYPE,
 };
 
 
@@ -99,7 +95,7 @@ Estimator::PARAMETER_TYPE[] =
 Estimator::Estimator(const std::string &type, const std::string &name) :
    Solver               (type, name),
    absoluteTolerance    (1.0e-3),
-   relativeTolerance    (1.0e-3),
+   relativeTolerance    (1.0e-4),
    propagatorName       (""),
    resetState           (false),
    timeStep             (60.0),
@@ -118,7 +114,7 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    startEpoch           (DateUtil::EARLIEST_VALID_MJD),					// made changes by TUAN NGUYEN
    endEpoch             (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
    epochFormat          ("TAIModJulian"),								// made changes by TUAN NGUYEN
-   maxResidualMult		(1.0e180),										// made changes by TUAN NGUYEN
+   maxResidualMult		(3000.0),										// made changes by TUAN NGUYEN
    constMult			(3.0),											// made changes by TUAN NGUYEN
    additiveConst        (0.0)											// made changes by TUAN NGUYEN
 {
@@ -130,12 +126,8 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
    estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
 
-   // Setting all bad records to be reuseable
-   reuseableTypes.push_back("OLSE");
-   reuseableTypes.push_back("OLSEInitialRMSSigma");
-   reuseableTypes.push_back("ResidualMax");
-   reuseableTypes.push_back("Timespan");
-   isReuseableTypesDefaultVal = true;
+   // Default value for Estimation.MaximumIterations = 15
+   maxIterations = 15;
 
    esm.SetMeasurementManager(&measManager);
 }
@@ -196,8 +188,7 @@ Estimator::Estimator(const Estimator& est) :
    endEpoch             (est.endEpoch),						// made changes by TUAN NGUYEN
    maxResidualMult		(est.maxResidualMult),				// made changes by TUAN NGUYEN
    constMult			(est.constMult),					// made changes by TUAN NGUYEN
-   additiveConst		(est.additiveConst),				// made changes by TUAN NGUYEN
-   reuseableTypes       (est.reuseableTypes)				// made changes by TUAN NGUYEN
+   additiveConst		(est.additiveConst)					// made changes by TUAN NGUYEN
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -266,7 +257,6 @@ Estimator& Estimator::operator=(const Estimator& est)
 	  maxResidualMult      = est.maxResidualMult;			// made changes by TUAN NGUYEN
 	  constMult            = est.constMult;					// made changes by TUAN NGUYEN
 	  additiveConst        = est.additiveConst;				// made changes by TUAN NGUYEN
-	  reuseableTypes       = est.reuseableTypes;			// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -550,9 +540,6 @@ std::string Estimator::GetStringParameter(const Integer id) const
    if (id == END_EPOCH)									// made changes by TUAN NGUYEN
       return endEpoch;									// made changes by TUAN NGUYEN
 
-   //if (id == REPORT_FILE_NAME)
-   //   return reportFilename;
-
    return Solver::GetStringParameter(id);
 }
 
@@ -578,14 +565,6 @@ std::string Estimator::GetStringParameter(const Integer id,
       return solveForStrings.at(index);
    if (id == ADD_RESIDUAL_PLOT)
       return addedPlots.at(index);
-
-   if (id == REUSEABLE_BAD_RECORD_TYPES)
-   {
-	  if (index < reuseableTypes.size())
-		 return reuseableTypes[index];
-	  else
-		 return "";
-   }
 
    return Solver::GetStringParameter(id, index);
 }
@@ -632,12 +611,6 @@ bool Estimator::SetStringParameter(const Integer id,
       estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
       return true;														// made changes by TUAN NGUYEN
    }																	// made changes by TUAN NGUYEN
-
-   //if (id == REPORT_FILE_NAME)
-   //{
-	  // reportFilename = value;
-	  // return true;
-   //}
 
    return Solver::SetStringParameter(id, value);
 }
@@ -723,28 +696,6 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       return true;
    }
 
-   if (id == REUSEABLE_BAD_RECORD_TYPES)
-   {
-      if ((value != "OLSE")&&(value != "OLSEInitialRMSSigma")&&
-		  (value != "ResidualMax"))
-		  return false;
-
-	  if (isReuseableTypesDefaultVal)
-	  {
-		 isReuseableTypesDefaultVal = false;
-		 reuseableTypes.clear();
-		 reuseableTypes.push_back(value);
-	  }
-	  else
-	  {
-	     if (index < reuseableTypes.size())
-		    reuseableTypes[index] = value;
-	     else
-		    reuseableTypes.push_back(value);
-	  }
-	  return true;
-   }
-
    return Solver::SetStringParameter(id, value, index);
 }
 
@@ -772,9 +723,6 @@ const StringArray& Estimator::GetStringArrayParameter(const Integer id) const
 
    if (id == ADD_RESIDUAL_PLOT)
       return addedPlots;
-
-   if (id == REUSEABLE_BAD_RECORD_TYPES)
-      return reuseableTypes;
 
    return Solver::GetStringArrayParameter(id);
 }
@@ -1722,186 +1670,6 @@ void Estimator::GetEstimationState(GmatState& outputState)
 }
 
 
-
-// made changes by TUAN NGUYEN
-//-------------------------------------------------------------------------
-// void DataFilter()
-//-------------------------------------------------------------------------
-/**
-* This function is used to filter bad observation data records. It has
-*   1. Measurement model's maximum residual filter
-*   2. Data filter based on time span
-*   3. Sigma editting
-*/
-//-------------------------------------------------------------------------
-// This function was moved to BatchEstimator
-/*
-bool Estimator::DataFilter()
-{
-
-   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
-   Real maxLimit = measModel->GetRealParameter("ResidualMax");									// Get value of MeasurementModel.ResidualMax parameter
-   const ObservationData *currentObs =  measManager.GetObsData();								// Get observation measurement data O
-   const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);		// Get calculated measurement data C
-
-   bool retVal = false;
-   if (iterationsTaken == 0)
-   {
-      for (Integer i=0; i < currentObs->value.size(); ++i)
-	  {
-         // 1.Data filtered based on measurement model's residual limits:
-		 if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
-		 {
-//			MessageInterface::ShowMessage("Throw away this observation data due to measurement model's residual limit %lf:  %.12lf   %s   %d", maxLimit, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
-
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "M";	// "M": represent for maximum residual limit
-			std::string filterName = measModel->GetName() + " maximum residual";				// made changes by TUAN NGUYEN
-		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
-               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
-			else																				// made changes by TUAN NGUYEN
-			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
-
-			retVal = IsReuseableType("ResidualMax");
-            break;
-		 }
-
-         // 2.Data filtered based on timespan:
-         Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-         Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-         if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
-         {
-//			MessageInterface::ShowMessage("Throw away this observation data due to time span [%.12lf, %.12lf]:  %.12lf   %s   %d", epoch1, epoch2, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
-
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "T";	// "T": represent for time span
-			std::string filterName = "Timespan";
-		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
-               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
-			else																				// made changes by TUAN NGUYEN
-			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
-
-			retVal = IsReuseableType("Timespan");
-			break;
-         }
-
-         // 3.Data filtered based on sigma editting
-         // 3.1. Specify Weight
-         Real weight = 1.0;
-         if (currentObs->noiseCovariance == NULL)
-         {
-            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
-               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
-            else
-               weight = 1.0;
-         }
-         else
-               weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
-         // 3.2. Filter based on maximum residual multiplier
-		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
-		 {
-//			MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
-
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "I";				// "I": represent for OLSEInitialRMSSigma
-			std::string filterName = "OLSEInitialRMSSigma";
-		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
-               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
-			else																				// made changes by TUAN NGUYEN
-			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
-
-			retVal = IsReuseableType("OLSEInitialRMSSigma");
-			break;
-		 }
-	  }
-   }
-   else
-   {
-	  for (Integer i=0; i < currentObs->value.size(); ++i)
-	  {
-         // Data filtered based on sigma editting
-         // 1. Specify Weight
-         Real weight = 1.0;
-         if (currentObs->noiseCovariance == NULL)
-         {
-            if ((*(calculatedMeas->covariance))(i,i) != 0.0)
-               weight = 1.0 / (*(calculatedMeas->covariance))(i,i);
-            else
-               weight = 1.0;
-         }
-         else
-            weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
-
-         // 2. Filter based on n-sigma			
-//		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*predictedRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
-		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*newResidualRMS + additiveConst))	// if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
-		 {
-//            MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| = %lf > kk*sigma + K = %lf:  %.12lf   %s   %d", 
-//				sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]), 
-//				constMult*predictedRMS + additiveConst, 
-//				currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
-
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "S";							// "S": represent for outer-loop sigma filter
-            numRemovedRecords["OLSE"]++;													// made changes by TUAN NGUYEN
-
-			std::stringstream ss;
-			ss << "OLSE for Iteration " << iterationsTaken;									// made changes by TUAN NGUYEN
-
-			if (numRemovedRecords.find(ss.str()) == numRemovedRecords.end())				// made changes by TUAN NGUYEN
-               numRemovedRecords[ss.str()] = 1;												// made changes by TUAN NGUYEN
-			else																			// made changes by TUAN NGUYEN
-			   numRemovedRecords[ss.str()]++;												// made changes by TUAN NGUYEN
-
-			retVal = IsReuseableType("OLSE");
-			break;
-		 }
-
-//       MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
-	  }
-
-   }
-
-   return retVal;
-}
-*/
-// This function was moved to BatchEstimator
-/*
-bool Estimator::IsReuseableType(const std::string& value)
-{
-   bool isReuseable = false;
-   for (int i = 0; i < reuseableTypes.size(); ++i)
-   {
-      if (reuseableTypes[i] == value)
-      {
-         isReuseable = true;
-		 break;
-	  }
-   }
-
-   return isReuseable;
-}
-*/
 
 /*
 // made changes by TUAN NGUYEN

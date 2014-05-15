@@ -245,11 +245,6 @@ protected:
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;	// made changes by TUAN NGUYEN
 
-   /// Types of reuseable bad record
-   StringArray reuseableTypes;
-   /// Flag to indicate resuseableTypes using default value
-   bool        isReuseableTypesDefaultVal;
-
    ///// Report file
    //std::string reportFilename;
    /// A string as a line/lines buffer to store a line/lines for writing to report file
@@ -271,8 +266,6 @@ protected:
 	  MAX_RESIDUAL_MULTIPLIER,				// made changes by TUAN NGUYEN  for data sigma editting
 	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
 	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
-	  REUSEABLE_BAD_RECORD_TYPES,
-	  //REPORT_FILE_NAME,
       EstimatorParamCount
    };
 
