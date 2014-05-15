@@ -225,14 +225,14 @@ protected:
    bool                    locatingEvent;
 
 
-   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
-   std::string         epochFormat;							// made changes by TUAN NGUYEN
-   std::string         startEpoch;							// made changes by TUAN NGUYEN
-   std::string         endEpoch;							// made changes by TUAN NGUYEN
-   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
-   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
-   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
-   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+//   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
+//   std::string         epochFormat;							// made changes by TUAN NGUYEN
+//   std::string         startEpoch;							// made changes by TUAN NGUYEN
+//   std::string         endEpoch;							// made changes by TUAN NGUYEN
+//   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
+//   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
+//   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
+//   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
 
    /// Parameters for data sigma editting
    Real maxResidualMult;									// made changes by TUAN NGUYEN
@@ -260,9 +260,9 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
-	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN  for time span filter
-	  START_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
-	  END_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
+//	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN  for time span filter
+//	  START_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
+//	  END_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
 	  MAX_RESIDUAL_MULTIPLIER,				// made changes by TUAN NGUYEN  for data sigma editting
 	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
 	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
