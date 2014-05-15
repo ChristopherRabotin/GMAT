@@ -913,8 +913,8 @@ void BatchEstimator::CompleteInitialization()
    // Write out maximum residual for each measuement model
    std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
    sLine << "\nData Editing criteria:\n";
-   for (int i = 0; i < modelsList.size(); ++i)
-      sLine << "   " << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+//   for (int i = 0; i < modelsList.size(); ++i)
+//      sLine << "   " << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
 
    // Write out OLSE Initial RMS: 
    sLine << "   " << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
@@ -932,7 +932,7 @@ void BatchEstimator::CompleteInitialization()
    sLine << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
    sLine << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
    sLine << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
-   sLine << "  M: Edited by measurement maximum residual\n";
+//   sLine << "  M: Edited by measurement maximum residual\n";
    sLine << "  I: Edited by Initial RMS Sigma filter\n";
    sLine << "  S: Edited by Outer-Loop Sigma Editing\n\n";
 
@@ -940,12 +940,6 @@ void BatchEstimator::CompleteInitialization()
    sLine << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
    
    linesBuff = sLine.str();
-
-   //if (reportFile.is_open())
-   //{
-	  // reportFile << sLine.str();
-	  // reportFile.flush();
-   //}
 
    WriteToTextFile();
    ReportProgress();
