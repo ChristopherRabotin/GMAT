@@ -1740,8 +1740,8 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 bool BatchEstimator::DataFilter()
 {
 
-   MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
-   Real maxLimit = measModel->GetRealParameter("ResidualMax");									// Get value of MeasurementModel.ResidualMax parameter
+   //MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);			// Get measurement model
+   //Real maxLimit = measModel->GetRealParameter("ResidualMax");									// Get value of MeasurementModel.ResidualMax parameter
    const ObservationData *currentObs =  measManager.GetObsData();								// Get observation measurement data O
    const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);		// Get calculated measurement data C
 
@@ -1751,50 +1751,36 @@ bool BatchEstimator::DataFilter()
       for (Integer i=0; i < currentObs->value.size(); ++i)
 	  {
          // 1.Data filtered based on measurement model's residual limits:
-		 if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
-		 {
-//			MessageInterface::ShowMessage("Throw away this observation data due to measurement model's residual limit %lf:  %.12lf   %s   %d", maxLimit, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
+		 //if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)	// if (abs(O-C) > max limit) then throw away this data record
+		 //{
+		 //   measManager.GetObsDataObject()->inUsed = false;
+			//measManager.GetObsDataObject()->removedReason = "M";	// "M": represent for maximum residual limit
+			//std::string filterName = measModel->GetName() + " maximum residual";				// made changes by TUAN NGUYEN
+		 //   if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+   //            numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			//else																				// made changes by TUAN NGUYEN
+			//   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "M";	// "M": represent for maximum residual limit
-			std::string filterName = measModel->GetName() + " maximum residual";				// made changes by TUAN NGUYEN
-		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
-               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
-			else																				// made changes by TUAN NGUYEN
-			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
-
-			retVal = true;		// IsReuseableType("ResidualMax");
-            break;
-		 }
+			//retVal = true;		// IsReuseableType("ResidualMax");
+   //         break;
+		 //}
 
          // 2.Data filtered based on timespan:
-         Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-         Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
-         if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
-         {
-//			MessageInterface::ShowMessage("Throw away this observation data due to time span [%.12lf, %.12lf]:  %.12lf   %s   %d", epoch1, epoch2, currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
+   //      Real epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+   //      Real epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, currentObs->epochSystem);
+   //      if ((currentObs->epoch < epoch1)||(currentObs->epoch > epoch2))
+   //      {
+		 //   measManager.GetObsDataObject()->inUsed = false;
+			//measManager.GetObsDataObject()->removedReason = "T";	// "T": represent for time span
+			//std::string filterName = "Timespan";
+		 //   if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
+   //            numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
+			//else																				// made changes by TUAN NGUYEN
+			//   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
-		    measManager.GetObsDataObject()->inUsed = false;
-			measManager.GetObsDataObject()->removedReason = "T";	// "T": represent for time span
-			std::string filterName = "Timespan";
-		    if (numRemovedRecords.find(filterName) == numRemovedRecords.end())					// made changes by TUAN NGUYEN
-               numRemovedRecords[filterName] = 1;												// made changes by TUAN NGUYEN
-			else																				// made changes by TUAN NGUYEN
-			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
-
-			retVal = true;		// IsReuseableType("Timespan");
-			break;
-         }
+			//retVal = true;		// IsReuseableType("Timespan");
+			//break;
+   //      }
 
          // 3.Data filtered based on sigma editting
          // 3.1. Specify Weight
@@ -1811,13 +1797,6 @@ bool BatchEstimator::DataFilter()
          // 3.2. Filter based on maximum residual multiplier
 		 if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)	// if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
 		 {
-//			MessageInterface::ShowMessage("Throw away this observation data due to: sqrt(Wjj)*|O-C| > MaximumConstantMultiplier :  %.12lf   %s   %d", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-//			for(int k = 0; k < currentObs->participantIDs.size(); ++k)
-//			   MessageInterface::ShowMessage("   %s", currentObs->participantIDs[k].c_str());
-//			for(int k = 0; k < currentObs->value.size(); ++k)
-//			   MessageInterface::ShowMessage("   %.8lf", currentObs->value[k]);
-//			MessageInterface::ShowMessage("\n");
-
 		    measManager.GetObsDataObject()->inUsed = false;
 			measManager.GetObsDataObject()->removedReason = "I";				// "I": represent for OLSEInitialRMSSigma
 			std::string filterName = "OLSEInitialRMSSigma";
@@ -1867,10 +1846,7 @@ bool BatchEstimator::DataFilter()
 			retVal = true;			// IsReuseableType("OLSE");
 			break;
 		 }
-
-//       MessageInterface::ShowMessage("    At epoch = %.12lf:   O-C = %.12lf  -  %.12lf = %.12lf\n", currentObs->epoch, currentObs->value[i], calculatedMeas->value[i], currentObs->value[i] - calculatedMeas->value[i]);
 	  }
-
    }
 
    return retVal;
