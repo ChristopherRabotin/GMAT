@@ -86,7 +86,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    estEpochFormat             ("FromParticipants"),
    estEpoch                   (""),
    oldResidualRMS             (0.0),
-   newResidualRMS             (0.0),
+   newResidualRMS             (1.0e12),
    useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
    converged                  (false),
@@ -126,7 +126,7 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    estEpochFormat             (est.estEpochFormat),
    estEpoch                   (est.estEpoch),
    oldResidualRMS             (0.0),
-   newResidualRMS             (0.0),
+   newResidualRMS             (1.0e12),
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
    converged                  (false),
@@ -1506,16 +1506,19 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
    bool retval = false;
    std::stringstream why;
 
-   if (GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS) <= relativeTolerance)
+   if (iterationsTaken >= 1)
    {
-      why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = (" << newResidualRMS << " - " 
+      if (GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS) <= relativeTolerance)
+      {
+         why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = (" << newResidualRMS << " - " 
 		  << oldResidualRMS << ")/ " << oldResidualRMS << " = " 
           << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
           << " is less than RelativeTol, "
           << relativeTolerance << "\n";
 
-	  reason = why.str();
-      retval = true;
+	     reason = why.str();
+         retval = true;
+	  }
    }
 
    if (newResidualRMS <= absoluteTolerance)
@@ -1765,7 +1768,7 @@ bool BatchEstimator::DataFilter()
 			else																				// made changes by TUAN NGUYEN
 			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
-			retVal = IsReuseableType("ResidualMax");
+			retVal = true;		// IsReuseableType("ResidualMax");
             break;
 		 }
 
@@ -1789,7 +1792,7 @@ bool BatchEstimator::DataFilter()
 			else																				// made changes by TUAN NGUYEN
 			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
-			retVal = IsReuseableType("Timespan");
+			retVal = true;		// IsReuseableType("Timespan");
 			break;
          }
 
@@ -1823,7 +1826,7 @@ bool BatchEstimator::DataFilter()
 			else																				// made changes by TUAN NGUYEN
 			   numRemovedRecords[filterName]++;													// made changes by TUAN NGUYEN
 
-			retVal = IsReuseableType("OLSEInitialRMSSigma");
+			retVal = true;			// IsReuseableType("OLSEInitialRMSSigma");
 			break;
 		 }
 	  }
@@ -1861,7 +1864,7 @@ bool BatchEstimator::DataFilter()
 			else																			// made changes by TUAN NGUYEN
 			   numRemovedRecords[ss.str()]++;												// made changes by TUAN NGUYEN
 
-			retVal = IsReuseableType("OLSE");
+			retVal = true;			// IsReuseableType("OLSE");
 			break;
 		 }
 
@@ -1873,7 +1876,7 @@ bool BatchEstimator::DataFilter()
    return retVal;
 }
 
-
+/*
 bool BatchEstimator::IsReuseableType(const std::string& value)
 {
    bool isReuseable = false;
@@ -1888,4 +1891,5 @@ bool BatchEstimator::IsReuseableType(const std::string& value)
 
    return isReuseable;
 }
+*/
 

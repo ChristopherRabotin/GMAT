@@ -157,8 +157,8 @@ protected:
 
    virtual bool            DataFilter();							// made changes by TUAN NGUYEN
 
-private:
-   bool                    IsReuseableType(const std::string& value);
+//private:
+//   bool                    IsReuseableType(const std::string& value);
 
 };
 
