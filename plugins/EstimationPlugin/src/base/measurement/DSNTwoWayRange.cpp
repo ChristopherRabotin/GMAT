@@ -1191,8 +1191,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 			currentMeasurement.isFeasible = false;
 			currentMeasurement.unfeasibleReason = "R";
 //			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 18
-			
-			if ((errnum == 2)||(errnum =3))
+			if ((errnum == 2)||(errnum == 3))
 			   throw exp;
 			else
 			   return false;
