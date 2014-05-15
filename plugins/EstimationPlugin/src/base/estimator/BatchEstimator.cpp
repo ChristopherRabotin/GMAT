@@ -1931,19 +1931,20 @@ bool BatchEstimator::IsReuseableType(const std::string& value)
  * @return 0 on success, anything else indicates a problem
  */
 //------------------------------------------------------------------------------
-/*Integer SchurInvert(Real *sum1, Integer array_size)
+Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
 {
-   MessageInterface::ShowMessage("Performing Schur inversion\n   ");
-   MessageInterface::ShowMessage("array_size = %d\n", array_size);
-
-   MessageInterface::ShowMessage("Packed array:   [");
-   for (UnsignedInt i = 0; i < array_size; ++i)
-   {
-      if (i > 0)
-         MessageInterface::ShowMessage(", ");
-      MessageInterface::ShowMessage("%.15le", sum1[i]);
-   }
-   MessageInterface::ShowMessage("]\n");
+   #ifdef DEBUG_SCHUR
+      MessageInterface::ShowMessage("Performing Schur inversion\n   ");
+      MessageInterface::ShowMessage("array_size = %d\n", array_size);
+      MessageInterface::ShowMessage("Packed array:   [");
+      for (UnsignedInt i = 0; i < array_size; ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("%.15le", sum1[i]);
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
 
    Integer retval = -1;
 
@@ -2054,154 +2055,4 @@ bool BatchEstimator::IsReuseableType(const std::string& value)
    }
 
    return retval;
-}
-*/
-
-
-Integer SchurInvert(Real *SUM1, Integer array_size)
-//int SchurInvert(double *SUM1, int array_size)
-{
-   double *DELTA = new double[array_size];
-
-   int NDIM , NLIM, I, I1, IJ, J, J1, JL, JN, L, L1, Lplus1;
-//   int MN[20], NDIM = 4, NLIM = 4, I, I1, IJ, J, J1, JL, JN, L, L1, Lplus1;
-   int N, NdimMinus1, NN, NOW, Nminus1, IMESG, ramp_debug = 8, IAA;
-   int iloop, jloop, iindex;
-
-   NDIM = NLIM = (int)((std::sqrt(1 + 8 * array_size) - 1) / 2);
-
-   //....Beginning
-   //..........IF RETURN FLAG *900 THEN {
-   //.............IMESG = 40
-   IJ = 0;
-
-   //
-   //.....INITIALLY INVERT 1 X 1 MATRIX
-   //
-   //.....CHECK IF OBSERVATION IS '0' , IF SO CALL COVUP
-   //
-two:
-     NOW = IJ + 1;
-
-     if (NOW > NLIM) {
-         if(IJ != 0) {
-            delete [] DELTA;
-            return 1;
-         }
-     }
-
-   // CHECK IF NON-ZERO VALUE, INVERTIBLE
-   if (SUM1[0] == 0.)
-   {
-      if (IJ == NLIM)
-      {
-         delete [] DELTA;
-         return 1;
-      }
-      else
-      {
-         goto two;
-      }
-   }
-   SUM1[0] = 1.0/ SUM1[0];
-   if (NLIM == 1)
-   {
-      delete [] DELTA;
-      return 0;
-   }
-   NdimMinus1 = NDIM - 1;
-
-
-   // RECURSIVELY INVERT N X N MATRIX KNOWING THE INVERSE OF
-   // (N-1) X (N-1) MATRIX UNTIL NLIM X NLIM MATRIX IS FOUND
-   for (N = 2; N <=NLIM; ++N)
-   {
-five:
-      Nminus1 = N-1;
-
-      L1 = 0;
-
-      // COMPUTE DELTA WORKING ARRAYS
-      for (L = 1; L <= Nminus1; ++L)
-      {
-         J1 = 0;
-         DELTA[L-1] = 0.0;
-
-         for (J = 1; J <= L; ++J)
-         {
-            JL = J1 + L-1;
-            JN = J1 + N-1;
-            DELTA[L-1] = DELTA[L-1] + (SUM1[JL] * SUM1[JN]);
-            J1 +=  NDIM - J;
-         }
-
-         if (L != Nminus1)
-         {
-            Lplus1 = L + 1;
-
-            for (J = Lplus1; J <= Nminus1; ++J) // Are FOR limits correct??
-            {
-               JN = J1 + N-1;
-               JL = L1 + J-1;
-               DELTA[L-1] += (SUM1[JL] * SUM1[JN]);
-               J1 += NDIM - J;
-            }
-            L1 += NDIM - L;
-         }
-      }
-      J1 = N;
-      NN = NdimMinus1 + N;
-
-      // COMPUTE W
-      for (J = 1; J <= Nminus1; ++J)
-      {
-         SUM1[NN-1] -= (DELTA[J-1] * SUM1[J1-1]);
-
-         J1 += NDIM - J;
-      }
-
-      // CHECK IF OBSERVATION IS '0' , IF SO CALL COVUP
-      NOW = N + IJ;
-      if (NOW > NLIM)
-      {
-         if (IJ != 0)
-         {
-            delete [] DELTA;
-            return 0;
-         }
-      }
-
-      if (SUM1[NN-1] == 0.)
-      {
-         goto five;
-      }
-
-      SUM1[NN-1] = 1.0 / SUM1[NN-1];
-      J1 = N;
-
-      // COMPUTE Y
-      for (J=1; J <= Nminus1; ++J)
-      {
-         SUM1[J1-1] = -DELTA[J-1] * SUM1[NN-1];
-         J1 += NDIM - J;
-      }
-      I1 = N;
-
-      // COMPUTE X
-      for (I=1; I <= Nminus1; ++I)
-      {
-         J1 = I;
-         for (J=1; J <= I; ++J)
-         {
-            SUM1[J1-1] -= (SUM1[I1-1] * DELTA[J-1]);
-            J1 += NDIM - J;
-         }
-         I1 += NDIM - I;
-      }
-      NdimMinus1 += NDIM - N;
-   }
-
-   delete [] DELTA;
-   return 0;
-
 }
