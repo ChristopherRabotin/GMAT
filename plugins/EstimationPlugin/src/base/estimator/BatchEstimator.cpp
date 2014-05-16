@@ -352,9 +352,6 @@ bool BatchEstimator::SetStringParameter(const Integer id,
    {
       if ((value == "Internal") || (value == "Schur") || (value == "Cholesky"))
       {
-         if (value == "Cholesky")
-            throw SolverException("The Cholesky inversion routine is not yet "
-                  "integrated into the batch estimator code");
          inversionType = value;
          return true;
       }
@@ -1952,7 +1949,7 @@ Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
    {
       Real *delta = new Real[array_size];
       Integer ij = 0, now = ij + 1;
-      Integer rowCount = (Integer)((std::sqrt(1 + array_size * 8) - 1) / 2);
+      Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8)-1)/2);
 
       sum1[0] = 1.0/ sum1[0];
       if (rowCount > 1)
@@ -2075,35 +2072,34 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
 {
    Integer retval = -1;
 
-   Integer rowCount = (Integer)((std::sqrt(1 + array_size * 8) - 1) / 2);
-   Integer i, i1, i2, i3, ist, iERowCount, iError = 0, il, il1, il2, iLeRowCount;
-   Integer j, k, k1, kl, rowCountIf, iPivot;
+   Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8) - 1) / 2);
+   Integer i, i1, i2, i3, ist, iERowCount, iError = 0, il, il1, il2;
+   Integer j, k, k1, kl, iLeRowCount, rowCountIf, iPivot;
    Real dPivot, din, dsum, tolerance;
    Real work;
 
    const Real epsilon = 1.0e-8;
 
-   bool lMatP = true;
-
    rowCountIf = 0;
    j = 1;
-   for( k = 1; k <= rowCount; ++k )
+
+   for (k = 1; k <= rowCount; ++k)
    {
-      iLeRowCount = k-1;
+      iLeRowCount = k - 1;
       tolerance = abs(epsilon * sum1[j-1]);
-      for( i = k; i <= rowCount; ++i)
+      for (i = k; i <= rowCount; ++i)
       {
          dsum = 0.0;
          if(k != 1)
          {
-            for( il = 1; il <= iLeRowCount; ++il)
+            for (il = 1; il <= iLeRowCount; ++il)
             {
                kl = k-il;
-               il1 = (kl-1) * rowCount - (kl-1) * kl/2;
-               dsum = dsum + sum1[il1 + k - 1] * sum1[il1 + i - 1 ];
+               il1 = (kl-1) * rowCount - (kl-1) * kl / 2;
+               dsum = dsum + sum1[il1 + k - 1] * sum1[il1 + i - 1];
             }
          }
-         dsum = sum1[j -1]- dsum;
+         dsum = sum1[j-1] - dsum;
          if (i > k)
             sum1[j -1] = dsum * dPivot;
          else if (dsum > tolerance)
@@ -2112,81 +2108,75 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
             sum1[j-1] = dPivot;
             dPivot = 1.0/dPivot;
          }
-         else if (dsum < 0.0)
-         {
-            retval = 1;
-            return retval;
-         }
          else if (iError < 0)
          {
             iError = k-1;
-            dPivot = sqrt(dsum);
-            sum1[j - 1] = dPivot;
-            dPivot = 1.0/dPivot;
+            dPivot = GmatMathUtil::Sqrt(dsum);
+            sum1[j-1] = dPivot;
+            dPivot = 1.0 / dPivot;
          }
+         else if (dsum < 0.0)
+         {
+            retval = 1;
+            break;            // Throw here?
+         }
+
          j = j + 1;
       }
       j = j + rowCountIf;
    }
 
-   // Invert R
-   j = (rowCount - 1) * rowCount + (3 - rowCount) * rowCount/2;
-
-   sum1[j - 1] = 1.0/sum1[j - 1];
-   iPivot = j;
-
-   for( i = 2; i <= rowCount; ++i)
+   if (retval == -1)
    {
-      j = iPivot - rowCountIf;
-      iPivot = j - i;
-      din = 1.0/sum1[iPivot - 1];
-      sum1[iPivot - 1] = din;
-      i1 = rowCount + 2 - i;
-      i2 = i - 1;
-      i3 = i1 - 1;
-      il1 = (i3 - 1) * rowCount - (i3 - 1) * i3/2;
-      for( k1 = 1; k1 <= i2; ++k1)
+      // Invert R
+      j = (rowCount - 1) * rowCount + (3 - rowCount) * rowCount/2;
+
+      sum1[j-1] = 1.0 / sum1[j-1];
+      iPivot = j;
+
+      for (i = 2; i <= rowCount; ++i)
       {
-         k = rowCount + 1 - k1;
-         j = j - 1;
-         work = 0.0;
-         for( il = i1; il <= k; ++il)
+         j = iPivot - rowCountIf;
+         iPivot = j - i;
+         din = 1.0 / sum1[iPivot-1];
+         sum1[iPivot-1] = din;
+
+         i1 = rowCount + 2 - i;
+         i2 = i - 1;
+         i3 = i1 - 1;
+         il1 = (i3 - 1) * rowCount - (i3 - 1) * i3/2;
+         for (k1 = 1; k1 <= i2; ++k1)
          {
-            il2 = (il - 1) * rowCount - (il - 1) * il/2 + k;
-            work = work + sum1[il1 + il - 1] * sum1[il2 - 1];
+            k = rowCount + 1 - k1;
+            j = j - 1;
+            work = 0.0;
+            for (il = i1; il <= k; ++il)
+            {
+               il2 = (il - 1) * rowCount - (il - 1) * il/2 + k;
+               work = work + sum1[il1+il-1] * sum1[il2-1];
+            }
+            sum1[j-1] = -din * work;
          }
-         sum1[j - 1] =  - din * work;
       }
-   }
 
-   // Inverse(A) = INV(R) * TRN(INV(R));
-   il = 1;
-   for( i = 1; i <= rowCount; ++i)
-   {
-      il1 = (i - 1) * rowCount - (i - 1) * i/2;
-      for( j = i; j <= rowCount; ++j)
+      // Inverse(A) = INV(R) * TRN(INV(R));
+      il = 1;
+      for (i = 1; i <= rowCount; ++i)
       {
-         il2 = (j - 1) * rowCount - (j - 1) * j/2;
-         work = 0.0;
-         for( k = j; k <= rowCount; ++k)
-            work = work + sum1[il1 + k - 1] * sum1[il2 + k - 1];
+         il1 = (i - 1) * rowCount - (i - 1) * i/2;
+         for (j = i; j <= rowCount; ++j)
+         {
+            il2 = (j - 1) * rowCount - (j - 1) * j/2;
+            work = 0.0;
+            for (k = j; k <= rowCount; ++k)
+               work = work + sum1[il1+k-1] * sum1[il2+k-1];
 
-         sum1[il - 1] = work;
-         il = il + 1;
+            sum1[il-1] = work;
+            il = il + 1;
+         }
+         il = il + rowCountIf;
       }
-      il = il + rowCountIf;
-   }
-
-   if(!lMatP)
       retval = 0;
-
-   ist = 1;
-   iERowCount = rowCount;
-
-   for( i = 1; i <= rowCount; ++i)
-   {
-      ist = rowCount - i + ist + 1;
-      iERowCount = ist + rowCount - i - 1;
    }
 
    return retval;

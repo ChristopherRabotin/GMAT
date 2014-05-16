@@ -649,46 +649,46 @@ void BatchEstimatorInv::Estimate()
                cov(j,i) = cov(i,j);
          }
       delete [] sum1;
-      MessageInterface::ShowMessage("Schur inverted; ");
    }
-/*   else if (inversionType == "Cholesky")
+   else if (inversionType == "Cholesky")
    {
       Real *sum1;
-	  Integer arraysize;
+      Integer arraysize;
 
-	  Integer iSize = information.GetNumColumns();
-	  if (iSize != information.GetNumRows())
-		  throw SolverException("Cholesky inversion requires a symmetric positive definite "
-		                        "information matrix");
+      Integer iSize = information.GetNumColumns();
+      if (iSize != information.GetNumRows())
+         throw SolverException("Cholesky inversion requires a symmetric positive definite "
+                  "information matrix");
 
-	  arraysize = iSize * (iSize + 1) / 2;
-	  sum1 = new Real[arraysize];
-	  // Fill sum1 with the upper triangle
-	  for (Integer i = 0; i < information.GetNumRows(); ++i)
-		  for (Integer j = i; j < information.GetNumColumns(); ++j)
-			  sum1[i * information.GetNumColumns() + j] = information(i,j);
+      arraysize = iSize * (iSize + 1) / 2;
+      sum1 = new Real[arraysize];
+      // Fill sum1 with the upper triangle
+      Integer index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            sum1[index] = information(i,j);
+            ++index;
+         }
 
-      if (CholInvert(sum1, arraysize, iSize) != 0)
-		  throw SolverException("Cholesky inversion failed");
+      if (CholeskyInvert(sum1, arraysize) != 0)
+         throw SolverException("Cholesky inversion failed");
 
-	  // Now fill in cov
-	  	  // Fill sum1 with the upper triangle
-	  for (Integer i = 0; i < information.GetNumRows(); ++i)
-		  for (Integer j = i; j < information.GetNumColumns(); ++j)
-		  {
-			  cov(i,j) = sum1[i * information.GetNumColumns() + j];
-			  if (i != j)
-				 cov(j,i) = cov(i,j);
-		  }
-	  delete [] sum1;
-   }
-*/
-   else
-   {
-      cov = information.Inverse();
-      MessageInterface::ShowMessage("Internal inverted; ");
-   }
-   MessageInterface::ShowMessage("con[0][0] = %.18le\n", cov(0,0));
+      // Now fill in cov
+      // Fill sum1 with the upper triangle
+      index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            cov(i,j) = sum1[index];
+            if (i != j)
+               cov(j,i) = cov(i,j);
+            ++index;
+         }
+            delete [] sum1;
+         }
+      else
+         cov = information.Inverse();
    
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage(" residuals: [\n");
