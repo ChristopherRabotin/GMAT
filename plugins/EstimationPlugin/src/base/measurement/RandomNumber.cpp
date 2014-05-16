@@ -99,6 +99,7 @@
 #include "RandomNumber.hpp"
 #include "MessageInterface.hpp"
 #include <time.h>
+#include <stdlib.h>           // for srand, etc.
 
 
 //#define DEBUG_CONSTRUCTOR
