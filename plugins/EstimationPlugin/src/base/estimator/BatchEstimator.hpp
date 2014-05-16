@@ -159,7 +159,7 @@ protected:
    virtual std::string    GetProgressString();
 
    Integer SchurInvert(Real *SUM1, Integer array_size);
-//   Integer CholInvert(Real *SUM1, Integer array_size);
+   Integer CholeskyInvert(Real *SUM1, Integer array_size);
 
    virtual bool            DataFilter();                    // made changes by TUAN NGUYEN
 
