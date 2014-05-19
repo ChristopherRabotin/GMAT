@@ -2225,11 +2225,6 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 {
-   CoordinateSystem *inertialCS =
-      CoordinateSystem::CreateLocalCoordinateSystem("", "MJ2000Eq", origin, NULL, NULL,
-                                                    mInternalCS->GetOrigin(),
-                                                    mSolarSystem);
-   
    // get spacecraft state
    Rvector6 scState = GetCartState();
    
@@ -2247,7 +2242,6 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
    #endif
    
    // return relative state
-   //return scState - originState;
    return relState;
 }
 
