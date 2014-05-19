@@ -27,8 +27,8 @@ GMAT aSat3.DelaunayH = 52184.99999999999;
 
 Create Spacecraft aSat4;
 GMAT aSat4.DisplayStateType = OutgoingAsymptote;
-GMAT aSat4.HyperbolicRadPer = 90000;
-GMAT aSat4.C3Energy = 1.328668138333331;
+GMAT aSat4.OutgoingRadPer = 90000;
+GMAT aSat4.OutgoingC3Energy = 1.328668138333331;
 GMAT aSat4.OutgoingRHA = 41.20469589091438;
 GMAT aSat4.OutgoingDHA = 12.81023172339924;
 GMAT aSat4.OutgoingBVAZI = 88.98024180552517;
@@ -36,8 +36,8 @@ GMAT aSat4.TA = 99.88774933204918;
 
 Create Spacecraft aSat5;
 GMAT aSat5.DisplayStateType = IncomingAsymptote;
-GMAT aSat5.HyperbolicRadPer = 90000;
-GMAT aSat5.C3Energy = 1.328668138333331;
+GMAT aSat5.IncomingRadPer = 90000;
+GMAT aSat5.IncomingC3Energy = 1.328668138333331;
 GMAT aSat5.IncomingRHA = 120.6720147637603;
 GMAT aSat5.IncomingDHA = 1.352950864480033;
 GMAT aSat5.IncomingBVAZI = 77.22015101770275;
