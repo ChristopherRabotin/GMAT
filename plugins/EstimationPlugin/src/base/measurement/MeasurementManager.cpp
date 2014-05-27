@@ -810,6 +810,13 @@ UnsignedInt MeasurementManager::LoadObservations()
 }
 
 
+
+std::vector<ObservationData>* MeasurementManager::GetObservationDataList()
+{
+   return &observations;
+}
+
+
 //-----------------------------------------------------------------------------
 // void LoadRampTables()												// this function was added by TUAN NGUYEN
 //-----------------------------------------------------------------------------

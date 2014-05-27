@@ -99,6 +99,8 @@ public:
    ObservationData*        GetObsDataObject(const Integer observationToGet = -1);	// made changes by TUAN NGUYEN
    bool                    AdvanceObservation();								// made changes by TUAN NGUYEN		for Bug 8 in ticket GMT-4314
    void                    Reset();
+   
+   std::vector<ObservationData>* GetObservationDataList();						// made changes by TUAN NGUYEN
 
 protected:
    /// List of the managed measurement models
