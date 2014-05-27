@@ -535,6 +535,13 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
             participants.size());
    #endif
 
+   // Get minimum elevation angle for ground station
+   Real minAngle;																							// made changes by TUAN NGUYEN
+   if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)												// made changes by TUAN NGUYEN
+      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");		// made changes by TUAN NGUYEN
+   else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)											// made changes by TUAN NGUYEN
+      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");		// made changes by TUAN NGUYEN
+
    if (withEvents == false)
    {
       #ifdef DEBUG_RANGE_CALC
@@ -554,8 +561,10 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       // coords
       std::string updateAll = "All";
       UpdateRotationMatrix(currentMeasurement.epoch, updateAll);
-      outState = R_o_j2k * rangeVecInertial;
-      currentMeasurement.feasibilityValue = outState[2];
+//      outState = R_o_j2k * rangeVecInertial;
+//      currentMeasurement.feasibilityValue = outState[2];
+	  outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
+	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -579,7 +588,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
                bfLoc.ToString().c_str());
       #endif
 
-      if (currentMeasurement.feasibilityValue > 0.0)
+      if (currentMeasurement.feasibilityValue > minAngle)
       {
          currentMeasurement.isFeasible = true;
          currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();
@@ -607,7 +616,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
                p2Loc.ToString().c_str());
          MessageInterface::ShowMessage("   Range Vector:  %s\n",
                rangeVecInertial.ToString().c_str());
-         MessageInterface::ShowMessage("   R(Groundstation) dot RangeVec =  %lf\n",
+         MessageInterface::ShowMessage("   Elevation angle =  %lf degree\n",
                currentMeasurement.feasibilityValue);
          MessageInterface::ShowMessage("   Feasibility:  %s\n",
                (currentMeasurement.isFeasible ? "true" : "false"));
