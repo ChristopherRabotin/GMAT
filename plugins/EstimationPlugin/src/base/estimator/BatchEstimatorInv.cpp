@@ -32,6 +32,7 @@
 //#define DEBUG_VERBOSE
 //#define DEBUG_WEIGHTS
 //#define DEBUG_O_MINUS_C
+//#define DEBUG_SCHUR
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -663,14 +664,117 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   Rmatrix cov;
-   try
+   Rmatrix cov(information.GetNumRows(), information.GetNumColumns());
+   if (inversionType == "Schur")
    {
-      cov = information.Inverse();
+      Real *sum1;
+      Integer arraysize;
+
+      Integer iSize = information.GetNumColumns();
+      if (iSize != information.GetNumRows())
+         throw SolverException("Schur inversion requires a square information "
+                        "matrix");
+
+      arraysize = iSize * (iSize + 1) / 2;
+      sum1 = new Real[arraysize];
+
+      // Fill sum1 with the upper triangle
+      Integer index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            sum1[index] = information(i,j);
+            ++index;
+         }
+
+      #ifdef DEBUG_SCHUR
+         MessageInterface::ShowMessage("Calling Schur with array size = %d\n"
+               "   Input vector:  [", arraysize);
+         for (Integer i = 0; i < arraysize; ++i)
+         {
+            if (i > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", sum1[i]);
+         }
+         MessageInterface::ShowMessage("]\n");
+      #endif
+      
+      Integer schurRet = SchurInvert(sum1, arraysize);
+
+      #ifdef DEBUG_SCHUR
+         MessageInterface::ShowMessage("   Output vector: [", arraysize);
+         for (Integer i = 0; i < arraysize; ++i)
+         {
+            if (i > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", sum1[i]);
+         }
+         MessageInterface::ShowMessage("]\n");
+      #endif
+
+      if (schurRet != 0)
+         throw SolverException("Schur inversion failed");
+
+      // Now fill in cov
+      // Fill sum1 with the upper triangle
+      index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            cov(i,j) = sum1[index];
+            ++index;
+            if (i != j)
+               cov(j,i) = cov(i,j);
+         }
+      delete [] sum1;
    }
-   catch(...)
+   else if (inversionType == "Cholesky")
    {
-	  throw EstimatorException("Error: Normal matrix is singular.\n");
+      Real *sum1;
+      Integer arraysize;
+
+      Integer iSize = information.GetNumColumns();
+      if (iSize != information.GetNumRows())
+         throw SolverException("Cholesky inversion requires a symmetric positive definite "
+                  "information matrix");
+
+      arraysize = iSize * (iSize + 1) / 2;
+      sum1 = new Real[arraysize];
+      // Fill sum1 with the upper triangle
+      Integer index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            sum1[index] = information(i,j);
+            ++index;
+         }
+
+      if (CholeskyInvert(sum1, arraysize) != 0)
+         throw SolverException("Cholesky inversion failed");
+
+      // Now fill in cov
+      // Fill sum1 with the upper triangle
+      index = 0;
+      for (Integer i = 0; i < information.GetNumRows(); ++i)
+         for (Integer j = i; j < information.GetNumColumns(); ++j)
+         {
+            cov(i,j) = sum1[index];
+            if (i != j)
+               cov(j,i) = cov(i,j);
+            ++index;
+         }
+      delete [] sum1;
+   }
+   else
+   {
+	  try
+	  {
+      cov = information.Inverse();
+	  } 
+	  catch (...)
+	  {
+	     throw EstimatorException("Error: Normal matrix is sigular\n");
+	  }
    }
 
    #ifdef DEBUG_VERBOSE
