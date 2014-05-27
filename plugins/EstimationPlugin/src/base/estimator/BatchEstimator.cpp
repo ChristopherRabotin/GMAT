@@ -89,7 +89,8 @@ BatchEstimator::BatchEstimator(const std::string &type,
    newResidualRMS             (1.0e12),
    useApriori                 (false),						// second term of Equation Eq8-184 in GTDS MathSpec is not used	
    advanceToEstimationEpoch   (false),
-   converged                  (false),
+//   converged                  (false),
+   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true)
 {
    objectTypeNames.push_back("BatchEstimator");
@@ -129,7 +130,8 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    newResidualRMS             (1.0e12),
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
-   converged                  (false),
+//   converged                  (false),
+   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP)
 {
    // Clear the loop buffer
@@ -164,7 +166,9 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       useApriori     = est.useApriori;
 
       advanceToEstimationEpoch = false;
-      converged                = false;
+//      converged                = false;
+	  estimationStatus         = UNKNOWN;
+
 	  chooseRMSP               = est.chooseRMSP;
 
       // Clear the loop buffer
@@ -593,7 +597,8 @@ bool BatchEstimator::TakeAction(const std::string &action,
    {
       currentState = INITIALIZING;
       isInitialized = false;
-      converged   = false;
+//      converged   = false;
+	  estimationStatus = UNKNOWN;
 
       return true;
    }
@@ -620,7 +625,8 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-      converged = false;
+//    converged = false;
+      estimationStatus = UNKNOWN;
       retval    = true;
    }
 
@@ -884,63 +890,42 @@ void BatchEstimator::CompleteInitialization()
    esm.BufferObjects(&outerLoopBuffer);
    esm.MapObjectsToVector();
 
-   converged   = false;
+//   converged   = false;
+   estimationStatus = UNKNOWN;
    isInitialized = true;
 
-   // Open report file											// made changes by TUAN NGUYEN
-   //if (reportFile.is_open() == false)							// made changes by TUAN NGUYEN
-   //{
-
-   //   if (reportFilename != "")
-   //   {
-   //      std::string fullPath = "";
-
-   //      // If no path designation slash character is found, add the default path
-   //      if ((reportFilename.find('/') == std::string::npos) &&
-   //          (reportFilename.find('\\') == std::string::npos))
-   //      {
-   //         FileManager *fm = FileManager::Instance();
-   //         fullPath = fm->GetPathname(FileManager::MEASUREMENT_PATH);
-   //      }
-   //      fullPath += reportFilename;
-
-   //      reportFile.open(fullPath, std::ios_base::out);		// made changes by TUAN NGUYEN
-	  //}
-   //}
-
-
-   std::stringstream sLine;
-   // Write out maximum residual for each measuement model
-   std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
-   sLine << "\nData Editing criteria:\n";
-//   for (int i = 0; i < modelsList.size(); ++i)
-//      sLine << "   " << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
-
-   // Write out OLSE Initial RMS: 
-   sLine << "   " << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
-   sLine << "   " << GetName() <<".OLSEMultiplicativeConstant = " << constMult << "\n";
-   sLine << "   " << GetName() <<".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
-
-   // Write out all notations used in table:
-   sLine << "Notaions used in report file: \n";
-   sLine << "  N: Normal\n";
-   sLine << "  U: Unmatched to any measurement model\n";
-   sLine << "  R: Out of ramped table\n";
-   sLine << "  ET: measurement unfeasible due to the block of transmitted signal\n";
-   sLine << "  ER: measurement unfeasible due to the block of received signal\n";
-   sLine << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
-   sLine << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
-   sLine << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
-   sLine << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
-//   sLine << "  M: Edited by measurement maximum residual\n";
-   sLine << "  I: Edited by Initial RMS Sigma filter\n";
-   sLine << "  S: Edited by Outer-Loop Sigma Editing\n\n";
-
-   // Write out the header
-   sLine << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
-   
-   linesBuff = sLine.str();
-
+//   std::stringstream sLine;
+//   // Write out maximum residual for each measuement model
+//   std::vector<MeasurementModel*> modelsList = measManager.GetAllMeasurementModels();  
+//   sLine << "\nData Editing criteria:\n";
+////   for (int i = 0; i < modelsList.size(); ++i)
+////      sLine << "   " << modelsList[i]->GetName() <<".ResidualMax = " << modelsList[i]->GetRealParameter("ResidualMax") << "\n";
+//
+//   // Write out OLSE Initial RMS: 
+//   sLine << "   " << GetName() <<".OLSEInitialRMSSigma        = " << maxResidualMult << "\n";
+//   sLine << "   " << GetName() <<".OLSEMultiplicativeConstant = " << constMult << "\n";
+//   sLine << "   " << GetName() <<".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
+//
+//   // Write out all notations used in table:
+//   sLine << "Notaions used in report file: \n";
+//   sLine << "  N: Normal\n";
+//   sLine << "  U: Unmatched to any measurement model\n";
+//   sLine << "  R: Out of ramped table\n";
+//   sLine << "  ET: measurement unfeasible due to the block of transmitted signal\n";
+//   sLine << "  ER: measurement unfeasible due to the block of received signal\n";
+//   sLine << "  EST: measurement unfeasible due to the block of Start path's transmitted signal\n";
+//   sLine << "  ESR: measurement unfeasible due to the block of Start path's received signal\n";
+//   sLine << "  EET: measurement unfeasible due to the block of Etart path's transmitted signal\n";
+//   sLine << "  EER: measurement unfeasible due to the block of Etart path's received signal\n";
+////   sLine << "  M: Edited by measurement maximum residual\n";
+//   sLine << "  I: Edited by Initial RMS Sigma filter\n";
+//   sLine << "  S: Edited by Outer-Loop Sigma Editing\n\n";
+//
+//   // Write out the header
+//   sLine << "Iter   RecNum   Epoch                Meas-Type      Part.s     Edit-Criteria Band   Uplink-Frequency         RangeModule              Doppler-Interval         Obs Measuement (O)   Cal Measurement (C)      Residual (O-C)   Weight (W)            W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   Partial-Derivative Vector\n";
+//   
+//   linesBuff = sLine.str();
+//
    WriteToTextFile();
    ReportProgress();
 
@@ -1157,23 +1142,21 @@ void BatchEstimator::CheckCompletion()
    #endif
 
    convergenceReason = "";
-   converged = TestForConvergence(convergenceReason);
+//   converged = TestForConvergence(convergenceReason);
+   estimationStatus = TestForConvergence(convergenceReason);
 
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
 
    ++iterationsTaken;
-   if ((converged) || (iterationsTaken >= maxIterations))
+//   if ((converged) || (iterationsTaken >= maxIterations))
+   if ((estimationStatus == ABSOLUTETOL_CONVERGED) ||
+	   (estimationStatus == RELATIVETOL_CONVERGED) ||
+	   (estimationStatus == ABS_AND_REL_TOL_CONVERGED) ||
+	   (estimationStatus == MAX_CONSECUTIVE_DIVERGED) ||
+	   (iterationsTaken >= maxIterations))
    {
-#ifdef DEBUG_VERBOSE
-      if (converged)
-         MessageInterface::ShowMessage("Estimation has converged\n%s\n\n",
-                  convergenceReason.c_str());
-      else
-         MessageInterface::ShowMessage("Estimation has reached the maximum "
-                  "iteration count, but has not converged\n\n");
-#endif
       currentState = FINISHED;
    }
    else
@@ -1326,10 +1309,10 @@ std::string BatchEstimator::GetProgressString()
 
                if (estEpochFormat != "FromParticipants")
                   progress << "   Estimation Epoch (" << estEpochFormat
-                           << "): " << estEpoch << "\n\n";
+                           << "): " << estEpoch << "\n";
                else
                   progress << "   Estimation Epoch (A.1 modified Julian): "
-                           << estimationEpoch << "\n\n";
+                           << estimationEpoch << "\n";
 
 			   GetEstimationState(outputEstimationState);						// made changes by TUAN NGUYEN
                
@@ -1343,25 +1326,50 @@ std::string BatchEstimator::GetProgressString()
                            << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
                };
 
-               progress << "\n a priori covariance:\n\n";
-               Rmatrix aPrioriCovariance = *(stateCovariance->GetCovariance());
-               for (Integer i = 0; i < aPrioriCovariance.GetNumRows(); ++i)
-               {
-                  progress << "----- Row " << (i+1) << "\n";
-                  for (Integer j = 0; j < aPrioriCovariance.GetNumColumns(); ++j)
-                     progress << "   " << aPrioriCovariance(i, j);
-                  progress << "\n";
-               }
+               //progress << "\n a priori covariance:\n\n";
+               //Rmatrix aPrioriCovariance = *(stateCovariance->GetCovariance());
+               //for (Integer i = 0; i < aPrioriCovariance.GetNumRows(); ++i)
+               //{
+               //   progress << "----- Row " << (i+1) << "\n";
+               //   for (Integer j = 0; j < aPrioriCovariance.GetNumColumns(); ++j)
+               //      progress << "   " << aPrioriCovariance(i, j);
+               //   progress << "\n";
+               //}
             }
             break;
 
          case CHECKINGRUN:
             progress << "\n   WeightedRMS residuals for this iteration: "
                      << newResidualRMS;
+            progress << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
-                     << predictedRMS << "\n\n";
+                     << predictedRMS << "\n";
+			
+			switch(estimationStatus)
+			{
+			case ABSOLUTETOL_CONVERGED:
+			   progress << "This iteration is converged due to absolute tolerance convergence criteria\n";
+			   break;
+			case RELATIVETOL_CONVERGED:
+			   progress << "This iteration is converged due to relative convergence criteria \n";
+			   break;
+			case ABS_AND_REL_TOL_CONVERGED:
+			   progress << "This iteration is converged due to boths: absolute and relative convergence criteria\n";
+			   break;
+			case MAX_CONSECUTIVE_DIVERGED:
+			   progress << "This iteration is diverged due to maximum consecutive diverged criteria\n";
+			   break;
+			case CONVERGING:
+			   progress << "This iteration is converging\n";
+			   break;
+			case DIVERGING:
+			   progress << "This iteration is diverging\n";
+			   break;
+			}
+			progress << "\n";
 
-            progress << "------------------------------"
+			progress << "------------------------------"
                      << "------------------------\n"
                      << "Iteration " << iterationsTaken
                      << "\n\nCurrent estimated state:\n";
@@ -1373,8 +1381,10 @@ std::string BatchEstimator::GetProgressString()
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
                progress << "   "
-//                        << (*estimationState)[i];								// made changes by TUAN NGUYEN
-			              << outputEstimationState[i];							// made changes by TUAN NGUYEN
+                        << (*map)[i]->objectName << "."
+                        << (*map)[i]->elementName << "."
+                        << (*map)[i]->subelement << " = "
+                        << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
             break;
@@ -1382,8 +1392,33 @@ std::string BatchEstimator::GetProgressString()
          case FINISHED:
             progress << "\n   WeightedRMS residuals for this iteration: "
                      << newResidualRMS;
+            progress << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
-                     << predictedRMS << "\n\n";
+                     << predictedRMS << "\n";
+
+			switch(estimationStatus)
+			{
+			case ABSOLUTETOL_CONVERGED:
+			   progress << "This iteration is converged due to absolute tolerance convergence criteria\n";
+			   break;
+			case RELATIVETOL_CONVERGED:
+			   progress << "This iteration is converged due to relative convergence criteria \n";
+			   break;
+			case ABS_AND_REL_TOL_CONVERGED:
+			   progress << "This iteration is converged due to boths: absolute and relative convergence criteria\n";
+			   break;
+			case MAX_CONSECUTIVE_DIVERGED:
+			   progress << "This iteration is diverged due to maximum consecutive diverged criteria\n";
+			   break;
+			case CONVERGING:
+			   progress << "This iteration is converging\n";
+			   break;
+			case DIVERGING:
+			   progress << "This iteration is diverging\n";
+			   break;
+			}
+			progress << "\n";
 
             progress << "\n****************************"
                      << "****************************\n"
@@ -1391,9 +1426,24 @@ std::string BatchEstimator::GetProgressString()
                      << " iterations"
                      << "\n****************************"
                      << "****************************\n\n"
-                     << "Estimation "
-                     << (converged ? "converged!" : "did not converge") << "\n"
-					 << convergenceReason << "\n"
+                     << "Estimation ";
+			switch(estimationStatus)
+			{
+			case ABSOLUTETOL_CONVERGED:
+			case RELATIVETOL_CONVERGED:
+			case ABS_AND_REL_TOL_CONVERGED:
+				progress << "converged!\n";
+				break;
+			case MAX_CONSECUTIVE_DIVERGED:
+			case CONVERGING:
+			case DIVERGING:
+				progress << "did not converge\n";
+				break;
+			case UNKNOWN:
+				break;
+			};
+            //         << (converged ? "converged!" : "did not converge") << "\n"
+			progress   << convergenceReason << "\n"
                      << "\nFinal Estimated State:\n\n";
 
             if (estEpochFormat != "FromParticipants")
@@ -1420,7 +1470,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "\nFinal Covariance Matrix:\n\n";
                for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
                {
-                  progress << "----- Row " << (i+1) << "\n";
+//                  progress << "----- Row " << (i+1) << "\n";
                   for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
                      progress << "   " << finalCovariance(i, j);
                   progress << "\n";
@@ -1432,7 +1482,9 @@ std::string BatchEstimator::GetProgressString()
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
                progress << "\n   WeightedRMS residuals for this iteration:     "
-                        << newResidualRMS << "\n\n";
+                        << newResidualRMS;
+               progress << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS << "\n\n";
             }
 
             progress << "\n****************************"
@@ -1469,7 +1521,7 @@ std::string BatchEstimator::GetProgressString()
 
 
 //------------------------------------------------------------------------------
-// bool TestForConvergence(std::string &reason)
+// Integer TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------
 /**
  * Provides the default convergence test for the BatchEstimators.
@@ -1477,16 +1529,15 @@ std::string BatchEstimator::GetProgressString()
  * GMAT's batch estimator report a converged solution when any of the following
  * criteria are met:
  *
- * 1.  The change in the root mean square of the sum of the measurement
- * residuals is less than a user specified relative change tolerance.
+ * 1. Aboslute Tolerance test: |RMS| <= Absolute Tol
  *
- * 2.  The L2 norm of the change in the estimation state vector is less than a
- * specified absolute tolerance.
+ * 2. Relative Tolerance test: |1 - RMSP/RMSB| <= Relative Tol
  *
- * This method indicates that at least one of these criteria is met by returning
- * true; if no convergence criteria are met, the return value is false.
+ * 3. Maximum consecutive divergence test
+ * 
+ * 4. Converging and diverging tests
  *
- * Derived classes can override this method to specify other criteria as needed.
+ * Note that: tests 2, 3, and 4 only perform after iteration 0
  *
  * @param reason A string that is set to indicate the criterion that was met
  *               when convergence is detected.  The string contains text for all
@@ -1495,26 +1546,13 @@ std::string BatchEstimator::GetProgressString()
  * @return true if the estimator has converged, false if not
  */
 //------------------------------------------------------------------------------
-bool BatchEstimator::TestForConvergence(std::string &reason)
+Integer BatchEstimator::TestForConvergence(std::string &reason)
 {
-   bool retval = false;
+   Integer MaximumConsecutiveDiverged = 4;
+   Integer retval = UNKNOWN;
    std::stringstream why;
 
-   if (iterationsTaken >= 1)
-   {
-      if (GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS) <= relativeTolerance)
-      {
-         why << "   (WeightedRMS - oldWeightedRMS)/oldWeightedRMS = (" << newResidualRMS << " - " 
-		  << oldResidualRMS << ")/ " << oldResidualRMS << " = " 
-          << GmatMathUtil::Abs((newResidualRMS - oldResidualRMS)/oldResidualRMS)
-          << " is less than RelativeTol, "
-          << relativeTolerance << "\n";
-
-	     reason = why.str();
-         retval = true;
-	  }
-   }
-
+   // AbsoluteTol test
    if (newResidualRMS <= absoluteTolerance)
    {
       why << "   WeightedRMS residual, " << newResidualRMS
@@ -1522,12 +1560,43 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
           << "\n";
 
 	  reason = why.str();
-      retval = true;
+      retval = ABSOLUTETOL_CONVERGED;
    }
 
-   if ((iterationsTaken + 1) >= maxIterations)
+   // RelativeTol test
+   if (GmatMathUtil::Abs((predictedRMS - bestResidualRMS)/bestResidualRMS) <= relativeTolerance)
    {
-	   reason =  "Estimation has reached the maximum iteration count\n";
+      why << "   |1 - RMSP/RMSB| = | 1- " << predictedRMS << " / " << bestResidualRMS << "| = " 
+          << GmatMathUtil::Abs(1 - predictedRMS/bestResidualRMS)
+          << " is less than RelativeTol, "
+          << relativeTolerance << "\n";
+
+	  reason = why.str();
+	  if (retval == ABSOLUTETOL_CONVERGED)
+         retval = ABS_AND_REL_TOL_CONVERGED;
+	  else
+		 retval = RELATIVETOL_CONVERGED;
+   }
+   if (retval != UNKNOWN)
+      return retval;
+
+
+   if (iterationsTaken >= 1)
+   {
+	  // Maximmum consecutive divergence test
+	  if (newResidualRMS > oldResidualRMS)
+	  {
+		 numDivIterations++;
+		 if (numDivIterations >= MaximumConsecutiveDiverged)
+		    retval = MAX_CONSECUTIVE_DIVERGED;
+		 else
+		    retval = DIVERGING;
+	  }
+	  else
+	  {
+		 numDivIterations = 0;
+		 retval = CONVERGING;
+	  }
    }
 
    return retval;
@@ -1545,7 +1614,8 @@ bool BatchEstimator::TestForConvergence(std::string &reason)
  * @param solverState The current state from the finite state machine
  */
 //------------------------------------------------------------------------------
-void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
+/*
+void BatchEstimator::WriteToTextFile1(Solver::SolverState sState)
 {
    GmatState outputEstimationState;											// made changes by TUAN NGUYEN
 
@@ -1572,10 +1642,10 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
                   << "\n\na priori state:\n";
          if (estEpochFormat != "FromParticipants")
             textFile << "   Estimation Epoch (" << estEpochFormat
-                     << "): " << estEpoch << "\n\n";
+                     << "): " << estEpoch << "\n";
          else
             textFile << "   Estimation Epoch (A.1 modified Julian): "
-                     << estimationEpoch << "\n\n";
+                     << estimationEpoch << "\n";
 
 
          GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
@@ -1619,6 +1689,8 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          {
             textFile << "\n   WeightedRMS residuals for this iteration: "
                      << newResidualRMS;
+            textFile << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS;
             textFile << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n\n";
 
@@ -1654,6 +1726,8 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          {
             textFile << "\n   WeightedRMS residuals for this iteration: "
                      << newResidualRMS;
+            textFile << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS;
             textFile << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n\n";
 		 }
@@ -1664,9 +1738,25 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
                   << " iterations"
                   << "\n****************************"
                   << "****************************\n\n"
-                  << "Estimation "
-                  << (converged ? "converged!" : "did not converge") << "\n"
-				  << convergenceReason << "\n"
+                  << "Estimation ";
+		 switch(estimationStatus)
+		 {
+			case ABSOLUTETOL_CONVERGED:
+			case RELATIVETOL_CONVERGED:
+			case ABS_AND_REL_TOL_CONVERGED:
+				textFile << "converged!\n";
+				break;
+			case MAX_CONSECUTIVE_DIVERGED:
+			case CONVERGING:
+			case DIVERGING:
+				textFile << "did not converge\n";
+				break;
+			case UNKNOWN:
+				break;
+		 };
+
+//                  << (converged ? "converged!" : "did not converge") << "\n"
+		 textFile  << convergenceReason << "\n"
                   << "\n\nFinal Estimated State:\n\n";
 
          if (estEpochFormat != "FromParticipants")
@@ -1705,7 +1795,9 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
             textFile << "\n   WeightedRMS residuals for previous iteration: "
                      << oldResidualRMS;
             textFile << "\n   WeightedRMS residuals for this iteration:     "
-                     << newResidualRMS << "\n\n";
+                     << newResidualRMS ;
+            textFile << "\n   BestRMS residuals for this iteration: "
+                     << bestResidualRMS << "\n\n";
          }
 
          textFile << "\n****************************"
@@ -1717,6 +1809,276 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
       default:
          break;
    }
+}
+*/
+
+void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
+{
+   GmatState outputEstimationState;											// made changes by TUAN NGUYEN
+
+   if (!showProgress)
+      return;
+
+   if (!textFile.is_open())
+      OpenSolverTextFile();
+
+   Solver::SolverState theState = sState;
+   if (sState == Solver::UNDEFINED_STATE)
+      theState = currentState;
+
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+
+   textFile.setf(std::ios::fixed, std::ios::floatfield);
+
+   switch (theState)
+   {
+      case INITIALIZING:
+		 WriteHeader();
+         break;
+	  case ACCUMULATING:
+		 if (textFileMode == "Debug")
+		 {
+			// Write detail about observation data and estimation calculation for that record here
+			textFile << linesBuff;
+			textFile.flush();
+		 }
+		 break;
+	  case ESTIMATING:
+		 WriteSummary(theState);
+		 break;
+      case CHECKINGRUN:
+		 WriteSummary(theState);
+		 WriteHeader();
+         break;
+
+      case FINISHED:
+		 WriteSummary(theState);
+		 WriteConclusion();
+         break;
+
+      default:
+         break;
+   }
+}
+
+
+void BatchEstimator::WriteConclusion()
+{
+   GmatState outputEstimationState;
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+
+   /// 1. Write estimation status
+   textFile << "\n"
+            << "********************************************************\n"
+            << "*** Estimating Completed in " << iterationsTaken << " iterations\n"
+            << "********************************************************\n\n"
+            << "Estimation ";
+   switch(estimationStatus)
+   {
+      case ABSOLUTETOL_CONVERGED:
+      case RELATIVETOL_CONVERGED:
+      case ABS_AND_REL_TOL_CONVERGED:
+         textFile << "converged!\n";
+         break;
+      case MAX_CONSECUTIVE_DIVERGED:
+      case CONVERGING:
+      case DIVERGING:
+         textFile << "did not converge\n";
+         break;
+      case UNKNOWN:
+         break;
+   };
+
+
+   /// 2. Write convergence reason
+   textFile.precision(15);
+   textFile << convergenceReason << "\n\n"
+            << "Final Estimated State:\n";
+
+   if (estEpochFormat != "FromParticipants")
+      textFile << "   Estimation Epoch (" << estEpochFormat
+               << "): " << estEpoch << "\n";
+   else
+      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+               << estimationEpoch << "\n";
+
+	
+   /// 3. Write final state
+   GetEstimationState(outputEstimationState);
+   textFile.precision(8);
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      textFile << "   "
+               << (*map)[i]->objectName << "."
+               << (*map)[i]->elementName << "."
+               << (*map)[i]->subelement << " = "
+               << outputEstimationState[i] << "\n";
+   }
+   textFile << "\n";
+
+
+   /// 4. Write final coveriance matrix 
+   Rmatrix finalCovariance = information.Inverse();
+   textFile << "\nFinal Covariance Matrix:\n";
+   textFile.precision(12);
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+   {
+      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+         textFile << "   " << finalCovariance(i, j);
+      textFile << "\n";
+   }
+
+
+   /// 5. Write previous RMS, current RMS, and the best RMS
+   textFile << "\n   WeightedRMS residuals for previous iteration: "
+            << oldResidualRMS;
+   textFile << "\n   WeightedRMS residuals for this iteration:     "
+            << newResidualRMS ;
+   textFile << "\n   BestRMS residuals for this iteration: "
+            << bestResidualRMS << "\n\n";
+
+   textFile << "\n********************************************************\n\n";
+   textFile.flush();
+
+}
+
+
+void BatchEstimator::WriteHeader()
+{
+   
+   GmatState outputEstimationState;
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+
+   /// 1. Write iteration number
+   textFile << "\n"
+	        << "********************************************************\n"
+            << "*** Iteration " << iterationsTaken << "\n"
+            << "********************************************************\n\n";
+
+
+   /// 2. Write state at beginning iteration:
+   textFile << "State at Beginning of Iteration:\n";
+   textFile.precision(15);
+   if (estEpochFormat != "FromParticipants")
+      textFile << "   Estimation Epoch (" << estEpochFormat
+               << "): " << estEpoch << "\n";
+   else
+      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+               << estimationEpoch << "\n";
+
+   // Convert state to participants' coordinate system:
+   GetEstimationState(outputEstimationState);
+   // write out state
+   textFile.precision(8);
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      textFile << "   "
+               << (*map)[i]->objectName << "."
+               << (*map)[i]->elementName << "."
+               << (*map)[i]->subelement << " = "
+               << outputEstimationState[i] << "\n";
+   }
+   textFile << "\n";
+
+
+   /// 3. Write data editing criteria:
+   textFile.precision(2);
+   textFile << "Data Editing Criteria:\n"
+	        << "   " << GetName() << ".OLSEInitialRMSSigma        = " << maxResidualMult << "\n"
+	        << "   " << GetName() << ".OLSEMultiplicativeConstant = " << constMult << "\n"
+			<< "   " << GetName() << ".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
+
+
+   /// 4. Write notations used in report file:
+   textFile << "Notations Used In Report File: \n" 
+            << "   N    : Not Edited \n"                                
+            << "   U    : Unused Because No Computed Value Configuration Available \n"
+            << "   R    : Out of Ramped Table Range \n"
+            << "   BXY  : Blocked.  X = Path Index.  Y = Count Index (Doppler) \n"
+            << "   IMRS : Edited by Initial RMS Sigma Filter \n"
+            << "   OLSE : Edited by Outer-Loop Sigma Editor \n\n";
+
+
+   /// 5. Write report header
+   textFile << "Iter   RecNum   Epoch                    Obs Type        Units  Participants        Edit             Obs (O)              Cal (C)           Residual (O-C)   Weight (W)       W*(O-C)^2             sqrt(W)*|O-C|            Elevation-Angle   \n";
+   textFile.flush();
+
+}
+
+
+#include "StringUtil.hpp"
+
+void BatchEstimator::WriteSummary(Solver::SolverState sState)
+{
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+   GmatState outputEstimationState;
+
+   if (sState == ESTIMATING)
+   {
+   /// 1. Write state summary
+   // Convert state to participants' coordinate system:
+   GetEstimationState(outputEstimationState);
+   // Write state to report file
+   textFile << "\n";
+   textFile << "Iteration " << iterationsTaken << ": State Information \n"
+	        << "      State Component         Initial State        Updated State         Change in State        \n";
+
+   textFile.precision(8);
+   for (int i = 0; i < map->size(); ++i) 
+   {
+      textFile << "   "
+               << (*map)[i]->objectName << "."
+               << (*map)[i]->elementName << "."
+               << (*map)[i]->subelement << "     "
+               << GmatStringUtil::ToString(oldEstimationState[i]) << "     "					// initial state
+			   << GmatStringUtil::ToString((*estimationState)[i]) << "     "					// updated state
+			   << GmatStringUtil::ToString(dx[i]) << "\n";									// change in state
+   }
+   textFile << "\n";
+
+
+   /// 2. Write statistics
+   textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
+	        << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
+            << "   Records Removed By Sigma Editing : " << "(No number available) " << "\n"
+			<< "   Records Used For Estimation : " << measurementResiduals.size() << "\n";
+   textFile.precision(12);
+   textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"
+            << "   PredictedRMS Residuals : " << predictedRMS << "\n";
+   }
+
+   if ((sState == CHECKINGRUN)||(sState == FINISHED))
+   {
+   textFile << "   DC Status : ";
+   switch(estimationStatus)
+   {
+   case ABSOLUTETOL_CONVERGED:
+	  textFile << "Absolute Tolerance Converged\n";
+	  break;
+   case RELATIVETOL_CONVERGED:
+	  textFile << "Relative Tolerance Converged\n";
+	  break;
+   case ABS_AND_REL_TOL_CONVERGED:
+	  textFile << "Absolute and Relative Tolerance Converged\n";
+	  break;
+   case MAX_CONSECUTIVE_DIVERGED:
+	  textFile << "Maximum Consecutive Diverged\n";
+	  break;
+   case CONVERGING:
+      textFile << "Converging\n";
+	  break;
+   case DIVERGING:
+      textFile << "Diverging\n";
+	  break;
+   case UNKNOWN:
+      textFile << "Unknown\n";
+	  break;
+   }
+   textFile << "\n";
+   }
+
+   textFile.flush();
+
 }
 
 

@@ -164,39 +164,49 @@ void BatchEstimatorInv::Accumulate()
    #endif
 
    std::stringstream sLine;
-   Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch,currentObs->epochSystem,TimeConverterUtil::TAIMJD); 
+//   Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch,currentObs->epochSystem,TimeConverterUtil::TAIMJD); 
+   std::string times;
+   Real temp;
+   TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch,"","UTCGregorian", temp, times, 1); 
    char s[1000];
-   sprintf(&s[0],"%d   %5d   %.12lf   ", iterationsTaken, measManager.GetCurrentRecordNumber(), timeTAI);
+   
+   sprintf(&s[0],"%4d  %5d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times);
    sLine << s;
-   if (currentObs->typeName == "DSNTwoWayRange")
-	  sLine << "DSNTwoWayRange     ";
-   else
-      sLine << currentObs->typeName << "   ";
-   for(int n=0; n < currentObs->participantIDs.size(); ++n)
-      sLine << currentObs->participantIDs[n] << "   ";
-   sLine << "       ";
+   std::string ss = currentObs->typeName + "                    ";
+   sLine << ss.substr(0,20) << "   ";
 
+   ss = "";
+   for(int n=0; n < currentObs->participantIDs.size(); ++n)
+      ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
+   ss = ss + "                    ";
+   sLine << ss.substr(0,20);
+   
 //   ValidateModelToAccess();						// verify observation data is matched to a measurement model
    if (modelsToAccess.size() == 0)
    {
 	  // Count number of records removed by measurement model unmatched 
-      std::string filterName = "Measurement model unmatched";
+      std::string filterName = "Unused";
       if (numRemovedRecords.find(filterName) == numRemovedRecords.end())
          numRemovedRecords[filterName] = 1;
 	  else
 		 numRemovedRecords[filterName]++;
 
-	  measManager.GetObsDataObject()->removedReason = "U";
+	  std::string ss = measManager.GetObsDataObject()->removedReason = "U";
 	  measManager.GetObsDataObject()->inUsed = false;
 
-	  sLine << measManager.GetObsDataObject()->removedReason << "     ";
+	  ss = ss + "    ";
+	  ss = ss.substr(0,4);
+	  sLine << ss << "     ";
+      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                  N/A                      N/A", currentObs->value[0]);
+	  sLine << s;
+
 	  if (currentObs->typeName == "DSNTwoWayRange")
 	     sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	  else if (currentObs->typeName == "DSNTwoWayDoppler")
 		 sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+	  else
+		 s[0] = '\0';
       sLine << s;
-      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                  N/A                      N/A", currentObs->value[0]);
-	  sLine << s;
 
 	  // fill out N/A for partial derivative
       for (int i = 0; i < stateMap->size(); ++i)
@@ -209,15 +219,20 @@ void BatchEstimatorInv::Accumulate()
 	  calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
 	  if (count == 0)
 	  {
-		 measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
-		 sLine << measManager.GetObsDataObject()->removedReason << "     ";
+		 std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
+		 ss = ss + "    ";
+		 ss = ss.substr(0,4);
+		 sLine << ss << "     ";
+		 sprintf(&s[0],"%18.6lf                  N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
+		 sLine << s;
+
 	     if (currentObs->typeName == "DSNTwoWayRange")
 		    sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	     else if (currentObs->typeName == "DSNTwoWayDoppler")
 		    sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+	     else
+		    s[0] = '\0';
          sLine << s;
-		 sprintf(&s[0],"%18.6lf                  N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
-		 sLine << s;
 
 		 // fill out N/A for partial derivative
 		 for (int i = 0; i < stateMap->size(); ++i)
@@ -237,14 +252,9 @@ void BatchEstimatorInv::Accumulate()
          if (measManager.GetObsDataObject()->inUsed == false)
 		 {
 			// Write report for this observation data for case data record is removed
-	        sLine << currentObs->removedReason << "      ";
-	        if (currentObs->typeName == "DSNTwoWayRange")
-			   sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-	        else if (currentObs->typeName == "DSNTwoWayDoppler")
-		       sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-            sLine << s;
-            sprintf(&s[0],"%18.6lf   ", currentObs->value[0]);
-	        sLine << s ;
+			std::string ss = currentObs->removedReason + "    ";
+		    ss = ss.substr(0,4);
+		    sLine << ss << "     ";
 
 			Real ocDiff = currentObs->value[0]-calculatedMeas->value[0];
 			Real weight;
@@ -252,8 +262,16 @@ void BatchEstimatorInv::Accumulate()
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-			sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %.12le   %18.12lf", calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+			sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf   %.12lf   %.12le   %.12le   %18.12lf", currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			sLine << s;
+
+	        if (currentObs->typeName == "DSNTwoWayRange")
+			   sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+	        else if (currentObs->typeName == "DSNTwoWayDoppler")
+		       sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+            else
+		       s[0] = '\0';
+            sLine << s;
 
 			// fill out N/A for partial derivative
 		    for (int i = 0; i < stateMap->size(); ++i)
@@ -367,19 +385,19 @@ void BatchEstimatorInv::Accumulate()
                ocDiff = currentObs->value[k] - calculatedMeas->value[k];
 
                #ifdef DEBUG_O_MINUS_C
-//		    if ((calculatedMeas->value[k] < 0)||(calculatedMeas->value[k] > currentObs->rangeModulo))
-//				MessageInterface::ShowMessage("!!!!! Error: Get incorrect calculated measurement value:   C =  %.12le\n", calculatedMeas->value[k]);
-//			MessageInterface::ShowMessage("Calculate O-C = %.12le:  O = %.12le    C = %.12le   k = %d  calculatedMeas = <%p>\n\n", ocDiff, currentObs->value[k], calculatedMeas->value[k], k, calculatedMeas);
-		    Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
+//		       if ((calculatedMeas->value[k] < 0)||(calculatedMeas->value[k] > currentObs->rangeModulo))
+//				  MessageInterface::ShowMessage("!!!!! Error: Get incorrect calculated measurement value:   C =  %.12le\n", calculatedMeas->value[k]);
+//			      MessageInterface::ShowMessage("Calculate O-C = %.12le:  O = %.12le    C = %.12le   k = %d  calculatedMeas = <%p>\n\n", ocDiff, currentObs->value[k], calculatedMeas->value[k], k, calculatedMeas);
+		       Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-		    Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
+		       Real C_Epoch = TimeConverterUtil::Convert(calculatedMeas->epoch,
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-		    MessageInterface::ShowMessage("Observation data: %s  %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     frequency = %.12le\n",
-				currentObs->typeName.c_str(), currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
-				calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
-				ocDiff, calculatedMeas->uplinkFreq);
+		       MessageInterface::ShowMessage("Observation data: %s  %s  %s  Epoch = %.12lf  O = %.12le;         Calculated measurement: %s  %s  Epoch = %.12lf  C = %.12le;       O-C = %.12le     frequency = %.12le\n",
+				  currentObs->typeName.c_str(), currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), OD_Epoch, currentObs->value[k], 
+				  calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
+				  ocDiff, calculatedMeas->uplinkFreq);
                #endif
 
                measurementEpochs.push_back(currentEpoch);
@@ -428,20 +446,21 @@ void BatchEstimatorInv::Accumulate()
                   residuals[i] += hMeas[k][i] * weight * ocDiff;
                }
 
-
+			   
 			   // Write report for this observation data for case data record is removed
-	           sLine << currentObs->removedReason << "      ";
+			   std::string ss = currentObs->removedReason + "    ";
+			   ss = ss.substr(0,4);
+	           sLine << ss << "      ";
+			   sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf   %.12lf   %.12le   %.12le   %18.12lf", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+			   sLine << s;
+
 	           if (currentObs->typeName == "DSNTwoWayRange")
 			      sprintf(&s[0],"%d   %.15le   %.15le   N/A                      ", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	           else if (currentObs->typeName == "DSNTwoWayDoppler")
 		          sprintf(&s[0],"%d   N/A                      N/A                      %.9le         ", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-
+			   else
+                  s[0] = '\0';
                sLine << s;
-               sprintf(&s[0],"%18.6lf   ", currentObs->value[k]);
-			   sLine << s;
-
-			   sprintf(&s[0],"%18.6lf   %18.6lf   %.12le   %.12le   %.12le   %18.12lf", calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-			   sLine << s;
 
                // fill out N/A for partial derivative
 			   for (int p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
@@ -502,12 +521,6 @@ void BatchEstimatorInv::Accumulate()
    linesBuff = sLine.str();
    WriteToTextFile(currentState);
 
-   //if (reportFile.is_open())
-   //{
-   //   reportFile << sLine.str();
-   //   reportFile.flush();
-   //}
-
    // Accumulate the processed data
    #ifdef RUN_SINGLE_PASS
       #ifdef SHOW_STATE_TRANSITIONS
@@ -557,20 +570,72 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("BatchEstimator state is ESTIMATING\n");
    #endif
 
-   if (measurementResiduals.size() == 0)
-      throw EstimatorException("Unable to estimate: No measurement data can be used for estimation or No measurements were feasible");
+   //// Prepair to write summary report:
+   //char s[1000];
+   //std::stringstream sLine;
+   //sLine << "\n";
+
+   // Display number of removed records for each type of filters
+   if (iterationsTaken == 0)
+   {
+	  if (!numRemovedRecords.empty())
+	  {
+	     MessageInterface::ShowMessage("Number of records removed by:\n");
+//		 sLine << "   Number of records removed by:\n";
+         for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
+		 {
+	        MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
+//			sprintf(&s[0],"      .%s: %d\n", i->first.c_str(), i->second);
+//			sLine << s;
+		 }
+	  }
+   }
+   else
+   {
+      std::stringstream ss;
+	  ss << "OLSE for Iteration " << iterationsTaken;
+	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
+	  {
+		  MessageInterface::ShowMessage("Number of records removed by:\n");
+		  MessageInterface::ShowMessage("      %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+//		  sprintf(&s[0], "   Number of records removed by:\n       %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
+//		  sLine << s;
+	  }
+   }
+   MessageInterface::ShowMessage("Number of records used for estimation: %d\n", measurementResiduals.size());
+//   sprintf(&s[0],"Number of reccords used for estimation: %d\n", measurementResiduals.size());
+//   sLine << s;
+   
+
+   if (measurementResiduals.size() < esm.GetStateMap()->size())
+   {
+	  std::stringstream ss;
+	  ss << "Error: For Batch estimator " << GetName() 
+		 << ", there are " << esm.GetStateMap()->size() 
+		 << " solver-for parameters, and only " << measurementResiduals.size() 
+		 << " valid observable records remaining after editing. Please modify data editing criteria or provide a better a-priori estimate.\n";
+      throw EstimatorException(ss.str());
+   }
 
    // Apriori state (initial state for 0th iteration) and initial state for current iteration: 
    if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
-   GmatState initState = (*estimationState);
+   oldEstimationState = (*estimationState);
 
-   // Calculate old and current weighted residuals' root mean square
-   oldResidualRMS = newResidualRMS;
+   // Specify RMSOLD, RMS, and RMSB:
+   // Calculate RMSOLD:
+   if (iterationsTaken > 0)
+      oldResidualRMS = newResidualRMS;			// old value is only valid from 1st iteration
+   // Calculate RMS:
    newResidualRMS = 0.0;
    for (int i = 0; i < measurementResiduals.size(); ++i)
       newResidualRMS += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
    newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
+   // Calculate RMSB:
+   if (iterationsTaken == 0)
+	   bestResidualRMS = newResidualRMS;
+   else
+	   bestResidualRMS = min(bestResidualRMS,newResidualRMS);
 
    // Solve normal equation
    #ifdef DEBUG_VERBOSE
@@ -598,8 +663,16 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   Rmatrix cov = information.Inverse();
-   
+   Rmatrix cov;
+   try
+   {
+      cov = information.Inverse();
+   }
+   catch(...)
+   {
+	  throw EstimatorException("Error: Normal matrix is singular.\n");
+   }
+
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage(" residuals: [\n");
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -642,7 +715,7 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("]\n");
    #endif
    
-   // Calculate predicted RMS
+   // Specify RMSP:
    predictedRMS = 0;
    if (useApriori)
    {
@@ -667,66 +740,32 @@ void BatchEstimatorInv::Estimate()
    predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
 
 
-   // Write report file:
-   char s[1000];
-   std::stringstream sLine;
-   sLine << "\n";
+   //// Write to report initial state for current iteration
+   //sLine << "   Initial state (solve-for vector) in EarthMJ2000:   x" << iterationsTaken << " = (";
+   //for (int i= 0; i < oldEstimationState.GetSize(); ++i)
+   //{
+	  //sprintf(&s[0],"%18.9lf   ", oldEstimationState[i]);
+   //   sLine << s;
+   //}
+   //sLine << ")\n";
 
-   // Display number of removed records for each type of filters
-   if (iterationsTaken == 0)
-   {
-	  if (!numRemovedRecords.empty())
-	  {
-	     MessageInterface::ShowMessage("Number of records removed by:\n");
-		 sLine << "   Number of records removed by:\n";
-         for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
-		 {
-	        MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
-			sprintf(&s[0],"      .%s: %d\n", i->first.c_str(), i->second);
-			sLine << s;
-		 }
-	  }
-   }
-   else
-   {
-      std::stringstream ss;
-	  ss << "OLSE for Iteration " << iterationsTaken;
-	  if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
-	  {
-		  MessageInterface::ShowMessage("Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
-		  sprintf(&s[0], "   Number of records removed by %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
-		  sLine << s;
-	  }
-   }
+   //sLine << "   Estimated state (solve-for vector) in EarthMJ2000: x" << iterationsTaken+1 << " = (";
+   //for (int i= 0; i < (*estimationState).GetSize(); ++i)
+   //{
+	  //sprintf(&s[0],"%18.9lf   ", (*estimationState)[i]);
+   //   sLine << s;
+   //}
+   //sLine << ")\n";
 
-   sprintf(&s[0],"   Number of reccords used for estimation = %d\n", measurementResiduals.size());
-   sLine << s;
-   
-   sLine << "   Initial state (solve-for vector) in EarthMJ2000:   x" << iterationsTaken << " = (";
-   for (int i= 0; i < initState.GetSize(); ++i)
-   {
-	  sprintf(&s[0],"%18.9lf   ", initState[i]);
-      sLine << s;
-   }
-   sLine << ")\n";
+   //sLine << "   State (solve-for vector) change: dx = x" << iterationsTaken+1 << " - x" << iterationsTaken << " = (";
+   //for (int i= 0; i < dx.size(); ++i)
+   //{
+	  //sprintf(&s[0],"%.15lf   ", dx[i]);
+   //   sLine << s;
+   //}
+   //sLine << ")\n";
 
-   sLine << "   Estimated state (solve-for vector) in EarthMJ2000: x" << iterationsTaken+1 << " = (";
-   for (int i= 0; i < (*estimationState).GetSize(); ++i)
-   {
-	  sprintf(&s[0],"%18.9lf   ", (*estimationState)[i]);
-      sLine << s;
-   }
-   sLine << ")\n";
-
-   sLine << "   State (solve-for vector) change: dx = x" << iterationsTaken+1 << " - x" << iterationsTaken << " = (";
-   for (int i= 0; i < dx.size(); ++i)
-   {
-	  sprintf(&s[0],"%.15lf   ", dx[i]);
-      sLine << s;
-   }
-   sLine << ")\n";
-
-   linesBuff = sLine.str();
+   //linesBuff = sLine.str();
    WriteToTextFile(currentState);
 
 

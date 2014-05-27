@@ -93,12 +93,17 @@ protected:
    std::string             estEpochFormat;
    /// The estimation epoch.  "FromParticipants" means use the spacecraft epoch.
    std::string             estEpoch;
+
    /// RMS residual value from the previous pass through the data
    Real                    oldResidualRMS;
-   /// RMS residual value froooom the current pass through the data
+   /// RMS residual value from the current pass through the data
    Real                    newResidualRMS;
-   /// Predicted RMS
+   /// The best RMS residual
+   Real                    bestResidualRMS;
+   /// Predicted RMS residual
    Real predictedRMS;
+   /// Number consecutive iterations diverging
+   Integer numDivIterations;
    /// Flag to indicate weightedRMS or predictedRMS
    bool chooseRMSP;
 
@@ -110,8 +115,10 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
-   /// Flag indicating convergence
-   bool                    converged;
+//   /// Flag indicating convergence					// made changes by TUAN NGUYEN
+//   bool        converged;								// made changes by TUAN NGUYEN
+   /// Estimation status								// made changes by TUAN NGUYEN
+   Integer                 estimationStatus;			// made changes by TUAN NGUYEN
    // String to show reason of convergence
    std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
@@ -148,7 +155,7 @@ protected:
    /// Abstract method that performs the estimation in derived classes
    virtual void            Estimate() = 0;
 
-   virtual bool            TestForConvergence(std::string &reason);
+   virtual Integer         TestForConvergence(std::string &reason);
    virtual void            WriteToTextFile(Solver::SolverState state =
                                               Solver::UNDEFINED_STATE);
 
@@ -157,8 +164,11 @@ protected:
 
    virtual bool            DataFilter();							// made changes by TUAN NGUYEN
 
-//private:
+private:
 //   bool                    IsReuseableType(const std::string& value);
+   void                   WriteHeader();
+   void                   WriteSummary(Solver::SolverState sState);
+   void                   WriteConclusion();
 
 };
 

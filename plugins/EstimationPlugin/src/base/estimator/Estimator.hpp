@@ -187,6 +187,9 @@ protected:
    Covariance              *stateCovariance;
    /// The estimated state
    GmatState               *estimationState;
+   /// The previous estimated state									// made changes by TUAN NGUYEN
+   GmatState               oldEstimationState;						// made changes by TUAN NGUYEN
+
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
    /// The estimated state											// made changes by TUAN NGUYEN
@@ -277,7 +280,7 @@ protected:
                                PARAMETER_TYPE[EstimatorParamCount -
                                               SolverParamCount];
 
-   virtual bool            TestForConvergence(std::string &reason);
+   virtual Integer TestForConvergence(std::string &reason);		// made change by TUAN NGUYEN
 
    Real                    ConvertToRealEpoch(const std::string &theEpoch,
                                               const std::string &theFormat);
@@ -298,6 +301,19 @@ protected:
 ///// TBD: Do simulators need this too?  If so, move to base class
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
    virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
+
+   /// Estimation status contains all st
+   enum EstimationStatus
+   {
+      UNKNOWN,
+      ABSOLUTETOL_CONVERGED,
+      RELATIVETOL_CONVERGED,
+      ABS_AND_REL_TOL_CONVERGED,
+      MAX_CONSECUTIVE_DIVERGED,
+      CONVERGING,
+      DIVERGING,
+   };
+
 
 //private:
 //   bool                    IsReuseableType(const std::string& value);	// It was moved to BatchEstimator

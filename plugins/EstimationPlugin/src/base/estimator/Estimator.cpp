@@ -1354,12 +1354,13 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
  *
  * @param reason String indicating the condition(s) that indicate convergence
  *
- * @return true on convergence, false if convergence was not achieved
+ * @return return an integer to tell status of estimation
  */
 //------------------------------------------------------------------------------
-bool Estimator::TestForConvergence(std::string &reason)
+// made changes by TUAN NGUYEN
+Integer Estimator::TestForConvergence(std::string &reason)
 {
-   return false;
+	return UNKNOWN;
 }
 
 //------------------------------------------------------------------------------
