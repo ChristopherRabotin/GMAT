@@ -21,6 +21,7 @@
 
 
 #include "GeometricRange.hpp"
+#include "GroundstationInterface.hpp"			// made changes by TUAN NGUYEN
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
 
@@ -199,20 +200,42 @@ bool GeometricRange::Evaluate(bool withEvents)
       
    if (!initialized) InitializeMeasurement();
 
-   CalculateRangeVectorInertial();
+   // Get minimum elevation angle for ground station
+   Real minAngle;																							// made changes by TUAN NGUYEN
+   if (participants[0]->IsOfType(Gmat::SPACECRAFT) == false)												// made changes by TUAN NGUYEN
+      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");		// made changes by TUAN NGUYEN
+   else if (participants[1]->IsOfType(Gmat::SPACECRAFT) == false)											// made changes by TUAN NGUYEN
+      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");		// made changes by TUAN NGUYEN
 
-   currentMeasurement.feasibilityValue = rangeVecInertial * p1Loc;
+   CalculateRangeVectorInertial();
+//   currentMeasurement.feasibilityValue = rangeVecInertial * p1Loc;
+   UpdateRotationMatrix(currentMeasurement.epoch, "All");
+   Rvector3 outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
+   currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+
 
    // @todo waiting for updated specs from Steve for this part
-   if (currentMeasurement.feasibilityValue > 0.0)
+//   if (currentMeasurement.feasibilityValue > 0.0)											// made changes by TUAN NGUYEN
+   if (withEvents == false)
    {
-      currentMeasurement.isFeasible = true;
-      currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();
+	   currentMeasurement.isFeasible = true;												// made changes by TUAN NGUYEN
+	   currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();						// made changes by TUAN NGUYEN
    }
    else
    {
-      currentMeasurement.isFeasible = false;
-      currentMeasurement.value[0] = 0.0;
+	  if (currentMeasurement.feasibilityValue > minAngle)
+	  {
+         currentMeasurement.isFeasible = true;
+		 currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();
+	  }
+	  else
+	  {
+		 currentMeasurement.isFeasible = false;
+		 currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();		// 0.0;			// made changes by TUAN NGUYEN
+		 currentMeasurement.unfeasibleReason = "ET";
+	  }
+      
+      
    }
 
    #ifdef DEBUG_RANGE_CALC
@@ -228,7 +251,7 @@ bool GeometricRange::Evaluate(bool withEvents)
             p2Loc.ToString().c_str());
       MessageInterface::ShowMessage("   Range Vector:  %s\n",
             rangeVecInertial.ToString().c_str());
-      MessageInterface::ShowMessage("   R(Groundstation) dot RangeVec =  %lf\n",
+      MessageInterface::ShowMessage("   Elevation angle =  %lf degree\n",
             currentMeasurement.feasibilityValue);
       MessageInterface::ShowMessage("   Feasibility:  %s\n",
             (currentMeasurement.isFeasible ? "true" : "false"));
