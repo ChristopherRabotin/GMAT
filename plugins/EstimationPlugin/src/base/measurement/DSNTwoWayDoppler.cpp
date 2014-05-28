@@ -1245,13 +1245,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 else
 		 {
 			currentMeasurement.feasibilityValue = feasibilityValue;
-			currentMeasurement.unfeasibleReason = "EST";
+			currentMeasurement.unfeasibleReason = "B1S";
 		    currentMeasurement.isFeasible = false;
 		 }
 	  }
 	  else
 	  {
-		 currentMeasurement.unfeasibleReason = "ESR";
+		 currentMeasurement.unfeasibleReason = "B2S";
 		 currentMeasurement.isFeasible = false;
 	  }
 
@@ -1275,13 +1275,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		    else
 		    {
 			   currentMeasurement.feasibilityValue = feasibilityValue;
-			   currentMeasurement.unfeasibleReason = "EET";
+			   currentMeasurement.unfeasibleReason = "B1E";
 		       currentMeasurement.isFeasible = false;
 		    }
 	     }
 	     else
 		 {
-			currentMeasurement.unfeasibleReason = "EER";
+			currentMeasurement.unfeasibleReason = "B2E";
 		    currentMeasurement.isFeasible = false;
 		 }
 	  }
