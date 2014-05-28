@@ -70,7 +70,7 @@ public:
    bool              isFeasible;
    
    /// Flag to indicate unfeasible reason
-   std::string       unfeasibleReason;				// "N": default value, "E": elevation angle, "R": out of ramped table, "U": unmatched to any measurement model   
+   std::string       unfeasibleReason;				// "N": default value, "BXY": blocked, "R": out of ramped table range, "U": unused, "IRMS", "OLSE"   
 
    /// Value used for root finding
    Real              feasibilityValue;
