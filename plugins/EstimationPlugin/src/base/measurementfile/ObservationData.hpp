@@ -53,8 +53,8 @@ public:
    bool inUsed;													// made changes by TUAN NGUYEN
 
    /// Flag to specify reason the record not been used. 
-   /// "N": Normal, "U": unmatch, "T": timespan, "M": maximum residual limit, 
-   /// "I": OLSEInitialRMSSigma, "S": outer-loop sigma filter, "F": feasibility, "R": out of ramp table
+   /// "N": Normal, "U": unused, "IRMS": OLSEInitialRMSSigma, 
+   /// "OLSE": outer-loop sigma filter, "BXY": Blocked, "R": out of ramped table range
    std::string       removedReason;
 
    /// The text name of the data type, if available
