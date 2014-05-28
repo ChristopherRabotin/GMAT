@@ -1131,13 +1131,13 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 else
 		 {
 			currentMeasurement.feasibilityValue = feasibilityValue;
-			currentMeasurement.unfeasibleReason = "ER";
+			currentMeasurement.unfeasibleReason = "B2";
 		    currentMeasurement.isFeasible = false;
 		 }
 	  }
 	  else
 	  {
-		 currentMeasurement.unfeasibleReason = "ET";
+		 currentMeasurement.unfeasibleReason = "B1";
 		 currentMeasurement.isFeasible = false;
 	  }
 
