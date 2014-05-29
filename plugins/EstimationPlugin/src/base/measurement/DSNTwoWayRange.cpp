@@ -889,11 +889,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       }
 
       if (objList1.size() != 1)
-		 throw MeasurementException("The first participant does not have only 1 transmitter to send signal.\n");
+		 throw MeasurementException(((objList1.size() == 0)?"Error: The first participant does not have a transmitter to send signal.\n":"Error: The first participant has more than one transmitter.\n"));
       if (objList2.size() != 1)
-		 throw MeasurementException("The first participant does not have only 1 receiver to receive signal.\n");
-      if (objList3.size() != 1)
-		 throw MeasurementException("The second participant does not have only 1 transponder to transpond signal.\n");
+		 throw MeasurementException(((objList2.size() == 0)?"Error: The first participant does not have a receiver to receive signal.\n":"Error: The first participant has more than one receiver.\n"));
+	  if (objList3.size() != 1)
+	  	 throw MeasurementException((objList3.size() == 0)?"Error: The second participant does not have a transponder to transpond signal.\n":"Error: The second participant has more than one transponder.\n");
 
 	  Transmitter* 	gsTransmitter 	= (Transmitter*)objList1[0];
 	  Receiver* 		gsReceiver 		= (Receiver*)objList2[0];
