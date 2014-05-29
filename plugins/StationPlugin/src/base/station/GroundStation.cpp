@@ -988,7 +988,7 @@ bool GroundStation::VerifyAddHardware()
     		 if (primaryAntenna == NULL)
     		 {
     			 MessageInterface::ShowMessage
-					 ("***Error***:primary antenna of %s in %s's AddHardware list is NULL \n",
+					 ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",				// made changes by TUAN NGUYEN
 					  obj->GetName().c_str(), this->GetName().c_str());
     			 check = false;
     		 }
