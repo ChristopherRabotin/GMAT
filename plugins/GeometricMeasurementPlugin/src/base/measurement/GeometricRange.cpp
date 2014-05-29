@@ -232,7 +232,7 @@ bool GeometricRange::Evaluate(bool withEvents)
 	  {
 		 currentMeasurement.isFeasible = false;
 		 currentMeasurement.value[0] = rangeVecInertial.GetMagnitude();		// 0.0;			// made changes by TUAN NGUYEN
-		 currentMeasurement.unfeasibleReason = "ET";
+		 currentMeasurement.unfeasibleReason = "B1";
 	  }
       
       
