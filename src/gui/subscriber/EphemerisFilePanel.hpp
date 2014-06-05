@@ -59,10 +59,12 @@ protected:
    void OnBrowse(wxCommandEvent& event);
    void OnCheck(wxCommandEvent& event);
    
-   void ShowAllCoordSystems(bool show);
-   void ShowCode500Items(bool show);
+   void ShowCoordSystems(const wxString &fileType);
+   void ShowCode500Items(const wxString &fileType);
+   void ShowInterpolatorAndStepSize(const wxString &fileType);
    
    wxComboBox*     spacecraftComboBox;
+   // Only allowed StateType is Cartesian for the 2010 release, per bug 2219
    //wxComboBox*     stateTypeComboBox;
    wxCheckBox*     writeEphemerisCheckBox;
    wxComboBox*     fileFormatComboBox;

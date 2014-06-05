@@ -338,16 +338,13 @@ void EphemerisFilePanel::LoadData()
       LoadControl("FinalEpoch");
       
       // Show all or only MJ2000Eq coordinate system
-      if (fileFormat == "CCSDS-OEM")
-         ShowAllCoordSystems(true);
-      else
-         ShowAllCoordSystems(false);
+      ShowCoordSystems(fileFormat);
       
       // Show or hide output format
-      if (fileFormat == "Code-500")
-         ShowCode500Items(true);
-      else
-         ShowCode500Items(false);
+      ShowCode500Items(fileFormat);
+      
+      // Show default interpolator; show or hide step size
+      ShowInterpolatorAndStepSize(fileFormat);
       
       outputFormat = outputFormatComboBox->GetValue();
    }
@@ -843,28 +840,15 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       if (fileFormat != newFileFormat)
       {
          fileFormat = newFileFormat;
-         if (newFileFormat == "SPK")
-         {
-            interpolatorComboBox->SetValue("Hermite");
-            allStepSizeComboBox->Enable(false);
-         }
-         else if (newFileFormat == "CCSDS-OEM" || newFileFormat == "Code-500")
-         {
-            interpolatorComboBox->SetValue("Lagrange");
-            allStepSizeComboBox->Enable(true);
-         }
-         
+                  
          // Show proper coordinate systems based on the format
-         if (newFileFormat == "CCSDS-OEM")
-            ShowAllCoordSystems(true);
-         else
-            ShowAllCoordSystems(false);
+         ShowCoordSystems(fileFormat);
          
          // Show proper fields for Code500 format
-         if (newFileFormat == "Code-500")
-            ShowCode500Items(true);
-         else
-            ShowCode500Items(false);
+         ShowCode500Items(fileFormat);
+         
+         // Show default interpolator; show or hide step size
+         ShowInterpolatorAndStepSize(fileFormat);
          
          EnableUpdate(true);
       }
@@ -1099,20 +1083,24 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void ShowAllCoordSystems(bool show)
+// void ShowCoordSystems(const wxString &fileType)
 //------------------------------------------------------------------------------
-void EphemerisFilePanel::ShowAllCoordSystems(bool show)
+void EphemerisFilePanel::ShowCoordSystems(const wxString &fileType)
 {
+   bool showAll = false;
+   if (fileType == "CCSDS-OEM")
+      showAll = true;
+   
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage
-      ("EphemerisFilePanel::ShowAllCoordSystems() entered, showAll=%d, fileFormat='%s'\n",
-       show, fileFormat.c_str());
+      ("EphemerisFilePanel::ShowCoordSystems() entered, showAll=%d, fileType='%s'\n",
+       showAll, fileType.c_str());
    #endif
    
-   grid1->Show(allCoordSystemStaticText, show);
-   grid1->Show(allCoordSystemComboBox, show);
-   grid1->Show(onlyMJ2000EqStaticText, !show);
-   grid1->Show(onlyMj2000EqComboBox, !show);
+   grid1->Show(allCoordSystemStaticText, showAll);
+   grid1->Show(allCoordSystemComboBox, showAll);
+   grid1->Show(onlyMJ2000EqStaticText, !showAll);
+   grid1->Show(onlyMj2000EqComboBox, !showAll);
    
    // Commented out for GMT-4452 fix (LOJ: 2014.04.01)
    #if 0
@@ -1131,16 +1119,20 @@ void EphemerisFilePanel::ShowAllCoordSystems(bool show)
    
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage
-      ("EphemerisFilePanel::ShowAllCoordSystems() leaving, showAll=%d, fileFormat='%s'\n",
+      ("EphemerisFilePanel::ShowCoordSystems() leaving, showAll=%d, fileFormat='%s'\n",
        show, fileFormat.c_str());
    #endif
 }
 
 //------------------------------------------------------------------------------
-// void ShowCode500Items(bool show)
+// void ShowCode500Items(const wxString &fileType)
 //------------------------------------------------------------------------------
-void EphemerisFilePanel::ShowCode500Items(bool show)
+void EphemerisFilePanel::ShowCode500Items(const wxString &fileType)
 {
+   bool show = false;
+   if (fileType == "Code-500")
+      show = true;
+   
    // Show or hide all step size
    // Show or hide numeric only step size
    grid2->Show(allStepSizeStaticText, !show);
@@ -1158,5 +1150,22 @@ void EphemerisFilePanel::ShowCode500Items(bool show)
    // Enable or disable output format
    outputFormatComboBox->Enable(show);
    theMiddleSizer->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowInterpolatorAndStepSize(const wxString &fileType)
+//------------------------------------------------------------------------------
+void EphemerisFilePanel::ShowInterpolatorAndStepSize(const wxString &fileType)
+{
+   if (fileType == "SPK")
+   {
+      interpolatorComboBox->SetValue("Hermite");
+      allStepSizeComboBox->Enable(false);
+   }
+   else if (fileType == "CCSDS-OEM" || fileType == "Code-500")
+   {
+      interpolatorComboBox->SetValue("Lagrange");
+      allStepSizeComboBox->Enable(true);
+   }
 }
 
