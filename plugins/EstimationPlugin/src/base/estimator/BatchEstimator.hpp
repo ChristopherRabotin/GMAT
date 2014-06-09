@@ -62,6 +62,10 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
@@ -126,6 +130,9 @@ protected:
    /// Inversion algorithm used 
    std::string             inversionType;
 
+   /// Maximum consecutive divergences
+   Integer				   maxConsDivergences;
+
    /// Parameter IDs for the BatchEstimators
    enum
    {
@@ -133,6 +140,7 @@ protected:
       ESTIMATION_EPOCH,
 //	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
       INVERSION_ALGORITHM,
+	  MAX_CONSECUTIVE_DIVERGENCES,						// made changes by TUAN NGUYEN
       BatchEstimatorParamCount,
    };
 
@@ -175,6 +183,7 @@ private:
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();
+   std::string            GetElementFullName(ListItem* infor) const;
 
 };
 

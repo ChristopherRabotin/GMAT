@@ -60,6 +60,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "EstimationEpoch",				// The epoch of the solution
 //   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
    "InversionAlgorithm",
+   "MaxConsecutiveDivergences",										// made changes by TUAN NGUYEN
    // todo Add useApriori here
 };
 
@@ -70,6 +71,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,
 //   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
    Gmat::STRING_TYPE,
+   Gmat::INTEGER_TYPE,
 };
 
 
@@ -95,6 +97,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
 //   converged                  (false),
    estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
+   maxConsDivergences		  (3),							// made changes by TUAN NGUYEN
    inversionType              ("")
 {
    objectTypeNames.push_back("BatchEstimator");
@@ -137,6 +140,7 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
 //   converged                  (false),
    estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
+   maxConsDivergences		  (est.maxConsDivergences),			// made changes by TUAN NGUYEN
    inversionType              (est.inversionType)
 {
    // Clear the loop buffer
@@ -175,6 +179,7 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
 	  estimationStatus         = UNKNOWN;
 
 	  chooseRMSP               = est.chooseRMSP;
+	  maxConsDivergences	   = est.maxConsDivergences;		// made changes by TUAN NGUYEN
 
       // Clear the loop buffer
       for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -266,6 +271,8 @@ Gmat::ParameterType BatchEstimator::GetParameterType(const Integer id) const
    return Estimator::GetParameterType(id);
 }
 
+
+
 //------------------------------------------------------------------------------
 //  std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
@@ -282,6 +289,32 @@ std::string BatchEstimator::GetParameterTypeString(const Integer id) const
    return Estimator::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+Integer BatchEstimator::GetIntegerParameter(const Integer id) const
+{
+   if (id == MAX_CONSECUTIVE_DIVERGENCES)
+      return maxConsDivergences;
+
+   return Estimator::GetIntegerParameter(id);
+}
+
+Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == MAX_CONSECUTIVE_DIVERGENCES)
+   {
+      if (value < 1)
+	  {
+		 std::stringstream ss;
+		 ss << "Error: " << GetName() << ".MaxConsecutiveDivergences has invalid value (" << value << "). It has to be a positive integer greater than 0.\n";
+         throw EstimatorException(ss.str());
+		 return value;
+	  }
+
+	  maxConsDivergences = value;
+   }
+
+   return Estimator::SetIntegerParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -1318,11 +1351,10 @@ std::string BatchEstimator::GetProgressString()
                
 			   for (UnsignedInt i = 0; i < map->size(); ++i)
                {
-                  progress << "   "
-                           << (*map)[i]->objectName << "."
-                           << (*map)[i]->elementName << "."
-                           << (*map)[i]->subelement << " = "
-//                           << (*estimationState)[i] << "\n";					// made changes by TUAN NGUYEN
+                  progress << "   " << GetElementFullName((*map)[i]) << " = "
+                           //<< (*map)[i]->objectName << "."
+                           //<< (*map)[i]->elementName << "."
+                           //<< (*map)[i]->subelement << " = "
                            << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
                };
 
@@ -1380,10 +1412,10 @@ std::string BatchEstimator::GetProgressString()
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
-               progress << "   "
-                        << (*map)[i]->objectName << "."
-                        << (*map)[i]->elementName << "."
-                        << (*map)[i]->subelement << " = "
+               progress << "   " << GetElementFullName((*map)[i]) << " = "
+                        //<< (*map)[i]->objectName << "."
+                        //<< (*map)[i]->elementName << "."
+                        //<< (*map)[i]->subelement << " = "
                         << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
@@ -1457,11 +1489,10 @@ std::string BatchEstimator::GetProgressString()
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
-               progress << "   "
-                        << (*map)[i]->objectName << "."
-                        << (*map)[i]->elementName << "."
-                        << (*map)[i]->subelement << " = "
-//                        << (*estimationState)[i] << "\n";						// made changes by TUAN NGUYEN
+               progress << "   " << GetElementFullName((*map)[i]) << " = "
+                        //<< (*map)[i]->objectName << "."
+                        //<< (*map)[i]->elementName << "."
+                        //<< (*map)[i]->subelement << " = "
 			            << outputEstimationState[i] << "\n";					// made changes by TUAN NGUYEN
             }
 
@@ -1519,6 +1550,70 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
+std::string BatchEstimator::GetElementFullName(ListItem* infor) const
+{
+   std::stringstream ss;
+   
+   ss << infor->objectName << ".";
+   if (infor->elementName == "CartesianState")
+   {
+	  switch(infor->subelement)
+	  {
+	  case 1:
+		 ss << "X";
+		 break;
+	  case 2:
+		 ss << "Y";
+		 break;
+	  case 3:
+		 ss << "Z";
+		 break;
+	  case 4:
+		 ss << "VX";
+		 break;
+	  case 5:
+		 ss << "VY";
+		 break;
+	  case 6:
+		 ss << "VZ";
+		 break;
+	  }
+   }
+   else if (infor->elementName == "Position")
+   {
+	  switch(infor->subelement)
+	  {
+	  case 1:
+		 ss << "X";
+		 break;
+	  case 2:
+		 ss << "Y";
+		 break;
+	  case 3:
+		 ss << "Z";
+		 break;
+	  }
+   }
+   else if (infor->elementName == "Velocity")
+   {
+	  switch(infor->subelement)
+	  {
+	  case 1:
+		 ss << "VX";
+		 break;
+	  case 2:
+		 ss << "VY";
+		 break;
+	  case 3:
+		 ss << "VZ";
+		 break;
+	  }
+   }
+   else
+      ss << infor->elementName << "." << infor->subelement;
+
+   return ss.str();
+}
 //------------------------------------------------------------------------------
 // Integer TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------
@@ -1547,7 +1642,6 @@ std::string BatchEstimator::GetProgressString()
 //------------------------------------------------------------------------------
 Integer BatchEstimator::TestForConvergence(std::string &reason)
 {
-   Integer MaximumConsecutiveDiverged = 4;
    Integer retval = UNKNOWN;
    std::stringstream why;
 
@@ -1586,7 +1680,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
 	  if (newResidualRMS > oldResidualRMS)
 	  {
 		 numDivIterations++;
-		 if (numDivIterations >= MaximumConsecutiveDiverged)
+		 if (numDivIterations >= maxConsDivergences)
 		    retval = MAX_CONSECUTIVE_DIVERGED;
 		 else
 		    retval = DIVERGING;
@@ -1615,6 +1709,10 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------
 void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 {
+   // Only write to report file when ReportStyle is Normal or Verbose
+//   if ((textFileMode != "Normal")&&(textFileMode != "Verbose"))
+//      return;
+
    GmatState outputEstimationState;											// made changes by TUAN NGUYEN
 
    if (!showProgress)
@@ -1637,12 +1735,8 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 		 WriteHeader();
          break;
 	  case ACCUMULATING:
-//		 if (textFileMode == "Debug")
-//		 {
-			// Write detail about observation data and estimation calculation for that record here
-			textFile << linesBuff;
-			textFile.flush();
-//		 }
+		textFile << linesBuff;
+		textFile.flush();
 		 break;
 	  case ESTIMATING:
 		 WriteSummary(theState);
@@ -1709,11 +1803,25 @@ void BatchEstimator::WriteConclusion()
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      textFile << "   "
-               << (*map)[i]->objectName << "."
-               << (*map)[i]->elementName << "."
-               << (*map)[i]->subelement << " = "
-               << outputEstimationState[i] << "\n";
+	  textFile << "   ";
+	  if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+	  {
+		 MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+		 StringArray sa = mm->GetStringArrayParameter("Participants");
+		 textFile << mm->GetStringParameter("Type") << " ";
+		 for( UnsignedInt j=0; j < sa.size(); ++j)
+			textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+		 textFile << (*map)[i]->subelement;
+	  }
+	  else
+	  {
+         //textFile << (*map)[i]->objectName << "."
+         //         << (*map)[i]->elementName << "."
+         //         << (*map)[i]->subelement;
+		 textFile << GetElementFullName((*map)[i]);
+	  }
+	  textFile << " = " << outputEstimationState[i] << "\n";
    }
    textFile << "\n";
 
@@ -1773,11 +1881,25 @@ void BatchEstimator::WriteHeader()
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      textFile << "   "
-               << (*map)[i]->objectName << "."
-               << (*map)[i]->elementName << "."
-               << (*map)[i]->subelement << " = "
-               << outputEstimationState[i] << "\n";
+	  textFile << "   ";
+	  if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+	  {
+		 MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+		 StringArray sa = mm->GetStringArrayParameter("Participants");
+		 textFile << mm->GetStringParameter("Type") << " ";
+		 for( UnsignedInt j=0; j < sa.size(); ++j)
+			textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+		 textFile << (*map)[i]->subelement;
+	  }
+	  else
+	  {
+         //textFile << (*map)[i]->objectName << "."
+         //         << (*map)[i]->elementName << "."
+         //         << (*map)[i]->subelement;
+		 textFile << GetElementFullName((*map)[i]);
+	  }
+	  textFile << " = " << outputEstimationState[i] << "\n";
    }
    textFile << "\n";
 
@@ -1801,11 +1923,11 @@ void BatchEstimator::WriteHeader()
 
 
    /// 5. Write report header
-   if (this->textFileMode == "Normal")
-      textFile << "Iter   RecNum   UTCGregorian-Epoch       Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
-   else if (this->textFileMode == "Verbose")
+   if (textFileMode == "Normal")
+      textFile << "Iter   RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+   else
    {
-      textFile << "Iter   RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter   RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
 	  for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
 		 textFile << "                         ";
@@ -1829,18 +1951,38 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    // Write state to report file
    textFile << "\n";
    textFile << "Iteration " << iterationsTaken << ": State Information \n"
-	        << "      State Component         Initial State        Updated State         Change in State        \n";
+	        << "   State Component                                               Apriori State           Previous State            Current State          Current-Apriori         Current-Privous\n";
 
    textFile.precision(8);
    for (int i = 0; i < map->size(); ++i) 
    {
-      textFile << "   "
-               << (*map)[i]->objectName << "."
-               << (*map)[i]->elementName << "."
-               << (*map)[i]->subelement << "     "
-               << GmatStringUtil::ToString(oldEstimationState[i]) << "     "					// initial state
-			   << GmatStringUtil::ToString((*estimationState)[i]) << "     "					// updated state
-			   << GmatStringUtil::ToString(dx[i]) << "\n";									// change in state
+	  textFile << "   ";
+	  std::stringstream ss;
+	  if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+	  {
+		 MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+		 StringArray sa = mm->GetStringArrayParameter("Participants");
+		 ss << mm->GetStringParameter("Type") << " ";
+		 for( UnsignedInt j=0; j < sa.size(); ++j)
+			ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+		 ss << (*map)[i]->subelement;
+	  }
+	  else
+	  {
+         //textFile << (*map)[i]->objectName << "."
+         //         << (*map)[i]->elementName << "."
+         //         << (*map)[i]->subelement;
+		 ss << GetElementFullName((*map)[i]);
+	  }
+	  
+	  textFile << GmatStringUtil::GetAlignmentString(ss.str(), 50, GmatStringUtil::LEFT);
+      textFile << "     "
+		       << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(initialEstimationState[i]), 20, GmatStringUtil::RIGHT) << "     "			    // Apriori state
+		       << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(oldEstimationState[i]), 20, GmatStringUtil::RIGHT) << "     "					// initial state
+			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString((*estimationState)[i]), 20, GmatStringUtil::RIGHT) << "     "					// updated state
+			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString((*estimationState)[i] - initialEstimationState[i]), 20, GmatStringUtil::RIGHT)  << "    "	// Apriori - Current state
+			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(dx[i]), 20, GmatStringUtil::RIGHT)  << "\n";									// Previous - Current state
    }
    textFile << "\n";
 
