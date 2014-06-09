@@ -51,6 +51,9 @@ public:
 protected:
    virtual void            Accumulate();
    virtual void            Estimate();
+
+private:
+   Real                    ObservationDataCorrection(Real cValue, Real oValue, Real moduloConstant);
 };
 
 #endif /* BatchEstimatorInv_hpp */

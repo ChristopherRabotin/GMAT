@@ -169,9 +169,9 @@ void BatchEstimatorInv::Accumulate()
    std::string times;
    Real temp;
    TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch,"","UTCGregorian", temp, times, 1); 
-   if (this->textFileMode == "Normal")
+   if (textFileMode == "Normal")
       sprintf(&s[0],"%4d  %5d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
-   else if (textFileMode == "Verbose")
+   else
    {
       Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch,currentObs->epochSystem,TimeConverterUtil::TAIMJD); 
 	  sprintf(&s[0],"%4d  %5d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
@@ -179,7 +179,10 @@ void BatchEstimatorInv::Accumulate()
    sLine << s;
 
    std::string ss = currentObs->typeName + "                    ";
-   sLine << ss.substr(0,20) << "   ";
+   sLine << ss.substr(0,20) << " ";
+
+   ss = currentObs->unit + "    ";
+   sLine << ss.substr(0,4) << " ";
 
    ss = "";
    for(int n=0; n < currentObs->participantIDs.size(); ++n)
@@ -201,7 +204,7 @@ void BatchEstimatorInv::Accumulate()
 	  sLine << s;
 
 
-	  if (textFileMode == "Verbose")
+	  if (textFileMode != "Normal")
 	  {
 		 // fill out N/A for partial derivative
          for (int i = 0; i < stateMap->size(); ++i)
@@ -235,7 +238,7 @@ void BatchEstimatorInv::Accumulate()
 		 sprintf(&s[0],"%18.6lf                  N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
 		 sLine << s;
 
-	     if (textFileMode == "Verbose")
+	     if (textFileMode != "Normal")
 	     {
 		    // fill out N/A for partial derivative
 		    for (int i = 0; i < stateMap->size(); ++i)
@@ -282,7 +285,7 @@ void BatchEstimatorInv::Accumulate()
 			sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			sLine << s;
 
-			if (textFileMode == "Verbose")
+			if (textFileMode != "Normal")
 			{
 			   // fill out N/A for partial derivative
 		       for (int i = 0; i < stateMap->size(); ++i)
@@ -472,7 +475,7 @@ void BatchEstimatorInv::Accumulate()
 			   sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			   sLine << s;
 
-			   if (textFileMode == "Verbose")
+			   if (textFileMode != "Normal")
 			   {
                   // fill out N/A for partial derivative
 			      for (int p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
@@ -595,32 +598,15 @@ void BatchEstimatorInv::Estimate()
 
 
    // Display number of removed records for each type of filters
-   //if (iterationsTaken == 0)
-   //{
-	  if (!numRemovedRecords.empty())
-	  {
-	     MessageInterface::ShowMessage("Number of Records Removed Due To:\n");
-		 MessageInterface::ShowMessage("   . No Computed Value Configuration Available : %d\n", numRemovedRecords["U"]);
-		 MessageInterface::ShowMessage("   . Out of Ramped Table Range : %d\n", numRemovedRecords["R"]);
-		 MessageInterface::ShowMessage("   . Signal Blocked : %d\n", numRemovedRecords["B"]);
-		 MessageInterface::ShowMessage("   . Initial RMS Sigma Filter  : %d\n", numRemovedRecords["IRMS"]);
-		 MessageInterface::ShowMessage("   . Outer-Loop Sigma Editor : %d\n", numRemovedRecords["OLSE"]);
-   //      for (std::map<std::string,UnsignedInt>::iterator i=numRemovedRecords.begin(); i != numRemovedRecords.end(); ++i)
-		 //{
-	  //      MessageInterface::ShowMessage("   .%s: %d\n", i->first.c_str(), i->second);
-		 //}
-	  }
-   //}
-   //else
-   //{
-   //   std::stringstream ss;
-	  //ss << "OLSE for Iteration " << iterationsTaken;
-	  //if (numRemovedRecords.find(ss.str()) != numRemovedRecords.end())
-	  //{
-		 // MessageInterface::ShowMessage("Number of records removed by:\n");
-		 // MessageInterface::ShowMessage("      %s: %d\n", ss.str().c_str(), numRemovedRecords[ss.str()]);
-	  //}
-   //}
+   if (!numRemovedRecords.empty())
+   {
+	  MessageInterface::ShowMessage("Number of Records Removed Due To:\n");
+	  MessageInterface::ShowMessage("   . No Computed Value Configuration Available : %d\n", numRemovedRecords["U"]);
+	  MessageInterface::ShowMessage("   . Out of Ramped Table Range : %d\n", numRemovedRecords["R"]);
+	  MessageInterface::ShowMessage("   . Signal Blocked : %d\n", numRemovedRecords["B"]);
+	  MessageInterface::ShowMessage("   . Initial RMS Sigma Filter  : %d\n", numRemovedRecords["IRMS"]);
+	  MessageInterface::ShowMessage("   . Outer-Loop Sigma Editor : %d\n", numRemovedRecords["OLSE"]);
+   }
    MessageInterface::ShowMessage("Number of records used for estimation: %d\n", measurementResiduals.size());
    
 
@@ -871,4 +857,13 @@ void BatchEstimatorInv::Estimate()
 
    
    currentState = CHECKINGRUN;
+}
+
+
+Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real moduloConstant)
+{
+	Real delta = cValue - oValue;
+	int N = (int) (delta/moduloConstant + ((delta >= 0)?1:-1)*0.5);
+
+	return (oValue + N*moduloConstant);
 }
