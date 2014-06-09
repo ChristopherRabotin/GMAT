@@ -393,39 +393,44 @@ ObservationData* GmatODDopplerType::ReadObservation()
    theLine >> type;
    currentObs.type = (Gmat::MeasurementType)type;
 
-   switch (currentObs.type)
-   {
-      case Gmat::GEOMETRIC_RANGE:
-      case Gmat::GEOMETRIC_RANGE_RATE:
-      case Gmat::USN_TWOWAYRANGE:
-      case Gmat::USN_TWOWAYRANGERATE:
-      case Gmat::DSN_TWOWAYRANGE:
-      case Gmat::DSN_TWOWAYDOPPLER:
-         participantSize = 2;
-         dataSize = 1;
-         break;
+   //switch (currentObs.type)
+   //{
+   //   case Gmat::GEOMETRIC_RANGE:
+   //   case Gmat::GEOMETRIC_RANGE_RATE:
+   //   case Gmat::USN_TWOWAYRANGE:
+   //   case Gmat::USN_TWOWAYRANGERATE:
+   //   case Gmat::DSN_TWOWAYRANGE:
+   //   case Gmat::DSN_TWOWAYDOPPLER:
+   //      participantSize = 2;
+   //      dataSize = 1;
+   //      break;
 
-      case Gmat::TDRSS_TWOWAYRANGE:
-      case Gmat::TDRSS_TWOWAYRANGERATE:
-         participantSize = 3;
-         dataSize = 1;
-         break;
+   //   case Gmat::TDRSS_TWOWAYRANGE:
+   //   case Gmat::TDRSS_TWOWAYRANGERATE:
+   //      participantSize = 3;
+   //      dataSize = 1;
+   //      break;
 
-      case Gmat::GEOMETRIC_AZ_EL:
-      case Gmat::GEOMETRIC_RA_DEC:
-      case Gmat::OPTICAL_AZEL:
-      case Gmat::OPTICAL_RADEC:
-         participantSize = 2;
-         dataSize = 2;
-         defaultNoiseCovariance = 0.1;
-         break;
+   //   case Gmat::GEOMETRIC_AZ_EL:
+   //   case Gmat::GEOMETRIC_RA_DEC:
+   //   case Gmat::OPTICAL_AZEL:
+   //   case Gmat::OPTICAL_RADEC:
+   //      participantSize = 2;
+   //      dataSize = 2;
+   //      defaultNoiseCovariance = 0.1;
+   //      break;
 
-      default:
-         participantSize = 0;
-         dataSize = 0;
-         break;
-   }
+   //   default:
+   //      participantSize = 0;
+   //      dataSize = 0;
+   //      break;
+   //}
 
+   // Set measurement unit 
+   currentObs.unit = "Hz";
+
+   participantSize = 2;
+   dataSize = 1;
    for (Integer i = 0; i < participantSize; ++i)
    {
       theLine >> str;

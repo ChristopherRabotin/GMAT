@@ -73,6 +73,8 @@ public:
    StringArray       participantIDs;
    /// The observed value.  Array to handle more than one value, like AZ_EL
    RealArray         value;
+   /// Measurement unit											// made changes by TUAN NGUYEN
+   std::string		 unit;										// made changes by TUAN NGUYEN
    /// The associated noise covariance matrix
    Covariance*       noiseCovariance;
 

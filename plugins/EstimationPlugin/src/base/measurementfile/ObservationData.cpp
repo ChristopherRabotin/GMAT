@@ -44,6 +44,7 @@ ObservationData::ObservationData() :
    epoch             (-1.0),
    noiseCovariance   (NULL),
 ///// TBD: Determine if there is a more generic way to add these, and if they go here
+   unit              ("km"),				// made changes by TUAN NGUYEN
    uplinkBand        (0),					// made changes by TUAN NGUYEN
    uplinkFreq        (0.0),					// made changes by TUAN NGUYEN
    rangeModulo       (1.0),					// made changes by TUAN NGUYEN
@@ -85,6 +86,7 @@ ObservationData::ObservationData(const ObservationData& od):
    epoch                   (od.epoch),
    participantIDs          (od.participantIDs),
    value                   (od.value),
+   unit					   (od.unit),					// made changes by TUAN NGUYEN
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
@@ -123,6 +125,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       epoch                   = od.epoch;
       participantIDs          = od.participantIDs;
       value                   = od.value;
+	  unit                    = od.unit;			// made changes by TUAN NGUYEN
       noiseCovariance         = od.noiseCovariance;
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;

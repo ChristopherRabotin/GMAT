@@ -419,6 +419,42 @@ ObservationData* GmatObType::ReadObservation()
          break;
    }
 
+   // Set measurement unit:
+   switch (currentObs.type)
+   {
+      case Gmat::GEOMETRIC_RANGE:
+	  case Gmat::USN_TWOWAYRANGE:
+		 currentObs.unit = "km";
+		 break;
+      case Gmat::GEOMETRIC_RANGE_RATE:
+      case Gmat::USN_TWOWAYRANGERATE:
+		 currentObs.unit = "km/s";
+		 break;
+      case Gmat::DSN_TWOWAYRANGE:
+		 currentObs.unit = "RU";
+		 break;
+      case Gmat::DSN_TWOWAYDOPPLER:
+		 currentObs.unit = "Hz";
+		 break;
+
+      case Gmat::TDRSS_TWOWAYRANGE:
+		 currentObs.unit = "km";
+		 break;
+      case Gmat::TDRSS_TWOWAYRANGERATE:
+		 currentObs.unit = "km";
+		 break;
+
+      case Gmat::GEOMETRIC_AZ_EL:
+      case Gmat::GEOMETRIC_RA_DEC:
+      case Gmat::OPTICAL_AZEL:
+      case Gmat::OPTICAL_RADEC:
+		 currentObs.unit = "rad";
+         break;
+
+      default:
+         break;
+   }
+
    for (Integer i = 0; i < participantSize; ++i)
    {
       theLine >> str;
