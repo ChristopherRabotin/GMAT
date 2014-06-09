@@ -186,6 +186,16 @@ namespace GmatStringUtil
    GMAT_API void WriteStringArray(const StringArray &strArray,
                                   const std::string &desc = "",
                                   const std::string &prefix = "");
+
+
+   enum AlignmentType
+   {
+      LEFT,
+      RIGHT,
+      CENTER,
+   };
+   
+   GMAT_API std::string GetAlignmentString(const std::string inputString, UnsignedInt len, AlignmentType alignment = LEFT); 
    
 }
 

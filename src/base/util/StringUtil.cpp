@@ -5208,5 +5208,32 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
    }
 }
 
+std::string GmatStringUtil::GetAlignmentString(const std::string inputString, 
+											  UnsignedInt len, 
+											  AlignmentType adjust)
+{
+   std::string s1, retVal;
+   s1.assign(len,' ');
+   
+   switch(adjust)
+   {
+   case LEFT:
+	  retVal = (inputString + s1).substr(0,len);
+	  break;
 
+   case RIGHT:
+      retVal = s1 + inputString;
+	  retVal = retVal.substr(retVal.length()-len, len);
+	  break;
+
+   case CENTER:
+      retVal = s1 + inputString + s1;
+	  retVal = retVal.substr((len + s1.length())/2 , len);
+      break;
+   }
+
+//   MessageInterface::ShowMessage("retVal=<%s>\n", retVal.c_str());
+
+   return retVal;
+}
 
