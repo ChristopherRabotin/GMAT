@@ -1614,7 +1614,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
          std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
          CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
          if (cs == NULL)
-            throw GmatBaseException("Coordinate system for "+obj->GetName()+" is not set\n");
+            throw EstimatorException("Coordinate system for "+obj->GetName()+" is not set\n");
 
          SpacePoint* sp = obj->GetJ2000Body();
          CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
