@@ -37,7 +37,7 @@ public:
    MeasurementModelFactory(const MeasurementModelFactory& fact);
    MeasurementModelFactory& operator= (const MeasurementModelFactory& fact);
 
-   MeasurementModel *CreateMeasurementModel(const std::string &ofType,
+   MeasurementModelBase *CreateMeasurementModel(const std::string &ofType,
          const std::string &withName = "");
 };
 

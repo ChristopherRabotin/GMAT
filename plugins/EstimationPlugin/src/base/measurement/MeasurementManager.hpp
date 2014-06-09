@@ -37,6 +37,10 @@
 #include "CoreMeasurement.hpp"
 #include "DataFile.hpp"
 
+// Extensions for tracking data adapters
+#include "TrackingFileSet.hpp"
+#include "TrackingDataAdapter.hpp"
+
 
 class ESTIMATION_API MeasurementManager
 {
@@ -63,6 +67,8 @@ public:
 
    Integer                 AddMeasurement(MeasurementModel *meas);
    Integer                 AddMeasurement(TrackingSystem *system);
+   Integer                 AddMeasurement(TrackingDataAdapter *adapter);  // Needed?
+   Integer                 AddMeasurement(TrackingFileSet* tfs);
    void                    AddMeasurementName(std::string measName);
    GmatBase*               GetClone(GmatBase *obj);
    const StringArray&      GetMeasurementNames() const;
@@ -111,6 +117,13 @@ protected:
    std::vector<MeasurementModel*>   models;
    /// Pointers to the tracking systems
    std::vector<TrackingSystem*>     systems;
+   /// Pointers to the measurements
+   std::vector<TrackingFileSet*> trackingSets;
+   /// Pointers to the measurements
+   std::vector<TrackingDataAdapter*> adapters;
+
+
+
    /// Current measurement epoch, ignoring event searching
    GmatEpoch                        anchorEpoch;
    /// Current measurement epoch, including event searching

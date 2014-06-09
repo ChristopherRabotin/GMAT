@@ -707,11 +707,11 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
 
 
 //------------------------------------------------------------------------------
-// MeasurementModel *CreateMeasurementModel(const std::string & ofType,
+// MeasurementModelBase *CreateMeasurementModel(const std::string & ofType,
 //    const std::string & withName)
 //------------------------------------------------------------------------------
 /**
- * Creates a MeasurementModel object.
+ * Creates a MeasurementModel or TrackingFileSet object.
  *
  * Must be implemented by derived classes that create MeasurementModel objects -
  * in that case, it returns a new MeasurementModel object.  Otherwise, it
@@ -727,7 +727,7 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
  *                               objects of type MeasurementModel.
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Factory::CreateMeasurementModel(const std::string & ofType,
+MeasurementModelBase* Factory::CreateMeasurementModel(const std::string & ofType,
                                          const std::string & withName)
 {
    throw FactoryException

@@ -25,6 +25,9 @@
 #include "MessageInterface.hpp"
 
 #include "DataFileAdapter.hpp"
+#include "GmatObType.hpp"
+
+#include <sstream>
 
 
 //#define DEBUG_INITIALIZATION
@@ -97,6 +100,18 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
       MeasurementData md;
       measurements.push_back(md);
    }
+
+   for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
+         i != mm.trackingSets.end(); ++i)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Cloning %s TrackingDataSet\n",
+               (*i)->GetName().c_str());
+      #endif
+      trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
+      MeasurementData md;
+      measurements.push_back(md);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -119,7 +134,7 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
       modelNames   = mm.modelNames;
       eventCount   = mm.eventCount;
 
-      // Clone the measurements
+      // Clone the measurements and tracking file sets
       for (std::vector<MeasurementModel*>::iterator i = models.begin();
             i != models.end(); ++i)
          delete (*i);
@@ -130,6 +145,17 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
       for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
             i != mm.models.end(); ++i)
          models.push_back((MeasurementModel*)(*i)->Clone());
+
+      for (std::vector<TrackingFileSet*>::iterator i = trackingSets.begin();
+            i != trackingSets.end(); ++i)
+         delete (*i);
+
+      models.clear();
+      for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
+            i != mm.trackingSets.end(); ++i)
+         trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
+
+      // Should measurements be rebuilt here?
    }
 
    return *this;
@@ -167,6 +193,57 @@ bool MeasurementManager::Initialize()
          return false;
       MeasurementData md;
       measurements.push_back(md);
+   }
+
+   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   {
+      if (trackingSets[i]->Initialize() == false)
+         return false;
+
+      std::vector<TrackingDataAdapter*> *setAdapters =
+            trackingSets[i]->GetAdapters();
+      for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
+      {
+         AddMeasurement((*setAdapters)[j]);
+         MeasurementData md;
+         measurements.push_back(md);
+
+         // Set retval?
+      }
+
+      // And the stream objects
+      StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
+      for (UnsignedInt i = 0; i < filenames.size(); ++i)
+      {
+         std::stringstream fn;
+         fn << trackingSets[i]->GetName() << "DataFile" << i;
+         DataFile *newStream = new DataFile(fn.str());
+         newStream->SetStringParameter("Filename", filenames[i]);
+         GmatObType *got = new GmatObType();
+         newStream->SetStream(got);
+
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
+                  (newStream->IsInitialized() ? "initialized" :
+                  "not initialized"), newStream->GetName().c_str(), newStream);
+         #endif
+
+         SetStreamObject(newStream);
+         if (newStream->OpenStream(true) == false)
+         {
+            MessageInterface::ShowMessage("Stream failed to open\n");
+         }
+         // Associate the adapters with the stream
+         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Associating %d with %s\n",
+                     (*setAdapters)[j]->GetModelID(),
+                     newStream->GetName().c_str());
+            #endif
+            idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
+         }
+      }
    }
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
@@ -243,6 +320,11 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
    bool retval = true;
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Opening the data stream to file %s\n",
+               streamList[i]->GetName().c_str());
+      #endif
+
       #ifdef USE_DATAFILE_PLUGINS
          std::string writeMode = (simulating ? "w" : "r");
          streamList[i]->SetStringParameter(
@@ -252,7 +334,10 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
             retval = false;
       #else
          if (streamList[i]->OpenStream(simulating) == false)
+         {
+            MessageInterface::ShowMessage("Open failed\n");
             retval = false;
+         }
       #endif
    }
 
@@ -1065,17 +1150,26 @@ bool MeasurementManager::AdvanceObservation()
 //------------------------------------------------------------------------------
 Integer MeasurementManager::AddMeasurement(MeasurementModel *meas)
 {
-   meas->SetModelID(largestId++);
-   models.push_back(meas);
+   Integer retval = -1;
+   if (meas->IsOfType("TrackingFileSet"))
+   {
+      retval = AddMeasurement((TrackingFileSet*)meas);
+   }
+   else
+   {
+      meas->SetModelID(largestId++);
+      models.push_back(meas);
+      retval = meas->GetModelID();
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage(
-            "Added measurement of type %s with unique ID %d\n",
-            meas->GetStringParameter("Type").c_str(),
-            meas->GetModelID());
-   #endif
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+               "Added measurement of type %s with unique ID %d\n",
+               meas->GetStringParameter("Type").c_str(),
+               meas->GetModelID());
+      #endif
+   }
 
-   return meas->GetModelID();
+   return retval;
 }
 
 
@@ -1111,6 +1205,7 @@ Integer MeasurementManager::AddMeasurement(TrackingSystem *system)
    return -1; //meas->GetModelID();
 }
 
+
 //------------------------------------------------------------------------------
 // const StringArray& GetParticipantList()
 //------------------------------------------------------------------------------
@@ -1124,12 +1219,16 @@ const StringArray& MeasurementManager::GetParticipantList()
 {
    participants.clear();
 
-#ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("MeasurementManager knows about %d "
-         "measurement models\n", models.size());
-   MessageInterface::ShowMessage("MeasurementManager knows about %d "
-         "measurement model names\n", modelNames.size());
-#endif
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("MeasurementManager knows about %d "
+            "measurement models\n", models.size());
+      MessageInterface::ShowMessage("MeasurementManager knows about %d "
+            "TrackingDataSets\n", trackingSets.size());
+      MessageInterface::ShowMessage("MeasurementManager knows about %d "
+            "measurement model names\n", modelNames.size());
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", modelNames[i].c_str());
+   #endif
 
    // Walk through the collection of measurement models...
    for (std::vector<MeasurementModel*>::iterator i =  models.begin();
@@ -1143,6 +1242,21 @@ const StringArray& MeasurementManager::GetParticipantList()
          if (find(participants.begin(), participants.end(), (*j)) ==
                participants.end())
             participants.push_back(*j);
+      }
+   }
+
+   for (std::vector<TrackingFileSet*>::iterator i =  trackingSets.begin();
+         i !=  trackingSets.end(); ++i)
+   {
+      /// @todo: This part will need changes
+      // Walk through the participant list for the model
+      StringArray parts = (*i)->GetStringArrayParameter("AddTrackingConfig");
+      for (UnsignedInt j = 0; j < parts.size() - 1; ++j)
+      {
+         // If the participant is not in the list yet, add it
+         if (find(participants.begin(), participants.end(), parts[j]) ==
+               participants.end())
+            participants.push_back(parts[j]);
       }
    }
 
@@ -1239,6 +1353,14 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
             retval = models[i];
             break;
          }
+
+      // Check the tracking file sets
+      for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+         if (trackingSets[i]->GetName() == objname)
+         {
+            retval = trackingSets[i];
+            break;
+         }
    }
 
    return retval;
@@ -1318,6 +1440,29 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		    MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[j].isFeasible?"feasible":" not feasible"), measurements[j].value[0]);
          #endif
 
+      }
+//MessageInterface::ShowMessage("Using %d adapters\n", adapters.size());
+      // Now do the same thing for the TrackingDataAdapters
+      for (UnsignedInt i = 0; i < adapters.size(); ++i)
+      {
+//         if (withEvents)
+//         {
+//           if (measurements[j].isFeasible)
+//                 measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
+//         }
+//         else
+//         {
+            std::vector<RampTableData>* rt = NULL;
+            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+            retval = measurements[i].isFeasible;
+//         }
+
+//         if (measurements[j].isFeasible)
+//         {
+//           if (!withEvents)
+//              eventCount += measurements[j].eventCount;
+//           retval = true;
+//         }
       }
    }
    else
@@ -1858,6 +2003,98 @@ Integer MeasurementManager::FindModelForObservation()
 void  MeasurementManager::Reset()
 {
    currentObs = observations.begin();
+}
+
+
+//------------------------------------------------------------------------------
+// Integer AddMeasurement(TrackingFileSet* tfs)
+//------------------------------------------------------------------------------
+/**
+ * Adds a tracking file set to the manager
+ *
+ * @param tfs The TrackingFileSet object that is managed
+ *
+ * @return TBD
+ */
+//------------------------------------------------------------------------------
+Integer MeasurementManager::AddMeasurement(TrackingFileSet* tfs)
+{
+   Integer retval = -1;
+
+   if (find(trackingSets.begin(),trackingSets.end(), tfs) == trackingSets.end())
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Adding %s TrackingFileSet %s <%p>\n",
+               (tfs->IsInitialized() ? "initialized" : "not initialized"),
+               tfs->GetName().c_str(), tfs);
+      #endif
+      trackingSets.push_back(tfs);
+
+//      // Now add the adapters
+//      std::vector<TrackingDataAdapter*> *setAdapters = tfs->GetAdapters();
+//
+//      for (UnsignedInt i = 0; i < setAdapters->size(); ++i)
+//         AddMeasurement((*setAdapters)[i]);
+//
+//      // And the stream objects
+//      StringArray filenames = tfs->GetStringArrayParameter("Filename");
+//      for (UnsignedInt i = 0; i < filenames.size(); ++i)
+//      {
+//         std::stringstream fn;
+//         fn << tfs->GetName() << "DataFile" << i;
+//         DataFile *newStream = new DataFile(fn.str());
+//         newStream->SetStringParameter("Filename", filenames[i]);
+//         GmatObType *got = new GmatObType();
+//         newStream->SetStream(got);
+//         newStream->Initialize();
+//
+//         #ifdef DEBUG_INITIALIZATION
+//            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
+//                  (newStream->IsInitialized() ? "initialized" :
+//                  "not initialized"), newStream->GetName().c_str(), newStream);
+//         #endif
+//
+//         SetStreamObject(newStream);
+//
+//         // Associate the adapters with the stream
+//         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
+//         {
+//            #ifdef DEBUG_INITIALIZATION
+//               MessageInterface::ShowMessage("Associating %d with %s\n",
+//                     (*setAdapters)[j]->GetModelID(),
+//                     newStream->GetName().c_str());
+//            #endif
+//            idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
+//         }
+//      }
+//      // Set retval?
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer AddMeasurement(TrackingDataAdapter* adapter)
+//------------------------------------------------------------------------------
+/**
+ * Adds a TrackingDataAdapter to the measurement manager
+ *
+ * @param adapter The adapter
+ *
+ * @return TBD
+ */
+//------------------------------------------------------------------------------
+Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("   Adding %s TrackingDataAdapter %s "
+            "<%p>\n", (adapter->IsInitialized() ? "initialized" :
+            "not initialized"), adapter->GetName().c_str(), adapter);
+   #endif
+   adapter->SetModelID(largestId++);
+   adapters.push_back(adapter);
+   return -1;
 }
 
 

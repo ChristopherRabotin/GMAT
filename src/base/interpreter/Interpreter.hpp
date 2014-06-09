@@ -359,6 +359,7 @@ private:
    StringArray   functionList;
    StringArray   hardwareList;
    StringArray   measurementList;
+   StringArray   measurementModelList;
    StringArray   trackingSystemList;
    StringArray   obtypeList;
    StringArray   odeModelList;

@@ -365,6 +365,13 @@ void Interpreter::BuildCreatableObjectMaps()
    for (UnsignedInt i = 0; i < measurementList.size(); i++)
       objectTypeMap.insert(std::make_pair(measurementList[i], Gmat::CORE_MEASUREMENT));
    
+   measurementModelList.clear();
+   StringArray measurementModels = theModerator->GetListOfFactoryItems(Gmat::MEASUREMENT_MODEL);
+   copy(measurementModels.begin(), measurementModels.end(), back_inserter(measurementModelList));
+   copy(measurementModels.begin(), measurementModels.end(), back_inserter(allObjectTypeList));
+   for (UnsignedInt i = 0; i < measurementModelList.size(); i++)
+      objectTypeMap.insert(std::make_pair(measurementModelList[i], Gmat::MEASUREMENT_MODEL));
+
    obtypeList.clear();
    StringArray obs = theModerator->GetListOfFactoryItems(Gmat::OBTYPE);
    copy(obs.begin(), obs.end(), back_inserter(obtypeList));
@@ -631,6 +638,10 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
          clist = measurementList;
          break;
 
+      case Gmat::MEASUREMENT_MODEL:
+         clist = measurementModelList;
+         break;
+
       case Gmat::OBTYPE:
          clist = obtypeList;
          break;
@@ -694,7 +705,6 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
       case Gmat::COORDINATE_SYSTEM:
       case Gmat::MATH_NODE:
       case Gmat::MATH_TREE:
-      case Gmat::MEASUREMENT_MODEL:
       case Gmat::DATASTREAM:
       case Gmat::TRACKING_DATA:
       case Gmat::UNKNOWN_OBJECT:
@@ -1122,9 +1132,6 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    else if (type == "PropSetup") 
       obj = (GmatBase*)theModerator->CreatePropSetup(name);
    
-   else if (type == "MeasurementModel")
-      obj = (GmatBase*)theModerator->CreateMeasurementModel(name);
-
    else if (type == "TrackingData")
       obj = (GmatBase*)theModerator->CreateTrackingData(name);
    
@@ -1203,6 +1210,10 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(measurementList.begin(), measurementList.end(), type) !=
                measurementList.end())
          obj = (GmatBase*)theModerator->CreateMeasurement(type, name);
+
+      else if (find(measurementModelList.begin(),
+            measurementModelList.end(), type) != measurementModelList.end())
+         obj = (GmatBase*)theModerator->CreateMeasurementModel(type, name);
 
       // Handle Observations
       else if (find(obtypeList.begin(), obtypeList.end(), type) !=

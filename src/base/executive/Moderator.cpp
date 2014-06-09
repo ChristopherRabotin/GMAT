@@ -3845,7 +3845,7 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 
 // MeasurementModel
 //------------------------------------------------------------------------------
-// MeasurementModel* CreateMeasurementModel(const std::string &name)
+// MeasurementModelBase* CreateMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a new named MeasurementModel and adds it to the configuration
@@ -3855,7 +3855,8 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
  * @return The new MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::CreateMeasurementModel(const std::string &type,
+      const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
@@ -3865,7 +3866,8 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 
    if (GetMeasurementModel(name) == NULL)
    {
-      MeasurementModel *obj = theFactoryManager->CreateMeasurementModel(name);
+      MeasurementModelBase *obj =
+            theFactoryManager->CreateMeasurementModel(type, name);
 
       if (obj == NULL)
       {
@@ -3909,7 +3911,7 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a measurement model from the configuration
@@ -3919,12 +3921,12 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
  * @return The named MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::GetMeasurementModel(const std::string &name)
 {
    if (name == "")
       return NULL;
    else
-      return (MeasurementModel*)FindObject(name);
+      return (MeasurementModelBase*)FindObject(name);
 }
 
 // TrackingSystem

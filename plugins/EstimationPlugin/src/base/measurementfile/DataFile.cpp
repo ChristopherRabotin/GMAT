@@ -239,6 +239,8 @@ bool DataFile::Initialize()
    MessageInterface::ShowMessage(" DataFile <%s,%p> script: \n%s\n", GetName().c_str(), this, this->GetGeneratingString().c_str()); 
    MessageInterface::ShowMessage("DataFile<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
 #endif
+
+   isInitialized = retval;
    return retval;
 }
 

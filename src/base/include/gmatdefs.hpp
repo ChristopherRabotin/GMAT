@@ -203,6 +203,10 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
+      GENERIC_OBJECT,      // Used for user defined objects that do not fall 
+                           // into any of the above categories, and for 
+                           // internal objects that users don't access
+      
       UNKNOWN_OBJECT
    };
 
