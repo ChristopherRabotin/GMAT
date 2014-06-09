@@ -714,10 +714,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
-//		 CelestialBody* sun = solarSystem->GetBody("Sun");
-//		 MessageInterface::ShowMessage(" Sun position at time t2T : %s\n", sun->GetMJ2000Position(t3R).ToString().c_str());
-//		 MessageInterface::ShowMessage(" S/C to Sun position at time t2T : %s\n", (r2B-sun->GetMJ2000Position(t3R)).ToString().c_str());
-
 	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
 		 MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r1 = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r1.Get(0), r1.Get(1), r1.Get(2), t3R);
 		 MessageInterface::ShowMessage("   Spacecraft %s position in %sMJ2000 coordinate system : r2 = (%.12lf, %.12lf, %.12lf)km  at epoch t2T = %.12lf\n", participants[1]->GetName().c_str(),  participants[1]->GetJ2000BodyName().c_str(), r2.Get(0), r2.Get(1), r2.Get(2), t2T);
@@ -731,10 +727,15 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
       Rvector3 downlinkVector = r2B - r1B;		// rVector = r2 - r1;
       downlinkRange = downlinkVector.GetMagnitude();
+
+      // Calculate ET-TAI at t3R:
+	  Real ettaiT3 = downlinkLeg.ETminusTAI(t3R, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("   Downlink range without relativity correction = r2B-r1B:  %.12lf km\n", downlinkRange);
 		 MessageInterface::ShowMessage("   Relativity correction for downlink leg    = %.12lf km\n", downlinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   Downlink range with relativity correction = %.12lf km\n", downlinkRange + downlinkLeg.GetRelativityCorrection());
+		 MessageInterface::ShowMessage("   (ET-TAI) at t3R = %.12le s\n", ettaiT3);
       #endif
 
 
@@ -801,10 +802,15 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
       Rvector3 uplinkVector = r4B - r3B;
       uplinkRange = uplinkVector.GetMagnitude();
+
+	  // Calculate ET-TAI at t1T:
+	  Real ettaiT1 = downlinkLeg.ETminusTAI(t1T, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("   Uplink range without relativity correction = r4B-r3B:  %.12lf km\n", uplinkRange);
 		 MessageInterface::ShowMessage("   Relativity correction for uplink leg    = %.12lf km\n", uplinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   Uplink range without relativity correction = %.12lf km\n", uplinkRange + uplinkLeg.GetRelativityCorrection());
+		 MessageInterface::ShowMessage("   (ET-TAI) at t1T = %.12le s\n", ettaiT1);
       #endif
 
 
@@ -1100,16 +1106,24 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   Downlink real range                 = %.12lf km\n",downlinkRealRange);
       #endif
 
-	  // 17. Calculate uplink time and down link time: (Is it needed???)
+	  // 17. Calculate travel time 
+	  // 17.1. Calculate uplink time and down link time:
 	  uplinkTime   = uplinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
 	  downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
-	  Real realTravelTime = uplinkTime + downlinkTime + receiveDelay + transmitDelay + targetDelay;		// unit: second
+	  // 17.2. Calculate ET-TAI correction
+	  Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);												// made change by TUAN NGUYEN
+	  // 17.3 Calcukate travel time
+	  Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;		// unit: second		// made change by TUAN NGUYEN
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 	     MessageInterface::ShowMessage("9. Travel time:\n");
-		 MessageInterface::ShowMessage("   Uplink time = %.12lf s\n",uplinkTime);
-		 MessageInterface::ShowMessage("   Downlink time = %.12lf s\n",downlinkTime);
-		 MessageInterface::ShowMessage("   Real travel time = %.15lf s\n",realTravelTime);
+		 MessageInterface::ShowMessage("   Uplink time         = %.12lf s\n",uplinkTime);
+		 MessageInterface::ShowMessage("   Downlink time       = %.12lf s\n",downlinkTime);
+		 MessageInterface::ShowMessage("   (ET-TAI) correction = %.12le s\n", ettaiCorrection);
+		 MessageInterface::ShowMessage("   Transmit delay      = %.12le s\n", transmitDelay);
+		 MessageInterface::ShowMessage("   Transpond delay     = %.12le s\n", targetDelay);
+		 MessageInterface::ShowMessage("   Receive delay       = %.12le s\n", receiveDelay);
+		 MessageInterface::ShowMessage("   Real travel time    = %.15lf s\n",realTravelTime);
       #endif
 
 
@@ -1121,7 +1135,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  {
          UpdateRotationMatrix(t3R, "R_o_j2k");
          outState = (R_o_j2k * (r2 - r1)).GetUnitVector();
-	     Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+	     Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;					// elevation angle in degree	// made changes by TUAN NGUYEN
 
 		 if (feasibilityValue > minAngle)
 		 {

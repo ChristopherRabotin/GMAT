@@ -630,6 +630,9 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Rvector3 downlinkVectorS = r2SB - r1SB;									// down link vector in SSB coordinate system
       Real downlinkRangeS = downlinkVectorS.GetMagnitude();						// down link range (unit: km)
 
+	  // Calculate ET-TAI at t3RS:
+	  Real ettaiT3S = downlinkLegS.ETminusTAI(t3RS, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 	     Rmatrix33 mtS = downlinkLegS.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
@@ -646,6 +649,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Downlink range without relativity correction: %.12lf km\n",downlinkRangeS);
 		 MessageInterface::ShowMessage("     Relativity correction for downlink leg      : %.12lf km\n", downlinkLegS.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Downlink range with relativity correction   : %.12lf km\n", downlinkLegS.GetRelativityCorrection() + downlinkRangeS);
+		 MessageInterface::ShowMessage("     (ET-TAI) at t3RS = %.12le s\n", ettaiT3S);
       #endif
 
       // 2. Calculate down link range rate for measurement S:
@@ -697,6 +701,9 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Rvector3 uplinkVectorS = r4SB - r3SB;
 	  Real uplinkRangeS = uplinkVectorS.GetMagnitude();
 	  
+	  // Calculate ET-TAI at t1TS:
+	  Real ettaiT1S = uplinkLegS.ETminusTAI(t1TS, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 	     Rmatrix33 mtS1 = uplinkLegS.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
@@ -713,6 +720,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Uplink range without ralativity correction: %.12lf km\n", uplinkRangeS);
 		 MessageInterface::ShowMessage("     Relativity correction for uplink leg      : %.12lf km\n", uplinkLegS.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Uplink range with relativity correction   : %.12lf km\n", uplinkLegS.GetRelativityCorrection() + uplinkRangeS);
+		 MessageInterface::ShowMessage("     (ET-TAI) at t1TS = %.12le s\n", ettaiT1S);
       #endif
 
       // 4. Calculate up link range rate for measurement S:
@@ -775,6 +783,9 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Rvector3 downlinkVectorE = r2EB - r1EB;									// down link vector in SSB coordinate system
       Real downlinkRangeE = downlinkVectorE.GetMagnitude();						// down link range (unit: km)
 
+	  // Calculate ET-TAI at t3RE:
+	  Real ettaiT3E = downlinkLegE.ETminusTAI(t3RE, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 	  	 Rmatrix33 mtE = downlinkLegE.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
@@ -791,6 +802,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Downlink range without relativity correction: %.12lf km\n",downlinkRangeE);
 		 MessageInterface::ShowMessage("     Relativity correction for downlink leg      : %.12lf km\n", downlinkLegE.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Downlink range with relativity correction   : %.12lf km\n", downlinkLegE.GetRelativityCorrection() + downlinkRangeE);
+		 MessageInterface::ShowMessage("     (ET-TAI) at t3RE = %.12le s\n", ettaiT3E);
       #endif
 
       // 6. Calculate down link range rate for measurement E:
@@ -841,6 +853,9 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Rvector3 uplinkVectorE = r4EB - r3EB;
 	  Real uplinkRangeE = uplinkVectorE.GetMagnitude();
 	  
+	  // Calculate ET-TAI at t1TE:
+	  Real ettaiT1E = uplinkLegE.ETminusTAI(t1TE, (GmatBase*)participants[0]);
+
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
 	     Rmatrix33 mtE1 = uplinkLegE.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
@@ -857,6 +872,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Uplink range without ralativity correction: %.12lf km\n", uplinkRangeE);
 		 MessageInterface::ShowMessage("     Relativity correction for uplink leg      : %.12lf km\n", uplinkLegE.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Uplink range with relativity correction   : %.12lf km\n", uplinkLegE.GetRelativityCorrection() + uplinkRangeE);
+		 MessageInterface::ShowMessage("     (ET-TAI) at t1TE = %.12le s\n", ettaiT1E);
       #endif
 
       // 8. Calculate up link range rate for measurement E:
@@ -1212,16 +1228,40 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       #endif
 
 
-	  // 14. Total times for the start path and the end path:
-	  dtS = (uplinkRealRangeS + downlinkRealRangeS)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM +
+	  // 14. Time travel for start path and the end path:
+	  // 14.1. Calculate ET-TAI correction
+	  Real ettaiCorrectionS = (useETminusTAICorrection?(ettaiT1S - ettaiT3S):0.0);																	// made change by TUAN NGUYEN
+	  Real ettaiCorrectionE = (useETminusTAICorrection?(ettaiT1E - ettaiT3E):0.0);																	// made change by TUAN NGUYEN
+	  // 14.2 Total times for the start path and the end path:
+	  dtS = (uplinkRealRangeS + downlinkRealRangeS)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionS +	// made change by TUAN NGUYEN
 	   		transmitDelay + receiveDelay + targetDelay;
-	  dtE = (uplinkRealRangeE + downlinkRealRangeE)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM +
+	  dtE = (uplinkRealRangeE + downlinkRealRangeE)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionE +	// made change by TUAN NGUYEN
 	   		transmitDelay + receiveDelay + targetDelay;
-
+	   
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("5. Measurement with hardware delay and media correction:\n");
-         MessageInterface::ShowMessage("    Time travel for Start path S: dtS =  %.15le s\n", dtS);
-         MessageInterface::ShowMessage("    Time travel for End path E  : dtE =  %.15le s\n", dtE);
+	     Real uplinkTimeS   = uplinkRealRangeS*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+		 Real downlinkTimeS = downlinkRealRangeS*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+		 Real uplinkTimeE   = uplinkRealRangeE*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+		 Real downlinkTimeE = downlinkRealRangeE*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+
+	     MessageInterface::ShowMessage("5. Travel time:\n");
+		 MessageInterface::ShowMessage("5.1. Travel time for S-path:\n");
+ 		 MessageInterface::ShowMessage("     Uplink time         = %.12lf s\n", uplinkTimeS);
+		 MessageInterface::ShowMessage("     Downlink time       = %.12lf s\n", downlinkTimeS);
+		 MessageInterface::ShowMessage("     (ET-TAI) correction = %.12le s\n", ettaiCorrectionS);
+		 MessageInterface::ShowMessage("     Transmit delay      = %.12le s\n", transmitDelay);
+		 MessageInterface::ShowMessage("     Transpond delay     = %.12le s\n", targetDelay);
+		 MessageInterface::ShowMessage("     Receive delay       = %.12le s\n", receiveDelay);
+		 MessageInterface::ShowMessage("     Real travel time    = %.15lf s\n", dtS);
+
+		 MessageInterface::ShowMessage("5.2. Travel time for E-path:\n");
+ 		 MessageInterface::ShowMessage("     Uplink time         = %.12lf s\n", uplinkTimeE);
+		 MessageInterface::ShowMessage("     Downlink time       = %.12lf s\n", downlinkTimeE);
+		 MessageInterface::ShowMessage("     (ET-TAI) correction = %.12le s\n", ettaiCorrectionE);
+		 MessageInterface::ShowMessage("     Transmit delay      = %.12le s\n", transmitDelay);
+		 MessageInterface::ShowMessage("     Transpond delay     = %.12le s\n", targetDelay);
+		 MessageInterface::ShowMessage("     Receive delay       = %.12le s\n", receiveDelay);
+		 MessageInterface::ShowMessage("     Real travel time    = %.15lf s\n", dtE);
       #endif
 
 

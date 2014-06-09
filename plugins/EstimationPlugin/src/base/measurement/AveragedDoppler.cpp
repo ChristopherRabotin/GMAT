@@ -768,10 +768,10 @@ bool AveragedDoppler::Initialize()
       uplinkLegE.SetRelativityCorrection(useRelativityCorrection);				// made changes by TUAN NGUYEN
       downlinkLegE.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
 
-	  uplinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
-	  downlinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
-	  uplinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
-      downlinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+//	  uplinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
+//	  downlinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+//	  uplinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
+//    downlinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
    }
 
    return retval;

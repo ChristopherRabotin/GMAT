@@ -256,12 +256,12 @@ bool TwoWayRange::Initialize()
          }
       }
 
-	  // Set options to run relativity and ET-TAI corrections: 
+	  // Set options to run relativity: // and ET-TAI corrections: 
 ///// TBD: Determine if there is a more generic way to add these
       uplinkLeg.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
 	  downlinkLeg.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
-      uplinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
-	  downlinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+//    uplinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+//	  downlinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
    }
 
 #ifdef DEBUG_INITIALIZE
